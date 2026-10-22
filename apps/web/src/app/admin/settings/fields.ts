@@ -88,6 +88,18 @@ export const SECTIONS: SectionDef[] = [
     ],
   },
   {
+    id: 'leadsource',
+    title: 'Lead-Quelle & Compliance',
+    description:
+      'Standard ist OpenStreetMap. Die Google-Bedingungen verbieten das Speichern von Firmennamen und Adressen (docs/compliance-google.md). Google-Modi nur mit dokumentierter Prüfung/Genehmigung.',
+    fields: [
+      { path: 'leadSource.mode', label: 'Modus (osm | osm_google_signal | google_text_search)', type: 'text' },
+      { path: 'leadSource.googleSignalAcknowledgement', label: 'Signal-Modus: rechtlich geprüft durch / am', type: 'text' },
+      { path: 'leadSource.googleTextSearchApproval', label: 'Text-Search-Modus: Nachweis der Google-Genehmigung', type: 'text' },
+      { path: 'filters.requireRatingSignal', label: 'Leads ohne Bewertungsdaten ablehnen', type: 'bool' },
+    ],
+  },
+  {
     id: 'timing',
     title: 'Fristen, Review & Onboarding',
     fields: [

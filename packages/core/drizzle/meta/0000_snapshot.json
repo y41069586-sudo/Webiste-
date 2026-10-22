@@ -1,5 +1,5 @@
 {
-  "id": "4a281675-b338-4c0c-9570-27dccc3254a8",
+  "id": "6f9c1497-ce0e-49ed-a1a1-ead73ebc815c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1270,6 +1270,24 @@
           "primaryKey": false,
           "notNull": false
         },
+        "identity_hash": {
+          "name": "identity_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "google_place_id": {
+          "name": "google_place_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "google_checked_at": {
+          "name": "google_checked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "domain_suggestion": {
           "name": "domain_suggestion",
           "type": "text",
@@ -1400,6 +1418,21 @@
           "columns": [
             {
               "expression": "score",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "leads_identity_idx": {
+          "name": "leads_identity_idx",
+          "columns": [
+            {
+              "expression": "identity_hash",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

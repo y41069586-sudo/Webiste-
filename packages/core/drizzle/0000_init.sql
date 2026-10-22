@@ -150,6 +150,9 @@ CREATE TABLE "leads" (
 	"segment_key" text NOT NULL,
 	"track_token" text NOT NULL,
 	"search_query" text,
+	"identity_hash" text,
+	"google_place_id" text,
+	"google_checked_at" timestamp with time zone,
 	"domain_suggestion" text,
 	"domain_checked_at" timestamp with time zone,
 	"source_fetched_at" timestamp with time zone,
@@ -352,6 +355,7 @@ CREATE UNIQUE INDEX "leads_track_token_uidx" ON "leads" USING btree ("track_toke
 CREATE INDEX "leads_status_idx" ON "leads" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "leads_segment_idx" ON "leads" USING btree ("segment_key");--> statement-breakpoint
 CREATE INDEX "leads_score_idx" ON "leads" USING btree ("score");--> statement-breakpoint
+CREATE INDEX "leads_identity_idx" ON "leads" USING btree ("identity_hash");--> statement-breakpoint
 CREATE UNIQUE INDEX "letters_lead_sequence_uidx" ON "letters" USING btree ("lead_id","sequence");--> statement-breakpoint
 CREATE INDEX "letters_status_idx" ON "letters" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "letters_provider_id_idx" ON "letters" USING btree ("provider_letter_id");--> statement-breakpoint

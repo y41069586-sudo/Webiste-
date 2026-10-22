@@ -15,7 +15,15 @@ export const branchSchema = z.object({
   /** Suchbegriffe ohne Stadt, z. B. „Nagelstudio“ → „Nagelstudio Dortmund“ */
   queries: z.array(z.string()).min(1),
   /** OSM-Tags für den Overpass-Fallback, z. B. [{ key: 'shop', value: 'beauty', extra: { beauty: 'nails' } }] */
-  osmTags: z.array(z.object({ key: z.string(), value: z.string(), extra: z.record(z.string(), z.string()).optional() })),
+  osmTags: z.array(
+    z.object({
+      key: z.string(),
+      value: z.string(),
+      extra: z.record(z.string(), z.string()).optional(),
+      /** Ausschluss per Regex, z. B. { beauty: 'nails|tanning' } (fehlender Tag zählt als passend) */
+      exclude: z.record(z.string(), z.string()).optional(),
+    }),
+  ),
   /** Google-Places-Typen, die zur Branche passen (zur Plausibilisierung) */
   googleTypes: z.array(z.string()).default([]),
   /** Gewichtung im Score */
@@ -73,7 +81,21 @@ export const appConfigSchema = z.object({
     minRatingCount: z.number().int().min(0),
     recontactMonths: z.number().int().min(0),
     requireOperational: z.boolean(),
+    /** Leads ohne Bewertungsdaten ablehnen (nur sinnvoll mit zulässiger Bewertungsquelle) */
+    requireRatingSignal: z.boolean(),
     socialDomains: z.array(z.string()),
+  }),
+  leadSource: z.object({
+    /**
+     * osm: OpenStreetMap (Standard, ODbL)
+     * osm_google_signal: OSM-Kandidaten + Google-Bewertung nur flüchtig zur Qualifizierung (nur place_id gespeichert)
+     * google_text_search: Google Places als Primärquelle – nur mit schriftlicher Genehmigung (siehe docs/compliance-google.md)
+     */
+    mode: z.enum(['osm', 'osm_google_signal', 'google_text_search']),
+    /** Bestätigung, dass der Signal-Modus rechtlich geprüft wurde (Name, Datum) */
+    googleSignalAcknowledgement: z.string(),
+    /** Nachweis einer Genehmigung von Google für die Speicherung (z. B. Vertragsnummer) */
+    googleTextSearchApproval: z.string(),
   }),
   budget: z.object({
     weeklyBudgetCents: z.number().int().min(0),
@@ -191,7 +213,11 @@ export const DEFAULT_BRANCHES: BranchConfig[] = [
     queries: ['Kosmetikstudio'],
     osmTags: [
       { key: 'shop', value: 'beauty', extra: { beauty: 'cosmetics' } },
-      { key: 'shop', value: 'beauty' },
+      {
+        key: 'shop',
+        value: 'beauty',
+        exclude: { beauty: 'nails|tanning|hair|hair_removal|waxing|massage|tattoo|piercing|lashes|brows|spa' },
+      },
     ],
     googleTypes: ['beauty_salon', 'skin_care_clinic', 'spa'],
     weight: 1,
@@ -281,6 +307,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     minRatingCount: 30,
     recontactMonths: 12,
     requireOperational: true,
+    requireRatingSignal: false,
     socialDomains: [
       'instagram.com',
       'facebook.com',
@@ -313,6 +340,11 @@ export const DEFAULT_CONFIG: AppConfig = {
       'yelp.de',
       'jimdosite.com',
     ],
+  },
+  leadSource: {
+    mode: 'osm',
+    googleSignalAcknowledgement: '',
+    googleTextSearchApproval: '',
   },
   budget: {
     weeklyBudgetCents: 6000,

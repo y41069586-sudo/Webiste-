@@ -69,6 +69,11 @@ export const leads = pgTable(
     /** Token für QR-Code (/q/{token}) – zufällig, nicht erratbar */
     trackToken: text('track_token').notNull(),
     searchQuery: text('search_query'),
+    /** Hash aus normalisiertem Namen + Anschrift (Dubletten über Quellen hinweg) */
+    identityHash: text('identity_hash'),
+    /** Nur die place_id darf dauerhaft gespeichert werden (Google-Bedingungen) */
+    googlePlaceId: text('google_place_id'),
+    googleCheckedAt: ts('google_checked_at'),
     domainSuggestion: text('domain_suggestion'),
     domainCheckedAt: ts('domain_checked_at'),
     /** Zeitpunkt, zu dem die Quelldaten zuletzt von der Quelle abgerufen wurden (Cache-Regeln) */
@@ -87,6 +92,7 @@ export const leads = pgTable(
     index('leads_status_idx').on(t.status),
     index('leads_segment_idx').on(t.segmentKey),
     index('leads_score_idx').on(t.score),
+    index('leads_identity_idx').on(t.identityHash),
   ],
 );
 

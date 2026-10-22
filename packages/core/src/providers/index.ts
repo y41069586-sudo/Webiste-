@@ -64,7 +64,7 @@ export function createProviders(): Providers {
       ? new AnthropicLlm(need(env.ANTHROPIC_API_KEY, 'ANTHROPIC_API_KEY'), process.env.LLM_SERVER_FALLBACK !== 'false')
       : new MockLlm();
 
-  const leadKind = env.LEAD_SOURCE ?? (env.GOOGLE_PLACES_API_KEY ? 'google_places' : 'mock');
+  const leadKind = env.LEAD_SOURCE ?? 'osm';
   const leadSources: LeadSource[] = registry.leadSources(leadKind, env) ?? [new MockLeadSource()];
 
   const mail: MailProvider = registry.mail(env.MAIL_PROVIDER, env) ?? new MockMailProvider(env.SESSION_SECRET);

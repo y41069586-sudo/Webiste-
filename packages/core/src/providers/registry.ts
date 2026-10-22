@@ -1,4 +1,5 @@
 import type { Env } from '../config/env';
+import { OverpassLeadSource } from './lead-source/overpass';
 import type { EmailProvider, HostingProvider, LeadSource, MailProvider, PaymentProvider, RegistrarProvider } from './types';
 
 /**
@@ -7,9 +8,9 @@ import type { EmailProvider, HostingProvider, LeadSource, MailProvider, PaymentP
  */
 export const registry = {
   leadSources(kind: string, env: Env): LeadSource[] | undefined {
-    void kind;
-    void env;
-    return undefined;
+    if (kind === 'mock') return undefined;
+    // Google wird – je nach Compliance-Modus – im Lead-Finder zugeschaltet
+    return [new OverpassLeadSource(env.OVERPASS_URL, `WebsiteBriefMaschine/0.1 (+${env.APP_URL})`)];
   },
   mail(kind: string, env: Env): MailProvider | undefined {
     void kind;
