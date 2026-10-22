@@ -1,3 +1,4 @@
+import { createServer } from 'node:http';
 import { closeDb, getBoss, getEnv, logger, runMigrations, seedDefaults, stopBoss, QUEUES } from '@wbm/core';
 import { scheduleCrons, startWorkers } from './runtime';
 import './jobs';
@@ -23,6 +24,15 @@ async function main(): Promise<void> {
     { queue: QUEUES.imapPoll, cron: '*/5 * * * *', enabled: () => Boolean(env.IMAP_HOST && env.IMAP_USER) },
   ]);
   logger.info({ dryRun: env.DRY_RUN }, 'Worker gestartet');
+
+  // Optionaler Health-Endpoint (Docker-Healthcheck, E2E-Tests)
+  const healthPort = Number(process.env.WORKER_HEALTH_PORT ?? 0);
+  if (healthPort > 0) {
+    createServer((req, res) => {
+      res.writeHead(req.url === '/health' ? 200 : 404, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok' }));
+    }).listen(healthPort, '127.0.0.1');
+  }
 
   let stopping = false;
   const shutdown = async (signal: string) => {

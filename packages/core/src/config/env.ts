@@ -95,7 +95,9 @@ let cached: Env | undefined;
 
 export function getEnv(): Env {
   if (!cached) {
-    const parsed = envSchema.safeParse(process.env);
+    // Leere Werte (z. B. `LLM_PROVIDER=` aus der .env-Vorlage) gelten als nicht gesetzt
+    const raw = Object.fromEntries(Object.entries(process.env).filter(([, v]) => v !== undefined && v !== ''));
+    const parsed = envSchema.safeParse(raw);
     if (!parsed.success) {
       const issues = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
       throw new Error(`Ungültige Umgebungsvariablen: ${issues}`);
