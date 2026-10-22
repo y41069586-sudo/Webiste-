@@ -1,0 +1,44 @@
+# Hostnamen kommen aus der .env (APP_URL ohne https://, DEMO_DOMAIN, TRACK_DOMAIN).
+# Caddy holt automatisch TLS-Zertifikate (Let's Encrypt).
+{
+	email {$ACME_EMAIL}
+}
+
+(common) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	# Echte Client-IP an die App (wird dort nur gehasht für Rate-Limits verwendet)
+	reverse_proxy web:3000 {
+		header_up X-Forwarded-For {remote_host}
+	}
+	log {
+		output stdout
+		format filter {
+			wrap json
+			fields {
+				request>remote_ip delete
+				request>client_ip delete
+				request>headers>Cookie delete
+				request>headers>Authorization delete
+				request>uri query {
+					delete token
+				}
+			}
+		}
+	}
+}
+
+{$APP_HOST:app.localhost} {
+	import common
+}
+
+{$DEMO_DOMAIN:entwurf.localhost} {
+	import common
+}
+
+{$TRACK_DOMAIN:go.localhost} {
+	import common
+}

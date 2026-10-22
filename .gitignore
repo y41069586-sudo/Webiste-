@@ -1,0 +1,17 @@
+node_modules/
+.next/
+dist/
+!packages/templates/dist/.gitkeep
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+data/
+backups/
+test-results/
+playwright-report/
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+.pnpm-store/
