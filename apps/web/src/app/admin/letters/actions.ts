@@ -40,3 +40,10 @@ export async function createTestLetterAction(): Promise<void> {
   await audit(getDb(), { entity: 'letter', entityId: 'test', action: 'test_requested', actor: actorOf(s) });
   revalidatePath('/admin/letters');
 }
+
+export async function sendApprovedNowAction(): Promise<void> {
+  const s = await requireAdmin();
+  await enqueue(QUEUES.sendApprovedLetters, { triggeredBy: actorOf(s) }, { singletonKey: 'send-approved' });
+  await audit(getDb(), { entity: 'job', entityId: QUEUES.sendApprovedLetters, action: 'enqueue', actor: actorOf(s) });
+  revalidatePath('/admin/letters');
+}

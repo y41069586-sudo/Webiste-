@@ -63,6 +63,20 @@ export interface LetterSendOptions {
   idempotencyKey: string;
   /** Interne Referenz (Letter-ID), wird beim Anbieter als Metadatum gespeichert */
   reference: string;
+  /** Seitenzahl des PDFs (für Preis und Druckmodus) */
+  pages?: number;
+  /** Strukturierte Anschriften zur Plausibilisierung beim Anbieter (optional) */
+  recipient?: PostalParty;
+  sender?: PostalParty;
+}
+
+export interface PostalParty {
+  name: string;
+  street: string;
+  number: string;
+  zip: string;
+  city: string;
+  country: string;
 }
 
 export type ProviderLetterStatus = 'validating' | 'queued' | 'sent' | 'delivered' | 'failed' | 'cancelled' | 'unknown';
@@ -85,7 +99,7 @@ export interface LetterWebhookEvent {
 export interface MailProvider {
   readonly name: string;
   /** Preis in Cent laut Anbieter (null = unbekannt, dann Config-Schätzung) */
-  estimateCost(pdf: Buffer, opts: Omit<LetterSendOptions, 'idempotencyKey' | 'reference'>): Promise<number | null>;
+  estimateCost(pdf: Buffer, opts: Omit<LetterSendOptions, 'idempotencyKey' | 'reference' | 'recipient' | 'sender'>): Promise<number | null>;
   send(pdf: Buffer, opts: LetterSendOptions): Promise<LetterSendResult>;
   getStatus(providerLetterId: string): Promise<{ status: ProviderLetterStatus; costCents?: number }>;
   cancel?(providerLetterId: string): Promise<void>;

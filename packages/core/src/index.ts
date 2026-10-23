@@ -44,3 +44,5 @@ export * from './services/letters';
 export { domainCandidates, suggestDomain, isValidDeLabel } from './letters/domain';
 export { recipientLines, composeLetter, lowerFirstWord } from './letters/compose';
 export { privacyNoticeText, objectionNoticeText } from './letters/notices';
+export * from './services/sending';
+export { PingenMailProvider, mapPingenStatus } from './providers/mail/pingen';

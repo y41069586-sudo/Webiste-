@@ -4,7 +4,7 @@ import { budgetStatus, effectiveSwitches, getConfig, getDb, schema, type LetterS
 import { Badge, Card, Notice, PageHeader, StatusBadge, Table, Td, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
-import { bulkApproveLettersAction, createTestLetterAction } from './actions';
+import { bulkApproveLettersAction, createTestLetterAction, sendApprovedNowAction } from './actions';
 
 export const metadata = { title: 'Briefe' };
 
@@ -42,9 +42,16 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
         title="Briefe"
         subtitle={`Wochenbudget: ${eur(budget.spentCents)} von ${eur(budget.limitCents)} verbraucht · Rest ${eur(budget.remainingCents)}`}
         actions={
-          <form action={createTestLetterAction}>
-            <button type="submit" className={btn.secondary}>Testbrief an mich erzeugen</button>
-          </form>
+          <>
+            <form action={createTestLetterAction}>
+              <button type="submit" className={btn.secondary}>Testbrief an mich erzeugen</button>
+            </form>
+            <form action={sendApprovedNowAction}>
+              <button type="submit" className={btn.primary} disabled={sw.killSwitch}>
+                Freigegebene jetzt versenden{sw.dryRun ? ' (DRY_RUN)' : ''}
+              </button>
+            </form>
+          </>
         }
       />
       {sw.dryRun ? (

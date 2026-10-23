@@ -6,7 +6,7 @@
  */
 import { createInterface } from 'node:readline/promises';
 import QRCode from 'qrcode';
-import { closeDb, createAdmin, enqueue, runMigrations, seedDefaults, stopBoss, type QueueName } from '@wbm/core';
+import { appUrl, closeDb, createAdmin, enqueue, getEnv, getProviders, PingenMailProvider, runMigrations, seedDefaults, stopBoss, type QueueName } from '@wbm/core';
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -40,8 +40,17 @@ async function main(): Promise<void> {
       await stopBoss();
       break;
     }
+    case 'pingen:webhooks': {
+      const mail = getProviders().mail;
+      if (!(mail instanceof PingenMailProvider)) throw new Error('MAIL_PROVIDER ist nicht pingen.');
+      const secret = getEnv().PINGEN_WEBHOOK_SECRET;
+      if (!secret) throw new Error('PINGEN_WEBHOOK_SECRET fehlt (20–32 Zeichen, z. B. openssl rand -hex 16).');
+      const ids = await mail.registerWebhooks(appUrl('/api/webhooks/pingen'), secret);
+      console.log(`Webhooks angelegt (${getEnv().PINGEN_ENV}): ${ids.join(', ')}`);
+      break;
+    }
     default:
-      console.log('Befehle: migrate | admin:create [--email x] | enqueue <queue> [--data JSON]');
+      console.log('Befehle: migrate | admin:create [--email x] | enqueue <queue> [--data JSON] | pingen:webhooks');
   }
   await closeDb();
 }
