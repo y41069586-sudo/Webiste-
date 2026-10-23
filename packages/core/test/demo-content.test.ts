@@ -28,16 +28,19 @@ describe('Inhaltsregeln', () => {
   });
 
   const base = libraryContent('maler', 'handwerk', { name: facts.name, stadt: 'Dortmund', branche: 'Malerbetrieb' }, 0);
-  const bad = (patch: Record<string, unknown>) => validateDemoContent({ ...base, ...patch } as typeof base, facts).map((v) => v.rule);
+  const bad = (patch: Record<string, unknown>) =>
+    validateDemoContent({ ...base, ...patch } as typeof base, facts).map((v) => v.rule);
 
   it('erkennt erfundene Fakten, Zahlen, Bewertungen, Preise, Platzhalter', () => {
-    expect(bad({ about: 'Seit 1998 sind wir Ihr Familienbetrieb in Dortmund und freuen uns auf Ihren Besuch bei uns im Laden.' })).toEqual(
-      expect.arrayContaining(['Zahlen', 'erfundene Historie']),
-    );
-    expect(bad({ hero_subline: 'Über hundert zufriedene Kunden und fünf Sterne Bewertung sprechen für uns, sagen alle.' })).toContain(
-      'Bewertungen/Testimonials',
-    );
-    expect(bad({ hero_subline: 'Innenanstrich ab neunzig Euro pro Raum – jetzt besonders günstig bei uns erhältlich.' })).toContain('Preise/Rabatte');
+    expect(
+      bad({ about: 'Seit 1998 sind wir Ihr Familienbetrieb in Dortmund und freuen uns auf Ihren Besuch bei uns im Laden.' }),
+    ).toEqual(expect.arrayContaining(['Zahlen', 'erfundene Historie']));
+    expect(
+      bad({ hero_subline: 'Über hundert zufriedene Kunden und fünf Sterne Bewertung sprechen für uns, sagen alle.' }),
+    ).toContain('Bewertungen/Testimonials');
+    expect(
+      bad({ hero_subline: 'Innenanstrich ab neunzig Euro pro Raum – jetzt besonders günstig bei uns erhältlich.' }),
+    ).toContain('Preise/Rabatte');
     expect(bad({ hero_headline: 'Lorem ipsum dolor sit amet' })).toContain('Platzhalter');
     expect(bad({ hero_subline: 'Wir sind ein zertifizierter Meisterbetrieb mit ausgezeichneter Qualität für Sie.' })).toContain(
       'Auszeichnungen/Zertifikate',
@@ -45,9 +48,11 @@ describe('Inhaltsregeln', () => {
     expect(bad({ hero_subline: 'Unser Notdienst ist rund um die Uhr für Sie da, auch am Wochenende für Sie da.' })).toContain(
       'Garantien/Versprechen',
     );
-    expect(bad({ about: 'Inhaberin Frau Schmidt und ihre Mitarbeiterinnen freuen sich auf Sie. Kommen Sie gern vorbei, wir beraten Sie.' })).toContain(
-      'Personen/Team',
-    );
+    expect(
+      bad({
+        about: 'Inhaberin Frau Schmidt und ihre Mitarbeiterinnen freuen sich auf Sie. Kommen Sie gern vorbei, wir beraten Sie.',
+      }),
+    ).toContain('Personen/Team');
     expect(bad({ hero_headline: 'The best painter in town' })).toEqual(expect.arrayContaining(['Englisch']));
   });
 
@@ -61,7 +66,11 @@ describe('Inhaltsregeln', () => {
   });
 
   it('normalisiert Leerraum und Satzzeichen', () => {
-    const n = normalizeContent({ ...base, hero_headline: '  Frische  Farbe für Sie . ', about: 'Absatz eins .\n\n\n\nAbsatz zwei' });
+    const n = normalizeContent({
+      ...base,
+      hero_headline: '  Frische  Farbe für Sie . ',
+      about: 'Absatz eins .\n\n\n\nAbsatz zwei',
+    });
     expect(n.hero_headline).toBe('Frische Farbe für Sie');
     expect(n.about).toBe('Absatz eins.\n\nAbsatz zwei');
   });

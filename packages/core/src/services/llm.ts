@@ -31,7 +31,15 @@ async function book(usage: LlmUsage, purpose: string, leadId: string | undefined
     },
   });
   logger.info(
-    { purpose, leadId, model: usage.model, in: usage.inputTokens, out: usage.outputTokens, cacheRead: usage.cacheReadTokens, costMicroCents: micro },
+    {
+      purpose,
+      leadId,
+      model: usage.model,
+      in: usage.inputTokens,
+      out: usage.outputTokens,
+      cacheRead: usage.cacheReadTokens,
+      costMicroCents: micro,
+    },
     'llm call',
   );
 }
@@ -47,7 +55,9 @@ export async function llmStructured<T>(
   return res.data;
 }
 
-export async function llmText(req: Omit<LlmTextRequest, 'model'> & { tier: ModelTier; idempotencyKey?: string }): Promise<string> {
+export async function llmText(
+  req: Omit<LlmTextRequest, 'model'> & { tier: ModelTier; idempotencyKey?: string },
+): Promise<string> {
   await assertBudgetAvailable('llm', 5);
   const { tier, idempotencyKey, ...rest } = req;
   const res = await getProviders().llm.generateText({ ...rest, model: modelFor(tier) });

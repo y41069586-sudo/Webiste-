@@ -19,7 +19,10 @@ export async function seedDefaults(db: DbOrTx = getDb()): Promise<void> {
         active: true,
         weight: 1,
       })
-      .onConflictDoUpdate({ target: [variants.kind, variants.name], set: { content: v.content as unknown as Record<string, unknown>, sequence: v.sequence } });
+      .onConflictDoUpdate({
+        target: [variants.kind, variants.name],
+        set: { content: v.content as unknown as Record<string, unknown>, sequence: v.sequence },
+      });
   }
   await db.execute(sql`INSERT INTO counters (name, value) VALUES ('demos_reviewed', 0) ON CONFLICT DO NOTHING`);
 }

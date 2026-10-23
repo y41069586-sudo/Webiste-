@@ -78,7 +78,9 @@ export async function login(
   await db.update(adminUsers).set({ lastTotpStep: step, lastLoginAt: new Date() }).where(eq(adminUsers.id, admin.id));
   await db.insert(adminSessions).values({ id: sha256(token), adminId: admin.id, expiresAt });
   await db.delete(adminSessions).where(lt(adminSessions.expiresAt, new Date()));
+  // Erfolgreiche Anmeldung setzt beide Zähler zurück: begrenzt werden Fehlversuche, nicht legitime Logins
   await resetRateLimit(db, `login:client:${input.clientKey}`);
+  await resetRateLimit(db, `login:account`);
   await audit(db, { entity: 'admin', entityId: admin.id, action: 'login', actor: `admin:${admin.id}` });
   return { ok: true, token, adminId: admin.id, expiresAt };
 }
@@ -93,7 +95,12 @@ export async function validateSession(token: string | undefined, db: DbOrTx = ge
   if (!token || token.length < 20) return null;
   const id = sha256(token);
   const row = await db
-    .select({ adminId: adminSessions.adminId, expiresAt: adminSessions.expiresAt, email: adminUsers.email, lastSeenAt: adminSessions.lastSeenAt })
+    .select({
+      adminId: adminSessions.adminId,
+      expiresAt: adminSessions.expiresAt,
+      email: adminUsers.email,
+      lastSeenAt: adminSessions.lastSeenAt,
+    })
     .from(adminSessions)
     .innerJoin(adminUsers, eq(adminUsers.id, adminSessions.adminId))
     .where(and(eq(adminSessions.id, id), gt(adminSessions.expiresAt, new Date())))

@@ -7,7 +7,16 @@ import { emailHash, normalizeBusinessName } from '../leads/normalize';
 import { errInfo, logger } from '../logger';
 import type { InboundEmail } from '../providers/types';
 import { enqueue, QUEUES } from '../queue';
-import { CLASSIFY_SCHEMA, CLASSIFY_SYSTEM, CLASSIFY_TOOL, isAutomated, OPT_OUT_RE, REPLY_SCHEMA, REPLY_TOOL, replySystemPrompt } from '../support/prompts';
+import {
+  CLASSIFY_SCHEMA,
+  CLASSIFY_SYSTEM,
+  CLASSIFY_TOOL,
+  isAutomated,
+  OPT_OUT_RE,
+  REPLY_SCHEMA,
+  REPLY_TOOL,
+  replySystemPrompt,
+} from '../support/prompts';
 import type { SupportClass } from '../types';
 import { formatDateLongDe, formatEuro } from '../util/time';
 import { appUrl } from '../config/env';
@@ -40,7 +49,9 @@ export function stripQuoted(text: string): string {
 }
 
 /** Eingehende E-Mail speichern (Duplikate über die Message-ID) und Verarbeitung anstoßen. */
-export async function ingestInboundEmail(mail: InboundEmail & { headers?: Record<string, string> }): Promise<{ id: string; duplicate: boolean }> {
+export async function ingestInboundEmail(
+  mail: InboundEmail & { headers?: Record<string, string> },
+): Promise<{ id: string; duplicate: boolean }> {
   const db = getDb();
   const from = plainAddress(mail.from);
   const automated = isAutomated(from, mail.subject, mail.headers);
@@ -64,20 +75,34 @@ export async function ingestInboundEmail(mail: InboundEmail & { headers?: Record
     .onConflictDoNothing({ target: supportMessages.providerMessageId })
     .returning({ id: supportMessages.id });
   if (!inserted[0]) {
-    const prev = await db.query.supportMessages.findFirst({ where: eq(supportMessages.providerMessageId, mail.providerMessageId.slice(0, 300)) });
+    const prev = await db.query.supportMessages.findFirst({
+      where: eq(supportMessages.providerMessageId, mail.providerMessageId.slice(0, 300)),
+    });
     return { id: prev!.id, duplicate: true };
   }
   const id = inserted[0].id;
-  await audit(db, { entity: 'support_message', entityId: id, action: 'received', actor: 'system', context: { channel: 'email', automated, linked: Boolean(link.customerId || link.leadId) } });
+  await audit(db, {
+    entity: 'support_message',
+    entityId: id,
+    action: 'received',
+    actor: 'system',
+    context: { channel: 'email', automated, linked: Boolean(link.customerId || link.leadId) },
+  });
   if (!automated) await enqueue(QUEUES.supportInbound, { messageId: id }, { singletonKey: `support-${id}` });
   return { id, duplicate: false };
 }
 
 /** Absender einem Kunden oder Lead zuordnen (nur über bereits bekannte Adressen bzw. Antwort-Bezug). */
-async function linkSender(db: DbOrTx, from: string, inReplyTo?: string): Promise<{ customerId: string | null; leadId: string | null; inReplyToId: string | null }> {
+async function linkSender(
+  db: DbOrTx,
+  from: string,
+  inReplyTo?: string,
+): Promise<{ customerId: string | null; leadId: string | null; inReplyToId: string | null }> {
   const inReplyToId: string | null = null;
   if (inReplyTo) {
-    const prev = await db.query.supportMessages.findFirst({ where: eq(supportMessages.providerMessageId, inReplyTo.slice(0, 300)) });
+    const prev = await db.query.supportMessages.findFirst({
+      where: eq(supportMessages.providerMessageId, inReplyTo.slice(0, 300)),
+    });
     if (prev) return { customerId: prev.customerId, leadId: prev.leadId, inReplyToId: prev.id };
   }
   const customer = await db.query.customers.findFirst({ where: eq(customers.email, from) });
@@ -120,7 +145,8 @@ async function classify(msg: SupportMessage): Promise<Classification> {
     logger.warn({ messageId: msg.id, ...errInfo(err) }, 'support: Klassifizierung fehlgeschlagen');
     c = { class: 'frage', confidence: 0, reason: 'Klassifizierung fehlgeschlagen', company_name: '' };
   }
-  if (ruleOptOut && c.class !== 'opt_out') c = { ...c, class: 'opt_out', confidence: Math.max(c.confidence, 0.9), reason: `Regel: Widerspruch erkannt. ${c.reason}` };
+  if (ruleOptOut && c.class !== 'opt_out')
+    c = { ...c, class: 'opt_out', confidence: Math.max(c.confidence, 0.9), reason: `Regel: Widerspruch erkannt. ${c.reason}` };
   return c;
 }
 
@@ -134,21 +160,33 @@ async function replyContext(db: DbOrTx, msg: SupportMessage): Promise<string> {
     if (c) {
       lines.push(`Absender ist Kunde: ${c.company}, Ansprechpartner ${c.contactName}.`);
       lines.push(`Domain: ${c.domain ?? 'noch offen'} (Status: ${c.domainStatus}).`);
-      if (s) lines.push(`Website-Status: ${s.status}${s.productionUrl ? `, online unter ${s.productionUrl}` : ''}. Änderungsrunden genutzt: ${c.changeRoundsUsed}.`);
-      if (o) lines.push(`Bestellung: ${o.invoiceNumber ?? 'ohne Rechnung'}, ${formatEuro(o.amountCents)}, Status ${o.status}${o.paidAt ? `, bezahlt am ${formatDateLongDe(o.paidAt)}` : ''}.`);
+      if (s)
+        lines.push(
+          `Website-Status: ${s.status}${s.productionUrl ? `, online unter ${s.productionUrl}` : ''}. Änderungsrunden genutzt: ${c.changeRoundsUsed}.`,
+        );
+      if (o)
+        lines.push(
+          `Bestellung: ${o.invoiceNumber ?? 'ohne Rechnung'}, ${formatEuro(o.amountCents)}, Status ${o.status}${o.paidAt ? `, bezahlt am ${formatDateLongDe(o.paidAt)}` : ''}.`,
+        );
       if (c.hostingUntil) lines.push(`Hosting inklusive bis ${formatDateLongDe(c.hostingUntil)}.`);
-      lines.push('Den persönlichen Link zu Angaben/Vorschau hat der Kunde per E-Mail erhalten (nicht in die Antwort schreiben, auf die E-Mail verweisen).');
+      lines.push(
+        'Den persönlichen Link zu Angaben/Vorschau hat der Kunde per E-Mail erhalten (nicht in die Antwort schreiben, auf die E-Mail verweisen).',
+      );
     }
   } else if (msg.leadId) {
     const l = await db.query.leads.findFirst({ where: eq(leads.id, msg.leadId) });
-    if (l && !l.anonymizedAt) lines.push(`Absender bezieht sich auf den Entwurf für ${l.businessName} (${l.city}). Lead-Status: ${l.status}.`);
+    if (l && !l.anonymizedAt)
+      lines.push(`Absender bezieht sich auf den Entwurf für ${l.businessName} (${l.city}). Lead-Status: ${l.status}.`);
   } else {
     lines.push('Absender ist uns nicht zugeordnet (vermutlich Empfänger eines Briefes).');
   }
   return lines.join('\n');
 }
 
-async function draftReply(msg: SupportMessage, cls: SupportClass): Promise<{ reply: string; needsHuman: boolean; reason: string }> {
+async function draftReply(
+  msg: SupportMessage,
+  cls: SupportClass,
+): Promise<{ reply: string; needsHuman: boolean; reason: string }> {
   const db = getDb();
   const cfg = await getConfig();
   const context = await replyContext(db, msg);
@@ -173,14 +211,29 @@ async function executeOptOut(msg: SupportMessage, companyName: string, actor: st
   let leadId = msg.leadId;
   if (!leadId && companyName.trim()) {
     const norm = normalizeBusinessName(companyName);
-    const candidates = await db.select({ id: leads.id, name: leads.businessName }).from(leads).where(or(eq(leads.status, 'letter_sent'), eq(leads.status, 'letter_delivered'), eq(leads.status, 'followup_sent'), eq(leads.status, 'scanned'), eq(leads.status, 'demo_published')));
+    const candidates = await db
+      .select({ id: leads.id, name: leads.businessName })
+      .from(leads)
+      .where(
+        or(
+          eq(leads.status, 'letter_sent'),
+          eq(leads.status, 'letter_delivered'),
+          eq(leads.status, 'followup_sent'),
+          eq(leads.status, 'scanned'),
+          eq(leads.status, 'demo_published'),
+        ),
+      );
     const hits = candidates.filter((c) => normalizeBusinessName(c.name) === norm);
     if (hits.length === 1) leadId = hits[0]!.id;
   }
   if (msg.fromEmail && EMAIL_RE.test(msg.fromEmail)) {
-    await db.insert(suppressionList).values({ hash: emailHash(msg.fromEmail), kind: 'email', reason: 'opt_out_email' }).onConflictDoNothing({ target: suppressionList.hash });
+    await db
+      .insert(suppressionList)
+      .values({ hash: emailHash(msg.fromEmail), kind: 'email', reason: 'opt_out_email' })
+      .onConflictDoNothing({ target: suppressionList.hash });
   }
-  if (!leadId) return { done: false, note: 'Widerspruch ohne eindeutige Zuordnung zu einem Betrieb – bitte im Dashboard den Lead sperren.' };
+  if (!leadId)
+    return { done: false, note: 'Widerspruch ohne eindeutige Zuordnung zu einem Betrieb – bitte im Dashboard den Lead sperren.' };
   await optOutLead(db, leadId, actor, 'widerspruch_email');
   return { done: true, note: 'Widerspruch umgesetzt (Lead gesperrt, Daten gelöscht).' };
 }
@@ -196,7 +249,10 @@ export async function processSupportMessage(id: string): Promise<{ status: strin
   const cfg = await getConfig();
   const c = await classify(msg);
   const isCustomer = Boolean(msg.customerId);
-  await db.update(supportMessages).set({ classification: c.class, classificationConfidence: c.confidence, status: 'classified', updatedAt: new Date() }).where(eq(supportMessages.id, id));
+  await db
+    .update(supportMessages)
+    .set({ classification: c.class, classificationConfidence: c.confidence, status: 'classified', updatedAt: new Date() })
+    .where(eq(supportMessages.id, id));
 
   if (c.class === 'spam') {
     await db.update(supportMessages).set({ status: 'ignored', updatedAt: new Date() }).where(eq(supportMessages.id, id));
@@ -214,17 +270,40 @@ export async function processSupportMessage(id: string): Promise<{ status: strin
         ],
       });
       try {
-        await sendTransactionalEmail({ ...mail, kind: 'opt_out_confirmation', idempotencyKey: `optout:${msg.id}`, to: msg.fromEmail, leadId: null });
+        await sendTransactionalEmail({
+          ...mail,
+          kind: 'opt_out_confirmation',
+          idempotencyKey: `optout:${msg.id}`,
+          to: msg.fromEmail,
+          leadId: null,
+        });
       } catch (err) {
         logger.warn({ messageId: id, ...errInfo(err) }, 'support: Bestätigung Widerspruch nicht gesendet');
       }
     }
     await db
       .update(supportMessages)
-      .set({ status: r.done ? 'done' : 'escalated', escalationReason: r.done ? null : r.note, leadId: r.done ? null : msg.leadId, updatedAt: new Date() })
+      .set({
+        status: r.done ? 'done' : 'escalated',
+        escalationReason: r.done ? null : r.note,
+        leadId: r.done ? null : msg.leadId,
+        updatedAt: new Date(),
+      })
       .where(eq(supportMessages.id, id));
-    await audit(db, { entity: 'support_message', entityId: id, action: 'opt_out', actor: 'job:support', context: { done: r.done } });
-    if (!r.done) await notifyAdmin({ key: `optout-unmatched:${id}`, title: 'Widerspruch ohne Zuordnung', lines: [r.note], link: appUrl(`/admin/support/${id}`) });
+    await audit(db, {
+      entity: 'support_message',
+      entityId: id,
+      action: 'opt_out',
+      actor: 'job:support',
+      context: { done: r.done },
+    });
+    if (!r.done)
+      await notifyAdmin({
+        key: `optout-unmatched:${id}`,
+        title: 'Widerspruch ohne Zuordnung',
+        lines: [r.note],
+        link: appUrl(`/admin/support/${id}`),
+      });
     return { status: r.done ? 'done' : 'escalated', class: c.class };
   }
 
@@ -232,7 +311,13 @@ export async function processSupportMessage(id: string): Promise<{ status: strin
   if (c.class === 'aenderungswunsch' && msg.customerId) {
     const site = await db.query.sites.findFirst({ where: eq(sites.customerId, msg.customerId) });
     if (site && ['live', 'preview'].includes(site.status)) {
-      await db.insert(changeRequests).values({ siteId: site.id, source: 'support', text: stripQuoted(msg.body).slice(0, 4000), status: 'needs_admin', countsAsRound: false });
+      await db.insert(changeRequests).values({
+        siteId: site.id,
+        source: 'support',
+        text: stripQuoted(msg.body).slice(0, 4000),
+        status: 'needs_admin',
+        countsAsRound: false,
+      });
     }
   }
 
@@ -258,7 +343,15 @@ export async function processSupportMessage(id: string): Promise<{ status: strin
     .where(eq(supportMessages.id, id));
   if (auto) await enqueue(QUEUES.supportSend, { messageId: id }, { singletonKey: `support-send-${id}` });
   if (escalate) {
-    await notifyAdmin({ key: `support-escalated:${id}`, title: `Support: ${c.class} braucht dich`, lines: [`Betreff: ${msg.subject ?? '–'}`, `Grund: ${c.class === 'beschwerde' ? 'Beschwerde' : draft.reason || 'Prüfung nötig'}`], link: appUrl(`/admin/support/${id}`) });
+    await notifyAdmin({
+      key: `support-escalated:${id}`,
+      title: `Support: ${c.class} braucht dich`,
+      lines: [
+        `Betreff: ${msg.subject ?? '–'}`,
+        `Grund: ${c.class === 'beschwerde' ? 'Beschwerde' : draft.reason || 'Prüfung nötig'}`,
+      ],
+      link: appUrl(`/admin/support/${id}`),
+    });
   }
   return { status: auto ? 'approved' : escalate ? 'escalated' : 'drafted', class: c.class };
 }
@@ -270,7 +363,10 @@ export async function approveSupportReply(id: string, text: string, actor: strin
   if (!msg || msg.direction !== 'in') throw new Error('Nachricht nicht gefunden');
   if (!msg.fromEmail || !EMAIL_RE.test(msg.fromEmail)) throw new Error('Keine gültige Absenderadresse');
   if (text.trim().length < 10) throw new Error('Antwort ist zu kurz');
-  await db.update(supportMessages).set({ draftReply: text.trim(), status: 'approved', approvedBy: actor, approvedAt: new Date(), updatedAt: new Date() }).where(eq(supportMessages.id, id));
+  await db
+    .update(supportMessages)
+    .set({ draftReply: text.trim(), status: 'approved', approvedBy: actor, approvedAt: new Date(), updatedAt: new Date() })
+    .where(eq(supportMessages.id, id));
   await audit(db, { entity: 'support_message', entityId: id, action: 'approved', actor });
   await enqueue(QUEUES.supportSend, { messageId: id }, { singletonKey: `support-send-${id}-${Date.now()}` });
 }
@@ -282,8 +378,14 @@ export async function sendSupportReply(id: string): Promise<'sent' | 'skipped'> 
   const msg = await db.query.supportMessages.findFirst({ where: eq(supportMessages.id, id) });
   if (!msg || msg.status !== 'approved' || !msg.draftReply || !msg.fromEmail) return 'skipped';
   const subject = msg.subject ? (/^(re|aw):/i.test(msg.subject) ? msg.subject : `Re: ${msg.subject}`) : 'Ihre Nachricht';
-  const name = msg.customerId ? (await db.query.customers.findFirst({ where: eq(customers.id, msg.customerId) }))?.contactName : null;
-  const mail = renderEmail(cfg, { subject, name, blocks: [msg.draftReply.replace(/^(guten tag|hallo|sehr geehrte[rs]?)[^\n]*\n+/i, '')] });
+  const name = msg.customerId
+    ? (await db.query.customers.findFirst({ where: eq(customers.id, msg.customerId) }))?.contactName
+    : null;
+  const mail = renderEmail(cfg, {
+    subject,
+    name,
+    blocks: [msg.draftReply.replace(/^(guten tag|hallo|sehr geehrte[rs]?)[^\n]*\n+/i, '')],
+  });
   const res = await sendTransactionalEmail({
     ...mail,
     kind: 'support_reply',
@@ -291,7 +393,9 @@ export async function sendSupportReply(id: string): Promise<'sent' | 'skipped'> 
     to: msg.fromEmail,
     customerId: msg.customerId,
     leadId: msg.leadId,
-    ...(msg.providerMessageId && msg.channel === 'email' ? { headers: { 'In-Reply-To': msg.providerMessageId, References: msg.providerMessageId } } : {}),
+    ...(msg.providerMessageId && msg.channel === 'email'
+      ? { headers: { 'In-Reply-To': msg.providerMessageId, References: msg.providerMessageId } }
+      : {}),
   });
   await db.insert(supportMessages).values({
     direction: 'out',
@@ -307,7 +411,10 @@ export async function sendSupportReply(id: string): Promise<'sent' | 'skipped'> 
     providerMessageId: res.messageId ? `out:${res.messageId}` : null,
     sentAt: new Date(),
   });
-  await db.update(supportMessages).set({ status: 'sent', sentAt: new Date(), updatedAt: new Date() }).where(eq(supportMessages.id, id));
+  await db
+    .update(supportMessages)
+    .set({ status: 'sent', sentAt: new Date(), updatedAt: new Date() })
+    .where(eq(supportMessages.id, id));
   return 'sent';
 }
 
@@ -330,7 +437,10 @@ export async function adminOptOut(id: string, leadId: string | null, actor: stri
 /** Admin: Entwurf neu erzeugen (setzt die Nachricht zurück auf „neu“). */
 export async function redraftSupport(id: string, actor: string): Promise<void> {
   const db = getDb();
-  await db.update(supportMessages).set({ status: 'new', draftReply: null, escalationReason: null, updatedAt: new Date() }).where(eq(supportMessages.id, id));
+  await db
+    .update(supportMessages)
+    .set({ status: 'new', draftReply: null, escalationReason: null, updatedAt: new Date() })
+    .where(eq(supportMessages.id, id));
   await audit(db, { entity: 'support_message', entityId: id, action: 'redraft', actor });
   await enqueue(QUEUES.supportInbound, { messageId: id }, { singletonKey: `support-${id}-${Date.now()}` });
 }
@@ -347,7 +457,9 @@ export function parseInboundPayload(raw: string): (InboundEmail & { headers: Rec
   }
   // Postmark Inbound
   if (typeof j.MessageID === 'string' && (typeof j.From === 'string' || typeof j.FromFull === 'object')) {
-    const headers = Object.fromEntries(((j.Headers as { Name: string; Value: string }[] | undefined) ?? []).map((h) => [h.Name, h.Value]));
+    const headers = Object.fromEntries(
+      ((j.Headers as { Name: string; Value: string }[] | undefined) ?? []).map((h) => [h.Name, h.Value]),
+    );
     const fromFull = j.FromFull as { Email?: string } | undefined;
     const msgIdHeader = headers['Message-ID'] ?? headers['Message-Id'];
     return {

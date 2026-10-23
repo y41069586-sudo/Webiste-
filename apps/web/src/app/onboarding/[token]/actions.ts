@@ -29,7 +29,13 @@ function fromForm(f: FormData): OnboardingData {
       postalCode: str(f, 'business.postalCode'),
       city: str(f, 'business.city'),
     },
-    texts: { headline: str(f, 'texts.headline'), subline: str(f, 'texts.subline'), about: str(f, 'texts.about'), services: services.filter((s) => s.title || s.text), wishes: str(f, 'texts.wishes') },
+    texts: {
+      headline: str(f, 'texts.headline'),
+      subline: str(f, 'texts.subline'),
+      about: str(f, 'texts.about'),
+      services: services.filter((s) => s.title || s.text),
+      wishes: str(f, 'texts.wishes'),
+    },
     hours: {
       mode: str(f, 'hours.mode') === 'appointment' ? 'appointment' : 'fixed',
       days: WEEK_DAYS.map(({ day }) => ({

@@ -33,7 +33,10 @@ function signatureText(cfg: AppConfig): string {
   ].join('\n');
 }
 
-export function renderEmail(cfg: AppConfig, input: { subject: string; name?: string | null; blocks: Block[]; noGreeting?: boolean }): EmailContent {
+export function renderEmail(
+  cfg: AppConfig,
+  input: { subject: string; name?: string | null; blocks: Block[]; noGreeting?: boolean },
+): EmailContent {
   const parts: string[] = [];
   const htmlParts: string[] = [];
   if (!input.noGreeting) {
@@ -145,7 +148,11 @@ export function renewalReminderEmail(
   blocks.push(
     'Möchten Sie nicht verlängern, müssen Sie nichts tun. Die Domain gehört Ihnen – auf Wunsch geben wir sie für einen Umzug zu einem anderen Anbieter frei.',
   );
-  return renderEmail(cfg, { subject: `Ihr Hosting für ${d.domain ?? 'Ihre Website'} läuft am ${d.hostingUntil} aus`, name: d.name, blocks });
+  return renderEmail(cfg, {
+    subject: `Ihr Hosting für ${d.domain ?? 'Ihre Website'} läuft am ${d.hostingUntil} aus`,
+    name: d.name,
+    blocks,
+  });
 }
 
 export function adminNotificationEmail(cfg: AppConfig, d: { title: string; lines: string[]; link?: string }): EmailContent {
@@ -156,7 +163,10 @@ export function adminNotificationEmail(cfg: AppConfig, d: { title: string; lines
   });
 }
 
-export function previewReadyEmail(cfg: AppConfig, d: { name: string; previewUrl: string; summary: string | null; roundsLeft: number; firstVersion: boolean }): EmailContent {
+export function previewReadyEmail(
+  cfg: AppConfig,
+  d: { name: string; previewUrl: string; summary: string | null; roundsLeft: number; firstVersion: boolean },
+): EmailContent {
   return renderEmail(cfg, {
     subject: d.firstVersion ? 'Ihre Website-Vorschau ist fertig' : 'Ihre geänderte Website-Vorschau ist fertig',
     name: d.name,
@@ -182,7 +192,9 @@ export function liveHandoverEmail(
       `Ihre Website ist ab sofort online: ${d.url}`,
       {
         list: [
-          d.domain ? `Die Domain ${d.domain} ist auf Sie registriert und gehört Ihnen.` : 'Ihre Website ist unter der oben genannten Adresse erreichbar.',
+          d.domain
+            ? `Die Domain ${d.domain} ist auf Sie registriert und gehört Ihnen.`
+            : 'Ihre Website ist unter der oben genannten Adresse erreichbar.',
           `Nachrichten aus dem Kontaktformular gehen an ${d.formTarget}.`,
           `Hosting und SSL-Verschlüsselung sind bis ${d.hostingUntil} enthalten. Wir erinnern Sie rechtzeitig vor Ablauf.`,
           'Impressum und Datenschutzerklärung stammen aus Ihren Angaben – bitte halten Sie sie aktuell und geben Sie uns Bescheid, wenn sich etwas ändert.',

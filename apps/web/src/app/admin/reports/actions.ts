@@ -12,6 +12,10 @@ export async function applyReportAction(form: FormData): Promise<void> {
 
 export async function runOptimizerAction(): Promise<void> {
   const s = await requireAdmin();
-  await enqueue(QUEUES.weeklyOptimizer, { periodEnd: new Date().toISOString() }, { singletonKey: `optimizer-${actorOf(s)}-${Date.now()}` });
+  await enqueue(
+    QUEUES.weeklyOptimizer,
+    { periodEnd: new Date().toISOString() },
+    { singletonKey: `optimizer-${actorOf(s)}-${Date.now()}` },
+  );
   revalidatePath('/admin/reports');
 }

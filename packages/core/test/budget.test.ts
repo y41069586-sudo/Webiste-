@@ -42,7 +42,9 @@ describe('Budget-Guard', () => {
   it('parallele Reservierungen überschreiten das Budget nicht', async () => {
     const db = getDb();
     const results = await Promise.allSettled(
-      Array.from({ length: 10 }, (_, i) => reserveBudget(db, { category: 'letter', estimateCents: 100, idempotencyKey: `p${i}` })),
+      Array.from({ length: 10 }, (_, i) =>
+        reserveBudget(db, { category: 'letter', estimateCents: 100, idempotencyKey: `p${i}` }),
+      ),
     );
     expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(5);
     expect((await budgetStatus('letter')).spentCents).toBe(500);

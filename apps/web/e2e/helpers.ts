@@ -48,8 +48,8 @@ export async function loginAsAdmin(page: Page): Promise<void> {
       step = Math.floor(Date.now() / 30000);
     }
     usedStep = step;
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/login', { waitUntil: 'load' });
+    await page.getByRole('button', { name: 'Anmelden' }).waitFor();
     await page.getByLabel('E-Mail').fill(s.email);
     await page.getByLabel('Passwort').fill(s.password);
     await page.getByLabel('2FA-Code').fill(totpNow(s.secret));

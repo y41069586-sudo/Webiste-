@@ -13,7 +13,8 @@ export const REVISION_SCHEMA = {
     content: DEMO_CONTENT_SCHEMA,
     not_possible: {
       type: 'array',
-      description: 'Wünsche, die sich NICHT durch Textänderungen umsetzen lassen (z. B. neue Unterseiten, Online-Buchung, Shop, anderes Layout). Leer, wenn alles umgesetzt wurde.',
+      description:
+        'Wünsche, die sich NICHT durch Textänderungen umsetzen lassen (z. B. neue Unterseiten, Online-Buchung, Shop, anderes Layout). Leer, wenn alles umgesetzt wurde.',
       items: { type: 'string' },
     },
     summary: { type: 'string', description: 'Ein bis drei Sätze: was wurde geändert (für den Kunden, Sie-Form).' },
@@ -38,7 +39,13 @@ export interface RevisionInput {
   branchLabel: string;
   city: string;
   current: SiteContent;
-  customer: { headline?: string; subline?: string; about?: string; services?: { title: string; text: string }[]; wishes?: string };
+  customer: {
+    headline?: string;
+    subline?: string;
+    about?: string;
+    services?: { title: string; text: string }[];
+    wishes?: string;
+  };
   changeRequest?: string;
 }
 
@@ -56,15 +63,22 @@ export function buildRevisionPrompt(r: RevisionInput, feedback?: string[]): stri
     JSON.stringify(r.customer),
   ];
   if (r.changeRequest) lines.push('', 'ÄNDERUNGSWUNSCH:', r.changeRequest);
-  if (feedback?.length) lines.push('', 'Der letzte Versuch verletzte diese Regeln – bitte korrigieren:', ...feedback.map((f) => `- ${f}`));
+  if (feedback?.length)
+    lines.push('', 'Der letzte Versuch verletzte diese Regeln – bitte korrigieren:', ...feedback.map((f) => `- ${f}`));
   lines.push('', `Gib die überarbeiteten Texte über das Werkzeug ${REVISION_TOOL_NAME} zurück.`);
   return lines.join('\n');
 }
 
 const RISKY: { rule: string; re: RegExp }[] = [
   { rule: 'Historie/Erfahrung', re: /\bseit\b|gegründet|jahrzehnt|tradition|familienbetrieb|generation|jahre(n)?\s+erfahrung/gi },
-  { rule: 'Titel/Zertifikate', re: /auszeichnung|preisgekrönt|prämiert|zertifi\w*|\btüv\b|meister\w*|innung\w*|testsieger|siegel/gi },
-  { rule: 'Preise/Garantien', re: /€|\beuro\b|garantie\w*|garantiert|notdienst|rund\s+um\s+die\s+uhr|24\s*\/\s*7|kostenlos|gratis|rabatt\w*/gi },
+  {
+    rule: 'Titel/Zertifikate',
+    re: /auszeichnung|preisgekrönt|prämiert|zertifi\w*|\btüv\b|meister\w*|innung\w*|testsieger|siegel/gi,
+  },
+  {
+    rule: 'Preise/Garantien',
+    re: /€|\beuro\b|garantie\w*|garantiert|notdienst|rund\s+um\s+die\s+uhr|24\s*\/\s*7|kostenlos|gratis|rabatt\w*/gi,
+  },
   { rule: 'Einzugsgebiet', re: /umgebung|umkreis|ruhrgebiet|region\w*/gi },
   { rule: 'Superlative', re: /(?<!\bam\s)\b(beste[nrms]?|bester|nummer\s+eins|marktführer|einzigartig|unschlagbar)\b/gi },
 ];
@@ -92,16 +106,20 @@ const LIMITS: Record<string, [number, number]> = {
 export function validateRevision(c: SiteContent, customerText: string, knownFacts: string[]): RuleViolation[] {
   const v: RuleViolation[] = [];
   const source = `${customerText}\n${knownFacts.join('\n')}`.toLowerCase();
-  if (!Array.isArray(c.services) || c.services.length < 1 || c.services.length > 6) v.push({ field: 'services', rule: 'Anzahl', detail: `${c.services?.length ?? 0} Leistungen (1–6)` });
-  if (!Array.isArray(c.faq) || c.faq.length < 2 || c.faq.length > 5) v.push({ field: 'faq', rule: 'Anzahl', detail: `${c.faq?.length ?? 0} Fragen (2–5)` });
+  if (!Array.isArray(c.services) || c.services.length < 1 || c.services.length > 6)
+    v.push({ field: 'services', rule: 'Anzahl', detail: `${c.services?.length ?? 0} Leistungen (1–6)` });
+  if (!Array.isArray(c.faq) || c.faq.length < 2 || c.faq.length > 5)
+    v.push({ field: 'faq', rule: 'Anzahl', detail: `${c.faq?.length ?? 0} Fragen (2–5)` });
   if (v.length) return v;
   for (const [field, [min, max]] of Object.entries(LIMITS)) {
     const n = String((c as unknown as Record<string, string>)[field] ?? '').trim().length;
     if (n < min || n > max) v.push({ field, rule: 'Länge', detail: `${n} Zeichen (erlaubt ${min}–${max})` });
   }
   c.services.forEach((s, i) => {
-    if (s.title.trim().length < 2 || s.title.length > 40) v.push({ field: `services[${i}].title`, rule: 'Länge', detail: `${s.title.length} Zeichen` });
-    if (s.text.trim().length < 5 || s.text.length > 170) v.push({ field: `services[${i}].text`, rule: 'Länge', detail: `${s.text.length} Zeichen` });
+    if (s.title.trim().length < 2 || s.title.length > 40)
+      v.push({ field: `services[${i}].title`, rule: 'Länge', detail: `${s.title.length} Zeichen` });
+    if (s.text.trim().length < 5 || s.text.length > 170)
+      v.push({ field: `services[${i}].text`, rule: 'Länge', detail: `${s.text.length} Zeichen` });
     if (!(ICON_KEYS as string[]).includes(s.icon)) v.push({ field: `services[${i}].icon`, rule: 'Icon', detail: s.icon });
   });
   const fields: [string, string][] = [
@@ -131,7 +149,8 @@ export function validateRevision(c: SiteContent, customerText: string, knownFact
     }
     for (const { rule, re } of RISKY) {
       for (const m of value.matchAll(re)) {
-        if (!source.includes(m[0].toLowerCase())) v.push({ field, rule, detail: `„${m[0]}“ steht nicht in den Angaben des Inhabers` });
+        if (!source.includes(m[0].toLowerCase()))
+          v.push({ field, rule, detail: `„${m[0]}“ steht nicht in den Angaben des Inhabers` });
       }
     }
     for (const m of value.matchAll(/\d+/g)) {
@@ -157,7 +176,11 @@ export function mergeCustomerTexts(current: SiteContent, customer: RevisionInput
     hero_subline: customer.subline?.trim() || current.hero_subline,
     about: customer.about?.trim() || current.about,
     services: services.length
-      ? services.map((s, i) => ({ title: s.title.trim().slice(0, 40), text: s.text.trim().slice(0, 160), icon: icons[i % Math.max(1, icons.length)] ?? 'check' }))
+      ? services.map((s, i) => ({
+          title: s.title.trim().slice(0, 40),
+          text: s.text.trim().slice(0, 160),
+          icon: icons[i % Math.max(1, icons.length)] ?? 'check',
+        }))
       : current.services,
   });
 }
@@ -171,5 +194,9 @@ registerMockStructured(REVISION_TOOL_NAME, (req) => {
   const customer = grab('ANGABEN_DES_INHABERS_JSON') as RevisionInput['customer'];
   const change = /ÄNDERUNGSWUNSCH:\n([\s\S]+?)(\n\n|$)/.exec(req.prompt)?.[1] ?? '';
   const notPossible = /shop|buchung|unterseite/i.test(change) ? [change.trim()] : [];
-  return { content: mergeCustomerTexts(current, customer), not_possible: notPossible, summary: change ? 'Ihre Änderungswünsche wurden eingearbeitet.' : 'Ihre Angaben wurden übernommen.' };
+  return {
+    content: mergeCustomerTexts(current, customer),
+    not_possible: notPossible,
+    summary: change ? 'Ihre Änderungswünsche wurden eingearbeitet.' : 'Ihre Angaben wurden übernommen.',
+  };
 });

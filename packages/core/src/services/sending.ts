@@ -54,7 +54,10 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
   if (!letter.isTest) {
     const demo = letter.demoId ? await db.query.demos.findFirst({ where: eq(demos.id, letter.demoId) }) : null;
     if (!demo || demo.status !== 'published' || (demo.expiresAt && demo.expiresAt < addDays(new Date(), 7))) {
-      await db.update(letters).set({ status: 'cancelled', statusReason: 'Demo nicht (mehr lange genug) online' }).where(eq(letters.id, letterId));
+      await db
+        .update(letters)
+        .set({ status: 'cancelled', statusReason: 'Demo nicht (mehr lange genug) online' })
+        .where(eq(letters.id, letterId));
       return { state: 'skipped', reason: 'Demo nicht verfügbar' };
     }
   }
@@ -79,19 +82,39 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     return { state: 'dry_run', estimateCents: letter.estimatedCostCents ?? cfg.costs.letterEstimateCents };
   }
 
-  const estimate = (await provider.estimateCost(pdf, base).catch(() => null)) ?? letter.estimatedCostCents ?? cfg.costs.letterEstimateCents;
+  const estimate =
+    (await provider.estimateCost(pdf, base).catch(() => null)) ?? letter.estimatedCostCents ?? cfg.costs.letterEstimateCents;
   const reservationKey = `letter:${letterId}`;
-  await reserveBudget(db, { category: 'letter', estimateCents: estimate, idempotencyKey: reservationKey, leadId: lead.id, ref: letterId });
+  await reserveBudget(db, {
+    category: 'letter',
+    estimateCents: estimate,
+    idempotencyKey: reservationKey,
+    leadId: lead.id,
+    ref: letterId,
+  });
 
   try {
     const recipient = letter.isTest
       ? cfg.letter.testRecipient
-      : { name: lead.businessName, street: lead.street ?? '', houseNumber: lead.houseNumber ?? '', postalCode: lead.postalCode ?? '', city: lead.city };
+      : {
+          name: lead.businessName,
+          street: lead.street ?? '',
+          houseNumber: lead.houseNumber ?? '',
+          postalCode: lead.postalCode ?? '',
+          city: lead.city,
+        };
     const res = await provider.send(pdf, {
       ...base,
       idempotencyKey: letterId,
       reference: `wbm-${letterId}`,
-      recipient: { name: recipient.name, street: recipient.street, number: recipient.houseNumber, zip: recipient.postalCode, city: recipient.city, country: 'DE' },
+      recipient: {
+        name: recipient.name,
+        street: recipient.street,
+        number: recipient.houseNumber,
+        zip: recipient.postalCode,
+        city: recipient.city,
+        country: 'DE',
+      },
       sender: {
         name: cfg.sender.company || cfg.sender.name,
         street: cfg.sender.street.replace(/\s+\S+$/, ''),
@@ -125,21 +148,33 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
         await transitionLead(tx, lead.id, letter.sequence === 2 ? 'followup_sent' : 'letter_sent', { actor, soft: true });
         if (letter.sequence === 1) await extendDemoExpiry(tx, lead.id, now);
       }
-      await audit(tx, { entity: 'letter', entityId: letterId, action: 'send', actor, context: { provider: provider.name, providerLetterId: res.providerLetterId, cost } });
+      await audit(tx, {
+        entity: 'letter',
+        entityId: letterId,
+        action: 'send',
+        actor,
+        context: { provider: provider.name, providerLetterId: res.providerLetterId, cost },
+      });
     });
     return { state: 'sent', providerLetterId: res.providerLetterId, costCents: cost };
   } catch (err) {
     await releaseReservation(db, reservationKey);
     await db
       .update(letters)
-      .set({ statusReason: `Versandfehler: ${err instanceof Error ? err.message.slice(0, 300) : String(err)}`, updatedAt: new Date() })
+      .set({
+        statusReason: `Versandfehler: ${err instanceof Error ? err.message.slice(0, 300) : String(err)}`,
+        updatedAt: new Date(),
+      })
       .where(eq(letters.id, letterId));
     throw err;
   }
 }
 
 /** Alle freigegebenen Briefe versenden (Testbriefe zuerst), stoppt beim Budget. */
-export async function sendApprovedLetters(actor: string, limit = 500): Promise<{ sent: number; dryRun: number; skipped: number; stoppedBy?: string }> {
+export async function sendApprovedLetters(
+  actor: string,
+  limit = 500,
+): Promise<{ sent: number; dryRun: number; skipped: number; stoppedBy?: string }> {
   const db = getDb();
   const rows = await db
     .select({ id: letters.id })
@@ -189,10 +224,18 @@ export async function applyLetterStatus(
   }
   if (status === 'failed' || status === 'cancelled') {
     if (['failed', 'cancelled', 'delivered'].includes(letter.status)) return false;
-    await db.update(letters).set({ status, statusReason: reason ?? status, updatedAt: new Date() }).where(eq(letters.id, letter.id));
+    await db
+      .update(letters)
+      .set({ status, statusReason: reason ?? status, updatedAt: new Date() })
+      .where(eq(letters.id, letter.id));
     if (!letter.isTest && status === 'failed') {
       await transitionLead(db, letter.leadId, 'failed', { actor, reason: `Brief: ${reason ?? 'unzustellbar'}`, soft: true });
-      await raiseAlert(db, { level: 'error', code: `letter_failed:${letter.id}`, message: `Brief fehlgeschlagen/unzustellbar: ${reason ?? ''}`, context: { letterId: letter.id } });
+      await raiseAlert(db, {
+        level: 'error',
+        code: `letter_failed:${letter.id}`,
+        message: `Brief fehlgeschlagen/unzustellbar: ${reason ?? ''}`,
+        context: { letterId: letter.id },
+      });
     }
     await audit(db, { entity: 'letter', entityId: letter.id, action: `status:${status}`, actor, context: { reason } });
     return true;
@@ -228,7 +271,10 @@ export async function processLetterWebhookEvents(events: LetterWebhookEvent[], p
         .returning({ id: webhookEvents.eventId });
       if (!inserted.length) return; // bereits verarbeitet
       if (await applyLetterStatus(tx, ev.providerLetterId, ev.status, ev.occurredAt, `webhook:${provider}`, ev.reason)) applied++;
-      await tx.update(webhookEvents).set({ processedAt: new Date() }).where(and(eq(webhookEvents.provider, provider), eq(webhookEvents.eventId, ev.eventId)));
+      await tx
+        .update(webhookEvents)
+        .set({ processedAt: new Date() })
+        .where(and(eq(webhookEvents.provider, provider), eq(webhookEvents.eventId, ev.eventId)));
     });
   }
   return applied;
@@ -264,7 +310,16 @@ export async function syncLetterStatuses(actor = 'job:sync-letter-status'): Prom
     .from(letters)
     .where(and(eq(letters.status, 'sent'), lt(letters.sentAt, cutoff), isNotNull(letters.providerLetterId)));
   for (const l of assume) {
-    if (await applyLetterStatus(db, l.providerLetterId!, 'delivered', addDays(l.sentAt!, cfg.timing.assumeDeliveredAfterDays), `${actor}:angenommen`)) changed++;
+    if (
+      await applyLetterStatus(
+        db,
+        l.providerLetterId!,
+        'delivered',
+        addDays(l.sentAt!, cfg.timing.assumeDeliveredAfterDays),
+        `${actor}:angenommen`,
+      )
+    )
+      changed++;
   }
   return { checked: open.length + assume.length, changed };
 }
@@ -288,12 +343,21 @@ export async function scheduleFollowups(): Promise<{ queued: number }> {
         eq(leads.status, 'letter_delivered'),
         lt(leads.lettersSent, cfg.letter.maxLettersPerLead),
         lt(letters.deliveredAt, cutoff),
-        notExists(db.select({ x: letters.id }).from(letters).where(and(eq(letters.leadId, leads.id), eq(letters.sequence, 2)))),
+        notExists(
+          db
+            .select({ x: letters.id })
+            .from(letters)
+            .where(and(eq(letters.leadId, leads.id), eq(letters.sequence, 2))),
+        ),
       ),
     )
     .limit(200);
   for (const d of due) {
-    await enqueue(QUEUES.generateLetter, { leadId: d.leadId, sequence: 2, triggeredBy: 'followup' }, { singletonKey: `letter:${d.leadId}:2` });
+    await enqueue(
+      QUEUES.generateLetter,
+      { leadId: d.leadId, sequence: 2, triggeredBy: 'followup' },
+      { singletonKey: `letter:${d.leadId}:2` },
+    );
   }
   return { queued: due.length };
 }

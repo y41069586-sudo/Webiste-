@@ -24,7 +24,10 @@ async function main(): Promise<void> {
   await runMigrations();
   await seedDefaults();
   const { secret } = await createAdmin('e2e@example.com', 'e2e-passwort-sehr-sicher');
-  writeFileSync(process.env.E2E_STATE_FILE!, JSON.stringify({ email: 'e2e@example.com', password: 'e2e-passwort-sehr-sicher', secret }));
+  writeFileSync(
+    process.env.E2E_STATE_FILE!,
+    JSON.stringify({ email: 'e2e@example.com', password: 'e2e-passwort-sehr-sicher', secret }),
+  );
   await closeDb();
 }
 

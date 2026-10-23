@@ -25,6 +25,11 @@ export async function sendAlertDigest(): Promise<number> {
   await db
     .update(alerts)
     .set({ emailedAt: new Date() })
-    .where(inArray(alerts.id, open.map((a) => a.id)));
+    .where(
+      inArray(
+        alerts.id,
+        open.map((a) => a.id),
+      ),
+    );
   return open.length;
 }

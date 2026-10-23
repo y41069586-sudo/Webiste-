@@ -11,15 +11,21 @@ export function LoginForm() {
   return (
     <form action={action} className="space-y-4">
       <div>
-        <label htmlFor="email" className="mb-1 block text-sm font-medium">E-Mail</label>
+        <label htmlFor="email" className="mb-1 block text-sm font-medium">
+          E-Mail
+        </label>
         <input id="email" name="email" type="email" autoComplete="username" required className={input} />
       </div>
       <div>
-        <label htmlFor="password" className="mb-1 block text-sm font-medium">Passwort</label>
+        <label htmlFor="password" className="mb-1 block text-sm font-medium">
+          Passwort
+        </label>
         <input id="password" name="password" type="password" autoComplete="current-password" required className={input} />
       </div>
       <div>
-        <label htmlFor="totp" className="mb-1 block text-sm font-medium">2FA-Code</label>
+        <label htmlFor="totp" className="mb-1 block text-sm font-medium">
+          2FA-Code
+        </label>
         <input
           id="totp"
           name="totp"

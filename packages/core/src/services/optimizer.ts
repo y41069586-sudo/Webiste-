@@ -106,17 +106,26 @@ export function thompsonAllocation(
   const k = arms.length;
   return params.map((p, idx) => {
     const pBest = wins[idx]! / opts.samples;
-    return { ...p.arm, priorMean: p.priorMean, posteriorMean: p.alpha / (p.alpha + p.beta), pBest, share: (1 - eps) * pBest + eps / k };
+    return {
+      ...p.arm,
+      priorMean: p.priorMean,
+      posteriorMean: p.alpha / (p.alpha + p.beta),
+      pBest,
+      share: (1 - eps) * pBest + eps / k,
+    };
   });
 }
 
-const pct = (v: number | null | undefined, d = 1) => (v === null || v === undefined ? '–' : `${(v * 100).toFixed(d).replace('.', ',')} %`);
+const pct = (v: number | null | undefined, d = 1) =>
+  v === null || v === undefined ? '–' : `${(v * 100).toFixed(d).replace('.', ',')} %`;
 
 /** Segmente: alle mit Briefen in der Lernphase plus alle mit freien Leads im Pool. */
 async function segmentArms(from: Date, to: Date): Promise<ArmStats[]> {
   const db = getDb();
   const rows = await kpiRows({ from, to }, 'segment', db);
-  const pool = await db.execute<{ segment_key: string }>(sql`SELECT DISTINCT segment_key FROM leads WHERE status IN ('qualified', 'demo_built', 'demo_approved', 'demo_published')`);
+  const pool = await db.execute<{ segment_key: string }>(
+    sql`SELECT DISTINCT segment_key FROM leads WHERE status IN ('qualified', 'demo_built', 'demo_approved', 'demo_published')`,
+  );
   const keys = new Set([...rows.map((r) => r.key), ...pool.rows.map((r) => r.segment_key)]);
   return [...keys].sort().map((key) => {
     const r = rows.find((x) => x.key === key);
@@ -127,7 +136,10 @@ async function segmentArms(from: Date, to: Date): Promise<ArmStats[]> {
 async function variantArms(from: Date, to: Date): Promise<ArmStats[]> {
   const db = getDb();
   const rows = await kpiRows({ from, to }, 'variant', db);
-  const active = await db.select().from(variants).where(sql`${variants.kind} = 'letter' AND ${variants.active} = true AND ${variants.sequence} = 1`);
+  const active = await db
+    .select()
+    .from(variants)
+    .where(sql`${variants.kind} = 'letter' AND ${variants.active} = true AND ${variants.sequence} = 1`);
   return active.map((v) => {
     const r = rows.find((x) => x.key === v.id);
     return { key: v.id, label: v.name, n: r?.leads ?? 0, scans: r?.scans ?? 0, purchases: r?.purchases ?? 0 };
@@ -172,7 +184,10 @@ export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): 
     ].join('\n');
   const curShares = cfg.budget.segmentShares;
   const curShareSum = Object.values(curShares).reduce((a, b) => a + b, 0);
-  const activeVariants = await getDb().select().from(variants).where(sql`${variants.kind} = 'letter' AND ${variants.active} = true AND ${variants.sequence} = 1`);
+  const activeVariants = await getDb()
+    .select()
+    .from(variants)
+    .where(sql`${variants.kind} = 'letter' AND ${variants.active} = true AND ${variants.sequence} = 1`);
   const wSum = activeVariants.reduce((a, v) => a + v.weight, 0) || 1;
   const sw = effectiveSwitches(cfg);
 
@@ -194,7 +209,9 @@ export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): 
     '## Briefvarianten',
     vars.length ? table(vars, (k) => (activeVariants.find((v) => v.id === k)?.weight ?? 0) / wSum) : 'Keine aktiven Varianten.',
     '',
-    sw.autoOptimize ? '**AUTO_OPTIMIZE ist an – die neuen Anteile wurden übernommen.**' : 'AUTO_OPTIMIZE ist aus – Vorschlag, Übernahme im Dashboard unter „Wochenberichte“.',
+    sw.autoOptimize
+      ? '**AUTO_OPTIMIZE ist an – die neuen Anteile wurden übernommen.**'
+      : 'AUTO_OPTIMIZE ist aus – Vorschlag, Übernahme im Dashboard unter „Wochenberichte“.',
     '',
     'Hinweis: Bei wenigen Briefen sind die Unterschiede überwiegend Zufall; die Exploration sorgt dafür, dass jedes Segment weiter Daten bekommt.',
   ].join('\n');
@@ -207,8 +224,23 @@ export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): 
   const db = getDb();
   const [row] = await db
     .insert(reports)
-    .values({ kind: 'weekly', periodStart: weekStart, periodEnd: now, markdown, allocationJson: allocation as unknown as Record<string, unknown> })
-    .onConflictDoUpdate({ target: [reports.kind, reports.periodStart], set: { periodEnd: now, markdown, allocationJson: allocation as unknown as Record<string, unknown>, applied: false, appliedAt: null } })
+    .values({
+      kind: 'weekly',
+      periodStart: weekStart,
+      periodEnd: now,
+      markdown,
+      allocationJson: allocation as unknown as Record<string, unknown>,
+    })
+    .onConflictDoUpdate({
+      target: [reports.kind, reports.periodStart],
+      set: {
+        periodEnd: now,
+        markdown,
+        allocationJson: allocation as unknown as Record<string, unknown>,
+        applied: false,
+        appliedAt: null,
+      },
+    })
     .returning();
   let applied = false;
   if (sw.autoOptimize) {
@@ -216,8 +248,17 @@ export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): 
     applied = true;
   }
   try {
-    const mail = renderEmail(cfg, { subject: `[Website-Brief] Wochenbericht ${formatDateDe(weekStart)}`, noGreeting: true, blocks: [markdown, { button: { href: appUrl('/admin/reports'), label: 'Im Dashboard ansehen' } }] });
-    await sendTransactionalEmail({ ...mail, kind: 'weekly_report', idempotencyKey: `report:${row!.id}:${now.toISOString().slice(0, 13)}`, to: getEnv().ADMIN_EMAIL });
+    const mail = renderEmail(cfg, {
+      subject: `[Website-Brief] Wochenbericht ${formatDateDe(weekStart)}`,
+      noGreeting: true,
+      blocks: [markdown, { button: { href: appUrl('/admin/reports'), label: 'Im Dashboard ansehen' } }],
+    });
+    await sendTransactionalEmail({
+      ...mail,
+      kind: 'weekly_report',
+      idempotencyKey: `report:${row!.id}:${now.toISOString().slice(0, 13)}`,
+      to: getEnv().ADMIN_EMAIL,
+    });
   } catch (err) {
     logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'Wochenbericht nicht gemailt');
   }
@@ -230,10 +271,20 @@ export async function applyReport(reportId: string, actor: string): Promise<void
   const r = await db.query.reports.findFirst({ where: eq(reports.id, reportId) });
   if (!r) throw new Error('Bericht nicht gefunden');
   const a = r.allocationJson as { segmentShares?: Record<string, number>; variantWeights?: Record<string, number> };
-  if (a.segmentShares && Object.keys(a.segmentShares).length) await updateConfig({ budget: { segmentShares: a.segmentShares } }, actor);
+  if (a.segmentShares && Object.keys(a.segmentShares).length)
+    await updateConfig({ budget: { segmentShares: a.segmentShares } }, actor);
   for (const [id, w] of Object.entries(a.variantWeights ?? {})) {
-    await db.update(variants).set({ weight: Math.max(0.01, Number(w)) }).where(eq(variants.id, id));
+    await db
+      .update(variants)
+      .set({ weight: Math.max(0.01, Number(w)) })
+      .where(eq(variants.id, id));
   }
   await db.update(reports).set({ applied: true, appliedAt: new Date() }).where(eq(reports.id, reportId));
-  await audit(db, { entity: 'report', entityId: reportId, action: 'applied', actor, context: { segments: Object.keys(a.segmentShares ?? {}).length } });
+  await audit(db, {
+    entity: 'report',
+    entityId: reportId,
+    action: 'applied',
+    actor,
+    context: { segments: Object.keys(a.segmentShares ?? {}).length },
+  });
 }

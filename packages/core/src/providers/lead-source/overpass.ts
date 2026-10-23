@@ -117,7 +117,10 @@ export function osmElementToPlace(el: OsmElement, fallbackCity: string): RawPlac
   if (!name) return null;
   const website = t.website ?? t['contact:website'] ?? t.url ?? t['contact:url'];
   const social = t['contact:instagram'] ?? t['contact:facebook'] ?? t['contact:tiktok'];
-  const status = t['disused:shop'] || t['disused:craft'] || t['abandoned:shop'] || t.opening_hours === 'closed' ? 'CLOSED_PERMANENTLY' : 'OPERATIONAL';
+  const status =
+    t['disused:shop'] || t['disused:craft'] || t['abandoned:shop'] || t.opening_hours === 'closed'
+      ? 'CLOSED_PERMANENTLY'
+      : 'OPERATIONAL';
   return {
     source: 'osm',
     sourceId: `${el.type}/${el.id}`,
@@ -167,7 +170,10 @@ export class OverpassLeadSource implements LeadSource {
         return { places, requests: 1, costCents: 0 };
       } catch (err) {
         lastErr = err;
-        logger.warn({ endpoint: new URL(endpoint).host, err: err instanceof Error ? err.message : String(err) }, 'overpass: Instanz fehlgeschlagen');
+        logger.warn(
+          { endpoint: new URL(endpoint).host, err: err instanceof Error ? err.message : String(err) },
+          'overpass: Instanz fehlgeschlagen',
+        );
       }
     }
     throw lastErr instanceof Error ? lastErr : new Error('Overpass nicht erreichbar');
@@ -186,7 +192,11 @@ export class OverpassLeadSource implements LeadSource {
         if (!res.ok) throw new HttpError(`Overpass HTTP ${res.status}`, res.status, text.slice(0, 500));
         return JSON.parse(text) as { elements?: OsmElement[] };
       },
-      { retries: 3, baseDelayMs: 8_000, shouldRetry: (e) => (e instanceof HttpError ? [429, 502, 503, 504].includes(e.status) : true) },
+      {
+        retries: 3,
+        baseDelayMs: 8_000,
+        shouldRetry: (e) => (e instanceof HttpError ? [429, 502, 503, 504].includes(e.status) : true),
+      },
     );
   }
 

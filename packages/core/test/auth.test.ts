@@ -11,9 +11,19 @@ describe('Admin-Login mit 2FA', () => {
     const { secret } = await createAdmin('admin@example.com', 'sehr-geheimes-passwort');
     const noTotp = await login({ email: 'admin@example.com', password: 'sehr-geheimes-passwort', totp: '', clientKey: 'c1' });
     expect(noTotp).toEqual({ ok: false, reason: 'totp_required' });
-    const wrongPw = await login({ email: 'admin@example.com', password: 'falsch-falsch-falsch', totp: totp(secret), clientKey: 'c1' });
+    const wrongPw = await login({
+      email: 'admin@example.com',
+      password: 'falsch-falsch-falsch',
+      totp: totp(secret),
+      clientKey: 'c1',
+    });
     expect(wrongPw.ok).toBe(false);
-    const ok = await login({ email: 'admin@example.com', password: 'sehr-geheimes-passwort', totp: totp(secret), clientKey: 'c1' });
+    const ok = await login({
+      email: 'admin@example.com',
+      password: 'sehr-geheimes-passwort',
+      totp: totp(secret),
+      clientKey: 'c1',
+    });
     expect(ok.ok).toBe(true);
     if (!ok.ok) return;
     const s = await validateSession(ok.token);

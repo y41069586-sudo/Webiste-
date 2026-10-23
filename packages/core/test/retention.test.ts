@@ -49,7 +49,14 @@ async function seedLead(status: string, opts: { letterMonthsAgo?: number; demoEx
   await storage.put(`demos/${demo!.id}/index.html`, '<html>');
   if (opts.letterMonthsAgo !== undefined) {
     await storage.put(`letters/${lead!.id}/brief.pdf`, '%PDF');
-    await db.insert(letters).values({ leadId: lead!.id, demoId: demo!.id, sequence: 1, status: 'delivered', sentAt: addMonths(new Date(), -opts.letterMonthsAgo), pdfStorageKey: `letters/${lead!.id}/brief.pdf` });
+    await db.insert(letters).values({
+      leadId: lead!.id,
+      demoId: demo!.id,
+      sequence: 1,
+      status: 'delivered',
+      sentAt: addMonths(new Date(), -opts.letterMonthsAgo),
+      pdfStorageKey: `letters/${lead!.id}/brief.pdf`,
+    });
   }
   return { lead: lead!, demo: demo! };
 }
@@ -94,13 +101,38 @@ describe('Lösch-Job', () => {
   it('Käufer und laufende Bestellungen bleiben unangetastet; alte Support-Nachrichten und Checkouts werden gelöscht', async () => {
     const db = getDb();
     const buyer = await seedLead('paid', { letterMonthsAgo: 9, demoExpiresInDays: -5 });
-    await db.insert(orders).values({ leadId: buyer.lead.id, amountCents: 39000, netCents: 39000, status: 'paid', customerCompany: 'K', customerName: 'N', customerEmail: 'k@example.org', billingAddressJson: { street: 'A 1', postalCode: '44135', city: 'Dortmund', country: 'DE' }, paidAt: new Date(), invoiceNumber: 'RE-2026-0001' });
-    await db.insert(orders).values({ amountCents: 39000, netCents: 39000, status: 'expired', customerCompany: 'A', customerName: 'B', customerEmail: 'a@example.org', billingAddressJson: { street: 'A 1', postalCode: '44135', city: 'Dortmund', country: 'DE' }, createdAt: addMonths(new Date(), -7) });
+    await db.insert(orders).values({
+      leadId: buyer.lead.id,
+      amountCents: 39000,
+      netCents: 39000,
+      status: 'paid',
+      customerCompany: 'K',
+      customerName: 'N',
+      customerEmail: 'k@example.org',
+      billingAddressJson: { street: 'A 1', postalCode: '44135', city: 'Dortmund', country: 'DE' },
+      paidAt: new Date(),
+      invoiceNumber: 'RE-2026-0001',
+    });
+    await db.insert(orders).values({
+      amountCents: 39000,
+      netCents: 39000,
+      status: 'expired',
+      customerCompany: 'A',
+      customerName: 'B',
+      customerEmail: 'a@example.org',
+      billingAddressJson: { street: 'A 1', postalCode: '44135', city: 'Dortmund', country: 'DE' },
+      createdAt: addMonths(new Date(), -7),
+    });
     await db.insert(supportMessages).values([
       { direction: 'in', fromEmail: 'alt@example.org', body: 'alt', status: 'done', createdAt: addMonths(new Date(), -13) },
       { direction: 'in', fromEmail: 'neu@example.org', body: 'neu', status: 'done' },
     ]);
-    await db.insert(events).values({ leadId: buyer.lead.id, type: 'scan', metaJson: { ipHash: 'abc', ua: 'mobil/safari' }, createdAt: addDays(new Date(), -40) });
+    await db.insert(events).values({
+      leadId: buyer.lead.id,
+      type: 'scan',
+      metaJson: { ipHash: 'abc', ua: 'mobil/safari' },
+      createdAt: addDays(new Date(), -40),
+    });
     const r = await runRetention();
     expect(r.demosExpired).toBe(0);
     expect(r.leadsAnonymized).toBe(0);

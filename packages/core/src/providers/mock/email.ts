@@ -22,7 +22,11 @@ export class MockEmail implements EmailProvider {
           html: mail.html,
           replyTo: mail.replyTo,
           tag: mail.tag,
-          attachments: (mail.attachments ?? []).map((a) => ({ filename: a.filename, contentType: a.contentType, size: a.content.length })),
+          attachments: (mail.attachments ?? []).map((a) => ({
+            filename: a.filename,
+            contentType: a.contentType,
+            size: a.content.length,
+          })),
           sentAt: new Date().toISOString(),
         },
         null,

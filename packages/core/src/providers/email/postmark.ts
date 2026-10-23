@@ -27,7 +27,13 @@ export class PostmarkEmail implements EmailProvider {
       ...(mail.tag ? { Tag: mail.tag.slice(0, 1000) } : {}),
       ...(mail.headers ? { Headers: Object.entries(mail.headers).map(([Name, Value]) => ({ Name, Value })) } : {}),
       ...(mail.attachments?.length
-        ? { Attachments: mail.attachments.map((a) => ({ Name: a.filename, Content: a.content.toString('base64'), ContentType: a.contentType })) }
+        ? {
+            Attachments: mail.attachments.map((a) => ({
+              Name: a.filename,
+              Content: a.content.toString('base64'),
+              ContentType: a.contentType,
+            })),
+          }
         : {}),
       TrackOpens: false,
       TrackLinks: 'None',
@@ -37,7 +43,11 @@ export class PostmarkEmail implements EmailProvider {
       async () => {
         const res = await this.fetchImpl('https://api.postmarkapp.com/email', {
           method: 'POST',
-          headers: { 'x-postmark-server-token': this.serverToken, 'content-type': 'application/json', accept: 'application/json' },
+          headers: {
+            'x-postmark-server-token': this.serverToken,
+            'content-type': 'application/json',
+            accept: 'application/json',
+          },
           body: JSON.stringify(body),
           signal: AbortSignal.timeout(30_000),
         });
@@ -45,7 +55,11 @@ export class PostmarkEmail implements EmailProvider {
         const json = (text ? JSON.parse(text) : {}) as { MessageID?: string; ErrorCode?: number; Message?: string };
         if (!res.ok || (json.ErrorCode ?? 0) !== 0 || !json.MessageID) {
           // 422 = inhaltlicher Fehler (z. B. inaktiver Empfänger) → nicht wiederholen
-          throw new HttpError(`Postmark HTTP ${res.status} (Code ${json.ErrorCode ?? '?'}): ${json.Message ?? ''}`.trim(), res.status, text.slice(0, 500));
+          throw new HttpError(
+            `Postmark HTTP ${res.status} (Code ${json.ErrorCode ?? '?'}): ${json.Message ?? ''}`.trim(),
+            res.status,
+            text.slice(0, 500),
+          );
         }
         return { messageId: json.MessageID };
       },

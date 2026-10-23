@@ -34,7 +34,11 @@ async function main(): Promise<void> {
         return;
       }
       // Lebenszeichen inkl. Datenbank-Erreichbarkeit
-      void pingDb().then((ok) => res.writeHead(ok ? 200 : 503, { 'content-type': 'application/json' }).end(JSON.stringify({ status: ok ? 'ok' : 'db_down' })));
+      void pingDb().then((ok) =>
+        res
+          .writeHead(ok ? 200 : 503, { 'content-type': 'application/json' })
+          .end(JSON.stringify({ status: ok ? 'ok' : 'db_down' })),
+      );
     }).listen(healthPort, process.env.WORKER_HEALTH_HOST ?? '127.0.0.1');
   }
 

@@ -12,26 +12,55 @@ interface Call {
 function fakeFetch(calls: Call[]): typeof fetch {
   return (async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input);
-    const headers = Object.fromEntries(Object.entries((init?.headers as Record<string, string>) ?? {}).map(([k, v]) => [k.toLowerCase(), v]));
+    const headers = Object.fromEntries(
+      Object.entries((init?.headers as Record<string, string>) ?? {}).map(([k, v]) => [k.toLowerCase(), v]),
+    );
     calls.push({ url, method: init?.method ?? 'GET', headers, body: init?.body });
-    const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json' } });
+    const json = (o: unknown, status = 200) =>
+      new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json' } });
     if (url.endsWith('/auth/access-tokens')) return json({ token_type: 'Bearer', expires_in: 43200, access_token: 'tok123' });
-    if (url.endsWith('/file-upload')) return json({ data: { id: 'u1', type: 'file_uploads', attributes: { url: 'https://s3.example/upload?sig=1', url_signature: '$2y$sig', expires_at: '2026-10-23T10:00:00+0200' } } });
+    if (url.endsWith('/file-upload'))
+      return json({
+        data: {
+          id: 'u1',
+          type: 'file_uploads',
+          attributes: {
+            url: 'https://s3.example/upload?sig=1',
+            url_signature: '$2y$sig',
+            expires_at: '2026-10-23T10:00:00+0200',
+          },
+        },
+      });
     if (url.startsWith('https://s3.example')) return new Response('', { status: 200 });
-    if (url.endsWith('/price-calculator')) return json({ data: { id: 'p', type: 'letter_price_calculator', attributes: { currency: 'EUR', price: 1.07 } } });
-    if (url.endsWith('/deliveries/letters') && init?.method === 'POST') return json({ data: { id: 'L-1', type: 'letters', attributes: { status: 'validating', price_value: null } } }, 201);
-    if (url.includes('/deliveries/letters/L-1')) return json({ data: { id: 'L-1', type: 'letters', attributes: { status: 'sent', price_value: 1.07 } } });
+    if (url.endsWith('/price-calculator'))
+      return json({ data: { id: 'p', type: 'letter_price_calculator', attributes: { currency: 'EUR', price: 1.07 } } });
+    if (url.endsWith('/deliveries/letters') && init?.method === 'POST')
+      return json({ data: { id: 'L-1', type: 'letters', attributes: { status: 'validating', price_value: null } } }, 201);
+    if (url.includes('/deliveries/letters/L-1'))
+      return json({ data: { id: 'L-1', type: 'letters', attributes: { status: 'sent', price_value: 1.07 } } });
     return new Response('not found', { status: 404 });
   }) as typeof fetch;
 }
 
-const cfg = { clientId: 'cid', clientSecret: 'secret', organisationId: 'org-1', env: 'staging' as const, webhookSecret: 'whsec_0123456789abcdefghij' };
+const cfg = {
+  clientId: 'cid',
+  clientSecret: 'secret',
+  organisationId: 'org-1',
+  env: 'staging' as const,
+  webhookSecret: 'whsec_0123456789abcdefghij',
+};
 
 describe('Pingen-Provider (gegen nachgebildete API v2)', () => {
   it('Preisrechner mit Seitenzahl, Druckmodus und Farbe', async () => {
     const calls: Call[] = [];
     const p = new PingenMailProvider(cfg, fakeFetch(calls));
-    const cents = await p.estimateCost(Buffer.from('%PDF'), { color: true, deliveryProduct: 'cheap', addressPosition: 'left', recipientCountry: 'DE', pages: 2 });
+    const cents = await p.estimateCost(Buffer.from('%PDF'), {
+      color: true,
+      deliveryProduct: 'cheap',
+      addressPosition: 'left',
+      recipientCountry: 'DE',
+      pages: 2,
+    });
     expect(cents).toBe(107);
     expect(calls[0]!.url).toBe('https://identity-staging.pingen.com/auth/access-tokens');
     expect(String(calls[0]!.body)).toContain('grant_type=client_credentials');
@@ -40,7 +69,16 @@ describe('Pingen-Provider (gegen nachgebildete API v2)', () => {
     expect(priceCall.headers.authorization).toBe('Bearer tok123');
     expect(priceCall.headers['content-type']).toBe('application/vnd.api+json');
     expect(JSON.parse(String(priceCall.body))).toEqual({
-      data: { type: 'letter_price_calculator', attributes: { country: 'DE', paper_types: ['normal', 'normal'], print_mode: 'duplex', print_spectrum: 'color', delivery_product: 'cheap' } },
+      data: {
+        type: 'letter_price_calculator',
+        attributes: {
+          country: 'DE',
+          paper_types: ['normal', 'normal'],
+          print_mode: 'duplex',
+          print_spectrum: 'color',
+          delivery_product: 'cheap',
+        },
+      },
     });
   });
 
@@ -55,7 +93,14 @@ describe('Pingen-Provider (gegen nachgebildete API v2)', () => {
       idempotencyKey: '11111111-2222-3333-4444-555555555555',
       reference: 'wbm-abc',
       pages: 1,
-      recipient: { name: 'An das Team von Testbetrieb', street: 'Kampstraße', number: '5', zip: '44137', city: 'Dortmund', country: 'DE' },
+      recipient: {
+        name: 'An das Team von Testbetrieb',
+        street: 'Kampstraße',
+        number: '5',
+        zip: '44137',
+        city: 'Dortmund',
+        country: 'DE',
+      },
       sender: { name: 'Website-Brief', street: 'Musterstraße', number: '1', zip: '44135', city: 'Dortmund', country: 'DE' },
     });
     expect(res).toEqual({ providerLetterId: 'L-1', status: 'validating' });
@@ -97,9 +142,19 @@ describe('Pingen-Provider (gegen nachgebildete API v2)', () => {
         id: 'wh-1',
         type: 'webhook_sent',
         attributes: { url: 'https://x', created_at: '2026-10-23T09:00:00+0200' },
-        relationships: { organisation: { data: { id: 'org-1', type: 'organisations' } }, deliverable: { data: { id: 'L-1', type: 'letters' } }, event: { data: { id: 'ev-1', type: 'letters_events' } } },
+        relationships: {
+          organisation: { data: { id: 'org-1', type: 'organisations' } },
+          deliverable: { data: { id: 'L-1', type: 'letters' } },
+          event: { data: { id: 'ev-1', type: 'letters_events' } },
+        },
       },
-      included: [{ id: 'ev-1', type: 'letters_events', attributes: { code: 'sent', name: 'Letter sent', emitted_at: '2026-10-23T08:59:00+0200' } }],
+      included: [
+        {
+          id: 'ev-1',
+          type: 'letters_events',
+          attributes: { code: 'sent', name: 'Letter sent', emitted_at: '2026-10-23T08:59:00+0200' },
+        },
+      ],
     });
     const h = new Headers({ signature: hmacSha256(cfg.webhookSecret, raw) });
     expect(p.verifyWebhook(raw, h)).toBe(true);

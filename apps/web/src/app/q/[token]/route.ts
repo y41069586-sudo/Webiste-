@@ -9,7 +9,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
   const { token } = await params;
   const res = await handleScan(token, requestMetaFrom(req.headers));
   if ('redirect' in res) {
-    return new Response(null, { status: 302, headers: { location: res.redirect, 'cache-control': 'no-store', 'referrer-policy': 'no-referrer' } });
+    return new Response(null, {
+      status: 302,
+      headers: { location: res.redirect, 'cache-control': 'no-store', 'referrer-policy': 'no-referrer' },
+    });
   }
   const cfg = await getConfig();
   if ('gone' in res) {

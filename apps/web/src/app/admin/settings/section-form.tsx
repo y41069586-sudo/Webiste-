@@ -40,7 +40,12 @@ export function SectionForm({ fields, action }: SectionFormProps) {
                 <div className="flex flex-wrap gap-3">
                   {(f.options ?? []).map((o) => (
                     <label key={o} className="flex items-center gap-1 text-sm">
-                      <input type="checkbox" name={f.path} value={o} defaultChecked={Array.isArray(f.value) && f.value.includes(o)} />
+                      <input
+                        type="checkbox"
+                        name={f.path}
+                        value={o}
+                        defaultChecked={Array.isArray(f.value) && f.value.includes(o)}
+                      />
                       {o}
                     </label>
                   ))}
@@ -83,8 +88,16 @@ export function SectionForm({ fields, action }: SectionFormProps) {
         >
           {pending ? 'Speichere …' : 'Speichern'}
         </button>
-        {state.ok ? <span className="text-sm text-emerald-700" role="status">Gespeichert.</span> : null}
-        {state.error ? <span className="text-sm text-red-700" role="alert">{state.error}</span> : null}
+        {state.ok ? (
+          <span className="text-sm text-emerald-700" role="status">
+            Gespeichert.
+          </span>
+        ) : null}
+        {state.error ? (
+          <span className="text-sm text-red-700" role="alert">
+            {state.error}
+          </span>
+        ) : null}
       </div>
     </form>
   );

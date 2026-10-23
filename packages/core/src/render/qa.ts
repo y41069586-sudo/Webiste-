@@ -40,7 +40,14 @@ export async function validateHtml(html: string): Promise<Check> {
   return {
     name: 'html-validierung',
     passed: msgs.length === 0,
-    ...(msgs.length ? { details: msgs.slice(0, 10).map((m) => `${m.ruleId}: ${m.message} (Z. ${m.line})`).join(' | ') } : {}),
+    ...(msgs.length
+      ? {
+          details: msgs
+            .slice(0, 10)
+            .map((m) => `${m.ruleId}: ${m.message} (Z. ${m.line})`)
+            .join(' | '),
+        }
+      : {}),
   };
 }
 
@@ -118,30 +125,46 @@ export async function browserChecks(opts: BrowserQaOptions): Promise<Check[]> {
     { label: 'mobil', width: 390, height: 844, isMobile: true },
   ];
   for (const vp of viewports) {
-    await withPage({ width: vp.width, height: vp.height, isMobile: vp.isMobile, deviceScaleFactor: vp.isMobile ? 2 : 1 }, async (page) => {
-      const consoleErrors: string[] = [];
-      page.on('console', (m) => {
-        if (m.type() === 'error') consoleErrors.push(m.text().slice(0, 200));
-      });
-      page.on('pageerror', (e) => consoleErrors.push(e.message.slice(0, 200)));
-      await page.setContent(opts.html, { waitUntil: 'load' });
-      if (vp.label === 'desktop') {
-        checks.push({ name: 'konsole', passed: consoleErrors.length === 0, ...(consoleErrors.length ? { details: consoleErrors.join(' | ') } : {}) });
-      }
-      const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
-      const violations = axe.violations.filter((v) => v.impact !== 'minor');
-      checks.push({
-        name: `axe-${vp.label}`,
-        passed: violations.length === 0,
-        ...(violations.length ? { details: violations.map((v) => `${v.id} (${v.impact}, ${v.nodes.length}×): ${v.help}`).join(' | ') } : {}),
-      });
-      const issues = await layoutIssues(page);
-      checks.push({
-        name: `layout-${vp.label}`,
-        passed: issues.length === 0,
-        ...(issues.length ? { details: issues.slice(0, 8).map((i) => `${i.kind}: ${i.detail}`).join(' | ') } : {}),
-      });
-    });
+    await withPage(
+      { width: vp.width, height: vp.height, isMobile: vp.isMobile, deviceScaleFactor: vp.isMobile ? 2 : 1 },
+      async (page) => {
+        const consoleErrors: string[] = [];
+        page.on('console', (m) => {
+          if (m.type() === 'error') consoleErrors.push(m.text().slice(0, 200));
+        });
+        page.on('pageerror', (e) => consoleErrors.push(e.message.slice(0, 200)));
+        await page.setContent(opts.html, { waitUntil: 'load' });
+        if (vp.label === 'desktop') {
+          checks.push({
+            name: 'konsole',
+            passed: consoleErrors.length === 0,
+            ...(consoleErrors.length ? { details: consoleErrors.join(' | ') } : {}),
+          });
+        }
+        const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+        const violations = axe.violations.filter((v) => v.impact !== 'minor');
+        checks.push({
+          name: `axe-${vp.label}`,
+          passed: violations.length === 0,
+          ...(violations.length
+            ? { details: violations.map((v) => `${v.id} (${v.impact}, ${v.nodes.length}×): ${v.help}`).join(' | ') }
+            : {}),
+        });
+        const issues = await layoutIssues(page);
+        checks.push({
+          name: `layout-${vp.label}`,
+          passed: issues.length === 0,
+          ...(issues.length
+            ? {
+                details: issues
+                  .slice(0, 8)
+                  .map((i) => `${i.kind}: ${i.detail}`)
+                  .join(' | '),
+              }
+            : {}),
+        });
+      },
+    );
   }
   return checks;
 }
@@ -160,7 +183,11 @@ async function freePort(): Promise<number> {
   });
 }
 
-export async function lighthouseCheck(liveHtml: string, minScore = 0.9, assets: { path: string; content: Buffer | string; contentType?: string }[] = []): Promise<Check> {
+export async function lighthouseCheck(
+  liveHtml: string,
+  minScore = 0.9,
+  assets: { path: string; content: Buffer | string; contentType?: string }[] = [],
+): Promise<Check> {
   const server = createServer((req, res) => {
     const asset = assets.find((a) => `/${a.path.replace(/^\//, '')}` === req.url);
     if (asset) {

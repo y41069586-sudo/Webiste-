@@ -6,7 +6,10 @@ defineJob(
   'build-demo',
   async (data) => {
     try {
-      const demoId = await buildDemo(data.leadId, { regenerate: data.regenerate, actor: `job:build-demo:${data.triggeredBy ?? 'system'}` });
+      const demoId = await buildDemo(data.leadId, {
+        regenerate: data.regenerate,
+        actor: `job:build-demo:${data.triggeredBy ?? 'system'}`,
+      });
       return { demoId };
     } catch (err) {
       if (err instanceof Error && /Status|nicht gefunden/.test(err.message)) throw new NonRetryableError(err.message);

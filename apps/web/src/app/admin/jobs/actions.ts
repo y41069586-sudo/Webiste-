@@ -9,7 +9,13 @@ export async function startFindLeads(form: FormData): Promise<void> {
   const cities = form.getAll('cities').map(String).filter(Boolean);
   const branches = form.getAll('branches').map(String).filter(Boolean);
   await enqueue(QUEUES.findLeads, { cities, branches, triggeredBy: actorOf(s) }, { singletonKey: 'find-leads' });
-  await audit(getDb(), { entity: 'job', entityId: QUEUES.findLeads, action: 'enqueue', actor: actorOf(s), context: { cities, branches } });
+  await audit(getDb(), {
+    entity: 'job',
+    entityId: QUEUES.findLeads,
+    action: 'enqueue',
+    actor: actorOf(s),
+    context: { cities, branches },
+  });
   revalidatePath('/admin/jobs');
 }
 

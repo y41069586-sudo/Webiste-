@@ -22,7 +22,11 @@ export const CONTENT_LIBRARY: Record<string, LibraryEntry> = {
       'Ob natürlich oder auffällig: Wir nehmen uns Zeit für Ihre Wünsche und Ihre Nägel.',
     ],
     services: [
-      { title: 'Maniküre', text: 'Pflege für Hände und Nägel: Formen, Nagelhaut pflegen und auf Wunsch lackieren.', icon: 'hand' },
+      {
+        title: 'Maniküre',
+        text: 'Pflege für Hände und Nägel: Formen, Nagelhaut pflegen und auf Wunsch lackieren.',
+        icon: 'hand',
+      },
       { title: 'Gel-Modellage', text: 'Haltbare Nägel in der Form und Länge, die zu Ihnen passt.', icon: 'nail' },
       { title: 'Auffüllen', text: 'Regelmäßige Pflege, damit Ihre Modellage lange schön bleibt.', icon: 'sparkle' },
       { title: 'Nageldesign', text: 'Von dezent bis kreativ – wir setzen Ihre Ideen um.', icon: 'flower' },
@@ -34,10 +38,22 @@ export const CONTENT_LIBRARY: Record<string, LibraryEntry> = {
     ],
     cta: ['Termin vereinbaren', 'Jetzt Termin anfragen'],
     faq: [
-      { q: 'Brauche ich einen Termin?', a: 'Am besten vereinbaren Sie vorab einen Termin. So können wir uns in Ruhe Zeit für Sie nehmen.' },
-      { q: 'Wie lange hält eine Gel-Modellage?', a: 'Das hängt vom Nagelwachstum ab. Mit regelmäßigem Auffüllen bleibt die Modellage dauerhaft schön – wir beraten Sie gern.' },
-      { q: 'Kann ich meine eigenen Designideen mitbringen?', a: 'Sehr gern. Bringen Sie Bilder oder Ideen mit, wir besprechen gemeinsam, was sich umsetzen lässt.' },
-      { q: 'Wie pflege ich meine Nägel zu Hause?', a: 'Regelmäßiges Eincremen von Händen und Nagelhaut hilft. Weitere Tipps geben wir Ihnen gern bei Ihrem Besuch.' },
+      {
+        q: 'Brauche ich einen Termin?',
+        a: 'Am besten vereinbaren Sie vorab einen Termin. So können wir uns in Ruhe Zeit für Sie nehmen.',
+      },
+      {
+        q: 'Wie lange hält eine Gel-Modellage?',
+        a: 'Das hängt vom Nagelwachstum ab. Mit regelmäßigem Auffüllen bleibt die Modellage dauerhaft schön – wir beraten Sie gern.',
+      },
+      {
+        q: 'Kann ich meine eigenen Designideen mitbringen?',
+        a: 'Sehr gern. Bringen Sie Bilder oder Ideen mit, wir besprechen gemeinsam, was sich umsetzen lässt.',
+      },
+      {
+        q: 'Wie pflege ich meine Nägel zu Hause?',
+        a: 'Regelmäßiges Eincremen von Händen und Nagelhaut hilft. Weitere Tipps geben wir Ihnen gern bei Ihrem Besuch.',
+      },
     ],
   },
   kosmetikstudio: {
@@ -59,9 +75,18 @@ export const CONTENT_LIBRARY: Record<string, LibraryEntry> = {
     ],
     cta: ['Termin vereinbaren', 'Jetzt Termin anfragen'],
     faq: [
-      { q: 'Welche Behandlung passt zu meiner Haut?', a: 'Das besprechen wir gemeinsam vor der Behandlung. Wir schauen uns Ihre Haut an und beraten Sie persönlich.' },
-      { q: 'Muss ich mich auf die Behandlung vorbereiten?', a: 'Eine besondere Vorbereitung ist meist nicht nötig. Kommen Sie am besten ungeschminkt, wenn eine Gesichtsbehandlung geplant ist.' },
-      { q: 'Kann ich einen Gutschein verschenken?', a: 'Fragen Sie uns gern nach Gutscheinen – wir beraten Sie zu den Möglichkeiten.' },
+      {
+        q: 'Welche Behandlung passt zu meiner Haut?',
+        a: 'Das besprechen wir gemeinsam vor der Behandlung. Wir schauen uns Ihre Haut an und beraten Sie persönlich.',
+      },
+      {
+        q: 'Muss ich mich auf die Behandlung vorbereiten?',
+        a: 'Eine besondere Vorbereitung ist meist nicht nötig. Kommen Sie am besten ungeschminkt, wenn eine Gesichtsbehandlung geplant ist.',
+      },
+      {
+        q: 'Kann ich einen Gutschein verschenken?',
+        a: 'Fragen Sie uns gern nach Gutscheinen – wir beraten Sie zu den Möglichkeiten.',
+      },
       { q: 'Wie vereinbare ich einen Termin?', a: 'Rufen Sie uns an oder schreiben Sie uns über das Kontaktformular.' },
     ],
   },
@@ -84,8 +109,14 @@ export const CONTENT_LIBRARY: Record<string, LibraryEntry> = {
     ],
     cta: ['Jetzt anrufen', 'Angebot anfragen'],
     faq: [
-      { q: 'Arbeiten Sie auch in bewohnten Räumen?', a: 'Ja. Möbel und Böden werden abgedeckt, damit Ihre Räume geschützt bleiben.' },
-      { q: 'Wie bekomme ich ein Angebot?', a: 'Rufen Sie uns an oder schreiben Sie uns über das Kontaktformular. Wir melden uns bei Ihnen.' },
+      {
+        q: 'Arbeiten Sie auch in bewohnten Räumen?',
+        a: 'Ja. Möbel und Böden werden abgedeckt, damit Ihre Räume geschützt bleiben.',
+      },
+      {
+        q: 'Wie bekomme ich ein Angebot?',
+        a: 'Rufen Sie uns an oder schreiben Sie uns über das Kontaktformular. Wir melden uns bei Ihnen.',
+      },
       { q: 'Übernehmen Sie auch kleinere Aufträge?', a: 'Sprechen Sie uns gern an – wir klären gemeinsam, was möglich ist.' },
       { q: 'Helfen Sie bei der Farbauswahl?', a: 'Gern beraten wir Sie zu Farben und Oberflächen, die zu Ihren Räumen passen.' },
     ],
@@ -109,10 +140,19 @@ export const CONTENT_LIBRARY: Record<string, LibraryEntry> = {
     ],
     cta: ['Jetzt anrufen', 'Anfrage senden'],
     faq: [
-      { q: 'Kommen Sie auch für kleine Reparaturen?', a: 'Sprechen Sie uns an – wir klären gemeinsam, wie wir Ihnen helfen können.' },
-      { q: 'Was soll ich tun, wenn die Sicherung immer wieder auslöst?', a: 'Schalten Sie das betroffene Gerät ab und lassen Sie die Ursache von einer Fachkraft prüfen.' },
+      {
+        q: 'Kommen Sie auch für kleine Reparaturen?',
+        a: 'Sprechen Sie uns an – wir klären gemeinsam, wie wir Ihnen helfen können.',
+      },
+      {
+        q: 'Was soll ich tun, wenn die Sicherung immer wieder auslöst?',
+        a: 'Schalten Sie das betroffene Gerät ab und lassen Sie die Ursache von einer Fachkraft prüfen.',
+      },
       { q: 'Wie bekomme ich ein Angebot?', a: 'Rufen Sie uns an oder nutzen Sie das Kontaktformular. Wir melden uns bei Ihnen.' },
-      { q: 'Arbeiten Sie für Privat- und Geschäftskunden?', a: 'Sprechen Sie uns gern an, wir besprechen Ihr Vorhaben persönlich.' },
+      {
+        q: 'Arbeiten Sie für Privat- und Geschäftskunden?',
+        a: 'Sprechen Sie uns gern an, wir besprechen Ihr Vorhaben persönlich.',
+      },
     ],
   },
 };
@@ -131,7 +171,12 @@ function pick<T>(arr: T[], seed: number, offset = 0): T {
 }
 
 /** Deterministischer Fallback-Inhalt (seed = Hash der Lead-ID). */
-export function libraryContent(branch: string, group: 'handwerk' | 'beauty', vars: { name: string; stadt: string; branche: string }, seed: number): SiteContent {
+export function libraryContent(
+  branch: string,
+  group: 'handwerk' | 'beauty',
+  vars: { name: string; stadt: string; branche: string },
+  seed: number,
+): SiteContent {
   const lib = CONTENT_LIBRARY[branch] ?? GENERIC[group];
   const v = { name: vars.name, stadt: vars.stadt, branche: vars.branche };
   const services = lib.services.slice(0, 4 + (seed % 3)).map((s) => ({ ...s, title: fill(s.title, v), text: fill(s.text, v) }));

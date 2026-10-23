@@ -27,7 +27,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ key: st
       'content-type': TYPES[ext] ?? 'application/octet-stream',
       'cache-control': 'private, no-store',
       'x-content-type-options': 'nosniff',
-      ...(ext === 'html' ? { 'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox" } : {}),
+      ...(ext === 'html'
+        ? { 'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox" }
+        : {}),
     },
   });
 }

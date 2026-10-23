@@ -38,9 +38,18 @@ export async function sendRenewalReminders(now = new Date()): Promise<number> {
       name: c.contactName,
       domain: c.domain,
       hostingUntil: formatDateLongDe(c.hostingUntil!),
-      subscriptionUrl: cfg.pricing.subscriptionEnabled && getProviders().payment.createSubscriptionCheckout ? appUrl(`/verlaengern/${c.accessToken}`) : null,
+      subscriptionUrl:
+        cfg.pricing.subscriptionEnabled && getProviders().payment.createSubscriptionCheckout
+          ? appUrl(`/verlaengern/${c.accessToken}`)
+          : null,
     });
-    await sendTransactionalEmail({ ...mail, kind: 'renewal_reminder', idempotencyKey: `renewal:${c.id}:${c.hostingUntil!.toISOString().slice(0, 10)}`, to: c.email, customerId: c.id });
+    await sendTransactionalEmail({
+      ...mail,
+      kind: 'renewal_reminder',
+      idempotencyKey: `renewal:${c.id}:${c.hostingUntil!.toISOString().slice(0, 10)}`,
+      to: c.email,
+      customerId: c.id,
+    });
     await db.update(customers).set({ renewalReminderSentAt: now, updatedAt: now }).where(eq(customers.id, c.id));
     sent++;
   }
@@ -54,7 +63,11 @@ export async function startSubscriptionCheckout(token: string): Promise<Subscrip
   const cfg = await getConfig();
   const c = await customerByToken(token);
   if (!c) return { ok: false, error: 'Link ungültig.' };
-  if (!cfg.pricing.subscriptionEnabled) return { ok: false, error: 'Die Verlängerung ist derzeit nur per E-Mail möglich – antworten Sie einfach auf unsere Erinnerung.' };
+  if (!cfg.pricing.subscriptionEnabled)
+    return {
+      ok: false,
+      error: 'Die Verlängerung ist derzeit nur per E-Mail möglich – antworten Sie einfach auf unsere Erinnerung.',
+    };
   if (c.subscriptionId) return { ok: false, error: 'Ihr Abo ist bereits aktiv.' };
   const p = getProviders().payment;
   if (!p.createSubscriptionCheckout) return { ok: false, error: 'Abo-Abschluss ist nicht eingerichtet.' };
@@ -77,8 +90,17 @@ export async function applySubscriptionEvent(ev: PaymentEvent, actor: string): P
   const db = getDb();
   const customerId = ev.metadata?.customerId ?? ev.clientReferenceId;
   if (ev.type === 'checkout.completed' && ev.subscriptionId && customerId) {
-    await db.update(customers).set({ subscriptionId: ev.subscriptionId, updatedAt: new Date() }).where(eq(customers.id, customerId));
-    await audit(db, { entity: 'customer', entityId: customerId, action: 'subscription_started', actor, context: { subscriptionId: ev.subscriptionId } });
+    await db
+      .update(customers)
+      .set({ subscriptionId: ev.subscriptionId, updatedAt: new Date() })
+      .where(eq(customers.id, customerId));
+    await audit(db, {
+      entity: 'customer',
+      entityId: customerId,
+      action: 'subscription_started',
+      actor,
+      context: { subscriptionId: ev.subscriptionId },
+    });
     return 'subscription_started';
   }
   if (ev.type === 'subscription.deleted' && ev.subscriptionId) {
@@ -86,7 +108,12 @@ export async function applySubscriptionEvent(ev: PaymentEvent, actor: string): P
     if (!c) return 'no_customer';
     await db.update(customers).set({ subscriptionId: null, updatedAt: new Date() }).where(eq(customers.id, c.id));
     await audit(db, { entity: 'customer', entityId: c.id, action: 'subscription_ended', actor });
-    await raiseAlert(db, { level: 'warn', code: `subscription_end_${c.id}`, message: `Abo beendet: ${c.company} (${c.domain ?? '–'})`, context: { customerId: c.id } });
+    await raiseAlert(db, {
+      level: 'warn',
+      code: `subscription_end_${c.id}`,
+      message: `Abo beendet: ${c.company} (${c.domain ?? '–'})`,
+      context: { customerId: c.id },
+    });
     return 'subscription_ended';
   }
   return 'ignored';

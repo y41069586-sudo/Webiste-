@@ -55,7 +55,12 @@ function png(w = 8, h = 8): Buffer {
   ihdr[8] = 8;
   ihdr[9] = 2;
   const raw = Buffer.concat(Array.from({ length: h }, () => Buffer.concat([Buffer.from([0]), Buffer.alloc(w * 3, 0x46)])));
-  return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', ihdr),
+    chunk('IDAT', deflateSync(raw)),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
 }
 
 async function paidCustomer() {
@@ -111,7 +116,17 @@ async function paidCustomer() {
     .returning();
   const res = await startCheckout(
     demo!.slug,
-    { company: 'Malerbetrieb Beispiel GmbH', contactName: 'Erika Beispiel', email: 'erika@example.org', street: 'Kampstraße 5', postalCode: '44137', city: 'Dortmund', domain: 'malerbetrieb-beispiel.de', b2b: true, terms: true },
+    {
+      company: 'Malerbetrieb Beispiel GmbH',
+      contactName: 'Erika Beispiel',
+      email: 'erika@example.org',
+      street: 'Kampstraße 5',
+      postalCode: '44137',
+      city: 'Dortmund',
+      domain: 'malerbetrieb-beispiel.de',
+      b2b: true,
+      terms: true,
+    },
     { ua: 'x', ipHash: 'h', isBot: false },
   );
   if (!res.ok) throw new Error(res.error);
@@ -121,13 +136,29 @@ async function paidCustomer() {
   return { lead: lead!, demo: demo!, customer };
 }
 
-const PRIVACY = 'Datenschutzerklärung\n\n' + 'Wir verarbeiten personenbezogene Daten nur im Rahmen der gesetzlichen Bestimmungen. '.repeat(8);
+const PRIVACY =
+  'Datenschutzerklärung\n\n' + 'Wir verarbeiten personenbezogene Daten nur im Rahmen der gesetzlichen Bestimmungen. '.repeat(8);
 
 function complete(d: OnboardingData): OnboardingData {
   return {
     ...d,
-    texts: { ...d.texts, about: 'Meisterbetrieb seit 1998 in Dortmund.\n\nWir streichen, tapezieren und gestalten Fassaden.', services: [{ title: 'Innenanstrich', text: 'Wände und Decken streichen.' }, { title: 'Fassade', text: 'Fassaden reinigen und streichen.' }] },
-    impressum: { ...d.impressum, legalForm: 'GmbH', register: 'Amtsgericht Dortmund', registerNumber: 'HRB 12345', phone: '0231 123456', professionalTitle: 'Malermeister (verliehen in Deutschland)', chamber: 'Handwerkskammer Dortmund' },
+    texts: {
+      ...d.texts,
+      about: 'Meisterbetrieb seit 1998 in Dortmund.\n\nWir streichen, tapezieren und gestalten Fassaden.',
+      services: [
+        { title: 'Innenanstrich', text: 'Wände und Decken streichen.' },
+        { title: 'Fassade', text: 'Fassaden reinigen und streichen.' },
+      ],
+    },
+    impressum: {
+      ...d.impressum,
+      legalForm: 'GmbH',
+      register: 'Amtsgericht Dortmund',
+      registerNumber: 'HRB 12345',
+      phone: '0231 123456',
+      professionalTitle: 'Malermeister (verliehen in Deutschland)',
+      chamber: 'Handwerkskammer Dortmund',
+    },
     privacyText: PRIVACY,
     confirmed: true,
   };
@@ -137,9 +168,33 @@ describe('Onboarding-Daten', () => {
   it('Pflichtangaben: Register bei GmbH, Datenschutztext, Bestätigung', () => {
     const base = {
       business: { name: 'X', phone: '', email: '', street: 'A', houseNumber: '1', postalCode: '44137', city: 'Dortmund' },
-      texts: { headline: 'Überschrift', subline: 'Untertitel', about: 'Über uns', services: [{ title: 'A', text: 'B' }], wishes: '' },
-      hours: { mode: 'appointment' as const, days: WEEK_DAYS.map(({ day }) => ({ day, closed: true, open: '', close: '', open2: '', close2: '' })) },
-      impressum: { company: 'X', legalForm: 'GmbH', owner: 'Y', street: 'A 1', postalCode: '44137', city: 'Dortmund', phone: '0231', email: 'a@b.de', register: '', registerNumber: '', vatId: '', chamber: '', professionalTitle: '', supervisoryAuthority: '' },
+      texts: {
+        headline: 'Überschrift',
+        subline: 'Untertitel',
+        about: 'Über uns',
+        services: [{ title: 'A', text: 'B' }],
+        wishes: '',
+      },
+      hours: {
+        mode: 'appointment' as const,
+        days: WEEK_DAYS.map(({ day }) => ({ day, closed: true, open: '', close: '', open2: '', close2: '' })),
+      },
+      impressum: {
+        company: 'X',
+        legalForm: 'GmbH',
+        owner: 'Y',
+        street: 'A 1',
+        postalCode: '44137',
+        city: 'Dortmund',
+        phone: '0231',
+        email: 'a@b.de',
+        register: '',
+        registerNumber: '',
+        vatId: '',
+        chamber: '',
+        professionalTitle: '',
+        supervisoryAuthority: '',
+      },
       privacyText: 'zu kurz',
       formTargetEmail: 'a@b.de',
       domain: 'x.de',
@@ -148,8 +203,21 @@ describe('Onboarding-Daten', () => {
     };
     const e = onboardingErrors(base)!;
     expect(Object.keys(e).sort()).toEqual(['confirmed', 'impressum.register', 'impressum.registerNumber', 'privacyText']);
-    expect(onboardingErrors({ ...base, impressum: { ...base.impressum, legalForm: 'Einzelunternehmen' }, privacyText: PRIVACY, confirmed: true })).toBeNull();
-    const fixed = { ...base, hours: { mode: 'fixed' as const, days: base.hours.days.map((d) => (d.day === 1 ? { ...d, closed: false, open: '18:00', close: '09:00' } : d)) } };
+    expect(
+      onboardingErrors({
+        ...base,
+        impressum: { ...base.impressum, legalForm: 'Einzelunternehmen' },
+        privacyText: PRIVACY,
+        confirmed: true,
+      }),
+    ).toBeNull();
+    const fixed = {
+      ...base,
+      hours: {
+        mode: 'fixed' as const,
+        days: base.hours.days.map((d) => (d.day === 1 ? { ...d, closed: false, open: '18:00', close: '09:00' } : d)),
+      },
+    };
     expect(Object.keys(onboardingErrors(fixed)!)).toContain('hours.days.0');
   });
 
@@ -196,14 +264,25 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     const ctx = await getOnboardingContext(token);
     expect(ctx.state).toBe('form');
     if (ctx.state !== 'form') return;
-    expect(ctx.data.business).toMatchObject({ name: 'Malerbetrieb Beispiel', street: 'Kampstraße', houseNumber: '5', phone: '0231 123456' });
+    expect(ctx.data.business).toMatchObject({
+      name: 'Malerbetrieb Beispiel',
+      street: 'Kampstraße',
+      houseNumber: '5',
+      phone: '0231 123456',
+    });
     expect(ctx.data.hours.mode).toBe('fixed');
     expect(ctx.data.hours.days.find((d) => d.day === 1)).toMatchObject({ closed: false, open: '08:00', close: '17:00' });
     expect(ctx.data.texts.services).toHaveLength(3);
-    expect(ctx.data.impressum).toMatchObject({ company: 'Malerbetrieb Beispiel GmbH', owner: 'Erika Beispiel', email: 'erika@example.org' });
+    expect(ctx.data.impressum).toMatchObject({
+      company: 'Malerbetrieb Beispiel GmbH',
+      owner: 'Erika Beispiel',
+      email: 'erika@example.org',
+    });
 
     // Uploads: SVG/Text abgelehnt, PNG angenommen
-    expect(await saveUpload(token, 'logo', Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'))).toMatchObject({ ok: false });
+    expect(await saveUpload(token, 'logo', Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'))).toMatchObject({
+      ok: false,
+    });
     expect(await saveUpload(token, 'logo', png(120, 40))).toMatchObject({ ok: true });
     const photo = await saveUpload(token, 'photo', png(1600, 1200));
     expect(photo.ok).toBe(true);
@@ -235,7 +314,10 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     expect(preview).not.toContain('Beispiel-Leistungen');
 
     // Änderungsrunde
-    expect(await requestChanges(token, 'Bitte die Überschrift ändern: Ihr Maler in Dortmund')).toEqual({ ok: true, mode: 'round' });
+    expect(await requestChanges(token, 'Bitte die Überschrift ändern: Ihr Maler in Dortmund')).toEqual({
+      ok: true,
+      mode: 'round',
+    });
     expect(await requestChanges(token, 'Noch etwas')).toMatchObject({ ok: false });
     const cr = (await db.select().from(changeRequests))[0]!;
     await buildSite(site.id, cr.id);
@@ -255,7 +337,17 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     const storage = getProviders().storage;
     const files = await storage.list(`mock-hosting/${s2.hostingProjectId}/`);
     const names = files.map((f) => f.split('/').slice(2).join('/')).sort();
-    expect(names).toEqual(['404.html', 'assets/foto-1.jpg', 'assets/logo.png', 'danke.html', 'datenschutz.html', 'impressum.html', 'index.html', 'robots.txt', 'sitemap.xml']);
+    expect(names).toEqual([
+      '404.html',
+      'assets/foto-1.jpg',
+      'assets/logo.png',
+      'danke.html',
+      'datenschutz.html',
+      'impressum.html',
+      'index.html',
+      'robots.txt',
+      'sitemap.xml',
+    ]);
     const live = (await storage.get(`mock-hosting/${s2.hostingProjectId}/index.html`))!.toString('utf8');
     expect(live).toContain('<meta name="robots" content="index, follow">');
     expect(live).not.toContain('Hinweis zum Entwurf');
@@ -270,7 +362,10 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
       const u = new URL(String(url));
       const key = `mock-hosting/${u.pathname.replace('/mock-hosting/', '')}`;
       const body = await storage.get(key);
-      return new Response(body ? new Uint8Array(body) : 'nf', { status: body ? 200 : 404, headers: { 'content-type': 'text/html' } });
+      return new Response(body ? new Uint8Array(body) : 'nf', {
+        status: body ? 200 : 404,
+        headers: { 'content-type': 'text/html' },
+      });
     });
     const res = await liveCheck(site.id, 0);
     vi.unstubAllGlobals();
@@ -280,21 +375,41 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     const c3 = (await db.query.customers.findFirst({ where: eq(customers.id, customer.id) }))!;
     expect(c3.hostingUntil!.getTime()).toBeGreaterThan(addDays(new Date(), 360).getTime());
     expect((await db.query.leads.findFirst({ where: eq(leads.id, lead.id) }))!.status).toBe('live');
-    const kinds = (await db.select().from(outboundEmails).where(eq(outboundEmails.customerId, customer.id))).map((m) => m.kind).sort();
+    const kinds = (await db.select().from(outboundEmails).where(eq(outboundEmails.customerId, customer.id)))
+      .map((m) => m.kind)
+      .sort();
     expect(kinds).toEqual(['live_handover', 'preview_ready', 'preview_ready']);
 
     // Kontaktformular der Live-Seite: Weiterleitung an den Kunden, Honeypot still verworfen
     const meta = { ua: 'x', ipHash: 'ip1', isBot: false };
-    const ok = await handleSiteForm(s3.formKey, { name: 'Max Muster', email: 'max@example.net', phone: '', message: 'Bitte um Rückruf wegen Fassade.', consent: true, honeypot: '' }, meta);
+    const ok = await handleSiteForm(
+      s3.formKey,
+      {
+        name: 'Max Muster',
+        email: 'max@example.net',
+        phone: '',
+        message: 'Bitte um Rückruf wegen Fassade.',
+        consent: true,
+        honeypot: '',
+      },
+      meta,
+    );
     expect(ok).toMatchObject({ ok: true });
     if (ok.ok) expect(ok.redirect).toMatch(/danke\.html$/);
-    await handleSiteForm(s3.formKey, { name: 'Bot', email: 'bot@example.net', phone: '', message: 'spam', consent: true, honeypot: 'x' }, meta);
+    await handleSiteForm(
+      s3.formKey,
+      { name: 'Bot', email: 'bot@example.net', phone: '', message: 'spam', consent: true, honeypot: 'x' },
+      meta,
+    );
     const forms = await db.select().from(outboundEmails).where(eq(outboundEmails.kind, 'site_form'));
     expect(forms).toHaveLength(1);
     expect(forms[0]!.toEmail).toBe('erika@example.org');
 
     // Erinnerung 30 Tage vor Ablauf (einmalig)
-    await db.update(customers).set({ hostingUntil: addDays(new Date(), 20) }).where(eq(customers.id, customer.id));
+    await db
+      .update(customers)
+      .set({ hostingUntil: addDays(new Date(), 20) })
+      .where(eq(customers.id, customer.id));
     expect(await sendRenewalReminders()).toBe(1);
     expect(await sendRenewalReminders()).toBe(0);
   });
@@ -307,10 +422,19 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     setProviders({ registrar: fakeRegistrar });
     try {
       const site = await ensureSiteForCustomer(customer.id);
-      await db.update(sites).set({ status: 'approved', version: 1, contentJson: (await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!.contentJson }).where(eq(sites.id, site.id));
+      await db
+        .update(sites)
+        .set({
+          status: 'approved',
+          version: 1,
+          contentJson: (await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!.contentJson,
+        })
+        .where(eq(sites.id, site.id));
       expect(await deploySite(site.id)).toBe('awaiting_domain_approval');
       expect(register).not.toHaveBeenCalled();
-      expect((await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!.statusReason).toBe('Domainkauf wartet auf Freigabe');
+      expect((await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!.statusReason).toBe(
+        'Domainkauf wartet auf Freigabe',
+      );
 
       await approveDomainPurchase(customer.id, 'admin:test');
       await updateConfig({ switches: { dryRun: true } }, 'test');

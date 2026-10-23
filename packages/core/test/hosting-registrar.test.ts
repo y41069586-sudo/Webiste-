@@ -43,9 +43,23 @@ describe('INWX', () => {
       const b = c.body as { method: string; params: Record<string, unknown> };
       switch (b.method) {
         case 'account.login':
-          return { json: { code: 1000, msg: 'OK', resData: { tfa: '0' } }, headers: { 'set-cookie': 'domrobot=abc123; path=/; HttpOnly' } };
+          return {
+            json: { code: 1000, msg: 'OK', resData: { tfa: '0' } },
+            headers: { 'set-cookie': 'domrobot=abc123; path=/; HttpOnly' },
+          };
         case 'domain.check':
-          return { json: { code: 1000, msg: 'OK', resData: { domain: [{ domain: 'frei-beispiel.de', avail: 1, price: 4.5 }, { domain: 'vergeben.de', avail: 0, reason: 'registered' }] } } };
+          return {
+            json: {
+              code: 1000,
+              msg: 'OK',
+              resData: {
+                domain: [
+                  { domain: 'frei-beispiel.de', avail: 1, price: 4.5 },
+                  { domain: 'vergeben.de', avail: 0, reason: 'registered' },
+                ],
+              },
+            },
+          };
         case 'domain.info':
           return { json: { code: 2303, msg: 'Object does not exist' } };
         case 'contact.create':
@@ -55,7 +69,13 @@ describe('INWX', () => {
         case 'nameserver.create':
           return { json: { code: 1000, msg: 'OK', resData: { roId: 1 } } };
         case 'nameserver.info':
-          return { json: { code: 1000, msg: 'OK', resData: { record: [{ id: 'r1', name: 'www.frei-beispiel.de', type: 'CNAME', content: 'alt.example' }] } } };
+          return {
+            json: {
+              code: 1000,
+              msg: 'OK',
+              resData: { record: [{ id: 'r1', name: 'www.frei-beispiel.de', type: 'CNAME', content: 'alt.example' }] },
+            },
+          };
         default:
           return { json: { code: 1000, msg: 'OK', resData: {} } };
       }
@@ -71,22 +91,53 @@ describe('INWX', () => {
 
     const reg = await r.registerDomain({
       domain: 'frei-beispiel.de',
-      owner: { company: 'Maler Beispiel GmbH', name: 'Erika Beispiel', street: 'Kampstraße 5', postalCode: '44137', city: 'Dortmund', country: 'DE', email: 'e@example.org', phone: '0231 123456' },
+      owner: {
+        company: 'Maler Beispiel GmbH',
+        name: 'Erika Beispiel',
+        street: 'Kampstraße 5',
+        postalCode: '44137',
+        city: 'Dortmund',
+        country: 'DE',
+        email: 'e@example.org',
+        phone: '0231 123456',
+      },
       nameservers: ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com'],
       idempotencyKey: 'domain-c1',
     });
     expect(reg).toMatchObject({ status: 'registered', registrarDomainId: '9001', ownerHandle: '777', costCents: 450 });
-    const contact = calls.find((c) => (c.body as { method: string }).method === 'contact.create')!.body as { params: Record<string, unknown> };
-    expect(contact.params).toMatchObject({ type: 'ORG', name: 'Erika Beispiel', org: 'Maler Beispiel GmbH', cc: 'DE', pc: '44137', voice: '+49.231123456' });
-    const create = calls.find((c) => (c.body as { method: string }).method === 'domain.create')!.body as { params: Record<string, unknown> };
-    expect(create.params).toMatchObject({ domain: 'frei-beispiel.de', period: '1Y', registrant: 777, ns: ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com'] });
+    const contact = calls.find((c) => (c.body as { method: string }).method === 'contact.create')!.body as {
+      params: Record<string, unknown>;
+    };
+    expect(contact.params).toMatchObject({
+      type: 'ORG',
+      name: 'Erika Beispiel',
+      org: 'Maler Beispiel GmbH',
+      cc: 'DE',
+      pc: '44137',
+      voice: '+49.231123456',
+    });
+    const create = calls.find((c) => (c.body as { method: string }).method === 'domain.create')!.body as {
+      params: Record<string, unknown>;
+    };
+    expect(create.params).toMatchObject({
+      domain: 'frei-beispiel.de',
+      period: '1Y',
+      registrant: 777,
+      ns: ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com'],
+    });
 
     await r.setDnsRecords('frei-beispiel.de', [
       { type: 'A', name: '@', value: '75.2.60.5' },
       { type: 'CNAME', name: 'www', value: 'x.netlify.app' },
     ]);
     const methods = calls.map((c) => (c.body as { method: string }).method);
-    expect(methods.slice(-5)).toEqual(['nameserver.create', 'nameserver.info', 'nameserver.createRecord', 'nameserver.deleteRecord', 'nameserver.createRecord']);
+    expect(methods.slice(-5)).toEqual([
+      'nameserver.create',
+      'nameserver.info',
+      'nameserver.createRecord',
+      'nameserver.deleteRecord',
+      'nameserver.createRecord',
+    ]);
   });
 
   it('Fehlercodes werden als Fehler gemeldet', async () => {
@@ -95,7 +146,9 @@ describe('INWX', () => {
       if (b.method === 'account.login') return { json: { code: 1000, msg: 'OK', resData: {} } };
       return { json: { code: 2400, msg: 'Command failed' } };
     });
-    await expect(new InwxRegistrar({ user: 'u', password: 'p', env: 'production' }, fn).checkAvailability(['a.de'])).rejects.toThrow(/2400/);
+    await expect(
+      new InwxRegistrar({ user: 'u', password: 'p', env: 'production' }, fn).checkAvailability(['a.de']),
+    ).rejects.toThrow(/2400/);
   });
 });
 
@@ -106,7 +159,8 @@ describe('Cloudflare (Workers Static Assets)', () => {
         const manifest = (c.body as { manifest: Record<string, { hash: string }> }).manifest;
         return { json: { success: true, result: { jwt: 'upload-jwt', buckets: [[manifest['/index.html']!.hash]] } } };
       }
-      if (c.url.includes('/workers/assets/upload')) return { status: 201, json: { success: true, result: { jwt: 'completion-jwt' } } };
+      if (c.url.includes('/workers/assets/upload'))
+        return { status: 201, json: { success: true, result: { jwt: 'completion-jwt' } } };
       if (c.url.endsWith('/workers/subdomain')) return { json: { success: true, result: { subdomain: 'meinkonto' } } };
       return { json: { success: true, result: { id: 'script', etag: 'etag-1' } } };
     });
@@ -127,18 +181,42 @@ describe('Cloudflare (Workers Static Assets)', () => {
     const put = calls.find((c) => c.method === 'PUT' && c.url.endsWith('/workers/scripts/wbm-test'))!;
     const form = put.body as FormData;
     const meta = JSON.parse(await (form.get('metadata') as Blob).text());
-    expect(meta).toMatchObject({ main_module: 'worker.js', assets: { jwt: 'completion-jwt' }, bindings: [{ name: 'ASSETS', type: 'assets' }] });
+    expect(meta).toMatchObject({
+      main_module: 'worker.js',
+      assets: { jwt: 'completion-jwt' },
+      bindings: [{ name: 'ASSETS', type: 'assets' }],
+    });
     const code = await (form.get('worker.js') as Blob).text();
-    expect(code).toContain("form-action https://app.example.de");
+    expect(code).toContain('form-action https://app.example.de');
     expect(code).toContain('Strict-Transport-Security');
   });
 
   it('Domain: Zone anlegen, Nameserver liefern; aktiv erst nach Zonen-Aktivierung', async () => {
     let zoneStatus = 'pending';
     const { fn, calls } = fake((c) => {
-      if (c.url.includes('/zones?name=')) return { json: { success: true, result: zoneStatus === 'none' ? [] : c.method === 'GET' && calls.filter((x) => x.url.includes('/zones?')).length === 1 ? [] : [{ id: 'z1', status: zoneStatus, name_servers: ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com'] }] } };
-      if (c.url.endsWith('/zones') && c.method === 'POST') return { json: { success: true, result: { id: 'z1', status: 'pending', name_servers: ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com'] } } };
-      if (c.url.endsWith('/workers/domains')) return zoneStatus === 'active' ? { json: { success: true, result: { id: 'd1' } } } : { status: 400, json: { success: false, errors: [{ code: 100117, message: 'zone not active' }] } };
+      if (c.url.includes('/zones?name='))
+        return {
+          json: {
+            success: true,
+            result:
+              zoneStatus === 'none'
+                ? []
+                : c.method === 'GET' && calls.filter((x) => x.url.includes('/zones?')).length === 1
+                  ? []
+                  : [{ id: 'z1', status: zoneStatus, name_servers: ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com'] }],
+          },
+        };
+      if (c.url.endsWith('/zones') && c.method === 'POST')
+        return {
+          json: {
+            success: true,
+            result: { id: 'z1', status: 'pending', name_servers: ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com'] },
+          },
+        };
+      if (c.url.endsWith('/workers/domains'))
+        return zoneStatus === 'active'
+          ? { json: { success: true, result: { id: 'd1' } } }
+          : { status: 400, json: { success: false, errors: [{ code: 100117, message: 'zone not active' }] } };
       return { json: { success: true, result: {} } };
     });
     const cf = new CloudflareHosting({ apiToken: 'tok', accountId: 'acc', formOrigin: 'https://app.example.de' }, fn);
@@ -147,7 +225,9 @@ describe('Cloudflare (Workers Static Assets)', () => {
     expect((await cf.getDomainStatus('wbm-test', 'frei-beispiel.de')).active).toBe(false);
     zoneStatus = 'active';
     expect((await cf.getDomainStatus('wbm-test', 'frei-beispiel.de')).active).toBe(true);
-    const attaches = calls.filter((c) => c.url.endsWith('/workers/domains') && c.method === 'PUT').map((c) => (c.body as { hostname: string }).hostname);
+    const attaches = calls
+      .filter((c) => c.url.endsWith('/workers/domains') && c.method === 'PUT')
+      .map((c) => (c.body as { hostname: string }).hostname);
     expect(attaches).toContain('www.frei-beispiel.de');
   });
 });
@@ -157,14 +237,17 @@ describe('Netlify', () => {
     let polls = 0;
     const { fn, calls } = fake((c) => {
       if (c.url.includes('/sites?name=')) return { json: [] };
-      if (c.url.endsWith('/sites') && c.method === 'POST') return { json: { id: 'site-1', name: 'wbm-abc', ssl_url: 'https://wbm-abc.netlify.app' } };
+      if (c.url.endsWith('/sites') && c.method === 'POST')
+        return { json: { id: 'site-1', name: 'wbm-abc', ssl_url: 'https://wbm-abc.netlify.app' } };
       if (c.url.endsWith('/sites/site-1/deploys') && c.method === 'POST') {
         const files = (c.body as { files: Record<string, string> }).files;
         return { json: { id: 'dep-1', required: [files['/index.html']] } };
       }
       if (c.url.includes('/deploys/dep-1/files/')) return { json: {} };
-      if (c.url.endsWith('/sites/site-1/deploys/dep-1')) return { json: { state: ++polls > 1 ? 'ready' : 'processing', ssl_url: 'https://dep--wbm-abc.netlify.app' } };
-      if (c.url.endsWith('/sites/site-1') && c.method === 'PATCH') return { json: { id: 'site-1', name: 'wbm-abc', custom_domain: 'frei-beispiel.de' } };
+      if (c.url.endsWith('/sites/site-1/deploys/dep-1'))
+        return { json: { state: ++polls > 1 ? 'ready' : 'processing', ssl_url: 'https://dep--wbm-abc.netlify.app' } };
+      if (c.url.endsWith('/sites/site-1') && c.method === 'PATCH')
+        return { json: { id: 'site-1', name: 'wbm-abc', custom_domain: 'frei-beispiel.de' } };
       return { json: {} };
     });
     const n = new NetlifyHosting({ apiToken: 'tok', formOrigin: 'https://app.example.de' }, fn, 1);

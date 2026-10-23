@@ -46,13 +46,23 @@ export const SECTIONS: SectionDef[] = [
       { path: 'pricing.packageCents', label: 'Paketpreis (€)', type: 'euro' },
       { path: 'pricing.packageDescription', label: 'Leistungsbeschreibung (Checkout & Rechnung)', type: 'textarea' },
       { path: 'pricing.hostingMonthsIncluded', label: 'Inkl. Hosting (Monate)', type: 'number' },
-      { path: 'pricing.subscriptionEnabled', label: 'Abo „Hosting & Pflege“ aktiv', type: 'bool', hint: 'v1: aus – stattdessen Erinnerungs-Mail' },
+      {
+        path: 'pricing.subscriptionEnabled',
+        label: 'Abo „Hosting & Pflege“ aktiv',
+        type: 'bool',
+        hint: 'v1: aus – stattdessen Erinnerungs-Mail',
+      },
       { path: 'pricing.subscriptionName', label: 'Abo-Name', type: 'text' },
       { path: 'pricing.subscriptionCents', label: 'Abo-Preis pro Monat (€)', type: 'euro' },
       { path: 'pricing.subscriptionStartMonth', label: 'Abo-Start (Monat)', type: 'number' },
       { path: 'tax.kleinunternehmer', label: 'Kleinunternehmer (§ 19 UStG)', type: 'bool' },
       { path: 'tax.vatRatePercent', label: 'USt-Satz (%) falls nicht Kleinunternehmer', type: 'number' },
-      { path: 'tax.pricesAreGross', label: 'Paketpreis ist Bruttopreis', type: 'bool', hint: 'Nur relevant ohne Kleinunternehmerregelung' },
+      {
+        path: 'tax.pricesAreGross',
+        label: 'Paketpreis ist Bruttopreis',
+        type: 'bool',
+        hint: 'Nur relevant ohne Kleinunternehmerregelung',
+      },
       { path: 'tax.invoicePrefix', label: 'Rechnungsnummer-Präfix', type: 'text' },
       { path: 'tax.kleinunternehmerNote', label: 'Hinweis auf der Rechnung', type: 'text' },
       { path: 'checkout.sessionMinutes', label: 'Checkout-Session gültig (Minuten)', type: 'number' },
@@ -68,7 +78,12 @@ export const SECTIONS: SectionDef[] = [
       { path: 'budget.firstBatchSize', label: 'Erste Charge (Anzahl Briefe)', type: 'number' },
       { path: 'budget.weeklyPlacesBudgetCents', label: 'Wochenbudget Google Places (€)', type: 'euro' },
       { path: 'budget.weeklyLlmBudgetCents', label: 'Wochenbudget KI (€)', type: 'euro' },
-      { path: 'budget.segmentShares', label: 'Budgetanteile je Segment (JSON)', type: 'json', hint: '{"dortmund:beauty:nagelstudio": 0.25, …} – leer = gleichmäßig' },
+      {
+        path: 'budget.segmentShares',
+        label: 'Budgetanteile je Segment (JSON)',
+        type: 'json',
+        hint: '{"dortmund:beauty:nagelstudio": 0.25, …} – leer = gleichmäßig',
+      },
       { path: 'costs.letterEstimateCents', label: 'Schätzung pro Brief (€), falls Anbieter keinen Preis liefert', type: 'euro' },
       { path: 'costs.usdToEur', label: 'Kurs USD → EUR', type: 'number' },
       { path: 'costs.placesTextSearchPer1000UsdCents', label: 'Places Text Search pro 1000 (US-Cent)', type: 'number' },
@@ -81,7 +96,12 @@ export const SECTIONS: SectionDef[] = [
     title: 'Städte, Branchen & Filter',
     fields: [
       { path: 'targeting.cities', label: 'Städte (eine pro Zeile)', type: 'lines' },
-      { path: 'targeting.branches', label: 'Branchen (JSON)', type: 'json', hint: 'key, group (handwerk|beauty), label, queries, osmTags, googleTypes, weight, active' },
+      {
+        path: 'targeting.branches',
+        label: 'Branchen (JSON)',
+        type: 'json',
+        hint: 'key, group (handwerk|beauty), label, queries, osmTags, googleTypes, weight, active',
+      },
       { path: 'targeting.chainNames', label: 'Ketten/Franchise-Namen (eine pro Zeile)', type: 'lines' },
       { path: 'targeting.chainMinCities', label: 'Kette ab gleichem Namen in X Städten', type: 'number' },
       { path: 'targeting.maxPagesPerQuery', label: 'Max. Seiten pro Suchanfrage (1–3)', type: 'number' },
@@ -144,7 +164,12 @@ export const SECTIONS: SectionDef[] = [
     id: 'support',
     title: 'Support & Optimizer',
     fields: [
-      { path: 'support.autoReplyClasses', label: 'Automatisch beantworten (nur mit AUTO_REPLY)', type: 'multi', options: SUPPORT_CLASSES },
+      {
+        path: 'support.autoReplyClasses',
+        label: 'Automatisch beantworten (nur mit AUTO_REPLY)',
+        type: 'multi',
+        options: SUPPORT_CLASSES,
+      },
       { path: 'optimizer.explorationShare', label: 'Exploration (Anteil 0–1)', type: 'number' },
       { path: 'optimizer.minLettersForSignal', label: 'Mindestbriefe je Segment für Signal', type: 'number' },
       { path: 'optimizer.samples', label: 'Thompson-Samples', type: 'number' },
@@ -171,12 +196,22 @@ export const SWITCHES: { key: string; label: string; hint: string }[] = [
   { key: 'followupEnabled', label: 'FOLLOWUP_ENABLED', hint: 'Zweiter Brief nach 12 Tagen ohne Scan' },
   { key: 'autoOptimize', label: 'AUTO_OPTIMIZE', hint: 'Optimizer setzt Budgetanteile automatisch' },
   { key: 'useRatingInLetter', label: 'USE_RATING_IN_LETTER', hint: 'Bewertungszeile im Brief – nur nach Compliance-Freigabe' },
-  { key: 'realLettersUnlocked', label: 'Echte Briefe an Leads freigegeben', hint: 'Erst nach erfolgreichem Testbrief an dich selbst' },
-  { key: 'autoRegisterDomains', label: 'Domains automatisch registrieren', hint: 'Aus: jede Domain-Registrierung einzeln unter „Kunden & Seiten“ freigeben' },
+  {
+    key: 'realLettersUnlocked',
+    label: 'Echte Briefe an Leads freigegeben',
+    hint: 'Erst nach erfolgreichem Testbrief an dich selbst',
+  },
+  {
+    key: 'autoRegisterDomains',
+    label: 'Domains automatisch registrieren',
+    hint: 'Aus: jede Domain-Registrierung einzeln unter „Kunden & Seiten“ freigeben',
+  },
 ];
 
 export function getPath(obj: unknown, path: string): unknown {
-  return path.split('.').reduce<unknown>((o, k) => (o && typeof o === 'object' ? (o as Record<string, unknown>)[k] : undefined), obj);
+  return path
+    .split('.')
+    .reduce<unknown>((o, k) => (o && typeof o === 'object' ? (o as Record<string, unknown>)[k] : undefined), obj);
 }
 
 export function setPath(obj: Record<string, unknown>, path: string, value: unknown): void {

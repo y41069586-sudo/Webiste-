@@ -11,7 +11,12 @@ import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
 import { resetDb } from './helpers';
 
-async function lead(segment: string, branch: string, variantId: string | null, opts: { scan?: boolean; cta?: boolean; buy?: boolean; sentDaysAgo?: number; test?: boolean } = {}) {
+async function lead(
+  segment: string,
+  branch: string,
+  variantId: string | null,
+  opts: { scan?: boolean; cta?: boolean; buy?: boolean; sentDaysAgo?: number; test?: boolean } = {},
+) {
   const db = getDb();
   const [l] = await db
     .insert(leads)
@@ -28,7 +33,16 @@ async function lead(segment: string, branch: string, variantId: string | null, o
     })
     .returning();
   const sentAt = addDays(new Date(), -(opts.sentDaysAgo ?? 10));
-  await db.insert(letters).values({ leadId: l!.id, sequence: 1, status: 'delivered', variantId, sentAt, costCents: 140, isTest: Boolean(opts.test), pdfStorageKey: 'x' });
+  await db.insert(letters).values({
+    leadId: l!.id,
+    sequence: 1,
+    status: 'delivered',
+    variantId,
+    sentAt,
+    costCents: 140,
+    isTest: Boolean(opts.test),
+    pdfStorageKey: 'x',
+  });
   if (opts.scan) await db.insert(events).values({ leadId: l!.id, type: 'scan' });
   if (opts.cta) await db.insert(events).values({ leadId: l!.id, type: 'cta_click' });
   if (opts.buy) {
@@ -107,7 +121,16 @@ describe('KPIs und Wochenbericht', () => {
     ]);
     const f = { from: addDays(new Date(), -30), to: addDays(new Date(), 1) };
     const seg = await kpiRows(f, 'segment');
-    expect(seg.find((r) => r.key === maler)).toMatchObject({ leads: 3, letters: 3, scans: 2, ctaClicks: 1, purchases: 1, revenueCents: 39000, letterCostCents: 420, costPerLetterCents: 140 });
+    expect(seg.find((r) => r.key === maler)).toMatchObject({
+      leads: 3,
+      letters: 3,
+      scans: 2,
+      ctaClicks: 1,
+      purchases: 1,
+      revenueCents: 39000,
+      letterCostCents: 420,
+      costPerLetterCents: 140,
+    });
     expect(seg.find((r) => r.key === nails)).toMatchObject({ leads: 1, scans: 1, purchases: 0 });
     const byVar = await kpiRows(f, 'variant');
     expect(byVar.find((r) => r.key === va)!.label).toBe(vs[0]!.name);

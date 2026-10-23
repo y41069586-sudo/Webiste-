@@ -14,7 +14,8 @@ main{max-width:40rem;margin:0 auto;padding:3rem 1.25rem}h1{font-size:1.6rem;marg
       'content-type': 'text/html; charset=utf-8',
       'cache-control': 'no-store',
       'x-robots-tag': 'noindex, nofollow',
-      'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+      'content-security-policy':
+        "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
     },
   });
 }

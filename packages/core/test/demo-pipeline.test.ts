@@ -31,7 +31,17 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
     const failed = result.checks.filter((c) => !c.passed);
     expect(failed, JSON.stringify(failed, null, 2)).toEqual([]);
     expect(result.checks.map((c) => c.name)).toEqual(
-      expect.arrayContaining(['inhaltsregeln', 'ki-pruefung', 'html-validierung', 'konsole', 'axe-desktop', 'axe-mobil', 'layout-desktop', 'layout-mobil', 'lighthouse']),
+      expect.arrayContaining([
+        'inhaltsregeln',
+        'ki-pruefung',
+        'html-validierung',
+        'konsole',
+        'axe-desktop',
+        'axe-mobil',
+        'layout-desktop',
+        'layout-mobil',
+        'lighthouse',
+      ]),
     );
     const demo = await getDb().query.demos.findFirst({ where: eq(demos.id, demoId) });
     expect(demo?.status).toBe('pending_review');
@@ -69,7 +79,10 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
   it('Review-Regel: erste N manuell, danach Stichprobe nur mit AUTO_APPROVE_DEMOS', async () => {
     await updateConfig({ switches: { autoApproveDemos: false } }, 'test');
     expect(await requiresManualReview(getDb(), 0.99)).toBe(true);
-    await updateConfig({ switches: { autoApproveDemos: true }, review: { manualReviewFirstN: 1, sampleRatePercent: 10 } }, 'test');
+    await updateConfig(
+      { switches: { autoApproveDemos: true }, review: { manualReviewFirstN: 1, sampleRatePercent: 10 } },
+      'test',
+    );
     // bereits 2 manuelle Prüfungen (approve + reject) → Stichprobe
     expect(await requiresManualReview(getDb(), 0.5)).toBe(false);
     expect(await requiresManualReview(getDb(), 0.05)).toBe(true);

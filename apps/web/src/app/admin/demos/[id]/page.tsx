@@ -25,25 +25,41 @@ export default async function DemoDetail({ params }: { params: Promise<{ id: str
         title={`Demo: ${lead?.businessName ?? '–'}`}
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={demo.status} /> {demo.templateId} / {demo.palette} · Inhalt: {meta?.source === 'fallback' ? 'Standardtexte' : 'KI'} · erstellt {dt(demo.createdAt)}
+            <StatusBadge status={demo.status} /> {demo.templateId} / {demo.palette} · Inhalt:{' '}
+            {meta?.source === 'fallback' ? 'Standardtexte' : 'KI'} · erstellt {dt(demo.createdAt)}
           </span>
         }
         actions={
           <>
-            <Link className={btn.secondary} href={`/admin/demos/${demo.id}/html`} target="_blank">Vorschau in neuem Tab</Link>
-            {lead ? <Link className={btn.secondary} href={`/admin/leads/${lead.id}`}>Lead</Link> : null}
+            <Link className={btn.secondary} href={`/admin/demos/${demo.id}/html`} target="_blank">
+              Vorschau in neuem Tab
+            </Link>
+            {lead ? (
+              <Link className={btn.secondary} href={`/admin/leads/${lead.id}`}>
+                Lead
+              </Link>
+            ) : null}
           </>
         }
       />
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
           <Card title="Vorschau (Desktop)">
-            <iframe title="Demo-Vorschau" src={`/admin/demos/${demo.id}/html`} className="h-[720px] w-full rounded-lg border border-slate-200" sandbox="allow-same-origin" />
+            <iframe
+              title="Demo-Vorschau"
+              src={`/admin/demos/${demo.id}/html`}
+              className="h-[720px] w-full rounded-lg border border-slate-200"
+              sandbox="allow-same-origin"
+            />
           </Card>
           <div className="grid gap-6 md:grid-cols-2">
             {demo.screenshotMobileKey ? (
               <Card title="Mobil (Screenshot)">
-                <img src={`/admin/files/${demo.screenshotMobileKey}`} alt="Mobil-Screenshot" className="mx-auto max-h-[640px] rounded-lg border" />
+                <img
+                  src={`/admin/files/${demo.screenshotMobileKey}`}
+                  alt="Mobil-Screenshot"
+                  className="mx-auto max-h-[640px] rounded-lg border"
+                />
               </Card>
             ) : null}
             {demo.compositeKey ? (
@@ -59,16 +75,26 @@ export default async function DemoDetail({ params }: { params: Promise<{ id: str
               <form action={approveDemoAction} className="space-y-3">
                 <input type="hidden" name="id" value={demo.id} />
                 <textarea name="note" placeholder="Notiz (optional)" className={input} rows={2} />
-                <button className={btn.primary} type="submit">Freigeben &amp; veröffentlichen</button>
-                {demo.status === 'qa_failed' ? <p className="text-xs text-amber-700">Achtung: QA nicht bestanden – nur freigeben, wenn die Befunde unkritisch sind.</p> : null}
+                <button className={btn.primary} type="submit">
+                  Freigeben &amp; veröffentlichen
+                </button>
+                {demo.status === 'qa_failed' ? (
+                  <p className="text-xs text-amber-700">
+                    Achtung: QA nicht bestanden – nur freigeben, wenn die Befunde unkritisch sind.
+                  </p>
+                ) : null}
               </form>
               <hr className="my-4" />
               <form action={rejectDemoAction} className="space-y-3">
                 <input type="hidden" name="id" value={demo.id} />
                 <textarea name="note" placeholder="Grund (Pflicht)" required className={input} rows={2} />
                 <div className="flex flex-wrap gap-2">
-                  <button className={btn.secondary} type="submit" name="regenerate" value="1">Ablehnen &amp; neu generieren</button>
-                  <button className={btn.danger} type="submit" name="regenerate" value="0">Ablehnen (Lead verwerfen)</button>
+                  <button className={btn.secondary} type="submit" name="regenerate" value="1">
+                    Ablehnen &amp; neu generieren
+                  </button>
+                  <button className={btn.danger} type="submit" name="regenerate" value="0">
+                    Ablehnen (Lead verwerfen)
+                  </button>
                 </div>
               </form>
             </Card>
@@ -78,7 +104,9 @@ export default async function DemoDetail({ params }: { params: Promise<{ id: str
               {(demo.qaResultJson?.checks ?? []).map((c) => (
                 <tr key={c.name}>
                   <Td className="font-mono text-xs">{c.name}</Td>
-                  <Td><Badge color={c.passed ? 'green' : 'red'}>{c.passed ? 'ok' : 'fehler'}</Badge></Td>
+                  <Td>
+                    <Badge color={c.passed ? 'green' : 'red'}>{c.passed ? 'ok' : 'fehler'}</Badge>
+                  </Td>
                   <Td className="text-xs break-words text-slate-600">{c.details ?? ''}</Td>
                 </tr>
               ))}
@@ -89,7 +117,9 @@ export default async function DemoDetail({ params }: { params: Promise<{ id: str
           </Card>
           {demo.status === 'published' ? (
             <Card title="Öffentlich">
-              <p className="text-sm">Slug: <code>{demo.slug}</code></p>
+              <p className="text-sm">
+                Slug: <code>{demo.slug}</code>
+              </p>
               <p className="text-sm">Läuft ab: {dt(demo.expiresAt)}</p>
             </Card>
           ) : null}

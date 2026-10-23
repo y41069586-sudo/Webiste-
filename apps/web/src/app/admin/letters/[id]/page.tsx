@@ -28,16 +28,27 @@ export default async function LetterDetail({ params }: { params: Promise<{ id: s
         title={`Brief an ${lead?.businessName ?? '–'}`}
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={letter.status} /> {letter.isTest ? <Badge color="purple">Testbrief</Badge> : null} {letter.dryRun ? <Badge color="yellow">DRY_RUN</Badge> : null}
+            <StatusBadge status={letter.status} /> {letter.isTest ? <Badge color="purple">Testbrief</Badge> : null}{' '}
+            {letter.dryRun ? <Badge color="yellow">DRY_RUN</Badge> : null}
             Seiten: {letter.pageCount} · Kosten: {eur(letter.costCents ?? letter.estimatedCostCents)}
           </span>
         }
-        actions={lead ? <Link className={btn.secondary} href={`/admin/leads/${lead.id}`}>Lead</Link> : null}
+        actions={
+          lead ? (
+            <Link className={btn.secondary} href={`/admin/leads/${lead.id}`}>
+              Lead
+            </Link>
+          ) : null
+        }
       />
       <div className="grid gap-6 xl:grid-cols-3">
         <Card title="PDF" className="xl:col-span-2">
           {letter.pdfStorageKey ? (
-            <iframe title="Brief-PDF" src={`/admin/files/${letter.pdfStorageKey}`} className="h-[900px] w-full rounded-lg border border-slate-200" />
+            <iframe
+              title="Brief-PDF"
+              src={`/admin/files/${letter.pdfStorageKey}`}
+              className="h-[900px] w-full rounded-lg border border-slate-200"
+            />
           ) : (
             <p className="text-sm text-slate-600">Kein PDF vorhanden.</p>
           )}
@@ -47,15 +58,21 @@ export default async function LetterDetail({ params }: { params: Promise<{ id: s
             <Card title="Entscheidung">
               <form action={approveLetterAction}>
                 <input type="hidden" name="id" value={letter.id} />
-                <button className={btn.primary} type="submit">Freigeben</button>
+                <button className={btn.primary} type="submit">
+                  Freigeben
+                </button>
               </form>
               <hr className="my-4" />
               <form action={rejectLetterAction} className="space-y-2">
                 <input type="hidden" name="id" value={letter.id} />
                 <textarea name="note" required placeholder="Grund" rows={2} className={input} />
                 <div className="flex flex-wrap gap-2">
-                  <button className={btn.secondary} name="regenerate" value="1" type="submit">Verwerfen &amp; neu erzeugen</button>
-                  <button className={btn.danger} name="regenerate" value="0" type="submit">Verwerfen</button>
+                  <button className={btn.secondary} name="regenerate" value="1" type="submit">
+                    Verwerfen &amp; neu erzeugen
+                  </button>
+                  <button className={btn.danger} name="regenerate" value="0" type="submit">
+                    Verwerfen
+                  </button>
                 </div>
               </form>
             </Card>
@@ -67,9 +84,14 @@ export default async function LetterDetail({ params }: { params: Promise<{ id: s
           ) : null}
           <Card title="Daten">
             <dl className="space-y-1 text-sm">
-              <div>Anbieter: {letter.provider ?? '–'} {letter.providerLetterId ? <code className="text-xs">{letter.providerLetterId}</code> : null}</div>
+              <div>
+                Anbieter: {letter.provider ?? '–'}{' '}
+                {letter.providerLetterId ? <code className="text-xs">{letter.providerLetterId}</code> : null}
+              </div>
               <div>Erstellt: {dt(letter.createdAt)}</div>
-              <div>Freigegeben: {dt(letter.approvedAt)} {letter.approvedBy ? `(${letter.approvedBy})` : ''}</div>
+              <div>
+                Freigegeben: {dt(letter.approvedAt)} {letter.approvedBy ? `(${letter.approvedBy})` : ''}
+              </div>
               <div>Versendet: {dt(letter.sentAt)}</div>
               <div>Zugestellt: {dt(letter.deliveredAt)}</div>
             </dl>

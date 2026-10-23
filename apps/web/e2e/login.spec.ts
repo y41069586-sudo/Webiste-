@@ -9,12 +9,16 @@ test.describe('Admin-Login', () => {
 
   test('falscher 2FA-Code wird abgelehnt', async ({ page }) => {
     const s = e2eState();
-    await page.goto('/login');
-    await page.getByLabel('E-Mail').fill(s.email);
-    await page.getByLabel('Passwort').fill(s.password);
-    await page.getByLabel('2FA-Code').fill('000000');
-    await page.getByRole('button', { name: 'Anmelden' }).click();
-    await expect(page.getByRole('alert').filter({ hasText: 'Anmeldung fehlgeschlagen' })).toBeVisible();
+    const alert = page.getByRole('alert').filter({ hasText: 'Anmeldung fehlgeschlagen' });
+    // Wiederholung, falls der Dev-Server die Seite beim ersten Aufruf neu kompiliert
+    await expect(async () => {
+      await page.goto('/login', { waitUntil: 'load' });
+      await page.getByLabel('E-Mail').fill(s.email);
+      await page.getByLabel('Passwort').fill(s.password);
+      await page.getByLabel('2FA-Code').fill('000000');
+      await page.getByRole('button', { name: 'Anmelden' }).click();
+      await expect(alert).toBeVisible({ timeout: 10_000 });
+    }).toPass({ timeout: 60_000 });
   });
 
   test('Login mit Passwort + TOTP öffnet das Dashboard, Logout beendet die Session', async ({ page }) => {

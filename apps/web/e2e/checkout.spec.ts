@@ -6,7 +6,10 @@ test.describe('Checkout', () => {
   test('Demo → Bestellen → (Test-)Zahlung → Danke-Seite → Rechnung im Postausgang', async ({ page }) => {
     const demo = seedPublishedDemo();
     await page.goto(`/d/${demo.slug}`);
-    await page.getByRole('complementary', { name: 'Hinweis zum Entwurf' }).getByRole('link', { name: /übernehmen/ }).click();
+    await page
+      .getByRole('complementary', { name: 'Hinweis zum Entwurf' })
+      .getByRole('link', { name: /übernehmen/ })
+      .click();
     await expect(page).toHaveURL(new RegExp(`/checkout/${demo.slug}$`));
     await expect(page.getByRole('heading', { name: 'Ihre Website übernehmen' })).toBeVisible();
     await expect(page.getByText('Testmodus')).toBeVisible();
@@ -30,7 +33,10 @@ test.describe('Checkout', () => {
     await page.getByRole('button', { name: 'Erfolgreich bezahlen (Karte)' }).click();
     await expect(page.getByRole('heading', { name: 'Vielen Dank für Ihre Bestellung!' })).toBeVisible();
     await expect(page.getByText(/Rechnung RE-\d{4}-\d{4}/)).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Jetzt Angaben eintragen' })).toHaveAttribute('href', /\/onboarding\/[A-Za-z0-9]{32}$/);
+    await expect(page.getByRole('link', { name: 'Jetzt Angaben eintragen' })).toHaveAttribute(
+      'href',
+      /\/onboarding\/[A-Za-z0-9]{32}$/,
+    );
 
     // Erneuter Aufruf des Checkouts: bereits bestellt, kein Onboarding-Link
     await page.goto(`/checkout/${demo.slug}`);

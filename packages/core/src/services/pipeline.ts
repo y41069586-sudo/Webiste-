@@ -84,11 +84,22 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
   const db = getDb();
   const cfg = await getConfig({ fresh: true });
   const sw = effectiveSwitches(cfg);
-  const result: PipelineTickResult = { halted: false, capacity: 0, inFlight: 0, demosEnqueued: 0, lettersEnqueued: 0, sendTriggered: false, bySegment: {} };
+  const result: PipelineTickResult = {
+    halted: false,
+    capacity: 0,
+    inFlight: 0,
+    demosEnqueued: 0,
+    lettersEnqueued: 0,
+    sendTriggered: false,
+    bySegment: {},
+  };
   if (sw.killSwitch) return { ...result, halted: true };
 
   // 1) Kapazität
-  const inFlightRows = await db.select({ n: sql<number>`count(*)::int` }).from(leads).where(inArray(leads.status, IN_FLIGHT));
+  const inFlightRows = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(leads)
+    .where(inArray(leads.status, IN_FLIGHT));
   const inFlight = inFlightRows[0]?.n ?? 0;
   const letterBudget = await budgetStatus('letter', db);
   const perLetter = Math.max(1, cfg.costs.letterEstimateCents);
@@ -108,7 +119,12 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
         and(
           eq(leads.status, 'qualified'),
           isNull(leads.anonymizedAt),
-          notExists(db.select({ x: demos.id }).from(demos).where(and(eq(demos.leadId, leads.id), inArray(demos.status, ['building', 'pending_review', 'approved'])))),
+          notExists(
+            db
+              .select({ x: demos.id })
+              .from(demos)
+              .where(and(eq(demos.leadId, leads.id), inArray(demos.status, ['building', 'pending_review', 'approved']))),
+          ),
         ),
       )
       .orderBy(desc(leads.score))
@@ -137,12 +153,21 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
     .where(
       and(
         eq(leads.status, 'demo_published'),
-        notExists(db.select({ x: letters.id }).from(letters).where(and(eq(letters.leadId, leads.id), eq(letters.sequence, 1)))),
+        notExists(
+          db
+            .select({ x: letters.id })
+            .from(letters)
+            .where(and(eq(letters.leadId, leads.id), eq(letters.sequence, 1))),
+        ),
       ),
     )
     .limit(200);
   for (const l of needLetter) {
-    await enqueue(QUEUES.generateLetter, { leadId: l.id, sequence: 1, triggeredBy: 'pipeline' }, { singletonKey: `letter:${l.id}:1` });
+    await enqueue(
+      QUEUES.generateLetter,
+      { leadId: l.id, sequence: 1, triggeredBy: 'pipeline' },
+      { singletonKey: `letter:${l.id}:1` },
+    );
     result.lettersEnqueued++;
   }
 

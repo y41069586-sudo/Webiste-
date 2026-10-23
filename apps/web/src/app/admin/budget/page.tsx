@@ -22,10 +22,18 @@ export default async function BudgetPage() {
   ]);
   return (
     <>
-      <PageHeader title="Budget" subtitle="Laufende Woche (ab Montag) und alle Buchungen. Jede kostenpflichtige Aktion wird hier verbucht." />
+      <PageHeader
+        title="Budget"
+        subtitle="Laufende Woche (ab Montag) und alle Buchungen. Jede kostenpflichtige Aktion wird hier verbucht."
+      />
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statuses.map(({ key, label, s }) => (
-          <Stat key={key} label={label} value={eur(s.spentCents)} hint={s.limitCents !== null ? `von ${eur(s.limitCents)} · Rest ${eur(s.remainingCents)}` : 'ohne Wochenlimit'} />
+          <Stat
+            key={key}
+            label={label}
+            value={eur(s.spentCents)}
+            hint={s.limitCents !== null ? `von ${eur(s.limitCents)} · Rest ${eur(s.remainingCents)}` : 'ohne Wochenlimit'}
+          />
         ))}
       </div>
       <Card title="Buchungen">

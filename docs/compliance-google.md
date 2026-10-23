@@ -59,11 +59,11 @@ Content From Google Maps Content“). **Empfehlung: nur nach rechtlicher Prüfun
 
 ## 3. Umsetzung im System
 
-| Modus (`Einstellungen → Lead-Quelle`) | Quelle für Name/Anschrift | Google-Nutzung | Standard |
-|---|---|---|---|
-| `osm` | OpenStreetMap (Overpass API) | keine | **ja** |
-| `osm_google_signal` | OpenStreetMap | Bewertung/Website flüchtig als Signal, gespeichert wird nur `place_id` | aus – nur mit dokumentierter rechtlicher Prüfung (`googleSignalAcknowledgement`) |
-| `google_text_search` | Google Places Text Search | Primärquelle | gesperrt – nur mit Nachweis einer Genehmigung durch Google (`googleTextSearchApproval`) |
+| Modus (`Einstellungen → Lead-Quelle`) | Quelle für Name/Anschrift    | Google-Nutzung                                                         | Standard                                                                                |
+| ------------------------------------- | ---------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `osm`                                 | OpenStreetMap (Overpass API) | keine                                                                  | **ja**                                                                                  |
+| `osm_google_signal`                   | OpenStreetMap                | Bewertung/Website flüchtig als Signal, gespeichert wird nur `place_id` | aus – nur mit dokumentierter rechtlicher Prüfung (`googleSignalAcknowledgement`)        |
+| `google_text_search`                  | Google Places Text Search    | Primärquelle                                                           | gesperrt – nur mit Nachweis einer Genehmigung durch Google (`googleTextSearchApproval`) |
 
 Technisch abgesichert:
 
@@ -94,7 +94,7 @@ angebunden werden.
 - **Attribution im System:** Der Brief nennt im Datenschutzhinweis (Art. 14 DSGVO) die Quelle
   „öffentlich zugängliche Firmeneinträge (u. a. OpenStreetMap, © OpenStreetMap-Mitwirkende, ODbL)“.
   Die Demo-Seiten zeigen keine Kartenkacheln; der Anfahrtslink führt auf openstreetmap.org.
-- **Share-Alike:** Gilt nur bei *öffentlicher* Nutzung einer abgeleiteten Datenbank. Die interne
+- **Share-Alike:** Gilt nur bei _öffentlicher_ Nutzung einer abgeleiteten Datenbank. Die interne
   Lead-Datenbank wird nicht veröffentlicht.
 - **Fair Use der öffentlichen Overpass-Instanz:** ca. 10 000 Anfragen/Tag und < 1 GB/Tag
   (<https://dev.overpass-api.de/overpass-doc/en/preface/commons.html>). Ein Lauf für Dortmund braucht

@@ -28,13 +28,20 @@ export function suppressionHashes(s: SuppressionSubject): { hash: string; kind: 
 
 export async function isSuppressed(db: DbOrTx, s: SuppressionSubject): Promise<boolean> {
   const hashes = suppressionHashes(s).map((h) => h.hash);
-  const hit = await db.select({ id: suppressionList.id }).from(suppressionList).where(inArray(suppressionList.hash, hashes)).limit(1);
+  const hit = await db
+    .select({ id: suppressionList.id })
+    .from(suppressionList)
+    .where(inArray(suppressionList.hash, hashes))
+    .limit(1);
   return hit.length > 0;
 }
 
 export async function addSuppression(db: DbOrTx, s: SuppressionSubject, reason: string): Promise<void> {
   for (const h of suppressionHashes(s)) {
-    await db.insert(suppressionList).values({ hash: h.hash, kind: h.kind, reason }).onConflictDoNothing({ target: suppressionList.hash });
+    await db
+      .insert(suppressionList)
+      .values({ hash: h.hash, kind: h.kind, reason })
+      .onConflictDoNothing({ target: suppressionList.hash });
   }
 }
 
@@ -48,7 +55,14 @@ export async function optOutLead(db: DbOrTx, leadId: string, actor: Actor | stri
   if (lead.status === 'suppressed' && lead.anonymizedAt) return true;
   await addSuppression(
     db,
-    { name: lead.businessName, street: lead.street, houseNumber: lead.houseNumber, postalCode: lead.postalCode, source: lead.source, sourceId: lead.sourceId },
+    {
+      name: lead.businessName,
+      street: lead.street,
+      houseNumber: lead.houseNumber,
+      postalCode: lead.postalCode,
+      source: lead.source,
+      sourceId: lead.sourceId,
+    },
     reason,
   );
   // Demo-Dateien löschen
@@ -58,7 +72,15 @@ export async function optOutLead(db: DbOrTx, leadId: string, actor: Actor | stri
     await storage.deletePrefix(`demos/${d.id}/`);
     await db
       .update(demos)
-      .set({ status: 'deleted', deletedAt: new Date(), contentJson: null, htmlStorageKey: null, screenshotDesktopKey: null, screenshotMobileKey: null, compositeKey: null })
+      .set({
+        status: 'deleted',
+        deletedAt: new Date(),
+        contentJson: null,
+        htmlStorageKey: null,
+        screenshotDesktopKey: null,
+        screenshotMobileKey: null,
+        compositeKey: null,
+      })
       .where(eq(demos.id, d.id));
   }
   await storage.deletePrefix(`letters/${leadId}/`);

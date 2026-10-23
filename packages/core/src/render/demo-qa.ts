@@ -3,14 +3,7 @@ import { renderSite } from '@wbm/templates';
 import { getConfig } from '../config/service';
 import { getDb } from '../db/client';
 import { demos, leads, type QaResult } from '../db/schema';
-import {
-  buildQaPrompt,
-  QA_SCHEMA,
-  QA_SYSTEM_PROMPT,
-  QA_TOOL_NAME,
-  validateDemoContent,
-  type QaIssue,
-} from '../demos/content';
+import { buildQaPrompt, QA_SCHEMA, QA_SYSTEM_PROMPT, QA_TOOL_NAME, validateDemoContent, type QaIssue } from '../demos/content';
 import { leadContentFacts, leadToFacts, renderDemoHtml, storedContent } from '../demos/build';
 import { logger } from '../logger';
 import { getProviders } from '../providers';
@@ -57,10 +50,18 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   checks.push({
     name: 'inhaltsregeln',
     passed: violations.length === 0,
-    ...(violations.length ? { details: violations.slice(0, 10).map((v) => `${v.field}: ${v.rule} – ${v.detail}`).join(' | ') } : {}),
+    ...(violations.length
+      ? {
+          details: violations
+            .slice(0, 10)
+            .map((v) => `${v.field}: ${v.rule} – ${v.detail}`)
+            .join(' | '),
+        }
+      : {}),
   });
   const meta = (demo.contentJson as { _meta?: { source?: string } } | null)?._meta;
-  if (meta?.source === 'fallback') checks.push({ name: 'inhaltsquelle', passed: true, details: 'Geprüfte Standardtexte (KI-Ausgabe verworfen)' });
+  if (meta?.source === 'fallback')
+    checks.push({ name: 'inhaltsquelle', passed: true, details: 'Geprüfte Standardtexte (KI-Ausgabe verworfen)' });
 
   // 2) KI-Prüfung (MODEL_BULK)
   if (opts.llm !== false) {
@@ -103,7 +104,12 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
         mode: 'live',
         content,
         facts: bizFacts,
-        live: { formAction: '/api/forms/qa', imprintPath: 'impressum.html', privacyPath: 'datenschutz.html', canonicalUrl: 'http://127.0.0.1/' },
+        live: {
+          formAction: '/api/forms/qa',
+          imprintPath: 'impressum.html',
+          privacyPath: 'datenschutz.html',
+          canonicalUrl: 'http://127.0.0.1/',
+        },
       });
       checks.push(await lighthouseCheck(liveHtml));
     } catch (err) {
@@ -112,7 +118,15 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   }
 
   // 6) Screenshots + Komposit (ohne Banner)
-  const shotHtml = renderDemoHtml({ templateId: demo.templateId, palette: demo.palette, content, facts: bizFacts, slug: demo.slug, cfg, mode: 'screenshot' });
+  const shotHtml = renderDemoHtml({
+    templateId: demo.templateId,
+    palette: demo.palette,
+    content,
+    facts: bizFacts,
+    slug: demo.slug,
+    cfg,
+    mode: 'screenshot',
+  });
   const shots = await takeScreenshots(shotHtml);
   const composite = await renderComposite(shots.desktop, shots.mobile);
   const base = `demos/${demoId}`;
@@ -148,7 +162,10 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
     await raiseAlert(db, {
       level: 'warn',
       code: `demo_qa_failed:${demoId}`,
-      message: `Demo-QA fehlgeschlagen (${checks.filter((c) => !c.passed).map((c) => c.name).join(', ')}).`,
+      message: `Demo-QA fehlgeschlagen (${checks
+        .filter((c) => !c.passed)
+        .map((c) => c.name)
+        .join(', ')}).`,
       context: { demoId, leadId: lead.id },
     });
   } else if (decide && !manual) {

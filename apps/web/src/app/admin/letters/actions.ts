@@ -28,7 +28,8 @@ export async function createTestLetterAction(): Promise<void> {
   const s = await requireAdmin();
   const cfg = await getConfig({ fresh: true });
   const t = cfg.letter.testRecipient;
-  if (!t.street || !t.postalCode || !t.city) throw new Error('Bitte zuerst die Testadresse unter Einstellungen → Brief & Versand eintragen.');
+  if (!t.street || !t.postalCode || !t.city)
+    throw new Error('Bitte zuerst die Testadresse unter Einstellungen → Brief & Versand eintragen.');
   const demo = await getDb()
     .select({ leadId: schema.demos.leadId })
     .from(schema.demos)

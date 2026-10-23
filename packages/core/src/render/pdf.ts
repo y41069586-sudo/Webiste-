@@ -10,7 +10,12 @@ export async function htmlToPdf(html: string): Promise<Buffer> {
     await page.emulateMedia({ media: 'print' });
     await page.setContent(html, { waitUntil: 'load' });
     await page.evaluate('document.fonts.ready');
-    return page.pdf({ format: 'A4', printBackground: true, preferCSSPageSize: true, margin: { top: '0', right: '0', bottom: '0', left: '0' } });
+    return page.pdf({
+      format: 'A4',
+      printBackground: true,
+      preferCSSPageSize: true,
+      margin: { top: '0', right: '0', bottom: '0', left: '0' },
+    });
   });
 }
 
@@ -55,10 +60,16 @@ export interface LayoutIssue {
   detail: string;
 }
 
-function inside(a: { x: number; y: number; w: number; h: number }, r: { x1: number; y1: number; x2: number; y2: number }): boolean {
+function inside(
+  a: { x: number; y: number; w: number; h: number },
+  r: { x1: number; y1: number; x2: number; y2: number },
+): boolean {
   return r.x1 >= a.x - 0.01 && r.x2 <= a.x + a.w + 0.01 && r.y1 >= a.y - 0.01 && r.y2 <= a.y + a.h + 0.01;
 }
-function intersects(a: { x: number; y: number; w: number; h: number }, r: { x1: number; y1: number; x2: number; y2: number }): boolean {
+function intersects(
+  a: { x: number; y: number; w: number; h: number },
+  r: { x1: number; y1: number; x2: number; y2: number },
+): boolean {
   return r.x1 < a.x + a.w && r.x2 > a.x && r.y1 < a.y + a.h && r.y2 > a.y;
 }
 
@@ -87,9 +98,14 @@ export async function validateLetterPdf(
     }
     used.add(hit);
     const r = { x1: hit.xMm, y1: hit.yTopMm, x2: hit.xMm + hit.wMm, y2: hit.yBottomMm };
-    box = box ? { x1: Math.min(box.x1, r.x1), y1: Math.min(box.y1, r.y1), x2: Math.max(box.x2, r.x2), y2: Math.max(box.y2, r.y2) } : r;
+    box = box
+      ? { x1: Math.min(box.x1, r.x1), y1: Math.min(box.y1, r.y1), x2: Math.max(box.x2, r.x2), y2: Math.max(box.y2, r.y2) }
+      : r;
     if (!inside(g.addressArea, r)) {
-      issues.push({ check: 'anschriftenfeld', detail: `„${line}“ außerhalb (${r.x1.toFixed(1)}–${r.x2.toFixed(1)} × ${r.y1.toFixed(1)}–${r.y2.toFixed(1)} mm)` });
+      issues.push({
+        check: 'anschriftenfeld',
+        detail: `„${line}“ außerhalb (${r.x1.toFixed(1)}–${r.x2.toFixed(1)} × ${r.y1.toFixed(1)}–${r.y2.toFixed(1)} mm)`,
+      });
     }
   }
   for (const it of items) {

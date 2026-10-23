@@ -16,7 +16,9 @@ export default async function MockCheckoutPage({ params }: { params: Promise<{ s
   return (
     <PublicShell company={cfg.sender.company}>
       <PublicCard>
-        <p className="mb-2 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">Testmodus – keine echte Zahlung</p>
+        <p className="mb-2 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
+          Testmodus – keine echte Zahlung
+        </p>
         <h1 className="mb-1 text-2xl font-semibold">Testzahlung</h1>
         <p className="mb-6 text-slate-600">
           {cfg.pricing.packageName} · {formatEuro(info.order.amountCents)} · {info.order.domainWish}

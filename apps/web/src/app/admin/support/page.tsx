@@ -38,10 +38,16 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   const countFor = (t: (typeof TABS)[number]) => counts.filter((c) => t.statuses.includes(c.status)).reduce((s, c) => s + c.n, 0);
   return (
     <>
-      <PageHeader title="Support" subtitle="Eingehende Nachrichten (Demo-Formular, E-Mail). Widersprüche werden automatisch umgesetzt." />
+      <PageHeader
+        title="Support"
+        subtitle="Eingehende Nachrichten (Demo-Formular, E-Mail). Widersprüche werden automatisch umgesetzt."
+      />
       <div className="mb-4">
         {sw.autoReply ? (
-          <Notice kind="warn">AUTO_REPLY ist an: Antworten der Klassen {cfg.support.autoReplyClasses.join(', ') || '(keine gewählt)'} gehen ohne Freigabe raus (nur bei hoher Sicherheit, nie bei Beschwerden).</Notice>
+          <Notice kind="warn">
+            AUTO_REPLY ist an: Antworten der Klassen {cfg.support.autoReplyClasses.join(', ') || '(keine gewählt)'} gehen ohne
+            Freigabe raus (nur bei hoher Sicherheit, nie bei Beschwerden).
+          </Notice>
         ) : (
           <Notice>AUTO_REPLY ist aus: Jede Antwort wird erst nach deiner Freigabe gesendet.</Notice>
         )}
@@ -76,7 +82,15 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
                   {m.subject || '(ohne Betreff)'}
                 </Link>
               </Td>
-              <Td>{m.classification ? <Badge color={m.classification === 'beschwerde' || m.classification === 'opt_out' ? 'red' : 'blue'}>{m.classification}</Badge> : '–'}</Td>
+              <Td>
+                {m.classification ? (
+                  <Badge color={m.classification === 'beschwerde' || m.classification === 'opt_out' ? 'red' : 'blue'}>
+                    {m.classification}
+                  </Badge>
+                ) : (
+                  '–'
+                )}
+              </Td>
               <Td>
                 <StatusBadge status={m.status} />
                 {m.escalationReason ? <span className="block text-xs text-slate-500">{m.escalationReason}</span> : null}

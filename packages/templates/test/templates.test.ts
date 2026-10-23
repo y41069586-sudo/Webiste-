@@ -62,7 +62,12 @@ describe('Templates', () => {
       ...base,
       mode: 'live',
       demo: undefined,
-      live: { formAction: 'https://app.example.de/api/forms/abc', imprintPath: 'impressum.html', privacyPath: 'datenschutz.html', canonicalUrl: 'https://malerbetrieb-beispiel.de/' },
+      live: {
+        formAction: 'https://app.example.de/api/forms/abc',
+        imprintPath: 'impressum.html',
+        privacyPath: 'datenschutz.html',
+        canonicalUrl: 'https://malerbetrieb-beispiel.de/',
+      },
     });
     expect(html).not.toContain('Unverbindlicher Entwurf');
     expect(html).not.toContain('noindex');

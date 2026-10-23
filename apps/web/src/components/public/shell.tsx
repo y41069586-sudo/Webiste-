@@ -18,7 +18,9 @@ export function PublicShell({ company, children, wide = false }: { company: stri
       </header>
       <main className={`mx-auto w-full flex-1 px-4 py-8 ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>{children}</main>
       <footer className="border-t border-slate-200 bg-white">
-        <div className={`mx-auto flex flex-wrap gap-x-5 gap-y-2 px-4 py-5 text-sm text-slate-600 ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
+        <div
+          className={`mx-auto flex flex-wrap gap-x-5 gap-y-2 px-4 py-5 text-sm text-slate-600 ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}
+        >
           <Link href="/impressum" className="hover:underline">
             Impressum
           </Link>

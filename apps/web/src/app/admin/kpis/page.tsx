@@ -6,7 +6,14 @@ import { eur, num, pct } from '@/lib/format';
 export const metadata = { title: 'Kennzahlen' };
 export const dynamic = 'force-dynamic';
 
-const CATEGORY: Record<string, string> = { letter: 'Briefe', places_api: 'Google Places', llm: 'KI', domain: 'Domains', hosting: 'Hosting', other: 'Sonstiges' };
+const CATEGORY: Record<string, string> = {
+  letter: 'Briefe',
+  places_api: 'Google Places',
+  llm: 'KI',
+  domain: 'Domains',
+  hosting: 'Hosting',
+  other: 'Sonstiges',
+};
 
 function parseDate(v: string | undefined, fallback: Date): Date {
   if (!v || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return fallback;
@@ -17,7 +24,22 @@ const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 function FunnelTable({ rows, first }: { rows: KpiRow[]; first: string }) {
   return (
-    <Table head={[first, 'Betriebe', 'Briefe', 'Kosten/Brief', 'Scans', 'Scan-Rate', 'Klicks', 'Checkout', 'Käufe', 'Kaufrate', 'Umsatz']} empty="Keine Briefe im Zeitraum">
+    <Table
+      head={[
+        first,
+        'Betriebe',
+        'Briefe',
+        'Kosten/Brief',
+        'Scans',
+        'Scan-Rate',
+        'Klicks',
+        'Checkout',
+        'Käufe',
+        'Kaufrate',
+        'Umsatz',
+      ]}
+      empty="Keine Briefe im Zeitraum"
+    >
       {rows.map((r) => (
         <tr key={r.key}>
           <Td>{r.label}</Td>
@@ -52,11 +74,22 @@ export default async function KpiPage({ searchParams }: { searchParams: Promise<
     ...(sp.branche && opts.branches.includes(sp.branche) ? { branch: sp.branche } : {}),
     ...(sp.variante && opts.variants.some((v) => v.id === sp.variante) ? { variantId: sp.variante } : {}),
   };
-  const [s, bySegment, byVariant, byWeek] = await Promise.all([kpiSummary(f), kpiRows(f, 'segment'), kpiRows(f, 'variant'), kpiRows(f, 'week')]);
+  const [s, bySegment, byVariant, byWeek] = await Promise.all([
+    kpiSummary(f),
+    kpiRows(f, 'segment'),
+    kpiRows(f, 'variant'),
+    kpiRows(f, 'week'),
+  ]);
   return (
     <>
-      <PageHeader title="Kennzahlen" subtitle="Kohorte: Betriebe, deren Erstbrief im Zeitraum versendet wurde (ohne Test- und DRY_RUN-Briefe)." />
-      <form method="get" className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <PageHeader
+        title="Kennzahlen"
+        subtitle="Kohorte: Betriebe, deren Erstbrief im Zeitraum versendet wurde (ohne Test- und DRY_RUN-Briefe)."
+      />
+      <form
+        method="get"
+        className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+      >
         <div>
           <label htmlFor="von" className={label}>
             Von
@@ -109,8 +142,16 @@ export default async function KpiPage({ searchParams }: { searchParams: Promise<
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Briefe" value={num(s.letters)} hint={`${num(s.leads)} Betriebe · ${eur(s.costPerLetterCents)} je Brief`} />
-        <Stat label="Scan-Rate" value={pct(s.scanRate)} hint={`${num(s.scans)} Scans · ${num(s.ctaClicks)} Klicks auf „Übernehmen“`} />
-        <Stat label="Käufe" value={num(s.purchases)} hint={`Kaufrate ${pct(s.purchaseRate, 2)} · Umsatz ${eur(s.revenueCents)}`} />
+        <Stat
+          label="Scan-Rate"
+          value={pct(s.scanRate)}
+          hint={`${num(s.scans)} Scans · ${num(s.ctaClicks)} Klicks auf „Übernehmen“`}
+        />
+        <Stat
+          label="Käufe"
+          value={num(s.purchases)}
+          hint={`Kaufrate ${pct(s.purchaseRate, 2)} · Umsatz ${eur(s.revenueCents)}`}
+        />
         <Stat
           label="CAC / ROI"
           value={s.cacCents !== null ? eur(s.cacCents) : '–'}
@@ -137,7 +178,9 @@ export default async function KpiPage({ searchParams }: { searchParams: Promise<
               </tr>
             ))}
           </Table>
-          <p className="mt-3 text-xs text-slate-500">CAC = Akquisekosten (Briefe, Places, KI) ÷ Käufe der Kohorte. Mit Filter: nur die zuordenbaren Briefkosten.</p>
+          <p className="mt-3 text-xs text-slate-500">
+            CAC = Akquisekosten (Briefe, Places, KI) ÷ Käufe der Kohorte. Mit Filter: nur die zuordenbaren Briefkosten.
+          </p>
         </Card>
       </div>
     </>

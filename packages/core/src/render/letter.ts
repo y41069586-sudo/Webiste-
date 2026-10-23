@@ -20,7 +20,12 @@ import { addDays, formatDateLongDe, formatEuroShort } from '../util/time';
 import { htmlToPdf, validateLetterDom, validateLetterPdf, type LayoutIssue } from './pdf';
 
 export async function qrDataUri(url: string): Promise<string> {
-  return QRCode.toDataURL(url, { errorCorrectionLevel: 'M', margin: 1, width: 600, color: { dark: '#111111', light: '#ffffff' } });
+  return QRCode.toDataURL(url, {
+    errorCorrectionLevel: 'M',
+    margin: 1,
+    width: 600,
+    color: { dark: '#111111', light: '#ffffff' },
+  });
 }
 
 function shortUrl(url: string): string {
@@ -50,7 +55,10 @@ async function domainFor(lead: typeof leads.$inferSelect, cfg: AppConfig): Promi
     await getDb().update(leads).set({ domainSuggestion: d, domainCheckedAt: new Date() }).where(eq(leads.id, lead.id));
     return d;
   } catch (err) {
-    logger.warn({ leadId: lead.id, err: err instanceof Error ? err.message : String(err) }, 'Domain-Prüfung fehlgeschlagen – Brief ohne Beispiel-Domain');
+    logger.warn(
+      { leadId: lead.id, err: err instanceof Error ? err.message : String(err) },
+      'Domain-Prüfung fehlgeschlagen – Brief ohne Beispiel-Domain',
+    );
     void cfg;
     return null;
   }
@@ -72,12 +80,18 @@ export async function generateLetter(leadId: string, sequence: 1 | 2, opts: Gene
   if (existing) {
     const replaceable = ['generated', 'failed', 'approved'].includes(existing.status);
     if (!(opts.regenerate || opts.test) || !replaceable) {
-      return { letterId: existing.id, status: existing.status as GeneratedLetter['status'], issues: [], pages: existing.pageCount };
+      return {
+        letterId: existing.id,
+        status: existing.status as GeneratedLetter['status'],
+        issues: [],
+        pages: existing.pageCount,
+      };
     }
     await db.delete(letters).where(eq(letters.id, existing.id));
   }
   const allowed = opts.regenerate ? ['demo_published', 'letter_generated', 'letter_approved'] : ['demo_published'];
-  if (!opts.test && sequence === 1 && !allowed.includes(lead.status)) throw new Error(`Lead im Status ${lead.status} – kein Erstbrief`);
+  if (!opts.test && sequence === 1 && !allowed.includes(lead.status))
+    throw new Error(`Lead im Status ${lead.status} – kein Erstbrief`);
 
   const demo = await currentDemoForLead(db, leadId);
   if (!demo) throw new Error('Keine veröffentlichte Demo für den Lead');
@@ -132,14 +146,23 @@ export async function generateLetter(leadId: string, sequence: 1 | 2, opts: Gene
   const pdf = await htmlToPdf(html);
   const expectedPages = screenshotPage ? 2 : 1;
   const domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
-  const pdfCheck = await validateLetterPdf(pdf, { recipientLines: recipientLines(recipient), position: cfg.letter.addressPosition, expectedPages });
+  const pdfCheck = await validateLetterPdf(pdf, {
+    recipientLines: recipientLines(recipient),
+    position: cfg.letter.addressPosition,
+    expectedPages,
+  });
   const issues = [...domIssues, ...pdfCheck.issues];
 
   // Kosten schätzen (im DRY_RUN ohne API-Aufruf)
   let estimate = cfg.costs.letterEstimateCents;
   if (!sw.dryRun) {
     const est = await getProviders()
-      .mail.estimateCost(pdf, { color: cfg.letter.color, deliveryProduct: cfg.letter.deliveryProduct, addressPosition: cfg.letter.addressPosition, recipientCountry: 'DE' })
+      .mail.estimateCost(pdf, {
+        color: cfg.letter.color,
+        deliveryProduct: cfg.letter.deliveryProduct,
+        addressPosition: cfg.letter.addressPosition,
+        recipientCountry: 'DE',
+      })
       .catch(() => null);
     if (est !== null) estimate = est;
   }
@@ -155,7 +178,12 @@ export async function generateLetter(leadId: string, sequence: 1 | 2, opts: Gene
       pageCount: pdfCheck.pages,
       estimatedCostCents: estimate,
       status,
-      statusReason: issues.length ? issues.map((i) => `${i.check}: ${i.detail}`).join(' | ').slice(0, 1000) : null,
+      statusReason: issues.length
+        ? issues
+            .map((i) => `${i.check}: ${i.detail}`)
+            .join(' | ')
+            .slice(0, 1000)
+        : null,
       isTest: Boolean(opts.test),
       dryRun: sw.dryRun,
     })
@@ -169,10 +197,23 @@ export async function generateLetter(leadId: string, sequence: 1 | 2, opts: Gene
     entityId: letterId,
     action: 'generate',
     actor: opts.actor,
-    context: { leadId, sequence, variant: variant.name, domain, pages: pdfCheck.pages, issues: issues.length, test: Boolean(opts.test) },
+    context: {
+      leadId,
+      sequence,
+      variant: variant.name,
+      domain,
+      pages: pdfCheck.pages,
+      issues: issues.length,
+      test: Boolean(opts.test),
+    },
   });
   if (issues.length) {
-    await raiseAlert(db, { level: 'error', code: `letter_layout:${letterId}`, message: 'Brief-Layout verletzt die Vorgaben des Briefdienstes.', context: { letterId, issues } });
+    await raiseAlert(db, {
+      level: 'error',
+      code: `letter_layout:${letterId}`,
+      message: 'Brief-Layout verletzt die Vorgaben des Briefdienstes.',
+      context: { letterId, issues },
+    });
     return { letterId, status, issues, pages: pdfCheck.pages };
   }
   if (!opts.test && sequence === 1) {

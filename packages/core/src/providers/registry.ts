@@ -22,7 +22,9 @@ export const registry = {
   mail(kind: string, env: Env): MailProvider | undefined {
     if (kind !== 'pingen') return undefined;
     if (!env.PINGEN_CLIENT_ID || !env.PINGEN_CLIENT_SECRET || !env.PINGEN_ORGANISATION_ID) {
-      throw new Error('MAIL_PROVIDER=pingen verlangt PINGEN_CLIENT_ID, PINGEN_CLIENT_SECRET und PINGEN_ORGANISATION_ID (sonst MAIL_PROVIDER=mock).');
+      throw new Error(
+        'MAIL_PROVIDER=pingen verlangt PINGEN_CLIENT_ID, PINGEN_CLIENT_SECRET und PINGEN_ORGANISATION_ID (sonst MAIL_PROVIDER=mock).',
+      );
     }
     return new PingenMailProvider({
       clientId: env.PINGEN_CLIENT_ID,
@@ -34,13 +36,20 @@ export const registry = {
   },
   registrar(kind: string, env: Env): RegistrarProvider | undefined {
     if (kind !== 'inwx') return undefined;
-    if (!env.REGISTRAR_USER || !env.REGISTRAR_PASSWORD) throw new Error('REGISTRAR_PROVIDER=inwx verlangt REGISTRAR_USER und REGISTRAR_PASSWORD (sonst mock).');
-    return new InwxRegistrar({ user: env.REGISTRAR_USER, password: env.REGISTRAR_PASSWORD, env: env.REGISTRAR_ENV, totpSecret: env.REGISTRAR_TOTP_SECRET });
+    if (!env.REGISTRAR_USER || !env.REGISTRAR_PASSWORD)
+      throw new Error('REGISTRAR_PROVIDER=inwx verlangt REGISTRAR_USER und REGISTRAR_PASSWORD (sonst mock).');
+    return new InwxRegistrar({
+      user: env.REGISTRAR_USER,
+      password: env.REGISTRAR_PASSWORD,
+      env: env.REGISTRAR_ENV,
+      totpSecret: env.REGISTRAR_TOTP_SECRET,
+    });
   },
   hosting(kind: string, env: Env): HostingProvider | undefined {
     const formOrigin = new URL(env.APP_URL).origin;
     if (kind === 'cloudflare') {
-      if (!env.CLOUDFLARE_API_TOKEN || !env.CLOUDFLARE_ACCOUNT_ID) throw new Error('HOSTING_PROVIDER=cloudflare verlangt CLOUDFLARE_API_TOKEN und CLOUDFLARE_ACCOUNT_ID.');
+      if (!env.CLOUDFLARE_API_TOKEN || !env.CLOUDFLARE_ACCOUNT_ID)
+        throw new Error('HOSTING_PROVIDER=cloudflare verlangt CLOUDFLARE_API_TOKEN und CLOUDFLARE_ACCOUNT_ID.');
       return new CloudflareHosting({ apiToken: env.CLOUDFLARE_API_TOKEN, accountId: env.CLOUDFLARE_ACCOUNT_ID, formOrigin });
     }
     if (kind === 'netlify') {
@@ -52,12 +61,16 @@ export const registry = {
   email(kind: string, env: Env): EmailProvider | undefined {
     if (kind !== 'resend' && kind !== 'postmark') return undefined;
     if (!env.EMAIL_API_KEY) throw new Error(`EMAIL_PROVIDER=${kind} verlangt EMAIL_API_KEY (sonst EMAIL_PROVIDER=mock).`);
-    return kind === 'resend' ? new ResendEmail(env.EMAIL_API_KEY, env.EMAIL_FROM) : new PostmarkEmail(env.EMAIL_API_KEY, env.EMAIL_FROM);
+    return kind === 'resend'
+      ? new ResendEmail(env.EMAIL_API_KEY, env.EMAIL_FROM)
+      : new PostmarkEmail(env.EMAIL_API_KEY, env.EMAIL_FROM);
   },
   payment(kind: string, env: Env): PaymentProvider | undefined {
     if (kind !== 'stripe') return undefined;
-    if (!env.STRIPE_SECRET_KEY) throw new Error('PAYMENT_PROVIDER=stripe verlangt STRIPE_SECRET_KEY (sonst PAYMENT_PROVIDER=mock).');
-    if (env.NODE_ENV === 'production' && !env.STRIPE_WEBHOOK_SECRET) throw new Error('STRIPE_WEBHOOK_SECRET fehlt (Webhook-Signaturen sind Pflicht).');
+    if (!env.STRIPE_SECRET_KEY)
+      throw new Error('PAYMENT_PROVIDER=stripe verlangt STRIPE_SECRET_KEY (sonst PAYMENT_PROVIDER=mock).');
+    if (env.NODE_ENV === 'production' && !env.STRIPE_WEBHOOK_SECRET)
+      throw new Error('STRIPE_WEBHOOK_SECRET fehlt (Webhook-Signaturen sind Pflicht).');
     return new StripePayment({ secretKey: env.STRIPE_SECRET_KEY, webhookSecret: env.STRIPE_WEBHOOK_SECRET });
   },
 };

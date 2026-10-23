@@ -42,7 +42,8 @@ export const LETTER_VARIANT_A: LetterVariantContent = {
 export const LETTER_VARIANT_B: LetterVariantContent = {
   subject: 'Ein Website-Entwurf für {firmenname}',
   greeting: 'Guten Tag, liebes Team von {firmenname},',
-  ratingSentence: 'Mit {rating_count} Bewertungen und durchschnittlich {rating} Sternen haben Sie sich einen sehr guten Ruf erarbeitet.',
+  ratingSentence:
+    'Mit {rating_count} Bewertungen und durchschnittlich {rating} Sternen haben Sie sich einen sehr guten Ruf erarbeitet.',
   hook: 'Eine eigene Website, auf der Kundinnen und Kunden alles Wichtige auf einen Blick finden, haben Sie bisher aber nicht.',
   intro: [
     'Ich habe Ihnen deshalb einen fertigen Entwurf gebaut: Leistungen, Öffnungszeiten, Anfahrt und Kontaktformular – übersichtlich und fürs Handy optimiert.',

@@ -103,7 +103,8 @@ export class PingenMailProvider implements MailProvider {
         });
         const text = await res.text();
         if (res.status === 401) this.token = undefined;
-        if (!res.ok) throw new HttpError(`Pingen ${method} ${path.split('?')[0]} HTTP ${res.status}`, res.status, text.slice(0, 1000));
+        if (!res.ok)
+          throw new HttpError(`Pingen ${method} ${path.split('?')[0]} HTTP ${res.status}`, res.status, text.slice(0, 1000));
         return (text ? JSON.parse(text) : {}) as T;
       },
       { retries: 4, baseDelayMs: 1_000, maxDelayMs: 20_000 },
@@ -146,7 +147,11 @@ export class PingenMailProvider implements MailProvider {
     const upload = await this.call<{ data: { attributes: { url: string; url_signature: string } } }>('GET', '/file-upload');
     // 2) PDF hochladen (vorsignierte URL, ohne Auth-Header)
     await withRetry(async () => {
-      const res = await this.fetchImpl(upload.data.attributes.url, { method: 'PUT', body: new Uint8Array(pdf), signal: AbortSignal.timeout(120_000) });
+      const res = await this.fetchImpl(upload.data.attributes.url, {
+        method: 'PUT',
+        body: new Uint8Array(pdf),
+        signal: AbortSignal.timeout(120_000),
+      });
       if (!res.ok) throw new HttpError(`Pingen-Upload HTTP ${res.status}`, res.status);
     });
     // 3) Brief anlegen und automatisch absenden
@@ -193,11 +198,19 @@ export class PingenMailProvider implements MailProvider {
       this.org(`/deliveries/letters/${encodeURIComponent(providerLetterId)}`),
     );
     const price = res.data.attributes.price_value;
-    return { status: mapPingenStatus(res.data.attributes.status), ...(typeof price === 'number' ? { costCents: Math.round(price * 100) } : {}) };
+    return {
+      status: mapPingenStatus(res.data.attributes.status),
+      ...(typeof price === 'number' ? { costCents: Math.round(price * 100) } : {}),
+    };
   }
 
   async cancel(providerLetterId: string): Promise<void> {
-    await this.call('PATCH', this.org(`/deliveries/letters/${encodeURIComponent(providerLetterId)}/cancel`), undefined, `cancel-${providerLetterId}`);
+    await this.call(
+      'PATCH',
+      this.org(`/deliveries/letters/${encodeURIComponent(providerLetterId)}/cancel`),
+      undefined,
+      `cancel-${providerLetterId}`,
+    );
   }
 
   /** Webhooks für alle Brief-Ereignisse anlegen (einmalig bei der Einrichtung). */
@@ -231,11 +244,16 @@ export class PingenMailProvider implements MailProvider {
         attributes?: { created_at?: string };
         relationships?: { deliverable?: { data?: { id?: string; type?: string } }; event?: { data?: { id?: string } } };
       };
-      included?: { id?: string; type?: string; attributes?: { code?: string; name?: string; emitted_at?: string; status?: string } }[];
+      included?: {
+        id?: string;
+        type?: string;
+        attributes?: { code?: string; name?: string; emitted_at?: string; status?: string };
+      }[];
     };
     const d = body.data;
     const letterId = d?.relationships?.deliverable?.data?.id;
-    if (!d?.id || !letterId || (d.relationships?.deliverable?.data?.type && d.relationships.deliverable.data.type !== 'letters')) return [];
+    if (!d?.id || !letterId || (d.relationships?.deliverable?.data?.type && d.relationships.deliverable.data.type !== 'letters'))
+      return [];
     const eventId = d.relationships?.event?.data?.id;
     const ev = body.included?.find((i) => i.id === eventId || i.type?.endsWith('events'));
     const status = WEBHOOK_TYPE[d.type ?? ''] ?? mapPingenStatus(ev?.attributes?.code);

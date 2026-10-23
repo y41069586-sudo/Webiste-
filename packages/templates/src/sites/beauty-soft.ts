@@ -81,7 +81,8 @@ export const beautySoft: TemplateDef = {
     sectionClass: 'py-12',
     cardClass: 'rounded-3xl bg-surface-alt p-6',
     titleClass: 'font-heading text-3xl font-semibold',
-    buttonClass: 'inline-flex min-h-12 items-center rounded-full bg-primary px-6 py-3 font-semibold text-on-primary disabled:opacity-60',
+    buttonClass:
+      'inline-flex min-h-12 items-center rounded-full bg-primary px-6 py-3 font-semibold text-on-primary disabled:opacity-60',
     inputClass: 'block w-full rounded-2xl border border-line bg-surface px-4 py-2.5 focus:outline-2 focus:outline-primary',
   })}
 

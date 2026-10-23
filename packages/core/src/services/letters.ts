@@ -35,8 +35,12 @@ export async function approveLetter(letterId: string, actor: string): Promise<bo
   return db.transaction(async (tx) => {
     const letter = await tx.query.letters.findFirst({ where: eq(letters.id, letterId) });
     if (!letter || letter.status !== 'generated') return false;
-    await tx.update(letters).set({ status: 'approved', approvedBy: actor, approvedAt: new Date(), updatedAt: new Date() }).where(eq(letters.id, letterId));
-    if (letter.sequence === 1 && !letter.isTest) await transitionLead(tx, letter.leadId, 'letter_approved', { actor, soft: true });
+    await tx
+      .update(letters)
+      .set({ status: 'approved', approvedBy: actor, approvedAt: new Date(), updatedAt: new Date() })
+      .where(eq(letters.id, letterId));
+    if (letter.sequence === 1 && !letter.isTest)
+      await transitionLead(tx, letter.leadId, 'letter_approved', { actor, soft: true });
     await audit(tx, { entity: 'letter', entityId: letterId, action: 'approve', actor });
     return true;
   });
@@ -56,23 +60,37 @@ export async function rejectLetter(letterId: string, actor: string, note: string
   await db.transaction(async (tx) => {
     const letter = await tx.query.letters.findFirst({ where: eq(letters.id, letterId) });
     if (!letter) throw new Error('Brief nicht gefunden');
-    if (!['generated', 'approved', 'failed'].includes(letter.status)) throw new Error(`Brief im Status ${letter.status} kann nicht verworfen werden`);
+    if (!['generated', 'approved', 'failed'].includes(letter.status))
+      throw new Error(`Brief im Status ${letter.status} kann nicht verworfen werden`);
     leadId = letter.leadId;
     sequence = letter.sequence;
     await tx.delete(letters).where(eq(letters.id, letterId));
     if (letter.sequence === 1 && !letter.isTest) {
       await transitionLead(tx, letter.leadId, 'demo_published', { actor, reason: `Brief verworfen: ${note}`, soft: true });
     }
-    await audit(tx, { entity: 'letter', entityId: letterId, action: regenerate ? 'reject_regenerate' : 'reject', actor, context: { note } });
+    await audit(tx, {
+      entity: 'letter',
+      entityId: letterId,
+      action: regenerate ? 'reject_regenerate' : 'reject',
+      actor,
+      context: { note },
+    });
   });
   if (regenerate && sequence >= 1) {
-    await enqueue(QUEUES.generateLetter, { leadId, sequence: sequence as 1 | 2, triggeredBy: actor, regenerate: true }, { singletonKey: `letter:${leadId}:${sequence}:${Date.now()}` });
+    await enqueue(
+      QUEUES.generateLetter,
+      { leadId, sequence: sequence as 1 | 2, triggeredBy: actor, regenerate: true },
+      { singletonKey: `letter:${leadId}:${sequence}:${Date.now()}` },
+    );
   }
 }
 
 /** Offene Briefe (für Dashboard-Zähler). */
 export async function pendingLetterCount(db: DbOrTx): Promise<number> {
-  const rows = await db.select({ id: letters.id }).from(letters).where(inArray(letters.status, ['generated']));
+  const rows = await db
+    .select({ id: letters.id })
+    .from(letters)
+    .where(inArray(letters.status, ['generated']));
   return rows.length;
 }
 

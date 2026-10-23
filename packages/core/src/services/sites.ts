@@ -57,7 +57,7 @@ export function onboardingDefaults(input: {
       phone,
       email: '',
       street: lead?.street ?? a.street.replace(/\s+\S+$/, ''),
-      houseNumber: lead?.houseNumber ?? (/\s(\S+)$/.exec(a.street)?.[1] ?? ''),
+      houseNumber: lead?.houseNumber ?? /\s(\S+)$/.exec(a.street)?.[1] ?? '',
       postalCode: lead?.postalCode ?? a.postalCode,
       city: lead?.city ?? a.city,
     },
@@ -166,16 +166,25 @@ export async function getOnboardingContext(token: string): Promise<OnboardingCon
   };
 }
 
-export type SaveOnboardingResult = { ok: true; submitted: boolean } | { ok: false; error: string; fieldErrors?: Record<string, string>; alternatives?: string[] };
+export type SaveOnboardingResult =
+  { ok: true; submitted: boolean } | { ok: false; error: string; fieldErrors?: Record<string, string>; alternatives?: string[] };
 
 /** Zwischenspeichern oder Absenden des Onboarding-Formulars. */
-export async function saveOnboarding(token: string, raw: Partial<Record<keyof OnboardingData, unknown>>, opts: { submit: boolean }): Promise<SaveOnboardingResult> {
+export async function saveOnboarding(
+  token: string,
+  raw: Partial<Record<keyof OnboardingData, unknown>>,
+  opts: { submit: boolean },
+): Promise<SaveOnboardingResult> {
   const ctx = await getOnboardingContext(token);
   if (ctx.state === 'not_found') return { ok: false, error: 'Link ungültig.' };
-  if (ctx.state === 'submitted') return { ok: false, error: 'Ihre Angaben wurden bereits abgeschickt. Änderungen bitte über die Vorschau.' };
+  if (ctx.state === 'submitted')
+    return { ok: false, error: 'Ihre Angaben wurden bereits abgeschickt. Änderungen bitte über die Vorschau.' };
   const db = getDb();
   const data = normalizeOnboarding(raw, ctx.data);
-  await db.update(sites).set({ onboardingJson: data as unknown as Record<string, unknown>, updatedAt: new Date() }).where(eq(sites.id, ctx.site.id));
+  await db
+    .update(sites)
+    .set({ onboardingJson: data as unknown as Record<string, unknown>, updatedAt: new Date() })
+    .where(eq(sites.id, ctx.site.id));
   if (!opts.submit) return { ok: true, submitted: false };
 
   const errors = onboardingErrors(data);
@@ -184,10 +193,19 @@ export async function saveOnboarding(token: string, raw: Partial<Record<keyof On
   // Domain: nur prüfen, wenn sie geändert wurde und noch nicht registriert ist
   let domain = ctx.customer.domain ?? '';
   if (data.domain.trim().toLowerCase() !== domain) {
-    if (ctx.customer.domainStatus === 'registered') return { ok: false, error: 'Die Domain ist bereits registriert und kann nicht mehr geändert werden.', fieldErrors: { domain: 'Bereits registriert.' } };
+    if (ctx.customer.domainStatus === 'registered')
+      return {
+        ok: false,
+        error: 'Die Domain ist bereits registriert und kann nicht mehr geändert werden.',
+        fieldErrors: { domain: 'Bereits registriert.' },
+      };
     const lead = ctx.customer.leadId ? await db.query.leads.findFirst({ where: eq(leads.id, ctx.customer.leadId) }) : undefined;
-    const check = await checkDomain(data.domain, lead ? { businessName: lead.businessName, city: lead.city, branch: lead.branch } : undefined);
-    if (!check.available || !check.domain) return { ok: false, error: check.message, fieldErrors: { domain: check.message }, alternatives: check.alternatives };
+    const check = await checkDomain(
+      data.domain,
+      lead ? { businessName: lead.businessName, city: lead.city, branch: lead.branch } : undefined,
+    );
+    if (!check.available || !check.domain)
+      return { ok: false, error: check.message, fieldErrors: { domain: check.message }, alternatives: check.alternatives };
     domain = check.domain;
   }
 
@@ -204,7 +222,9 @@ export async function saveOnboarding(token: string, raw: Partial<Record<keyof On
       .where(eq(sites.id, ctx.site.id));
     await tx.update(customers).set({ domain, updatedAt: new Date() }).where(eq(customers.id, ctx.customer.id));
     if (ctx.customer.leadId) {
-      await tx.insert(events).values({ leadId: ctx.customer.leadId, type: 'onboarding_submitted', metaJson: { siteId: ctx.site.id } });
+      await tx
+        .insert(events)
+        .values({ leadId: ctx.customer.leadId, type: 'onboarding_submitted', metaJson: { siteId: ctx.site.id } });
       await transitionLead(tx, ctx.customer.leadId, 'onboarding', { actor: 'public:onboarding', soft: true });
     }
     await audit(tx, { entity: 'site', entityId: ctx.site.id, action: 'onboarding_submitted', actor: 'public:onboarding' });
@@ -223,7 +243,8 @@ export const MAX_PHOTOS = 6;
 export function imageType(buf: Buffer): 'png' | 'jpg' | 'webp' | null {
   if (buf.length > 8 && buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'png';
   if (buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'jpg';
-  if (buf.length > 12 && buf.subarray(0, 4).toString('ascii') === 'RIFF' && buf.subarray(8, 12).toString('ascii') === 'WEBP') return 'webp';
+  if (buf.length > 12 && buf.subarray(0, 4).toString('ascii') === 'RIFF' && buf.subarray(8, 12).toString('ascii') === 'WEBP')
+    return 'webp';
   return null;
 }
 
@@ -242,7 +263,8 @@ export async function saveUpload(token: string, kind: 'logo' | 'photo', data: Bu
   const keys = { ...(ctx.site.assetKeys ?? {}) };
   const storage = getProviders().storage;
   const id = kind === 'logo' ? 'logo' : randomToken(10);
-  if (kind === 'photo' && siteUploads(ctx.site).photos.length >= MAX_PHOTOS) return { ok: false, error: `Höchstens ${MAX_PHOTOS} Fotos.` };
+  if (kind === 'photo' && siteUploads(ctx.site).photos.length >= MAX_PHOTOS)
+    return { ok: false, error: `Höchstens ${MAX_PHOTOS} Fotos.` };
   if (kind === 'logo' && keys.logo) await storage.delete(keys.logo);
   const key = `uploads/${ctx.customer.id}/${kind === 'logo' ? 'logo' : `foto-${id}`}-${sha256(data.toString('base64')).slice(0, 8)}.${type}`;
   await storage.put(key, data, type === 'jpg' ? 'image/jpeg' : `image/${type}`);
@@ -299,7 +321,11 @@ export async function getPreviewContext(token: string): Promise<PreviewContext> 
   const site = await db.query.sites.findFirst({ where: eq(sites.id, customer.siteId) });
   if (!site) return { state: 'not_found' };
   const cfg = await getConfig();
-  const history = await db.select().from(changeRequests).where(eq(changeRequests.siteId, site.id)).orderBy(asc(changeRequests.createdAt));
+  const history = await db
+    .select()
+    .from(changeRequests)
+    .where(eq(changeRequests.siteId, site.id))
+    .orderBy(asc(changeRequests.createdAt));
   const map: Record<string, PreviewContext extends { state: infer S } ? S : never> = {
     onboarding: 'onboarding',
     generating: 'generating',
@@ -332,10 +358,20 @@ export async function approvePreview(token: string): Promise<{ ok: boolean; erro
     .returning({ id: sites.id });
   if (!res.length) return { ok: false, error: 'Bereits freigegeben.' };
   if (ctx.customer.leadId) {
-    await db.insert(events).values({ leadId: ctx.customer.leadId, type: 'preview_approved', metaJson: { siteId: ctx.site.id, version: ctx.site.version } });
+    await db.insert(events).values({
+      leadId: ctx.customer.leadId,
+      type: 'preview_approved',
+      metaJson: { siteId: ctx.site.id, version: ctx.site.version },
+    });
     await transitionLead(db, ctx.customer.leadId, 'preview_approved', { actor: 'public:preview', soft: true });
   }
-  await audit(db, { entity: 'site', entityId: ctx.site.id, action: 'preview_approved', actor: 'public:preview', context: { version: ctx.site.version } });
+  await audit(db, {
+    entity: 'site',
+    entityId: ctx.site.id,
+    action: 'preview_approved',
+    actor: 'public:preview',
+    context: { version: ctx.site.version },
+  });
   await enqueue(QUEUES.deploySite, { siteId: ctx.site.id }, { singletonKey: `deploy-${ctx.site.id}` });
   return { ok: true };
 }
@@ -354,13 +390,32 @@ export async function requestChanges(token: string, text: string): Promise<Chang
   const withinRounds = ctx.roundsLeft > 0;
   const [cr] = await db
     .insert(changeRequests)
-    .values({ siteId: ctx.site.id, source: 'preview', text: t, status: withinRounds ? 'open' : 'needs_admin', countsAsRound: withinRounds })
+    .values({
+      siteId: ctx.site.id,
+      source: 'preview',
+      text: t,
+      status: withinRounds ? 'open' : 'needs_admin',
+      countsAsRound: withinRounds,
+    })
     .returning();
-  await audit(db, { entity: 'site', entityId: ctx.site.id, action: 'change_requested', actor: 'public:preview', context: { changeRequestId: cr!.id, withinRounds } });
+  await audit(db, {
+    entity: 'site',
+    entityId: ctx.site.id,
+    action: 'change_requested',
+    actor: 'public:preview',
+    context: { changeRequestId: cr!.id, withinRounds },
+  });
   if (withinRounds) {
-    await db.update(customers).set({ changeRoundsUsed: ctx.customer.changeRoundsUsed + 1, updatedAt: new Date() }).where(eq(customers.id, ctx.customer.id));
+    await db
+      .update(customers)
+      .set({ changeRoundsUsed: ctx.customer.changeRoundsUsed + 1, updatedAt: new Date() })
+      .where(eq(customers.id, ctx.customer.id));
     await db.update(sites).set({ status: 'changes_requested', updatedAt: new Date() }).where(eq(sites.id, ctx.site.id));
-    await enqueue(QUEUES.buildSite, { siteId: ctx.site.id, changeRequestId: cr!.id }, { singletonKey: `build-${ctx.site.id}-${cr!.id}` });
+    await enqueue(
+      QUEUES.buildSite,
+      { siteId: ctx.site.id, changeRequestId: cr!.id },
+      { singletonKey: `build-${ctx.site.id}-${cr!.id}` },
+    );
     return { ok: true, mode: 'round' };
   }
   await notifyAdmin({
@@ -384,7 +439,8 @@ export interface SiteFormInput {
   honeypot: string;
 }
 
-export type SiteFormResult = { ok: true; redirect: string } | { ok: false; reason: 'not_found' | 'invalid' | 'rate_limited'; back: string | null };
+export type SiteFormResult =
+  { ok: true; redirect: string } | { ok: false; reason: 'not_found' | 'invalid' | 'rate_limited'; back: string | null };
 
 const MAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
 
@@ -398,7 +454,13 @@ export async function handleSiteForm(formKey: string, input: SiteFormInput, meta
   // Honeypot / Link-Spam: gleiche Antwort wie Erfolg, aber nichts senden
   const links = (input.message.match(/https?:\/\//g) ?? []).length;
   if (input.honeypot.trim() || links > 2) return { ok: true, redirect: thanks };
-  if (!input.consent || input.name.trim().length < 2 || !MAIL_RE.test(input.email.trim()) || input.message.trim().length < 5 || input.message.length > 4000) {
+  if (
+    !input.consent ||
+    input.name.trim().length < 2 ||
+    !MAIL_RE.test(input.email.trim()) ||
+    input.message.trim().length < 5 ||
+    input.message.length > 4000
+  ) {
     return { ok: false, reason: 'invalid', back: base };
   }
   const r1 = await rateLimit(db, `siteform:${site.id}:${meta.ipHash}`, 5, 3600);
@@ -457,7 +519,13 @@ export async function sendOnboardingReminders(now = new Date()): Promise<number>
         'Brauchen Sie Hilfe? Antworten Sie einfach auf diese E-Mail.',
       ],
     });
-    await sendTransactionalEmail({ ...mail, kind: 'onboarding_reminder', idempotencyKey: `onboarding-reminder:${c.id}`, to: c.email, customerId: c.id });
+    await sendTransactionalEmail({
+      ...mail,
+      kind: 'onboarding_reminder',
+      idempotencyKey: `onboarding-reminder:${c.id}`,
+      to: c.email,
+      customerId: c.id,
+    });
     await db.update(customers).set({ onboardingRemindedAt: now }).where(eq(customers.id, c.id));
     sent++;
   }
@@ -474,7 +542,10 @@ export async function approveDomainPurchase(customerId: string, actor: string): 
   const db = getDb();
   const c = await db.query.customers.findFirst({ where: eq(customers.id, customerId) });
   if (!c?.siteId || !c.domain) throw new Error('Kunde ohne Seite oder Domain');
-  await db.update(customers).set({ domainApprovedAt: new Date(), domainApprovedBy: actor, updatedAt: new Date() }).where(eq(customers.id, customerId));
+  await db
+    .update(customers)
+    .set({ domainApprovedAt: new Date(), domainApprovedBy: actor, updatedAt: new Date() })
+    .where(eq(customers.id, customerId));
   await audit(db, { entity: 'customer', entityId: customerId, action: 'domain_approved', actor, context: { domain: c.domain } });
   await enqueue(QUEUES.deploySite, { siteId: c.siteId }, { singletonKey: `deploy-${c.siteId}-approved` });
 }
@@ -496,8 +567,15 @@ export async function redeploySite(siteId: string, actor: string): Promise<void>
 export async function adminChangeRequest(siteId: string, text: string, actor: string, resolvesId?: string): Promise<void> {
   const db = getDb();
   if (text.trim().length < 5) throw new Error('Bitte eine Anweisung eingeben.');
-  if (resolvesId) await db.update(changeRequests).set({ status: 'applied', resultNote: 'Vom Betreiber übernommen', appliedAt: new Date() }).where(eq(changeRequests.id, resolvesId));
-  const [cr] = await db.insert(changeRequests).values({ siteId, source: 'admin', text: text.trim(), status: 'open', countsAsRound: false }).returning();
+  if (resolvesId)
+    await db
+      .update(changeRequests)
+      .set({ status: 'applied', resultNote: 'Vom Betreiber übernommen', appliedAt: new Date() })
+      .where(eq(changeRequests.id, resolvesId));
+  const [cr] = await db
+    .insert(changeRequests)
+    .values({ siteId, source: 'admin', text: text.trim(), status: 'open', countsAsRound: false })
+    .returning();
   await db.update(sites).set({ status: 'changes_requested', updatedAt: new Date() }).where(eq(sites.id, siteId));
   await audit(db, { entity: 'site', entityId: siteId, action: 'admin_change', actor, context: { changeRequestId: cr!.id } });
   await enqueue(QUEUES.buildSite, { siteId, changeRequestId: cr!.id }, { singletonKey: `build-${siteId}-${cr!.id}` });
@@ -505,8 +583,13 @@ export async function adminChangeRequest(siteId: string, text: string, actor: st
 
 export async function resolveChangeRequest(id: string, actor: string, note: string): Promise<void> {
   const db = getDb();
-  const [cr] = await db.update(changeRequests).set({ status: 'rejected', resultNote: note || 'Vom Betreiber erledigt', appliedAt: new Date() }).where(eq(changeRequests.id, id)).returning();
-  if (cr) await audit(db, { entity: 'site', entityId: cr.siteId, action: 'change_resolved', actor, context: { changeRequestId: id } });
+  const [cr] = await db
+    .update(changeRequests)
+    .set({ status: 'rejected', resultNote: note || 'Vom Betreiber erledigt', appliedAt: new Date() })
+    .where(eq(changeRequests.id, id))
+    .returning();
+  if (cr)
+    await audit(db, { entity: 'site', entityId: cr.siteId, action: 'change_resolved', actor, context: { changeRequestId: id } });
 }
 
 /** Seite sperren (z. B. nach Erstattung oder Hosting-Ende); Formular-Endpunkt nimmt nichts mehr an. */
@@ -516,7 +599,41 @@ export async function setSiteSuspended(siteId: string, suspended: boolean, actor
   if (!site) throw new Error('Seite nicht gefunden');
   await db
     .update(sites)
-    .set({ status: suspended ? 'suspended' : site.liveAt ? 'live' : 'preview', statusReason: suspended ? 'gesperrt durch Betreiber' : null, updatedAt: new Date() })
+    .set({
+      status: suspended ? 'suspended' : site.liveAt ? 'live' : 'preview',
+      statusReason: suspended ? 'gesperrt durch Betreiber' : null,
+      updatedAt: new Date(),
+    })
     .where(eq(sites.id, siteId));
   await audit(db, { entity: 'site', entityId: siteId, action: suspended ? 'suspended' : 'unsuspended', actor });
+}
+
+/** Admin: Wunschdomain eines Kunden ändern (nur solange noch nicht registriert; mit Verfügbarkeitsprüfung). */
+export async function changeCustomerDomain(customerId: string, raw: string, actor: string): Promise<string> {
+  const db = getDb();
+  const c = await db.query.customers.findFirst({ where: eq(customers.id, customerId) });
+  if (!c) throw new Error('Kunde nicht gefunden');
+  if (c.domainStatus === 'registered') throw new Error('Die Domain ist bereits registriert.');
+  const check = await checkDomain(raw);
+  if (!check.available || !check.domain) throw new Error(check.message);
+  await db
+    .update(customers)
+    .set({ domain: check.domain, domainStatus: 'available', updatedAt: new Date() })
+    .where(eq(customers.id, customerId));
+  if (c.siteId) {
+    const site = await db.query.sites.findFirst({ where: eq(sites.id, c.siteId) });
+    if (site?.onboardingJson)
+      await db
+        .update(sites)
+        .set({ onboardingJson: { ...site.onboardingJson, domain: check.domain } })
+        .where(eq(sites.id, site.id));
+  }
+  await audit(db, {
+    entity: 'customer',
+    entityId: customerId,
+    action: 'domain_changed',
+    actor,
+    context: { from: c.domain, to: check.domain },
+  });
+  return check.domain;
 }

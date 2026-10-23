@@ -104,7 +104,17 @@ export class StripePayment implements PaymentProvider {
         locale: 'de',
         client_reference_id: input.customerRef,
         customer_email: input.customerEmail,
-        line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: input.amountCents, recurring: { interval: 'month' }, product_data: { name: input.productName } } }],
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: 'eur',
+              unit_amount: input.amountCents,
+              recurring: { interval: 'month' },
+              product_data: { name: input.productName },
+            },
+          },
+        ],
         subscription_data: { trial_end: trialEnd, metadata: input.metadata },
         metadata: input.metadata,
         success_url: input.successUrl,
@@ -188,7 +198,11 @@ export class StripePayment implements PaymentProvider {
 
   async refund(paymentIntentId: string, opts: { idempotencyKey: string; amountCents?: number }): Promise<{ refundId: string }> {
     const r = await this.stripe.refunds.create(
-      { payment_intent: paymentIntentId, ...(opts.amountCents ? { amount: opts.amountCents } : {}), reason: 'requested_by_customer' },
+      {
+        payment_intent: paymentIntentId,
+        ...(opts.amountCents ? { amount: opts.amountCents } : {}),
+        reason: 'requested_by_customer',
+      },
       { idempotencyKey: opts.idempotencyKey },
     );
     return { refundId: r.id };

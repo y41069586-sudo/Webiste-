@@ -74,8 +74,16 @@ export function googlePlaceToRaw(p: GPlace): RawPlace {
 }
 
 function nameSimilarity(a: string, b: string): number {
-  const ta = new Set(normalizeBusinessName(a).split(' ').filter((t) => t.length > 1));
-  const tb = new Set(normalizeBusinessName(b).split(' ').filter((t) => t.length > 1));
+  const ta = new Set(
+    normalizeBusinessName(a)
+      .split(' ')
+      .filter((t) => t.length > 1),
+  );
+  const tb = new Set(
+    normalizeBusinessName(b)
+      .split(' ')
+      .filter((t) => t.length > 1),
+  );
   if (!ta.size || !tb.size) return 0;
   let inter = 0;
   for (const t of ta) if (tb.has(t)) inter++;
@@ -120,9 +128,20 @@ export class GooglePlacesClient {
    * Signal-Modus: Bewertung/Website zu einem bereits bekannten Betrieb (aus OSM) nachschlagen.
    * Ergebnis wird nur flüchtig für die Entscheidung verwendet; gespeichert wird nur place_id.
    */
-  async lookupSignal(name: string, street: string, houseNumber: string, postalCode: string, city: string): Promise<GoogleSignal | null> {
+  async lookupSignal(
+    name: string,
+    street: string,
+    houseNumber: string,
+    postalCode: string,
+    city: string,
+  ): Promise<GoogleSignal | null> {
     const res = await this.searchPage(
-      { textQuery: `${name}, ${street} ${houseNumber}, ${postalCode} ${city}`, languageCode: 'de', regionCode: 'DE', pageSize: 3 },
+      {
+        textQuery: `${name}, ${street} ${houseNumber}, ${postalCode} ${city}`,
+        languageCode: 'de',
+        regionCode: 'DE',
+        pageSize: 3,
+      },
       SIGNAL_FIELD_MASK,
     );
     const best = (res.places ?? [])

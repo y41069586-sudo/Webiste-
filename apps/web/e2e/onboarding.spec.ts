@@ -28,7 +28,12 @@ function png(w = 60, h = 20): Buffer {
   ihdr[8] = 8;
   ihdr[9] = 2;
   const raw = Buffer.concat(Array.from({ length: h }, () => Buffer.concat([Buffer.from([0]), Buffer.alloc(w * 3, 0x30)])));
-  return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', ihdr),
+    chunk('IDAT', deflateSync(raw)),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
 }
 
 async function buyDemo(page: Page): Promise<string> {
@@ -72,7 +77,12 @@ test.describe('Onboarding bis Go-Live', () => {
 
     await page.getByLabel('Rechtsform').selectOption('Einzelunternehmen');
     await page.getByLabel('Telefon', { exact: true }).fill('0231 123456');
-    await page.getByLabel('Ihre Datenschutzerklärung (Text einfügen)').fill('Datenschutzerklärung\n\n' + 'Wir verarbeiten personenbezogene Daten nur im Rahmen der gesetzlichen Bestimmungen. '.repeat(8));
+    await page
+      .getByLabel('Ihre Datenschutzerklärung (Text einfügen)')
+      .fill(
+        'Datenschutzerklärung\n\n' +
+          'Wir verarbeiten personenbezogene Daten nur im Rahmen der gesetzlichen Bestimmungen. '.repeat(8),
+      );
     await page.getByLabel(/Ich bestätige, dass die Angaben/).check();
     await page.getByRole('button', { name: 'Zwischenspeichern' }).click();
     await expect(page.getByText('Zwischengespeichert.')).toBeVisible();

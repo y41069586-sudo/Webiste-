@@ -25,7 +25,17 @@ export async function systemHealth(db: DbOrTx = getDb()): Promise<SystemHealth> 
   try {
     await db.execute(sql`SELECT 1`);
   } catch {
-    return { status: 'down', db: false, storage: false, workerHeartbeatAgeSec: null, failedJobsLastHour: 0, deadLettersLastDay: 0, backlog: 0, backup: null, problems: ['Datenbank nicht erreichbar'] };
+    return {
+      status: 'down',
+      db: false,
+      storage: false,
+      workerHeartbeatAgeSec: null,
+      failedJobsLastHour: 0,
+      deadLettersLastDay: 0,
+      backlog: 0,
+      backup: null,
+      problems: ['Datenbank nicht erreichbar'],
+    };
   }
   let storage = true;
   try {
@@ -47,15 +57,23 @@ export async function systemHealth(db: DbOrTx = getDb()): Promise<SystemHealth> 
     .catch(() => ({ rows: [{ heartbeat: null, failed: 0, dead: 0, backlog: 0 }] }));
   const row = q.rows[0]!;
   const hb = row.heartbeat === null ? null : Number(row.heartbeat);
-  if (hb === null || hb > 15 * 60) problems.push(hb === null ? 'Worker hat noch keinen Pipeline-Takt abgeschlossen' : `Worker-Herzschlag seit ${Math.round(hb / 60)} Minuten aus`);
+  if (hb === null || hb > 15 * 60)
+    problems.push(
+      hb === null
+        ? 'Worker hat noch keinen Pipeline-Takt abgeschlossen'
+        : `Worker-Herzschlag seit ${Math.round(hb / 60)} Minuten aus`,
+    );
   if (row.failed > 10) problems.push(`${row.failed} fehlgeschlagene Jobs in der letzten Stunde`);
   if (row.backlog > 50) problems.push(`${row.backlog} Jobs warten seit über 30 Minuten`);
-  const b = await db.execute<{ value: { status: string; at: string } }>(sql`SELECT value FROM settings WHERE key = 'backup_status'`);
+  const b = await db.execute<{ value: { status: string; at: string } }>(
+    sql`SELECT value FROM settings WHERE key = 'backup_status'`,
+  );
   const backup = b.rows[0]?.value ?? null;
   if (getEnv().NODE_ENV === 'production') {
     if (!backup) problems.push('Noch kein geprüftes Backup');
     else if (backup.status !== 'ok') problems.push('Letzter Backup-Wiederherstellungstest fehlgeschlagen');
-    else if (Date.now() - new Date(backup.at).getTime() > 36 * 3600 * 1000) problems.push('Letztes geprüftes Backup älter als 36 Stunden');
+    else if (Date.now() - new Date(backup.at).getTime() > 36 * 3600 * 1000)
+      problems.push('Letztes geprüftes Backup älter als 36 Stunden');
   }
   return {
     status: problems.length ? 'degraded' : 'ok',

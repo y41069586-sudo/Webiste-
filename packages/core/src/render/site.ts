@@ -55,7 +55,10 @@ async function loadCtx(siteId: string): Promise<Ctx> {
   const lead = customer.leadId ? ((await db.query.leads.findFirst({ where: eq(leads.id, customer.leadId) })) ?? null) : null;
   const cfg = await getConfig({ fresh: true });
   const content = site.contentJson as unknown as SiteContent;
-  const data = normalizeOnboarding((site.onboardingJson ?? {}) as Partial<Record<keyof OnboardingData, unknown>>, onboardingDefaults({ customer, order, lead, content }));
+  const data = normalizeOnboarding(
+    (site.onboardingJson ?? {}) as Partial<Record<keyof OnboardingData, unknown>>,
+    onboardingDefaults({ customer, order, lead, content }),
+  );
   return { site, customer, order, lead, cfg, data };
 }
 
@@ -68,18 +71,35 @@ function currentContent(site: Site): SiteContent {
 // ---------------------------------------------------------------------------
 // Inhalte überarbeiten (Claude) und Vorschau bauen
 // ---------------------------------------------------------------------------
-async function reviseContent(ctx: Ctx, changeRequest?: string): Promise<{ content: SiteContent; notPossible: string[]; summary: string; source: 'llm' | 'fallback' }> {
+async function reviseContent(
+  ctx: Ctx,
+  changeRequest?: string,
+): Promise<{ content: SiteContent; notPossible: string[]; summary: string; source: 'llm' | 'fallback' }> {
   const branch = ctx.cfg.targeting.branches.find((b) => b.key === ctx.lead?.branch);
   const input: RevisionInput = {
     businessName: ctx.data.business.name,
     branchLabel: branch?.label ?? ctx.lead?.branch ?? '',
     city: ctx.data.business.city,
     current: currentContent(ctx.site),
-    customer: changeRequest ? {} : { headline: ctx.data.texts.headline, subline: ctx.data.texts.subline, about: ctx.data.texts.about, services: ctx.data.texts.services, wishes: ctx.data.texts.wishes },
+    customer: changeRequest
+      ? {}
+      : {
+          headline: ctx.data.texts.headline,
+          subline: ctx.data.texts.subline,
+          about: ctx.data.texts.about,
+          services: ctx.data.texts.services,
+          wishes: ctx.data.texts.wishes,
+        },
     ...(changeRequest ? { changeRequest } : {}),
   };
   // Alles, was der Inhaber selbst geschrieben hat, darf in den Texten vorkommen
-  const customerText = [JSON.stringify(ctx.data.texts), ctx.data.impressum.professionalTitle, ctx.data.impressum.chamber, changeRequest ?? '', JSON.stringify(input.current)].join('\n');
+  const customerText = [
+    JSON.stringify(ctx.data.texts),
+    ctx.data.impressum.professionalTitle,
+    ctx.data.impressum.chamber,
+    changeRequest ?? '',
+    JSON.stringify(input.current),
+  ].join('\n');
   const known = [input.businessName, input.branchLabel, input.city, ctx.data.business.street];
   let feedback: string[] | undefined;
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -108,7 +128,12 @@ async function reviseContent(ctx: Ctx, changeRequest?: string): Promise<{ conten
   }
   if (changeRequest) throw new RevisionFailedError('Änderungswunsch konnte nicht automatisch umgesetzt werden');
   // Erstfassung: Angaben des Inhabers direkt übernehmen (seine eigenen Worte)
-  return { content: mergeCustomerTexts(input.current, input.customer), notPossible: [], summary: 'Ihre Angaben wurden übernommen.', source: 'fallback' };
+  return {
+    content: mergeCustomerTexts(input.current, input.customer),
+    notPossible: [],
+    summary: 'Ihre Angaben wurden übernommen.',
+    source: 'fallback',
+  };
 }
 
 export class RevisionFailedError extends Error {
@@ -159,7 +184,8 @@ function factsFor(ctx: Ctx, assets: PreparedAssets, mode: 'preview' | 'live'): B
   const b = ctx.data.business;
   const branch = ctx.cfg.targeting.branches.find((x) => x.key === ctx.lead?.branch);
   const phone = formatPhoneDe(b.phone) ?? (b.phone || null);
-  const src = (a: { path: string; data: Buffer; mime: string }) => (mode === 'live' ? a.path : `data:${a.mime};base64,${a.data.toString('base64')}`);
+  const src = (a: { path: string; data: Buffer; mime: string }) =>
+    mode === 'live' ? a.path : `data:${a.mime};base64,${a.data.toString('base64')}`;
   return {
     name: b.name,
     branchLabel: branch?.label ?? ctx.lead?.branch ?? '',
@@ -215,23 +241,50 @@ export function buildLiveFiles(ctx: Ctx, content: SiteContent, assets: PreparedA
   const base = domain ? `https://${domain}/` : '';
   const files: SiteFile[] = [
     { path: 'index.html', content: html(renderSite(input)), contentType: 'text/html; charset=utf-8' },
-    { path: 'impressum.html', content: html(renderSubpage(input, { title: 'Impressum', bodyHtml: impressumHtml(toImpressumData(ctx.data.impressum)) })), contentType: 'text/html; charset=utf-8' },
-    { path: 'datenschutz.html', content: html(renderSubpage(input, { title: 'Datenschutzerklärung', bodyHtml: privacyHtml(ctx.data.privacyText) })), contentType: 'text/html; charset=utf-8' },
+    {
+      path: 'impressum.html',
+      content: html(renderSubpage(input, { title: 'Impressum', bodyHtml: impressumHtml(toImpressumData(ctx.data.impressum)) })),
+      contentType: 'text/html; charset=utf-8',
+    },
+    {
+      path: 'datenschutz.html',
+      content: html(renderSubpage(input, { title: 'Datenschutzerklärung', bodyHtml: privacyHtml(ctx.data.privacyText) })),
+      contentType: 'text/html; charset=utf-8',
+    },
     {
       path: 'danke.html',
-      content: html(renderSubpage(input, { title: 'Vielen Dank für Ihre Nachricht', bodyHtml: `<p>Wir haben Ihre Nachricht erhalten und melden uns so bald wie möglich bei Ihnen.</p><p><a href="./">Zurück zur Startseite</a></p>` })),
+      content: html(
+        renderSubpage(input, {
+          title: 'Vielen Dank für Ihre Nachricht',
+          bodyHtml: `<p>Wir haben Ihre Nachricht erhalten und melden uns so bald wie möglich bei Ihnen.</p><p><a href="./">Zurück zur Startseite</a></p>`,
+        }),
+      ),
       contentType: 'text/html; charset=utf-8',
     },
     {
       path: '404.html',
-      content: html(renderSubpage(input, { title: 'Seite nicht gefunden', bodyHtml: `<p>Diese Seite gibt es nicht (mehr).</p><p><a href="/">Zur Startseite von ${esc(facts.name)}</a></p>`, homeHref: '/' })),
+      content: html(
+        renderSubpage(input, {
+          title: 'Seite nicht gefunden',
+          bodyHtml: `<p>Diese Seite gibt es nicht (mehr).</p><p><a href="/">Zur Startseite von ${esc(facts.name)}</a></p>`,
+          homeHref: '/',
+        }),
+      ),
       contentType: 'text/html; charset=utf-8',
     },
-    { path: 'robots.txt', content: `User-agent: *\nAllow: /\n${base ? `Sitemap: ${base}sitemap.xml\n` : ''}`, contentType: 'text/plain; charset=utf-8' },
+    {
+      path: 'robots.txt',
+      content: `User-agent: *\nAllow: /\n${base ? `Sitemap: ${base}sitemap.xml\n` : ''}`,
+      contentType: 'text/plain; charset=utf-8',
+    },
   ];
   if (base) {
     const urls = ['', 'impressum.html', 'datenschutz.html'].map((p) => `<url><loc>${esc(base + p)}</loc></url>`).join('');
-    files.push({ path: 'sitemap.xml', content: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>\n`, contentType: 'application/xml' });
+    files.push({
+      path: 'sitemap.xml',
+      content: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>\n`,
+      contentType: 'application/xml',
+    });
   }
   if (assets.logo) files.push({ path: assets.logo.path, content: assets.logo.data, contentType: assets.logo.mime });
   for (const p of assets.photos) files.push({ path: p.path, content: p.data, contentType: p.mime });
@@ -242,7 +295,13 @@ export function buildLiveFiles(ctx: Ctx, content: SiteContent, assets: PreparedA
  * Qualitätsprüfung der Kundenseite (HTML-Validierung, Barrierefreiheit, Layout, optional Lighthouse).
  * Blockiert nicht – Auffälligkeiten erscheinen als Meldung im Dashboard.
  */
-async function siteQa(ctx: Ctx, content: SiteContent, assets: PreparedAssets, previewHtml: string, version: number): Promise<{ passed: boolean; checks: { name: string; passed: boolean; details?: string }[] }> {
+async function siteQa(
+  ctx: Ctx,
+  content: SiteContent,
+  assets: PreparedAssets,
+  previewHtml: string,
+  version: number,
+): Promise<{ passed: boolean; checks: { name: string; passed: boolean; details?: string }[] }> {
   try {
     const files = buildLiveFiles(ctx, content, assets, version);
     const liveIndex = String(files[0]!.content);
@@ -253,11 +312,21 @@ async function siteQa(ctx: Ctx, content: SiteContent, assets: PreparedAssets, pr
       await raiseAlert(getDb(), {
         level: 'warn',
         code: `site_qa_${ctx.site.id}`,
-        message: `QA-Hinweise für ${ctx.data.business.name}: ${checks.filter((c) => !c.passed).map((c) => c.name).join(', ')}`,
+        message: `QA-Hinweise für ${ctx.data.business.name}: ${checks
+          .filter((c) => !c.passed)
+          .map((c) => c.name)
+          .join(', ')}`,
         context: { siteId: ctx.site.id },
       });
     }
-    return { passed, checks: checks.map((c) => ({ name: c.name, passed: c.passed, ...(c.details ? { details: String(c.details).slice(0, 500) } : {}) })) };
+    return {
+      passed,
+      checks: checks.map((c) => ({
+        name: c.name,
+        passed: c.passed,
+        ...(c.details ? { details: String(c.details).slice(0, 500) } : {}),
+      })),
+    };
   } catch (err) {
     logger.warn({ siteId: ctx.site.id, ...errInfo(err) }, 'site: QA fehlgeschlagen');
     return { passed: false, checks: [{ name: 'qa', passed: false, details: errInfo(err).message }] };
@@ -272,11 +341,16 @@ export function previewKey(siteId: string, version: number): string {
  * Vorschau bauen: Angaben übernehmen (bzw. Änderungswunsch umsetzen), Bilder optimieren,
  * Vorschau-HTML speichern, Kunden benachrichtigen.
  */
-export async function buildSite(siteId: string, changeRequestId?: string): Promise<{ version: number; source: string } | { skipped: string }> {
+export async function buildSite(
+  siteId: string,
+  changeRequestId?: string,
+): Promise<{ version: number; source: string } | { skipped: string }> {
   const db = getDb();
   const ctx = await loadCtx(siteId);
   if (!['generating', 'changes_requested'].includes(ctx.site.status)) return { skipped: `Status ${ctx.site.status}` };
-  const cr = changeRequestId ? await db.query.changeRequests.findFirst({ where: eq(changeRequests.id, changeRequestId) }) : undefined;
+  const cr = changeRequestId
+    ? await db.query.changeRequests.findFirst({ where: eq(changeRequests.id, changeRequestId) })
+    : undefined;
   if (changeRequestId && (!cr || cr.status !== 'open')) return { skipped: 'Änderungswunsch nicht offen' };
 
   let revised: Awaited<ReturnType<typeof reviseContent>>;
@@ -286,7 +360,12 @@ export async function buildSite(siteId: string, changeRequestId?: string): Promi
     if (err instanceof RevisionFailedError && cr) {
       await db.update(changeRequests).set({ status: 'needs_admin', resultNote: err.message }).where(eq(changeRequests.id, cr.id));
       await db.update(sites).set({ status: 'preview', updatedAt: new Date() }).where(eq(sites.id, siteId));
-      await notifyAdmin({ key: `change-failed:${cr.id}`, title: 'Änderungswunsch braucht dich', lines: [`Kunde: ${ctx.customer.company}`, `Wunsch: ${cr.text.slice(0, 500)}`], link: appUrl(`/admin/customers/${ctx.customer.id}`) });
+      await notifyAdmin({
+        key: `change-failed:${cr.id}`,
+        title: 'Änderungswunsch braucht dich',
+        lines: [`Kunde: ${ctx.customer.company}`, `Wunsch: ${cr.text.slice(0, 500)}`],
+        link: appUrl(`/admin/customers/${ctx.customer.id}`),
+      });
       return { skipped: 'an Admin übergeben' };
     }
     throw err;
@@ -302,7 +381,10 @@ export async function buildSite(siteId: string, changeRequestId?: string): Promi
   await db
     .update(sites)
     .set({
-      contentJson: { ...revised.content, _meta: { source: revised.source, summary: revised.summary, version, qa } } as unknown as Record<string, unknown>,
+      contentJson: {
+        ...revised.content,
+        _meta: { source: revised.source, summary: revised.summary, version, qa },
+      } as unknown as Record<string, unknown>,
       impressumJson: impressum,
       privacyText: ctx.data.privacyText,
       previewHtmlKey: previewKey(siteId, version),
@@ -316,18 +398,58 @@ export async function buildSite(siteId: string, changeRequestId?: string): Promi
     const needsAdmin = revised.notPossible.length > 0;
     await db
       .update(changeRequests)
-      .set({ status: 'applied', appliedAt: new Date(), resultNote: [revised.summary, ...(needsAdmin ? [`Nicht automatisch umsetzbar: ${revised.notPossible.join('; ')}`] : [])].join(' ') })
+      .set({
+        status: 'applied',
+        appliedAt: new Date(),
+        resultNote: [
+          revised.summary,
+          ...(needsAdmin ? [`Nicht automatisch umsetzbar: ${revised.notPossible.join('; ')}`] : []),
+        ].join(' '),
+      })
       .where(eq(changeRequests.id, cr.id));
     if (needsAdmin) {
-      await notifyAdmin({ key: `change-partial:${cr.id}`, title: 'Teil eines Änderungswunsches nicht automatisch umsetzbar', lines: [`Kunde: ${ctx.customer.company}`, ...revised.notPossible], link: appUrl(`/admin/customers/${ctx.customer.id}`) });
+      await notifyAdmin({
+        key: `change-partial:${cr.id}`,
+        title: 'Teil eines Änderungswunsches nicht automatisch umsetzbar',
+        lines: [`Kunde: ${ctx.customer.company}`, ...revised.notPossible],
+        link: appUrl(`/admin/customers/${ctx.customer.id}`),
+      });
     }
   }
-  await audit(db, { entity: 'site', entityId: siteId, action: 'preview_built', actor: 'job:build-site', context: { version, source: revised.source, changeRequestId: cr?.id } });
+  await audit(db, {
+    entity: 'site',
+    entityId: siteId,
+    action: 'preview_built',
+    actor: 'job:build-site',
+    context: { version, source: revised.source, changeRequestId: cr?.id },
+  });
 
   const roundsLeft = Math.max(0, ctx.cfg.onboarding.includedChangeRounds - ctx.customer.changeRoundsUsed);
-  const summary = cr ? [revised.summary, revised.notPossible.length ? `Folgendes geht nicht über eine Textänderung, wir melden uns dazu: ${revised.notPossible.join('; ')}` : ''].filter(Boolean).join(' ') : null;
-  const mail = previewReadyEmail(ctx.cfg, { name: ctx.customer.contactName, previewUrl: appUrl(`/preview/${ctx.customer.accessToken}`), summary, roundsLeft, firstVersion: !cr });
-  await sendTransactionalEmail({ ...mail, kind: 'preview_ready', idempotencyKey: `preview:${siteId}:${version}`, to: ctx.customer.email, customerId: ctx.customer.id, leadId: ctx.customer.leadId });
+  const summary = cr
+    ? [
+        revised.summary,
+        revised.notPossible.length
+          ? `Folgendes geht nicht über eine Textänderung, wir melden uns dazu: ${revised.notPossible.join('; ')}`
+          : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
+    : null;
+  const mail = previewReadyEmail(ctx.cfg, {
+    name: ctx.customer.contactName,
+    previewUrl: appUrl(`/preview/${ctx.customer.accessToken}`),
+    summary,
+    roundsLeft,
+    firstVersion: !cr,
+  });
+  await sendTransactionalEmail({
+    ...mail,
+    kind: 'preview_ready',
+    idempotencyKey: `preview:${siteId}:${version}`,
+    to: ctx.customer.email,
+    customerId: ctx.customer.id,
+    leadId: ctx.customer.leadId,
+  });
   return { version, source: revised.source };
 }
 
@@ -349,11 +471,27 @@ export async function deploySite(siteId: string, actor = 'job:deploy-site'): Pro
   let registerNow = false;
   if (domain && ctx.customer.domainStatus !== 'registered') {
     if (!simulated && sw.dryRun) {
-      await db.update(sites).set({ statusReason: 'DRY_RUN: Domain wird nicht registriert', updatedAt: new Date() }).where(eq(sites.id, siteId));
+      await db
+        .update(sites)
+        .set({ statusReason: 'DRY_RUN: Domain wird nicht registriert', updatedAt: new Date() })
+        .where(eq(sites.id, siteId));
     } else if (!simulated && !sw.autoRegisterDomains && !ctx.customer.domainApprovedAt) {
-      await db.update(sites).set({ status: 'deploying', statusReason: 'Domainkauf wartet auf Freigabe', updatedAt: new Date() }).where(eq(sites.id, siteId));
-      await raiseAlert(db, { level: 'warn', code: `domain_approval_${ctx.customer.id}`, message: `Domain ${domain} wartet auf Freigabe (${ctx.customer.company})`, context: { customerId: ctx.customer.id } });
-      await notifyAdmin({ key: `domain-approval:${ctx.customer.id}`, title: `Domainkauf freigeben: ${domain}`, lines: [`Kunde: ${ctx.customer.company}`, 'Die Vorschau ist freigegeben. Bitte den Domainkauf im Dashboard bestätigen.'], link: appUrl(`/admin/customers/${ctx.customer.id}`) });
+      await db
+        .update(sites)
+        .set({ status: 'deploying', statusReason: 'Domainkauf wartet auf Freigabe', updatedAt: new Date() })
+        .where(eq(sites.id, siteId));
+      await raiseAlert(db, {
+        level: 'warn',
+        code: `domain_approval_${ctx.customer.id}`,
+        message: `Domain ${domain} wartet auf Freigabe (${ctx.customer.company})`,
+        context: { customerId: ctx.customer.id },
+      });
+      await notifyAdmin({
+        key: `domain-approval:${ctx.customer.id}`,
+        title: `Domainkauf freigeben: ${domain}`,
+        lines: [`Kunde: ${ctx.customer.company}`, 'Die Vorschau ist freigegeben. Bitte den Domainkauf im Dashboard bestätigen.'],
+        link: appUrl(`/admin/customers/${ctx.customer.id}`),
+      });
       return 'awaiting_domain_approval';
     } else {
       registerNow = true;
@@ -364,9 +502,10 @@ export async function deploySite(siteId: string, actor = 'job:deploy-site'): Pro
   await db.update(sites).set({ status: 'deploying', statusReason: null, updatedAt: new Date() }).where(eq(sites.id, siteId));
 
   // 2) Dateien hochladen
-  const project = ctx.site.hostingProjectId && ctx.site.hostingProvider === hosting.name
-    ? { projectId: ctx.site.hostingProjectId }
-    : await hosting.ensureProject(`wbm-${ctx.site.formKey.slice(0, 12).toLowerCase()}`);
+  const project =
+    ctx.site.hostingProjectId && ctx.site.hostingProvider === hosting.name
+      ? { projectId: ctx.site.hostingProjectId }
+      : await hosting.ensureProject(`wbm-${ctx.site.formKey.slice(0, 12).toLowerCase()}`);
   const assets = await prepareAssets(ctx);
   const content = currentContent(ctx.site);
   const files = buildLiveFiles(ctx, content, assets, ctx.site.version);
@@ -375,7 +514,14 @@ export async function deploySite(siteId: string, actor = 'job:deploy-site'): Pro
   await getProviders().storage.put(liveKey, files[0]!.content, 'text/html; charset=utf-8');
   await db
     .update(sites)
-    .set({ hostingProvider: hosting.name, hostingProjectId: project.projectId, hostingUrl: dep.url || null, liveHtmlKey: liveKey, lastDeployedAt: new Date(), updatedAt: new Date() })
+    .set({
+      hostingProvider: hosting.name,
+      hostingProjectId: project.projectId,
+      hostingUrl: dep.url || null,
+      liveHtmlKey: liveKey,
+      lastDeployedAt: new Date(),
+      updatedAt: new Date(),
+    })
     .where(eq(sites.id, siteId));
 
   // 3) Domain an das Hosting binden und registrieren (auf den Kunden)
@@ -384,19 +530,47 @@ export async function deploySite(siteId: string, actor = 'job:deploy-site'): Pro
     if (!avail[0]?.available) {
       const own = await registrar.getDomainStatus(domain).catch(() => ({ status: 'unknown' }));
       if (own.status === 'unknown') {
-        await db.update(customers).set({ domainStatus: 'failed', updatedAt: new Date() }).where(eq(customers.id, ctx.customer.id));
-        await db.update(sites).set({ statusReason: `Domain ${domain} nicht mehr verfügbar`, updatedAt: new Date() }).where(eq(sites.id, siteId));
-        await raiseAlert(db, { level: 'error', code: `domain_taken_${ctx.customer.id}`, message: `Domain ${domain} ist nicht mehr frei – bitte mit dem Kunden eine Alternative abstimmen`, context: { customerId: ctx.customer.id } });
-        await notifyAdmin({ key: `domain-taken:${ctx.customer.id}`, title: `Domain ${domain} nicht mehr frei`, lines: [`Kunde: ${ctx.customer.company}`], link: appUrl(`/admin/customers/${ctx.customer.id}`) });
+        await db
+          .update(customers)
+          .set({ domainStatus: 'failed', updatedAt: new Date() })
+          .where(eq(customers.id, ctx.customer.id));
+        await db
+          .update(sites)
+          .set({ statusReason: `Domain ${domain} nicht mehr verfügbar`, updatedAt: new Date() })
+          .where(eq(sites.id, siteId));
+        await raiseAlert(db, {
+          level: 'error',
+          code: `domain_taken_${ctx.customer.id}`,
+          message: `Domain ${domain} ist nicht mehr frei – bitte mit dem Kunden eine Alternative abstimmen`,
+          context: { customerId: ctx.customer.id },
+        });
+        await notifyAdmin({
+          key: `domain-taken:${ctx.customer.id}`,
+          title: `Domain ${domain} nicht mehr frei`,
+          lines: [`Kunde: ${ctx.customer.company}`],
+          link: appUrl(`/admin/customers/${ctx.customer.id}`),
+        });
         return 'domain_unavailable';
       }
     }
     const plan = await hosting.attachDomain(project.projectId, domain);
     const imp = ctx.data.impressum;
-    await db.update(customers).set({ domainStatus: 'registering', updatedAt: new Date() }).where(eq(customers.id, ctx.customer.id));
+    await db
+      .update(customers)
+      .set({ domainStatus: 'registering', updatedAt: new Date() })
+      .where(eq(customers.id, ctx.customer.id));
     const reg = await registrar.registerDomain({
       domain,
-      owner: { company: imp.company, name: imp.owner, street: imp.street, postalCode: imp.postalCode, city: imp.city, country: 'DE', email: imp.email, phone: imp.phone },
+      owner: {
+        company: imp.company,
+        name: imp.owner,
+        street: imp.street,
+        postalCode: imp.postalCode,
+        city: imp.city,
+        country: 'DE',
+        email: imp.email,
+        phone: imp.phone,
+      },
       nameservers: plan.nameservers,
       idempotencyKey: `domain-${ctx.customer.id}`,
     });
@@ -420,9 +594,21 @@ export async function deploySite(siteId: string, actor = 'job:deploy-site'): Pro
         updatedAt: new Date(),
       })
       .where(eq(customers.id, ctx.customer.id));
-    await audit(db, { entity: 'customer', entityId: ctx.customer.id, action: 'domain_registered', actor, context: { domain, registrar: registrar.name, status: reg.status } });
+    await audit(db, {
+      entity: 'customer',
+      entityId: ctx.customer.id,
+      action: 'domain_registered',
+      actor,
+      context: { domain, registrar: registrar.name, status: reg.status },
+    });
   }
-  await audit(db, { entity: 'site', entityId: siteId, action: 'deployed', actor, context: { provider: hosting.name, deploymentId: dep.deploymentId, version: ctx.site.version } });
+  await audit(db, {
+    entity: 'site',
+    entityId: siteId,
+    action: 'deployed',
+    actor,
+    context: { provider: hosting.name, deploymentId: dep.deploymentId, version: ctx.site.version },
+  });
   await enqueue(QUEUES.liveCheck, { siteId, attempt: 0 }, { singletonKey: `live-${siteId}-${ctx.site.version}` });
   return 'deployed';
 }
@@ -442,11 +628,16 @@ export interface LiveCheckResult {
 async function probe(url: string, expectedMarker: string): Promise<LiveCheckResult> {
   const checks: Record<string, boolean | string> = {};
   try {
-    const res = await fetch(url, { redirect: 'follow', signal: AbortSignal.timeout(20_000), headers: { 'user-agent': 'WebsiteBriefMaschine-LiveCheck/1.0' } });
+    const res = await fetch(url, {
+      redirect: 'follow',
+      signal: AbortSignal.timeout(20_000),
+      headers: { 'user-agent': 'WebsiteBriefMaschine-LiveCheck/1.0' },
+    });
     const html = await res.text();
     checks.status = res.status === 200;
     checks.marker = html.includes(`content="${expectedMarker}"`);
-    checks.indexable = !/<meta name="robots" content="noindex/i.test(html) && !/noindex/i.test(res.headers.get('x-robots-tag') ?? '');
+    checks.indexable =
+      !/<meta name="robots" content="noindex/i.test(html) && !/noindex/i.test(res.headers.get('x-robots-tag') ?? '');
     checks.noBanner = !html.includes('Hinweis zum Entwurf') && !html.includes('aria-label="Vorschau"');
     const imp = await fetch(new URL('impressum.html', url), { signal: AbortSignal.timeout(20_000) });
     checks.impressum = imp.status === 200;
@@ -469,24 +660,42 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
   const useDomain = Boolean(domain && ctx.customer.domainStatus === 'registered' && hosting.name !== 'mock');
   let url: string;
   if (useDomain) {
-    const st = await hosting.getDomainStatus(ctx.site.hostingProjectId!, domain!).catch((err) => ({ active: false, details: errInfo(err).message }));
+    const st = await hosting
+      .getDomainStatus(ctx.site.hostingProjectId!, domain!)
+      .catch((err) => ({ active: false, details: errInfo(err).message }));
     url = `https://${domain}/`;
-    if (!st.active) return scheduleNext(ctx, attempt, { ok: false, url, checks: { hosting: (st as { details?: string }).details ?? 'nicht aktiv' } });
+    if (!st.active)
+      return scheduleNext(ctx, attempt, {
+        ok: false,
+        url,
+        checks: { hosting: (st as { details?: string }).details ?? 'nicht aktiv' },
+      });
   } else {
     url = ctx.site.hostingUrl ?? '';
     if (!url) return scheduleNext(ctx, attempt, { ok: false, url: '', checks: { error: 'keine Standard-URL beim Hosting' } });
   }
   const result = await probe(url, marker(ctx.site, ctx.site.version));
-  await db.update(sites).set({ liveCheckJson: { ...result, attempt, at: new Date().toISOString() }, updatedAt: new Date() }).where(eq(sites.id, siteId));
+  await db
+    .update(sites)
+    .set({ liveCheckJson: { ...result, attempt, at: new Date().toISOString() }, updatedAt: new Date() })
+    .where(eq(sites.id, siteId));
   if (!result.ok) return scheduleNext(ctx, attempt, result);
 
   if (ctx.site.status === 'live') return result; // Re-Deploy einer bereits live geschalteten Seite
   const now = new Date();
   const hostingUntil = ctx.customer.hostingUntil ?? addMonths(now, ctx.cfg.pricing.hostingMonthsIncluded);
   let domainExpires: Date | undefined;
-  if (useDomain) domainExpires = (await getProviders().registrar.getDomainStatus(domain!).catch(() => ({ expiresAt: undefined }))).expiresAt;
+  if (useDomain)
+    domainExpires = (
+      await getProviders()
+        .registrar.getDomainStatus(domain!)
+        .catch(() => ({ expiresAt: undefined }))
+    ).expiresAt;
   await db.transaction(async (tx) => {
-    await tx.update(sites).set({ status: 'live', liveAt: now, productionUrl: url, statusReason: null, updatedAt: now }).where(eq(sites.id, siteId));
+    await tx
+      .update(sites)
+      .set({ status: 'live', liveAt: now, productionUrl: url, statusReason: null, updatedAt: now })
+      .where(eq(sites.id, siteId));
     await tx
       .update(customers)
       .set({ hostingUntil, ...(domainExpires ? { domainExpiresAt: domainExpires } : {}), updatedAt: now })
@@ -495,22 +704,61 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
       await tx.insert(events).values({ leadId: ctx.customer.leadId, type: 'live', metaJson: { siteId, url } });
       await transitionLead(tx, ctx.customer.leadId, 'live', { actor: 'job:live-check', soft: true });
     }
-    await audit(tx, { entity: 'site', entityId: siteId, action: 'live', actor: 'job:live-check', context: { url, simulated: !useDomain } });
+    await audit(tx, {
+      entity: 'site',
+      entityId: siteId,
+      action: 'live',
+      actor: 'job:live-check',
+      context: { url, simulated: !useDomain },
+    });
   });
-  const mail = liveHandoverEmail(ctx.cfg, { name: ctx.customer.contactName, url, domain: useDomain ? domain : null, hostingUntil: formatDateLongDe(hostingUntil), formTarget: ctx.site.formTargetEmail ?? ctx.customer.email });
-  await sendTransactionalEmail({ ...mail, kind: 'live_handover', idempotencyKey: `live:${siteId}`, to: ctx.customer.email, customerId: ctx.customer.id, leadId: ctx.customer.leadId });
-  await notifyAdmin({ key: `live:${siteId}`, title: `Website live: ${ctx.customer.company}`, lines: [url], link: appUrl(`/admin/customers/${ctx.customer.id}`) });
+  const mail = liveHandoverEmail(ctx.cfg, {
+    name: ctx.customer.contactName,
+    url,
+    domain: useDomain ? domain : null,
+    hostingUntil: formatDateLongDe(hostingUntil),
+    formTarget: ctx.site.formTargetEmail ?? ctx.customer.email,
+  });
+  await sendTransactionalEmail({
+    ...mail,
+    kind: 'live_handover',
+    idempotencyKey: `live:${siteId}`,
+    to: ctx.customer.email,
+    customerId: ctx.customer.id,
+    leadId: ctx.customer.leadId,
+  });
+  await notifyAdmin({
+    key: `live:${siteId}`,
+    title: `Website live: ${ctx.customer.company}`,
+    lines: [url],
+    link: appUrl(`/admin/customers/${ctx.customer.id}`),
+  });
   return result;
 }
 
 async function scheduleNext(ctx: Ctx, attempt: number, result: LiveCheckResult): Promise<LiveCheckResult> {
   const db = getDb();
-  await db.update(sites).set({ liveCheckJson: { ...result, attempt, at: new Date().toISOString() } }).where(eq(sites.id, ctx.site.id));
+  await db
+    .update(sites)
+    .set({ liveCheckJson: { ...result, attempt, at: new Date().toISOString() } })
+    .where(eq(sites.id, ctx.site.id));
   if (attempt + 1 >= LIVE_CHECK_MAX_ATTEMPTS) {
-    await db.update(sites).set({ status: 'failed', statusReason: 'Live-Check nach 48 h nicht erfolgreich', updatedAt: new Date() }).where(eq(sites.id, ctx.site.id));
-    await raiseAlert(db, { level: 'error', code: `live_check_${ctx.site.id}`, message: `Live-Check für ${ctx.customer.domain ?? ctx.site.id} gescheitert`, context: { siteId: ctx.site.id, checks: result.checks } });
+    await db
+      .update(sites)
+      .set({ status: 'failed', statusReason: 'Live-Check nach 48 h nicht erfolgreich', updatedAt: new Date() })
+      .where(eq(sites.id, ctx.site.id));
+    await raiseAlert(db, {
+      level: 'error',
+      code: `live_check_${ctx.site.id}`,
+      message: `Live-Check für ${ctx.customer.domain ?? ctx.site.id} gescheitert`,
+      context: { siteId: ctx.site.id, checks: result.checks },
+    });
     return result;
   }
-  await enqueue(QUEUES.liveCheck, { siteId: ctx.site.id, attempt: attempt + 1 }, { startAfter: liveCheckDelayMinutes(attempt) * 60, singletonKey: `live-${ctx.site.id}-${ctx.site.version}-${attempt + 1}` });
+  await enqueue(
+    QUEUES.liveCheck,
+    { siteId: ctx.site.id, attempt: attempt + 1 },
+    { startAfter: liveCheckDelayMinutes(attempt) * 60, singletonKey: `live-${ctx.site.id}-${ctx.site.version}-${attempt + 1}` },
+  );
   return result;
 }

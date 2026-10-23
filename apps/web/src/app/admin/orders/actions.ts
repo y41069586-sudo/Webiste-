@@ -21,8 +21,11 @@ export async function resendInvoiceAction(form: FormData): Promise<void> {
 export async function refundOrderAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
   const id = String(form.get('id'));
-  if (String(form.get('confirm')).trim().toUpperCase() !== 'ERSTATTEN') throw new Error('Bitte zur Bestätigung ERSTATTEN eintippen.');
-  const euros = String(form.get('amount') ?? '').replace(',', '.').trim();
+  if (String(form.get('confirm')).trim().toUpperCase() !== 'ERSTATTEN')
+    throw new Error('Bitte zur Bestätigung ERSTATTEN eintippen.');
+  const euros = String(form.get('amount') ?? '')
+    .replace(',', '.')
+    .trim();
   const cents = euros ? Math.round(Number(euros) * 100) : undefined;
   if (cents !== undefined && (!Number.isFinite(cents) || cents <= 0)) throw new Error('Ungültiger Betrag');
   await refundOrder(id, actorOf(s), cents);

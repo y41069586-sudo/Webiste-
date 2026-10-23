@@ -92,7 +92,9 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
     const ctrl = new AbortController();
     timer.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/domain-check?d=${encodeURIComponent(d)}&s=${encodeURIComponent(slug)}`, { signal: ctrl.signal });
+        const res = await fetch(`/api/domain-check?d=${encodeURIComponent(d)}&s=${encodeURIComponent(slug)}`, {
+          signal: ctrl.signal,
+        });
         if (!res.ok) throw new Error(String(res.status));
         const j = (await res.json()) as { available: boolean; domain: string | null; message: string; alternatives: string[] };
         setStatus({ state: 'result', ...j });
@@ -109,18 +111,49 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
   return (
     <form action={action} className="space-y-6" noValidate>
       {state.error ? (
-        <div ref={errorRef} tabIndex={-1} role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+        <div
+          ref={errorRef}
+          tabIndex={-1}
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"
+        >
           {state.error}
         </div>
       ) : null}
 
       <fieldset className="space-y-4">
         <legend className="mb-2 text-base font-semibold text-slate-900">Rechnungsadresse</legend>
-        <Field id="company" label="Firma" defaultValue={v.company ?? prefill.company} autoComplete="organization" error={fe.company} />
-        <Field id="contactName" label="Ihr Name (Vor- und Nachname)" defaultValue={v.contactName} autoComplete="name" error={fe.contactName} />
-        <Field id="street" label="Straße und Hausnummer" defaultValue={v.street ?? prefill.street} autoComplete="street-address" error={fe.street} />
+        <Field
+          id="company"
+          label="Firma"
+          defaultValue={v.company ?? prefill.company}
+          autoComplete="organization"
+          error={fe.company}
+        />
+        <Field
+          id="contactName"
+          label="Ihr Name (Vor- und Nachname)"
+          defaultValue={v.contactName}
+          autoComplete="name"
+          error={fe.contactName}
+        />
+        <Field
+          id="street"
+          label="Straße und Hausnummer"
+          defaultValue={v.street ?? prefill.street}
+          autoComplete="street-address"
+          error={fe.street}
+        />
         <div className="grid grid-cols-[8rem_1fr] gap-3">
-          <Field id="postalCode" label="PLZ" defaultValue={v.postalCode ?? prefill.postalCode} autoComplete="postal-code" inputMode="numeric" maxLength={5} error={fe.postalCode} />
+          <Field
+            id="postalCode"
+            label="PLZ"
+            defaultValue={v.postalCode ?? prefill.postalCode}
+            autoComplete="postal-code"
+            inputMode="numeric"
+            maxLength={5}
+            error={fe.postalCode}
+          />
           <Field id="city" label="Ort" defaultValue={v.city ?? prefill.city} autoComplete="address-level2" error={fe.city} />
         </div>
       </fieldset>
@@ -138,7 +171,17 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
           hint="Hierhin schicken wir Rechnung und den Link für Ihre Angaben."
           maxLength={254}
         />
-        <Field id="phone" label="Telefon" type="tel" inputMode="tel" defaultValue={v.phone} autoComplete="tel" required={false} error={fe.phone} maxLength={40} />
+        <Field
+          id="phone"
+          label="Telefon"
+          type="tel"
+          inputMode="tel"
+          defaultValue={v.phone}
+          autoComplete="tel"
+          required={false}
+          error={fe.phone}
+          maxLength={40}
+        />
       </fieldset>
 
       <fieldset>
@@ -167,7 +210,11 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
               {status.message}
             </span>
           ) : null}
-          {status.state === 'error' ? <span className="text-slate-500">Verfügbarkeit konnte gerade nicht geprüft werden – wir prüfen beim Absenden erneut.</span> : null}
+          {status.state === 'error' ? (
+            <span className="text-slate-500">
+              Verfügbarkeit konnte gerade nicht geprüft werden – wir prüfen beim Absenden erneut.
+            </span>
+          ) : null}
           {status.state === 'idle' && domainError ? <span className="text-red-700">{domainError}</span> : null}
         </div>
         {alternatives.length ? (
@@ -193,14 +240,26 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
       <fieldset className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
         <legend className="sr-only">Bestätigungen</legend>
         <label className="flex items-start gap-3 text-sm">
-          <input type="checkbox" name="b2b" required className="mt-0.5 h-5 w-5 shrink-0 accent-brand-600" aria-invalid={fe.b2b ? true : undefined} />
+          <input
+            type="checkbox"
+            name="b2b"
+            required
+            className="mt-0.5 h-5 w-5 shrink-0 accent-brand-600"
+            aria-invalid={fe.b2b ? true : undefined}
+          />
           <span>
             Ich bestelle als <strong>Unternehmer</strong> (§ 14 BGB) für meinen Betrieb, nicht als Verbraucher.
             {fe.b2b ? <span className="mt-1 block text-red-700">{fe.b2b}</span> : null}
           </span>
         </label>
         <label className="flex items-start gap-3 text-sm">
-          <input type="checkbox" name="terms" required className="mt-0.5 h-5 w-5 shrink-0 accent-brand-600" aria-invalid={fe.terms ? true : undefined} />
+          <input
+            type="checkbox"
+            name="terms"
+            required
+            className="mt-0.5 h-5 w-5 shrink-0 accent-brand-600"
+            aria-invalid={fe.terms ? true : undefined}
+          />
           <span>
             Ich akzeptiere die{' '}
             <a href="/agb" target="_blank" rel="noopener" className="text-brand-700 underline">
@@ -218,7 +277,8 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
           <label className="flex items-start gap-3 text-sm">
             <input type="checkbox" name="subscription" className="mt-0.5 h-5 w-5 shrink-0 accent-brand-600" />
             <span>
-              Optional: Nach Ablauf der 12 Monate automatisch mit <strong>{subscription.label}</strong> weitermachen (monatlich kündbar). Wir erinnern Sie vorher per E-Mail.
+              Optional: Nach Ablauf der 12 Monate automatisch mit <strong>{subscription.label}</strong> weitermachen (monatlich
+              kündbar). Wir erinnern Sie vorher per E-Mail.
             </span>
           </label>
         ) : null}
@@ -231,7 +291,9 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
       >
         {pending ? 'Einen Moment …' : `Weiter zur Zahlung (${priceLabel})`}
       </button>
-      <p className="text-center text-xs text-slate-500">Sie werden zu unserem Zahlungsdienstleister Stripe weitergeleitet. Zahlung per Karte, Lastschrift u. a.</p>
+      <p className="text-center text-xs text-slate-500">
+        Sie werden zu unserem Zahlungsdienstleister Stripe weitergeleitet. Zahlung per Karte, Lastschrift u. a.
+      </p>
     </form>
   );
 }

@@ -21,7 +21,12 @@ describe('Domain-Vorschlag', () => {
     for (const d of c) expect(isValidDeLabel(d.replace(/\.de$/, ''))).toBe(true);
     const n = domainCandidates("Kim's Nails", { city: 'Dortmund', branch: 'nagelstudio' });
     expect(n).toContain('kims-nails.de');
-    expect(domainCandidates("Mira's Kosmetikinstitut, Wellness- und Gesundheitszentrum", { city: 'Dortmund', branch: 'kosmetikstudio' })).toContain('miras-kosmetikinstitut.de');
+    expect(
+      domainCandidates("Mira's Kosmetikinstitut, Wellness- und Gesundheitszentrum", {
+        city: 'Dortmund',
+        branch: 'kosmetikstudio',
+      }),
+    ).toContain('miras-kosmetikinstitut.de');
     expect(n.every((d) => d.length <= 40)).toBe(true);
   });
   it('ungültige Labels werden verworfen', () => {
@@ -33,11 +38,15 @@ describe('Domain-Vorschlag', () => {
 
 describe('Anschrift & Text', () => {
   it('„An das Team von …“, letzte Zeile PLZ Ort, max. 45 Zeichen je Zeile', () => {
-    expect(recipientLines({ businessName: 'Nails by Mira', street: 'Kampstraße', houseNumber: '5', postalCode: '44137', city: 'Dortmund' })).toEqual([
-      'An das Team von Nails by Mira',
-      'Kampstraße 5',
-      '44137 Dortmund',
-    ]);
+    expect(
+      recipientLines({
+        businessName: 'Nails by Mira',
+        street: 'Kampstraße',
+        houseNumber: '5',
+        postalCode: '44137',
+        city: 'Dortmund',
+      }),
+    ).toEqual(['An das Team von Nails by Mira', 'Kampstraße 5', '44137 Dortmund']);
     const long = recipientLines({
       businessName: "Mira's Kosmetikinstitut, Wellness- und Gesundheitszentrum",
       street: 'Kampstraße',
@@ -83,7 +92,13 @@ describe('Brief-PDF (echter Browser)', () => {
     const lead = await getDb().query.leads.findFirst({ where: eq(leads.id, leadId) });
     expect(lead?.status).toBe('letter_generated');
     const check = await validateLetterPdf(pdf, {
-      recipientLines: recipientLines({ businessName: lead!.businessName, street: lead!.street!, houseNumber: lead!.houseNumber!, postalCode: lead!.postalCode!, city: lead!.city }),
+      recipientLines: recipientLines({
+        businessName: lead!.businessName,
+        street: lead!.street!,
+        houseNumber: lead!.houseNumber!,
+        postalCode: lead!.postalCode!,
+        city: lead!.city,
+      }),
       position: 'left',
       expectedPages: 1,
     });
@@ -109,7 +124,9 @@ describe('Brief-PDF (echter Browser)', () => {
     expect(res.pages).toBe(2);
     const letter = await getDb().query.letters.findFirst({ where: eq(letters.id, res.letterId) });
     await updateConfig({ switches: { useRatingInLetter: false }, letter: { includeScreenshotPage: false } }, 'test');
-    const text = (await pdfTextItems((await getProviders().storage.get(letter!.pdfStorageKey!))!)).items.map((i) => i.str).join(' ');
+    const text = (await pdfTextItems((await getProviders().storage.get(letter!.pdfStorageKey!))!)).items
+      .map((i) => i.str)
+      .join(' ');
     expect(text).toMatch(/Bewertungen (mit durchschnittlich|und durchschnittlich)/);
   }, 60_000);
 
@@ -122,7 +139,14 @@ describe('Brief-PDF (echter Browser)', () => {
   }, 60_000);
 
   it('Testbrief an die eigene Adresse ändert den Lead nicht', async () => {
-    await updateConfig({ letter: { testRecipient: { name: 'Max Muster', street: 'Teststraße', houseNumber: '1', postalCode: '44135', city: 'Dortmund' } } }, 'test');
+    await updateConfig(
+      {
+        letter: {
+          testRecipient: { name: 'Max Muster', street: 'Teststraße', houseNumber: '1', postalCode: '44135', city: 'Dortmund' },
+        },
+      },
+      'test',
+    );
     const before = await getDb().query.leads.findFirst({ where: eq(leads.id, leadId) });
     const res = await generateLetter(leadId, 1, { actor: 'admin:test', test: true });
     expect(res.issues).toEqual([]);
@@ -145,7 +169,9 @@ describe('Alle Briefvarianten passen im ungünstigsten Fall auf eine Seite', () 
     const { privacyNoticeText, objectionNoticeText } = await import('../src/letters/notices');
     const { qrDataUri } = await import('../src/render/letter');
     // Platzhalterbild im Seitenverhältnis des Komposits (1800×1080)
-    const svg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1080"><rect width="1800" height="1080" fill="#ccc"/></svg>');
+    const svg = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1080"><rect width="1800" height="1080" fill="#ccc"/></svg>',
+    );
     for (const v of DEFAULT_LETTER_VARIANTS) {
       const recipient = {
         businessName: "Mira's Kosmetikinstitut, Wellness- und Gesundheitszentrum",
@@ -172,7 +198,8 @@ describe('Alle Briefvarianten passen im ungünstigsten Fall auf eine Seite', () 
       const dom = await validateLetterDom(html, 'left');
       expect(dom, `${v.name}: ${JSON.stringify(dom)}`).toEqual([]);
       const pdf = await htmlToPdf(html);
-      if (process.env.LETTER_SAMPLE_DIR) (await import('node:fs')).writeFileSync(`${process.env.LETTER_SAMPLE_DIR}/${v.name.slice(0, 2).trim()}.pdf`, pdf);
+      if (process.env.LETTER_SAMPLE_DIR)
+        (await import('node:fs')).writeFileSync(`${process.env.LETTER_SAMPLE_DIR}/${v.name.slice(0, 2).trim()}.pdf`, pdf);
       const check = await validateLetterPdf(pdf, { recipientLines: data.recipientLines, position: 'left', expectedPages: 1 });
       expect(check.issues, `${v.name}: ${JSON.stringify(check.issues)}`).toEqual([]);
     }

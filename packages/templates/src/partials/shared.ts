@@ -17,7 +17,13 @@ export interface SharedParts {
   phoneLabel: string | null;
   /** Primärer CTA-Link (Anrufen, sonst Kontaktformular) */
   ctaHref: string;
-  contactSection(opts: { sectionClass: string; cardClass: string; titleClass: string; buttonClass: string; inputClass: string }): string;
+  contactSection(opts: {
+    sectionClass: string;
+    cardClass: string;
+    titleClass: string;
+    buttonClass: string;
+    inputClass: string;
+  }): string;
   hoursList(opts?: { rowClass?: string; labelClass?: string; mutedClass?: string }): string;
   addressLines: string;
   mapsHref: string;
@@ -106,7 +112,9 @@ ${jsonLd}
   const addressLines = `${esc(facts.street)} ${esc(facts.houseNumber)}<br>${esc(facts.postalCode)} ${esc(facts.city)}`;
 
   const servicesNote = (cls = 'text-sm text-muted') =>
-    isDemo ? `<p class="${cls}"><span aria-hidden="true">✎ </span>Beispiel-Leistungen – passen wir gemeinsam für Sie an.</p>` : '';
+    isDemo
+      ? `<p class="${cls}"><span aria-hidden="true">✎ </span>Beispiel-Leistungen – passen wir gemeinsam für Sie an.</p>`
+      : '';
 
   const hoursList = (opts: { rowClass?: string; labelClass?: string; mutedClass?: string } = {}) => {
     const muted = opts.mutedClass ?? 'text-muted';
@@ -129,7 +137,13 @@ ${jsonLd}
       )
       .join('');
 
-  const contactSection = (o: { sectionClass: string; cardClass: string; titleClass: string; buttonClass: string; inputClass: string }) => {
+  const contactSection = (o: {
+    sectionClass: string;
+    cardClass: string;
+    titleClass: string;
+    buttonClass: string;
+    inputClass: string;
+  }) => {
     const ts = String(input.renderedAt ?? Date.now());
     let title = 'Kontakt';
     let intro = `Schreiben Sie uns – wir melden uns schnellstmöglich bei Ihnen.`;
@@ -238,9 +252,14 @@ ${jsonLd}
     jsonLd,
     brand: () => {
       // Kundenlogo/-fotos gibt es nur nach dem Onboarding – Demos zeigen nie Material des Betriebs
-      const logo = !isDemo && facts.logoSrc ? `<img src="${esc(facts.logoSrc)}" alt="" class="h-8 w-auto max-w-28 object-contain sm:h-10 sm:max-w-40" height="40">` : '';
+      const logo =
+        !isDemo && facts.logoSrc
+          ? `<img src="${esc(facts.logoSrc)}" alt="" class="h-8 w-auto max-w-28 object-contain sm:h-10 sm:max-w-40" height="40">`
+          : '';
       // Auf schmalen Bildschirmen nur das Logo (Name bleibt für Screenreader erhalten)
-      return logo ? `<span class="inline-flex min-w-0 items-center gap-3">${logo}<span class="sr-only sm:not-sr-only">${esc(facts.name)}</span></span>` : esc(facts.name);
+      return logo
+        ? `<span class="inline-flex min-w-0 items-center gap-3">${logo}<span class="sr-only sm:not-sr-only">${esc(facts.name)}</span></span>`
+        : esc(facts.name);
     },
     gallery: (o = {}) => {
       const photos = isDemo ? [] : (facts.photos ?? []);
@@ -249,7 +268,10 @@ ${jsonLd}
   <div class="mx-auto max-w-6xl px-4">
     <h2 id="einblicke-titel" class="${o.titleClass ?? 'text-2xl font-bold md:text-3xl'}">Einblicke</h2>
     <ul class="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">${photos
-      .map((ph) => `<li><img src="${esc(ph.src)}" alt="${esc(ph.alt)}" loading="lazy" class="aspect-[4/3] w-full rounded-lg object-cover" width="600" height="450"></li>`)
+      .map(
+        (ph) =>
+          `<li><img src="${esc(ph.src)}" alt="${esc(ph.alt)}" loading="lazy" class="aspect-[4/3] w-full rounded-lg object-cover" width="600" height="450"></li>`,
+      )
       .join('')}</ul>
   </div>
 </section>`;

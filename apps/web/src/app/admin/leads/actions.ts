@@ -7,7 +7,9 @@ import { actorOf, requireAdmin } from '@/lib/auth';
 export async function requalifyLead(form: FormData): Promise<void> {
   const s = await requireAdmin();
   const id = String(form.get('id'));
-  await getDb().transaction((tx) => transitionLead(tx, id, 'qualified', { actor: actorOf(s), reason: 'manuell freigegeben', soft: true }));
+  await getDb().transaction((tx) =>
+    transitionLead(tx, id, 'qualified', { actor: actorOf(s), reason: 'manuell freigegeben', soft: true }),
+  );
   revalidatePath(`/admin/leads/${id}`);
   revalidatePath('/admin/leads');
 }

@@ -69,7 +69,12 @@ export async function recordCost(db: DbOrTx, entry: CostEntry): Promise<void> {
 }
 
 /** Ersetzt eine geschätzte Buchung durch die tatsächlichen Kosten. */
-export async function settleCost(db: DbOrTx, idempotencyKey: string, actualCents: number, meta?: Record<string, unknown>): Promise<void> {
+export async function settleCost(
+  db: DbOrTx,
+  idempotencyKey: string,
+  actualCents: number,
+  meta?: Record<string, unknown>,
+): Promise<void> {
   await db
     .update(budgetLedger)
     .set({ amountCents: actualCents, amountMicroCents: 0, estimated: false, ...(meta ? { meta } : {}) })
@@ -180,7 +185,11 @@ export async function reserveBudget(
 }
 
 /** Prüft ohne zu reservieren (z. B. für Places/LLM, deren Kosten erst danach feststehen). */
-export async function assertBudgetAvailable(category: BudgetCategory, estimateCents: number, db: DbOrTx = getDb()): Promise<void> {
+export async function assertBudgetAvailable(
+  category: BudgetCategory,
+  estimateCents: number,
+  db: DbOrTx = getDb(),
+): Promise<void> {
   const cfg = await getConfig({ db });
   if (effectiveSwitches(cfg).killSwitch) throw new KillSwitchError();
   const limit = weeklyLimit(cfg, category);

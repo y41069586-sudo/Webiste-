@@ -54,10 +54,12 @@ export default async function JobsPage() {
               </div>
             </fieldset>
             <p className="text-xs text-slate-600">
-              Quelle: <strong>{cfg.leadSource.mode}</strong> (siehe docs/compliance-google.md). OSM ist kostenlos; Google-Modi buchen
-              Kosten ins Places-Budget.
+              Quelle: <strong>{cfg.leadSource.mode}</strong> (siehe docs/compliance-google.md). OSM ist kostenlos; Google-Modi
+              buchen Kosten ins Places-Budget.
             </p>
-            <button type="submit" className={btn.primary}>Suche einreihen</button>
+            <button type="submit" className={btn.primary}>
+              Suche einreihen
+            </button>
           </form>
         </Card>
         <Card title="Jobs manuell auslösen">
@@ -76,7 +78,9 @@ export default async function JobsPage() {
                 <span>{label}</span>
                 <form action={runJobNow}>
                   <input type="hidden" name="queue" value={q} />
-                  <button className={btn.secondary} type="submit">Starten</button>
+                  <button className={btn.secondary} type="submit">
+                    Starten
+                  </button>
                 </form>
               </li>
             ))}
@@ -88,11 +92,21 @@ export default async function JobsPage() {
           {jobs.rows.map((j) => (
             <tr key={j.id}>
               <Td className="font-mono text-xs">{j.name}</Td>
-              <Td><Badge color={j.state === 'completed' ? 'green' : j.state === 'failed' ? 'red' : j.state === 'active' ? 'blue' : 'gray'}>{j.state}</Badge></Td>
+              <Td>
+                <Badge
+                  color={
+                    j.state === 'completed' ? 'green' : j.state === 'failed' ? 'red' : j.state === 'active' ? 'blue' : 'gray'
+                  }
+                >
+                  {j.state}
+                </Badge>
+              </Td>
               <Td className="text-xs whitespace-nowrap">{dt(j.created_on)}</Td>
               <Td className="text-xs whitespace-nowrap">{dt(j.completed_on)}</Td>
               <Td>{j.retry_count}</Td>
-              <Td className="max-w-lg font-mono text-xs break-all text-slate-600">{j.output ? JSON.stringify(j.output).slice(0, 400) : ''}</Td>
+              <Td className="max-w-lg font-mono text-xs break-all text-slate-600">
+                {j.output ? JSON.stringify(j.output).slice(0, 400) : ''}
+              </Td>
             </tr>
           ))}
         </Table>

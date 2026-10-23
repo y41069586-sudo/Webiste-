@@ -9,6 +9,9 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const require = createRequire(import.meta.url);
 const cli = path.join(path.dirname(require.resolve('@tailwindcss/cli/package.json')), 'dist/index.mjs');
 mkdirSync(path.join(root, 'dist'), { recursive: true });
-execFileSync(process.execPath, [cli, '-i', 'styles/site.css', '-o', 'dist/site.css', '--minify'], { cwd: root, stdio: 'inherit' });
+execFileSync(process.execPath, [cli, '-i', 'styles/site.css', '-o', 'dist/site.css', '--minify'], {
+  cwd: root,
+  stdio: 'inherit',
+});
 const size = statSync(path.join(root, 'dist/site.css')).size;
 console.log(`dist/site.css: ${(size / 1024).toFixed(1)} KB`);

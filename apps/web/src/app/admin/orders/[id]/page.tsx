@@ -19,7 +19,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   if (!order) notFound();
   const [customer, mails, log] = await Promise.all([
     db.query.customers.findFirst({ where: eq(schema.customers.orderId, id) }),
-    db.select().from(schema.outboundEmails).where(eq(schema.outboundEmails.orderId, id)).orderBy(desc(schema.outboundEmails.createdAt)),
+    db
+      .select()
+      .from(schema.outboundEmails)
+      .where(eq(schema.outboundEmails.orderId, id))
+      .orderBy(desc(schema.outboundEmails.createdAt)),
     db
       .select()
       .from(schema.auditLog)
@@ -72,7 +76,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <dl className="grid grid-cols-[10rem_1fr] gap-y-1.5 text-sm">
             <dt className="text-slate-500">Betrag</dt>
             <dd>
-              {eur(order.amountCents)} {order.vatCents ? `(netto ${eur(order.netCents)}, USt ${eur(order.vatCents)})` : '(ohne USt, § 19)'}
+              {eur(order.amountCents)}{' '}
+              {order.vatCents ? `(netto ${eur(order.netCents)}, USt ${eur(order.vatCents)})` : '(ohne USt, § 19)'}
             </dd>
             <dt className="text-slate-500">Anbieter</dt>
             <dd>{order.provider}</dd>
@@ -108,7 +113,15 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               ) : null}
             </dd>
             <dt className="text-slate-500">Kunde</dt>
-            <dd>{customer ? <Link href={`/admin/customers/${customer.id}`} className="text-brand-700 underline">{customer.company}</Link> : '–'}</dd>
+            <dd>
+              {customer ? (
+                <Link href={`/admin/customers/${customer.id}`} className="text-brand-700 underline">
+                  {customer.company}
+                </Link>
+              ) : (
+                '–'
+              )}
+            </dd>
           </dl>
           {order.invoiceNumber ? (
             <form action={resendInvoiceAction} className="mt-4">
@@ -121,7 +134,9 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <Card title="Erstattung">
             <form action={refundOrderAction} className="space-y-3">
               <input type="hidden" name="id" value={order.id} />
-              <p className="text-sm text-slate-600">Löst eine echte Erstattung beim Zahlungsanbieter aus. Eine Stornorechnung wird automatisch erstellt und versendet.</p>
+              <p className="text-sm text-slate-600">
+                Löst eine echte Erstattung beim Zahlungsanbieter aus. Eine Stornorechnung wird automatisch erstellt und versendet.
+              </p>
               <div>
                 <label htmlFor="amount" className={label}>
                   Betrag in € (leer = voller Betrag {eur(order.amountCents - order.refundedCents)})

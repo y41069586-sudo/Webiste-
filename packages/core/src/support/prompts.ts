@@ -35,8 +35,15 @@ export const REPLY_SCHEMA = {
   additionalProperties: false,
   required: ['reply', 'needs_human', 'reason'],
   properties: {
-    reply: { type: 'string', description: 'Antwort-E-Mail (Fließtext ohne Betreff, beginnt mit der Anrede, endet ohne Grußformel und ohne Signatur).' },
-    needs_human: { type: 'boolean', description: 'true, wenn die Antwort Zusagen, Ausnahmen, rechtliche Einschätzungen oder Informationen erfordert, die nicht im Kontext stehen.' },
+    reply: {
+      type: 'string',
+      description: 'Antwort-E-Mail (Fließtext ohne Betreff, beginnt mit der Anrede, endet ohne Grußformel und ohne Signatur).',
+    },
+    needs_human: {
+      type: 'boolean',
+      description:
+        'true, wenn die Antwort Zusagen, Ausnahmen, rechtliche Einschätzungen oder Informationen erfordert, die nicht im Kontext stehen.',
+    },
     reason: { type: 'string', description: 'Kurz: warum needs_human (oder leer).' },
   },
 } as const;
@@ -71,7 +78,9 @@ export function isAutomated(from: string, subject: string, headers: Record<strin
   if (h['auto-submitted'] && h['auto-submitted'] !== 'no') return true;
   if (h['x-autoreply'] || h['x-autorespond'] || h['precedence'] === 'bulk' || h['precedence'] === 'auto_reply') return true;
   if (/mailer-daemon|postmaster|no-?reply|donotreply/i.test(from)) return true;
-  return /^(automatische antwort|abwesenheit|out of office|autoreply|auto:|undeliver|unzustellbar|delivery status notification)/i.test(subject.trim());
+  return /^(automatische antwort|abwesenheit|out of office|autoreply|auto:|undeliver|unzustellbar|delivery status notification)/i.test(
+    subject.trim(),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -91,7 +100,8 @@ registerMockStructured(CLASSIFY_TOOL, (req) => {
 registerMockStructured(REPLY_TOOL, (req) => {
   const human = /rabatt|günstiger|anwalt|frist|bis wann/i.test(req.prompt);
   return {
-    reply: 'vielen Dank für Ihre Nachricht. Gern beantworte ich Ihre Frage: Das Website-Paket enthält Ihre Website, die eigene Domain und das Hosting für 12 Monate.',
+    reply:
+      'vielen Dank für Ihre Nachricht. Gern beantworte ich Ihre Frage: Das Website-Paket enthält Ihre Website, die eigene Domain und das Hosting für 12 Monate.',
     needs_human: human,
     reason: human ? 'Zusage außerhalb des Angebots angefragt' : '',
   };

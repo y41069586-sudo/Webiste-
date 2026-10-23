@@ -65,8 +65,17 @@ export async function sendOrderInvoice(orderId: string): Promise<'sent' | 'alrea
   const now = new Date();
   await db.update(orders).set({ invoiceSentAt: now, updatedAt: now }).where(eq(orders.id, orderId));
   // Die Bestellbestätigung enthält den Onboarding-Link
-  await db.update(customers).set({ onboardingMailSentAt: sql`coalesce(${customers.onboardingMailSentAt}, now())`, updatedAt: now }).where(eq(customers.id, customer.id));
-  await audit(db, { entity: 'order', entityId: orderId, action: 'invoice_sent', actor: 'job:send-invoice', context: { invoiceNumber: number } });
+  await db
+    .update(customers)
+    .set({ onboardingMailSentAt: sql`coalesce(${customers.onboardingMailSentAt}, now())`, updatedAt: now })
+    .where(eq(customers.id, customer.id));
+  await audit(db, {
+    entity: 'order',
+    entityId: orderId,
+    action: 'invoice_sent',
+    actor: 'job:send-invoice',
+    context: { invoiceNumber: number },
+  });
   return 'sent';
 }
 
@@ -80,7 +89,9 @@ export async function sendCancellationInvoice(orderId: string): Promise<'sent' |
   if (order.cancellationSentAt) return 'already';
   if (!order.cancellationNumber) {
     await db.transaction(async (tx) => {
-      const locked = await tx.execute<{ cancellation_number: string | null }>(sql`SELECT cancellation_number FROM orders WHERE id = ${orderId} FOR UPDATE`);
+      const locked = await tx.execute<{ cancellation_number: string | null }>(
+        sql`SELECT cancellation_number FROM orders WHERE id = ${orderId} FOR UPDATE`,
+      );
       if (locked.rows[0]?.cancellation_number) return;
       const now = new Date();
       const number = await nextInvoiceNumber(tx, cfg, now);
@@ -93,13 +104,20 @@ export async function sendCancellationInvoice(orderId: string): Promise<'sent' |
       const pdf = await htmlToPdf(renderInvoiceHtml(data));
       const key = invoiceKey(number, now);
       await storage.put(key, pdf, 'application/pdf');
-      await tx.update(orders).set({ cancellationNumber: number, cancellationPdfKey: key, updatedAt: now }).where(eq(orders.id, orderId));
+      await tx
+        .update(orders)
+        .set({ cancellationNumber: number, cancellationPdfKey: key, updatedAt: now })
+        .where(eq(orders.id, orderId));
     });
     order = (await db.query.orders.findFirst({ where: eq(orders.id, orderId) }))!;
   }
   const pdf = await storage.get(order.cancellationPdfKey!);
   if (!pdf) throw new Error('Stornorechnung-PDF fehlt im Speicher');
-  const mail = refundEmail(cfg, { name: order.customerName, amount: formatEuro(order.refundedCents), cancellationNumber: order.cancellationNumber! });
+  const mail = refundEmail(cfg, {
+    name: order.customerName,
+    amount: formatEuro(order.refundedCents),
+    cancellationNumber: order.cancellationNumber!,
+  });
   await sendTransactionalEmail({
     ...mail,
     kind: 'cancellation',

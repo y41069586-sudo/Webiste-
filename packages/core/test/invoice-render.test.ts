@@ -35,7 +35,15 @@ async function paidOrder() {
     .returning();
   const [demo] = await db
     .insert(demos)
-    .values({ leadId: lead!.id, slug: randomToken(24), templateId: 'handwerk-klar', palette: 'werkblau', status: 'published', publishedAt: new Date(), expiresAt: addDays(new Date(), 30) })
+    .values({
+      leadId: lead!.id,
+      slug: randomToken(24),
+      templateId: 'handwerk-klar',
+      palette: 'werkblau',
+      status: 'published',
+      publishedAt: new Date(),
+      expiresAt: addDays(new Date(), 30),
+    })
     .returning();
   const res = await startCheckout(
     demo!.slug,
@@ -79,9 +87,16 @@ describe('Rechnungs-PDF und Versand', () => {
     const { pages, items } = await pdfTextItems(pdf);
     expect(pages).toBe(1);
     const text = items.map((i) => i.str).join(' ');
-    for (const s of [o.invoiceNumber!, '§ 19 UStG', 'Elektro Beispiel GmbH', 'Steuernummer', 'Leistungszeitpunkt', '390,00']) expect(text).toContain(s);
-    const layout = await validateLetterPdf(pdf, { recipientLines: ['Elektro Beispiel GmbH', 'Max Beispiel', 'Hohe Straße 12', '44139 Dortmund'], position: 'left', expectedPages: 1 });
-    expect(layout.issues.filter((i) => i.check === 'anschriftenfeld' || i.check === 'anschrift' || i.check === 'rand')).toEqual([]);
+    for (const s of [o.invoiceNumber!, '§ 19 UStG', 'Elektro Beispiel GmbH', 'Steuernummer', 'Leistungszeitpunkt', '390,00'])
+      expect(text).toContain(s);
+    const layout = await validateLetterPdf(pdf, {
+      recipientLines: ['Elektro Beispiel GmbH', 'Max Beispiel', 'Hohe Straße 12', '44139 Dortmund'],
+      position: 'left',
+      expectedPages: 1,
+    });
+    expect(layout.issues.filter((i) => i.check === 'anschriftenfeld' || i.check === 'anschrift' || i.check === 'rand')).toEqual(
+      [],
+    );
 
     const mails = await db.select().from(outboundEmails).where(eq(outboundEmails.orderId, order.id));
     expect(mails).toHaveLength(1);

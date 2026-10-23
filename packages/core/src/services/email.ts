@@ -35,7 +35,9 @@ const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
  * (auch bei Anbietern ohne Idempotenz-Header); fehlgeschlagene oder hängende Versuche
  * (> 10 min „sending“) werden beim nächsten Aufruf wiederholt. Keine Adressen im Log.
  */
-export async function sendTransactionalEmail(mail: TransactionalEmail): Promise<{ status: 'sent' | 'duplicate'; messageId: string | null }> {
+export async function sendTransactionalEmail(
+  mail: TransactionalEmail,
+): Promise<{ status: 'sent' | 'duplicate'; messageId: string | null }> {
   if (!EMAIL_RE.test(mail.to)) throw new Error(`Ungültige Empfängeradresse (${mail.kind})`);
   const db = getDb();
   const { email } = getProviders();
@@ -67,7 +69,10 @@ export async function sendTransactionalEmail(mail: TransactionalEmail): Promise<
       .where(
         and(
           eq(outboundEmails.id, existing.id),
-          or(eq(outboundEmails.status, 'failed'), and(eq(outboundEmails.status, 'sending'), lt(outboundEmails.createdAt, sql`now() - interval '10 minutes'`))),
+          or(
+            eq(outboundEmails.status, 'failed'),
+            and(eq(outboundEmails.status, 'sending'), lt(outboundEmails.createdAt, sql`now() - interval '10 minutes'`)),
+          ),
         ),
       )
       .returning({ id: outboundEmails.id });
@@ -87,7 +92,10 @@ export async function sendTransactionalEmail(mail: TransactionalEmail): Promise<
       idempotencyKey: mail.idempotencyKey,
       ...(mail.headers ? { headers: mail.headers } : {}),
     });
-    await db.update(outboundEmails).set({ status: 'sent', providerMessageId: res.messageId, sentAt: new Date() }).where(eq(outboundEmails.id, rowId));
+    await db
+      .update(outboundEmails)
+      .set({ status: 'sent', providerMessageId: res.messageId, sentAt: new Date() })
+      .where(eq(outboundEmails.id, rowId));
     logger.info({ kind: mail.kind, emailId: rowId, provider: email.name }, 'E-Mail versendet');
     return { status: 'sent', messageId: res.messageId };
   } catch (err) {

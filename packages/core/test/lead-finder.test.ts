@@ -40,7 +40,11 @@ describe('Lead-Finder (Mock-Quelle)', () => {
   it('Sperrliste greift bei erneuter Suche', async () => {
     await findLeads({ actor: 'job:test' });
     const lead = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')))[0]!;
-    await addSuppression(getDb(), { name: lead.businessName, street: lead.street, houseNumber: lead.houseNumber, postalCode: lead.postalCode }, 'test');
+    await addSuppression(
+      getDb(),
+      { name: lead.businessName, street: lead.street, houseNumber: lead.houseNumber, postalCode: lead.postalCode },
+      'test',
+    );
     await getDb().delete(leads).where(eq(leads.id, lead.id));
     await findLeads({ actor: 'job:test' });
     const again = await getDb().query.leads.findFirst({ where: eq(leads.sourceId, lead.sourceId) });
@@ -56,7 +60,14 @@ describe('Lead-Finder (Mock-Quelle)', () => {
     expect(after?.status).toBe('suppressed');
     expect(after?.businessName).toBe('[gelöscht]');
     expect(after?.street).toBeNull();
-    expect(await isSuppressed(getDb(), { name: lead.businessName, street: lead.street, houseNumber: lead.houseNumber, postalCode: lead.postalCode })).toBe(true);
+    expect(
+      await isSuppressed(getDb(), {
+        name: lead.businessName,
+        street: lead.street,
+        houseNumber: lead.houseNumber,
+        postalCode: lead.postalCode,
+      }),
+    ).toBe(true);
     const logs = await getDb().select().from(auditLog).where(eq(auditLog.entityId, lead.id));
     expect(logs.some((l) => l.action === 'opt_out')).toBe(true);
   });

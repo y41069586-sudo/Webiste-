@@ -43,7 +43,10 @@ export const checkoutInputSchema = z.object({
     .optional()
     .default(''),
   street: req('Bitte Straße und Hausnummer angeben.').min(4, 'Bitte Straße und Hausnummer angeben.').max(120),
-  postalCode: z.string().trim().regex(/^\d{5}$/, 'Bitte eine fünfstellige Postleitzahl angeben.'),
+  postalCode: z
+    .string()
+    .trim()
+    .regex(/^\d{5}$/, 'Bitte eine fünfstellige Postleitzahl angeben.'),
   city: req('Bitte den Ort angeben.').max(80),
   domain: req('Bitte eine Wunschdomain angeben.').max(80),
   b2b: z.literal(true, 'Bitte bestätigen Sie, dass Sie als Unternehmer bestellen.'),
@@ -89,7 +92,9 @@ export async function getCheckoutContext(slug: string): Promise<CheckoutContext>
     return found.state === 'gone' ? await orderedOrGone(slug) : found;
   }
   const db = getDb();
-  const paid = await db.query.orders.findFirst({ where: and(eq(orders.leadId, found.lead.id), inArray(orders.status, ['paid', 'processing'])) });
+  const paid = await db.query.orders.findFirst({
+    where: and(eq(orders.leadId, found.lead.id), inArray(orders.status, ['paid', 'processing'])),
+  });
   // Kein Onboarding-Link hier: der Demo-Link ist halböffentlich, der Link geht nur per E-Mail an den Käufer
   if (paid) return { state: 'ordered' };
   if (!avail.ok) return { state: 'disabled', reason: avail.reason };
@@ -116,7 +121,9 @@ async function orderedOrGone(slug: string): Promise<CheckoutContext> {
   const db = getDb();
   const demo = await db.query.demos.findFirst({ where: eq(demos.slug, slug) });
   if (!demo) return { state: 'gone' };
-  const paid = await db.query.orders.findFirst({ where: and(eq(orders.leadId, demo.leadId), inArray(orders.status, ['paid', 'processing'])) });
+  const paid = await db.query.orders.findFirst({
+    where: and(eq(orders.leadId, demo.leadId), inArray(orders.status, ['paid', 'processing'])),
+  });
   return paid ? { state: 'ordered' } : { state: 'gone' };
 }
 
@@ -149,7 +156,8 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
 
   const rl = await rateLimit(db, `checkout:${meta.ipHash}`, 10, 3600);
   const rlLead = await rateLimit(db, `checkout-lead:${lead.id}`, 20, 86400);
-  if (!rl.allowed || !rlLead.allowed) return { ok: false, error: 'Zu viele Versuche. Bitte versuchen Sie es in einer Stunde erneut.' };
+  if (!rl.allowed || !rlLead.allowed)
+    return { ok: false, error: 'Zu viele Versuche. Bitte versuchen Sie es in einer Stunde erneut.' };
 
   const dom = await checkDomain(input.domain, { businessName: lead.businessName, city: lead.city, branch: lead.branch });
   if (!dom.valid || !dom.available || !dom.domain) {
@@ -203,8 +211,19 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
   if (!order) throw new Error('Bestellung konnte nicht angelegt werden');
 
   await db.transaction(async (tx) => {
-    await recordEvent(tx, { leadId: lead.id, type: 'checkout_started', meta: { orderId: order.id, mode: avail.ok ? avail.mode : 'n/a' }, req: { ...meta, isBot: false } });
-    await audit(tx, { entity: 'order', entityId: order.id, action: 'checkout_started', actor: 'public:checkout', context: { leadId: lead.id, amountCents: amounts.grossCents } });
+    await recordEvent(tx, {
+      leadId: lead.id,
+      type: 'checkout_started',
+      meta: { orderId: order.id, mode: avail.ok ? avail.mode : 'n/a' },
+      req: { ...meta, isBot: false },
+    });
+    await audit(tx, {
+      entity: 'order',
+      entityId: order.id,
+      action: 'checkout_started',
+      actor: 'public:checkout',
+      context: { leadId: lead.id, amountCents: amounts.grossCents },
+    });
   });
 
   try {
@@ -224,21 +243,37 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
     });
     await db
       .update(orders)
-      .set({ stripeSessionId: session.sessionId, checkoutUrl: session.url, checkoutExpiresAt: new Date(Date.now() + minutes * 60 * 1000), updatedAt: new Date() })
+      .set({
+        stripeSessionId: session.sessionId,
+        checkoutUrl: session.url,
+        checkoutExpiresAt: new Date(Date.now() + minutes * 60 * 1000),
+        updatedAt: new Date(),
+      })
       .where(eq(orders.id, order.id));
     return { ok: true, url: session.url, orderId: order.id };
   } catch (err) {
     logger.error({ orderId: order.id, ...errInfo(err) }, 'Checkout-Session fehlgeschlagen');
     await db.update(orders).set({ status: 'failed', updatedAt: new Date() }).where(eq(orders.id, order.id));
-    await raiseAlert(db, { level: 'error', code: 'checkout_failed', message: 'Checkout-Session konnte nicht erstellt werden', context: { orderId: order.id } });
-    return { ok: false, error: 'Die Bezahlseite ist gerade nicht erreichbar. Bitte versuchen Sie es in ein paar Minuten erneut.' };
+    await raiseAlert(db, {
+      level: 'error',
+      code: 'checkout_failed',
+      message: 'Checkout-Session konnte nicht erstellt werden',
+      context: { orderId: order.id },
+    });
+    return {
+      ok: false,
+      error: 'Die Bezahlseite ist gerade nicht erreichbar. Bitte versuchen Sie es in ein paar Minuten erneut.',
+    };
   }
 }
 
 /** Offene Bestellungen eines Leads beenden (Session beim Anbieter ablaufen lassen). */
 export async function cancelOpenOrders(leadId: string, reason: string): Promise<number> {
   const db = getDb();
-  const open = await db.select().from(orders).where(and(eq(orders.leadId, leadId), eq(orders.status, 'pending')));
+  const open = await db
+    .select()
+    .from(orders)
+    .where(and(eq(orders.leadId, leadId), eq(orders.status, 'pending')));
   const p = getProviders().payment;
   for (const o of open) {
     if (o.stripeSessionId && p.expireSession && o.provider === p.name) {
@@ -248,7 +283,10 @@ export async function cancelOpenOrders(leadId: string, reason: string): Promise<
         logger.warn({ orderId: o.id, ...errInfo(err) }, 'Session konnte nicht beendet werden');
       }
     }
-    await db.update(orders).set({ status: 'cancelled', updatedAt: new Date() }).where(and(eq(orders.id, o.id), eq(orders.status, 'pending')));
+    await db
+      .update(orders)
+      .set({ status: 'cancelled', updatedAt: new Date() })
+      .where(and(eq(orders.id, o.id), eq(orders.status, 'pending')));
     await audit(db, { entity: 'order', entityId: o.id, action: 'cancelled', actor: 'system', context: { reason } });
   }
   return open.length;
@@ -287,7 +325,11 @@ export async function fulfillOrder(
     if (!amountOk || !currencyOk) {
       await tx
         .update(orders)
-        .set({ status: 'processing', stripePaymentIntent: info.paymentIntentId ?? order.stripePaymentIntent, updatedAt: new Date() })
+        .set({
+          status: 'processing',
+          stripePaymentIntent: info.paymentIntentId ?? order.stripePaymentIntent,
+          updatedAt: new Date(),
+        })
         .where(eq(orders.id, orderId));
       await raiseAlert(tx, {
         level: 'error',
@@ -331,12 +373,20 @@ export async function fulfillOrder(
     const cust = customer ?? (await tx.query.customers.findFirst({ where: eq(customers.orderId, order.id) }))!;
 
     if (order.leadId) {
-      await tx.insert(events).values({ leadId: order.leadId, type: 'paid', metaJson: { orderId: order.id, amountCents: order.amountCents } });
+      await tx
+        .insert(events)
+        .values({ leadId: order.leadId, type: 'paid', metaJson: { orderId: order.id, amountCents: order.amountCents } });
       await transitionLead(tx, order.leadId, 'paid', { actor, soft: true, context: { orderId: order.id } });
     }
     // Gekaufte Demo läuft nicht mehr ab (dient als Grundlage der Kundenseite)
     if (order.demoId) await tx.update(demos).set({ expiresAt: null, updatedAt: new Date() }).where(eq(demos.id, order.demoId));
-    await audit(tx, { entity: 'order', entityId: order.id, action: 'paid', actor, context: { invoiceNumber: number, amountCents: order.amountCents } });
+    await audit(tx, {
+      entity: 'order',
+      entityId: order.id,
+      action: 'paid',
+      actor,
+      context: { invoiceNumber: number, amountCents: order.amountCents },
+    });
     return { state: 'paid', orderId, customerId: cust.id, invoiceNumber: number, alreadyPaid: false };
   });
 
@@ -394,13 +444,21 @@ export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promis
     case 'checkout.completed':
     case 'checkout.async_succeeded': {
       if (ev.paymentStatus === 'paid' || ev.paymentStatus === 'no_payment_required') {
-        const r = await fulfillOrder(order.id, { paymentIntentId: ev.paymentIntentId, amountTotal: ev.amountTotal, currency: ev.currency }, actor);
+        const r = await fulfillOrder(
+          order.id,
+          { paymentIntentId: ev.paymentIntentId, amountTotal: ev.amountTotal, currency: ev.currency },
+          actor,
+        );
         return r.state;
       }
       // z. B. SEPA-Lastschrift: Zahlung läuft noch
       await db
         .update(orders)
-        .set({ status: 'processing', stripePaymentIntent: ev.paymentIntentId ?? order.stripePaymentIntent, updatedAt: new Date() })
+        .set({
+          status: 'processing',
+          stripePaymentIntent: ev.paymentIntentId ?? order.stripePaymentIntent,
+          updatedAt: new Date(),
+        })
         .where(and(eq(orders.id, order.id), inArray(orders.status, ['pending', 'cancelled', 'expired'])));
       await audit(db, { entity: 'order', entityId: order.id, action: 'processing', actor });
       return 'processing';
@@ -433,12 +491,23 @@ async function markPaymentFailed(order: Order, actor: string): Promise<void> {
     .returning({ id: orders.id });
   if (!res.length) return;
   await audit(db, { entity: 'order', entityId: order.id, action: 'payment_failed', actor });
-  if (order.leadId) await transitionLead(db, order.leadId, 'cta_clicked', { actor, soft: true, reason: 'Zahlung fehlgeschlagen' });
+  if (order.leadId)
+    await transitionLead(db, order.leadId, 'cta_clicked', { actor, soft: true, reason: 'Zahlung fehlgeschlagen' });
   const demo = order.demoId ? await db.query.demos.findFirst({ where: eq(demos.id, order.demoId) }) : undefined;
   const cfg = await getConfig();
   try {
-    const mail = paymentFailedEmail(cfg, { name: order.customerName, retryUrl: demo ? appUrl(`/checkout/${demo.slug}`) : appUrl('/') });
-    await sendTransactionalEmail({ ...mail, kind: 'payment_failed', idempotencyKey: `payment-failed:${order.id}`, to: order.customerEmail, orderId: order.id, leadId: order.leadId });
+    const mail = paymentFailedEmail(cfg, {
+      name: order.customerName,
+      retryUrl: demo ? appUrl(`/checkout/${demo.slug}`) : appUrl('/'),
+    });
+    await sendTransactionalEmail({
+      ...mail,
+      kind: 'payment_failed',
+      idempotencyKey: `payment-failed:${order.id}`,
+      to: order.customerEmail,
+      orderId: order.id,
+      leadId: order.leadId,
+    });
   } catch (err) {
     logger.warn({ orderId: order.id, ...errInfo(err) }, 'Mail „Zahlung fehlgeschlagen“ nicht versendet');
   }
@@ -457,11 +526,26 @@ export async function applyRefund(orderId: string, refundedCents: number, actor:
     .update(orders)
     .set({ refundedCents, refundedAt: new Date(), ...(full ? { status: 'refunded' as const } : {}), updatedAt: new Date() })
     .where(eq(orders.id, orderId));
-  await audit(db, { entity: 'order', entityId: orderId, action: full ? 'refunded' : 'partially_refunded', actor, context: { refundedCents } });
-  await raiseAlert(db, { level: 'warn', code: `refund_${orderId}`, message: `Erstattung ${formatEuro(refundedCents)} zu ${order.invoiceNumber ?? orderId}`, context: { orderId } });
+  await audit(db, {
+    entity: 'order',
+    entityId: orderId,
+    action: full ? 'refunded' : 'partially_refunded',
+    actor,
+    context: { refundedCents },
+  });
+  await raiseAlert(db, {
+    level: 'warn',
+    code: `refund_${orderId}`,
+    message: `Erstattung ${formatEuro(refundedCents)} zu ${order.invoiceNumber ?? orderId}`,
+    context: { orderId },
+  });
   if (order.invoiceNumber) {
     try {
-      await enqueue(QUEUES.sendInvoice, { orderId, kind: 'cancellation' }, { singletonKey: `cancellation-${orderId}-${refundedCents}` });
+      await enqueue(
+        QUEUES.sendInvoice,
+        { orderId, kind: 'cancellation' },
+        { singletonKey: `cancellation-${orderId}-${refundedCents}` },
+      );
     } catch (err) {
       logger.error({ orderId, ...errInfo(err) }, 'Stornorechnung nicht eingereiht');
     }
@@ -479,8 +563,12 @@ export async function refundOrder(orderId: string, actor: string, amountCents?: 
   const p = getProviders().payment;
   if (!p.refund) throw new Error('Der Zahlungsanbieter unterstützt keine Erstattung über die API.');
   if (p.name !== order.provider) throw new Error(`Bestellung wurde über ${order.provider} bezahlt, aktiv ist ${p.name}.`);
-  if (!order.stripePaymentIntent && p.name !== 'mock') throw new Error('Keine Zahlungs-ID gespeichert – Erstattung bitte im Stripe-Dashboard.');
-  await p.refund(order.stripePaymentIntent ?? `pi_mock_${order.id}`, { idempotencyKey: `refund-${order.id}-${amount}`, amountCents: amount });
+  if (!order.stripePaymentIntent && p.name !== 'mock')
+    throw new Error('Keine Zahlungs-ID gespeichert – Erstattung bitte im Stripe-Dashboard.');
+  await p.refund(order.stripePaymentIntent ?? `pi_mock_${order.id}`, {
+    idempotencyKey: `refund-${order.id}-${amount}`,
+    amountCents: amount,
+  });
   await applyRefund(order.id, order.refundedCents + amount, actor);
 }
 
@@ -492,7 +580,10 @@ export class InvalidWebhookError extends Error {
 }
 
 /** Webhook verifizieren, Replay-Schutz (webhook_events), anwenden. Fehler ⇒ Anbieter wiederholt. */
-export async function processPaymentWebhook(rawBody: string, signature: string | null): Promise<{ result: string; duplicate: boolean }> {
+export async function processPaymentWebhook(
+  rawBody: string,
+  signature: string | null,
+): Promise<{ result: string; duplicate: boolean }> {
   const p = getProviders().payment;
   let ev: PaymentEvent;
   try {
@@ -507,7 +598,9 @@ export async function processPaymentWebhook(rawBody: string, signature: string |
     .onConflictDoNothing()
     .returning({ id: webhookEvents.eventId });
   if (!inserted.length) {
-    const prev = await db.query.webhookEvents.findFirst({ where: and(eq(webhookEvents.provider, p.name), eq(webhookEvents.eventId, ev.eventId)) });
+    const prev = await db.query.webhookEvents.findFirst({
+      where: and(eq(webhookEvents.provider, p.name), eq(webhookEvents.eventId, ev.eventId)),
+    });
     if (prev?.processedAt) return { result: 'duplicate', duplicate: true };
   }
   try {
@@ -552,11 +645,25 @@ export async function confirmCheckoutReturn(slug: string, sessionId: string): Pr
   const info = await p.retrieveSession(sessionId);
   if (!info) return { state: 'unknown' };
   if (info.paymentStatus === 'paid' || info.paymentStatus === 'no_payment_required') {
-    const r = await fulfillOrder(order.id, { paymentIntentId: info.paymentIntentId, amountTotal: info.amountTotal, currency: info.currency }, 'public:checkout-return');
+    const r = await fulfillOrder(
+      order.id,
+      { paymentIntentId: info.paymentIntentId, amountTotal: info.amountTotal, currency: info.currency },
+      'public:checkout-return',
+    );
     return r.state === 'paid' ? done() : { state: 'processing' };
   }
   if (info.status === 'complete') {
-    await applyPaymentEvent({ eventId: `return-${sessionId}`, type: 'checkout.completed', rawType: 'return', sessionId, paymentStatus: 'unpaid', paymentIntentId: info.paymentIntentId }, 'public:checkout-return');
+    await applyPaymentEvent(
+      {
+        eventId: `return-${sessionId}`,
+        type: 'checkout.completed',
+        rawType: 'return',
+        sessionId,
+        paymentStatus: 'unpaid',
+        paymentIntentId: info.paymentIntentId,
+      },
+      'public:checkout-return',
+    );
     return { state: 'processing' };
   }
   return { state: 'open' };
@@ -578,7 +685,14 @@ export async function sweepPaidOrders(): Promise<number> {
     .select({ id: customers.id })
     .from(customers)
     .innerJoin(orders, eq(orders.id, customers.orderId))
-    .where(and(eq(orders.status, 'paid'), isNull(customers.onboardingMailSentAt), isNull(customers.siteId), lt(customers.createdAt, sql`now() - interval '10 minutes'`)))
+    .where(
+      and(
+        eq(orders.status, 'paid'),
+        isNull(customers.onboardingMailSentAt),
+        isNull(customers.siteId),
+        lt(customers.createdAt, sql`now() - interval '10 minutes'`),
+      ),
+    )
     .limit(20);
   for (const c of noOnboarding) await enqueue(QUEUES.onboarding, { customerId: c.id }, { singletonKey: `onboarding-${c.id}` });
   // Offene Bestellungen nach Ablauf der Session schließen (falls das Expired-Event fehlte)
@@ -589,7 +703,10 @@ export async function sweepPaidOrders(): Promise<number> {
   return stale.length + noOnboarding.length;
 }
 
-export async function orderWithCustomer(db: DbOrTx, orderId: string): Promise<{ order: Order; customer: Customer | undefined } | null> {
+export async function orderWithCustomer(
+  db: DbOrTx,
+  orderId: string,
+): Promise<{ order: Order; customer: Customer | undefined } | null> {
   const order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
   if (!order) return null;
   const customer = await db.query.customers.findFirst({ where: eq(customers.orderId, orderId) });
@@ -619,15 +736,33 @@ export async function simulateMockPayment(sessionId: string, outcome: MockOutcom
   if (outcome === 'cancel') return appUrl(`/checkout/${slug}?abgebrochen=1`);
   const p = getProviders().payment as unknown as PaymentProviderWithSign;
   const fire = async (ev: Omit<PaymentEvent, 'eventId' | 'rawType'> & { rawType: string }) => {
-    const raw = JSON.stringify({ eventId: `evt_mock_${randomToken(16)}`, sessionId, clientReferenceId: order.id, amountTotal: order.amountCents, currency: 'eur', ...ev });
+    const raw = JSON.stringify({
+      eventId: `evt_mock_${randomToken(16)}`,
+      sessionId,
+      clientReferenceId: order.id,
+      amountTotal: order.amountCents,
+      currency: 'eur',
+      ...ev,
+    });
     await processPaymentWebhook(raw, p.sign(raw));
   };
   const pi = `pi_mock_${order.id.replace(/-/g, '')}`;
   if (outcome === 'paid') {
     await fire({ type: 'checkout.completed', rawType: 'checkout.session.completed', paymentStatus: 'paid', paymentIntentId: pi });
   } else {
-    await fire({ type: 'checkout.completed', rawType: 'checkout.session.completed', paymentStatus: 'unpaid', paymentIntentId: pi });
-    if (outcome === 'sepa_failed') await fire({ type: 'checkout.async_failed', rawType: 'checkout.session.async_payment_failed', paymentStatus: 'unpaid', paymentIntentId: pi });
+    await fire({
+      type: 'checkout.completed',
+      rawType: 'checkout.session.completed',
+      paymentStatus: 'unpaid',
+      paymentIntentId: pi,
+    });
+    if (outcome === 'sepa_failed')
+      await fire({
+        type: 'checkout.async_failed',
+        rawType: 'checkout.session.async_payment_failed',
+        paymentStatus: 'unpaid',
+        paymentIntentId: pi,
+      });
   }
   return appUrl(`/checkout/${slug}/erfolg?session_id=${encodeURIComponent(sessionId)}`);
 }

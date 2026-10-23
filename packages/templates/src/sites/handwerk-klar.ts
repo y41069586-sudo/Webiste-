@@ -40,7 +40,10 @@ export const handwerkKlar: TemplateDef = {
           <li class="flex items-center gap-2"><span class="text-primary">${icon('wrench', 'h-4 w-4')}</span>${esc(f.branchLabel)}</li>
         </ul>
       </div>
-      <div class="md:col-span-2">${gridArt(c.services.map((s) => s.icon), 'mx-auto max-w-xs')}</div>
+      <div class="md:col-span-2">${gridArt(
+        c.services.map((s) => s.icon),
+        'mx-auto max-w-xs',
+      )}</div>
     </div>
   </section>
 
@@ -89,7 +92,8 @@ export const handwerkKlar: TemplateDef = {
     sectionClass: 'py-16',
     cardClass: 'rounded-2xl bg-surface-alt p-6 ring-1 ring-line',
     titleClass: 'font-heading text-3xl font-bold',
-    buttonClass: 'inline-flex min-h-12 items-center rounded-full bg-primary px-6 py-3 font-semibold text-on-primary disabled:opacity-60',
+    buttonClass:
+      'inline-flex min-h-12 items-center rounded-full bg-primary px-6 py-3 font-semibold text-on-primary disabled:opacity-60',
     inputClass: 'block w-full rounded-lg border border-line bg-surface px-3 py-2.5 focus:outline-2 focus:outline-primary',
   })}
 

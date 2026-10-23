@@ -39,7 +39,9 @@ export default async function Dashboard() {
             {openAlerts.map((a) => (
               <li key={a.id} className="flex items-start justify-between gap-4 py-2 text-sm">
                 <div>
-                  <span className={`mr-2 font-semibold ${a.level === 'error' ? 'text-red-700' : a.level === 'warn' ? 'text-amber-700' : 'text-slate-700'}`}>
+                  <span
+                    className={`mr-2 font-semibold ${a.level === 'error' ? 'text-red-700' : a.level === 'warn' ? 'text-amber-700' : 'text-slate-700'}`}
+                  >
                     {a.level.toUpperCase()}
                   </span>
                   {a.message}
@@ -60,7 +62,11 @@ export default async function Dashboard() {
       ) : null}
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <Stat label="Budget Briefe (Woche)" value={eur(letterBudget.spentCents)} hint={`von ${eur(letterBudget.limitCents)} · Rest ${eur(letterBudget.remainingCents)}`} />
+        <Stat
+          label="Budget Briefe (Woche)"
+          value={eur(letterBudget.spentCents)}
+          hint={`von ${eur(letterBudget.limitCents)} · Rest ${eur(letterBudget.remainingCents)}`}
+        />
         <Stat label="KI-Kosten (Woche)" value={eur(llmBudget.spentCents)} hint={`Limit ${eur(llmBudget.limitCents)}`} />
         <Stat label="Places-API (Woche)" value={eur(placesBudget.spentCents)} hint={`Limit ${eur(placesBudget.limitCents)}`} />
       </div>
@@ -73,7 +79,11 @@ export default async function Dashboard() {
             {Object.entries(counts)
               .sort((a, b) => b[1] - a[1])
               .map(([status, n]) => (
-                <a key={status} href={`/admin/leads?status=${status}`} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50">
+                <a
+                  key={status}
+                  href={`/admin/leads?status=${status}`}
+                  className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50"
+                >
                   <StatusBadge status={status} />
                   <span className="font-semibold tabular-nums">{num(n)}</span>
                 </a>

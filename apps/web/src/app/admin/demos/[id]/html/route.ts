@@ -19,7 +19,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       'content-type': 'text/html; charset=utf-8',
       'cache-control': 'private, no-store',
       'x-robots-tag': 'noindex',
-      'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; sandbox allow-same-origin",
+      'content-security-policy':
+        "default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; sandbox allow-same-origin",
     },
   });
 }

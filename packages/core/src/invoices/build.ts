@@ -57,7 +57,11 @@ export interface InvoiceOrder {
 }
 
 /** Unveränderlicher Rechnungsstand (wird am Auftrag gespeichert und daraus das PDF erzeugt). */
-export function buildInvoiceData(cfg: AppConfig, order: InvoiceOrder, opts: { number: string; paidAt: Date; issuedAt: Date; amounts: Amounts }): InvoiceData {
+export function buildInvoiceData(
+  cfg: AppConfig,
+  order: InvoiceOrder,
+  opts: { number: string; paidAt: Date; issuedAt: Date; amounts: Amounts },
+): InvoiceData {
   const a = opts.amounts;
   const s = cfg.sender;
   const domain = order.domainWish ? ` (Domain: ${order.domainWish})` : '';
@@ -110,7 +114,10 @@ export function buildInvoiceData(cfg: AppConfig, order: InvoiceOrder, opts: { nu
 }
 
 /** Stornorechnung zur ursprünglichen Rechnung (negative Beträge, eigene fortlaufende Nummer). */
-export function buildCancellationData(original: InvoiceData, opts: { number: string; issuedAt: Date; refundedCents: number; amounts: Amounts }): InvoiceData {
+export function buildCancellationData(
+  original: InvoiceData,
+  opts: { number: string; issuedAt: Date; refundedCents: number; amounts: Amounts },
+): InvoiceData {
   const full = opts.refundedCents >= opts.amounts.grossCents;
   const ratio = full ? 1 : opts.refundedCents / opts.amounts.grossCents;
   const gross = full ? opts.amounts.grossCents : opts.refundedCents;

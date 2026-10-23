@@ -24,7 +24,10 @@ async function worker() {
     const r = routes[i % routes.length];
     const t0 = performance.now();
     try {
-      const res = await fetch(base + r.path, { redirect: 'manual', headers: { 'user-agent': 'Mozilla/5.0 (Lasttest) Chrome/130', 'x-forwarded-for': `10.0.${(i >> 8) & 255}.${i & 255}` } });
+      const res = await fetch(base + r.path, {
+        redirect: 'manual',
+        headers: { 'user-agent': 'Mozilla/5.0 (Lasttest) Chrome/130', 'x-forwarded-for': `10.0.${(i >> 8) & 255}.${i & 255}` },
+      });
       await res.arrayBuffer();
       if (!r.expect.includes(res.status)) stats.get(r.name).errors++;
     } catch {
@@ -41,7 +44,9 @@ let failed = false;
 console.log(`${total} Anfragen, ${conc} parallel, ${secs.toFixed(1)} s, ${(total / secs).toFixed(0)} Anfragen/s`);
 for (const [name, s] of stats) {
   const p95 = q(s.ms, 0.95);
-  console.log(`${name.padEnd(14)} n=${s.ms.length} p50=${q(s.ms, 0.5).toFixed(0)}ms p95=${p95.toFixed(0)}ms p99=${q(s.ms, 0.99).toFixed(0)}ms Fehler=${s.errors}`);
+  console.log(
+    `${name.padEnd(14)} n=${s.ms.length} p50=${q(s.ms, 0.5).toFixed(0)}ms p95=${p95.toFixed(0)}ms p99=${q(s.ms, 0.99).toFixed(0)}ms Fehler=${s.errors}`,
+  );
   if (s.errors > 0 || p95 > 1500) failed = true;
 }
 process.exit(failed ? 1 : 0);

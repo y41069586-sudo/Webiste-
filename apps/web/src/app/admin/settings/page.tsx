@@ -18,8 +18,8 @@ export default async function SettingsPage() {
       <Card title="Not-Aus" className="mb-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="max-w-xl text-sm text-slate-700">
-            Stoppt sofort alle Jobs mit Kostenfolge (Places-Suche, KI, Briefversand, Domainkauf). Laufende Jobs prüfen den Schalter vor
-            jeder kostenpflichtigen Aktion.
+            Stoppt sofort alle Jobs mit Kostenfolge (Places-Suche, KI, Briefversand, Domainkauf). Laufende Jobs prüfen den
+            Schalter vor jeder kostenpflichtigen Aktion.
           </p>
           <form action={toggleSwitch}>
             <input type="hidden" name="key" value="killSwitch" />
@@ -51,7 +51,9 @@ export default async function SettingsPage() {
                   <div className="text-xs text-slate-500">{s.hint}</div>
                 </div>
                 <form action={toggleSwitch} className="flex items-center gap-3">
-                  <span className={`text-sm font-medium ${effective ? 'text-emerald-700' : 'text-slate-500'}`}>{effective ? 'AN' : 'AUS'}</span>
+                  <span className={`text-sm font-medium ${effective ? 'text-emerald-700' : 'text-slate-500'}`}>
+                    {effective ? 'AN' : 'AUS'}
+                  </span>
                   <input type="hidden" name="key" value={s.key} />
                   <input type="hidden" name="value" value={String(!value)} />
                   <button type="submit" className={btn.secondary} disabled={s.key === 'dryRun' && sw.dryRunLockedByEnv}>

@@ -60,7 +60,8 @@ export class NetlifyHosting implements HostingProvider {
           signal: AbortSignal.timeout(120_000),
         });
         const text = await res.text();
-        if (!res.ok) throw new HttpError(`Netlify ${method} ${p.split('?')[0]} HTTP ${res.status}`, res.status, text.slice(0, 500));
+        if (!res.ok)
+          throw new HttpError(`Netlify ${method} ${p.split('?')[0]} HTTP ${res.status}`, res.status, text.slice(0, 500));
         return (text ? JSON.parse(text) : {}) as T;
       },
       { retries: 3, baseDelayMs: 2_000 },
@@ -68,30 +69,45 @@ export class NetlifyHosting implements HostingProvider {
   }
 
   async ensureProject(name: string): Promise<{ projectId: string; defaultUrl: string }> {
-    const siteName = name.toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 60);
+    const siteName = name
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '-')
+      .slice(0, 60);
     const found = await this.api<NetlifySite[]>('GET', `/sites?name=${encodeURIComponent(siteName)}&filter=all`);
     const site = found.find((s) => s.name === siteName) ?? (await this.api<NetlifySite>('POST', '/sites', { name: siteName }));
     return { projectId: site.id, defaultUrl: site.ssl_url ?? `https://${site.name}.netlify.app/` };
   }
 
   async deploy(projectId: string, files: SiteFile[]): Promise<{ deploymentId: string; url: string }> {
-    const all = [...files, { path: '_headers', content: netlifyHeadersFile(this.cfg.formOrigin), contentType: 'text/plain' }].map((f) => {
-      const content = Buffer.isBuffer(f.content) ? f.content : Buffer.from(f.content, 'utf8');
-      const p = `/${f.path.replace(/^\//, '')}`;
-      return { path: p, content, sha: createHash('sha1').update(content).digest('hex') };
-    });
-    const deploy = await this.api<{ id: string; required?: string[]; ssl_url?: string; deploy_ssl_url?: string }>('POST', `/sites/${projectId}/deploys`, {
-      files: Object.fromEntries(all.map((f) => [f.path, f.sha])),
-    });
+    const all = [...files, { path: '_headers', content: netlifyHeadersFile(this.cfg.formOrigin), contentType: 'text/plain' }].map(
+      (f) => {
+        const content = Buffer.isBuffer(f.content) ? f.content : Buffer.from(f.content, 'utf8');
+        const p = `/${f.path.replace(/^\//, '')}`;
+        return { path: p, content, sha: createHash('sha1').update(content).digest('hex') };
+      },
+    );
+    const deploy = await this.api<{ id: string; required?: string[]; ssl_url?: string; deploy_ssl_url?: string }>(
+      'POST',
+      `/sites/${projectId}/deploys`,
+      {
+        files: Object.fromEntries(all.map((f) => [f.path, f.sha])),
+      },
+    );
     const required = new Set(deploy.required ?? []);
     for (const f of all) {
       if (!required.has(f.sha)) continue;
       required.delete(f.sha);
       const encoded = f.path.split('/').map(encodeURIComponent).join('/');
-      await this.api('PUT', `/deploys/${deploy.id}/files${encoded}`, undefined, { data: f.content, contentType: 'application/octet-stream' });
+      await this.api('PUT', `/deploys/${deploy.id}/files${encoded}`, undefined, {
+        data: f.content,
+        contentType: 'application/octet-stream',
+      });
     }
     for (let i = 0; i < 60; i++) {
-      const d = await this.api<{ state: string; ssl_url?: string; error_message?: string }>('GET', `/sites/${projectId}/deploys/${deploy.id}`);
+      const d = await this.api<{ state: string; ssl_url?: string; error_message?: string }>(
+        'GET',
+        `/sites/${projectId}/deploys/${deploy.id}`,
+      );
       if (d.state === 'ready') return { deploymentId: deploy.id, url: d.ssl_url ?? deploy.ssl_url ?? '' };
       if (d.state === 'error') throw new Error(`Netlify-Deploy fehlgeschlagen: ${d.error_message ?? 'unbekannt'}`);
       await sleep(this.pollMs);
@@ -100,7 +116,10 @@ export class NetlifyHosting implements HostingProvider {
   }
 
   async attachDomain(projectId: string, domain: string): Promise<DnsPlan> {
-    const site = await this.api<NetlifySite>('PATCH', `/sites/${projectId}`, { custom_domain: domain, domain_aliases: [`www.${domain}`] });
+    const site = await this.api<NetlifySite>('PATCH', `/sites/${projectId}`, {
+      custom_domain: domain,
+      domain_aliases: [`www.${domain}`],
+    });
     return {
       records: [
         { type: 'A', name: '@', value: NETLIFY_APEX_IP },

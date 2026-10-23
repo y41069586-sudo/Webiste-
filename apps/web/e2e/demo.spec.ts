@@ -34,7 +34,10 @@ test.describe('Demo: Ansicht, Frage, Opt-out', () => {
 
     // Kein Interesse → sofortiger Widerspruch
     await page.goto(`/d/${demo.slug}`);
-    await page.getByRole('complementary', { name: 'Hinweis zum Entwurf' }).getByRole('button', { name: 'Kein Interesse' }).click();
+    await page
+      .getByRole('complementary', { name: 'Hinweis zum Entwurf' })
+      .getByRole('button', { name: 'Kein Interesse' })
+      .click();
     await expect(page.getByRole('heading', { name: /wir schreiben Ihnen nicht mehr/ })).toBeVisible();
 
     // Danach: Demo und QR liefern 410

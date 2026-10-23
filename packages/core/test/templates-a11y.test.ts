@@ -18,7 +18,13 @@ const fullFacts = {
     { label: 'Sonntag', value: 'geschlossen' },
   ],
 };
-const minimalFacts = { ...fullFacts, name: 'Ein sehr langer Firmenname für Kosmetik, Wellness und Gesundheit', phone: null, phoneHref: null, openingLines: [] };
+const minimalFacts = {
+  ...fullFacts,
+  name: 'Ein sehr langer Firmenname für Kosmetik, Wellness und Gesundheit',
+  phone: null,
+  phoneHref: null,
+  openingLines: [],
+};
 
 const sender = {
   name: 'Max Muster',
@@ -36,9 +42,17 @@ describe('Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Date
   afterAll(closeBrowser);
   for (const t of TEMPLATES) {
     for (const palette of t.palettes) {
-      for (const [label, facts] of [['voll', fullFacts], ['minimal', minimalFacts]] as const) {
+      for (const [label, facts] of [
+        ['voll', fullFacts],
+        ['minimal', minimalFacts],
+      ] as const) {
         it(`${t.id} / ${palette} / ${label}`, async () => {
-          const content = libraryContent(t.group === 'beauty' ? 'kosmetikstudio' : 'elektriker', t.group, { name: facts.name, stadt: 'Dortmund', branche: facts.branchLabel }, 3);
+          const content = libraryContent(
+            t.group === 'beauty' ? 'kosmetikstudio' : 'elektriker',
+            t.group,
+            { name: facts.name, stadt: 'Dortmund', branche: facts.branchLabel },
+            3,
+          );
           const html = renderSite({
             templateId: t.id,
             palette,

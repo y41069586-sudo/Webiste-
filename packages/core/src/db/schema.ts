@@ -416,10 +416,7 @@ export const supportMessages = pgTable(
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [
-    uniqueIndex('support_provider_msg_uidx').on(t.providerMessageId),
-    index('support_status_idx').on(t.status),
-  ],
+  (t) => [uniqueIndex('support_provider_msg_uidx').on(t.providerMessageId), index('support_status_idx').on(t.status)],
 );
 
 // ---------------------------------------------------------------------------

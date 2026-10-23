@@ -3,7 +3,12 @@ import { allocate, segmentShares } from '../src/services/pipeline';
 import { DEFAULT_CONFIG } from '../src/config/settings';
 
 describe('Pipeline-Planung', () => {
-  const segs = ['dortmund:beauty:nagelstudio', 'dortmund:beauty:kosmetikstudio', 'dortmund:handwerk:maler', 'dortmund:handwerk:elektriker'];
+  const segs = [
+    'dortmund:beauty:nagelstudio',
+    'dortmund:beauty:kosmetikstudio',
+    'dortmund:handwerk:maler',
+    'dortmund:handwerk:elektriker',
+  ];
 
   it('Standard: 50 % Beauty / 50 % Handwerk → erste Charge 20/20', () => {
     const shares = segmentShares(DEFAULT_CONFIG, segs);
@@ -14,7 +19,12 @@ describe('Pipeline-Planung', () => {
 
   it('fehlender Vorrat wird auf andere Segmente umverteilt', () => {
     const shares = segmentShares(DEFAULT_CONFIG, segs);
-    const plan = allocate(40, shares, { 'dortmund:beauty:nagelstudio': 30, 'dortmund:beauty:kosmetikstudio': 30, 'dortmund:handwerk:maler': 3, 'dortmund:handwerk:elektriker': 5 });
+    const plan = allocate(40, shares, {
+      'dortmund:beauty:nagelstudio': 30,
+      'dortmund:beauty:kosmetikstudio': 30,
+      'dortmund:handwerk:maler': 3,
+      'dortmund:handwerk:elektriker': 5,
+    });
     expect(Object.values(plan).reduce((a, b) => a + b, 0)).toBe(40);
     expect(plan['dortmund:handwerk:maler']).toBe(3);
   });

@@ -30,7 +30,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ formKey
       requestMetaFrom(req.headers),
     );
     if (res.ok) return new Response(null, { status: 303, headers: { location: res.redirect } });
-    if (res.reason === 'not_found') return simplePage('Formular nicht gefunden', '<p>Dieses Kontaktformular ist nicht (mehr) aktiv.</p>', 404);
+    if (res.reason === 'not_found')
+      return simplePage('Formular nicht gefunden', '<p>Dieses Kontaktformular ist nicht (mehr) aktiv.</p>', 404);
     const back = res.back ? `<p><a href="${res.back}#frage">Zurück zur Website</a></p>` : '';
     const msg =
       res.reason === 'rate_limited'
@@ -39,6 +40,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ formKey
     return simplePage('Nachricht nicht gesendet', `<p>${msg}</p>${back}`, 400);
   } catch (err) {
     logger.error({ ...errInfo(err) }, 'Kontaktformular fehlgeschlagen');
-    return simplePage('Nachricht nicht gesendet', '<p>Leider ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut oder rufen Sie uns an.</p>', 502);
+    return simplePage(
+      'Nachricht nicht gesendet',
+      '<p>Leider ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut oder rufen Sie uns an.</p>',
+      502,
+    );
   }
 }

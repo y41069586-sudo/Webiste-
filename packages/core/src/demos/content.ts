@@ -110,13 +110,34 @@ export interface RuleViolation {
 }
 
 const FORBIDDEN: { rule: string; re: RegExp }[] = [
-  { rule: 'erfundene Historie', re: /\bseit\b|gegründet|gründung|jahre(n)?\s+(lang|erfahrung)|jahrzehnt|tradition|familienbetrieb|generation/i },
-  { rule: 'Auszeichnungen/Zertifikate', re: /auszeichnung|preisgekrönt|prämiert|zertifi|\btüv\b|\biso\b|meister|innung|kammer|testsieger|siegel|geprüft(e|er|es)?\s+(fach|qualität)/i },
-  { rule: 'Superlative', re: /(?<!\bam\s)\b(beste[nrms]?|bester|nummer\s+eins|nr\.?\s*1|marktführer|einzigartig|unschlagbar|perfekt(e|en|er)?)\b/i },
-  { rule: 'Bewertungen/Testimonials', re: /bewertung|rezension|sterne|kundenstimme|testimonial|zufriedene[nr]?\s+kund|empfehlen\s+uns|weiterempfohlen/i },
-  { rule: 'Preise/Rabatte', re: /€|\beuro\b|\beur\b|\bpreis|kostenlos|kostenfrei|gratis|rabatt|günstig|billig|festpreis|unverbindliches\s+angebot\s+zum/i },
-  { rule: 'Garantien/Versprechen', re: /garantie|garantiert|notdienst|\b24\s*\/\s*7\b|rund\s+um\s+die\s+uhr|am\s+selben\s+tag|innerhalb\s+(von|weniger)|schnellstmöglich|express|versichert|haftpflicht/i },
-  { rule: 'Personen/Team', re: /\b(inhaber(in)?|chefin|geschäftsführer(in)?|mitarbeiter(in|innen)?|mitarbeitende|kollegen|kolleginnen|azubi|auszubildende|team\s+aus|frau\s+[A-ZÄÖÜ]|herr\s+[A-ZÄÖÜ])\b/i },
+  {
+    rule: 'erfundene Historie',
+    re: /\bseit\b|gegründet|gründung|jahre(n)?\s+(lang|erfahrung)|jahrzehnt|tradition|familienbetrieb|generation/i,
+  },
+  {
+    rule: 'Auszeichnungen/Zertifikate',
+    re: /auszeichnung|preisgekrönt|prämiert|zertifi|\btüv\b|\biso\b|meister|innung|kammer|testsieger|siegel|geprüft(e|er|es)?\s+(fach|qualität)/i,
+  },
+  {
+    rule: 'Superlative',
+    re: /(?<!\bam\s)\b(beste[nrms]?|bester|nummer\s+eins|nr\.?\s*1|marktführer|einzigartig|unschlagbar|perfekt(e|en|er)?)\b/i,
+  },
+  {
+    rule: 'Bewertungen/Testimonials',
+    re: /bewertung|rezension|sterne|kundenstimme|testimonial|zufriedene[nr]?\s+kund|empfehlen\s+uns|weiterempfohlen/i,
+  },
+  {
+    rule: 'Preise/Rabatte',
+    re: /€|\beuro\b|\beur\b|\bpreis|kostenlos|kostenfrei|gratis|rabatt|günstig|billig|festpreis|unverbindliches\s+angebot\s+zum/i,
+  },
+  {
+    rule: 'Garantien/Versprechen',
+    re: /garantie|garantiert|notdienst|\b24\s*\/\s*7\b|rund\s+um\s+die\s+uhr|am\s+selben\s+tag|innerhalb\s+(von|weniger)|schnellstmöglich|express|versichert|haftpflicht/i,
+  },
+  {
+    rule: 'Personen/Team',
+    re: /\b(inhaber(in)?|chefin|geschäftsführer(in)?|mitarbeiter(in|innen)?|mitarbeitende|kollegen|kolleginnen|azubi|auszubildende|team\s+aus|frau\s+[A-ZÄÖÜ]|herr\s+[A-ZÄÖÜ])\b/i,
+  },
   { rule: 'Einzugsgebiet', re: /umgebung|umkreis|ganz\s+(nrw|deutschland)|ruhrgebiet|region/i },
   { rule: 'Platzhalter', re: /lorem|ipsum|\[|\]|\{|\}|\btodo\b|xxx|platzhalter|beispieltext|mustermann|musterstra/i },
   { rule: 'Links/Kontaktdaten', re: /https?:|www\.|@|\.de\b|\.com\b/i },
@@ -187,7 +208,8 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
   c.services.forEach((s, i) => {
     len(`services[${i}].title`, s.title, LIMITS.serviceTitle);
     len(`services[${i}].text`, s.text, LIMITS.serviceText);
-    if (!(ICON_KEYS as string[]).includes(s.icon)) v.push({ field: `services[${i}].icon`, rule: 'Icon', detail: `unbekannt: ${s.icon}` });
+    if (!(ICON_KEYS as string[]).includes(s.icon))
+      v.push({ field: `services[${i}].icon`, rule: 'Icon', detail: `unbekannt: ${s.icon}` });
   });
   c.faq.forEach((q, i) => {
     len(`faq[${i}].q`, q.q, LIMITS.faqQ);
@@ -210,14 +232,19 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
       const m = re.exec(stripped);
       if (m) v.push({ field, rule, detail: `„${m[0]}“ in „${value.slice(0, 80)}“` });
     }
-    if (/["„“”«»]/.test(value) && /[„“”«»]\s*[–-]\s*[A-ZÄÖÜ]/.test(value)) v.push({ field, rule: 'Zitat', detail: 'Zitat mit Namensangabe' });
+    if (/["„“”«»]/.test(value) && /[„“”«»]\s*[–-]\s*[A-ZÄÖÜ]/.test(value))
+      v.push({ field, rule: 'Zitat', detail: 'Zitat mit Namensangabe' });
   }
   return v;
 }
 
 /** Leerraum und typografische Kleinigkeiten säubern. */
 export function normalizeContent(c: SiteContent): SiteContent {
-  const t = (s: string) => s.replace(/[ \t]+/g, ' ').replace(/\s+([.,!?;:])/g, '$1').trim();
+  const t = (s: string) =>
+    s
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\s+([.,!?;:])/g, '$1')
+      .trim();
   return {
     hero_headline: t(c.hero_headline).replace(/[.!]+$/, ''),
     hero_subline: t(c.hero_subline),

@@ -40,13 +40,28 @@ async function seed(opts: { status?: string; letterStatus?: string } = {}) {
     .returning();
   const [demo] = await db
     .insert(demos)
-    .values({ leadId: lead!.id, slug: randomToken(24), templateId: 'handwerk-solid', palette: 'werkblau', status: 'published', publishedAt: new Date(), expiresAt: addDays(new Date(), 30) })
+    .values({
+      leadId: lead!.id,
+      slug: randomToken(24),
+      templateId: 'handwerk-solid',
+      palette: 'werkblau',
+      status: 'published',
+      publishedAt: new Date(),
+      expiresAt: addDays(new Date(), 30),
+    })
     .returning();
   const key = `letters/${lead!.id}/x.pdf`;
   await getProviders().storage.put(key, Buffer.from('%PDF-1.7 test'));
   const [letter] = await db
     .insert(letters)
-    .values({ leadId: lead!.id, demoId: demo!.id, sequence: 1, pdfStorageKey: key, status: (opts.letterStatus ?? 'approved') as never, estimatedCostCents: 135 })
+    .values({
+      leadId: lead!.id,
+      demoId: demo!.id,
+      sequence: 1,
+      pdfStorageKey: key,
+      status: (opts.letterStatus ?? 'approved') as never,
+      estimatedCostCents: 135,
+    })
     .returning();
   return { lead: lead!, demo: demo!, letter: letter! };
 }
@@ -131,7 +146,18 @@ describe('Versand', () => {
     const { letter, lead } = await seed();
     const sent = await sendLetter(letter.id, 'test');
     if (sent.state !== 'sent') throw new Error('nicht gesendet');
-    await processLetterWebhookEvents([{ eventId: 'ev-x', providerLetterId: sent.providerLetterId, status: 'failed', occurredAt: new Date(), reason: 'undeliverable' }], 'mock');
+    await processLetterWebhookEvents(
+      [
+        {
+          eventId: 'ev-x',
+          providerLetterId: sent.providerLetterId,
+          status: 'failed',
+          occurredAt: new Date(),
+          reason: 'undeliverable',
+        },
+      ],
+      'mock',
+    );
     expect((await getDb().query.leads.findFirst({ where: eq(leads.id, lead.id) }))?.status).toBe('failed');
   });
 
@@ -139,7 +165,10 @@ describe('Versand', () => {
     const { letter, lead } = await seed();
     const sent = await sendLetter(letter.id, 'test');
     if (sent.state !== 'sent') throw new Error('nicht gesendet');
-    await getDb().update(letters).set({ status: 'sent', sentAt: addDays(new Date(), -5), provider: 'other' }).where(eq(letters.id, letter.id));
+    await getDb()
+      .update(letters)
+      .set({ status: 'sent', sentAt: addDays(new Date(), -5), provider: 'other' })
+      .where(eq(letters.id, letter.id));
     const r = await syncLetterStatuses();
     expect(r.changed).toBeGreaterThanOrEqual(1);
     expect((await getDb().query.leads.findFirst({ where: eq(leads.id, lead.id) }))?.status).toBe('letter_delivered');
@@ -147,7 +176,10 @@ describe('Versand', () => {
 
   it('Follow-up nur mit Schalter und nach 12 Tagen ohne Scan', async () => {
     const { letter, lead } = await seed({ status: 'letter_delivered', letterStatus: 'delivered' });
-    await getDb().update(letters).set({ deliveredAt: addDays(new Date(), -13) }).where(eq(letters.id, letter.id));
+    await getDb()
+      .update(letters)
+      .set({ deliveredAt: addDays(new Date(), -13) })
+      .where(eq(letters.id, letter.id));
     await getDb().update(leads).set({ lettersSent: 1 }).where(eq(leads.id, lead.id));
     expect((await scheduleFollowups()).queued).toBe(0);
     await updateConfig({ switches: { followupEnabled: true } }, 'test');

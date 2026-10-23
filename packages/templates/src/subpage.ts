@@ -9,7 +9,11 @@ import type { RenderInput } from './types';
 export function renderSubpage(input: RenderInput, page: { title: string; bodyHtml: string; homeHref?: string }): string {
   const parts = buildParts({
     ...input,
-    content: { ...input.content, seo_title: `${page.title} – ${input.facts.name}`, seo_description: `${page.title} von ${input.facts.name}` },
+    content: {
+      ...input.content,
+      seo_title: `${page.title} – ${input.facts.name}`,
+      seo_description: `${page.title} von ${input.facts.name}`,
+    },
   });
   const home = page.homeHref ?? './';
   const body = `

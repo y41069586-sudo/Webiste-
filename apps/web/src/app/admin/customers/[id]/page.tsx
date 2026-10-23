@@ -5,7 +5,16 @@ import { appUrl, effectiveSwitches, getConfig, getDb, schema } from '@wbm/core';
 import { Badge, Card, Notice, PageHeader, StatusBadge, Table, Td, btn, input, label } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
-import { adminChangeAction, approveDomainAction, liveCheckAction, rebuildAction, redeployAction, resolveChangeAction, suspendAction } from '../actions';
+import {
+  adminChangeAction,
+  approveDomainAction,
+  changeDomainAction,
+  liveCheckAction,
+  rebuildAction,
+  redeployAction,
+  resolveChangeAction,
+  suspendAction,
+} from '../actions';
 
 export const metadata = { title: 'Kunde' };
 export const dynamic = 'force-dynamic';
@@ -24,14 +33,25 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
   ]);
   const sw = effectiveSwitches(cfg);
   const [crs, log, mails] = await Promise.all([
-    site ? db.select().from(schema.changeRequests).where(eq(schema.changeRequests.siteId, site.id)).orderBy(asc(schema.changeRequests.createdAt)) : [],
+    site
+      ? db
+          .select()
+          .from(schema.changeRequests)
+          .where(eq(schema.changeRequests.siteId, site.id))
+          .orderBy(asc(schema.changeRequests.createdAt))
+      : [],
     db
       .select()
       .from(schema.auditLog)
       .where(and(eq(schema.auditLog.entity, site ? 'site' : 'customer'), eq(schema.auditLog.entityId, site?.id ?? id)))
       .orderBy(desc(schema.auditLog.createdAt))
       .limit(40),
-    db.select().from(schema.outboundEmails).where(eq(schema.outboundEmails.customerId, id)).orderBy(desc(schema.outboundEmails.createdAt)).limit(30),
+    db
+      .select()
+      .from(schema.outboundEmails)
+      .where(eq(schema.outboundEmails.customerId, id))
+      .orderBy(desc(schema.outboundEmails.createdAt))
+      .limit(30),
   ]);
   const hidden = (
     <>
@@ -99,10 +119,18 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
             <dd>{c.phone ?? '–'}</dd>
             <dt className="text-slate-500">Onboarding-Link</dt>
             <dd className="break-all">
-              <a href={appUrl(`/onboarding/${c.accessToken}`)} className="text-brand-700 underline" target="_blank" rel="noopener">
+              <a
+                href={appUrl(`/onboarding/${c.accessToken}`)}
+                className="text-brand-700 underline"
+                target="_blank"
+                rel="noopener"
+              >
                 öffnen
               </a>{' '}
-              · <a href={appUrl(`/preview/${c.accessToken}`)} className="text-brand-700 underline" target="_blank" rel="noopener">Vorschau-Seite</a>
+              ·{' '}
+              <a href={appUrl(`/preview/${c.accessToken}`)} className="text-brand-700 underline" target="_blank" rel="noopener">
+                Vorschau-Seite
+              </a>
             </dd>
             <dt className="text-slate-500">Änderungsrunden</dt>
             <dd>
@@ -115,9 +143,23 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
             <dt className="text-slate-500">Domain</dt>
             <dd>
               {c.domain ?? '–'} · registriert {dt(c.domainRegisteredAt)} · läuft ab {dt(c.domainExpiresAt)}
-              {c.domainApprovedAt ? <span className="block text-xs text-slate-500">freigegeben {dt(c.domainApprovedAt)}</span> : null}
+              {c.domainApprovedAt ? (
+                <span className="block text-xs text-slate-500">freigegeben {dt(c.domainApprovedAt)}</span>
+              ) : null}
             </dd>
           </dl>
+          {c.domainStatus !== 'registered' ? (
+            <form action={changeDomainAction} className="mt-4 flex flex-wrap items-end gap-2">
+              <input type="hidden" name="customerId" value={c.id} />
+              <div>
+                <label htmlFor="domain" className={label}>
+                  Domain ändern
+                </label>
+                <input id="domain" name="domain" defaultValue={c.domain ?? ''} className={input} />
+              </div>
+              <button className={btn.secondary}>Prüfen und speichern</button>
+            </form>
+          ) : null}
         </Card>
         <Card title="Website">
           {site ? (
@@ -129,10 +171,23 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                 </dd>
                 <dt className="text-slate-500">Hosting</dt>
                 <dd>
-                  {site.hostingProvider ?? '–'} {site.hostingUrl ? <a href={site.hostingUrl} className="text-brand-700 underline">Standard-URL</a> : null}
+                  {site.hostingProvider ?? '–'}{' '}
+                  {site.hostingUrl ? (
+                    <a href={site.hostingUrl} className="text-brand-700 underline">
+                      Standard-URL
+                    </a>
+                  ) : null}
                 </dd>
                 <dt className="text-slate-500">Live-URL</dt>
-                <dd>{site.productionUrl ? <a href={site.productionUrl} className="text-brand-700 underline">{site.productionUrl}</a> : '–'}</dd>
+                <dd>
+                  {site.productionUrl ? (
+                    <a href={site.productionUrl} className="text-brand-700 underline">
+                      {site.productionUrl}
+                    </a>
+                  ) : (
+                    '–'
+                  )}
+                </dd>
                 <dt className="text-slate-500">Formular an</dt>
                 <dd>{site.formTargetEmail ?? '–'}</dd>
                 <dt className="text-slate-500">Status-Hinweis</dt>
@@ -161,7 +216,9 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                 <form action={suspendAction}>
                   {hidden}
                   <input type="hidden" name="suspend" value={site.status === 'suspended' ? '0' : '1'} />
-                  <button className={site.status === 'suspended' ? btn.secondary : btn.danger}>{site.status === 'suspended' ? 'Sperre aufheben' : 'Seite sperren'}</button>
+                  <button className={site.status === 'suspended' ? btn.secondary : btn.danger}>
+                    {site.status === 'suspended' ? 'Sperre aufheben' : 'Seite sperren'}
+                  </button>
                 </form>
               </div>
             </>
@@ -199,7 +256,9 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
             </Table>
             <form action={adminChangeAction} className="mt-4 space-y-2">
               {hidden}
-              {crs.find((r) => r.status === 'needs_admin') ? <input type="hidden" name="resolves" value={crs.find((r) => r.status === 'needs_admin')!.id} /> : null}
+              {crs.find((r) => r.status === 'needs_admin') ? (
+                <input type="hidden" name="resolves" value={crs.find((r) => r.status === 'needs_admin')!.id} />
+              ) : null}
               <label htmlFor="admin-text" className={label}>
                 Eigene Änderungsanweisung (zählt nicht als Kundenrunde, erzeugt neue Vorschau)
               </label>

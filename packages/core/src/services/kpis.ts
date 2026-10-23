@@ -186,9 +186,15 @@ export async function kpiSummary(f: KpiFilter, db: DbOrTx = getDb()): Promise<Kp
 }
 
 /** Werte für die Filter-Auswahl im Dashboard. */
-export async function kpiFilterOptions(db: DbOrTx = getDb()): Promise<{ cities: string[]; branches: string[]; variants: { id: string; name: string }[] }> {
-  const seg = await db.execute<{ city: string; branch: string }>(sql`SELECT DISTINCT split_part(segment_key, ':', 1) AS city, branch FROM leads`);
-  const vars = await db.execute<{ id: string; name: string }>(sql`SELECT id::text AS id, name FROM variants WHERE kind = 'letter' ORDER BY sequence, name`);
+export async function kpiFilterOptions(
+  db: DbOrTx = getDb(),
+): Promise<{ cities: string[]; branches: string[]; variants: { id: string; name: string }[] }> {
+  const seg = await db.execute<{ city: string; branch: string }>(
+    sql`SELECT DISTINCT split_part(segment_key, ':', 1) AS city, branch FROM leads`,
+  );
+  const vars = await db.execute<{ id: string; name: string }>(
+    sql`SELECT id::text AS id, name FROM variants WHERE kind = 'letter' ORDER BY sequence, name`,
+  );
   return {
     cities: [...new Set(seg.rows.map((r) => r.city))].sort(),
     branches: [...new Set(seg.rows.map((r) => r.branch))].sort(),

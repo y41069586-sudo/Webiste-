@@ -6,7 +6,13 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Test-Abo', robots: { index: false, follow: false } };
 
 /** Simulierter Abo-Abschluss (nur PAYMENT_PROVIDER=mock außerhalb der Produktion). */
-export default async function MockSubscriptionPage({ params, searchParams }: { params: Promise<{ session: string }>; searchParams: Promise<{ ref?: string }> }) {
+export default async function MockSubscriptionPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ session: string }>;
+  searchParams: Promise<{ ref?: string }>;
+}) {
   const { session } = await params;
   const { ref = '' } = await searchParams;
   const avail = checkoutAvailability();
@@ -16,7 +22,15 @@ export default async function MockSubscriptionPage({ params, searchParams }: { p
     'use server';
     const p = getProviders().payment;
     if (!(p instanceof MockPayment)) throw new Error('nur im Testmodus');
-    const raw = JSON.stringify({ eventId: `evt_mock_${randomToken(16)}`, type: 'checkout.completed', rawType: 'checkout.session.completed', sessionId: session, mode: 'subscription', subscriptionId: `sub_mock_${randomToken(12)}`, metadata: { kind: 'subscription', customerId: ref } });
+    const raw = JSON.stringify({
+      eventId: `evt_mock_${randomToken(16)}`,
+      type: 'checkout.completed',
+      rawType: 'checkout.session.completed',
+      sessionId: session,
+      mode: 'subscription',
+      subscriptionId: `sub_mock_${randomToken(12)}`,
+      metadata: { kind: 'subscription', customerId: ref },
+    });
     await processPaymentWebhook(raw, p.sign(raw));
     redirect('/');
   }

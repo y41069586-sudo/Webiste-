@@ -35,9 +35,7 @@ export class S3Storage implements StorageProvider {
 
   async put(key: string, data: Buffer | string, contentType?: string): Promise<void> {
     const { client, mod } = await this.c();
-    await client.send(
-      new mod.PutObjectCommand({ Bucket: this.cfg.bucket, Key: key, Body: data, ContentType: contentType }),
-    );
+    await client.send(new mod.PutObjectCommand({ Bucket: this.cfg.bucket, Key: key, Body: data, ContentType: contentType }));
   }
 
   async get(key: string): Promise<Buffer | null> {

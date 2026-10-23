@@ -12,7 +12,10 @@ export function SubscribeButton({ token, label }: { token: string; label: string
           {state.error}
         </p>
       ) : null}
-      <button disabled={pending} className="rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-60">
+      <button
+        disabled={pending}
+        className="rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+      >
         {pending ? 'Einen Moment …' : label}
       </button>
     </form>

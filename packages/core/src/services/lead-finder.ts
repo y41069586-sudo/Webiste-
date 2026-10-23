@@ -107,19 +107,30 @@ async function chainNames(db: DbOrTx, candidates: Candidate[], minLocations: num
   const keys = [...locations.keys()];
   if (keys.length) {
     // bekannte Leads mit gleichem Namen (andere Städte) einbeziehen
-    const rows = await db.execute<{ business_name: string; city: string; street: string | null; house_number: string | null; postal_code: string | null }>(
-      sql`SELECT business_name, city, street, house_number, postal_code FROM leads WHERE anonymized_at IS NULL`,
-    );
+    const rows = await db.execute<{
+      business_name: string;
+      city: string;
+      street: string | null;
+      house_number: string | null;
+      postal_code: string | null;
+    }>(sql`SELECT business_name, city, street, house_number, postal_code FROM leads WHERE anonymized_at IS NULL`);
     for (const r of rows.rows) {
       const k = normalizeBusinessName(r.business_name);
       const set = locations.get(k);
-      if (set) set.add(`${r.city}|${normalizeAddress({ street: r.street, houseNumber: r.house_number, postalCode: r.postal_code })}`);
+      if (set)
+        set.add(`${r.city}|${normalizeAddress({ street: r.street, houseNumber: r.house_number, postalCode: r.postal_code })}`);
     }
   }
   return new Set([...locations.entries()].filter(([, s]) => s.size >= minLocations).map(([k]) => k));
 }
 
-async function recentlyContacted(db: DbOrTx, identity: string, place: RawPlace, months: number, selfId?: string): Promise<boolean> {
+async function recentlyContacted(
+  db: DbOrTx,
+  identity: string,
+  place: RawPlace,
+  months: number,
+  selfId?: string,
+): Promise<boolean> {
   const since = addMonths(new Date(), -months);
   const sameAddress =
     place.street && place.houseNumber && place.postalCode
@@ -132,7 +143,13 @@ async function recentlyContacted(db: DbOrTx, identity: string, place: RawPlace, 
   const rows = await db
     .select({ id: leads.id })
     .from(leads)
-    .where(and(or(eq(leads.identityHash, identity), sameAddress), gt(leads.contactedAt, since), selfId ? ne(leads.id, selfId) : undefined))
+    .where(
+      and(
+        or(eq(leads.identityHash, identity), sameAddress),
+        gt(leads.contactedAt, since),
+        selfId ? ne(leads.id, selfId) : undefined,
+      ),
+    )
     .limit(1);
   return rows.length > 0;
 }
@@ -178,7 +195,8 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
   for (const city of cities) {
     for (const branch of branches) {
       // OSM sucht über Tags (einmal je Branche), Google über die Suchbegriffe
-      const texts = src.primary.kind === 'google_places' ? branch.queries.map((q) => `${q} ${city}`) : [`${branch.label} ${city}`];
+      const texts =
+        src.primary.kind === 'google_places' ? branch.queries.map((q) => `${q} ${city}`) : [`${branch.label} ${city}`];
       for (const text of texts) {
         try {
           if (src.primary.kind === 'google_places') {
@@ -189,7 +207,10 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
             res = await src.primary.search({ text, city, branch, maxPages: cfg.targeting.maxPagesPerQuery });
           } catch (err) {
             if (!src.fallback) throw err;
-            logger.warn({ text, err: err instanceof Error ? err.message : String(err) }, 'lead-finder: Primärquelle fehlgeschlagen, nutze Fallback');
+            logger.warn(
+              { text, err: err instanceof Error ? err.message : String(err) },
+              'lead-finder: Primärquelle fehlgeschlagen, nutze Fallback',
+            );
             res = await src.fallback.search({ text, city, branch, maxPages: cfg.targeting.maxPagesPerQuery });
           }
           summary.queries++;
@@ -222,7 +243,9 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
   // 2) Upsert + Qualifizierung
   for (const c of candidates) {
     const { place, branch, city } = c;
-    const existing = await db.query.leads.findFirst({ where: and(eq(leads.source, place.source), eq(leads.sourceId, place.sourceId)) });
+    const existing = await db.query.leads.findFirst({
+      where: and(eq(leads.source, place.source), eq(leads.sourceId, place.sourceId)),
+    });
     if (existing && (!UPDATABLE_STATUSES.has(existing.status) || existing.anonymizedAt)) {
       summary.skipped++;
       continue;
@@ -248,7 +271,17 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
     } else if (place.source === 'google_places' && place.rating !== undefined && place.ratingCount !== undefined) {
       rating = { rating: place.rating, ratingCount: place.ratingCount };
     }
-    const prelim = qualify({ place, branch, city, cfg, isSuppressed: suppressed, recentlyContacted: contacted, chainByFrequency: chains.has(nameKey(place)), isDuplicate: Boolean(dup), rating });
+    const prelim = qualify({
+      place,
+      branch,
+      city,
+      cfg,
+      isSuppressed: suppressed,
+      recentlyContacted: contacted,
+      chainByFrequency: chains.has(nameKey(place)),
+      isDuplicate: Boolean(dup),
+      rating,
+    });
     if (src.signal && prelim.qualified && place.street && place.houseNumber && place.postalCode) {
       try {
         await assertBudgetAvailable('places_api', 4);
@@ -256,7 +289,12 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
         summary.googleLookups++;
         const cost = src.signal.costPerRequestCents();
         summary.costCents += cost;
-        await recordCost(db, { category: 'places_api', amountMicroCents: Math.round(cost * 1e6), ref: 'signal', meta: { requests: 1 } });
+        await recordCost(db, {
+          category: 'places_api',
+          amountMicroCents: Math.round(cost * 1e6),
+          ref: 'signal',
+          meta: { requests: 1 },
+        });
         if (sig) {
           googlePlaceId = sig.placeId;
           if (sig.rating !== null && sig.ratingCount !== null) rating = { rating: sig.rating, ratingCount: sig.ratingCount };
@@ -328,7 +366,13 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
           .returning({ id: leads.id });
         id = row!.id;
         summary.created++;
-        await audit(tx, { entity: 'lead', entityId: id, action: 'discovered', actor: opts.actor, context: { source: place.source, segment: values.segmentKey } });
+        await audit(tx, {
+          entity: 'lead',
+          entityId: id,
+          action: 'discovered',
+          actor: opts.actor,
+          context: { source: place.source, segment: values.segmentKey },
+        });
       }
       const current = existing?.status ?? 'discovered';
       if (current !== target) {

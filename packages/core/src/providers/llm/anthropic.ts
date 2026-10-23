@@ -37,12 +37,15 @@ export class AnthropicLlm implements LlmProvider {
     this.client = new Anthropic({ apiKey, maxRetries: 3, timeout: 180_000 });
   }
 
-  private usageOf(model: string, u: {
-    input_tokens: number;
-    output_tokens: number;
-    cache_read_input_tokens?: number | null;
-    cache_creation_input_tokens?: number | null;
-  }): LlmUsage {
+  private usageOf(
+    model: string,
+    u: {
+      input_tokens: number;
+      output_tokens: number;
+      cache_read_input_tokens?: number | null;
+      cache_creation_input_tokens?: number | null;
+    },
+  ): LlmUsage {
     return {
       model,
       inputTokens: u.input_tokens,

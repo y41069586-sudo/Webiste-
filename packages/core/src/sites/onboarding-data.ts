@@ -13,7 +13,17 @@ export const WEEK_DAYS: { day: number; label: string }[] = [
   { day: 0, label: 'Sonntag' },
 ];
 
-export const LEGAL_FORMS = ['Einzelunternehmen', 'e. K.', 'GbR', 'GmbH', 'UG (haftungsbeschränkt)', 'OHG', 'KG', 'GmbH & Co. KG', 'Sonstige'] as const;
+export const LEGAL_FORMS = [
+  'Einzelunternehmen',
+  'e. K.',
+  'GbR',
+  'GmbH',
+  'UG (haftungsbeschränkt)',
+  'OHG',
+  'KG',
+  'GmbH & Co. KG',
+  'Sonstige',
+] as const;
 /** Rechtsformen mit Handelsregister-Eintrag (Registergericht + Nummer sind Pflicht) */
 export const REGISTERED_FORMS = new Set<string>(['e. K.', 'GmbH', 'UG (haftungsbeschränkt)', 'OHG', 'KG', 'GmbH & Co. KG']);
 
@@ -60,7 +70,14 @@ const req = (msg: string, max = 200) => z.string().trim().min(1, msg).max(max, '
 const opt = (max = 200) => z.string().trim().max(max, 'Text ist zu lang.');
 
 const daySchema = z
-  .object({ day: z.number().int().min(0).max(6), closed: z.boolean(), open: z.string(), close: z.string(), open2: z.string(), close2: z.string() })
+  .object({
+    day: z.number().int().min(0).max(6),
+    closed: z.boolean(),
+    open: z.string(),
+    close: z.string(),
+    open2: z.string(),
+    close2: z.string(),
+  })
   .superRefine((d, ctx) => {
     if (d.closed) return;
     if (!TIME.test(d.open) || !TIME.test(d.close) || d.open >= d.close) {
@@ -80,7 +97,10 @@ export const onboardingSubmitSchema = z
       email: z.union([z.literal(''), EMAIL]),
       street: req('Bitte die Straße angeben.', 100),
       houseNumber: req('Bitte die Hausnummer angeben.', 12),
-      postalCode: z.string().trim().regex(/^\d{5}$/, 'Bitte eine fünfstellige Postleitzahl angeben.'),
+      postalCode: z
+        .string()
+        .trim()
+        .regex(/^\d{5}$/, 'Bitte eine fünfstellige Postleitzahl angeben.'),
       city: req('Bitte den Ort angeben.', 80),
     }),
     texts: z.object({
@@ -100,7 +120,10 @@ export const onboardingSubmitSchema = z
         legalForm: z.enum(LEGAL_FORMS, 'Bitte die Rechtsform wählen.'),
         owner: req('Bitte den Inhaber bzw. die vertretungsberechtigte Person angeben.', 120),
         street: req('Bitte Straße und Hausnummer angeben.', 120),
-        postalCode: z.string().trim().regex(/^\d{5}$/, 'Bitte eine fünfstellige Postleitzahl angeben.'),
+        postalCode: z
+          .string()
+          .trim()
+          .regex(/^\d{5}$/, 'Bitte eine fünfstellige Postleitzahl angeben.'),
         city: req('Bitte den Ort angeben.', 80),
         phone: req('Telefon ist im Impressum Pflicht (schnelle Kontaktaufnahme).', 40),
         email: EMAIL,
@@ -113,8 +136,18 @@ export const onboardingSubmitSchema = z
       })
       .superRefine((i, ctx) => {
         if (REGISTERED_FORMS.has(i.legalForm)) {
-          if (!i.register) ctx.addIssue({ code: 'custom', path: ['register'], message: 'Bei dieser Rechtsform ist das Registergericht Pflicht.' });
-          if (!i.registerNumber) ctx.addIssue({ code: 'custom', path: ['registerNumber'], message: 'Bei dieser Rechtsform ist die Registernummer Pflicht.' });
+          if (!i.register)
+            ctx.addIssue({
+              code: 'custom',
+              path: ['register'],
+              message: 'Bei dieser Rechtsform ist das Registergericht Pflicht.',
+            });
+          if (!i.registerNumber)
+            ctx.addIssue({
+              code: 'custom',
+              path: ['registerNumber'],
+              message: 'Bei dieser Rechtsform ist die Registernummer Pflicht.',
+            });
         }
       }),
     privacyText: z
@@ -180,7 +213,14 @@ export function normalizeOnboarding(raw: Partial<Record<keyof OnboardingData, un
       mode: h.mode === 'appointment' ? 'appointment' : 'fixed',
       days: WEEK_DAYS.map(({ day }) => {
         const d = days.find((x) => x.day === day) ?? {};
-        return { day, closed: Boolean(d.closed), open: s(d.open, 5), close: s(d.close, 5), open2: s(d.open2, 5), close2: s(d.close2, 5) };
+        return {
+          day,
+          closed: Boolean(d.closed),
+          open: s(d.open, 5),
+          close: s(d.close, 5),
+          open2: s(d.open2, 5),
+          close2: s(d.close2, 5),
+        };
       }),
     },
     impressum: {
@@ -204,7 +244,11 @@ export function normalizeOnboarding(raw: Partial<Record<keyof OnboardingData, un
     domain: s(raw.domain, 80),
     photoAlts:
       raw.photoAlts && typeof raw.photoAlts === 'object' && !Array.isArray(raw.photoAlts)
-        ? Object.fromEntries(Object.entries(raw.photoAlts as Record<string, unknown>).slice(0, 12).map(([k, v]) => [k.slice(0, 40), s(v, 120)]))
+        ? Object.fromEntries(
+            Object.entries(raw.photoAlts as Record<string, unknown>)
+              .slice(0, 12)
+              .map(([k, v]) => [k.slice(0, 40), s(v, 120)]),
+          )
         : base.photoAlts,
     confirmed: raw.confirmed === true,
   };
@@ -226,7 +270,14 @@ export function openingHoursToDays(oh: OpeningHours | null | undefined): Onboard
   return WEEK_DAYS.map(({ day }) => {
     const d = oh?.days.find((x) => x.day === day);
     const p = d?.periods ?? [];
-    return { day, closed: !d || p.length === 0, open: p[0]?.open ?? '', close: p[0]?.close ?? '', open2: p[1]?.open ?? '', close2: p[1]?.close ?? '' };
+    return {
+      day,
+      closed: !d || p.length === 0,
+      open: p[0]?.open ?? '',
+      close: p[0]?.close ?? '',
+      open2: p[1]?.open ?? '',
+      close2: p[1]?.close ?? '',
+    };
   });
 }
 

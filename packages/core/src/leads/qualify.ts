@@ -47,7 +47,9 @@ export function classifyWebsite(uri: string | undefined | null, socialDomains: s
     return { hasWebsite: false, socialOnly: false, websiteUri: uri };
   }
   const social = socialDomains.some((d) => host === d || host.endsWith(`.${d}`));
-  return social ? { hasWebsite: false, socialOnly: true, websiteUri: uri } : { hasWebsite: true, socialOnly: false, websiteUri: uri };
+  return social
+    ? { hasWebsite: false, socialOnly: true, websiteUri: uri }
+    : { hasWebsite: true, socialOnly: false, websiteUri: uri };
 }
 
 /** Kettenname enthalten (Wortgrenzen, Umlaut-tolerant)? */
@@ -91,7 +93,12 @@ export interface QualifyResult {
   website: WebsiteClass;
 }
 
-export function computeScore(input: { branch: BranchConfig; place: RawPlace; rating?: RatingSignal | null; website: WebsiteClass }): number {
+export function computeScore(input: {
+  branch: BranchConfig;
+  place: RawPlace;
+  rating?: RatingSignal | null;
+  website: WebsiteClass;
+}): number {
   const { place, rating } = input;
   // Vollständigkeit des Eintrags als Signal für einen etablierten Betrieb
   let completeness = 2;
@@ -108,7 +115,8 @@ export function qualify(input: QualifyInput): QualifyResult {
   const reasons: RejectionReason[] = [];
   const website = classifyWebsite(place.websiteUri, cfg.filters.socialDomains);
   if (website.hasWebsite) reasons.push('has_website');
-  if (cfg.filters.requireOperational && place.businessStatus && place.businessStatus !== 'OPERATIONAL') reasons.push('not_operational');
+  if (cfg.filters.requireOperational && place.businessStatus && place.businessStatus !== 'OPERATIONAL')
+    reasons.push('not_operational');
   if (input.rating) {
     if (input.rating.rating < cfg.filters.minRating) reasons.push('rating_too_low');
     if (input.rating.ratingCount < cfg.filters.minRatingCount) reasons.push('too_few_ratings');

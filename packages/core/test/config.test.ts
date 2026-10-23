@@ -19,7 +19,12 @@ describe('Konfiguration', () => {
     expect(cfg.timing.followupAfterDays).toBe(12);
     expect(cfg.review.manualReviewFirstN).toBe(30);
     expect(cfg.targeting.cities).toEqual(['Dortmund']);
-    expect(cfg.targeting.branches.map((b) => b.queries[0])).toEqual(['Nagelstudio', 'Kosmetikstudio', 'Malerbetrieb', 'Elektriker']);
+    expect(cfg.targeting.branches.map((b) => b.queries[0])).toEqual([
+      'Nagelstudio',
+      'Kosmetikstudio',
+      'Malerbetrieb',
+      'Elektriker',
+    ]);
   });
 
   it('speichert Änderungen und validiert', async () => {

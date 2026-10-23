@@ -22,11 +22,18 @@ export function startOfIsoWeek(d: Date): Date {
 }
 
 export function formatDateDe(d: Date): string {
-  return new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Berlin' }).format(d);
+  return new Intl.DateTimeFormat('de-DE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'Europe/Berlin',
+  }).format(d);
 }
 
 export function formatDateLongDe(d: Date): string {
-  return new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' }).format(d);
+  return new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' }).format(
+    d,
+  );
 }
 
 export function formatEuro(cents: number): string {

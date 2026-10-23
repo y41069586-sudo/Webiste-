@@ -40,7 +40,12 @@ describe('Qualifizierung', () => {
 
   it('echte Website → abgelehnt; Instagram/Linktree/Facebook → qualifiziert (social_only)', () => {
     expect(q({ websiteUri: 'https://www.studio-lumi.de' }).reasons).toContain('has_website');
-    for (const url of ['https://www.instagram.com/lumi', 'https://linktr.ee/lumi', 'https://m.facebook.com/lumi', 'https://www.tiktok.com/@lumi']) {
+    for (const url of [
+      'https://www.instagram.com/lumi',
+      'https://linktr.ee/lumi',
+      'https://m.facebook.com/lumi',
+      'https://www.tiktok.com/@lumi',
+    ]) {
       const r = q({ websiteUri: url });
       expect(r.qualified, url).toBe(true);
       expect(r.website.socialOnly).toBe(true);
@@ -71,7 +76,9 @@ describe('Qualifizierung', () => {
   });
 
   it('höherer Score bei mehr Bewertungen', () => {
-    expect(q({}, { rating: { rating: 4.8, ratingCount: 300 } }).score).toBeGreaterThan(q({}, { rating: { rating: 4.8, ratingCount: 40 } }).score);
+    expect(q({}, { rating: { rating: 4.8, ratingCount: 300 } }).score).toBeGreaterThan(
+      q({}, { rating: { rating: 4.8, ratingCount: 40 } }).score,
+    );
   });
 
   it('Kettenname matcht nur ganze Wörter', () => {
@@ -112,7 +119,11 @@ describe('Öffnungszeiten (OSM)', () => {
   it('parst gängige Formate', () => {
     const oh = parseOsmOpeningHours('Mo-Fr 08:00-17:00; Sa 09:00-13:00; Su off');
     expect(oh?.days.map((d) => d.day)).toEqual([1, 2, 3, 4, 5, 6]);
-    expect(formatOpeningHours(oh)).toEqual(['Montag – Freitag: 08:00 – 17:00 Uhr', 'Samstag: 09:00 – 13:00 Uhr', 'Sonntag: geschlossen']);
+    expect(formatOpeningHours(oh)).toEqual([
+      'Montag – Freitag: 08:00 – 17:00 Uhr',
+      'Samstag: 09:00 – 13:00 Uhr',
+      'Sonntag: geschlossen',
+    ]);
   });
   it('mehrere Zeitfenster und Tageslisten', () => {
     const oh = parseOsmOpeningHours('Mo,We 09:00-12:00,14:00-18:00');

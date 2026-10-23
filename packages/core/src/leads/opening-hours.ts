@@ -37,7 +37,10 @@ export function parseOsmOpeningHours(raw: string | undefined | null): OpeningHou
   const text = raw.trim();
   if (!text || /24\/7/.test(text)) return null;
   const map = new Map<number, { open: string; close: string }[]>();
-  for (const rule of text.split(';').map((r) => r.trim()).filter(Boolean)) {
+  for (const rule of text
+    .split(';')
+    .map((r) => r.trim())
+    .filter(Boolean)) {
     if (/^PH\b/.test(rule)) continue; // Feiertage ignorieren
     const m = /^([A-Za-z,\s-]+?)\s+(off|closed|[\d:,\s-]+)$/.exec(rule);
     if (!m) return null;
@@ -58,7 +61,10 @@ export function parseOsmOpeningHours(raw: string | undefined | null): OpeningHou
     days.forEach((d) => map.set(d, periods));
   }
   if (map.size === 0) return null;
-  const days: OpeningHoursDay[] = ORDER.filter((d) => map.has(d) && map.get(d)!.length > 0).map((d) => ({ day: d, periods: map.get(d)! }));
+  const days: OpeningHoursDay[] = ORDER.filter((d) => map.has(d) && map.get(d)!.length > 0).map((d) => ({
+    day: d,
+    periods: map.get(d)!,
+  }));
   return { days, weekdayText: formatOpeningHours({ days }) };
 }
 
@@ -87,10 +93,18 @@ export function formatOpeningHours(oh: OpeningHours | null | undefined): string[
 }
 
 /** Google-Places regularOpeningHours → eigenes Format. */
-export function fromGoogleOpeningHours(g: {
-  periods?: { open?: { day?: number; hour?: number; minute?: number }; close?: { day?: number; hour?: number; minute?: number } }[];
-  weekdayDescriptions?: string[];
-} | null | undefined): OpeningHours | null {
+export function fromGoogleOpeningHours(
+  g:
+    | {
+        periods?: {
+          open?: { day?: number; hour?: number; minute?: number };
+          close?: { day?: number; hour?: number; minute?: number };
+        }[];
+        weekdayDescriptions?: string[];
+      }
+    | null
+    | undefined,
+): OpeningHours | null {
   if (!g?.periods?.length) return null;
   const map = new Map<number, { open: string; close: string }[]>();
   const t = (h?: number, m?: number) => `${String(h ?? 0).padStart(2, '0')}:${String(m ?? 0).padStart(2, '0')}`;

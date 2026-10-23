@@ -29,5 +29,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     res.reason === 'rate_limited'
       ? 'Sie haben in kurzer Zeit mehrere Nachrichten gesendet. Bitte versuchen Sie es später erneut.'
       : 'Bitte füllen Sie Name, E-Mail und Nachricht aus und bestätigen Sie den Datenschutzhinweis.';
-  return simplePage('Nachricht nicht gesendet', `<p>${msg}</p><p><a href="${demoUrl(`/d/${slug}#frage`)}">Zurück zum Entwurf</a></p>`, 400);
+  return simplePage(
+    'Nachricht nicht gesendet',
+    `<p>${msg}</p><p><a href="${demoUrl(`/d/${slug}#frage`)}">Zurück zum Entwurf</a></p>`,
+    400,
+  );
 }

@@ -20,7 +20,10 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
     .limit(300);
   return (
     <>
-      <PageHeader title="Audit-Log" subtitle="Alle Statuswechsel, Freigaben und Einstellungsänderungen (neueste zuerst, max. 300)." />
+      <PageHeader
+        title="Audit-Log"
+        subtitle="Alle Statuswechsel, Freigaben und Einstellungsänderungen (neueste zuerst, max. 300)."
+      />
       <Card>
         <Table head={['Zeit', 'Entität', 'ID', 'Aktion', 'Auslöser', 'Kontext']}>
           {rows.map((r) => (

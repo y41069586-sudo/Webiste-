@@ -21,10 +21,38 @@ const STREETS = [
 ] as const;
 
 const NAME_PARTS: Record<string, string[]> = {
-  nagelstudio: ['Nagelstudio Lumi', 'Nails by Mira', 'Nagelzauber', 'Studio Glanzstück', 'Nagelkunst am Markt', 'Pure Nails Dortmund'],
-  kosmetikstudio: ['Kosmetik Hautnah', 'Kosmetikstudio Augenblick', 'Beauty Lounge Selin', 'Hautsache Kosmetik', 'Kosmetik am Park', 'Studio Zeitlos'],
-  maler: ['Malerbetrieb Kowalski', 'Farbwerk Meisterbetrieb', 'Maler Schmidt & Sohn', 'Malerwerkstatt Ruhrfarben', 'Malermeister Yilmaz', 'Pinselstrich Malerei'],
-  elektriker: ['Elektro Becker', 'Elektrotechnik Nowak', 'Strom & Licht Dortmund', 'Elektro Hoffmann GmbH', 'E-Technik Aydin', 'Elektro Wagner'],
+  nagelstudio: [
+    'Nagelstudio Lumi',
+    'Nails by Mira',
+    'Nagelzauber',
+    'Studio Glanzstück',
+    'Nagelkunst am Markt',
+    'Pure Nails Dortmund',
+  ],
+  kosmetikstudio: [
+    'Kosmetik Hautnah',
+    'Kosmetikstudio Augenblick',
+    'Beauty Lounge Selin',
+    'Hautsache Kosmetik',
+    'Kosmetik am Park',
+    'Studio Zeitlos',
+  ],
+  maler: [
+    'Malerbetrieb Kowalski',
+    'Farbwerk Meisterbetrieb',
+    'Maler Schmidt & Sohn',
+    'Malerwerkstatt Ruhrfarben',
+    'Malermeister Yilmaz',
+    'Pinselstrich Malerei',
+  ],
+  elektriker: [
+    'Elektro Becker',
+    'Elektrotechnik Nowak',
+    'Strom & Licht Dortmund',
+    'Elektro Hoffmann GmbH',
+    'E-Technik Aydin',
+    'Elektro Wagner',
+  ],
 };
 
 function pick<T>(arr: readonly T[], n: number): T {
@@ -51,15 +79,15 @@ export class MockLeadSource implements LeadSource {
         country: 'DE',
         formattedAddress: `${street} ${(seed % 120) + 1}, ${plz} ${q.city}`,
         phone: `0231 ${String(100000 + (seed % 899999))}`,
-        rating: Number((4.3 + ((seed % 8) / 10)).toFixed(1)),
+        rating: Number((4.3 + (seed % 8) / 10).toFixed(1)),
         ratingCount: 20 + (seed % 180),
         businessStatus: 'OPERATIONAL',
         primaryType: q.branch.googleTypes[0],
         types: q.branch.googleTypes,
         openingHours: {
-          days: [1, 2, 3, 4, 5].map((day) => ({ day, periods: [{ open: '09:00', close: '18:00' }] })).concat(
-            q.branch.group === 'beauty' ? [{ day: 6, periods: [{ open: '10:00', close: '14:00' }] }] : [],
-          ),
+          days: [1, 2, 3, 4, 5]
+            .map((day) => ({ day, periods: [{ open: '09:00', close: '18:00' }] }))
+            .concat(q.branch.group === 'beauty' ? [{ day: 6, periods: [{ open: '10:00', close: '14:00' }] }] : []),
         },
       };
       // Varianten, die an Filtern scheitern bzw. Sonderfälle abdecken

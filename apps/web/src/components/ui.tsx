@@ -12,7 +12,17 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   );
 }
 
-export function Card({ title, children, className = '', actions }: { title?: ReactNode; children: ReactNode; className?: string; actions?: ReactNode }) {
+export function Card({
+  title,
+  children,
+  className = '',
+  actions,
+}: {
+  title?: ReactNode;
+  children: ReactNode;
+  className?: string;
+  actions?: ReactNode;
+}) {
   return (
     <section className={`rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}>
       {title ? (
@@ -46,13 +56,23 @@ const badgeColors: Record<string, string> = {
 };
 
 export function Badge({ children, color = 'gray' }: { children: ReactNode; color?: keyof typeof badgeColors }) {
-  return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${badgeColors[color]}`}>{children}</span>;
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${badgeColors[color]}`}>
+      {children}
+    </span>
+  );
 }
 
 export function statusColor(status: string): keyof typeof badgeColors {
-  if (['live', 'paid', 'delivered', 'approved', 'published', 'sent', 'demo_published', 'preview_approved'].includes(status)) return 'green';
+  if (['live', 'paid', 'delivered', 'approved', 'published', 'sent', 'demo_published', 'preview_approved'].includes(status))
+    return 'green';
   if (['failed', 'rejected', 'qa_failed', 'suppressed', 'error'].includes(status)) return 'red';
-  if (['pending_review', 'generated', 'letter_generated', 'demo_built', 'drafted', 'escalated', 'changes_requested'].includes(status)) return 'yellow';
+  if (
+    ['pending_review', 'generated', 'letter_generated', 'demo_built', 'drafted', 'escalated', 'changes_requested'].includes(
+      status,
+    )
+  )
+    return 'yellow';
   if (['scanned', 'cta_clicked', 'checkout_started', 'onboarding'].includes(status)) return 'purple';
   if (['expired', 'deleted', 'cancelled'].includes(status)) return 'gray';
   return 'blue';
@@ -84,7 +104,11 @@ export function Table({ head, children, empty }: { head: ReactNode[]; children: 
         <thead>
           <tr>
             {head.map((h, i) => (
-              <th key={i} scope="col" className="px-3 py-2 text-left text-xs font-semibold tracking-wide whitespace-nowrap text-slate-500 uppercase">
+              <th
+                key={i}
+                scope="col"
+                className="px-3 py-2 text-left text-xs font-semibold tracking-wide whitespace-nowrap text-slate-500 uppercase"
+              >
                 {h}
               </th>
             ))}

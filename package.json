@@ -5,7 +5,7 @@
   "description": "Demo-Websites für lokale Betriebe ohne Website, Versand per Post-Brief, Kauf per Checkout, automatisches Go-Live.",
   "packageManager": "pnpm@10.28.0",
   "engines": {
-    "node": ">=20.11"
+    "node": ">=22.12"
   },
   "scripts": {
     "build": "pnpm -r --filter ./packages/* build && pnpm --filter @wbm/web build && pnpm --filter @wbm/worker build",

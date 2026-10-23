@@ -56,7 +56,41 @@ export function inwxPhone(raw: string): string {
 }
 
 /** Ländervorwahlen Europa/Nordamerika (für Telefonnummern ausländischer Kunden). */
-const COUNTRY_CODES = new Set(['1', '7', '30', '31', '32', '33', '34', '36', '39', '40', '41', '43', '44', '45', '46', '47', '48', '351', '352', '353', '354', '356', '357', '358', '359', '370', '371', '372', '385', '386', '420', '421', '423']);
+const COUNTRY_CODES = new Set([
+  '1',
+  '7',
+  '30',
+  '31',
+  '32',
+  '33',
+  '34',
+  '36',
+  '39',
+  '40',
+  '41',
+  '43',
+  '44',
+  '45',
+  '46',
+  '47',
+  '48',
+  '351',
+  '352',
+  '353',
+  '354',
+  '356',
+  '357',
+  '358',
+  '359',
+  '370',
+  '371',
+  '372',
+  '385',
+  '386',
+  '420',
+  '421',
+  '423',
+]);
 
 /** Hausnummer/Straße sind für INWX ein Feld; Rechtsformen deuten auf eine Organisation hin. */
 function contactType(owner: DomainOwner): 'ORG' | 'PERSON' {
@@ -122,7 +156,9 @@ export class InwxRegistrar implements RegistrarProvider {
 
   async checkAvailability(domains: string[]): Promise<DomainAvailability[]> {
     if (!domains.length) return [];
-    const { data } = await this.call<{ domain?: { domain: string; avail: number; price?: number; premium?: unknown; reason?: string }[] }>('domain.check', {
+    const { data } = await this.call<{
+      domain?: { domain: string; avail: number; price?: number; premium?: unknown; reason?: string }[];
+    }>('domain.check', {
       domain: domains,
       wide: 2,
     });
@@ -140,9 +176,13 @@ export class InwxRegistrar implements RegistrarProvider {
     });
   }
 
-  private async ownDomainInfo(domain: string): Promise<{ roId: number; registrant?: number; status?: string; exDate?: string } | null> {
+  private async ownDomainInfo(
+    domain: string,
+  ): Promise<{ roId: number; registrant?: number; status?: string; exDate?: string } | null> {
     try {
-      const { data } = await this.call<{ roId: number; registrant?: number; status?: string; exDate?: string }>('domain.info', { domain });
+      const { data } = await this.call<{ roId: number; registrant?: number; status?: string; exDate?: string }>('domain.info', {
+        domain,
+      });
       return data;
     } catch (err) {
       if (err instanceof InwxError && (err.code === 2303 || err.code === 2201 || err.code === 2202)) return null;
@@ -150,11 +190,21 @@ export class InwxRegistrar implements RegistrarProvider {
     }
   }
 
-  async registerDomain(input: { domain: string; owner: DomainOwner; nameservers?: string[]; idempotencyKey: string }): Promise<DomainRegistration> {
+  async registerDomain(input: {
+    domain: string;
+    owner: DomainOwner;
+    nameservers?: string[];
+    idempotencyKey: string;
+  }): Promise<DomainRegistration> {
     // Idempotenz: liegt die Domain schon in unserem Konto, nichts erneut registrieren
     const existing = await this.ownDomainInfo(input.domain);
     if (existing) {
-      return { domain: input.domain, registrarDomainId: String(existing.roId), ownerHandle: String(existing.registrant ?? ''), status: 'registered' };
+      return {
+        domain: input.domain,
+        registrarDomainId: String(existing.roId),
+        ownerHandle: String(existing.registrant ?? ''),
+        status: 'registered',
+      };
     }
     const o = input.owner;
     const type = contactType(o);
@@ -194,7 +244,10 @@ export class InwxRegistrar implements RegistrarProvider {
   /** DNS-Records in der INWX-Zone setzen (vorhandene gleichen Namens/Typs werden ersetzt). */
   async setDnsRecords(domain: string, records: DnsRecord[]): Promise<void> {
     await this.call('nameserver.create', { domain, type: 'MASTER', ns: INWX_DEFAULT_NS, ignoreExisting: true });
-    const { data } = await this.call<{ record?: { id: string; name: string; type: string; content: string }[] }>('nameserver.info', { domain });
+    const { data } = await this.call<{ record?: { id: string; name: string; type: string; content: string }[] }>(
+      'nameserver.info',
+      { domain },
+    );
     const existing = data.record ?? [];
     for (const r of records) {
       const rel = r.name === '@' ? '' : r.name;
@@ -204,7 +257,14 @@ export class InwxRegistrar implements RegistrarProvider {
       if (same.length === 1 && same[0]!.content === r.value) continue;
       for (const e of same) await this.call('nameserver.deleteRecord', { id: e.id });
       // apex: CNAME ist dort nicht erlaubt → wird vom Hosting-Provider als A/ALIAS geliefert
-      await this.call('nameserver.createRecord', { domain, type, name: rel, content: r.value, ttl: r.ttl ?? 3600, ...(r.priority ? { prio: r.priority } : {}) });
+      await this.call('nameserver.createRecord', {
+        domain,
+        type,
+        name: rel,
+        content: r.value,
+        ttl: r.ttl ?? 3600,
+        ...(r.priority ? { prio: r.priority } : {}),
+      });
     }
   }
 

@@ -50,7 +50,14 @@ describe('Google Places (New)', () => {
         ],
       },
     });
-    expect(raw).toMatchObject({ street: 'Hauptstraße', houseNumber: '5', postalCode: '44137', city: 'Dortmund', country: 'DE', rating: 4.7 });
+    expect(raw).toMatchObject({
+      street: 'Hauptstraße',
+      houseNumber: '5',
+      postalCode: '44137',
+      city: 'Dortmund',
+      country: 'DE',
+      rating: 4.7,
+    });
     expect(raw.openingHours?.weekdayText?.[0]).toBe('Montag – Dienstag: 08:00 – 17:00 Uhr');
   });
 });
@@ -66,7 +73,12 @@ describe('Overpass-Ausschlussfilter', () => {
 describe('Adress-Anreicherung', () => {
   it('übernimmt Gebäudeadresse und PLZ-Gebiet, überschreibt keine abweichende Straße', async () => {
     const { parseEnrichment, applyEnrichment, buildEnrichmentQuery } = await import('../src/providers/lead-source/overpass');
-    expect(buildEnrichmentQuery([{ type: 'node', id: 1 }, { type: 'way', id: 2 }])).toContain('foreach.p->.n');
+    expect(
+      buildEnrichmentQuery([
+        { type: 'node', id: 1 },
+        { type: 'way', id: 2 },
+      ]),
+    ).toContain('foreach.p->.n');
     const els = [
       { type: 'node', id: 1 },
       { type: 'area', id: 3600001, tags: { boundary: 'postal_code', postal_code: '44137' } },
@@ -77,7 +89,10 @@ describe('Adress-Anreicherung', () => {
     const m = parseEnrichment(els, new Set(['node/1', 'node/2']));
     const a = applyEnrichment({ source: 'osm', sourceId: 'node/1', name: 'A' }, m.get('node/1'));
     expect(a).toMatchObject({ street: 'Kampstraße', houseNumber: '5', postalCode: '44137' });
-    const b = applyEnrichment({ source: 'osm', sourceId: 'node/2', name: 'B', street: 'Hohe Straße', houseNumber: '1' }, m.get('node/2'));
+    const b = applyEnrichment(
+      { source: 'osm', sourceId: 'node/2', name: 'B', street: 'Hohe Straße', houseNumber: '1' },
+      m.get('node/2'),
+    );
     expect(b).toMatchObject({ street: 'Hohe Straße', houseNumber: '1', postalCode: '44139' });
   });
 });

@@ -61,7 +61,13 @@ export interface InvoiceData {
 export function renderInvoiceHtml(d: InvoiceData): string {
   const g = LETTER_GEOMETRY.left;
   const title = d.kind === 'cancellation' ? 'Stornorechnung' : 'Rechnung';
-  const buyerLines = [d.buyer.company, d.buyer.name && d.buyer.name !== d.buyer.company ? d.buyer.name : '', d.buyer.street, `${d.buyer.postalCode} ${d.buyer.city}`, d.buyer.country !== 'DE' ? d.buyer.country : '']
+  const buyerLines = [
+    d.buyer.company,
+    d.buyer.name && d.buyer.name !== d.buyer.company ? d.buyer.name : '',
+    d.buyer.street,
+    `${d.buyer.postalCode} ${d.buyer.city}`,
+    d.buyer.country !== 'DE' ? d.buyer.country : '',
+  ]
     .map((l) => l.trim())
     .filter(Boolean);
   const sellerLine = `${d.seller.company} · ${d.seller.street} · ${d.seller.postalCode} ${d.seller.city}`;

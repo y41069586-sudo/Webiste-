@@ -32,7 +32,10 @@ interface CfEnvelope<T> {
 /** Hash wie im offiziellen Beispiel: SHA-256 über Base64-Inhalt + Dateiendung, erste 32 Hex-Zeichen. */
 export function assetHash(content: Buffer, filePath: string): string {
   const ext = path.extname(filePath).slice(1);
-  return createHash('sha256').update(content.toString('base64') + ext).digest('hex').slice(0, 32);
+  return createHash('sha256')
+    .update(content.toString('base64') + ext)
+    .digest('hex')
+    .slice(0, 32);
 }
 
 /** Worker vor den Assets: www → Apex, Sicherheits-Header. */
@@ -67,7 +70,12 @@ export class CloudflareHosting implements HostingProvider {
     private readonly fetchImpl: typeof fetch = fetch,
   ) {}
 
-  private async api<T>(method: string, p: string, body?: unknown, opts: { token?: string; form?: FormData; okCodes?: number[] } = {}): Promise<T> {
+  private async api<T>(
+    method: string,
+    p: string,
+    body?: unknown,
+    opts: { token?: string; form?: FormData; okCodes?: number[] } = {},
+  ): Promise<T> {
     return withRetry(
       async () => {
         const res = await this.fetchImpl(`${API}${p}`, {
@@ -83,7 +91,11 @@ export class CloudflareHosting implements HostingProvider {
         const json = (text ? JSON.parse(text) : {}) as CfEnvelope<T> & { result?: T };
         if (!res.ok || json.success === false) {
           const msg = (json.errors ?? []).map((e) => `${e.code} ${e.message}`).join('; ');
-          throw new HttpError(`Cloudflare ${method} ${p.split('?')[0]} HTTP ${res.status}: ${msg}`, res.status, text.slice(0, 500));
+          throw new HttpError(
+            `Cloudflare ${method} ${p.split('?')[0]} HTTP ${res.status}: ${msg}`,
+            res.status,
+            text.slice(0, 500),
+          );
         }
         return json.result as T;
       },
@@ -123,7 +135,11 @@ export class CloudflareHosting implements HostingProvider {
       return { path: p, content, hash: assetHash(content, p), contentType: f.contentType ?? 'application/octet-stream' };
     });
     const manifest = Object.fromEntries(entries.map((e) => [e.path, { hash: e.hash, size: e.content.length }]));
-    const session = await this.api<{ jwt: string; buckets?: string[][] }>('POST', this.acc(`/workers/scripts/${projectId}/assets-upload-session`), { manifest });
+    const session = await this.api<{ jwt: string; buckets?: string[][] }>(
+      'POST',
+      this.acc(`/workers/scripts/${projectId}/assets-upload-session`),
+      { manifest },
+    );
     let completion = session.jwt;
     const byHash = new Map(entries.map((e) => [e.hash, e]));
     for (const bucket of session.buckets ?? []) {
@@ -133,7 +149,10 @@ export class CloudflareHosting implements HostingProvider {
         if (!e) continue;
         form.append(h, new Blob([e.content.toString('base64')], { type: e.contentType }), h);
       }
-      const r = await this.api<{ jwt?: string } | null>('POST', this.acc('/workers/assets/upload?base64=true'), undefined, { token: session.jwt, form });
+      const r = await this.api<{ jwt?: string } | null>('POST', this.acc('/workers/assets/upload?base64=true'), undefined, {
+        token: session.jwt,
+        form,
+      });
       if (r?.jwt) completion = r.jwt;
     }
     const metadata = {
@@ -144,8 +163,14 @@ export class CloudflareHosting implements HostingProvider {
     };
     const form = new FormData();
     form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-    form.append('worker.js', new Blob([workerModule(this.cfg.formOrigin)], { type: 'application/javascript+module' }), 'worker.js');
-    const script = await this.api<{ id?: string; etag?: string }>('PUT', this.acc(`/workers/scripts/${projectId}`), undefined, { form });
+    form.append(
+      'worker.js',
+      new Blob([workerModule(this.cfg.formOrigin)], { type: 'application/javascript+module' }),
+      'worker.js',
+    );
+    const script = await this.api<{ id?: string; etag?: string }>('PUT', this.acc(`/workers/scripts/${projectId}`), undefined, {
+      form,
+    });
     try {
       // workers.dev-Adresse aktivieren (für Prüfung vor der eigenen Domain)
       await this.api('POST', this.acc(`/workers/scripts/${projectId}/subdomain`), { enabled: true });
@@ -172,7 +197,13 @@ export class CloudflareHosting implements HostingProvider {
 
   /** Zone anlegen (Nameserver gehen an den Registrar) und Hostnamen an den Worker binden. */
   async attachDomain(projectId: string, domain: string): Promise<DnsPlan> {
-    const zone = (await this.zone(domain)) ?? (await this.api<{ id: string; status: string; name_servers: string[] }>('POST', '/zones', { name: domain, account: { id: this.cfg.accountId }, type: 'full' }));
+    const zone =
+      (await this.zone(domain)) ??
+      (await this.api<{ id: string; status: string; name_servers: string[] }>('POST', '/zones', {
+        name: domain,
+        account: { id: this.cfg.accountId },
+        type: 'full',
+      }));
     try {
       await this.attachHostnames(projectId, domain, zone.id);
     } catch {
@@ -184,11 +215,17 @@ export class CloudflareHosting implements HostingProvider {
   async getDomainStatus(projectId: string, domain: string): Promise<HostingDomainStatus> {
     const zone = await this.zone(domain);
     if (!zone) return { domain, active: false, ssl: 'unknown', details: 'Zone fehlt' };
-    if (zone.status !== 'active') return { domain, active: false, ssl: 'pending', details: `Zone ${zone.status} – Nameserver noch nicht übernommen` };
+    if (zone.status !== 'active')
+      return { domain, active: false, ssl: 'pending', details: `Zone ${zone.status} – Nameserver noch nicht übernommen` };
     try {
       await this.attachHostnames(projectId, domain, zone.id);
     } catch (err) {
-      return { domain, active: false, ssl: 'pending', details: err instanceof Error ? err.message.slice(0, 200) : 'Domain-Bindung fehlgeschlagen' };
+      return {
+        domain,
+        active: false,
+        ssl: 'pending',
+        details: err instanceof Error ? err.message.slice(0, 200) : 'Domain-Bindung fehlgeschlagen',
+      };
     }
     return { domain, active: true, ssl: 'unknown' };
   }

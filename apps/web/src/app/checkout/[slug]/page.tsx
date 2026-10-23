@@ -6,7 +6,13 @@ import { CheckoutForm } from './checkout-form';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Website bestellen', robots: { index: false, follow: false } };
 
-export default async function CheckoutPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ abgebrochen?: string }> }) {
+export default async function CheckoutPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ abgebrochen?: string }>;
+}) {
   const { slug } = await params;
   const { abgebrochen } = await searchParams;
   const cfg = await getConfig();
@@ -22,7 +28,9 @@ export default async function CheckoutPage({ params, searchParams }: { params: P
     return (
       <PublicShell company={cfg.sender.company}>
         <PublicCard>
-          <h1 className="mb-3 text-2xl font-semibold">{ctx.state === 'ordered' ? 'Bereits bestellt' : 'Bestellung nicht möglich'}</h1>
+          <h1 className="mb-3 text-2xl font-semibold">
+            {ctx.state === 'ordered' ? 'Bereits bestellt' : 'Bestellung nicht möglich'}
+          </h1>
           <p className="text-slate-700">{text}</p>
         </PublicCard>
       </PublicShell>
@@ -36,7 +44,8 @@ export default async function CheckoutPage({ params, searchParams }: { params: P
     <PublicShell company={cfg.sender.company} wide>
       {mode.ok && mode.mode !== 'live' ? (
         <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Testmodus: Es wird keine echte Zahlung ausgelöst{mode.mode === 'mock' ? ' (simulierte Bezahlseite)' : ' (Stripe-Testumgebung)'}.
+          Testmodus: Es wird keine echte Zahlung ausgelöst
+          {mode.mode === 'mock' ? ' (simulierte Bezahlseite)' : ' (Stripe-Testumgebung)'}.
         </div>
       ) : null}
       {abgebrochen ? (
@@ -48,7 +57,8 @@ export default async function CheckoutPage({ params, searchParams }: { params: P
         <div>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Ihre Website übernehmen</h1>
           <p className="mt-2 mb-6 text-slate-600">
-            Noch ein Schritt: Rechnungsadresse und Wunschdomain angeben, dann bezahlen. Danach tragen Sie Ihre Angaben für Impressum, Leistungen und Öffnungszeiten ein.
+            Noch ein Schritt: Rechnungsadresse und Wunschdomain angeben, dann bezahlen. Danach tragen Sie Ihre Angaben für
+            Impressum, Leistungen und Öffnungszeiten ein.
           </p>
           <PublicCard>
             <CheckoutForm
@@ -58,7 +68,10 @@ export default async function CheckoutPage({ params, searchParams }: { params: P
               termsVersion={cfg.legal.termsVersion}
               subscription={
                 cfg.pricing.subscriptionEnabled
-                  ? { enabled: true, label: `${cfg.pricing.subscriptionName} für ${formatEuro(cfg.pricing.subscriptionCents)}/Monat ab Monat ${cfg.pricing.subscriptionStartMonth}` }
+                  ? {
+                      enabled: true,
+                      label: `${cfg.pricing.subscriptionName} für ${formatEuro(cfg.pricing.subscriptionCents)}/Monat ab Monat ${cfg.pricing.subscriptionStartMonth}`,
+                    }
                   : null
               }
             />
@@ -69,8 +82,18 @@ export default async function CheckoutPage({ params, searchParams }: { params: P
             <h2 className="text-base font-semibold">{cfg.pricing.packageName}</h2>
             <p className="mt-1 text-sm text-slate-600">für {lead.businessName}</p>
             {demo.screenshotDesktopKey ? (
-              <a href={demoUrl(`/d/${slug}`)} className="mt-4 block overflow-hidden rounded-lg border border-slate-200" title="Entwurf ansehen">
-                <img src={`/d/${slug}/vorschau.jpg`} alt="Vorschau Ihres Website-Entwurfs" width={720} height={450} className="h-auto w-full" />
+              <a
+                href={demoUrl(`/d/${slug}`)}
+                className="mt-4 block overflow-hidden rounded-lg border border-slate-200"
+                title="Entwurf ansehen"
+              >
+                <img
+                  src={`/d/${slug}/vorschau.jpg`}
+                  alt="Vorschau Ihres Website-Entwurfs"
+                  width={720}
+                  height={450}
+                  className="h-auto w-full"
+                />
               </a>
             ) : null}
             <ul className="mt-4 space-y-2 text-sm text-slate-700">
@@ -107,7 +130,8 @@ export default async function CheckoutPage({ params, searchParams }: { params: P
                 <span>{price.label}</span>
               </div>
               <p className="mt-1 text-xs text-slate-500">
-                {price.vatCents ? 'inkl. Umsatzsteuer' : cfg.tax.kleinunternehmerNote} Keine laufenden Kosten in den ersten {months} Monaten, kein Abo.
+                {price.vatCents ? 'inkl. Umsatzsteuer' : cfg.tax.kleinunternehmerNote} Keine laufenden Kosten in den ersten{' '}
+                {months} Monaten, kein Abo.
               </p>
             </div>
           </PublicCard>

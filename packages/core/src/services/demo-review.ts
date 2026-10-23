@@ -26,7 +26,11 @@ export async function requiresManualReview(db: DbOrTx, random = Math.random()): 
   return random < cfg.review.sampleRatePercent / 100;
 }
 
-export async function approveDemo(demoId: string, actor: string, opts: { manual: boolean; note?: string } = { manual: true }): Promise<void> {
+export async function approveDemo(
+  demoId: string,
+  actor: string,
+  opts: { manual: boolean; note?: string } = { manual: true },
+): Promise<void> {
   const db = getDb();
   await db.transaction(async (tx) => {
     const demo = await tx.query.demos.findFirst({ where: eq(demos.id, demoId) });
@@ -37,11 +41,23 @@ export async function approveDemo(demoId: string, actor: string, opts: { manual:
     if (demo.status === 'qa_failed' && !opts.manual) throw new Error('QA nicht bestanden');
     await tx
       .update(demos)
-      .set({ status: 'approved', approvedBy: actor, approvedAt: new Date(), reviewNote: opts.note ?? null, updatedAt: new Date() })
+      .set({
+        status: 'approved',
+        approvedBy: actor,
+        approvedAt: new Date(),
+        reviewNote: opts.note ?? null,
+        updatedAt: new Date(),
+      })
       .where(eq(demos.id, demoId));
     if (opts.manual) await tx.execute(sql`UPDATE counters SET value = value + 1 WHERE name = 'demos_reviewed'`);
     await transitionLead(tx, demo.leadId, 'demo_approved', { actor, soft: true });
-    await audit(tx, { entity: 'demo', entityId: demoId, action: opts.manual ? 'approve' : 'auto_approve', actor, context: { note: opts.note } });
+    await audit(tx, {
+      entity: 'demo',
+      entityId: demoId,
+      action: opts.manual ? 'approve' : 'auto_approve',
+      actor,
+      context: { note: opts.note },
+    });
   });
   await enqueue(QUEUES.publishDemo, { demoId }, { singletonKey: `publish:${demoId}` });
 }
@@ -61,9 +77,16 @@ export async function rejectDemo(demoId: string, actor: string, note: string, re
       reason: regenerate ? 'Demo neu generieren' : `Demo abgelehnt: ${note}`,
       soft: true,
     });
-    await audit(tx, { entity: 'demo', entityId: demoId, action: regenerate ? 'reject_regenerate' : 'reject', actor, context: { note } });
+    await audit(tx, {
+      entity: 'demo',
+      entityId: demoId,
+      action: regenerate ? 'reject_regenerate' : 'reject',
+      actor,
+      context: { note },
+    });
   });
-  if (regenerate) await enqueue(QUEUES.buildDemo, { leadId, regenerate: true, triggeredBy: actor }, { singletonKey: `demo:${leadId}` });
+  if (regenerate)
+    await enqueue(QUEUES.buildDemo, { leadId, regenerate: true, triggeredBy: actor }, { singletonKey: `demo:${leadId}` });
 }
 
 /** Veröffentlichen: Demo unter /d/{slug} erreichbar, Ablaufdatum setzen. */
@@ -83,8 +106,18 @@ export async function publishDemo(demoId: string, actor: string, now = new Date(
     await tx
       .update(demos)
       .set({ status: 'rejected', reviewNote: 'ersetzt' })
-      .where(and(eq(demos.leadId, demo.leadId), inArray(demos.status, ['pending_review', 'qa_failed', 'building']), sql`${demos.id} <> ${demoId}`));
-    await transitionLead(tx, demo.leadId, 'demo_published', { actor, soft: true, patch: { expiresAt: addDays(now, cfg.timing.demoExpiryDays) } });
+      .where(
+        and(
+          eq(demos.leadId, demo.leadId),
+          inArray(demos.status, ['pending_review', 'qa_failed', 'building']),
+          sql`${demos.id} <> ${demoId}`,
+        ),
+      );
+    await transitionLead(tx, demo.leadId, 'demo_published', {
+      actor,
+      soft: true,
+      patch: { expiresAt: addDays(now, cfg.timing.demoExpiryDays) },
+    });
     await audit(tx, { entity: 'demo', entityId: demoId, action: 'publish', actor });
   });
 }
@@ -107,6 +140,12 @@ export async function extendDemoExpiry(db: DbOrTx, leadId: string, from: Date): 
   await db
     .update(demos)
     .set({ expiresAt: until })
-    .where(and(eq(demos.leadId, leadId), eq(demos.status, 'published'), sql`(${demos.expiresAt} IS NULL OR ${demos.expiresAt} < ${until})`));
+    .where(
+      and(
+        eq(demos.leadId, leadId),
+        eq(demos.status, 'published'),
+        sql`(${demos.expiresAt} IS NULL OR ${demos.expiresAt} < ${until})`,
+      ),
+    );
   await db.update(leads).set({ expiresAt: until }).where(eq(leads.id, leadId));
 }

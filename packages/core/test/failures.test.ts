@@ -38,7 +38,15 @@ describe('Fehlertoleranz', () => {
     );
     expect([ok, n]).toEqual(['ok', 3]);
     let m = 0;
-    await expect(withRetry(async () => { m++; throw new HttpError('bad', 400); }, { baseDelayMs: 1 })).rejects.toThrow('bad');
+    await expect(
+      withRetry(
+        async () => {
+          m++;
+          throw new HttpError('bad', 400);
+        },
+        { baseDelayMs: 1 },
+      ),
+    ).rejects.toThrow('bad');
     expect(m).toBe(1);
   });
 
@@ -65,16 +73,63 @@ describe('Fehlertoleranz', () => {
     const db = getDb();
     const [lead] = await db
       .insert(leads)
-      .values({ source: 'mock', sourceId: randomToken(8), businessName: 'Elektro Test', branch: 'elektriker', branchGroup: 'handwerk', city: 'Dortmund', street: 'A', houseNumber: '1', postalCode: '44137', segmentKey: 'dortmund:handwerk:elektriker', trackToken: randomToken(24), status: 'cta_clicked' })
+      .values({
+        source: 'mock',
+        sourceId: randomToken(8),
+        businessName: 'Elektro Test',
+        branch: 'elektriker',
+        branchGroup: 'handwerk',
+        city: 'Dortmund',
+        street: 'A',
+        houseNumber: '1',
+        postalCode: '44137',
+        segmentKey: 'dortmund:handwerk:elektriker',
+        trackToken: randomToken(24),
+        status: 'cta_clicked',
+      })
       .returning();
-    const [demo] = await db.insert(demos).values({ leadId: lead!.id, slug: randomToken(24), templateId: 'handwerk-klar', palette: 'werkblau', status: 'published', expiresAt: addDays(new Date(), 10) }).returning();
-    const res = await startCheckout(demo!.slug, { company: 'Elektro Test', contactName: 'Max Test', email: 'm@example.org', street: 'Hauptweg 1', postalCode: '44137', city: 'Dortmund', domain: 'elektro-test-dortmund.de', b2b: true, terms: true }, { ua: 'x', ipHash: 'h', isBot: false });
+    const [demo] = await db
+      .insert(demos)
+      .values({
+        leadId: lead!.id,
+        slug: randomToken(24),
+        templateId: 'handwerk-klar',
+        palette: 'werkblau',
+        status: 'published',
+        expiresAt: addDays(new Date(), 10),
+      })
+      .returning();
+    const res = await startCheckout(
+      demo!.slug,
+      {
+        company: 'Elektro Test',
+        contactName: 'Max Test',
+        email: 'm@example.org',
+        street: 'Hauptweg 1',
+        postalCode: '44137',
+        city: 'Dortmund',
+        domain: 'elektro-test-dortmund.de',
+        b2b: true,
+        terms: true,
+      },
+      { ua: 'x', ipHash: 'h', isBot: false },
+    );
     if (!res.ok) throw new Error(res.error);
     const order = (await db.query.orders.findFirst({ where: eq(orders.id, res.orderId) }))!;
     // Event wurde registriert, Verarbeitung brach ab (processedAt fehlt)
-    await db.insert(webhookEvents).values({ provider: 'mock', eventId: 'evt_crash', type: 'checkout.session.completed', error: 'Absturz' });
+    await db
+      .insert(webhookEvents)
+      .values({ provider: 'mock', eventId: 'evt_crash', type: 'checkout.session.completed', error: 'Absturz' });
     const p = getProviders().payment as MockPayment;
-    const raw = JSON.stringify({ eventId: 'evt_crash', type: 'checkout.completed', rawType: 'checkout.session.completed', sessionId: order.stripeSessionId, paymentStatus: 'paid', amountTotal: 39000, currency: 'eur' });
+    const raw = JSON.stringify({
+      eventId: 'evt_crash',
+      type: 'checkout.completed',
+      rawType: 'checkout.session.completed',
+      sessionId: order.stripeSessionId,
+      paymentStatus: 'paid',
+      amountTotal: 39000,
+      currency: 'eur',
+    });
     expect(await processPaymentWebhook(raw, p.sign(raw))).toMatchObject({ duplicate: false, result: 'paid' });
     expect((await db.query.orders.findFirst({ where: eq(orders.id, order.id) }))!.status).toBe('paid');
     expect(await processPaymentWebhook(raw, p.sign(raw))).toMatchObject({ duplicate: true });
@@ -84,14 +139,69 @@ describe('Fehlertoleranz', () => {
     const db = getDb();
     const [lead] = await db
       .insert(leads)
-      .values({ source: 'mock', sourceId: randomToken(8), businessName: 'Maler Test', branch: 'maler', branchGroup: 'handwerk', city: 'Dortmund', street: 'A', houseNumber: '1', postalCode: '44137', segmentKey: 'dortmund:handwerk:maler', trackToken: randomToken(24), status: 'cta_clicked' })
+      .values({
+        source: 'mock',
+        sourceId: randomToken(8),
+        businessName: 'Maler Test',
+        branch: 'maler',
+        branchGroup: 'handwerk',
+        city: 'Dortmund',
+        street: 'A',
+        houseNumber: '1',
+        postalCode: '44137',
+        segmentKey: 'dortmund:handwerk:maler',
+        trackToken: randomToken(24),
+        status: 'cta_clicked',
+      })
       .returning();
-    const [demo] = await db.insert(demos).values({ leadId: lead!.id, slug: randomToken(24), templateId: 'handwerk-klar', palette: 'werkblau', status: 'published', expiresAt: addDays(new Date(), 10), contentJson: { hero_headline: 'Maler', hero_subline: 'x', services: [{ title: 'A', text: 'B', icon: 'roller' }], about: 'x', cta_text: 'x', seo_title: 'x', seo_description: 'x', faq: [] } }).returning();
-    const res = await startCheckout(demo!.slug, { company: 'Maler Test', contactName: 'Max Test', email: 'm@example.org', street: 'Hauptweg 1', postalCode: '44137', city: 'Dortmund', domain: 'maler-test-dortmund.de', b2b: true, terms: true }, { ua: 'x', ipHash: 'h', isBot: false });
+    const [demo] = await db
+      .insert(demos)
+      .values({
+        leadId: lead!.id,
+        slug: randomToken(24),
+        templateId: 'handwerk-klar',
+        palette: 'werkblau',
+        status: 'published',
+        expiresAt: addDays(new Date(), 10),
+        contentJson: {
+          hero_headline: 'Maler',
+          hero_subline: 'x',
+          services: [{ title: 'A', text: 'B', icon: 'roller' }],
+          about: 'x',
+          cta_text: 'x',
+          seo_title: 'x',
+          seo_description: 'x',
+          faq: [],
+        },
+      })
+      .returning();
+    const res = await startCheckout(
+      demo!.slug,
+      {
+        company: 'Maler Test',
+        contactName: 'Max Test',
+        email: 'm@example.org',
+        street: 'Hauptweg 1',
+        postalCode: '44137',
+        city: 'Dortmund',
+        domain: 'maler-test-dortmund.de',
+        b2b: true,
+        terms: true,
+      },
+      { ua: 'x', ipHash: 'h', isBot: false },
+    );
     if (!res.ok) throw new Error(res.error);
     const p = getProviders().payment as MockPayment;
     const order = (await db.query.orders.findFirst({ where: eq(orders.id, res.orderId) }))!;
-    const raw = JSON.stringify({ eventId: 'evt_pay', type: 'checkout.completed', rawType: 'x', sessionId: order.stripeSessionId, paymentStatus: 'paid', amountTotal: 39000, currency: 'eur' });
+    const raw = JSON.stringify({
+      eventId: 'evt_pay',
+      type: 'checkout.completed',
+      rawType: 'x',
+      sessionId: order.stripeSessionId,
+      paymentStatus: 'paid',
+      amountTotal: 39000,
+      currency: 'eur',
+    });
     await processPaymentWebhook(raw, p.sign(raw));
     const customer = (await db.query.customers.findFirst())!;
     const site = await ensureSiteForCustomer(customer.id);

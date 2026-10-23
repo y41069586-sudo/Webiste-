@@ -17,7 +17,15 @@ async function main(): Promise<void> {
     await publishDemo(d.id, 'admin:cli');
     const lead = await db.query.leads.findFirst({ where: eq(leads.id, d.leadId) });
     const res = await generateLetter(d.leadId, 1, { actor: 'admin:cli' });
-    console.log(JSON.stringify({ name: lead?.businessName, status: res.status, pages: res.pages, issues: res.issues, domain: (await db.query.leads.findFirst({ where: eq(leads.id, d.leadId) }))?.domainSuggestion }));
+    console.log(
+      JSON.stringify({
+        name: lead?.businessName,
+        status: res.status,
+        pages: res.pages,
+        issues: res.issues,
+        domain: (await db.query.leads.findFirst({ where: eq(leads.id, d.leadId) }))?.domainSuggestion,
+      }),
+    );
   }
   await closeBrowser();
   await stopBoss();

@@ -66,9 +66,7 @@ export async function recordEvent(
 }
 
 export type DemoLookup =
-  | { state: 'ok'; demo: typeof demos.$inferSelect; lead: typeof leads.$inferSelect }
-  | { state: 'gone' }
-  | { state: 'not_found' };
+  { state: 'ok'; demo: typeof demos.$inferSelect; lead: typeof leads.$inferSelect } | { state: 'gone' } | { state: 'not_found' };
 
 /** Veröffentlichte, nicht abgelaufene Demo per Slug. */
 export async function findPublicDemo(slug: string, now = new Date()): Promise<DemoLookup> {
@@ -83,7 +81,10 @@ export async function findPublicDemo(slug: string, now = new Date()): Promise<De
 }
 
 /** QR-Scan: Event + Weiterleitung zur aktuellen Demo. */
-export async function handleScan(token: string, req: RequestMeta): Promise<{ redirect: string } | { gone: true } | { notFound: true }> {
+export async function handleScan(
+  token: string,
+  req: RequestMeta,
+): Promise<{ redirect: string } | { gone: true } | { notFound: true }> {
   if (!/^[A-Za-z0-9]{16,64}$/.test(token)) return { notFound: true };
   const db = getDb();
   const lead = await db.query.leads.findFirst({ where: eq(leads.trackToken, token) });
@@ -148,14 +149,25 @@ export async function handleDemoQuestion(slug: string, input: QuestionInput, req
       channel: 'form',
       fromEmail: input.email.trim().toLowerCase().slice(0, 200),
       subject: `Frage zum Entwurf von ${found.lead.businessName}`.slice(0, 200),
-      body: [`Name: ${input.name.trim().slice(0, 120)}`, input.phone ? `Telefon: ${input.phone.trim().slice(0, 40)}` : '', '', input.message.trim().slice(0, 4000)]
+      body: [
+        `Name: ${input.name.trim().slice(0, 120)}`,
+        input.phone ? `Telefon: ${input.phone.trim().slice(0, 40)}` : '',
+        '',
+        input.message.trim().slice(0, 4000),
+      ]
         .filter((l, i) => l || i > 1)
         .join('\n'),
       status: 'new',
     })
     .returning({ id: supportMessages.id });
   await recordEvent(db, { leadId, type: 'question_sent', req: { ...req, isBot: false } });
-  await audit(db, { entity: 'support_message', entityId: msg!.id, action: 'received', actor: 'public:demo-form', context: { leadId } });
+  await audit(db, {
+    entity: 'support_message',
+    entityId: msg!.id,
+    action: 'received',
+    actor: 'public:demo-form',
+    context: { leadId },
+  });
   await enqueue(QUEUES.supportInbound, { messageId: msg!.id });
   return { ok: true };
 }

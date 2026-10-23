@@ -34,7 +34,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap gap-2 border-b border-slate-200 bg-white px-4 py-2 text-xs">
           {sw.killSwitch ? <span className="rounded bg-red-600 px-2 py-1 font-semibold text-white">NOT-AUS AKTIV</span> : null}
-          <span className={`rounded px-2 py-1 font-medium ${sw.dryRun ? 'bg-amber-100 text-amber-900' : 'bg-red-100 text-red-900'}`}>
+          <span
+            className={`rounded px-2 py-1 font-medium ${sw.dryRun ? 'bg-amber-100 text-amber-900' : 'bg-red-100 text-red-900'}`}
+          >
             {sw.dryRun ? `DRY_RUN${sw.dryRunLockedByEnv ? ' (Umgebung)' : ''}` : 'LIVE – echte Aktionen'}
           </span>
           <span className="rounded bg-slate-100 px-2 py-1">AUTO_SEND: {sw.autoSend ? 'an' : 'aus'}</span>

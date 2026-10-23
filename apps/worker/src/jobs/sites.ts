@@ -18,4 +18,7 @@ defineJob('deploy-site', async (data) => deploySite(data.siteId));
 defineJob('live-check', async (data) => liveCheck(data.siteId, data.attempt ?? 0));
 
 /** Täglich: Onboarding-Erinnerung und Hinweis vor Ablauf des Hostings. */
-defineJob('renewal-reminders', async () => ({ onboarding: await sendOnboardingReminders(), renewal: await sendRenewalReminders() }));
+defineJob('renewal-reminders', async () => ({
+  onboarding: await sendOnboardingReminders(),
+  renewal: await sendRenewalReminders(),
+}));

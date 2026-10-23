@@ -6,7 +6,14 @@ import { alerts, demos, leads, outboundEmails, supportMessages, suppressionList 
 import { emailHash } from '../src/leads/normalize';
 import { stopBoss } from '../src/queue';
 import { sendAlertDigest } from '../src/services/alerts';
-import { ingestInboundEmail, parseInboundPayload, processSupportMessage, sendSupportReply, stripQuoted, approveSupportReply } from '../src/services/support';
+import {
+  ingestInboundEmail,
+  parseInboundPayload,
+  processSupportMessage,
+  sendSupportReply,
+  stripQuoted,
+  approveSupportReply,
+} from '../src/services/support';
 import { isAutomated } from '../src/support/prompts';
 import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
@@ -31,7 +38,14 @@ async function seedLead(name = 'Nagelstudio Beispiel') {
       status: 'letter_delivered',
     })
     .returning();
-  await db.insert(demos).values({ leadId: lead!.id, slug: randomToken(24), templateId: 'beauty-soft', palette: 'rose', status: 'published', expiresAt: addDays(new Date(), 20) });
+  await db.insert(demos).values({
+    leadId: lead!.id,
+    slug: randomToken(24),
+    templateId: 'beauty-soft',
+    palette: 'rose',
+    status: 'published',
+    expiresAt: addDays(new Date(), 20),
+  });
   return lead!;
 }
 
@@ -65,8 +79,17 @@ describe('Support: Eingang und Erkennung', () => {
         ],
       }),
     );
-    expect(pm).toMatchObject({ providerMessageId: '<abc@mail.example.org>', from: 'a@example.org', subject: 'Frage', text: 'Text', inReplyTo: '<out-1@example.com>' });
-    expect(parseInboundPayload(JSON.stringify({ messageId: 'x', from: 'b@example.org', text: 'Hallo' }))).toMatchObject({ providerMessageId: 'x', from: 'b@example.org' });
+    expect(pm).toMatchObject({
+      providerMessageId: '<abc@mail.example.org>',
+      from: 'a@example.org',
+      subject: 'Frage',
+      text: 'Text',
+      inReplyTo: '<out-1@example.com>',
+    });
+    expect(parseInboundPayload(JSON.stringify({ messageId: 'x', from: 'b@example.org', text: 'Hallo' }))).toMatchObject({
+      providerMessageId: 'x',
+      from: 'b@example.org',
+    });
     expect(parseInboundPayload('kein json')).toBeNull();
   });
 
@@ -92,8 +115,17 @@ describe('Support: Verarbeitung', () => {
     const lead = await seedLead();
     const db = getDb();
     // frühere Frage über das Demo-Formular verknüpft die Adresse mit dem Lead
-    await db.insert(supportMessages).values({ leadId: lead.id, direction: 'in', channel: 'form', fromEmail: 'inhaberin@example.org', body: 'Frage', status: 'done' });
-    const { id } = await ingestInboundEmail(mail({ text: 'Bitte schicken Sie mir keine Post mehr und löschen Sie meine Daten.' }));
+    await db.insert(supportMessages).values({
+      leadId: lead.id,
+      direction: 'in',
+      channel: 'form',
+      fromEmail: 'inhaberin@example.org',
+      body: 'Frage',
+      status: 'done',
+    });
+    const { id } = await ingestInboundEmail(
+      mail({ text: 'Bitte schicken Sie mir keine Post mehr und löschen Sie meine Daten.' }),
+    );
     expect(await processSupportMessage(id)).toEqual({ status: 'done', class: 'opt_out' });
     const l = await db.query.leads.findFirst({ where: eq(leads.id, lead.id) });
     expect(l!.status).toBe('suppressed');
@@ -104,7 +136,9 @@ describe('Support: Verarbeitung', () => {
   });
 
   it('Widerspruch mit Firmenname ohne Zuordnung → eskaliert (Adresse trotzdem gesperrt)', async () => {
-    const { id } = await ingestInboundEmail(mail({ from: 'unbekannt@example.net', text: 'Widerspruch nach Art. 21 DSGVO. Ich will keine Werbung.' }));
+    const { id } = await ingestInboundEmail(
+      mail({ from: 'unbekannt@example.net', text: 'Widerspruch nach Art. 21 DSGVO. Ich will keine Werbung.' }),
+    );
     expect(await processSupportMessage(id)).toEqual({ status: 'escalated', class: 'opt_out' });
     expect((await getDb().select().from(suppressionList)).some((s) => s.kind === 'email')).toBe(true);
   });

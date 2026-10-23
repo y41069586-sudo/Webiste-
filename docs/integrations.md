@@ -16,10 +16,10 @@ eine Mock-Implementierung für Entwicklung, Tests und `DRY_RUN`. Prüfdatum alle
 - **Paginierung:** `nextPageToken` → `pageToken`; max. 60 Ergebnisse je Suche (3 Seiten). Alle übrigen
   Parameter müssen beim Folgeaufruf identisch sein.
 - **Feldmaske (Lead-Suche):** `places.id, displayName, formattedAddress, addressComponents,
-  nationalPhoneNumber, websiteUri, rating, userRatingCount, businessStatus, primaryType,
-  regularOpeningHours, nextPageToken`
+nationalPhoneNumber, websiteUri, rating, userRatingCount, businessStatus, primaryType,
+regularOpeningHours, nextPageToken`
 - **SKU:** `websiteUri`, `nationalPhoneNumber`, `rating`, `userRatingCount`, `regularOpeningHours` sind
-  **Enterprise**-Felder → jede Anfrage wird als *Text Search Enterprise* abgerechnet.
+  **Enterprise**-Felder → jede Anfrage wird als _Text Search Enterprise_ abgerechnet.
 - **Preis (global, je 1 000 Events):** Text Search Enterprise **35,00 USD** (bis 100 000), 1 000 frei/Monat;
   Text Search Pro 32,00 USD (5 000 frei). Konfiguriert: `costs.placesTextSearchPer1000UsdCents = 3500`.
 - **Nutzungsbedingungen:** siehe `docs/compliance-google.md` – Speichern von Namen/Adressen untersagt,
@@ -127,7 +127,7 @@ Geprüft am 23.10.2026.
 
 - **Resend:** `POST https://api.resend.com/emails`, `Authorization: Bearer …`, Felder `from`, `to`,
   `subject`, `text`, `html`, `reply_to`, `headers`, `tags[{name,value}]`, `attachments[{filename,
-  content(Base64)}]` (Typ aus dem Dateinamen), max. 40 MB. Header `Idempotency-Key` (≤ 256 Zeichen,
+content(Base64)}]` (Typ aus dem Dateinamen), max. 40 MB. Header `Idempotency-Key` (≤ 256 Zeichen,
   24 h gültig).
 - **Postmark:** `POST https://api.postmarkapp.com/email`, Header `X-Postmark-Server-Token`, Felder
   `From`, `To`, `Subject`, `TextBody`, `HtmlBody`, `ReplyTo`, `Tag`, `Headers[{Name,Value}]`,
@@ -149,8 +149,8 @@ Geprüft am 23.10.2026 (account.inwx.de/en/help/apidoc, Kapitel 1.2, 2.1, 2.6, 2
   (`resData.tfa`), folgt `account.unlock {tan}` mit TOTP aus `REGISTRAR_TOTP_SECRET`.
 - **Ablauf beim Go-Live:** `domain.check {domain[]}` (avail, price, premium) → `domain.info` (Idempotenz: liegt die
   Domain schon in unserem Konto?) → `contact.create {type ORG|PERSON, name, org, street, city, pc, cc, voice
-  (+49.2311234), email}` mit den **Impressumsdaten des Kunden** (Domain-Inhaber = Kunde) → `domain.create {domain,
-  period '1Y', registrant, ns, renewalMode 'AUTOEXPIRE', transferLock}`.
+(+49.2311234), email}` mit den **Impressumsdaten des Kunden** (Domain-Inhaber = Kunde) → `domain.create {domain,
+period '1Y', registrant, ns, renewalMode 'AUTOEXPIRE', transferLock}`.
 - **DNS (nur bei Netlify):** `nameserver.create {domain, type 'MASTER', ns, ignoreExisting}`, `nameserver.info`,
   `nameserver.deleteRecord`, `nameserver.createRecord {domain, type, name, content, ttl}`.
 - **Kosten:** Preis aus `domain.create` (sonst Schätzung `costs.domainPerYearCents`) → Budget-Ledger „domain“.

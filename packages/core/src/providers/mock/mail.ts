@@ -32,7 +32,13 @@ export class MockMailProvider implements MailProvider {
   }
 
   parseWebhook(rawBody: string): LetterWebhookEvent[] {
-    const body = JSON.parse(rawBody) as { id: string; letterId: string; status: ProviderLetterStatus; at?: string; reason?: string };
+    const body = JSON.parse(rawBody) as {
+      id: string;
+      letterId: string;
+      status: ProviderLetterStatus;
+      at?: string;
+      reason?: string;
+    };
     return [
       {
         eventId: body.id,

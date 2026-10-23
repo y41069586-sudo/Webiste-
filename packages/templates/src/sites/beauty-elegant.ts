@@ -84,7 +84,8 @@ export const beautyElegant: TemplateDef = {
     sectionClass: 'bg-surface-alt py-16',
     cardClass: 'rounded-2xl bg-surface p-6 ring-1 ring-line',
     titleClass: 'font-heading text-4xl',
-    buttonClass: 'inline-flex min-h-12 items-center rounded-full bg-primary px-7 py-3 text-sm font-semibold uppercase tracking-widest text-on-primary disabled:opacity-60',
+    buttonClass:
+      'inline-flex min-h-12 items-center rounded-full bg-primary px-7 py-3 text-sm font-semibold uppercase tracking-widest text-on-primary disabled:opacity-60',
     inputClass: 'block w-full rounded-lg border border-line bg-surface px-3 py-2.5 focus:outline-2 focus:outline-primary',
   })}
 

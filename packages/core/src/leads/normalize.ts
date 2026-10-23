@@ -41,7 +41,9 @@ export function normalizeStreet(street: string): string {
 }
 
 export function normalizeHouseNumber(hn: string): string {
-  return foldUmlauts(hn).replace(/\s+/g, '').replace(/[^a-z0-9-]/g, '');
+  return foldUmlauts(hn)
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9-]/g, '');
 }
 
 export interface AddressParts {
@@ -51,7 +53,11 @@ export interface AddressParts {
 }
 
 export function normalizeAddress(a: AddressParts): string {
-  return [normalizeStreet(a.street ?? ''), normalizeHouseNumber(a.houseNumber ?? ''), (a.postalCode ?? '').replace(/\D/g, '')].join('|');
+  return [
+    normalizeStreet(a.street ?? ''),
+    normalizeHouseNumber(a.houseNumber ?? ''),
+    (a.postalCode ?? '').replace(/\D/g, ''),
+  ].join('|');
 }
 
 /** Hash aus Name + Anschrift (Sperrliste, Dubletten). Keine Klartextdaten. */
@@ -88,7 +94,11 @@ export function segmentKey(city: string, group: string, branch: string): string 
 /** Telefonnummer für die Anzeige: +49 231 … → 0231 … */
 export function formatPhoneDe(phone: string | null | undefined): string | null {
   if (!phone) return null;
-  let p = phone.trim().replace(/[^\d+]/g, ' ').replace(/\s+/g, ' ').trim();
+  let p = phone
+    .trim()
+    .replace(/[^\d+]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   p = p.replace(/^\+49\s?(\(0\))?\s?/, '0').replace(/^0049\s?/, '0');
   const digits = p.replace(/\s/g, '');
   if (!/^0\d{5,14}$/.test(digits) && !/^\+\d{6,15}$/.test(digits)) return phone.trim();

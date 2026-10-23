@@ -6,7 +6,19 @@
  */
 import { createInterface } from 'node:readline/promises';
 import QRCode from 'qrcode';
-import { appUrl, closeDb, createAdmin, enqueue, getEnv, getProviders, PingenMailProvider, runMigrations, seedDefaults, stopBoss, type QueueName } from '@wbm/core';
+import {
+  appUrl,
+  closeDb,
+  createAdmin,
+  enqueue,
+  getEnv,
+  getProviders,
+  PingenMailProvider,
+  runMigrations,
+  seedDefaults,
+  stopBoss,
+  type QueueName,
+} from '@wbm/core';
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);

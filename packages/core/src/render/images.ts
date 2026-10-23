@@ -5,8 +5,17 @@ import { withPage } from './browser';
  * Läuft im Browser (Canvas) – keine native Bildbibliothek nötig. Skript als String,
  * damit der Transpiler keine Hilfsfunktionen einfügt, die im Browser fehlen.
  */
-export async function optimizeImage(data: Buffer, mime: string, opts: { maxWidth: number; format: 'jpeg' | 'png'; quality?: number }): Promise<Buffer> {
-  const args = JSON.stringify({ src: `data:${mime};base64,${data.toString('base64')}`, maxW: opts.maxWidth, format: opts.format, quality: opts.quality ?? 0.82 });
+export async function optimizeImage(
+  data: Buffer,
+  mime: string,
+  opts: { maxWidth: number; format: 'jpeg' | 'png'; quality?: number },
+): Promise<Buffer> {
+  const args = JSON.stringify({
+    src: `data:${mime};base64,${data.toString('base64')}`,
+    maxW: opts.maxWidth,
+    format: opts.format,
+    quality: opts.quality ?? 0.82,
+  });
   const script = `(async () => {
     const a = ${args};
     const img = new Image();

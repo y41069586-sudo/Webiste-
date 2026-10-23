@@ -7,7 +7,13 @@ import { PreviewActions } from './preview-actions';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Vorschau Ihrer Website', robots: { index: false, follow: false } };
 
-export default async function PreviewPage({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ freigegeben?: string; aenderung?: string }> }) {
+export default async function PreviewPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ token: string }>;
+  searchParams: Promise<{ freigegeben?: string; aenderung?: string }>;
+}) {
   const { token } = await params;
   const sp = await searchParams;
   const cfg = await getConfig();
@@ -20,7 +26,8 @@ export default async function PreviewPage({ params, searchParams }: { params: Pr
       </PublicCard>
     </PublicShell>
   );
-  if (ctx.state === 'not_found') return shell('Link ungültig', <p>Dieser Link ist nicht (mehr) gültig. Fragen? {cfg.sender.email}</p>);
+  if (ctx.state === 'not_found')
+    return shell('Link ungültig', <p>Dieser Link ist nicht (mehr) gültig. Fragen? {cfg.sender.email}</p>);
   if (ctx.state === 'onboarding') {
     return shell(
       'Noch keine Vorschau',
@@ -36,14 +43,20 @@ export default async function PreviewPage({ params, searchParams }: { params: Pr
   if (ctx.state === 'generating') {
     return shell(
       sp.aenderung ? 'Danke – wir arbeiten Ihre Änderungen ein' : 'Ihre Vorschau wird erstellt',
-      <p>Das dauert meist nur wenige Minuten. Sie bekommen eine E-Mail, sobald die Vorschau fertig ist. Sie können diese Seite auch einfach neu laden.</p>,
+      <p>
+        Das dauert meist nur wenige Minuten. Sie bekommen eine E-Mail, sobald die Vorschau fertig ist. Sie können diese Seite auch
+        einfach neu laden.
+      </p>,
     );
   }
   if (ctx.state === 'approved') {
     return shell(
       sp.freigegeben ? 'Vielen Dank für die Freigabe!' : 'Freigegeben – Veröffentlichung läuft',
       <>
-        <p>Wir registrieren jetzt Ihre Domain{ctx.customer.domain ? ` ${ctx.customer.domain}` : ''} und veröffentlichen die Website. Neue Domains brauchen manchmal einige Stunden, bis sie überall erreichbar sind.</p>
+        <p>
+          Wir registrieren jetzt Ihre Domain{ctx.customer.domain ? ` ${ctx.customer.domain}` : ''} und veröffentlichen die
+          Website. Neue Domains brauchen manchmal einige Stunden, bis sie überall erreichbar sind.
+        </p>
         <p>Sobald alles online ist, schicken wir Ihnen eine E-Mail mit allen Infos.</p>
       </>,
     );
@@ -64,21 +77,38 @@ export default async function PreviewPage({ params, searchParams }: { params: Pr
   return (
     <PublicShell company={cfg.sender.company} wide>
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Vorschau Ihrer Website</h1>
-      <p className="mt-2 mb-4 text-slate-600">So sieht Ihre Website aus. Scrollen Sie durch und prüfen Sie Texte, Kontaktdaten und Öffnungszeiten. Das Kontaktformular wird erst mit der Veröffentlichung aktiv.</p>
+      <p className="mt-2 mb-4 text-slate-600">
+        So sieht Ihre Website aus. Scrollen Sie durch und prüfen Sie Texte, Kontaktdaten und Öffnungszeiten. Das Kontaktformular
+        wird erst mit der Veröffentlichung aktiv.
+      </p>
       {sp.aenderung === 'admin' ? (
         <div role="status" className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
           Danke! Ihr Wunsch liegt bei uns, wir melden uns persönlich.
         </div>
       ) : null}
       {ctx.openRequest?.status === 'needs_admin' ? (
-        <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">Ihr letzter Änderungswunsch wird persönlich bearbeitet. Sie können die Seite trotzdem bereits freigeben.</div>
+        <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+          Ihr letzter Änderungswunsch wird persönlich bearbeitet. Sie können die Seite trotzdem bereits freigeben.
+        </div>
       ) : null}
-      {ctx.lastSummary ? <p className="mb-4 rounded-lg bg-slate-100 px-4 py-3 text-sm text-slate-700">Zuletzt geändert: {ctx.lastSummary}</p> : null}
+      {ctx.lastSummary ? (
+        <p className="mb-4 rounded-lg bg-slate-100 px-4 py-3 text-sm text-slate-700">Zuletzt geändert: {ctx.lastSummary}</p>
+      ) : null}
       <div className="mb-6 overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm">
-        <iframe src={`/preview/${token}/site?v=${ctx.site.version}`} title="Vorschau Ihrer Website" className="h-[75vh] w-full" sandbox="" />
+        <iframe
+          src={`/preview/${token}/site?v=${ctx.site.version}`}
+          title="Vorschau Ihrer Website"
+          className="h-[75vh] w-full"
+          sandbox=""
+        />
       </div>
       <p className="mb-6 text-sm">
-        <a href={`/preview/${token}/site?v=${ctx.site.version}`} target="_blank" rel="noopener" className="text-brand-700 underline">
+        <a
+          href={`/preview/${token}/site?v=${ctx.site.version}`}
+          target="_blank"
+          rel="noopener"
+          className="text-brand-700 underline"
+        >
           Vorschau im eigenen Fenster öffnen (z. B. auf dem Handy)
         </a>
       </p>

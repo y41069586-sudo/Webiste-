@@ -20,10 +20,17 @@ export default async function SupportMessagePage({ params }: { params: Promise<{
   const thread = await db
     .select()
     .from(schema.supportMessages)
-    .where(or(eq(schema.supportMessages.inReplyToId, id), m.fromEmail ? eq(schema.supportMessages.toEmail, m.fromEmail) : eq(schema.supportMessages.id, id)))
+    .where(
+      or(
+        eq(schema.supportMessages.inReplyToId, id),
+        m.fromEmail ? eq(schema.supportMessages.toEmail, m.fromEmail) : eq(schema.supportMessages.id, id),
+      ),
+    )
     .orderBy(asc(schema.supportMessages.createdAt))
     .limit(20);
-  const customer = m.customerId ? await db.query.customers.findFirst({ where: eq(schema.customers.id, m.customerId) }) : undefined;
+  const customer = m.customerId
+    ? await db.query.customers.findFirst({ where: eq(schema.customers.id, m.customerId) })
+    : undefined;
   const lead = m.leadId ? await db.query.leads.findFirst({ where: eq(schema.leads.id, m.leadId) }) : undefined;
   const editable = ['drafted', 'escalated', 'classified', 'new'].includes(m.status);
   return (
@@ -34,7 +41,9 @@ export default async function SupportMessagePage({ params }: { params: Promise<{
           <span className="flex flex-wrap items-center gap-2">
             <StatusBadge status={m.status} />
             {m.classification ? <Badge color="blue">{m.classification}</Badge> : null}
-            {m.classificationConfidence !== null ? <span className="text-xs">Sicherheit {Math.round((m.classificationConfidence ?? 0) * 100)} %</span> : null}
+            {m.classificationConfidence !== null ? (
+              <span className="text-xs">Sicherheit {Math.round((m.classificationConfidence ?? 0) * 100)} %</span>
+            ) : null}
           </span>
         }
         actions={
@@ -45,7 +54,9 @@ export default async function SupportMessagePage({ params }: { params: Promise<{
       />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title={`Nachricht von ${m.fromEmail ?? 'unbekannt'} · ${dt(m.createdAt)}`}>
-          {m.escalationReason ? <p className="mb-3 rounded bg-amber-50 px-3 py-2 text-sm text-amber-900">Hinweis: {m.escalationReason}</p> : null}
+          {m.escalationReason ? (
+            <p className="mb-3 rounded bg-amber-50 px-3 py-2 text-sm text-amber-900">Hinweis: {m.escalationReason}</p>
+          ) : null}
           <pre className="max-h-[60vh] overflow-auto text-sm whitespace-pre-wrap">{m.body}</pre>
           <div className="mt-4 text-sm text-slate-600">
             {customer ? (

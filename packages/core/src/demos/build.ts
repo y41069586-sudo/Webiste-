@@ -1,5 +1,12 @@
 import { eq, sql } from 'drizzle-orm';
-import { renderSite, templatesForGroup, type BusinessFacts, type DemoOptions, type SiteContent, type SenderInfo } from '@wbm/templates';
+import {
+  renderSite,
+  templatesForGroup,
+  type BusinessFacts,
+  type DemoOptions,
+  type SiteContent,
+  type SenderInfo,
+} from '@wbm/templates';
 import { appUrl, demoUrl } from '../config/env';
 import { getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
@@ -114,10 +121,16 @@ export function chooseTemplate(
   const seed = seedFromId(lead.id);
   const fresh = options.filter((t) => !previous.includes(t.id));
   const pool = fresh.length ? fresh : options;
-  const tplUse = (id: string) => Object.entries(usage).filter(([k]) => k.startsWith(`${id}/`)).reduce((s, [, n]) => s + n, 0);
-  const tpl = [...pool].sort((a, b) => tplUse(a.id) - tplUse(b.id) || ((seed + a.id.length) % 7) - ((seed + b.id.length) % 7))[0]!;
+  const tplUse = (id: string) =>
+    Object.entries(usage)
+      .filter(([k]) => k.startsWith(`${id}/`))
+      .reduce((s, [, n]) => s + n, 0);
+  const tpl = [...pool].sort(
+    (a, b) => tplUse(a.id) - tplUse(b.id) || ((seed + a.id.length) % 7) - ((seed + b.id.length) % 7),
+  )[0]!;
   const palette = [...tpl.palettes].sort(
-    (a, b) => (usage[`${tpl.id}/${a}`] ?? 0) - (usage[`${tpl.id}/${b}`] ?? 0) || tpl.palettes.indexOf(a) - tpl.palettes.indexOf(b),
+    (a, b) =>
+      (usage[`${tpl.id}/${a}`] ?? 0) - (usage[`${tpl.id}/${b}`] ?? 0) || tpl.palettes.indexOf(a) - tpl.palettes.indexOf(b),
   )[0]!;
   return { templateId: tpl.id, palette };
 }
@@ -174,7 +187,12 @@ export async function generateDemoContent(lead: Lead, cfg: AppConfig): Promise<G
     }
   }
   const branch = cfg.targeting.branches.find((b) => b.key === lead.branch);
-  const content = libraryContent(lead.branch, lead.branchGroup, { name: lead.businessName, stadt: lead.city, branche: branch?.label ?? lead.branch }, seed);
+  const content = libraryContent(
+    lead.branch,
+    lead.branchGroup,
+    { name: lead.businessName, stadt: lead.city, branche: branch?.label ?? lead.branch },
+    seed,
+  );
   return { content, source: 'fallback', attempts: 2, violations: lastViolations };
 }
 
@@ -221,7 +239,11 @@ export async function buildDemo(leadId: string, opts: { regenerate?: boolean; ac
     throw new Error(`Lead im Status ${lead.status} – Demo nicht vorgesehen`);
   }
 
-  const { templateId, palette } = chooseTemplate(lead, existing.map((d) => d.templateId), await templateUsage());
+  const { templateId, palette } = chooseTemplate(
+    lead,
+    existing.map((d) => d.templateId),
+    await templateUsage(),
+  );
   const generated = await generateDemoContent(lead, cfg);
   const facts = leadToFacts(lead, cfg);
   const slug = randomToken(24);
@@ -235,15 +257,18 @@ export async function buildDemo(leadId: string, opts: { regenerate?: boolean; ac
       templateId,
       palette,
       status: 'building',
-      contentJson: { ...generated.content, _meta: { source: generated.source, attempts: generated.attempts, violations: generated.violations } } as unknown as Record<
-        string,
-        unknown
-      >,
+      contentJson: {
+        ...generated.content,
+        _meta: { source: generated.source, attempts: generated.attempts, violations: generated.violations },
+      } as unknown as Record<string, unknown>,
     })
     .returning({ id: demos.id });
   const demoId = demo!.id;
   await getProviders().storage.put(demoHtmlKey(demoId), html, 'text/html; charset=utf-8');
-  await db.update(demos).set({ htmlStorageKey: demoHtmlKey(demoId) }).where(eq(demos.id, demoId));
+  await db
+    .update(demos)
+    .set({ htmlStorageKey: demoHtmlKey(demoId) })
+    .where(eq(demos.id, demoId));
   await db.transaction(async (tx) => {
     await transitionLead(tx, leadId, 'demo_built', { actor: opts.actor, soft: true });
     await audit(tx, {

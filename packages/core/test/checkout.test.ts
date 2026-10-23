@@ -50,7 +50,15 @@ async function seedDemo(name = 'Malerbetrieb Beispiel') {
     .returning();
   const [demo] = await db
     .insert(demos)
-    .values({ leadId: lead!.id, slug: randomToken(24), templateId: 'handwerk-solid', palette: 'werkblau', status: 'published', publishedAt: new Date(), expiresAt: addDays(new Date(), 30) })
+    .values({
+      leadId: lead!.id,
+      slug: randomToken(24),
+      templateId: 'handwerk-solid',
+      palette: 'werkblau',
+      status: 'published',
+      publishedAt: new Date(),
+      expiresAt: addDays(new Date(), 30),
+    })
     .returning();
   return { lead: lead!, demo: demo! };
 }
@@ -100,14 +108,24 @@ describe('Beträge und Rechnungsdaten', () => {
       billingAddressJson: { street: 'Kampstraße 5', postalCode: '44137', city: 'Dortmund', country: 'DE' },
       domainWish: 'beispiel.de',
     };
-    const inv = buildInvoiceData(DEFAULT_CONFIG, order, { number: 'RE-2026-0001', paidAt: new Date('2026-10-20T10:00:00Z'), issuedAt: new Date('2026-10-20T10:00:00Z'), amounts });
+    const inv = buildInvoiceData(DEFAULT_CONFIG, order, {
+      number: 'RE-2026-0001',
+      paidAt: new Date('2026-10-20T10:00:00Z'),
+      issuedAt: new Date('2026-10-20T10:00:00Z'),
+      amounts,
+    });
     expect(inv.number).toBe('RE-2026-0001');
     expect(inv.taxNote).toContain('§ 19 UStG');
     expect(inv.vat).toBeNull();
     expect(inv.seller.taxNumber).toBe(DEFAULT_CONFIG.sender.taxNumber);
     expect(inv.serviceDate).toContain('20.10.2026');
     expect(inv.gross).toBe('390,00 €');
-    const storno = buildCancellationData(inv, { number: 'RE-2026-0002', issuedAt: new Date('2026-10-25T10:00:00Z'), refundedCents: 39000, amounts });
+    const storno = buildCancellationData(inv, {
+      number: 'RE-2026-0002',
+      issuedAt: new Date('2026-10-25T10:00:00Z'),
+      refundedCents: 39000,
+      amounts,
+    });
     expect(storno.kind).toBe('cancellation');
     expect(storno.originalNumber).toBe('RE-2026-0001');
     expect(storno.gross).toBe('-390,00 €');
@@ -139,13 +157,23 @@ describe('Checkout und Zahlung', () => {
     const ctx = await getCheckoutContext(demo.slug);
     expect(ctx.state).toBe('ok');
     if (ctx.state !== 'ok') return;
-    expect(ctx.prefill).toEqual({ company: 'Malerbetrieb Beispiel', street: 'Kampstraße 5', postalCode: '44137', city: 'Dortmund', domain: 'malerbetrieb-beispiel.de' });
+    expect(ctx.prefill).toEqual({
+      company: 'Malerbetrieb Beispiel',
+      street: 'Kampstraße 5',
+      postalCode: '44137',
+      city: 'Dortmund',
+      domain: 'malerbetrieb-beispiel.de',
+    });
     expect(ctx.price.grossCents).toBe(39000);
   });
 
   it('Pflichtfelder und Checkboxen werden geprüft', async () => {
     const { demo } = await seedDemo();
-    const res = await startCheckout(demo.slug, input({ b2b: false as never, terms: false as never, postalCode: '441', email: 'kaputt' }), meta);
+    const res = await startCheckout(
+      demo.slug,
+      input({ b2b: false as never, terms: false as never, postalCode: '441', email: 'kaputt' }),
+      meta,
+    );
     expect(res.ok).toBe(false);
     if (res.ok) return;
     expect(Object.keys(res.fieldErrors ?? {}).sort()).toEqual(['b2b', 'email', 'postalCode', 'terms']);
@@ -164,7 +192,15 @@ describe('Checkout und Zahlung', () => {
   it('legt Bestellung an, setzt Lead auf checkout_started; Doppelklick liefert dieselbe Session', async () => {
     const { demo, lead } = await seedDemo();
     const { res, order } = await checkout(demo.slug);
-    expect(order).toMatchObject({ status: 'pending', amountCents: 39000, netCents: 39000, vatCents: 0, customerEmail: 'erika@example.org', domainWish: 'malerbetrieb-beispiel.de', b2bConfirmed: true });
+    expect(order).toMatchObject({
+      status: 'pending',
+      amountCents: 39000,
+      netCents: 39000,
+      vatCents: 0,
+      customerEmail: 'erika@example.org',
+      domainWish: 'malerbetrieb-beispiel.de',
+      b2bConfirmed: true,
+    });
     expect(order.termsVersion).toBe((await getConfig()).legal.termsVersion);
     expect(res.url).toContain('/checkout/mock/cs_mock_');
     const l = await getDb().query.leads.findFirst({ where: eq(leads.id, lead.id) });
@@ -190,11 +226,20 @@ describe('Checkout und Zahlung', () => {
     expect(paid.invoiceNumber).toBe(`RE-${year}-0001`);
     expect(paid.invoiceJson).toMatchObject({ number: `RE-${year}-0001`, buyer: { company: 'Malerbetrieb Beispiel' } });
     const cust = await db.query.customers.findFirst({ where: eq(customers.orderId, order.id) });
-    expect(cust).toMatchObject({ company: 'Malerbetrieb Beispiel', domain: 'malerbetrieb-beispiel.de', domainStatus: 'available' });
+    expect(cust).toMatchObject({
+      company: 'Malerbetrieb Beispiel',
+      domain: 'malerbetrieb-beispiel.de',
+      domainStatus: 'available',
+    });
     expect(cust!.accessToken).toHaveLength(32);
     expect((await db.query.leads.findFirst({ where: eq(leads.id, lead.id) }))!.status).toBe('paid');
     expect((await db.query.demos.findFirst({ where: eq(demos.id, demo.id) }))!.expiresAt).toBeNull();
-    expect(await db.select().from(events).where(and(eq(events.leadId, lead.id), eq(events.type, 'paid')))).toHaveLength(1);
+    expect(
+      await db
+        .select()
+        .from(events)
+        .where(and(eq(events.leadId, lead.id), eq(events.type, 'paid'))),
+    ).toHaveLength(1);
 
     // Bereits gekauft: Checkout zeigt „bestellt“, ohne Onboarding-Token
     expect(await getCheckoutContext(demo.slug)).toEqual({ state: 'ordered' });
@@ -206,7 +251,15 @@ describe('Checkout und Zahlung', () => {
 
     // Replay desselben Events
     const p = getProviders().payment as MockPayment;
-    const raw = JSON.stringify({ eventId: 'evt_fix_1', type: 'checkout.completed', rawType: 'x', sessionId: order.stripeSessionId, paymentStatus: 'paid', amountTotal: 39000, currency: 'eur' });
+    const raw = JSON.stringify({
+      eventId: 'evt_fix_1',
+      type: 'checkout.completed',
+      rawType: 'x',
+      sessionId: order.stripeSessionId,
+      paymentStatus: 'paid',
+      amountTotal: 39000,
+      currency: 'eur',
+    });
     expect((await processPaymentWebhook(raw, p.sign(raw))).duplicate).toBe(false);
     expect((await processPaymentWebhook(raw, p.sign(raw))).duplicate).toBe(true);
     expect((await db.query.orders.findFirst({ where: eq(orders.id, order.id) }))!.invoiceNumber).toBe(`RE-${year}-0001`);
@@ -276,7 +329,10 @@ describe('Checkout und Zahlung', () => {
   it('Sweeper schließt abgelaufene offene Bestellungen', async () => {
     const { demo } = await seedDemo();
     const { order } = await checkout(demo.slug);
-    await getDb().update(orders).set({ checkoutExpiresAt: addDays(new Date(), -1) }).where(eq(orders.id, order.id));
+    await getDb()
+      .update(orders)
+      .set({ checkoutExpiresAt: addDays(new Date(), -1) })
+      .where(eq(orders.id, order.id));
     await sweepPaidOrders();
     expect((await getDb().query.orders.findFirst({ where: eq(orders.id, order.id) }))!.status).toBe('expired');
   });
@@ -305,6 +361,8 @@ describe('Transaktions-Mails', () => {
   });
 
   it('ungültige Adresse wird abgelehnt', async () => {
-    await expect(sendTransactionalEmail({ kind: 'test', idempotencyKey: 'k2', to: 'kaputt', subject: 's', text: 't', html: '' })).rejects.toThrow();
+    await expect(
+      sendTransactionalEmail({ kind: 'test', idempotencyKey: 'k2', to: 'kaputt', subject: 's', text: 't', html: '' }),
+    ).rejects.toThrow();
   });
 });

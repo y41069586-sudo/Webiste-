@@ -19,7 +19,8 @@ export function normalizeDomainInput(raw: string, allowedTlds: string[]): Domain
   const parts = s.split('.');
   if (parts.length !== 2) return { ok: false, error: 'Bitte nur den Namen ohne Subdomain eingeben, z. B. maler-beispiel.de.' };
   const [label, tld] = parts as [string, string];
-  if (!tlds.includes(tld)) return { ok: false, error: `Möglich sind Domains mit der Endung ${tlds.map((t) => `.${t}`).join(', ')}.` };
+  if (!tlds.includes(tld))
+    return { ok: false, error: `Möglich sind Domains mit der Endung ${tlds.map((t) => `.${t}`).join(', ')}.` };
   if (label.length < 3) return { ok: false, error: 'Der Name muss mindestens 3 Zeichen lang sein.' };
   if (!isValidDeLabel(label)) {
     return { ok: false, error: 'Erlaubt sind Buchstaben a–z, Ziffern und Bindestriche (nicht am Anfang oder Ende).' };
@@ -64,22 +65,38 @@ async function availability(domains: string[]): Promise<Map<string, { available:
 }
 
 /** Live-Prüfung der Wunschdomain (Checkout, Onboarding) inkl. freier Alternativen. */
-export async function checkDomain(raw: string, ctx?: { businessName: string; city: string; branch: string }): Promise<DomainCheckResult> {
+export async function checkDomain(
+  raw: string,
+  ctx?: { businessName: string; city: string; branch: string },
+): Promise<DomainCheckResult> {
   const cfg = await getConfig();
   const parsed = normalizeDomainInput(raw, cfg.checkout.allowedTlds);
   if (!parsed.ok) return { input: raw, domain: null, valid: false, available: false, message: parsed.error, alternatives: [] };
   const res = await availability([parsed.domain]);
   const r = res.get(parsed.domain);
-  if (r?.available) return { input: raw, domain: parsed.domain, valid: true, available: true, message: `${parsed.domain} ist frei.`, alternatives: [] };
+  if (r?.available)
+    return {
+      input: raw,
+      domain: parsed.domain,
+      valid: true,
+      available: true,
+      message: `${parsed.domain} ist frei.`,
+      alternatives: [],
+    };
   let alternatives: string[] = [];
   if (ctx) {
-    const candidates = domainCandidates(ctx.businessName, { city: ctx.city, branch: ctx.branch }).filter((d) => d !== parsed.domain);
+    const candidates = domainCandidates(ctx.businessName, { city: ctx.city, branch: ctx.branch }).filter(
+      (d) => d !== parsed.domain,
+    );
     if (candidates.length) {
       const alt = await availability(candidates);
       alternatives = candidates.filter((d) => alt.get(d)?.available).slice(0, 3);
     }
   }
-  const message = r?.reason === 'premium' ? `${parsed.domain} ist eine Premium-Domain und nicht im Paket enthalten.` : `${parsed.domain} ist leider schon vergeben.`;
+  const message =
+    r?.reason === 'premium'
+      ? `${parsed.domain} ist eine Premium-Domain und nicht im Paket enthalten.`
+      : `${parsed.domain} ist leider schon vergeben.`;
   return { input: raw, domain: parsed.domain, valid: true, available: false, message, alternatives };
 }
 

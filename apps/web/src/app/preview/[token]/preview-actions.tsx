@@ -3,14 +3,24 @@
 import { useActionState } from 'react';
 import { approveAction, changesAction, type PreviewState } from './actions';
 
-export function PreviewActions({ token, roundsLeft, roundsIncluded }: { token: string; roundsLeft: number; roundsIncluded: number }) {
+export function PreviewActions({
+  token,
+  roundsLeft,
+  roundsIncluded,
+}: {
+  token: string;
+  roundsLeft: number;
+  roundsIncluded: number;
+}) {
   const [aState, approve, aPending] = useActionState<PreviewState, FormData>(approveAction.bind(null, token), {});
   const [cState, changes, cPending] = useActionState<PreviewState, FormData>(changesAction.bind(null, token), {});
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <form action={approve} className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
         <h2 className="text-lg font-semibold text-emerald-950">Alles passt?</h2>
-        <p className="mt-1 text-sm text-emerald-900">Mit der Freigabe registrieren wir Ihre Domain und schalten die Website live. Das dauert je nach Domain wenige Stunden.</p>
+        <p className="mt-1 text-sm text-emerald-900">
+          Mit der Freigabe registrieren wir Ihre Domain und schalten die Website live. Das dauert je nach Domain wenige Stunden.
+        </p>
         <label className="mt-3 flex items-start gap-2 text-sm text-emerald-950">
           <input type="checkbox" name="confirm" className="mt-0.5 h-5 w-5 accent-emerald-700" />
           <span>Ich habe die Vorschau geprüft und gebe sie zur Veröffentlichung frei.</span>
@@ -20,7 +30,10 @@ export function PreviewActions({ token, roundsLeft, roundsIncluded }: { token: s
             {aState.error}
           </p>
         ) : null}
-        <button disabled={aPending} className="mt-4 w-full rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:opacity-60">
+        <button
+          disabled={aPending}
+          className="mt-4 w-full rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
+        >
           {aPending ? 'Einen Moment …' : 'Freigeben und veröffentlichen'}
         </button>
       </form>
@@ -47,7 +60,10 @@ export function PreviewActions({ token, roundsLeft, roundsIncluded }: { token: s
             {cState.error}
           </p>
         ) : null}
-        <button disabled={cPending} className="mt-4 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-medium shadow-sm hover:bg-slate-50 disabled:opacity-60">
+        <button
+          disabled={cPending}
+          className="mt-4 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-medium shadow-sm hover:bg-slate-50 disabled:opacity-60"
+        >
           {cPending ? 'Wird gesendet …' : 'Änderungswunsch senden'}
         </button>
       </form>

@@ -9,7 +9,8 @@ export const sampleContent: SiteContent = {
     { title: 'Tapezierarbeiten', text: 'Vom Entfernen alter Tapeten bis zur neuen Wandgestaltung.', icon: 'wall' },
     { title: 'Lackierarbeiten', text: 'Türen, Fenster und Heizkörper wie neu.', icon: 'brush' },
   ],
-  about: 'Wir sind Ihr Malerbetrieb in Dortmund. Uns ist wichtig, dass Sie sich auf eine saubere und zuverlässige Ausführung verlassen können.\n\nSprechen Sie uns an – wir besprechen Ihr Vorhaben gern persönlich.',
+  about:
+    'Wir sind Ihr Malerbetrieb in Dortmund. Uns ist wichtig, dass Sie sich auf eine saubere und zuverlässige Ausführung verlassen können.\n\nSprechen Sie uns an – wir besprechen Ihr Vorhaben gern persönlich.',
   cta_text: 'Jetzt anrufen',
   seo_title: 'Malerbetrieb Beispiel – Maler in Dortmund',
   seo_description: 'Malerarbeiten in Dortmund: Innenanstrich, Fassade, Tapezieren und Lackieren. Rufen Sie uns an.',
