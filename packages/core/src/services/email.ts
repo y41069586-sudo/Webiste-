@@ -15,6 +15,7 @@ export interface TransactionalEmail extends EmailContent {
   to: string;
   attachments?: EmailAttachment[];
   replyTo?: string;
+  headers?: Record<string, string>;
   orderId?: string | null;
   customerId?: string | null;
   leadId?: string | null;
@@ -84,6 +85,7 @@ export async function sendTransactionalEmail(mail: TransactionalEmail): Promise<
       attachments: mail.attachments,
       tag: mail.kind,
       idempotencyKey: mail.idempotencyKey,
+      ...(mail.headers ? { headers: mail.headers } : {}),
     });
     await db.update(outboundEmails).set({ status: 'sent', providerMessageId: res.messageId, sentAt: new Date() }).where(eq(outboundEmails.id, rowId));
     logger.info({ kind: mail.kind, emailId: rowId, provider: email.name }, 'E-Mail versendet');

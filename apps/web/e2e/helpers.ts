@@ -35,19 +35,31 @@ export function e2eState(): { email: string; password: string; secret: string } 
 }
 
 let usedStep = 0;
-/** Meldet den Admin an (wartet ggf. auf den nächsten TOTP-Schritt – Replay-Schutz). */
+/**
+ * Meldet den Admin an (wartet ggf. auf den nächsten TOTP-Schritt – Replay-Schutz).
+ * Wiederholt, falls der Dev-Server die Seite beim ersten Aufruf neu lädt.
+ */
 export async function loginAsAdmin(page: Page): Promise<void> {
   const s = e2eState();
-  let step = Math.floor(Date.now() / 30000);
-  if (step <= usedStep) {
-    await page.waitForTimeout((usedStep + 1) * 30000 - Date.now() + 200);
-    step = Math.floor(Date.now() / 30000);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let step = Math.floor(Date.now() / 30000);
+    if (step <= usedStep) {
+      await page.waitForTimeout((usedStep + 1) * 30000 - Date.now() + 200);
+      step = Math.floor(Date.now() / 30000);
+    }
+    usedStep = step;
+    await page.goto('/login');
+    await page.waitForLoadState('networkidle');
+    await page.getByLabel('E-Mail').fill(s.email);
+    await page.getByLabel('Passwort').fill(s.password);
+    await page.getByLabel('2FA-Code').fill(totpNow(s.secret));
+    await page.getByRole('button', { name: 'Anmelden' }).click();
+    try {
+      await page.waitForURL('**/admin', { timeout: 20_000 });
+      return;
+    } catch {
+      // nächster Versuch mit neuem Code
+    }
   }
-  usedStep = step;
-  await page.goto('/login');
-  await page.getByLabel('E-Mail').fill(s.email);
-  await page.getByLabel('Passwort').fill(s.password);
-  await page.getByLabel('2FA-Code').fill(totpNow(s.secret));
-  await page.getByRole('button', { name: 'Anmelden' }).click();
-  await page.waitForURL('**/admin');
+  throw new Error('Admin-Anmeldung fehlgeschlagen');
 }

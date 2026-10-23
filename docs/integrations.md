@@ -185,3 +185,17 @@ Geprüft am 23.10.2026 (docs.netlify.com „Get started with the Netlify API“,
 - Eigene Domain: `PATCH /api/v1/sites/{id} {custom_domain, domain_aliases}`; DNS bei INWX: Apex `A 75.2.60.5`,
   `www CNAME {site}.netlify.app`; SSL: `POST /api/v1/sites/{id}/ssl`.
 - Umschalten mit `HOSTING_PROVIDER=netlify` und `NETLIFY_API_TOKEN`.
+
+## Eingehende E-Mails (Support)
+
+Geprüft am 23.10.2026.
+
+- **IMAP (empfohlen, anbieterunabhängig):** `imapflow` 2.9 + `mailparser` 3.12. Job `imap-poll` alle 5 Minuten,
+  liest ungelesene Nachrichten der INBOX, Duplikatschutz über die Message-ID, markiert als gelesen.
+  Variablen `IMAP_HOST`, `IMAP_PORT` (993 = TLS), `IMAP_USER`, `IMAP_PASSWORD`.
+- **Postmark Inbound (alternativ):** Postmark sendet die Mail als JSON (`FromFull.Email`, `Subject`, `MessageID`,
+  `TextBody`, `StrippedTextReply`, `Headers[{Name,Value}]`, `OriginalRecipient`, …) an
+  `/api/webhooks/email-inbound`. Die Postmark-Doku nennt keine Signatur – wir verlangen daher das Geheimnis
+  `EMAIL_INBOUND_SECRET` als `?token=` oder als Basic-Auth-Passwort in der Webhook-URL. Antwort 403 stoppt
+  Postmark-Wiederholungen.
+- Automatische Antworten (Auto-Submitted, Abwesenheit, Mailer-Daemon) werden erkannt und nie beantwortet.

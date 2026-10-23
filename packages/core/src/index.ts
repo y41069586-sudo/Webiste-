@@ -56,3 +56,6 @@ export * from './sites/onboarding-data';
 export { impressumHtml, privacyHtml } from './sites/legal';
 export { validateRevision, mergeCustomerTexts, REVISION_TOOL_NAME } from './sites/revision';
 export * from './services/renewals';
+export * from './services/support';
+export { isAutomated, OPT_OUT_RE } from './support/prompts';
+export * from './services/alerts';
