@@ -50,12 +50,15 @@ export async function recordEvent(
       .limit(1);
     if (dup.length) return false;
   }
+  const target = EVENT_STATUS[input.type];
+  // Zuerst die Lead-Zeile sperren, dann das Event schreiben: sonst Deadlock bei gleichzeitigen
+  // Scans (Fremdschlüssel-Sperre des Events gegen die Zeilensperre des Statuswechsels)
+  if (target) await db.execute(sql`SELECT id FROM leads WHERE id = ${input.leadId} FOR UPDATE`);
   await db.insert(events).values({
     leadId: input.leadId,
     type: input.type,
     metaJson: { ...(input.meta ?? {}), ...(input.req ? { ua: input.req.ua, ipHash: input.req.ipHash } : {}) },
   });
-  const target = EVENT_STATUS[input.type];
   if (target) {
     await transitionLead(db, input.leadId, target, { actor: `public:${input.type}`, onlyForward: true });
   }

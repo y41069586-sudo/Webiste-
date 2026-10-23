@@ -61,3 +61,5 @@ export { isAutomated, OPT_OUT_RE } from './support/prompts';
 export * from './services/alerts';
 export * from './services/kpis';
 export * from './services/optimizer';
+export * from './services/retention';
+export * from './services/monitoring';

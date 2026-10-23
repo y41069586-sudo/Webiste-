@@ -112,6 +112,8 @@ export const SECTIONS: SectionDef[] = [
       { path: 'timing.followupAfterDays', label: 'Follow-up nach (Tage ohne Scan)', type: 'number' },
       { path: 'timing.leadRetentionMonths', label: 'Leads ohne Reaktion löschen nach (Monate)', type: 'number' },
       { path: 'timing.invoiceRetentionYears', label: 'Aufbewahrung Rechnungen (Jahre)', type: 'number' },
+      { path: 'timing.supportRetentionMonths', label: 'Löschung Support-Nachrichten ohne Kundenbezug (Monate)', type: 'number' },
+      { path: 'timing.unpaidOrderRetentionMonths', label: 'Löschung abgebrochener Bestellungen (Monate)', type: 'number' },
       { path: 'timing.renewalReminderDays', label: 'Erinnerung vor Hosting-Ablauf (Tage)', type: 'number' },
       { path: 'timing.assumeDeliveredAfterDays', label: 'Zustellung annehmen nach (Tage)', type: 'number' },
       { path: 'timing.placesCacheDays', label: 'Places-Daten-Cache (Tage, max. 30)', type: 'number' },

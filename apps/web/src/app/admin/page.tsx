@@ -1,6 +1,6 @@
 import { desc, isNull, sql } from 'drizzle-orm';
-import { budgetStatus, getDb, schema } from '@wbm/core';
-import { Card, PageHeader, Stat, StatusBadge } from '@/components/ui';
+import { budgetStatus, getDb, schema, systemHealth } from '@wbm/core';
+import { Card, Notice, PageHeader, Stat, StatusBadge } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur, num } from '@/lib/format';
 import { acknowledgeAlert } from './actions';
@@ -10,7 +10,7 @@ export const metadata = { title: 'Übersicht' };
 export default async function Dashboard() {
   await requireAdmin();
   const db = getDb();
-  const [byStatus, openAlerts, letterBudget, llmBudget, placesBudget] = await Promise.all([
+  const [byStatus, openAlerts, letterBudget, llmBudget, placesBudget, health] = await Promise.all([
     db
       .select({ status: schema.leads.status, n: sql<number>`count(*)::int` })
       .from(schema.leads)
@@ -19,12 +19,20 @@ export default async function Dashboard() {
     budgetStatus('letter'),
     budgetStatus('llm'),
     budgetStatus('places_api'),
+    systemHealth(),
   ]);
   const counts = Object.fromEntries(byStatus.map((r) => [r.status, r.n]));
   const total = byStatus.reduce((a, r) => a + r.n, 0);
   return (
     <>
       <PageHeader title="Übersicht" subtitle="Pipeline-Status, Budget der laufenden Woche und offene Meldungen." />
+      {health.problems.length ? (
+        <div className="mb-6">
+          <Notice kind="error">
+            <strong>Systemzustand:</strong> {health.problems.join(' · ')}
+          </Notice>
+        </div>
+      ) : null}
       {openAlerts.length > 0 ? (
         <Card title={`Offene Meldungen (${openAlerts.length})`} className="mb-6">
           <ul className="divide-y divide-slate-100">

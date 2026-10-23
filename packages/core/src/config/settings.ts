@@ -143,6 +143,10 @@ export const appConfigSchema = z.object({
     followupAfterDays: z.number().int().min(1),
     leadRetentionMonths: z.number().int().min(1),
     invoiceRetentionYears: z.number().int().min(1),
+    /** Support-Nachrichten ohne Kundenbezug */
+    supportRetentionMonths: z.number().int().min(1),
+    /** Abgebrochene/unbezahlte Bestellungen (Checkout-Daten von Nicht-Käufern) */
+    unpaidOrderRetentionMonths: z.number().int().min(1),
     renewalReminderDays: z.number().int().min(1),
     /** Ohne Zustellbestätigung gilt ein Brief nach X Tagen als zugestellt */
     assumeDeliveredAfterDays: z.number().int().min(1),
@@ -407,6 +411,8 @@ export const DEFAULT_CONFIG: AppConfig = {
     followupAfterDays: 12,
     leadRetentionMonths: 6,
     invoiceRetentionYears: 10,
+    supportRetentionMonths: 12,
+    unpaidOrderRetentionMonths: 6,
     renewalReminderDays: 30,
     assumeDeliveredAfterDays: 4,
     placesCacheDays: 30,

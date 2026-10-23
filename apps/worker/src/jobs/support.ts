@@ -1,4 +1,4 @@
-import { processSupportMessage, sendAlertDigest, sendSupportReply } from '@wbm/core';
+import { processSupportMessage, sendAlertDigest, sendSupportReply, watchdog } from '@wbm/core';
 import { pollImapInbox } from '@wbm/core/render';
 import { defineJob } from '../runtime';
 
@@ -11,5 +11,8 @@ defineJob('support-send', async (data) => sendSupportReply(data.messageId));
 /** Postfach per IMAP abrufen (falls konfiguriert). */
 defineJob('imap-poll', async () => pollImapInbox());
 
-/** Sammel-Mail mit neuen Warnungen an den Betreiber. */
-defineJob('alert-mails', async () => ({ sent: await sendAlertDigest() }));
+/** Watchdog (Worker, Jobs, Speicher) und Sammel-Mail mit neuen Warnungen an den Betreiber. */
+defineJob('alert-mails', async () => {
+  const health = await watchdog();
+  return { sent: await sendAlertDigest(), health: health.status };
+});

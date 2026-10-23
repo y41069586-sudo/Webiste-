@@ -1,6 +1,6 @@
 #!/bin/sh
 # Tägliches Postgres-Backup (pg_dump -Fc) + Storage-Archiv, Aufbewahrung BACKUP_KEEP_DAYS.
-# Läuft im Container "backup". Wiederherstellungstest: scripts/restore-test.sh
+# Läuft im Container "backup". Nach jedem Backup: Wiederherstellungstest (restore-test.sh).
 set -eu
 KEEP="${BACKUP_KEEP_DAYS:-14}"
 HOUR="${BACKUP_HOUR:-2}"
@@ -16,14 +16,15 @@ run_backup() {
   # Integritätsprüfung: Inhaltsverzeichnis des Dumps muss lesbar sein
   pg_restore -l "/backups/db/wbm-$TS.dump" > /dev/null
   echo "{\"level\":\"info\",\"msg\":\"backup ok\",\"file\":\"wbm-$TS.dump\"}"
+  sh /scripts/restore-test.sh "/backups/db/wbm-$TS.dump"
 }
 
 # Beim Start einmal sichern, danach täglich zur Stunde HOUR (UTC)
-run_backup || echo '{"level":"error","msg":"backup fehlgeschlagen"}'
+run_backup || { echo '{"level":"error","msg":"backup fehlgeschlagen"}'; psql -q -c "INSERT INTO alerts (level, code, message) VALUES ('error', 'backup_failed', 'Backup fehlgeschlagen')" || true; }
 while true; do
   NOW_H=$(date -u +%H | sed 's/^0//')
   if [ "${NOW_H:-0}" -eq "$HOUR" ]; then
-    run_backup || echo '{"level":"error","msg":"backup fehlgeschlagen"}'
+    run_backup || { echo '{"level":"error","msg":"backup fehlgeschlagen"}'; psql -q -c "INSERT INTO alerts (level, code, message) VALUES ('error', 'backup_failed', 'Backup fehlgeschlagen')" || true; }
     sleep 3700
   fi
   sleep 300

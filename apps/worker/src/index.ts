@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { closeDb, getBoss, getEnv, logger, runMigrations, seedDefaults, stopBoss, QUEUES } from '@wbm/core';
+import { closeDb, getBoss, getEnv, logger, pingDb, runMigrations, seedDefaults, stopBoss, QUEUES } from '@wbm/core';
 import { scheduleCrons, startWorkers } from './runtime';
 import './jobs';
 
@@ -29,9 +29,13 @@ async function main(): Promise<void> {
   const healthPort = Number(process.env.WORKER_HEALTH_PORT ?? 0);
   if (healthPort > 0) {
     createServer((req, res) => {
-      res.writeHead(req.url === '/health' ? 200 : 404, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok' }));
-    }).listen(healthPort, '127.0.0.1');
+      if (req.url !== '/health') {
+        res.writeHead(404).end();
+        return;
+      }
+      // Lebenszeichen inkl. Datenbank-Erreichbarkeit
+      void pingDb().then((ok) => res.writeHead(ok ? 200 : 503, { 'content-type': 'application/json' }).end(JSON.stringify({ status: ok ? 'ok' : 'db_down' })));
+    }).listen(healthPort, process.env.WORKER_HEALTH_HOST ?? '127.0.0.1');
   }
 
   let stopping = false;
