@@ -34,6 +34,8 @@ export interface RetentionResult {
   customersAnonymized: number;
   emailsDeleted: number;
   eventsStripped: number;
+  /** Aus Google-Signalen abgeleitete Werte (Segment „neu“, Score-Anteil) nach max. 30 Tagen zurückgesetzt */
+  googleDerivedReset: number;
   housekeeping: number;
 }
 
@@ -56,6 +58,7 @@ export async function runRetention(now = new Date(), actor = 'job:retention'): P
     customersAnonymized: 0,
     emailsDeleted: 0,
     eventsStripped: 0,
+    googleDerivedReset: 0,
     housekeeping: 0,
   };
 
@@ -223,6 +226,14 @@ export async function runRetention(now = new Date(), actor = 'job:retention'): P
     WHERE created_at < ${addDays(now, -30)} AND (meta_json ? 'ipHash' OR meta_json ? 'ua')
   `);
   r.eventsStripped = stripped.rowCount ?? 0;
+
+  // 7b) Google-Signal: Rohwerte werden nie gespeichert; abgeleitete Werte nur bis placesCacheDays (max. 30)
+  const g = await db.execute(sql`
+    UPDATE leads SET google_checked_at = NULL,
+      lead_segment = CASE WHEN lead_segment = 'neu' THEN (CASE WHEN social_only THEN 'social_only' ELSE 'etabliert' END) ELSE lead_segment END
+    WHERE google_checked_at IS NOT NULL AND google_checked_at < ${addDays(now, -cfg.timing.placesCacheDays)}
+  `);
+  r.googleDerivedReset = g.rowCount ?? 0;
 
   // 8) Aufräumen: Webhook-Replay-Tabelle, Sitzungen, Rate-Limits, alte quittierte Meldungen
   const wh = await db

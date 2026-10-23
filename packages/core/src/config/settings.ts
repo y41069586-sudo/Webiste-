@@ -84,6 +84,16 @@ export const appConfigSchema = z.object({
     /** 14-Tage-Zufriedenheitsgarantie: Erstattung per Admin-Button, Seite offline, Domain freigeben */
     enabled: z.boolean(),
     days: z.number().int().min(1).max(60),
+    /** Garantie beginnt mit dem Go-Live, spätestens aber so viele Tage nach der Zahlung */
+    latestStartDays: z.number().int().min(0).max(90),
+  }),
+  dunning: z.object({
+    /** Nach dem letzten fehlgeschlagenen Einzug (Smart Retries): Erinnerung 1 sofort, Erinnerung 2 nach X Tagen */
+    secondReminderAfterDays: z.number().int().min(1).max(60),
+    /** Wartungsmodus X Tage nach Erinnerung 2; danach Forderungsbrief zur Freigabe */
+    maintenanceAfterDays: z.number().int().min(1).max(60),
+    /** Zahlungsziel im Forderungsbrief (Tage) */
+    claimDueDays: z.number().int().min(7).max(60),
   }),
   segments: z.object({
     /** Segment „neu“: neu aufgetaucht mit so vielen Bewertungen (Mindestanzahl entfällt, Mindest-Rating bleibt) */
@@ -99,7 +109,11 @@ export const appConfigSchema = z.object({
   tax: z.object({
     kleinunternehmer: z.boolean(),
     vatRatePercent: z.number().min(0).max(100),
-    /** Paketpreis ist Bruttopreis (bei USt-Pflicht wird die USt herausgerechnet) */
+    /**
+     * Nur ohne Kleinunternehmerregelung relevant: true = Preise sind Bruttopreise (USt wird herausgerechnet),
+     * false = Nettopreise zzgl. USt. (Standard: nach Wegfall der Regelung gelten die Preise für neue Verträge
+     * als Nettopreise; bestehende Bestellungen behalten ihre gespeicherten Beträge)
+     */
     pricesAreGross: z.boolean(),
     invoicePrefix: z.string(),
     kleinunternehmerNote: z.string(),
@@ -111,6 +125,8 @@ export const appConfigSchema = z.object({
     allowedTlds: z.array(z.string()).min(1),
     /** Domains teurer als dieser Jahrespreis gelten als nicht verfügbar (Premium) */
     maxDomainPriceCents: z.number().int().positive(),
+    /** Zahlungsarten im Stripe Checkout (müssen im Stripe-Dashboard aktiviert sein) – kein PayPal */
+    paymentMethods: z.array(z.enum(['card', 'sepa_debit'])).min(1),
   }),
   targeting: z.object({
     cities: z.array(z.string()).min(1),
@@ -200,6 +216,8 @@ export const appConfigSchema = z.object({
     qaLighthouse: z.boolean(),
     /** KI-Prüfung der Texte in der Demo-QA */
     qaLlm: z.boolean(),
+    /** Brief 3 („Wir haben Ihre Website verbessert“): die ersten N Überarbeitungen und Briefe gibt der Betreiber frei */
+    letter3ManualFirstN: z.number().int().min(0),
   }),
   onboarding: z.object({
     includedChangeRounds: z.number().int().min(0),
@@ -345,6 +363,12 @@ export const DEFAULT_CONFIG: AppConfig = {
   guarantee: {
     enabled: true,
     days: 14,
+    latestStartDays: 14,
+  },
+  dunning: {
+    secondReminderAfterDays: 7,
+    maintenanceAfterDays: 7,
+    claimDueDays: 14,
   },
   segments: {
     newMinRatings: 3,
@@ -356,7 +380,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   tax: {
     kleinunternehmer: true,
     vatRatePercent: 19,
-    pricesAreGross: true,
+    pricesAreGross: false,
     invoicePrefix: 'RE',
     kleinunternehmerNote: 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.',
   },
@@ -483,11 +507,13 @@ export const DEFAULT_CONFIG: AppConfig = {
     sampleRatePercent: 10,
     qaLighthouse: true,
     qaLlm: true,
+    letter3ManualFirstN: 20,
   },
   checkout: {
     sessionMinutes: 60,
     allowedTlds: ['de'],
     maxDomainPriceCents: 1500,
+    paymentMethods: ['card', 'sepa_debit'],
   },
   onboarding: {
     includedChangeRounds: 2,

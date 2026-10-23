@@ -1,4 +1,4 @@
-import { ensureSiteForCustomer, sendOnboardingReminders, sendRenewalReminders } from '@wbm/core';
+import { ensureSiteForCustomer, runDunning, sendOnboardingReminders, sendRenewalReminders } from '@wbm/core';
 import { buildSite, deploySite, liveCheck } from '@wbm/core/render';
 import { defineJob } from '../runtime';
 
@@ -18,6 +18,9 @@ defineJob('deploy-site', async (data) => deploySite(data.siteId));
 defineJob('live-check', async (data) => liveCheck(data.siteId, data.attempt ?? 0));
 
 /** Täglich: Onboarding-Erinnerung und Hinweis vor Ablauf des Hostings. */
+/** Mahnverfahren: Erinnerung 2, Wartungsmodus, Forderungsbrief-Entwurf (Versand nur nach Freigabe). */
+defineJob('dunning', async () => runDunning());
+
 defineJob('renewal-reminders', async () => ({
   onboarding: await sendOnboardingReminders(),
   renewal: await sendRenewalReminders(),

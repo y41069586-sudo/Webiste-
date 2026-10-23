@@ -1,5 +1,6 @@
 import type { LetterData } from '@wbm/templates/letter-types';
 import type { AppConfig } from '../config/settings';
+import { priceTaxSuffix } from '../invoices/build';
 import { formatEuroShort } from '../util/time';
 import type { LetterVariantContent } from './variants';
 
@@ -72,8 +73,10 @@ export interface ComposeInput {
 /** Beide Preisoptionen in einem Satzteil – die Mindestlaufzeit steht immer direkt neben der Monatsrate. */
 export function pricesPhrase(cfg: AppConfig, oneTimeLabel: string): string {
   const p = cfg.pricing;
-  if (!p.monthlyEnabled) return `einmalig **${oneTimeLabel}**`;
-  return `**${oneTimeLabel} einmalig** oder **${formatEuroShort(p.monthlyCents)} pro Monat** (${p.minTermMonths} Monate Mindestlaufzeit)`;
+  const tax = priceTaxSuffix(cfg);
+  const t = tax ? ` ${tax}` : '';
+  if (!p.monthlyEnabled) return `einmalig **${oneTimeLabel}**${t}`;
+  return `**${oneTimeLabel} einmalig** oder **${formatEuroShort(p.monthlyCents)} pro Monat** (${p.minTermMonths} Monate Mindestlaufzeit)${tax ? `, jeweils ${tax}` : ''}`;
 }
 
 export function guaranteeSentence(cfg: AppConfig): string {

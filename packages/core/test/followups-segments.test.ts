@@ -16,7 +16,7 @@ import { suppressEmail } from '../src/services/suppression';
 import { trackTokenForShortCode } from '../src/services/tracking';
 import { randomShortCode, randomToken } from '../src/util/crypto';
 import { addBusinessDays, addDays, endOfDayBerlin } from '../src/util/time';
-import { resetDb } from './helpers';
+import { OPERATOR_TEST_CONFIG, resetDb } from './helpers';
 
 const place: RawPlace = {
   source: 'mock',
@@ -258,7 +258,10 @@ describe('Folgesendungen, Kurz-URL, Erinnerungs-Mail', () => {
   it('Versand: veraltetes „online bis …“ wird nicht verschickt; Folgebrief verlängert die Demo bis zum genannten Datum', async () => {
     process.env.DRY_RUN = 'false';
     resetEnvCache();
-    await updateConfig({ switches: { dryRun: false, killSwitch: false }, budget: { weeklyBudgetCents: 1000 } }, 'test');
+    await updateConfig(
+      { ...OPERATOR_TEST_CONFIG, switches: { dryRun: false, killSwitch: false }, budget: { weeklyBudgetCents: 1000 } },
+      'test',
+    );
     const db = getDb();
     const { lead, demo } = await seedLead('letter_delivered');
     const key = `letters/${lead.id}/x.pdf`;

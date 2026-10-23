@@ -23,6 +23,13 @@ const EVENT_TYPES: Record<string, PaymentEventType> = {
   'customer.subscription.deleted': 'subscription.deleted',
 };
 
+/**
+ * Kunden sind Betriebe: Karte und SEPA-Lastschrift (PayPal bewusst nicht, Entscheidung des Betreibers).
+ * Seit API 2026-09-30 gibt es `payment_method_types` nicht mehr; `allowed_payment_method_types` filtert die im
+ * Dashboard aktiven Zahlungsarten – ist SEPA dort nicht aktiv, wird nur Karte angeboten (kein Fehler).
+ */
+const DEFAULT_PAYMENT_METHODS: Stripe.Checkout.SessionCreateParams.AllowedPaymentMethodType[] = ['card', 'sepa_debit'];
+
 function fromUnix(v: number | null | undefined): Date | undefined {
   return typeof v === 'number' ? new Date(v * 1000) : undefined;
 }
@@ -61,7 +68,7 @@ export interface StripePaymentConfig {
 /**
  * Stripe Checkout (gehostete Seite). Option A: Modus „payment“; Option B: Modus „subscription“
  * (erste Rate sofort) plus Subscription Schedule (12 Monate 49 € → danach 19 €). Zahlungsarten kommen
- * aus den Dashboard-Einstellungen (dynamische Zahlungsmethoden: Karte, SEPA, PayPal). Die Rechnungen
+ * fest: Karte und SEPA-Lastschrift. Die Rechnungen
  * erstellen wir selbst (fortlaufende Nummer, § 19 UStG). Fulfillment ausschließlich idempotent über
  * Webhooks + Abfrage auf der Erfolgsseite.
  */
@@ -89,6 +96,7 @@ export class StripePayment implements PaymentProvider {
         {
           mode: 'subscription',
           locale: 'de',
+          allowed_payment_method_types: input.paymentMethods ?? DEFAULT_PAYMENT_METHODS,
           client_reference_id: input.orderId,
           customer_email: input.customerEmail,
           line_items: [
@@ -122,6 +130,7 @@ export class StripePayment implements PaymentProvider {
     const params: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
       locale: 'de',
+      allowed_payment_method_types: input.paymentMethods ?? DEFAULT_PAYMENT_METHODS,
       submit_type: 'pay',
       client_reference_id: input.orderId,
       customer_email: input.customerEmail,

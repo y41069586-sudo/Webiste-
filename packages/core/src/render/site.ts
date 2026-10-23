@@ -14,6 +14,7 @@ import { LlmNoToolCallError, LlmRefusalError } from '../providers/llm/anthropic'
 import type { SiteFile } from '../providers/types';
 import { enqueue, QUEUES } from '../queue';
 import { audit } from '../services/audit';
+import { guaranteeEndFor } from '../services/guarantee';
 import { assertNotHalted, raiseAlert, recordCost } from '../services/budget';
 import { notifyAdmin, sendTransactionalEmail } from '../services/email';
 import { transitionLead } from '../services/lead-state';
@@ -700,6 +701,13 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
       .update(customers)
       .set({ hostingUntil, ...(domainExpires ? { domainExpiresAt: domainExpires } : {}), updatedAt: now })
       .where(eq(customers.id, ctx.customer.id));
+    // Garantie läuft ab Go-Live (höchstens bis zum spätesten Beginn laut Zahlung)
+    const order = await tx.query.orders.findFirst({ where: eq(orders.id, ctx.customer.orderId) });
+    if (order?.paidAt && order.guaranteeEndsAt) {
+      const end = guaranteeEndFor(ctx.cfg, order.paidAt, now);
+      if (end < order.guaranteeEndsAt)
+        await tx.update(orders).set({ guaranteeEndsAt: end, updatedAt: now }).where(eq(orders.id, order.id));
+    }
     if (ctx.customer.leadId) {
       await tx.insert(events).values({ leadId: ctx.customer.leadId, type: 'live', metaJson: { siteId, url } });
       await transitionLead(tx, ctx.customer.leadId, 'live', { actor: 'job:live-check', soft: true });

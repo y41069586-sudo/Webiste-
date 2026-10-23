@@ -6,12 +6,26 @@ import { customers, orders } from '../db/schema';
 import { guaranteeRefundEmail } from '../emails/templates';
 import { errInfo, logger } from '../logger';
 import { getProviders } from '../providers';
-import { formatEuro } from '../util/time';
+import { addDays, formatDateLongDe, formatEuro } from '../util/time';
 import { audit } from './audit';
 import { raiseAlert } from './budget';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { setSiteMaintenance } from './maintenance';
 import { refundOrder } from './orders';
+
+/**
+ * Ende der Garantiefrist: Sie beginnt mit dem Go-Live, spätestens aber `latestStartDays` nach der Zahlung
+ * (falls sich der Go-Live wegen des Kunden verzögert), und dauert `days` Tage.
+ */
+export function guaranteeEndFor(
+  cfg: { guarantee: { days: number; latestStartDays: number } },
+  paidAt: Date,
+  liveAt: Date | null,
+): Date {
+  const latest = addDays(paidAt, cfg.guarantee.latestStartDays);
+  const start = liveAt && liveAt < latest ? liveAt : latest;
+  return addDays(start, cfg.guarantee.days);
+}
 
 export interface GuaranteeStatus {
   available: boolean;
@@ -91,7 +105,7 @@ export async function guaranteeRefund(orderId: string, actor: string): Promise<{
     await raiseAlert(db, {
       level: 'warn',
       code: `guarantee_domain_${order.id}`,
-      message: `Garantie: Domain ${registered} an den Kunden übertragen (Auth-Code) oder kündigen.`,
+      message: `Garantie: Domain ${registered} – dem Kunden kostenlos per Auth-Code übertragen, falls er antwortet; sonst Auto-Verlängerung bei INWX abschalten (nicht verlängern).`,
       context: { orderId, customerId: customer?.id },
     });
   }
@@ -102,6 +116,7 @@ export async function guaranteeRefund(orderId: string, actor: string): Promise<{
       amount: formatEuro(refundable),
       monthly: order.plan === 'monthly',
       domainRegistered: registered,
+      domainExpires: customer?.domainExpiresAt ? formatDateLongDe(customer.domainExpiresAt) : null,
     });
     await sendTransactionalEmail({
       ...mail,

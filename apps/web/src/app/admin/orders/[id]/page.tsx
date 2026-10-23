@@ -5,7 +5,13 @@ import { getDb, guaranteeStatus, schema } from '@wbm/core';
 import { Card, PageHeader, StatusBadge, Table, Td, btn, input, label } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
-import { guaranteeRefundAction, refundOrderAction, resendInvoiceAction } from '../actions';
+import {
+  approveClaimLetterAction,
+  cancelClaimLetterAction,
+  guaranteeRefundAction,
+  refundOrderAction,
+  resendInvoiceAction,
+} from '../actions';
 
 export const metadata = { title: 'Bestellung' };
 export const dynamic = 'force-dynamic';
@@ -17,7 +23,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const db = getDb();
   const order = await db.query.orders.findFirst({ where: eq(schema.orders.id, id) });
   if (!order) notFound();
-  const [customer, mails, log, payments, guarantee] = await Promise.all([
+  const [customer, mails, log, payments, guarantee, claims] = await Promise.all([
     db.query.customers.findFirst({ where: eq(schema.customers.orderId, id) }),
     db
       .select()
@@ -32,6 +38,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       .limit(50),
     db.select().from(schema.orderPayments).where(eq(schema.orderPayments.orderId, id)).orderBy(desc(schema.orderPayments.paidAt)),
     guaranteeStatus(order),
+    db
+      .select()
+      .from(schema.dunningLetters)
+      .where(eq(schema.dunningLetters.orderId, id))
+      .orderBy(desc(schema.dunningLetters.createdAt)),
   ]);
   const monthly = order.plan === 'monthly';
   const a = order.billingAddressJson;
@@ -86,6 +97,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 <dd>{dt(order.minTermEndsAt)}</dd>
               </>
             ) : null}
+            <dt className="text-slate-500">Mahnverfahren</dt>
+            <dd>
+              {['–', 'Erinnerung 1 gesendet', 'Erinnerung 2 gesendet', 'Wartungsmodus'][order.dunningStage] ?? '–'}
+              {order.dunningUpdatedAt ? ` · ${dt(order.dunningUpdatedAt)}` : ''}
+            </dd>
             <dt className="text-slate-500">Garantie bis</dt>
             <dd>{dt(order.guaranteeEndsAt)}</dd>
             {order.endedAt ? (
@@ -177,6 +193,50 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 </tr>
               ))}
             </Table>
+          </Card>
+        ) : null}
+        {claims.length ? (
+          <Card title="Forderungsbriefe (offene Raten)">
+            <ul className="space-y-4 text-sm">
+              {claims.map((c) => (
+                <li key={c.id} className="rounded-lg border border-slate-200 p-3">
+                  <p>
+                    <StatusBadge status={c.status} /> {c.openRates} offene Raten · {eur(c.amountCents)} · erstellt{' '}
+                    {dt(c.createdAt)}
+                    {c.pdfStorageKey ? (
+                      <>
+                        {' · '}
+                        <a href={`/admin/files/${c.pdfStorageKey}`} className="text-brand-700 underline">
+                          PDF ansehen
+                        </a>
+                      </>
+                    ) : null}
+                  </p>
+                  {c.note ? <p className="mt-1 text-slate-600">{c.note}</p> : null}
+                  {c.status === 'draft' ? (
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <form action={approveClaimLetterAction} className="flex items-end gap-2">
+                        <input type="hidden" name="id" value={c.id} />
+                        <input type="hidden" name="orderId" value={order.id} />
+                        <div>
+                          <label htmlFor={`c-${c.id}`} className={label}>
+                            FREIGEBEN eintippen
+                          </label>
+                          <input id={`c-${c.id}`} name="confirm" required className={input} autoComplete="off" />
+                        </div>
+                        <button className={btn.primary}>Freigeben und versenden</button>
+                      </form>
+                      <form action={cancelClaimLetterAction} className="flex items-end gap-2">
+                        <input type="hidden" name="id" value={c.id} />
+                        <input type="hidden" name="orderId" value={order.id} />
+                        <input name="note" placeholder="Grund (optional)" className={input} />
+                        <button className={btn.secondary}>Verwerfen</button>
+                      </form>
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
           </Card>
         ) : null}
         {guarantee.available ? (

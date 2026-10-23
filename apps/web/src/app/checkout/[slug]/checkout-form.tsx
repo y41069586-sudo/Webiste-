@@ -356,7 +356,7 @@ export function CheckoutForm({ slug, prefill, plans, initialPlan, guaranteeNote,
         {pending ? 'Einen Moment …' : chosen ? `Weiter zur Zahlung (${chosen.buttonLabel})` : 'Weiter zur Zahlung'}
       </button>
       <p className="text-center text-xs text-slate-500">
-        Sie werden zu unserem Zahlungsdienstleister Stripe weitergeleitet. Zahlung per Karte, SEPA-Lastschrift oder PayPal.
+        Sie werden zu unserem Zahlungsdienstleister Stripe weitergeleitet. Zahlung per Karte oder SEPA-Lastschrift.
       </p>
     </form>
   );

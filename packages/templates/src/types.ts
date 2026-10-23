@@ -81,6 +81,8 @@ export interface BusinessFacts {
   logoSrc?: string | null;
   /** Fotos des Kunden (nur Live/Vorschau; nie in Demos) */
   photos?: { src: string; alt: string }[];
+  /** Nur Link „Bewertungen auf Google“ aus der place_id – nie Inhalte von Google */
+  googleReviewsUrl?: string | null;
 }
 
 export interface SenderInfo {

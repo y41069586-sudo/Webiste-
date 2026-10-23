@@ -54,6 +54,7 @@ export * from './emails/templates';
 export {
   packageAmounts,
   planAmounts,
+  priceTaxSuffix,
   amountsFor,
   orderAmounts,
   buildInvoiceData,
@@ -69,6 +70,9 @@ export * from './services/renewals';
 export * from './services/recurring';
 export * from './services/guarantee';
 export * from './services/maintenance';
+export * from './services/dunning';
+export * from './services/readiness';
+export * from './services/template-stats';
 export * from './services/support';
 export { isAutomated, OPT_OUT_RE } from './support/prompts';
 export * from './services/alerts';

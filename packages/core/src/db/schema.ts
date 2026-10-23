@@ -289,6 +289,9 @@ export const orders = pgTable(
     /** Vertrag beendet (Garantie, Kündigung nach Mindestlaufzeit, Zahlungsausfall) */
     endedAt: ts('ended_at'),
     endedReason: text('ended_reason'),
+    /** Mahnverfahren nach Zahlungsausfall: 0 = keins, 1/2 = Erinnerung 1/2 gesendet, 3 = Wartungsmodus */
+    dunningStage: integer('dunning_stage').default(0).notNull(),
+    dunningUpdatedAt: ts('dunning_updated_at'),
     paidAt: ts('paid_at'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -375,6 +378,35 @@ export const orderPayments = pgTable(
     uniqueIndex('order_payments_number_uidx').on(t.invoiceNumber),
     index('order_payments_order_idx').on(t.orderId),
   ],
+);
+
+/**
+ * Vorbereitete Forderungsbriefe (offene Raten bis zum Ende der Mindestlaufzeit). Gehen nie automatisch raus:
+ * erst nach Freigabe im Dashboard, kein automatisiertes Inkasso.
+ */
+export const dunningLetters = pgTable(
+  'dunning_letters',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orderId: uuid('order_id')
+      .notNull()
+      .references(() => orders.id, { onDelete: 'restrict' }),
+    /** Anzahl offener Monatsraten bis Monat 12 und Summe */
+    openRates: integer('open_rates').notNull(),
+    amountCents: integer('amount_cents').notNull(),
+    pdfStorageKey: text('pdf_storage_key'),
+    /** draft = wartet auf Freigabe | approved | sent | cancelled */
+    status: text('status').$type<'draft' | 'approved' | 'sent' | 'cancelled'>().default('draft').notNull(),
+    provider: text('provider'),
+    providerLetterId: text('provider_letter_id'),
+    approvedBy: text('approved_by'),
+    approvedAt: ts('approved_at'),
+    sentAt: ts('sent_at'),
+    note: text('note'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index('dunning_letters_order_idx').on(t.orderId), index('dunning_letters_status_idx').on(t.status)],
 );
 
 export interface ImpressumData {

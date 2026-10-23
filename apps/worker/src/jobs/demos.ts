@@ -10,6 +10,7 @@ defineJob(
         regenerate: data.regenerate,
         actor: `job:build-demo:${data.triggeredBy ?? 'system'}`,
         reviewNote: data.reviewNote,
+        templateId: data.templateId,
       });
       return { demoId };
     } catch (err) {

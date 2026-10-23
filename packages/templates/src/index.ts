@@ -38,3 +38,4 @@ export { renderLetterHtml, embeddedFontCss, LETTER_GEOMETRY, type LetterData, ty
 export { renderInvoiceHtml, type InvoiceData, type InvoiceLine, type InvoiceBuyer, type InvoiceSeller } from './invoice';
 export { renderSubpage } from './subpage';
 export { renderMaintenanceHtml } from './maintenance';
+export { renderClaimLetterHtml, type ClaimLetterData } from './claim-letter';

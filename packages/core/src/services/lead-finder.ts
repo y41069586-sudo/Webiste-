@@ -5,7 +5,7 @@ import type { AppConfig, BranchConfig } from '../config/settings';
 import { getDb, type DbOrTx } from '../db/client';
 import { leads } from '../db/schema';
 import { businessHash, normalizeAddress, normalizeBusinessName, segmentKey } from '../leads/normalize';
-import { qualify, type RatingSignal, type RejectionReason } from '../leads/qualify';
+import { classifyWebsite, qualify, type RatingSignal, type RejectionReason } from '../leads/qualify';
 import { logger } from '../logger';
 import { getProviders } from '../providers';
 import { GooglePlacesClient, GooglePlacesLeadSource } from '../providers/lead-source/google-places';
@@ -418,4 +418,50 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
   await audit(db, { entity: 'job', entityId: 'find-leads', action: 'run', actor: opts.actor, context: { ...summary } });
   logger.info({ ...summary, errors: summary.errors.length }, 'lead-finder abgeschlossen');
   return summary;
+}
+
+export interface LeadRefresh {
+  refreshed: boolean;
+  /** Betrieb hat inzwischen eine eigene Website bzw. ist geschlossen → keine weitere Sendung */
+  hasWebsite: boolean;
+  closed: boolean;
+}
+
+/**
+ * Neueste Daten eines Betriebs aus der Quelle laden (Telefon, Öffnungszeiten, Website/Social, Status).
+ * Name und Anschrift bleiben unverändert (Brief und Demo sind darauf ausgelegt). Google-Inhalte werden nie
+ * gespeichert; Quellen ohne Einzelabruf liefern „nicht aufgefrischt“.
+ */
+export async function refreshLeadData(leadId: string, actor = 'system'): Promise<LeadRefresh> {
+  const db = getDb();
+  const cfg = await getConfig();
+  const lead = await db.query.leads.findFirst({ where: eq(leads.id, leadId) });
+  if (!lead || lead.anonymizedAt) return { refreshed: false, hasWebsite: false, closed: false };
+  const source = getProviders().leadSources.find((s) => s.kind === lead.source);
+  if (!source?.refresh) return { refreshed: false, hasWebsite: lead.hasWebsite, closed: false };
+  const { place } = await source.refresh(lead.sourceId);
+  if (!place) return { refreshed: false, hasWebsite: lead.hasWebsite, closed: false };
+  const website = classifyWebsite(place.websiteUri, cfg.filters.socialDomains);
+  const closed = Boolean(place.businessStatus && place.businessStatus !== 'OPERATIONAL');
+  await db
+    .update(leads)
+    .set({
+      phone: place.phone ?? lead.phone,
+      openingHours: place.openingHours ?? lead.openingHours,
+      hasWebsite: website.hasWebsite,
+      socialOnly: website.socialOnly,
+      websiteUri: website.websiteUri ?? null,
+      businessStatus: place.businessStatus ?? lead.businessStatus,
+      sourceFetchedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(leads.id, leadId));
+  await audit(db, {
+    entity: 'lead',
+    entityId: leadId,
+    action: 'refreshed',
+    actor,
+    context: { hasWebsite: website.hasWebsite, closed },
+  });
+  return { refreshed: true, hasWebsite: website.hasWebsite, closed };
 }

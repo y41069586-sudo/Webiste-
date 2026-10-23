@@ -24,6 +24,7 @@ import { llmStructured } from '../services/llm';
 import { randomToken, sha256 } from '../util/crypto';
 import { formatEuroShort } from '../util/time';
 import { optimizeImage } from '../render/images';
+import { priceTaxSuffix } from '../invoices/build';
 import {
   buildDemoPrompt,
   DEMO_CONTENT_SCHEMA,
@@ -52,6 +53,9 @@ export function leadToFacts(lead: Lead, cfg: AppConfig): BusinessFacts {
   return {
     name: lead.businessName,
     branchLabel: branch?.label ?? lead.branch,
+    googleReviewsUrl: lead.googlePlaceId
+      ? `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(lead.googlePlaceId)}`
+      : null,
     group: lead.branchGroup,
     street: lead.street ?? '',
     houseNumber: lead.houseNumber ?? '',
@@ -106,13 +110,14 @@ export function whatsappUrl(cfg: AppConfig, slug: string): string | null {
 
 export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string | null = null): DemoOptions {
   const p = cfg.pricing;
+  const tax = priceTaxSuffix(cfg);
   const care = `${formatEuroShort(p.subscriptionCents)}/Monat`;
   const take = (plan: 'one_time' | 'monthly') => demoUrl(`/d/${slug}/uebernehmen?plan=${plan}`);
   const offers: NonNullable<DemoOptions['offers']> = [
     {
       title: 'Einmalzahlung',
       price: formatEuroShort(p.packageCents),
-      unit: 'einmalig',
+      unit: tax ? `einmalig ${tax}` : 'einmalig',
       points: [
         `Eigene Domain und ${p.hostingMonthsIncluded} Monate Hosting inklusive`,
         `Danach optional ${care}, monatlich kündbar`,
@@ -124,7 +129,7 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
     offers.push({
       title: 'Monatlich',
       price: formatEuroShort(p.monthlyCents),
-      unit: 'pro Monat',
+      unit: tax ? `pro Monat ${tax}` : 'pro Monat',
       points: [
         `${p.minTermMonths} Monate Mindestlaufzeit`,
         `Ab Monat ${p.minTermMonths + 1} nur noch ${care}, dann monatlich kündbar`,
@@ -306,7 +311,10 @@ export async function buildDemo(
   opts: {
     regenerate?: boolean;
     actor: string;
-    /** erzwingt die manuelle Prüfung (z. B. Überarbeitung für Brief 3) */ reviewNote?: string;
+    /** erzwingt die manuelle Prüfung (z. B. Überarbeitung für Brief 3) */
+    reviewNote?: string;
+    /** festes Template (z. B. bestes der Branche laut Lernsystem) */
+    templateId?: string;
   },
 ): Promise<string> {
   const db = getDb();
@@ -323,11 +331,14 @@ export async function buildDemo(
     throw new Error(`Lead im Status ${lead.status} – Demo nicht vorgesehen`);
   }
 
-  const { templateId, palette } = chooseTemplate(
+  const rotated = chooseTemplate(
     lead,
     existing.map((d) => d.templateId),
     await templateUsage(),
   );
+  const fixed = opts.templateId ? templatesForGroup(lead.branchGroup).find((t) => t.id === opts.templateId) : undefined;
+  const templateId = fixed?.id ?? rotated.templateId;
+  const palette = fixed ? (fixed.palettes.includes(rotated.palette) ? rotated.palette : fixed.palettes[0]!) : rotated.palette;
   const generated = await generateDemoContent(lead, cfg);
   const facts = leadToFacts(lead, cfg);
   const slug = randomToken(24);

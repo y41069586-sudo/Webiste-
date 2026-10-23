@@ -91,6 +91,13 @@ export const SECTIONS: SectionDef[] = [
       { path: 'checkout.sessionMinutes', label: 'Checkout-Session gültig (Minuten)', type: 'number' },
       { path: 'checkout.allowedTlds', label: 'Erlaubte Domain-Endungen (je Zeile)', type: 'lines' },
       { path: 'checkout.maxDomainPriceCents', label: 'Max. Domainpreis pro Jahr (€)', type: 'euro' },
+      {
+        path: 'checkout.paymentMethods',
+        label: 'Zahlungsarten im Checkout',
+        type: 'multi',
+        options: ['card', 'sepa_debit'],
+        hint: 'Müssen im Stripe-Dashboard aktiviert sein (Einstellungen → Zahlungsmethoden)',
+      },
     ],
   },
   {

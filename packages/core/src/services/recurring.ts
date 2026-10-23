@@ -12,6 +12,7 @@ import { formatDateLongDe, formatEuro } from '../util/time';
 import { audit } from './audit';
 import { raiseAlert } from './budget';
 import { notifyAdmin, sendTransactionalEmail } from './email';
+import { resetDunning, startDunning } from './dunning';
 import { maintenanceReasonOf, setSiteMaintenance } from './maintenance';
 import { fulfillOrder, type Order } from './orders';
 import { applySubscriptionEvent } from './renewals';
@@ -168,7 +169,8 @@ async function recordRecurringPayment(t: Target, ev: PaymentEvent, actor: string
   } catch (err) {
     logger.error({ orderId: t.order.id, ...errInfo(err) }, 'Rechnung zur Rate nicht eingereiht');
   }
-  // Zahlung wieder da → pausierte Seite wieder online
+  // Zahlung wieder da → Mahnverfahren beenden, pausierte Seite wieder online
+  await resetDunning(t.order.id, actor);
   await restoreIfPausedForPayment(t, actor);
   return 'recorded';
 }
@@ -191,29 +193,6 @@ async function restoreIfPausedForPayment(t: Target, actor: string): Promise<void
   }
 }
 
-async function pauseForPayment(t: Target, actor: string, why: string): Promise<void> {
-  const db = getDb();
-  const site = await siteOf(t);
-  if (site && site.status !== 'suspended') {
-    try {
-      await setSiteMaintenance(site.id, true, 'payment', actor);
-    } catch (err) {
-      await raiseAlert(db, {
-        level: 'error',
-        code: `maintenance_failed_${site.id}`,
-        message: 'Wartungsmodus konnte nicht aktiviert werden – bitte manuell prüfen.',
-        context: { siteId: site.id, error: err instanceof Error ? err.message : String(err) },
-      });
-    }
-  }
-  await notifyAdmin({
-    key: `payment-pause:${t.order.id}:${new Date().toISOString().slice(0, 10)}`,
-    title: `Zahlungsausfall – Seite pausiert: ${t.customer?.domain ?? t.order.customerCompany}`,
-    lines: [`Kunde: ${t.order.customerCompany}`, why],
-    link: appUrl(`/admin/orders/${t.order.id}`),
-  });
-}
-
 async function handleFailedPayment(t: Target, ev: PaymentEvent, actor: string): Promise<string> {
   const db = getDb();
   const cfg = await getConfig();
@@ -229,6 +208,11 @@ async function handleFailedPayment(t: Target, ev: PaymentEvent, actor: string): 
     actor,
     context: { invoiceId: ev.invoiceId, attempt: ev.attemptCount, final },
   });
+  // Nach dem letzten automatischen Versuch übernimmt das Mahnverfahren (2 Erinnerungen, dann Wartungsmodus)
+  if (final) {
+    await startDunning(t.order.id, actor, ev.hostedInvoiceUrl ?? null);
+    return 'dunning';
+  }
   try {
     const mail = subscriptionPaymentFailedEmail(cfg, {
       name: t.order.customerName,
@@ -240,8 +224,8 @@ async function handleFailedPayment(t: Target, ev: PaymentEvent, actor: string): 
     await sendTransactionalEmail({
       ...mail,
       kind: 'payment_failed',
-      // Je Rechnung eine Mail beim ersten Fehlschlag und eine beim endgültigen
-      idempotencyKey: `recurring-failed:${ev.invoiceId}:${final ? 'final' : 'first'}`,
+      // Je Rechnung eine Mail beim ersten Fehlschlag (danach Mahnverfahren)
+      idempotencyKey: `recurring-failed:${ev.invoiceId}:first`,
       to: t.customer?.email ?? t.order.customerEmail,
       orderId: t.order.id,
       customerId: t.customer?.id,
@@ -256,8 +240,7 @@ async function handleFailedPayment(t: Target, ev: PaymentEvent, actor: string): 
     message: `Monatsrate ${formatEuro(ev.amountTotal ?? 0)} fehlgeschlagen (${t.order.customerCompany})${final ? ' – keine weiteren Versuche' : ''}`,
     context: { orderId: t.order.id },
   });
-  if (final) await pauseForPayment(t, actor, 'Alle automatischen Zahlungsversuche sind fehlgeschlagen.');
-  return final ? 'paused' : 'retrying';
+  return 'retrying';
 }
 
 async function handleStatusChange(t: Target, ev: PaymentEvent, actor: string): Promise<string> {
@@ -266,10 +249,11 @@ async function handleStatusChange(t: Target, ev: PaymentEvent, actor: string): P
   if (t.kind === 'monthly')
     await db.update(orders).set({ subscriptionStatus: status, updatedAt: new Date() }).where(eq(orders.id, t.order.id));
   if (status === 'unpaid') {
-    await pauseForPayment(t, actor, 'Das Abo steht nach den Zahlungsversuchen auf „unbezahlt“.');
-    return 'paused';
+    await startDunning(t.order.id, actor);
+    return 'dunning';
   }
   if (status === 'active') {
+    await resetDunning(t.order.id, actor);
     await restoreIfPausedForPayment(t, actor);
     return 'active';
   }
@@ -292,10 +276,12 @@ async function handleEnded(t: Target, ev: PaymentEvent, actor: string): Promise<
     .where(eq(orders.id, t.order.id));
   if (t.customer) await db.update(customers).set({ subscriptionId: null, updatedAt: now }).where(eq(customers.id, t.customer.id));
   await audit(db, { entity: 'order', entityId: t.order.id, action: 'subscription_ended', actor, context: { reason } });
+  // Vorzeitiges Ende (meist Zahlungsausfall): Mahnverfahren übernimmt den Wartungsmodus und den Forderungsbrief
+  if (early) await startDunning(t.order.id, actor);
   const site = await siteOf(t);
-  if (site && site.status !== 'suspended') {
+  if (!early && site && site.status !== 'suspended') {
     try {
-      await setSiteMaintenance(site.id, true, early ? 'payment' : 'cancelled', actor);
+      await setSiteMaintenance(site.id, true, 'cancelled', actor);
     } catch (err) {
       logger.error({ siteId: site.id, ...errInfo(err) }, 'Seite nach Vertragsende nicht pausiert');
     }
@@ -312,7 +298,9 @@ async function handleEnded(t: Target, ev: PaymentEvent, actor: string): Promise<
     lines: [
       `Grund: ${reason}`,
       `Domain: ${t.customer?.domain ?? '–'} (gehört dem Kunden – Übertragung/Kündigung klären)`,
-      'Die Seite ist pausiert.',
+      early
+        ? 'Mahnverfahren läuft (2 Erinnerungen, dann Wartungsmodus und Forderungsbrief zur Freigabe).'
+        : 'Die Seite ist pausiert.',
     ],
     link: appUrl(`/admin/orders/${t.order.id}`),
   });

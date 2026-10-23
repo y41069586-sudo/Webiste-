@@ -13,13 +13,15 @@ import type { PaymentEvent } from '../providers/types';
 import { enqueue, QUEUES } from '../queue';
 import { ORDER_PLANS, type Actor, type OrderPlan } from '../types';
 import { randomToken } from '../util/crypto';
-import { addDays, addMonths, formatEuro } from '../util/time';
+import { addMonths, formatEuro } from '../util/time';
 import { audit } from './audit';
 import { raiseAlert } from './budget';
 import { checkDomain } from './domains';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
+import { guaranteeEndFor } from './guarantee';
+import { goLiveBlockers } from './readiness';
 import { applyRecurringEvent } from './recurring';
 import { applySubscriptionEvent } from './renewals';
 import { findPublicDemo, recordEvent, type RequestMeta } from './tracking';
@@ -105,6 +107,9 @@ export async function getCheckoutContext(slug: string): Promise<CheckoutContext>
   if (paid) return { state: 'ordered' };
   if (!avail.ok) return { state: 'disabled', reason: avail.reason };
   const cfg = await getConfig();
+  // Echte Zahlungen erst, wenn Absenderdaten, Rechtstexte und AGB vollständig sind
+  if (avail.mode === 'live' && goLiveBlockers(cfg).length)
+    return { state: 'disabled', reason: 'Online-Bestellung ist noch nicht freigeschaltet.' };
   const a = planAmounts(cfg, 'one_time');
   const m = planAmounts(cfg, 'monthly');
   const l = found.lead;
@@ -263,6 +268,7 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
       metadata: { kind: 'order', orderId: order.id, leadId: lead.id, demoId: demo.id, plan },
       idempotencyKey: `checkout-${order.id}`,
       expiresInMinutes: minutes,
+      paymentMethods: cfg.checkout.paymentMethods,
       ...(plan === 'monthly' ? { recurring: { interval: 'month' as const } } : {}),
     });
     await db
@@ -377,7 +383,8 @@ export async function fulfillOrder(
         invoiceNumber: number,
         invoiceJson: invoice as unknown as Record<string, unknown>,
         // Garantie gilt für beide Optionen ab Zahlung; Mindestlaufzeit nur für Option B
-        guaranteeEndsAt: cfg.guarantee.enabled ? addDays(paidAt, cfg.guarantee.days) : null,
+        // Vorläufig: spätester Beginn (Zahlung + 14 Tage); beim Go-Live wird auf Go-Live + 14 Tage verkürzt
+        guaranteeEndsAt: cfg.guarantee.enabled ? guaranteeEndFor(cfg, paidAt, null) : null,
         ...(monthly
           ? {
               stripeSubscriptionId: info.subscriptionId ?? order.stripeSubscriptionId,

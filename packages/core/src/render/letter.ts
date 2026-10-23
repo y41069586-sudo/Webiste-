@@ -16,6 +16,7 @@ import { raiseAlert } from '../services/budget';
 import { currentDemoForLead } from '../services/demo-review';
 import { transitionLead } from '../services/lead-state';
 import { extendDemoUntil } from '../services/demo-review';
+import { reviewedImprovements } from '../services/followups';
 import { approveLetter, chooseLetterVariant } from '../services/letters';
 import { randomShortCode } from '../util/crypto';
 import { addBusinessDays, addDays, endOfDayBerlin, formatDateLongDe, formatEuroShort } from '../util/time';
@@ -264,6 +265,11 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   }
   if (!opts.test && sequence === 1) {
     await db.transaction((tx) => transitionLead(tx, leadId, 'letter_generated', { actor: opts.actor, soft: true }));
+  }
+  // Brief 3: nach den ersten N vom Betreiber geprüften Briefen automatisch freigeben (Wahrheits-Check grün)
+  if (sequence === 3 && !opts.test && (await reviewedImprovements()) >= cfg.review.letter3ManualFirstN) {
+    await approveLetter(letterId, 'job:auto-letter3');
+    return { letterId, status: 'approved', issues, pages: pdfCheck.pages };
   }
   if (sw.autoSend && !opts.test) {
     await approveLetter(letterId, 'job:auto-send');

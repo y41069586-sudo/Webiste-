@@ -12,6 +12,8 @@ import { audit } from './audit';
 import { currentDemoForLead } from './demo-review';
 import { sendTransactionalEmail } from './email';
 import { isEmailSuppressed } from './suppression';
+import { refreshLeadData } from './lead-finder';
+import { bestTemplateForBranch } from './template-stats';
 
 export interface FollowupSummary {
   /** Sendung 2 („nur noch bis … online“) eingereiht */
@@ -115,14 +117,43 @@ export async function scheduleFollowups(now = new Date()): Promise<FollowupSumma
         .where(and(eq(demos.leadId, r.lead_id), gt(demos.createdAt, hotAt)))
         .limit(1);
       if (started.length) continue;
+      // Neueste Daten des Betriebs laden; hat er inzwischen eine Website oder ist geschlossen → kein Brief 3
+      let refresh = { refreshed: false, hasWebsite: false, closed: false };
+      try {
+        refresh = await refreshLeadData(r.lead_id, 'job:followup');
+      } catch (err) {
+        logger.warn({ leadId: r.lead_id, ...errInfo(err) }, 'Lead-Daten nicht aufgefrischt – Überarbeitung mit bekannten Daten');
+      }
+      if (refresh.hasWebsite || refresh.closed) {
+        await audit(db, {
+          entity: 'lead',
+          entityId: r.lead_id,
+          action: 'followup3_skipped',
+          actor: 'job:followup',
+          context: { reason: refresh.hasWebsite ? 'hat jetzt eine Website' : 'geschlossen' },
+        });
+        continue;
+      }
+      const lead = await db.query.leads.findFirst({ where: eq(leads.id, r.lead_id) });
+      // Das in der Branche am besten konvertierende Template (Lernsystem); ohne genug Daten: Rotation
+      const templateId = lead
+        ? await bestTemplateForBranch(lead.branch, lead.branchGroup, { exclude: current ? [current.templateId] : [] })
+        : null;
+      // Die ersten N Überarbeitungen prüft der Betreiber, danach automatisch (QA und Wahrheits-Check müssen bestehen)
+      const manual = (await reviewedImprovements()) < cfg.review.letter3ManualFirstN;
       await enqueue(
         QUEUES.buildDemo,
         {
           leadId: r.lead_id,
           regenerate: true,
           triggeredBy: 'followup-hot',
-          reviewNote:
-            'Überarbeitung für Folgebrief 3 („Wir haben Ihre Website verbessert“) – bitte prüfen, ob die neue Version wirklich besser ist.',
+          ...(templateId ? { templateId } : {}),
+          ...(manual
+            ? {
+                reviewNote:
+                  'Überarbeitung für Folgebrief 3 („Wir haben Ihre Website verbessert“) – bitte prüfen, ob die neue Version wirklich besser ist.',
+              }
+            : {}),
         },
         { singletonKey: `improve:${r.lead_id}` },
       );
@@ -131,7 +162,7 @@ export async function scheduleFollowups(now = new Date()): Promise<FollowupSumma
         entityId: r.lead_id,
         action: 'followup3_improve_demo',
         actor: 'job:followup',
-        context: { hotAt: hotAt.toISOString() },
+        context: { hotAt: hotAt.toISOString(), templateId, manual, refreshed: refresh.refreshed },
       });
       out.improving++;
     }
@@ -140,6 +171,14 @@ export async function scheduleFollowups(now = new Date()): Promise<FollowupSumma
   out.reminders = await sendDemoReminders(now);
   out.queued = out.second + out.third;
   return out;
+}
+
+/** Anzahl der vom Betreiber geprüften Brief-3-Briefe (Schwelle für den Automatikbetrieb). */
+export async function reviewedImprovements(): Promise<number> {
+  const res = await getDb().execute<{ n: number }>(
+    sql`SELECT count(*)::int AS n FROM letters WHERE sequence = 3 AND is_test = false AND approved_at IS NOT NULL AND approved_by NOT LIKE 'job:%'`,
+  );
+  return res.rows[0]?.n ?? 0;
 }
 
 /** Signatur für den Abmeldelink (an der Support-Nachricht, ohne E-Mail-Adresse in der URL). */

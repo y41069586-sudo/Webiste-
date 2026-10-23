@@ -106,7 +106,7 @@ Empfohlen: Hetzner Cloud (Standort Deutschland), z. B. CX32 (4 vCPU, 8 GB RAM), 
      `checkout.session.async_payment_failed`, `checkout.session.expired`, `charge.refunded`,
      `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`,
      `customer.subscription.deleted`; Signing Secret in `STRIPE_WEBHOOK_SECRET`. Zahlungsarten im
-     Stripe-Dashboard aktivieren: Karte, SEPA-Lastschrift, PayPal (für Abos ggf. Freischaltung beantragen);
+     Stripe-Dashboard aktivieren: Karte und SEPA-Lastschrift;
      Smart Retries für fehlgeschlagene Abo-Zahlungen einschalten.
    - Briefdienst: LetterXpress hat keine Webhooks – der Status wird abgefragt (Baustein L3).
    - E-Mail-Eingang: IMAP-Zugang in `IMAP_*` **oder** Postmark-Inbound auf

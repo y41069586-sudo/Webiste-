@@ -91,7 +91,7 @@ describe('Beträge und Rechnungsdaten', () => {
     expect(packageAmounts(DEFAULT_CONFIG)).toEqual({ grossCents: 59000, netCents: 59000, vatCents: 0, vatRatePercent: 0 });
   });
   it('Regelbesteuerung brutto: USt wird herausgerechnet', () => {
-    const cfg = { ...DEFAULT_CONFIG, tax: { ...DEFAULT_CONFIG.tax, kleinunternehmer: false } };
+    const cfg = { ...DEFAULT_CONFIG, tax: { ...DEFAULT_CONFIG.tax, kleinunternehmer: false, pricesAreGross: true } };
     expect(packageAmounts(cfg)).toEqual({ grossCents: 59000, netCents: 49580, vatCents: 9420, vatRatePercent: 19 });
   });
   it('Regelbesteuerung netto: USt kommt hinzu', () => {

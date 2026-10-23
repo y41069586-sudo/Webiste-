@@ -46,8 +46,7 @@ Online-Checkout, geht die Seite automatisch auf seiner eigenen Domain live.
     „ab Monat 13 nur noch 19 €/Monat“ (Demo-Karte, Checkout).
   - **14-Tage-Zufriedenheitsgarantie** (Config, Standard an): Erstattung per Admin-Button, Seite
     offline, Domain freigeben bzw. übertragen; bei Option B Vertrag beenden und erste Rate erstatten.
-  - Zahlungsarten: Karte, SEPA-Lastschrift, PayPal (über Stripe, im Dashboard aktivieren; für Abos
-    ggf. Freischaltung nötig). Für Option B mindestens Karte und SEPA.
+  - Zahlungsarten: Karte und SEPA-Lastschrift (PayPal vorerst nicht – die Kunden sind Betriebe).
   - Alle Preise, Laufzeiten und die Garantie sind in der Config einstellbar.
 - **Vertriebskanal:** ausschließlich personalisierter Werbebrief per Print-&-Mail-API. Keine
   Kalt-E-Mails, keine Kaltanrufe, keine SMS/WhatsApp (§ 7 UWG). E-Mails nur an Kontakte, die ihre

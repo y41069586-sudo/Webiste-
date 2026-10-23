@@ -17,7 +17,7 @@ import {
 } from '../src/services/sending';
 import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
-import { resetDb } from './helpers';
+import { OPERATOR_TEST_CONFIG, resetDb } from './helpers';
 
 async function seed(opts: { status?: string; letterStatus?: string } = {}) {
   const db = getDb();
@@ -71,7 +71,10 @@ describe('Versand', () => {
     await resetDb();
     process.env.DRY_RUN = 'false';
     resetEnvCache();
-    await updateConfig({ switches: { dryRun: false, killSwitch: false }, budget: { weeklyBudgetCents: 300 } }, 'test');
+    await updateConfig(
+      { ...OPERATOR_TEST_CONFIG, switches: { dryRun: false, killSwitch: false }, budget: { weeklyBudgetCents: 300 } },
+      'test',
+    );
   });
   afterAll(async () => {
     delete process.env.DRY_RUN;

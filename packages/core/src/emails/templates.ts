@@ -176,10 +176,32 @@ export function subscriptionPaymentFailedEmail(
   });
 }
 
+/** Zahlungserinnerung 1/2 nach erfolglosen automatischen Einzugsversuchen. */
+export function dunningReminderEmail(
+  cfg: AppConfig,
+  d: { name: string; stage: 1 | 2; amount: string; domain: string | null; pauseOn: string | null; payUrl: string | null },
+): EmailContent {
+  const blocks: Block[] = [
+    d.stage === 1
+      ? `die Monatsrate über ${d.amount}${d.domain ? ` für ${d.domain}` : ''} konnte auch nach mehreren automatischen Versuchen nicht eingezogen werden.`
+      : `wir erinnern noch einmal an die offene Monatsrate über ${d.amount}${d.domain ? ` für ${d.domain}` : ''}.`,
+    d.pauseOn
+      ? `Bitte begleichen Sie die Rate bis zum ${d.pauseOn}. Ist sie bis dahin nicht eingegangen, müssen wir Ihre Website vorübergehend pausieren.`
+      : 'Bitte begleichen Sie die Rate so bald wie möglich.',
+  ];
+  if (d.payUrl) blocks.push({ button: { href: d.payUrl, label: 'Rate bezahlen' } });
+  blocks.push('Gibt es ein Problem mit der Zahlung? Antworten Sie einfach auf diese E-Mail – wir finden eine Lösung.');
+  return renderEmail(cfg, {
+    subject: d.stage === 1 ? 'Zahlungserinnerung: offene Monatsrate' : 'Zweite Zahlungserinnerung: offene Monatsrate',
+    name: d.name,
+    blocks,
+  });
+}
+
 /** Bestätigung der Rückabwicklung im Rahmen der Zufriedenheitsgarantie. */
 export function guaranteeRefundEmail(
   cfg: AppConfig,
-  d: { name: string; amount: string; monthly: boolean; domainRegistered: string | null },
+  d: { name: string; amount: string; monthly: boolean; domainRegistered: string | null; domainExpires?: string | null },
 ): EmailContent {
   return renderEmail(cfg, {
     subject: 'Ihre Bestellung wurde rückabgewickelt (Zufriedenheitsgarantie)',
@@ -188,7 +210,7 @@ export function guaranteeRefundEmail(
       `schade, dass die Website nicht gepasst hat. Wie versprochen erstatten wir Ihnen ${d.amount}${d.monthly ? ' und haben den Vertrag beendet – es werden keine weiteren Raten abgebucht' : ''}. Die Stornorechnung folgt in einer separaten E-Mail.`,
       'Die Website ist offline genommen.',
       d.domainRegistered
-        ? `Die Domain ${d.domainRegistered} ist auf Ihren Namen registriert. Möchten Sie sie behalten und zu einem anderen Anbieter umziehen, antworten Sie auf diese E-Mail – Sie erhalten dann den Code für den Umzug. Sonst kündigen wir sie für Sie.`
+        ? `Die Domain ${d.domainRegistered} ist auf Ihren Namen registriert. Wir übertragen sie Ihnen gern kostenlos: Antworten Sie einfach auf diese E-Mail, dann schicken wir Ihnen den Auth-Code für den Umzug zu einem Anbieter Ihrer Wahl. Möchten Sie sie nicht behalten, verlängern wir sie nicht${d.domainExpires ? ` – sie läuft dann am ${d.domainExpires} aus` : ''}.`
         : 'Eine Domain wurde noch nicht registriert, es bleibt also nichts zu tun.',
       'Vielen Dank, dass Sie es ausprobiert haben.',
     ],

@@ -179,6 +179,28 @@ export class OverpassLeadSource implements LeadSource {
     throw lastErr instanceof Error ? lastErr : new Error('Overpass nicht erreichbar');
   }
 
+  /** Einzelnen Eintrag (node/way/relation mit ID) neu laden – z. B. vor einer Überarbeitung der Demo. */
+  async refresh(sourceId: string): Promise<{ place: RawPlace | null; costCents: number }> {
+    const m = /^(node|way|relation)\/(\d+)$/.exec(sourceId);
+    if (!m) return { place: null, costCents: 0 };
+    const ql = `[out:json][timeout:60];\n${m[1]}(${m[2]});\nout center tags;`;
+    let lastErr: unknown;
+    for (const endpoint of this.endpoints) {
+      try {
+        const data = await this.post(endpoint, ql);
+        const el = (data.elements ?? [])[0];
+        if (!el) return { place: null, costCents: 0 };
+        const place = osmElementToPlace(el, '');
+        if (!place) return { place: null, costCents: 0 };
+        const [enriched] = await this.enrich(endpoint, [place]);
+        return { place: enriched ?? place, costCents: 0 };
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    throw lastErr instanceof Error ? lastErr : new Error('Overpass nicht erreichbar');
+  }
+
   private async post(endpoint: string, ql: string): Promise<{ elements?: OsmElement[] }> {
     return withRetry(
       async () => {

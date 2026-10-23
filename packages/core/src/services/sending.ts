@@ -10,6 +10,7 @@ import { addBusinessDays, addDays } from '../util/time';
 import { audit } from './audit';
 import { BudgetExceededError, KillSwitchError, raiseAlert, releaseReservation, reserveBudget, settleCost } from './budget';
 import { extendDemoExpiry, extendDemoUntil } from './demo-review';
+import { GoLiveBlockedError, goLiveBlockers } from './readiness';
 import { transitionLead } from './lead-state';
 
 export class SendBlockedError extends Error {
@@ -72,6 +73,11 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
   const provider = getProviders().mail;
   const gate = realLettersGate(provider.name, letter.isTest, sw.realLettersUnlocked);
   if (gate) throw new SendBlockedError(gate);
+  // Echte Briefe an Leads erst, wenn Absenderdaten, Rechtstexte und AGB vollständig sind
+  if (!letter.isTest && !sw.dryRun) {
+    const blockers = goLiveBlockers(cfg);
+    if (blockers.length) throw new SendBlockedError(new GoLiveBlockedError(blockers).message);
+  }
 
   const storage = getProviders().storage;
   const pdf = letter.pdfStorageKey ? await storage.get(letter.pdfStorageKey) : null;

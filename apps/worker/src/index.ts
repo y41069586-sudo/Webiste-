@@ -21,6 +21,7 @@ async function main(): Promise<void> {
     { queue: QUEUES.findLeads, cron: '20 5 * * 1' },
     { queue: QUEUES.retention, cron: '15 3 * * *' },
     { queue: QUEUES.renewalReminders, cron: '10 8 * * *' },
+    { queue: QUEUES.dunning, cron: '40 8 * * *' },
     { queue: QUEUES.weeklyOptimizer, cron: '0 18 * * 0' },
     { queue: QUEUES.alertMails, cron: '*/15 * * * *' },
     { queue: QUEUES.imapPoll, cron: '*/5 * * * *', enabled: () => Boolean(env.IMAP_HOST && env.IMAP_USER) },

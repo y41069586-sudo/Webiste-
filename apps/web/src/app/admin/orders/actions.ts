@@ -2,7 +2,17 @@
 
 import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
-import { audit, enqueue, getDb, guaranteeRefund, QUEUES, refundOrder, schema } from '@wbm/core';
+import {
+  approveClaimLetter,
+  audit,
+  cancelClaimLetter,
+  enqueue,
+  getDb,
+  guaranteeRefund,
+  QUEUES,
+  refundOrder,
+  schema,
+} from '@wbm/core';
 import { actorOf, requireAdmin } from '@/lib/auth';
 
 export async function resendInvoiceAction(form: FormData): Promise<void> {
@@ -40,4 +50,20 @@ export async function guaranteeRefundAction(form: FormData): Promise<void> {
     throw new Error('Bitte zur Bestätigung GARANTIE eintippen.');
   await guaranteeRefund(id, actorOf(s));
   revalidatePath(`/admin/orders/${id}`);
+}
+
+/** Forderungsbrief freigeben (Versand über den Briefdienst; im DRY_RUN nur Freigabe). */
+export async function approveClaimLetterAction(form: FormData): Promise<void> {
+  const s = await requireAdmin();
+  const id = String(form.get('id'));
+  if (String(form.get('confirm')).trim().toUpperCase() !== 'FREIGEBEN')
+    throw new Error('Bitte zur Bestätigung FREIGEBEN eintippen.');
+  await approveClaimLetter(id, actorOf(s));
+  revalidatePath(`/admin/orders/${String(form.get('orderId'))}`);
+}
+
+export async function cancelClaimLetterAction(form: FormData): Promise<void> {
+  const s = await requireAdmin();
+  await cancelClaimLetter(String(form.get('id')), actorOf(s), String(form.get('note') ?? ''));
+  revalidatePath(`/admin/orders/${String(form.get('orderId'))}`);
 }

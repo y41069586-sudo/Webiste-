@@ -4,7 +4,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { updateConfig } from '../src/config/service';
 import { DEFAULT_CONFIG } from '../src/config/settings';
 import { getDb } from '../src/db/client';
-import { alerts, customers, demos, leads, orderPayments, orders, outboundEmails, sites } from '../src/db/schema';
+import { alerts, customers, demos, dunningLetters, leads, orderPayments, orders, outboundEmails, sites } from '../src/db/schema';
 import { buildInvoiceData, planAmounts } from '../src/invoices/build';
 import { getProviders } from '../src/providers';
 import type { MockPayment } from '../src/providers/mock/payment';
@@ -12,7 +12,8 @@ import { addMonthsUnix, StripePayment } from '../src/providers/payment/stripe';
 import type { PaymentEvent } from '../src/providers/types';
 import { stopBoss } from '../src/queue';
 import { clearDomainCache } from '../src/services/domains';
-import { guaranteeRefund, guaranteeStatus } from '../src/services/guarantee';
+import { approveClaimLetter, runDunning } from '../src/services/dunning';
+import { guaranteeEndFor, guaranteeRefund, guaranteeStatus } from '../src/services/guarantee';
 import { processPaymentWebhook, simulateMockPayment, startCheckout, type CheckoutInput } from '../src/services/orders';
 import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
@@ -115,7 +116,7 @@ describe('Preise und Rechnungstexte (Update 2)', () => {
       subscriptionCents: 1900,
       monthlyEnabled: true,
     });
-    expect(DEFAULT_CONFIG.guarantee).toEqual({ enabled: true, days: 14 });
+    expect(DEFAULT_CONFIG.guarantee).toEqual({ enabled: true, days: 14, latestStartDays: 14 });
     expect(planAmounts(DEFAULT_CONFIG, 'monthly').grossCents).toBe(4900);
   });
 
@@ -191,8 +192,11 @@ describe('Stripe: Abo-Checkout und Abo-Webhooks', () => {
     expect(body.get('line_items[0][price_data][unit_amount]')).toBe('4900');
     expect(body.get('subscription_data[metadata][orderId]')).toBe('o1');
     expect(body.get('payment_intent_data[description]')).toBeNull();
-    // Zahlungsarten kommen aus dem Dashboard (Karte, SEPA, PayPal) – keine feste Liste
-    expect(body.get('payment_method_types[0]')).toBeNull();
+    // Betriebe zahlen per Karte oder SEPA-Lastschrift (kein PayPal)
+    expect([body.get('allowed_payment_method_types[0]'), body.get('allowed_payment_method_types[1]')]).toEqual([
+      'card',
+      'sepa_debit',
+    ]);
   });
 
   it('invoice.paid / invoice.payment_failed / subscription.updated werden normalisiert', async () => {
@@ -263,7 +267,8 @@ describe('Option B „Monatlich“ und Garantie', () => {
     const months = (order.minTermEndsAt!.getTime() - before) / (30.4 * 86400_000);
     expect(months).toBeGreaterThan(11.8);
     expect(months).toBeLessThan(12.2);
-    expect(Math.round((order.guaranteeEndsAt!.getTime() - before) / 86400_000)).toBe(14);
+    // Vor dem Go-Live: spätester Beginn (Zahlung + 14 Tage) + 14 Tage Garantie
+    expect(Math.round((order.guaranteeEndsAt!.getTime() - before) / 86400_000)).toBe(28);
     expect(customer.subscriptionId).toBe(order.stripeSubscriptionId);
     expect((order.invoiceJson as { lines: { title: string }[] }).lines[0]!.title).toContain('Monatsrate 1 von 12');
   });
@@ -294,7 +299,7 @@ describe('Option B „Monatlich“ und Garantie', () => {
     expect((rows[0]!.invoiceJson as { lines: { title: string }[] }).lines[0]!.title).toContain('Monatsrate 2 von 12');
   });
 
-  it('Zahlungsausfall: erst Hinweis-Mail, nach dem letzten Versuch Wartungsmodus; Zahlung → wieder online', async () => {
+  it('Zahlungsausfall: Smart Retries → 2 Erinnerungen → Wartungsmodus → Forderungsbrief zur Freigabe; Zahlung → online', async () => {
     const { order, customer } = await buy('monthly');
     const site = await liveSite(customer.id);
     const db = getDb();
@@ -309,19 +314,27 @@ describe('Option B „Monatlich“ und Garantie', () => {
     expect(
       (await fire({ ...base, type: 'invoice.payment_failed', nextPaymentAttempt: new Date(Date.now() + 3 * 86400_000) })).result,
     ).toBe('retrying');
-    expect((await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!.status).toBe('live');
-    expect((await fire({ ...base, type: 'invoice.payment_failed', nextPaymentAttempt: null })).result).toBe('paused');
-    const paused = (await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!;
-    expect(paused).toMatchObject({ status: 'suspended', statusReason: 'wartung:payment' });
+    expect((await fire({ ...base, type: 'invoice.payment_failed', nextPaymentAttempt: null })).result).toBe('dunning');
+    const siteNow = async () => (await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!;
+    const orderNow = async () => (await db.query.orders.findFirst({ where: eq(orders.id, order.id) }))!;
+    expect((await siteNow()).status).toBe('live');
+    expect((await orderNow()).dunningStage).toBe(1);
+    expect((await orderNow()).subscriptionStatus).toBe('past_due');
+    const day = 86400_000;
+    expect(await runDunning(new Date(Date.now() + 8 * day))).toMatchObject({ reminders: 1, paused: 0 });
+    expect((await siteNow()).status).toBe('live');
+    expect(await runDunning(new Date(Date.now() + 16 * day))).toMatchObject({ reminders: 0, paused: 1, claims: 1 });
+    expect(await siteNow()).toMatchObject({ status: 'suspended', statusReason: 'wartung:payment' });
     const page = (await getProviders().storage.get('mock-hosting/wbm-test-site/index.html'))!.toString('utf8');
     expect(page).toContain('vorübergehend nicht erreichbar');
     expect(page).toContain('noindex');
-    const mails = await db.select().from(outboundEmails).where(eq(outboundEmails.kind, 'payment_failed'));
-    expect(mails.map((m) => m.idempotencyKey).sort()).toEqual([
-      'recurring-failed:in_fail:final',
-      'recurring-failed:in_fail:first',
-    ]);
-    expect((await db.query.orders.findFirst({ where: eq(orders.id, order.id) }))!.subscriptionStatus).toBe('past_due');
+    const dunningMails = await db.select().from(outboundEmails).where(eq(outboundEmails.kind, 'dunning'));
+    expect(dunningMails).toHaveLength(2);
+    // Forderungsbrief: Entwurf mit den offenen Raten bis Monat 12, nie automatisch versendet
+    const [claim] = await db.select().from(dunningLetters).where(eq(dunningLetters.orderId, order.id));
+    expect(claim).toMatchObject({ status: 'draft', openRates: 11, amountCents: 11 * 4900 });
+    expect(await getProviders().storage.exists(claim!.pdfStorageKey!)).toBe(true);
+    expect(await approveClaimLetter(claim!.id, 'admin:test')).toBe('approved_dry_run');
 
     await fire({
       ...base,
@@ -330,14 +343,12 @@ describe('Option B „Monatlich“ und Garantie', () => {
       billingReason: 'subscription_cycle',
       rawType: 'invoice.paid',
     });
-    expect((await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!).toMatchObject({
-      status: 'live',
-      statusReason: null,
-    });
-    expect((await db.query.orders.findFirst({ where: eq(orders.id, order.id) }))!.subscriptionStatus).toBe('active');
+    expect(await siteNow()).toMatchObject({ status: 'live', statusReason: null });
+    expect(await orderNow()).toMatchObject({ dunningStage: 0, subscriptionStatus: 'active' });
+    expect((await db.query.dunningLetters.findFirst({ where: eq(dunningLetters.id, claim!.id) }))!.status).toBe('cancelled');
   });
 
-  it('Abo „unbezahlt“ pausiert; Abo-Ende vor Mindestlaufzeit → Vertrag beendet, Meldung', async () => {
+  it('Abo „unbezahlt“ startet das Mahnverfahren; Abo-Ende vor Mindestlaufzeit → Vertrag beendet, Meldung', async () => {
     const { order, customer } = await buy('monthly');
     const site = await liveSite(customer.id);
     const db = getDb();
@@ -351,15 +362,26 @@ describe('Option B „Monatlich“ und Garantie', () => {
           subscriptionStatus: 'unpaid',
         })
       ).result,
-    ).toBe('paused');
-    expect((await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!.status).toBe('suspended');
+    ).toBe('dunning');
+    expect((await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!.status).toBe('live');
     expect((await fire({ ...sub, type: 'subscription.deleted', rawType: 'customer.subscription.deleted' })).result).toBe('ended');
     const o = (await db.query.orders.findFirst({ where: eq(orders.id, order.id) }))!;
-    expect(o).toMatchObject({ subscriptionStatus: 'canceled' });
+    expect(o).toMatchObject({ subscriptionStatus: 'canceled', dunningStage: 1 });
     expect(o.endedAt).not.toBeNull();
     expect(o.endedReason).toContain('Mindestlaufzeit');
     expect((await db.query.customers.findFirst({ where: eq(customers.id, customer.id) }))!.subscriptionId).toBeNull();
     expect((await db.select().from(alerts)).some((a) => a.code === `monthly_ended_${order.id}`)).toBe(true);
+  });
+
+  it('Garantie beginnt mit dem Go-Live, spätestens 14 Tage nach der Zahlung', () => {
+    const paid = new Date('2026-10-01T10:00:00Z');
+    expect(guaranteeEndFor(DEFAULT_CONFIG, paid, new Date('2026-10-05T10:00:00Z')).toISOString()).toBe(
+      '2026-10-19T10:00:00.000Z',
+    );
+    expect(guaranteeEndFor(DEFAULT_CONFIG, paid, new Date('2026-10-30T10:00:00Z')).toISOString()).toBe(
+      '2026-10-29T10:00:00.000Z',
+    );
+    expect(guaranteeEndFor(DEFAULT_CONFIG, paid, null).toISOString()).toBe('2026-10-29T10:00:00.000Z');
   });
 
   it('Garantie Option B: Vertrag beendet, erste Rate erstattet, Seite offline, Mail an den Kunden', async () => {

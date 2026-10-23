@@ -13,6 +13,12 @@ export interface Amounts {
   vatRatePercent: number;
 }
 
+/** Zusatz zu Preisangaben in Werbung/Checkout: leer (Kleinunternehmer), „inkl. USt.“ oder „zzgl. USt.“ */
+export function priceTaxSuffix(cfg: AppConfig): string {
+  if (cfg.tax.kleinunternehmer || cfg.tax.vatRatePercent === 0) return '';
+  return cfg.tax.pricesAreGross ? 'inkl. USt.' : 'zzgl. USt.';
+}
+
 /** Beträge aus der Config: Kleinunternehmer ohne USt, sonst Brutto/Netto je nach `pricesAreGross`. */
 export function packageAmounts(cfg: AppConfig): Amounts {
   return amountsFor(cfg, cfg.pricing.packageCents);

@@ -25,6 +25,7 @@ export const QUEUES = {
   weeklyOptimizer: 'weekly-optimizer',
   retention: 'retention',
   renewalReminders: 'renewal-reminders',
+  dunning: 'dunning',
   alertMails: 'alert-mails',
   pipelineTick: 'pipeline-tick',
   deadLetters: 'dead-letters',
@@ -34,7 +35,7 @@ export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
 
 export interface QueuePayloads {
   'find-leads': { cities?: string[]; branches?: string[]; /** fehlt beim wöchentlichen Cron-Lauf */ triggeredBy?: string };
-  'build-demo': { leadId: string; regenerate?: boolean; triggeredBy?: string; reviewNote?: string };
+  'build-demo': { leadId: string; regenerate?: boolean; triggeredBy?: string; reviewNote?: string; templateId?: string };
   'qa-demo': { demoId: string };
   'publish-demo': { demoId: string };
   'generate-letter': { leadId: string; sequence: 1 | 2 | 3; triggeredBy?: string; test?: boolean; regenerate?: boolean };
@@ -54,6 +55,7 @@ export interface QueuePayloads {
   'weekly-optimizer': { periodEnd?: string };
   retention: Record<string, never>;
   'renewal-reminders': Record<string, never>;
+  dunning: Record<string, never>;
   'alert-mails': Record<string, never>;
   'pipeline-tick': Record<string, never>;
   'dead-letters': Record<string, unknown>;
@@ -75,6 +77,7 @@ export const QUEUE_DEFS: Partial<Record<QueueName, Partial<QueueDef>>> = {
   'send-approved-letters': { policy: 'singleton', retryLimit: 1 },
   'weekly-optimizer': { policy: 'singleton', retryLimit: 2 },
   retention: { policy: 'singleton', retryLimit: 2 },
+  dunning: { policy: 'singleton', retryLimit: 2 },
   'live-check': { retryLimit: 10, retryDelay: 120 },
   'deploy-site': { retryLimit: 3, retryDelay: 60, expireInSeconds: 30 * 60 },
   'pipeline-tick': { policy: 'singleton', retryLimit: 0 },

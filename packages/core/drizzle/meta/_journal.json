@@ -29,6 +29,13 @@
       "when": 1792769257103,
       "tag": "0003_update2_plans_segments",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792785113190,
+      "tag": "0004_antworten_mahnverfahren",
+      "breakpoints": true
     }
   ]
 }

@@ -316,6 +316,8 @@ export interface CheckoutSessionInput {
   expiresInMinutes?: number;
   /** Gesetzt = monatliches Abo (Plan „monthly“, erste Rate sofort) statt Einmalzahlung */
   recurring?: { interval: 'month' };
+  /** Zahlungsarten (Config `checkout.paymentMethods`) */
+  paymentMethods?: ('card' | 'sepa_debit')[];
 }
 
 export interface CheckoutSession {

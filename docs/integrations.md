@@ -144,10 +144,9 @@ Doku „Fulfill orders“ (docs.stripe.com/checkout/fulfillment).
     `payments.data[].payment.payment_intent` → `refunds.create`. Vertrag beenden:
     `subscription_schedules.cancel` (beendet auch das Abo) bzw. `subscriptions.cancel`, jeweils ohne
     anteilige Gutschrift.
-  - **Zahlungsarten:** keine feste Liste im Code, sondern dynamisch aus dem Dashboard. PayPal über Stripe
-    ist für Konten in Deutschland verfügbar (EUR), auch für Abos – „Recurring payments … might require
-    approval“: im Dashboard freischalten lassen. SEPA-Lastschrift: Zahlung kommt asynchron
-    (`processing`, danach `invoice.paid`).
+  - **Zahlungsarten:** `allowed_payment_method_types: ['card', 'sepa_debit']` (Config `checkout.paymentMethods`; `payment_method_types` gibt es seit API 2026-09-30 nicht mehr, der neue Parameter filtert die im Dashboard aktiven Arten) (Entscheidung des Betreibers
+    vom 23.10.2026: Kunden sind Betriebe, PayPal vorerst nicht). Beide Arten im Stripe-Dashboard
+    aktivieren. SEPA-Lastschrift: Zahlung kommt asynchron (`processing`, danach `invoice.paid`).
   - Fehlgeschlagene Raten: Smart Retries im Dashboard aktivieren; Endzustand nach den Versuchen
     (Abo `unpaid` oder gekündigt) wird beides behandelt.
 - **Test:** `PAYMENT_PROVIDER=mock` simuliert die Bezahlseite (`/checkout/mock/…`) inkl. signierter

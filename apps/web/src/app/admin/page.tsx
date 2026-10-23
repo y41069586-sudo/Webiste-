@@ -1,5 +1,5 @@
 import { desc, isNull, sql } from 'drizzle-orm';
-import { budgetStatus, getDb, schema, systemHealth } from '@wbm/core';
+import { budgetStatus, getConfig, getDb, goLiveBlockers, schema, systemHealth } from '@wbm/core';
 import { Card, Notice, PageHeader, Stat, StatusBadge } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur, num } from '@/lib/format';
@@ -10,7 +10,7 @@ export const metadata = { title: 'Übersicht' };
 export default async function Dashboard() {
   await requireAdmin();
   const db = getDb();
-  const [byStatus, openAlerts, letterBudget, llmBudget, placesBudget, health] = await Promise.all([
+  const [byStatus, openAlerts, letterBudget, llmBudget, placesBudget, health, cfg] = await Promise.all([
     db
       .select({ status: schema.leads.status, n: sql<number>`count(*)::int` })
       .from(schema.leads)
@@ -20,7 +20,9 @@ export default async function Dashboard() {
     budgetStatus('llm'),
     budgetStatus('places_api'),
     systemHealth(),
+    getConfig(),
   ]);
+  const blockers = goLiveBlockers(cfg);
   const counts = Object.fromEntries(byStatus.map((r) => [r.status, r.n]));
   const total = byStatus.reduce((a, r) => a + r.n, 0);
   return (
@@ -30,6 +32,14 @@ export default async function Dashboard() {
         <div className="mb-6">
           <Notice kind="error">
             <strong>Systemzustand:</strong> {health.problems.join(' · ')}
+          </Notice>
+        </div>
+      ) : null}
+      {blockers.length ? (
+        <div className="mb-6">
+          <Notice kind="warn">
+            <strong>Livegang gesperrt</strong> (echte Briefe an Leads, Live-Checkout) – es fehlt:{' '}
+            {blockers.map((b) => b.label).join(' · ')}. Einstellungen → Absender bzw. Rechtstexte.
           </Notice>
         </div>
       ) : null}

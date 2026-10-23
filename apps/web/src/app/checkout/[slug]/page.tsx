@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { checkoutAvailability, demoUrl, formatEuro, getCheckoutContext, getConfig } from '@wbm/core';
+import { checkoutAvailability, demoUrl, formatEuro, getCheckoutContext, getConfig, priceTaxSuffix } from '@wbm/core';
 import { PublicCard, PublicShell } from '@/components/public/shell';
 import { CheckoutForm, type PlanOffer } from './checkout-form';
 
@@ -42,12 +42,13 @@ export default async function CheckoutPage({
   const p = cfg.pricing;
   const months = p.hostingMonthsIncluded;
   const care = `${formatEuro(p.subscriptionCents)}/Monat`;
+  const tax = priceTaxSuffix(cfg);
   const plans: PlanOffer[] = [
     {
       id: 'one_time',
       title: 'Einmalzahlung',
       price: price.label,
-      unit: 'einmalig',
+      unit: tax ? `einmalig ${tax}` : 'einmalig',
       buttonLabel: price.label,
       points: [
         `Eigene Domain und ${months} Monate Hosting inklusive`,
@@ -60,7 +61,7 @@ export default async function CheckoutPage({
             id: 'monthly' as const,
             title: 'Monatlich',
             price: monthly.label,
-            unit: 'pro Monat',
+            unit: tax ? `pro Monat ${tax}` : 'pro Monat',
             buttonLabel: `${monthly.label} pro Monat`,
             points: [
               `${p.minTermMonths} Monate Mindestlaufzeit`,
