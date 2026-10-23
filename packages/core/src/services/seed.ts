@@ -1,7 +1,9 @@
 import { sql } from 'drizzle-orm';
 import { getDb, type DbOrTx } from '../db/client';
 import { variants } from '../db/schema';
+import { maintainClaims } from '../claims/library';
 import { DEFAULT_LETTER_VARIANTS } from '../letters/variants';
+import { syncPlaybooks } from '../playbooks';
 
 /**
  * Idempotentes Anlegen der Standarddaten. Die mitgelieferten Briefvarianten werden
@@ -25,4 +27,7 @@ export async function seedDefaults(db: DbOrTx = getDb()): Promise<void> {
       });
   }
   await db.execute(sql`INSERT INTO counters (name, value) VALUES ('demos_reviewed', 0) ON CONFLICT DO NOTHING`);
+  // Claims-Bibliothek und Playbooks aus den YAML-Dateien (B2/B3)
+  await maintainClaims(db);
+  await syncPlaybooks(db);
 }

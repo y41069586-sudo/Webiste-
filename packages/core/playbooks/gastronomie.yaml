@@ -1,0 +1,32 @@
+# Branchen-Playbook (Update 2, B3). Die Demo muss den Aufhänger des Briefs tatsächlich zeigen.
+id: gastronomie
+label: Gastronomie
+priority: 10
+# Google-Places-Typen (Places API New); `*` als Platzhalter erlaubt
+google_types: [restaurant, '*_restaurant', cafe, coffee_shop, bakery, meal_takeaway, bar, pub, ice_cream_shop, bistro]
+# OSM-Tags `key=value` (Wert `*` = beliebig)
+osm_tags:
+  [
+    amenity=restaurant,
+    amenity=cafe,
+    amenity=fast_food,
+    amenity=bar,
+    amenity=pub,
+    amenity=ice_cream,
+    amenity=biergarten,
+    shop=bakery,
+    shop=pastry,
+    shop=confectionery,
+  ]
+hook: Gäste wollen vorher Speisekarte und Fotos sehen.
+allowed_claims:
+  - GASTRO_SPEISEKARTE_ONLINE
+  - GASTRO_WEBSITE_ERWARTET
+  - GASTRO_WEBSITE_ERWARTET_KURZ
+  - GASTRO_RESERVIERUNG_ONLINE
+  - GASTRO_ONLINE_SUCHE
+  - GASTRO_TISCH_ONLINE_RESERVIERT
+demo_sections: [speisekarte, fotos_beispiel, oeffnungszeiten, anfahrt, reservierungsanfrage]
+letter:
+  qr_label: Scannen und Ihre Restaurant-Website ansehen
+  start_variants: [GASTRO_A]

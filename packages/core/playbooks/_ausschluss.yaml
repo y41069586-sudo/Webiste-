@@ -1,0 +1,68 @@
+# Ausgeschlossene Branchen (Update 2, B3): Heilberufe und Gesundheit (Heilmittelwerbegesetz,
+# Berufsrecht) sowie Anwälte, Steuerberater, Notare (Berufsrecht). Der Lead-Finder sortiert
+# Treffer mit einem dieser Merkmale aus (Ablehnungsgrund `excluded_industry`).
+google_types:
+  - doctor
+  - dentist
+  - dental_clinic
+  - physiotherapist
+  - chiropractor
+  - pharmacy
+  - hospital
+  - medical_lab
+  - medical_clinic
+  - '*_clinic'
+  - '*_doctor'
+  - veterinary_care
+  - optician
+  - hearing_aid_store
+  - lawyer
+  - accounting
+  - notary
+  - tax_advisor
+# skin_care_clinic ist Kosmetik (Beauty), nicht ausgeschlossen – Namen mit Arzt/Dermatologie greifen unten
+google_types_allow: [skin_care_clinic]
+osm_tags:
+  - healthcare=*
+  - amenity=doctors
+  - amenity=dentist
+  - amenity=pharmacy
+  - amenity=clinic
+  - amenity=hospital
+  - amenity=veterinary
+  - shop=medical_supply
+  - shop=optician
+  - shop=hearing_aids
+  - shop=chemist_pharmacy
+  - office=lawyer
+  - office=tax_advisor
+  - office=notary
+  - office=accountant
+# Namensmuster (ohne Groß-/Kleinschreibung, Umlaute werden vorher aufgelöst: ä→ae usw.)
+name_patterns:
+  - 'physio'
+  - 'krankengymnast'
+  - 'heilpraktik'
+  - 'ergotherap'
+  - 'logopaed'
+  - 'osteopath'
+  - 'podolog'
+  - 'medizinische fusspflege'
+  - 'aerzt'
+  - '\barzt'
+  - 'zahn(arzt|aerzt|medizin|technik)'
+  - 'praxis fuer'
+  - 'apotheke'
+  - 'dermatolog'
+  - 'hautarzt'
+  - 'psychotherap'
+  - 'hebamme'
+  - 'pflegedienst'
+  - 'sanitaetshaus'
+  - 'optik'
+  - 'hoerakustik|hoergeraet'
+  - 'rechtsanw'
+  - '\banwalt|anwaelt|anwaltskanzlei'
+  - 'kanzlei'
+  - 'steuerber'
+  - 'notar'

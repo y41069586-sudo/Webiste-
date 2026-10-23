@@ -29,6 +29,17 @@ export type LeadStatus = (typeof LEAD_STATUSES)[number];
 export const BRANCH_GROUPS = ['handwerk', 'beauty'] as const;
 export type BranchGroup = (typeof BRANCH_GROUPS)[number];
 
+/** Branchen-Playbooks (Update 2, B3). Gesundheit und Recht sind ausgeschlossen. */
+export const INDUSTRIES = ['gastronomie', 'handwerk', 'beauty', 'einzelhandel', 'kurse_training', 'dienstleistung'] as const;
+export type Industry = (typeof INDUSTRIES)[number];
+
+/** Claims-Bibliothek (Update 2, B2) */
+export const CLAIM_STATUSES = ['approved', 'needs_verification', 'blocked'] as const;
+export type ClaimStatus = (typeof CLAIM_STATUSES)[number];
+export const CLAIM_CHECK_RESULTS = ['ok', 'corrected', 'primary_missing', 'mismatch'] as const;
+export type ClaimCheckResult = (typeof CLAIM_CHECK_RESULTS)[number];
+export type ClaimSourceType = 'external' | 'own_data';
+
 export type LeadSourceKind = 'google_places' | 'osm' | 'mock';
 
 export const DEMO_STATUSES = [

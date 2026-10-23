@@ -25,6 +25,8 @@ export interface RawPlace {
   businessStatus?: string;
   primaryType?: string;
   types?: string[];
+  /** Relevante OSM-Tags (amenity, shop, craft, leisure, healthcare, office, beauty, sport) für die Branchen-Zuordnung */
+  osmTags?: Record<string, string>;
   openingHours?: OpeningHours | null;
 }
 

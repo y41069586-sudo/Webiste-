@@ -153,7 +153,7 @@ Wichtige Schalter:
 
 **Takte (Worker, Zeitzone Europe/Berlin):** Pipeline alle 5 Min., Briefstatus alle 2 Std., Follow-ups
 9:05, Erinnerungen (Onboarding, Hosting-Ende) 8:10, Lösch-Job 3:15, Wochenbericht So 18:00,
-Watchdog + Fehler-Mail alle 15 Min., IMAP-Abruf alle 5 Min.
+Watchdog + Fehler-Mail alle 15 Min., IMAP-Abruf alle 5 Min., Claims-Abgleich und Ablaufprüfung 6:25.
 
 **Deine Aufgaben im Dashboard:**
 
@@ -164,6 +164,7 @@ Watchdog + Fehler-Mail alle 15 Min., IMAP-Abruf alle 5 Min.
 5. **Kunden & Seiten** – Domainkäufe freigeben, Änderungswünsche außerhalb der Runden bearbeiten.
 6. **Bestellungen** – Zahlungen, Rechnungen, Erstattungen (mit Bestätigung).
 7. **Wochenberichte** (sonntags) – Vorschlag für Budgetanteile übernehmen oder nicht.
+8. **Claims & Playbooks** – Statistiken für Briefe nach eigener Prüfung freigeben; abgelaufene Quellen ersetzen.
 
 **Erste echte Charge:** [docs/go-live-checkliste.md](docs/go-live-checkliste.md) vollständig abhaken,
 dann Testbrief an dich → Schalter „Echte Briefe freigegeben“ → `DRY_RUN=false` (in `.env` **und** im
@@ -192,6 +193,10 @@ die offene Restlaufzeit.
 
 **… das Wochenbudget erreicht ist?** Versand stoppt automatisch und setzt in der nächsten Woche fort.
 Budget unter Einstellungen → Budget anpassen (Briefe/Places/KI getrennt).
+
+**… eine Quelle veraltet ist („Quelle veraltet, neuere Studie suchen“)?** Der Claim ist schon gesperrt,
+Briefe nutzen ihn nicht mehr. Neuere Primärquelle suchen, in `packages/core/claims/claims.yaml` eintragen
+(mit `check`-Zitat), `docs/claims-verifikation.md` ergänzen, deployen und den Claim im Dashboard freigeben.
 
 **… ein Brief „failed“ ist?** Briefe → Fehler: Grund lesen (Status des Briefdienstes, Layout-Prüfung,
 „Ablaufdatum im Brief liegt zu nah“ → neu erzeugen). Bei
@@ -275,5 +280,6 @@ Lösch-Job, Optimizer, Fehlerfälle (Ausfälle, Absturz während Verarbeitung).
 - [docs/go-live-checkliste.md](docs/go-live-checkliste.md) – Checkliste vor dem ersten echten Versand
 - [docs/compliance-google.md](docs/compliance-google.md) – Google-Places-Bedingungen, Entscheidung OSM
 - [docs/integrations.md](docs/integrations.md) – geprüfte API-Dokumentation je Anbieter
+- [docs/claims-verifikation.md](docs/claims-verifikation.md) – Prüfprotokoll der Claims (Statistiken in Briefen)
 - [docs/verarbeitungsverzeichnis.md](docs/verarbeitungsverzeichnis.md) – Verzeichnis der Verarbeitungstätigkeiten (Entwurf)
 - [docs/auftragsverarbeiter.md](docs/auftragsverarbeiter.md) – Auftragsverarbeiter, Standorte, EU-Optionen

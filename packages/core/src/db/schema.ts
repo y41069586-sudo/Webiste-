@@ -16,8 +16,12 @@ import {
 import type {
   BranchGroup,
   BudgetCategory,
+  ClaimCheckResult,
+  ClaimSourceType,
+  ClaimStatus,
   DemoStatus,
   EventType,
+  Industry,
   LeadSegment,
   LeadSourceKind,
   LeadStatus,
@@ -84,6 +88,8 @@ export const leads = pgTable(
     lettersSent: integer('letters_sent').default(0).notNull(),
     /** neu | social_only | etabliert (bei der Qualifizierung gesetzt) */
     leadSegment: text('lead_segment').$type<LeadSegment>(),
+    /** Playbook-Branche (B3), vom Lead-Finder zugeordnet */
+    industry: text('industry').$type<Industry>(),
     /** Erstes Auftauchen in den Suchergebnissen (Grundlage für Segment „neu“) */
     firstSeenAt: ts('first_seen_at').defaultNow(),
     /** Kurzcode für die Kurz-URL im Brief ({TRACK_DOMAIN}/{kurzcode}), zufällig */
@@ -692,5 +698,79 @@ export const alerts = pgTable(
   },
   (t) => [index('alerts_open_idx').on(t.acknowledgedAt, t.createdAt)],
 );
+
+// ---------------------------------------------------------------------------
+// Claims-Bibliothek und Playbooks (Update 2, B2/B3/B7)
+// ---------------------------------------------------------------------------
+export const claims = pgTable(
+  'claims',
+  {
+    id: text('id').primaryKey(),
+    textDe: text('text_de').notNull(),
+    footnoteDe: text('footnote_de').notNull(),
+    sourcePublisher: text('source_publisher').notNull(),
+    sourceTitle: text('source_title').notNull(),
+    sourceUrl: text('source_url').notNull(),
+    publishedAt: ts('published_at').notNull(),
+    sample: integer('sample'),
+    population: text('population'),
+    scope: text('scope').notNull(),
+    industries: text('industries')
+      .array()
+      .default(sql`'{}'::text[]`)
+      .notNull(),
+    status: text('status').$type<ClaimStatus>().default('needs_verification').notNull(),
+    /** Grund einer Sperre: expired | yaml | removed | manual | scope */
+    blockedReason: text('blocked_reason'),
+    verifiedBy: text('verified_by'),
+    verifiedAt: ts('verified_at'),
+    expiresAt: ts('expires_at').notNull(),
+    sourceType: text('source_type').$type<ClaimSourceType>().default('external').notNull(),
+    note: text('note'),
+    checkResult: text('check_result').$type<ClaimCheckResult>(),
+    checkQuote: text('check_quote'),
+    checkNote: text('check_note'),
+    checkedAt: ts('checked_at'),
+    /** Hash über Text, Fußnote, Quelle – ändert er sich, ist eine neue Freigabe nötig */
+    contentHash: text('content_hash').notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index('claims_status_idx').on(t.status)],
+);
+
+export const claimUsages = pgTable(
+  'claim_usages',
+  {
+    letterId: uuid('letter_id')
+      .notNull()
+      .references(() => letters.id, { onDelete: 'cascade' }),
+    claimId: text('claim_id')
+      .notNull()
+      .references(() => claims.id),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.letterId, t.claimId] }), index('claim_usages_claim_idx').on(t.claimId)],
+);
+
+export const playbooks = pgTable('playbooks', {
+  id: text('id').$type<Industry>().primaryKey(),
+  branche: text('branche').notNull(),
+  googleTypes: text('google_types')
+    .array()
+    .default(sql`'{}'::text[]`)
+    .notNull(),
+  hook: text('hook').notNull(),
+  allowedClaimIds: text('allowed_claim_ids')
+    .array()
+    .default(sql`'{}'::text[]`)
+    .notNull(),
+  demoSections: text('demo_sections')
+    .array()
+    .default(sql`'{}'::text[]`)
+    .notNull(),
+  definition: jsonb('definition').$type<Record<string, unknown>>().default({}).notNull(),
+  updatedAt: updatedAt(),
+});
 
 export const sqlNow = sql`now()`;

@@ -31,7 +31,12 @@ const nextConfig: NextConfig = {
   ],
   outputFileTracingRoot: root,
   outputFileTracingIncludes: {
-    '/*': ['../../packages/core/drizzle/**/*', '../../packages/templates/dist/**/*'],
+    '/*': [
+      '../../packages/core/drizzle/**/*',
+      '../../packages/core/claims/**/*',
+      '../../packages/core/playbooks/**/*',
+      '../../packages/templates/dist/**/*',
+    ],
   },
   turbopack: { root },
   experimental: {

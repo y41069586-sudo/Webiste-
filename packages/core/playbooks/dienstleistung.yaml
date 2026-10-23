@@ -1,0 +1,39 @@
+# Fallback-Branche ohne Statistik; dient zugleich als Kontrollgruppe (B4.6).
+id: dienstleistung
+label: Dienstleistung
+priority: 90
+fallback: true
+google_types:
+  [
+    photographer,
+    laundry,
+    pet_groomer,
+    pet_care,
+    tailor,
+    house_cleaning_service,
+    dry_cleaner,
+    shoe_repair,
+    moving_company,
+    travel_agency,
+  ]
+osm_tags:
+  [
+    craft=photographer,
+    craft=tailor,
+    craft=shoemaker,
+    craft=dressmaker,
+    shop=laundry,
+    shop=dry_cleaning,
+    shop=tailor,
+    shop=pet_grooming,
+    shop=photo,
+    shop=travel_agency,
+    shop=copyshop,
+    office=moving_company,
+  ]
+hook: Online gefunden werden, Anfrage ohne Telefonat.
+allowed_claims: []
+demo_sections: [leistungen, anfrageformular]
+letter:
+  qr_label: Scannen und Ihre fertige Website ansehen
+  start_variants: [A]

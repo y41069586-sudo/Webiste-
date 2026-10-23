@@ -80,3 +80,5 @@ export * from './services/kpis';
 export * from './services/optimizer';
 export * from './services/retention';
 export * from './services/monitoring';
+export * from './claims/library';
+export * from './playbooks';

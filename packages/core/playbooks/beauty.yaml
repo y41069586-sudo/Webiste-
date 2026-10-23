@@ -1,0 +1,17 @@
+id: beauty
+label: Beauty (Kosmetik, Nagelstudio, Friseur, Barber)
+priority: 30
+google_types:
+  [beauty_salon, hair_care, hair_salon, nail_salon, beautician, barber_shop, spa, makeup_artist, tanning_studio, skin_care_clinic]
+osm_tags: [shop=beauty, shop=hairdresser, shop=massage, amenity=spa, leisure=tanning_salon]
+hook: Kundinnen wollen ohne Telefonat einen Termin anfragen.
+allowed_claims:
+  - TERMIN_ONLINE_GEWOHNT
+  - TERMIN_KEIN_TELEFONAT
+  - TERMIN_KEIN_TELEFONAT_KURZ
+  - TERMIN_FLEXIBEL
+  - TERMIN_BEHOERDE_ONLINE
+demo_sections: [leistungen_preise_auf_anfrage, terminanfrage, oeffnungszeiten]
+letter:
+  qr_label: Scannen und Ihre Studio-Website ansehen
+  start_variants: [BEAUTY_A]

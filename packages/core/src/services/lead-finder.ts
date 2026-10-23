@@ -7,6 +7,7 @@ import { leads } from '../db/schema';
 import { businessHash, normalizeAddress, normalizeBusinessName, segmentKey } from '../leads/normalize';
 import { classifyWebsite, qualify, type RatingSignal, type RejectionReason } from '../leads/qualify';
 import { logger } from '../logger';
+import { classifyIndustry, exclusionFor } from '../playbooks';
 import { getProviders } from '../providers';
 import { GooglePlacesClient, GooglePlacesLeadSource } from '../providers/lead-source/google-places';
 import type { LeadSource, RawPlace } from '../providers/types';
@@ -292,6 +293,10 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       seenAt.getTime() - segFirst.getTime() >= 6 * 86400_000 &&
       runStart.getTime() - seenAt.getTime() <= cfg.segments.newWindowDays * 86400_000,
     );
+    // Branchen-Zuordnung und Ausschluss (Gesundheit/Recht) laut Playbooks
+    const exclusion = exclusionFor(place);
+    const excludedIndustry = exclusion !== null;
+    const industry = classifyIndustry(place, branch);
     const prelim = qualify({
       place,
       branch,
@@ -303,6 +308,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       isDuplicate: Boolean(dup),
       rating,
       newAppearance,
+      excludedIndustry,
     });
     if (src.signal && prelim.qualified && place.street && place.houseNumber && place.postalCode) {
       try {
@@ -340,6 +346,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       isDuplicate: Boolean(dup),
       rating,
       newAppearance,
+      excludedIndustry,
     });
 
     // Google-Inhalte (Bewertung, Website, Name/Anschrift) werden NICHT gespeichert – nur place_id
@@ -350,6 +357,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       businessName: place.name,
       branch: branch.key,
       branchGroup: branch.group,
+      industry,
       city,
       street: place.street ?? null,
       houseNumber: place.houseNumber ?? null,

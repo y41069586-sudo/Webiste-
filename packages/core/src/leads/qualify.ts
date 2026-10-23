@@ -15,6 +15,7 @@ export const REJECTION_REASONS = [
   'chain',
   'outside_city',
   'duplicate',
+  'excluded_industry',
 ] as const;
 export type RejectionReason = (typeof REJECTION_REASONS)[number];
 
@@ -30,6 +31,7 @@ export const REJECTION_LABELS: Record<RejectionReason, string> = {
   chain: 'Filialkette / Franchise',
   outside_city: 'Außerhalb der Zielstadt',
   duplicate: 'Dublette eines anderen Leads',
+  excluded_industry: 'Ausgeschlossene Branche (Gesundheit/Recht)',
 };
 
 export interface WebsiteClass {
@@ -87,6 +89,8 @@ export interface QualifyInput {
   rating?: RatingSignal | null;
   /** Betrieb ist erst kürzlich in den Suchergebnissen aufgetaucht (Segment schon früher durchsucht) */
   newAppearance?: boolean;
+  /** Gesundheit/Recht laut Playbook-Ausschlussliste (B3) */
+  excludedIndustry?: boolean;
 }
 
 export interface QualifyResult {
@@ -149,6 +153,7 @@ export function qualify(input: QualifyInput): QualifyResult {
   if (input.recentlyContacted) reasons.push('recently_contacted');
   if (input.chainByFrequency || matchesChainName(place.name, cfg.targeting.chainNames)) reasons.push('chain');
   if (input.isDuplicate) reasons.push('duplicate');
+  if (input.excludedIndustry) reasons.push('excluded_industry');
   const base = computeScore({ branch: input.branch, place, rating: input.rating, website });
   return {
     qualified: reasons.length === 0,

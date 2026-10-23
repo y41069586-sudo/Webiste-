@@ -1,0 +1,34 @@
+id: kurse_training
+label: Kurse & Training (Fitness, Yoga, Tanz, Fahrschule)
+priority: 50
+google_types:
+  [
+    gym,
+    fitness_center,
+    yoga_studio,
+    dance_school,
+    driving_school,
+    pilates_studio,
+    martial_arts_school,
+    swimming_school,
+    sports_school,
+  ]
+osm_tags:
+  [
+    leisure=fitness_centre,
+    leisure=dance,
+    amenity=driving_school,
+    amenity=dancing_school,
+    sport=yoga,
+    sport=pilates,
+    sport=martial_arts,
+  ]
+hook: Interessenten wollen Kursinfos und eine Probestunde ohne Anruf.
+allowed_claims:
+  - TERMIN_ONLINE_GEWOHNT
+  - TERMIN_FLEXIBEL
+  - TERMIN_BEHOERDE_ONLINE
+demo_sections: [angebot, kursplan_platzhalter, probetermin_anfrage]
+letter:
+  qr_label: Scannen und Ihre Kurs-Website ansehen
+  start_variants: [KURSE_A]

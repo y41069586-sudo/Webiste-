@@ -1,0 +1,325 @@
+# Claims-Bibliothek (Update 2, B1/B2).
+#
+# Briefe und Demos referenzieren Zahlen nur per Claim-ID; der Text wird von hier eingesetzt.
+# Diese Datei ist die Quelle für Text, Quelle und Prüfergebnis. Der Status in der Datenbank
+# (approved/blocked) wird NUR im Dashboard durch den Betreiber gesetzt bzw. vom Ablauf-Job.
+# Ändert sich text_de/footnote_de/source_url eines Claims, fällt er automatisch auf
+# needs_verification zurück und braucht eine neue Freigabe.
+#
+# Felder unter `check`: Ergebnis der Quellenprüfung (Details: docs/claims-verifikation.md)
+#   result: ok | corrected | primary_missing | mismatch
+#   quote:  Wortlaut der Quelle, auf den sich der Claim stützt
+#
+# Regeln für neue Claims: Primärquelle, Stichprobe und Jahr bekannt, nicht älter als 3 Jahre,
+# Wortlaut exakt. Jeder neue Claim startet als needs_verification.
+
+- id: GASTRO_WEBSITE_ERWARTET
+  text_de: '69 % der Menschen in Deutschland erwarten, dass ein Café oder Restaurant einen Internetauftritt hat, auf dem sich zum Beispiel Fotos der Speisen und Räumlichkeiten ansehen lassen.'
+  footnote_de: 'Bitkom Research 2024, 1.005 Befragte ab 16 Jahren, telefonisch, repräsentativ'
+  source_publisher: Bitkom e. V.
+  source_title: 'Restaurants und Cafés: Für knapp ein Drittel sind Online-Bewertungen entscheidend'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Restaurants-und-Cafes-Online-Bewertungen-entscheidend
+  published_at: 2024-06-27
+  sample: 1005
+  population: Personen in Deutschland ab 16 Jahren (telefonisch, KW 18–21 2024)
+  scope: DE
+  industries: [gastronomie]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: 'Dementsprechend erwartet generell die große Mehrheit von 69 Prozent, dass ein Café oder Restaurant einen Internetauftritt hat, wo sich zum Beispiel Fotos der Speisen und Räumlichkeiten anschauen lassen.'
+    note: 'Startfassung sagte „Website mit Fotos von Speisen und Räumen“ – im Original nur „zum Beispiel“. Quelle älter als 24 Monate (abgelaufen am 27.06.2026).'
+
+- id: GASTRO_WEBSITE_ERWARTET_KURZ
+  text_de: '69 % erwarten von einem Café oder Restaurant einen eigenen Internetauftritt.'
+  footnote_de: 'Bitkom Research 2024, 1.005 Befragte ab 16 Jahren, telefonisch, repräsentativ'
+  source_publisher: Bitkom e. V.
+  source_title: 'Restaurants und Cafés: Für knapp ein Drittel sind Online-Bewertungen entscheidend'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Restaurants-und-Cafes-Online-Bewertungen-entscheidend
+  published_at: 2024-06-27
+  sample: 1005
+  population: Personen in Deutschland ab 16 Jahren (telefonisch, KW 18–21 2024)
+  scope: DE
+  industries: [gastronomie]
+  source_type: external
+  note: 'Kurzform von GASTRO_WEBSITE_ERWARTET (B4.1).'
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: 'Dementsprechend erwartet generell die große Mehrheit von 69 Prozent, dass ein Café oder Restaurant einen Internetauftritt hat, wo sich zum Beispiel Fotos der Speisen und Räumlichkeiten anschauen lassen.'
+    note: 'Vorgeschlagene Kurzform „eine Website mit Fotos“ überdehnt das „zum Beispiel“ des Originals; Kurzform ohne Fotos formuliert. Quelle abgelaufen am 27.06.2026.'
+
+- id: GASTRO_SPEISEKARTE_ONLINE
+  text_de: '53 % schauen sich in der Regel online die Speisekarte an, bevor sie ein neues Restaurant oder Café besuchen, bei den 16- bis 29-Jährigen sind es 65 %.'
+  footnote_de: 'Bitkom Research 2024, 1.005 Befragte ab 16 Jahren, telefonisch, repräsentativ'
+  source_publisher: Bitkom e. V.
+  source_title: 'Restaurants und Cafés: Für knapp ein Drittel sind Online-Bewertungen entscheidend'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Restaurants-und-Cafes-Online-Bewertungen-entscheidend
+  published_at: 2024-06-27
+  sample: 1005
+  population: Personen in Deutschland ab 16 Jahren (telefonisch, KW 18–21 2024)
+  scope: DE
+  industries: [gastronomie]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: 'Über die Hälfte (53 Prozent) schaut sich dabei in der Regel online die Speisekarte an, bevor sie ein neues Restaurant oder Café besucht. Unter den 16- bis 29-Jährigen haben sogar knapp zwei Drittel (65 Prozent) diese Angewohnheit.'
+    note: 'Im Original geht es um ein NEUES Restaurant oder Café – das fehlte in der Startfassung. Quelle abgelaufen am 27.06.2026.'
+
+- id: GASTRO_RESERVIERUNG_ONLINE
+  text_de: '47 % reservieren einen Tisch am liebsten direkt online.'
+  footnote_de: 'Bitkom Research 2024, 1.005 Befragte ab 16 Jahren, telefonisch, repräsentativ'
+  source_publisher: Bitkom e. V.
+  source_title: 'Restaurants und Cafés: Für knapp ein Drittel sind Online-Bewertungen entscheidend'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Restaurants-und-Cafes-Online-Bewertungen-entscheidend
+  published_at: 2024-06-27
+  sample: 1005
+  population: Personen in Deutschland ab 16 Jahren (telefonisch, KW 18–21 2024)
+  scope: DE
+  industries: [gastronomie]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: ok
+    quote: '47 Prozent aller Befragten reservieren auch einen Tisch am liebsten direkt online.'
+    note: 'Zahl und Wortlaut stimmen. Quelle abgelaufen am 27.06.2026.'
+
+- id: GASTRO_ONLINE_SUCHE
+  text_de: '70 % der Restaurantbesucher in Deutschland nutzen digitale Plattformen, um nach Lokalen zu suchen.'
+  footnote_de: 'YouGov im Auftrag von METRO und DISH, Januar 2025, 2.000 Befragte, repräsentativ'
+  source_publisher: METRO AG / DISH Digital Solutions (Durchführung YouGov)
+  source_title: 'Repräsentative Umfrage digitale Gastronomie (YouGov im Auftrag von METRO und DISH)'
+  source_url: https://www.food-monitor.de/2025/02/repraesentative-umfrage-digitale-gastronomie-gaeste-sind-bereit-branche-sollte-potenziale-nutzen/
+  published_at: 2025-02-01
+  sample: 2000
+  population: Restaurantbesucher in Deutschland (YouGov, Januar 2025)
+  scope: DE
+  industries: [gastronomie]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: primary_missing
+    quote: '70 % der Befragten nutzen digitale Plattformen zur Restaurantsuche.'
+    note: 'Nur als Sekundärbericht (food-monitor.de) gefunden; die METRO-Presseseite blockiert den Abruf (403). Vor einer Freigabe Primärquelle (METRO-Pressemitteilung oder Studienbericht) im Browser prüfen und source_url ersetzen.'
+
+- id: GASTRO_TISCH_ONLINE_RESERVIERT
+  text_de: '50 % der Restaurantbesucher in Deutschland haben schon einmal online einen Tisch reserviert.'
+  footnote_de: 'YouGov im Auftrag von METRO und DISH, Januar 2025, 2.000 Befragte, repräsentativ'
+  source_publisher: METRO AG / DISH Digital Solutions (Durchführung YouGov)
+  source_title: 'Repräsentative Umfrage digitale Gastronomie (YouGov im Auftrag von METRO und DISH)'
+  source_url: https://www.food-monitor.de/2025/02/repraesentative-umfrage-digitale-gastronomie-gaeste-sind-bereit-branche-sollte-potenziale-nutzen/
+  published_at: 2025-02-01
+  sample: 2000
+  population: Restaurantbesucher in Deutschland (YouGov, Januar 2025)
+  scope: DE
+  industries: [gastronomie]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: primary_missing
+    quote: 'Bei der Besuchsplanung und Reservierung haben bereits 50 % der Deutschen online einen Tisch reserviert, bei wöchentlichen Restaurantbesuchern steigt dieser Anteil sogar auf 71 %.'
+    note: 'Wie GASTRO_ONLINE_SUCHE: Primärquelle fehlt. Der Sekundärbericht spricht einmal von „Deutschen“, einmal von „Restaurantbesuchern“ – Grundgesamtheit vor Freigabe in der Primärquelle klären.'
+
+- id: HANDWERK_OHNE_WEBSITE_AUSSORTIERT
+  text_de: 'Für 40 % der Menschen in Deutschland ist das Fehlen einer Website ein Ausschlusskriterium bei der Wahl eines Handwerksbetriebs.'
+  footnote_de: 'Bitkom Research 2025, 1.004 Befragte ab 16 Jahren, repräsentativ'
+  source_publisher: Bitkom e. V.
+  source_title: 'Handwerkersuche: Persönliches Gespräch schlägt Infos im Netz'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Handwerkersuche-Gespraech-schlaegt-Netz
+  published_at: 2025-06-12
+  sample: 1004
+  population: Personen in Deutschland ab 16 Jahren (KW 7–10 2025)
+  scope: DE
+  industries: [handwerk]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: '… für 4 von 10 (40 Prozent) ist das Fehlen einer Webseite sogar ein Ausschlusskriterium bei der Wahl eines entsprechenden Betriebs.'
+    note: 'Startfassung „kommt er für sie nicht infrage“ steht so nicht in der Quelle; Wortlaut an „Ausschlusskriterium“ angepasst.'
+
+- id: HANDWERK_DIGITAL_ATTRAKTIVER
+  text_de: '55 % finden, dass digitale Angebote Handwerksbetriebe attraktiver machen.'
+  footnote_de: 'Bitkom Research 2025, 1.004 Befragte ab 16 Jahren, repräsentativ'
+  source_publisher: Bitkom e. V.
+  source_title: 'Handwerkersuche: Persönliches Gespräch schlägt Infos im Netz'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Handwerkersuche-Gespraech-schlaegt-Netz
+  published_at: 2025-06-12
+  sample: 1004
+  population: Personen in Deutschland ab 16 Jahren (KW 7–10 2025)
+  scope: DE
+  industries: [handwerk]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: ok
+    quote: '… ist über die Hälfte der Deutschen der Meinung, dass digitale Angebote Handwerksbetriebe durchaus attraktiver machen (55 Prozent) …'
+
+- id: HANDWERK_EMPFEHLUNG_PLUS_WEBSITE
+  text_de: '83 % holen sich bei der Wahl eines Handwerksbetriebs Rat bei Freunden, Familie oder Kollegen, 26 % schauen sich die Websites infrage kommender Betriebe an.'
+  footnote_de: 'Bitkom Research 2025, 1.004 Befragte ab 16 Jahren, repräsentativ'
+  source_publisher: Bitkom e. V.
+  source_title: 'Handwerkersuche: Persönliches Gespräch schlägt Infos im Netz'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Handwerkersuche-Gespraech-schlaegt-Netz
+  published_at: 2025-06-12
+  sample: 1004
+  population: Personen in Deutschland ab 16 Jahren (KW 7–10 2025)
+  scope: DE
+  industries: [handwerk]
+  source_type: external
+  note: 'Ehrlich verwenden: Empfehlung ist der Hauptweg, die Website ist der Check danach.'
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: '8 von 10 Deutschen holen sich bei der Entscheidung für einen Handwerksbetrieb Rat im persönlichen Gespräch mit dem Freundeskreis, der Familie oder Kolleginnen und Kollegen (83 Prozent). … etwa ein Viertel klickt sich durch die Webseiten möglicher Betriebe (26 Prozent).'
+    note: 'Startfassung sagte „zusätzlich“ – die Quelle sagt nicht, dass die 26 % eine Teilmenge der 83 % sind (Mehrfachnennung). „zusätzlich“ gestrichen.'
+
+- id: HANDEL_INFO_VORHER
+  text_de: '73 % der Internetnutzer möchten vorab online Informationen über das aktuelle Produktangebot im Geschäft abrufen können.'
+  footnote_de: 'Bitkom Research 2025, 1.180 Internetnutzer ab 16 Jahren, online befragt'
+  source_publisher: Bitkom e. V.
+  source_title: 'Attraktivität des stationären Handels: Bargeldloses Bezahlen wird wichtiger'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Attraktivitaet-stationaerer-Handel-Bargeldloses-Bezahlen-wichtiger
+  published_at: 2025-02-27
+  sample: 1180
+  population: Internetnutzerinnen und -nutzer in Deutschland ab 16 Jahren (online, KW 40–43 2024)
+  scope: DE
+  industries: [einzelhandel]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: '73 Prozent wollen vorab Online-Informationen über das aktuelle Produktangebot vor Ort abrufen können.'
+    note: 'Startfassung „Sortiment … ansehen“ an den Wortlaut „Online-Informationen über das aktuelle Produktangebot vor Ort abrufen“ angepasst.'
+
+- id: HANDEL_RESERVIEREN
+  text_de: '74 % der Internetnutzer möchten Produkte vorab online reservieren, um Wartezeiten im Laden zu minimieren.'
+  footnote_de: 'Bitkom Research 2025, 1.180 Internetnutzer ab 16 Jahren, online befragt'
+  source_publisher: Bitkom e. V.
+  source_title: 'Attraktivität des stationären Handels: Bargeldloses Bezahlen wird wichtiger'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Attraktivitaet-stationaerer-Handel-Bargeldloses-Bezahlen-wichtiger
+  published_at: 2025-02-27
+  sample: 1180
+  population: Internetnutzerinnen und -nutzer in Deutschland ab 16 Jahren (online, KW 40–43 2024)
+  scope: DE
+  industries: [einzelhandel]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: 'Knapp drei Viertel (74 Prozent) der Internetnutzerinnen und -nutzer wollen Produkte vorab online reservieren, um Wartezeiten im Laden zu minimieren …'
+    note: 'Startfassung „um im Laden nicht warten zu müssen“ an den Wortlaut („Wartezeiten … minimieren“) angepasst.'
+
+- id: TERMIN_ONLINE_GEWOHNT
+  text_de: '64 % der Menschen in Deutschland haben schon einmal einen Arzttermin online vereinbart – 2023 waren es noch 36 %.'
+  footnote_de: 'Bitkom Research 2025, 1.145 Befragte ab 16 Jahren, telefonisch, repräsentativ'
+  source_publisher: Bitkom e. V.
+  source_title: 'Zwei Drittel vereinbaren Arzttermine online'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Zwei-Drittel-vereinbaren-Arzttermine-online
+  published_at: 2025-12-22
+  sample: 1145
+  population: Personen in Deutschland ab 16 Jahren (telefonisch, KW 38–43 2025)
+  scope: DE
+  industries: [beauty, kurse_training, dienstleistung]
+  source_type: external
+  note: 'Nur als Beleg für Gewohnheit verwenden („kennen Online-Buchung schon vom Arzt“). NIE behaupten, dass Kundinnen von Kosmetikstudios zu 64 % online buchen.'
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: 'Bereits 64 Prozent der Deutschen haben inzwischen mindestens einmal einen Arzttermin online vereinbart. Damit ist der Anteil innerhalb von zwei Jahren stark gestiegen: 2024 lag er noch bei 50 Prozent, 2023 sogar erst bei 36 Prozent.'
+    note: 'Quelle von Ärzteblatt (Sekundärbericht, 23.12.2025) auf die Bitkom-Presseinformation (Primärquelle, 22.12.2025) umgestellt; „gebucht“ → „vereinbart“ wie im Original.'
+
+- id: TERMIN_KEIN_TELEFONAT
+  text_de: '84 % derer, die Arzttermine online vereinbaren oder es sich vorstellen können, schätzen daran, nicht von der telefonischen Erreichbarkeit der Praxis abhängig zu sein.'
+  footnote_de: 'Bitkom Research 2025 zu Arztterminen, 1.145 Befragte ab 16 Jahren, telefonisch'
+  source_publisher: Bitkom e. V.
+  source_title: 'Zwei Drittel vereinbaren Arzttermine online'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Zwei-Drittel-vereinbaren-Arzttermine-online
+  published_at: 2025-12-22
+  sample: 1145
+  population: Personen in Deutschland ab 16 Jahren, davon Nutzer/Interessierte der Online-Terminvereinbarung
+  scope: DE
+  industries: [beauty, kurse_training, dienstleistung]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: 'Als größter Vorteil der digitalen Terminbuchung gilt die Unabhängigkeit von den telefonischen Erreichbarkeiten der Praxen: 84 Prozent der Befragten, die die Online-Terminvereinbarung nutzen oder sich dies vorstellen können, nennen diesen Punkt.'
+    note: 'Startfassung „keine langen Telefonate“ steht so nicht in der Quelle; Wortlaut an „Unabhängigkeit von den telefonischen Erreichbarkeiten“ angepasst. Primärquelle statt Ärzteblatt.'
+
+- id: TERMIN_KEIN_TELEFONAT_KURZ
+  text_de: 'Als größten Vorteil nennen sie, nicht von der telefonischen Erreichbarkeit der Praxis abhängig zu sein.'
+  footnote_de: 'Bitkom Research 2025 zu Arztterminen, 1.145 Befragte ab 16 Jahren, telefonisch'
+  source_publisher: Bitkom e. V.
+  source_title: 'Zwei Drittel vereinbaren Arzttermine online'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Zwei-Drittel-vereinbaren-Arzttermine-online
+  published_at: 2025-12-22
+  sample: 1145
+  population: Personen in Deutschland ab 16 Jahren, davon Nutzer/Interessierte der Online-Terminvereinbarung
+  scope: DE
+  industries: [beauty, kurse_training, dienstleistung]
+  source_type: external
+  note: 'Kurzform von TERMIN_KEIN_TELEFONAT (B4.3). Nur direkt nach TERMIN_ONLINE_GEWOHNT verwenden („sie“ = Menschen, die Arzttermine online vereinbaren); die Fußnote muss sagen, dass es um Arzttermine ging.'
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: 'Als größter Vorteil der digitalen Terminbuchung gilt die Unabhängigkeit von den telefonischen Erreichbarkeiten der Praxen: 84 Prozent der Befragten, die die Online-Terminvereinbarung nutzen oder sich dies vorstellen können, nennen diesen Punkt.'
+    note: 'Vorgeschlagene Kurzform „lange Telefonate zu vermeiden“ steht so nicht in der Quelle; an „Unabhängigkeit von den telefonischen Erreichbarkeiten“ angepasst.'
+
+- id: TERMIN_FLEXIBEL
+  text_de: '58 % schätzen an der Online-Terminvereinbarung die flexible Auswahl an Terminen, etwa zu Randzeiten.'
+  footnote_de: 'Bitkom Research 2025 zu Arztterminen, 1.145 Befragte ab 16 Jahren, telefonisch'
+  source_publisher: Bitkom e. V.
+  source_title: 'Zwei Drittel vereinbaren Arzttermine online'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Zwei-Drittel-vereinbaren-Arzttermine-online
+  published_at: 2025-12-22
+  sample: 1145
+  population: Personen in Deutschland ab 16 Jahren, davon Nutzer/Interessierte der Online-Terminvereinbarung
+  scope: DE
+  industries: [beauty, kurse_training, dienstleistung]
+  source_type: external
+  check:
+    checked_at: 2026-10-23
+    result: corrected
+    quote: '58 Prozent schätzen die flexible Auswahl an Terminen, etwa zu Randzeiten.'
+    note: 'Startfassung „außerhalb der Sprechzeiten“ ist falsch – im Original „etwa zu Randzeiten“. Bezugsgruppe steht im Original nicht ausdrücklich dabei, daher „derselben Gruppe“ gestrichen.'
+
+- id: TERMIN_BEHOERDE_ONLINE
+  text_de: '72 % der Menschen in Deutschland haben schon einmal online einen Termin bei einer Behörde vereinbart.'
+  footnote_de: 'Bitkom Research 2026, 1.004 Befragte ab 18 Jahren, telefonisch, repräsentativ'
+  source_publisher: Bitkom e. V.
+  source_title: 'Online aufs Amt bleibt die Ausnahme – aber es geht voran'
+  source_url: https://www.bitkom.org/Presse/Presseinformation/Online-Amt-bleibt-Ausnahme
+  published_at: 2026-10-13
+  sample: 1004
+  population: Personen in Deutschland ab 18 Jahren (telefonisch, KW 33–37 2026)
+  scope: DE
+  industries: [beauty, kurse_training, dienstleistung, handwerk]
+  source_type: external
+  note: 'Neu in L1. Wie TERMIN_ONLINE_GEWOHNT nur als Beleg für die Gewohnheit verwenden, Termine online zu vereinbaren.'
+  check:
+    checked_at: 2026-10-23
+    result: ok
+    quote: 'So haben 72 Prozent der Bürgerinnen und Bürger schon einmal online einen Termin bei einer Behörde vereinbart …'
+
+- id: BEWERTUNG_45_STERNE_US
+  text_de: '31 % der Verbraucher in den USA nutzen nur Betriebe mit mindestens 4,5 Sternen.'
+  footnote_de: 'BrightLocal Local Consumer Review Survey 2026, 1.002 Erwachsene in den USA'
+  source_publisher: BrightLocal
+  source_title: 'Local Consumer Review Survey 2026'
+  source_url: https://www.brightlocal.com/research/local-consumer-review-survey/
+  published_at: 2026-02-11
+  sample: 1002
+  population: Erwachsene Verbraucher in den USA (Panel über SurveyMonkey)
+  scope: US
+  industries: []
+  source_type: external
+  blocked: true
+  note: 'US-Daten. Für Briefe gesperrt, nur intern als Kontext.'
+  check:
+    checked_at: 2026-10-23
+    result: ok
+    quote: '31% of consumers will only use a business that has 4.5+ stars'
+    note: 'Veröffentlicht am 11.02.2026 (Startfassung: 01.02.2026). Stichprobe 1.002 US-Erwachsene bestätigt.'

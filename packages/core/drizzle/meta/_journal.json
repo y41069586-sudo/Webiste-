@@ -36,6 +36,13 @@
       "when": 1792785113190,
       "tag": "0004_antworten_mahnverfahren",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792788513644,
+      "tag": "0005_claims_playbooks",
+      "breakpoints": true
     }
   ]
 }

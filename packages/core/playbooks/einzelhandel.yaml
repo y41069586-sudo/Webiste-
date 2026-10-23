@@ -1,0 +1,56 @@
+id: einzelhandel
+label: Einzelhandel
+priority: 40
+google_types:
+  [
+    florist,
+    clothing_store,
+    gift_shop,
+    book_store,
+    pet_store,
+    shoe_store,
+    jewelry_store,
+    toy_store,
+    home_goods_store,
+    furniture_store,
+    bicycle_store,
+    sporting_goods_store,
+    liquor_store,
+    store,
+  ]
+osm_tags:
+  [
+    shop=florist,
+    shop=clothes,
+    shop=gift,
+    shop=books,
+    shop=pet,
+    shop=shoes,
+    shop=jewelry,
+    shop=toys,
+    shop=stationery,
+    shop=deli,
+    shop=wine,
+    shop=bicycle,
+    shop=boutique,
+    shop=interior_decoration,
+    shop=houseware,
+    shop=furniture,
+    shop=tea,
+    shop=coffee,
+    shop=cheese,
+    shop=chocolate,
+    shop=fabric,
+    shop=craft,
+    shop=art,
+    shop=second_hand,
+    shop=sports,
+  ]
+hook: Kunden wollen vorher sehen, was es gibt.
+allowed_claims:
+  - HANDEL_INFO_VORHER
+  - HANDEL_RESERVIEREN
+demo_sections: [sortiment, oeffnungszeiten, anfahrt, vorab_reservieren]
+letter:
+  qr_label: Scannen und Ihre Laden-Website ansehen
+  start_variants: [HANDEL_A]

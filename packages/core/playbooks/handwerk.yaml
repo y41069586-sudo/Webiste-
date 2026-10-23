@@ -1,0 +1,37 @@
+id: handwerk
+label: Handwerk
+priority: 20
+google_types:
+  [painter, electrician, plumber, roofing_contractor, carpenter, general_contractor, locksmith, hvac_contractor, tile_contractor]
+osm_tags:
+  [
+    craft=painter,
+    craft=electrician,
+    craft=plumber,
+    craft=roofer,
+    craft=carpenter,
+    craft=joiner,
+    craft=tiler,
+    craft=hvac,
+    craft=glaziery,
+    craft=metal_construction,
+    craft=stonemason,
+    craft=floorer,
+    craft=plasterer,
+    craft=locksmith,
+    craft=builder,
+    craft=gardener,
+    craft=window_construction,
+    craft=heating_engineer,
+    craft=sanitary_engineer,
+  ]
+hook: Kunden prüfen nach der Empfehlung online, ob es den Betrieb „wirklich gibt“.
+allowed_claims:
+  - HANDWERK_OHNE_WEBSITE_AUSSORTIERT
+  - HANDWERK_DIGITAL_ATTRAKTIVER
+  - HANDWERK_EMPFEHLUNG_PLUS_WEBSITE
+  - TERMIN_BEHOERDE_ONLINE
+demo_sections: [leistungen, einzugsgebiet, anfrageformular, wir_stellen_ein]
+letter:
+  qr_label: Scannen und Ihre Betriebs-Website ansehen
+  start_variants: [HANDWERK_A, HANDWERK_B]

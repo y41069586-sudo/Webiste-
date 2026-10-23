@@ -110,6 +110,9 @@ ${filters}
 out center tags;`;
 }
 
+/** OSM-Schlüssel, die für Branchen-Zuordnung und Ausschluss (Playbooks) gebraucht werden */
+const CLASSIFY_KEYS = ['amenity', 'shop', 'craft', 'leisure', 'healthcare', 'office', 'beauty', 'sport'] as const;
+
 /** OSM-Element → RawPlace. Website/Social-Tags werden für die Qualifizierung übernommen. */
 export function osmElementToPlace(el: OsmElement, fallbackCity: string): RawPlace | null {
   const t = el.tags ?? {};
@@ -135,6 +138,7 @@ export function osmElementToPlace(el: OsmElement, fallbackCity: string): RawPlac
     businessStatus: status,
     primaryType: t.craft ?? t.shop,
     types: [t.craft, t.shop, t.beauty].filter((x): x is string => Boolean(x)),
+    osmTags: Object.fromEntries(CLASSIFY_KEYS.filter((k) => t[k]).map((k) => [k, t[k]!])),
     openingHours: parseOsmOpeningHours(t.opening_hours),
   };
 }

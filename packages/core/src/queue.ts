@@ -26,6 +26,7 @@ export const QUEUES = {
   retention: 'retention',
   renewalReminders: 'renewal-reminders',
   dunning: 'dunning',
+  claims: 'claims',
   alertMails: 'alert-mails',
   pipelineTick: 'pipeline-tick',
   deadLetters: 'dead-letters',
@@ -56,6 +57,7 @@ export interface QueuePayloads {
   retention: Record<string, never>;
   'renewal-reminders': Record<string, never>;
   dunning: Record<string, never>;
+  claims: Record<string, never>;
   'alert-mails': Record<string, never>;
   'pipeline-tick': Record<string, never>;
   'dead-letters': Record<string, unknown>;
@@ -78,6 +80,7 @@ export const QUEUE_DEFS: Partial<Record<QueueName, Partial<QueueDef>>> = {
   'weekly-optimizer': { policy: 'singleton', retryLimit: 2 },
   retention: { policy: 'singleton', retryLimit: 2 },
   dunning: { policy: 'singleton', retryLimit: 2 },
+  claims: { policy: 'singleton', retryLimit: 2 },
   'live-check': { retryLimit: 10, retryDelay: 120 },
   'deploy-site': { retryLimit: 3, retryDelay: 60, expireInSeconds: 30 * 60 },
   'pipeline-tick': { policy: 'singleton', retryLimit: 0 },

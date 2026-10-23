@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SUPPORT_CLASSES } from '../types';
+import { INDUSTRIES, SUPPORT_CLASSES } from '../types';
 
 /**
  * Fachliche Konfiguration („config.ts“ aus dem Auftrag). Standardwerte stehen hier,
@@ -11,6 +11,8 @@ export const branchSchema = z.object({
   /** technischer Schlüssel, z. B. `nagelstudio` */
   key: z.string().regex(/^[a-z0-9_-]+$/),
   group: z.enum(['handwerk', 'beauty']),
+  /** Playbook-Branche (B3); ohne Angabe gilt die Gruppe (handwerk → handwerk, beauty → beauty) */
+  industry: z.enum(INDUSTRIES).optional(),
   label: z.string(),
   /** Suchbegriffe ohne Stadt, z. B. „Nagelstudio“ → „Nagelstudio Dortmund“ */
   queries: z.array(z.string()).min(1),
