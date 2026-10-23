@@ -75,7 +75,7 @@ export async function ingestInboundEmail(mail: InboundEmail & { headers?: Record
 
 /** Absender einem Kunden oder Lead zuordnen (nur über bereits bekannte Adressen bzw. Antwort-Bezug). */
 async function linkSender(db: DbOrTx, from: string, inReplyTo?: string): Promise<{ customerId: string | null; leadId: string | null; inReplyToId: string | null }> {
-  let inReplyToId: string | null = null;
+  const inReplyToId: string | null = null;
   if (inReplyTo) {
     const prev = await db.query.supportMessages.findFirst({ where: eq(supportMessages.providerMessageId, inReplyTo.slice(0, 300)) });
     if (prev) return { customerId: prev.customerId, leadId: prev.leadId, inReplyToId: prev.id };
