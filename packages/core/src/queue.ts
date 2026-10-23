@@ -43,7 +43,7 @@ export interface QueuePayloads {
   'sync-letter-status': Record<string, never>;
   followup: Record<string, never>;
   'process-payment': { orderId: string; eventId: string };
-  'send-invoice': { orderId: string };
+  'send-invoice': { orderId: string; kind?: 'invoice' | 'cancellation' };
   onboarding: { customerId: string };
   'build-site': { siteId: string; changeRequestId?: string };
   'deploy-site': { siteId: string };

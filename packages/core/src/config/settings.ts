@@ -59,12 +59,24 @@ export const appConfigSchema = z.object({
     subscriptionName: z.string(),
     subscriptionStartMonth: z.number().int().positive(),
     currency: z.literal('eur'),
+    /** Leistungsbeschreibung (Checkout, Rechnung) */
+    packageDescription: z.string(),
   }),
   tax: z.object({
     kleinunternehmer: z.boolean(),
     vatRatePercent: z.number().min(0).max(100),
+    /** Paketpreis ist Bruttopreis (bei USt-Pflicht wird die USt herausgerechnet) */
+    pricesAreGross: z.boolean(),
     invoicePrefix: z.string(),
     kleinunternehmerNote: z.string(),
+  }),
+  checkout: z.object({
+    /** Gültigkeit der Stripe-Checkout-Session (30–1440 Minuten) */
+    sessionMinutes: z.number().int().min(30).max(1440),
+    /** Erlaubte Endungen für die Wunschdomain */
+    allowedTlds: z.array(z.string()).min(1),
+    /** Domains teurer als dieser Jahrespreis gelten als nicht verfügbar (Premium) */
+    maxDomainPriceCents: z.number().int().positive(),
   }),
   targeting: z.object({
     cities: z.array(z.string()).min(1),
@@ -274,10 +286,13 @@ export const DEFAULT_CONFIG: AppConfig = {
     subscriptionName: 'Hosting & Pflege',
     subscriptionStartMonth: 13,
     currency: 'eur',
+    packageDescription:
+      'Ihre Website auf Basis des Entwurfs, eigene Domain auf Ihren Namen, Hosting mit SSL für 12 Monate ab Veröffentlichung, bis zu 2 Änderungsrunden vor dem Start.',
   },
   tax: {
     kleinunternehmer: true,
     vatRatePercent: 19,
+    pricesAreGross: true,
     invoicePrefix: 'RE',
     kleinunternehmerNote: 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.',
   },
@@ -399,6 +414,11 @@ export const DEFAULT_CONFIG: AppConfig = {
     sampleRatePercent: 10,
     qaLighthouse: true,
     qaLlm: true,
+  },
+  checkout: {
+    sessionMinutes: 60,
+    allowedTlds: ['de'],
+    maxDomainPriceCents: 1500,
   },
   onboarding: {
     includedChangeRounds: 2,

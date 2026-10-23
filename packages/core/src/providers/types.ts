@@ -326,21 +326,44 @@ export type PaymentEventType =
   | 'charge.refunded'
   | 'other';
 
+export type PaymentStatus = 'paid' | 'unpaid' | 'no_payment_required';
+
 export interface PaymentEvent {
   eventId: string;
   type: PaymentEventType;
   rawType: string;
   sessionId?: string;
+  /** = orderId (client_reference_id) */
+  clientReferenceId?: string;
   paymentIntentId?: string;
-  paymentStatus?: 'paid' | 'unpaid' | 'no_payment_required';
+  paymentStatus?: PaymentStatus;
   amountTotal?: number;
+  /** charge.refunded: bisher erstatteter Betrag */
+  amountRefunded?: number;
+  currency?: string;
   metadata?: Record<string, string>;
+}
+
+export interface PaymentSessionInfo {
+  sessionId: string;
+  /** open | complete | expired */
+  status: string;
+  paymentStatus: PaymentStatus;
+  clientReferenceId?: string;
+  paymentIntentId?: string;
+  amountTotal?: number;
+  currency?: string;
+  metadata: Record<string, string>;
 }
 
 export interface PaymentProvider {
   readonly name: string;
   createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSession>;
+  /** Session beim Anbieter abfragen (für die Erfolgsseite, falls der Webhook noch fehlt). */
+  retrieveSession?(sessionId: string): Promise<PaymentSessionInfo | null>;
+  /** Offene Session vorzeitig beenden (z. B. wenn der Kunde neu startet). */
+  expireSession?(sessionId: string): Promise<void>;
   /** Webhook verifizieren und normalisieren. Wirft bei ungültiger Signatur. */
   parseWebhook(rawBody: string, signatureHeader: string | null): Promise<PaymentEvent>;
-  refund?(paymentIntentId: string): Promise<void>;
+  refund?(paymentIntentId: string, opts: { idempotencyKey: string; amountCents?: number }): Promise<{ refundId: string }>;
 }

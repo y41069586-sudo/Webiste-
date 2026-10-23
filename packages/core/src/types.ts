@@ -62,7 +62,7 @@ export type EventType = (typeof EVENT_TYPES)[number];
 
 export type VariantKind = 'letter' | 'demo_banner' | 'price';
 
-export const ORDER_STATUSES = ['pending', 'paid', 'failed', 'expired', 'refunded', 'cancelled'] as const;
+export const ORDER_STATUSES = ['pending', 'processing', 'paid', 'failed', 'expired', 'refunded', 'cancelled'] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export const SITE_STATUSES = [

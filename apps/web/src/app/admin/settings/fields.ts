@@ -44,6 +44,7 @@ export const SECTIONS: SectionDef[] = [
     fields: [
       { path: 'pricing.packageName', label: 'Produktname', type: 'text' },
       { path: 'pricing.packageCents', label: 'Paketpreis (€)', type: 'euro' },
+      { path: 'pricing.packageDescription', label: 'Leistungsbeschreibung (Checkout & Rechnung)', type: 'textarea' },
       { path: 'pricing.hostingMonthsIncluded', label: 'Inkl. Hosting (Monate)', type: 'number' },
       { path: 'pricing.subscriptionEnabled', label: 'Abo „Hosting & Pflege“ aktiv', type: 'bool', hint: 'v1: aus – stattdessen Erinnerungs-Mail' },
       { path: 'pricing.subscriptionName', label: 'Abo-Name', type: 'text' },
@@ -51,8 +52,12 @@ export const SECTIONS: SectionDef[] = [
       { path: 'pricing.subscriptionStartMonth', label: 'Abo-Start (Monat)', type: 'number' },
       { path: 'tax.kleinunternehmer', label: 'Kleinunternehmer (§ 19 UStG)', type: 'bool' },
       { path: 'tax.vatRatePercent', label: 'USt-Satz (%) falls nicht Kleinunternehmer', type: 'number' },
+      { path: 'tax.pricesAreGross', label: 'Paketpreis ist Bruttopreis', type: 'bool', hint: 'Nur relevant ohne Kleinunternehmerregelung' },
       { path: 'tax.invoicePrefix', label: 'Rechnungsnummer-Präfix', type: 'text' },
       { path: 'tax.kleinunternehmerNote', label: 'Hinweis auf der Rechnung', type: 'text' },
+      { path: 'checkout.sessionMinutes', label: 'Checkout-Session gültig (Minuten)', type: 'number' },
+      { path: 'checkout.allowedTlds', label: 'Erlaubte Domain-Endungen (je Zeile)', type: 'lines' },
+      { path: 'checkout.maxDomainPriceCents', label: 'Max. Domainpreis pro Jahr (€)', type: 'euro' },
     ],
   },
   {

@@ -6,3 +6,4 @@ export * from './demo-qa';
 export * from '../demos/build';
 export * from './pdf';
 export * from './letter';
+export * from './invoice';

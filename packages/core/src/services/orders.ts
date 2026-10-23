@@ -1,0 +1,597 @@
+import { and, desc, eq, gt, inArray, isNull, lt, sql } from 'drizzle-orm';
+import { z } from 'zod';
+import { appUrl, getEnv } from '../config/env';
+import { getConfig } from '../config/service';
+import type { AppConfig } from '../config/settings';
+import { getDb, type DbOrTx } from '../db/client';
+import { customers, demos, events, leads, orders, webhookEvents } from '../db/schema';
+import { paymentFailedEmail } from '../emails/templates';
+import { buildInvoiceData, nextInvoiceNumber, orderAmounts, packageAmounts } from '../invoices/build';
+import { errInfo, logger } from '../logger';
+import { getProviders } from '../providers';
+import type { PaymentEvent } from '../providers/types';
+import { enqueue, QUEUES } from '../queue';
+import type { Actor } from '../types';
+import { randomToken } from '../util/crypto';
+import { formatEuro } from '../util/time';
+import { audit } from './audit';
+import { raiseAlert } from './budget';
+import { checkDomain } from './domains';
+import { notifyAdmin, sendTransactionalEmail } from './email';
+import { transitionLead } from './lead-state';
+import { rateLimit } from './rate-limit';
+import { findPublicDemo, recordEvent, type RequestMeta } from './tracking';
+
+export type Order = typeof orders.$inferSelect;
+export type Customer = typeof customers.$inferSelect;
+
+// ---------------------------------------------------------------------------
+// Checkout-Formular
+// ---------------------------------------------------------------------------
+const req = (msg: string) => z.string().trim().min(1, msg);
+
+export const checkoutInputSchema = z.object({
+  company: req('Bitte den Firmennamen angeben.').max(120, 'Firmenname ist zu lang.'),
+  contactName: req('Bitte Ihren Namen angeben.').min(3, 'Bitte Vor- und Nachnamen angeben.').max(120),
+  email: z.string().trim().toLowerCase().pipe(z.email('Bitte eine gültige E-Mail-Adresse angeben.')).pipe(z.string().max(254)),
+  phone: z
+    .string()
+    .trim()
+    .max(40, 'Telefonnummer ist zu lang.')
+    .regex(/^[0-9+()/\s-]*$/, 'Telefonnummer bitte nur mit Ziffern, Leerzeichen, +, -, / angeben.')
+    .optional()
+    .default(''),
+  street: req('Bitte Straße und Hausnummer angeben.').min(4, 'Bitte Straße und Hausnummer angeben.').max(120),
+  postalCode: z.string().trim().regex(/^\d{5}$/, 'Bitte eine fünfstellige Postleitzahl angeben.'),
+  city: req('Bitte den Ort angeben.').max(80),
+  domain: req('Bitte eine Wunschdomain angeben.').max(80),
+  b2b: z.literal(true, 'Bitte bestätigen Sie, dass Sie als Unternehmer bestellen.'),
+  terms: z.literal(true, 'Bitte stimmen Sie den AGB zu.'),
+  subscription: z.boolean().optional().default(false),
+});
+
+export type CheckoutInput = z.input<typeof checkoutInputSchema>;
+
+export type CheckoutContext =
+  | {
+      state: 'ok';
+      lead: typeof leads.$inferSelect;
+      demo: typeof demos.$inferSelect;
+      cfg: AppConfig;
+      price: { grossCents: number; netCents: number; vatCents: number; label: string };
+      prefill: { company: string; street: string; postalCode: string; city: string; domain: string };
+    }
+  | { state: 'ordered'; customerToken: string | null }
+  | { state: 'gone' }
+  | { state: 'not_found' }
+  | { state: 'disabled'; reason: string };
+
+/** Bestellen ist nur möglich, wenn ein echter Zahlungsanbieter aktiv ist (Mock nur außerhalb der Produktion). */
+export function checkoutAvailability(): { ok: true; mode: 'live' | 'test' | 'mock' } | { ok: false; reason: string } {
+  const env = getEnv();
+  const p = getProviders().payment;
+  if (p.name === 'mock') {
+    if (env.NODE_ENV === 'production' && process.env.ALLOW_MOCK_PAYMENT !== 'true') {
+      return { ok: false, reason: 'Online-Bestellung ist noch nicht eingerichtet.' };
+    }
+    return { ok: true, mode: 'mock' };
+  }
+  const key = env.STRIPE_SECRET_KEY ?? '';
+  return { ok: true, mode: key.startsWith('sk_live_') || key.startsWith('rk_live_') ? 'live' : 'test' };
+}
+
+export async function getCheckoutContext(slug: string): Promise<CheckoutContext> {
+  const avail = checkoutAvailability();
+  const found = await findPublicDemo(slug);
+  if (found.state !== 'ok') {
+    // Bereits gekaufte Demos bleiben für den Käufer erreichbar
+    return found.state === 'gone' ? await orderedOrGone(slug) : found;
+  }
+  const db = getDb();
+  const paid = await db.query.orders.findFirst({ where: and(eq(orders.leadId, found.lead.id), inArray(orders.status, ['paid', 'processing'])) });
+  if (paid) {
+    const c = await db.query.customers.findFirst({ where: eq(customers.orderId, paid.id) });
+    return { state: 'ordered', customerToken: c?.accessToken ?? null };
+  }
+  if (!avail.ok) return { state: 'disabled', reason: avail.reason };
+  const cfg = await getConfig();
+  const a = packageAmounts(cfg);
+  const l = found.lead;
+  return {
+    state: 'ok',
+    lead: l,
+    demo: found.demo,
+    cfg,
+    price: { grossCents: a.grossCents, netCents: a.netCents, vatCents: a.vatCents, label: formatEuro(a.grossCents) },
+    prefill: {
+      company: l.anonymizedAt ? '' : l.businessName,
+      street: [l.street, l.houseNumber].filter(Boolean).join(' '),
+      postalCode: l.postalCode ?? '',
+      city: l.city,
+      domain: l.domainSuggestion ?? '',
+    },
+  };
+}
+
+async function orderedOrGone(slug: string): Promise<CheckoutContext> {
+  const db = getDb();
+  const demo = await db.query.demos.findFirst({ where: eq(demos.slug, slug) });
+  if (!demo) return { state: 'gone' };
+  const paid = await db.query.orders.findFirst({ where: and(eq(orders.leadId, demo.leadId), inArray(orders.status, ['paid', 'processing'])) });
+  if (!paid) return { state: 'gone' };
+  const c = await db.query.customers.findFirst({ where: eq(customers.orderId, paid.id) });
+  return { state: 'ordered', customerToken: c?.accessToken ?? null };
+}
+
+export type StartCheckoutResult =
+  | { ok: true; url: string; orderId: string }
+  | { ok: false; error: string; fieldErrors?: Record<string, string>; alternatives?: string[] };
+
+/**
+ * Bestellung anlegen und zum Zahlungsanbieter weiterleiten. Doppelklicks liefern dieselbe
+ * Session; ältere offene Bestellungen desselben Leads werden beendet.
+ */
+export async function startCheckout(slug: string, raw: CheckoutInput, meta: RequestMeta): Promise<StartCheckoutResult> {
+  const ctx = await getCheckoutContext(slug);
+  if (ctx.state === 'ordered') return { ok: false, error: 'Für diesen Entwurf liegt bereits eine Bestellung vor.' };
+  if (ctx.state === 'disabled') return { ok: false, error: ctx.reason };
+  if (ctx.state !== 'ok') return { ok: false, error: 'Dieser Entwurf ist nicht mehr verfügbar.' };
+
+  const parsed = checkoutInputSchema.safeParse(raw);
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const i of parsed.error.issues) {
+      const k = String(i.path[0] ?? 'form');
+      if (!fieldErrors[k]) fieldErrors[k] = i.message;
+    }
+    return { ok: false, error: 'Bitte prüfen Sie die markierten Angaben.', fieldErrors };
+  }
+  const input = parsed.data;
+  const db = getDb();
+  const { cfg, lead, demo } = ctx;
+
+  const rl = await rateLimit(db, `checkout:${meta.ipHash}`, 10, 3600);
+  const rlLead = await rateLimit(db, `checkout-lead:${lead.id}`, 20, 86400);
+  if (!rl.allowed || !rlLead.allowed) return { ok: false, error: 'Zu viele Versuche. Bitte versuchen Sie es in einer Stunde erneut.' };
+
+  const dom = await checkDomain(input.domain, { businessName: lead.businessName, city: lead.city, branch: lead.branch });
+  if (!dom.valid || !dom.available || !dom.domain) {
+    return { ok: false, error: dom.message, fieldErrors: { domain: dom.message }, alternatives: dom.alternatives };
+  }
+  const domain = dom.domain;
+  const avail = checkoutAvailability();
+  const subscriptionOptIn = cfg.pricing.subscriptionEnabled && input.subscription;
+  const amounts = packageAmounts(cfg);
+
+  // Doppelklick: gleiche offene Session wiederverwenden
+  const reusable = await db.query.orders.findFirst({
+    where: and(
+      eq(orders.leadId, lead.id),
+      eq(orders.status, 'pending'),
+      eq(orders.customerEmail, input.email),
+      eq(orders.domainWish, domain),
+      eq(orders.amountCents, amounts.grossCents),
+      gt(orders.checkoutExpiresAt, new Date(Date.now() + 10 * 60 * 1000)),
+    ),
+    orderBy: desc(orders.createdAt),
+  });
+  if (reusable?.checkoutUrl) return { ok: true, url: reusable.checkoutUrl, orderId: reusable.id };
+
+  await cancelOpenOrders(lead.id, 'neuer Checkout');
+
+  const [order] = await db
+    .insert(orders)
+    .values({
+      leadId: lead.id,
+      demoId: demo.id,
+      provider: getProviders().payment.name,
+      amountCents: amounts.grossCents,
+      netCents: amounts.netCents,
+      vatCents: amounts.vatCents,
+      vatRatePercent: amounts.vatRatePercent,
+      currency: 'eur',
+      status: 'pending',
+      customerCompany: input.company,
+      customerName: input.contactName,
+      customerEmail: input.email,
+      customerPhone: input.phone || null,
+      billingAddressJson: { street: input.street, postalCode: input.postalCode, city: input.city, country: 'DE' },
+      domainWish: domain,
+      b2bConfirmed: true,
+      termsAcceptedAt: new Date(),
+      termsVersion: cfg.legal.termsVersion,
+      subscriptionOptIn,
+    })
+    .returning();
+  if (!order) throw new Error('Bestellung konnte nicht angelegt werden');
+
+  await db.transaction(async (tx) => {
+    await recordEvent(tx, { leadId: lead.id, type: 'checkout_started', meta: { orderId: order.id, mode: avail.ok ? avail.mode : 'n/a' }, req: { ...meta, isBot: false } });
+    await audit(tx, { entity: 'order', entityId: order.id, action: 'checkout_started', actor: 'public:checkout', context: { leadId: lead.id, amountCents: amounts.grossCents } });
+  });
+
+  try {
+    const minutes = cfg.checkout.sessionMinutes;
+    const session = await getProviders().payment.createCheckoutSession({
+      orderId: order.id,
+      amountCents: amounts.grossCents,
+      currency: 'eur',
+      productName: `${cfg.pricing.packageName} – ${domain}`,
+      productDescription: cfg.pricing.packageDescription,
+      customerEmail: input.email,
+      successUrl: appUrl(`/checkout/${slug}/erfolg?session_id={CHECKOUT_SESSION_ID}`),
+      cancelUrl: appUrl(`/checkout/${slug}?abgebrochen=1`),
+      metadata: { orderId: order.id, leadId: lead.id, demoId: demo.id },
+      idempotencyKey: `checkout-${order.id}`,
+      expiresInMinutes: minutes,
+    });
+    await db
+      .update(orders)
+      .set({ stripeSessionId: session.sessionId, checkoutUrl: session.url, checkoutExpiresAt: new Date(Date.now() + minutes * 60 * 1000), updatedAt: new Date() })
+      .where(eq(orders.id, order.id));
+    return { ok: true, url: session.url, orderId: order.id };
+  } catch (err) {
+    logger.error({ orderId: order.id, ...errInfo(err) }, 'Checkout-Session fehlgeschlagen');
+    await db.update(orders).set({ status: 'failed', updatedAt: new Date() }).where(eq(orders.id, order.id));
+    await raiseAlert(db, { level: 'error', code: 'checkout_failed', message: 'Checkout-Session konnte nicht erstellt werden', context: { orderId: order.id } });
+    return { ok: false, error: 'Die Bezahlseite ist gerade nicht erreichbar. Bitte versuchen Sie es in ein paar Minuten erneut.' };
+  }
+}
+
+/** Offene Bestellungen eines Leads beenden (Session beim Anbieter ablaufen lassen). */
+export async function cancelOpenOrders(leadId: string, reason: string): Promise<number> {
+  const db = getDb();
+  const open = await db.select().from(orders).where(and(eq(orders.leadId, leadId), eq(orders.status, 'pending')));
+  const p = getProviders().payment;
+  for (const o of open) {
+    if (o.stripeSessionId && p.expireSession && o.provider === p.name) {
+      try {
+        await p.expireSession(o.stripeSessionId);
+      } catch (err) {
+        logger.warn({ orderId: o.id, ...errInfo(err) }, 'Session konnte nicht beendet werden');
+      }
+    }
+    await db.update(orders).set({ status: 'cancelled', updatedAt: new Date() }).where(and(eq(orders.id, o.id), eq(orders.status, 'pending')));
+    await audit(db, { entity: 'order', entityId: o.id, action: 'cancelled', actor: 'system', context: { reason } });
+  }
+  return open.length;
+}
+
+// ---------------------------------------------------------------------------
+// Zahlungseingang
+// ---------------------------------------------------------------------------
+export type FulfillResult =
+  | { state: 'paid'; orderId: string; customerId: string; invoiceNumber: string; alreadyPaid: boolean }
+  | { state: 'mismatch' | 'not_payable'; orderId: string };
+
+/**
+ * Zahlung verbuchen – idempotent und nebenläufig sicher (Zeilensperre). Vergibt die
+ * fortlaufende Rechnungsnummer, legt den Kunden an, setzt den Lead auf „paid“ und
+ * stößt Rechnung und Onboarding an.
+ */
+export async function fulfillOrder(
+  orderId: string,
+  info: { paymentIntentId?: string; amountTotal?: number; currency?: string },
+  actor: Actor | string,
+): Promise<FulfillResult> {
+  const db = getDb();
+  const cfg = await getConfig();
+  const result = await db.transaction(async (tx): Promise<FulfillResult> => {
+    const locked = await tx.execute<{ id: string }>(sql`SELECT id FROM orders WHERE id = ${orderId} FOR UPDATE`);
+    if (!locked.rows[0]) throw new Error(`Bestellung ${orderId} nicht gefunden`);
+    const order = (await tx.query.orders.findFirst({ where: eq(orders.id, orderId) }))!;
+    if (order.status === 'paid' || order.status === 'refunded') {
+      const c = await tx.query.customers.findFirst({ where: eq(customers.orderId, order.id) });
+      return { state: 'paid', orderId, customerId: c!.id, invoiceNumber: order.invoiceNumber!, alreadyPaid: true };
+    }
+    if (order.status === 'failed' && !info.paymentIntentId) return { state: 'not_payable', orderId };
+    const amountOk = info.amountTotal === undefined || info.amountTotal === order.amountCents;
+    const currencyOk = !info.currency || info.currency.toLowerCase() === order.currency;
+    if (!amountOk || !currencyOk) {
+      await tx
+        .update(orders)
+        .set({ status: 'processing', stripePaymentIntent: info.paymentIntentId ?? order.stripePaymentIntent, updatedAt: new Date() })
+        .where(eq(orders.id, orderId));
+      await raiseAlert(tx, {
+        level: 'error',
+        code: `payment_mismatch_${orderId}`,
+        message: `Zahlbetrag weicht ab (erwartet ${order.amountCents}, erhalten ${info.amountTotal} ${info.currency ?? ''}) – bitte manuell prüfen.`,
+        context: { orderId },
+      });
+      return { state: 'mismatch', orderId };
+    }
+
+    const paidAt = new Date();
+    const number = await nextInvoiceNumber(tx, cfg, paidAt);
+    const invoice = buildInvoiceData(cfg, order, { number, paidAt, issuedAt: paidAt, amounts: orderAmounts(order) });
+    await tx
+      .update(orders)
+      .set({
+        status: 'paid',
+        paidAt,
+        stripePaymentIntent: info.paymentIntentId ?? order.stripePaymentIntent,
+        invoiceNumber: number,
+        invoiceJson: invoice as unknown as Record<string, unknown>,
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, orderId));
+
+    const [customer] = await tx
+      .insert(customers)
+      .values({
+        orderId: order.id,
+        leadId: order.leadId,
+        company: order.customerCompany,
+        contactName: order.customerName,
+        email: order.customerEmail,
+        phone: order.customerPhone,
+        domain: order.domainWish,
+        domainStatus: order.domainWish ? 'available' : 'none',
+        accessToken: randomToken(32),
+      })
+      .onConflictDoNothing({ target: customers.orderId })
+      .returning();
+    const cust = customer ?? (await tx.query.customers.findFirst({ where: eq(customers.orderId, order.id) }))!;
+
+    if (order.leadId) {
+      await tx.insert(events).values({ leadId: order.leadId, type: 'paid', metaJson: { orderId: order.id, amountCents: order.amountCents } });
+      await transitionLead(tx, order.leadId, 'paid', { actor, soft: true, context: { orderId: order.id } });
+    }
+    // Gekaufte Demo läuft nicht mehr ab (dient als Grundlage der Kundenseite)
+    if (order.demoId) await tx.update(demos).set({ expiresAt: null, updatedAt: new Date() }).where(eq(demos.id, order.demoId));
+    await audit(tx, { entity: 'order', entityId: order.id, action: 'paid', actor, context: { invoiceNumber: number, amountCents: order.amountCents } });
+    return { state: 'paid', orderId, customerId: cust.id, invoiceNumber: number, alreadyPaid: false };
+  });
+
+  if (result.state === 'paid' && !result.alreadyPaid) {
+    await afterPaid(result.orderId, result.customerId);
+  }
+  return result;
+}
+
+async function afterPaid(orderId: string, customerId: string): Promise<void> {
+  try {
+    await enqueue(QUEUES.sendInvoice, { orderId }, { singletonKey: `invoice-${orderId}` });
+    await enqueue(QUEUES.onboarding, { customerId }, { singletonKey: `onboarding-${customerId}` });
+  } catch (err) {
+    // Der Sweeper im pipeline-tick holt das nach
+    logger.error({ orderId, ...errInfo(err) }, 'Folgejobs nach Zahlung nicht eingereiht');
+  }
+  const order = await getDb().query.orders.findFirst({ where: eq(orders.id, orderId) });
+  await notifyAdmin({
+    key: `order-paid:${orderId}`,
+    title: `Neue Bestellung ${order?.invoiceNumber ?? ''}`,
+    lines: [`Betrag: ${formatEuro(order?.amountCents ?? 0)}`, `Domain-Wunsch: ${order?.domainWish ?? '–'}`],
+    link: appUrl(`/admin/orders/${orderId}`),
+  });
+}
+
+async function findOrderForEvent(ev: PaymentEvent): Promise<Order | undefined> {
+  const db = getDb();
+  if (ev.sessionId) {
+    const o = await db.query.orders.findFirst({ where: eq(orders.stripeSessionId, ev.sessionId) });
+    if (o) return o;
+  }
+  const ref = ev.clientReferenceId ?? ev.metadata?.orderId;
+  if (ref && /^[0-9a-f-]{36}$/.test(ref)) {
+    const o = await db.query.orders.findFirst({ where: eq(orders.id, ref) });
+    if (o) return o;
+  }
+  if (ev.paymentIntentId) return db.query.orders.findFirst({ where: eq(orders.stripePaymentIntent, ev.paymentIntentId) });
+  return undefined;
+}
+
+/** Normalisiertes Zahlungs-Event anwenden (ohne Replay-Schutz – siehe processPaymentWebhook). */
+export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promise<string> {
+  if (ev.type === 'other') return 'ignored';
+  const order = await findOrderForEvent(ev);
+  if (!order) {
+    logger.warn({ eventId: ev.eventId, type: ev.rawType }, 'Zahlungs-Event ohne passende Bestellung');
+    return 'no_order';
+  }
+  const db = getDb();
+  switch (ev.type) {
+    case 'checkout.completed':
+    case 'checkout.async_succeeded': {
+      if (ev.paymentStatus === 'paid' || ev.paymentStatus === 'no_payment_required') {
+        const r = await fulfillOrder(order.id, { paymentIntentId: ev.paymentIntentId, amountTotal: ev.amountTotal, currency: ev.currency }, actor);
+        return r.state;
+      }
+      // z. B. SEPA-Lastschrift: Zahlung läuft noch
+      await db
+        .update(orders)
+        .set({ status: 'processing', stripePaymentIntent: ev.paymentIntentId ?? order.stripePaymentIntent, updatedAt: new Date() })
+        .where(and(eq(orders.id, order.id), inArray(orders.status, ['pending', 'cancelled', 'expired'])));
+      await audit(db, { entity: 'order', entityId: order.id, action: 'processing', actor });
+      return 'processing';
+    }
+    case 'checkout.async_failed':
+      await markPaymentFailed(order, actor);
+      return 'failed';
+    case 'checkout.expired': {
+      const res = await db
+        .update(orders)
+        .set({ status: 'expired', updatedAt: new Date() })
+        .where(and(eq(orders.id, order.id), eq(orders.status, 'pending')))
+        .returning({ id: orders.id });
+      return res.length ? 'expired' : 'unchanged';
+    }
+    case 'charge.refunded':
+      await applyRefund(order.id, ev.amountRefunded ?? ev.amountTotal ?? order.amountCents, actor);
+      return 'refunded';
+    default:
+      return 'ignored';
+  }
+}
+
+async function markPaymentFailed(order: Order, actor: string): Promise<void> {
+  const db = getDb();
+  const res = await db
+    .update(orders)
+    .set({ status: 'failed', updatedAt: new Date() })
+    .where(and(eq(orders.id, order.id), inArray(orders.status, ['pending', 'processing'])))
+    .returning({ id: orders.id });
+  if (!res.length) return;
+  await audit(db, { entity: 'order', entityId: order.id, action: 'payment_failed', actor });
+  if (order.leadId) await transitionLead(db, order.leadId, 'cta_clicked', { actor, soft: true, reason: 'Zahlung fehlgeschlagen' });
+  const demo = order.demoId ? await db.query.demos.findFirst({ where: eq(demos.id, order.demoId) }) : undefined;
+  const cfg = await getConfig();
+  try {
+    const mail = paymentFailedEmail(cfg, { name: order.customerName, retryUrl: demo ? appUrl(`/checkout/${demo.slug}`) : appUrl('/') });
+    await sendTransactionalEmail({ ...mail, kind: 'payment_failed', idempotencyKey: `payment-failed:${order.id}`, to: order.customerEmail, orderId: order.id, leadId: order.leadId });
+  } catch (err) {
+    logger.warn({ orderId: order.id, ...errInfo(err) }, 'Mail „Zahlung fehlgeschlagen“ nicht versendet');
+  }
+}
+
+/**
+ * Erstattung verbuchen (aus Webhook oder Admin-Aktion, idempotent über den Betrag).
+ * Bei vollständiger Erstattung: Status „refunded“ und Stornorechnung.
+ */
+export async function applyRefund(orderId: string, refundedCents: number, actor: string): Promise<boolean> {
+  const db = getDb();
+  const order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+  if (!order || refundedCents <= order.refundedCents) return false;
+  const full = refundedCents >= order.amountCents;
+  await db
+    .update(orders)
+    .set({ refundedCents, refundedAt: new Date(), ...(full ? { status: 'refunded' as const } : {}), updatedAt: new Date() })
+    .where(eq(orders.id, orderId));
+  await audit(db, { entity: 'order', entityId: orderId, action: full ? 'refunded' : 'partially_refunded', actor, context: { refundedCents } });
+  await raiseAlert(db, { level: 'warn', code: `refund_${orderId}`, message: `Erstattung ${formatEuro(refundedCents)} zu ${order.invoiceNumber ?? orderId}`, context: { orderId } });
+  if (order.invoiceNumber) {
+    try {
+      await enqueue(QUEUES.sendInvoice, { orderId, kind: 'cancellation' }, { singletonKey: `cancellation-${orderId}-${refundedCents}` });
+    } catch (err) {
+      logger.error({ orderId, ...errInfo(err) }, 'Stornorechnung nicht eingereiht');
+    }
+  }
+  return true;
+}
+
+/** Admin: Zahlung erstatten (Betrag in Cent, Standard: voll). Löst eine echte Erstattung aus. */
+export async function refundOrder(orderId: string, actor: string, amountCents?: number): Promise<void> {
+  const db = getDb();
+  const order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+  if (!order || order.status !== 'paid') throw new Error('Nur bezahlte Bestellungen können erstattet werden.');
+  const amount = Math.min(order.amountCents, amountCents ?? order.amountCents);
+  if (amount <= 0) throw new Error('Ungültiger Betrag');
+  const p = getProviders().payment;
+  if (!p.refund) throw new Error('Der Zahlungsanbieter unterstützt keine Erstattung über die API.');
+  if (p.name !== order.provider) throw new Error(`Bestellung wurde über ${order.provider} bezahlt, aktiv ist ${p.name}.`);
+  if (!order.stripePaymentIntent && p.name !== 'mock') throw new Error('Keine Zahlungs-ID gespeichert – Erstattung bitte im Stripe-Dashboard.');
+  await p.refund(order.stripePaymentIntent ?? `pi_mock_${order.id}`, { idempotencyKey: `refund-${order.id}-${amount}`, amountCents: amount });
+  await applyRefund(order.id, order.refundedCents + amount, actor);
+}
+
+export class InvalidWebhookError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidWebhookError';
+  }
+}
+
+/** Webhook verifizieren, Replay-Schutz (webhook_events), anwenden. Fehler ⇒ Anbieter wiederholt. */
+export async function processPaymentWebhook(rawBody: string, signature: string | null): Promise<{ result: string; duplicate: boolean }> {
+  const p = getProviders().payment;
+  let ev: PaymentEvent;
+  try {
+    ev = await p.parseWebhook(rawBody, signature);
+  } catch (err) {
+    throw new InvalidWebhookError(err instanceof Error ? err.message : 'ungültig');
+  }
+  const db = getDb();
+  const inserted = await db
+    .insert(webhookEvents)
+    .values({ provider: p.name, eventId: ev.eventId, type: ev.rawType })
+    .onConflictDoNothing()
+    .returning({ id: webhookEvents.eventId });
+  if (!inserted.length) {
+    const prev = await db.query.webhookEvents.findFirst({ where: and(eq(webhookEvents.provider, p.name), eq(webhookEvents.eventId, ev.eventId)) });
+    if (prev?.processedAt) return { result: 'duplicate', duplicate: true };
+  }
+  try {
+    const result = await applyPaymentEvent(ev, `webhook:${p.name}`);
+    await db
+      .update(webhookEvents)
+      .set({ processedAt: new Date(), error: null })
+      .where(and(eq(webhookEvents.provider, p.name), eq(webhookEvents.eventId, ev.eventId)));
+    return { result, duplicate: false };
+  } catch (err) {
+    await db
+      .update(webhookEvents)
+      .set({ error: err instanceof Error ? err.message.slice(0, 500) : String(err) })
+      .where(and(eq(webhookEvents.provider, p.name), eq(webhookEvents.eventId, ev.eventId)));
+    throw err;
+  }
+}
+
+export type ReturnState =
+  | { state: 'paid'; customerToken: string | null; invoiceNumber: string | null }
+  | { state: 'processing' }
+  | { state: 'open' }
+  | { state: 'unknown' };
+
+/** Erfolgsseite: Zahlung direkt beim Anbieter prüfen, falls der Webhook noch nicht da war. */
+export async function confirmCheckoutReturn(slug: string, sessionId: string): Promise<ReturnState> {
+  const db = getDb();
+  if (!/^cs_[A-Za-z0-9_]{8,200}$/.test(sessionId)) return { state: 'unknown' };
+  const order = await db.query.orders.findFirst({ where: eq(orders.stripeSessionId, sessionId) });
+  if (!order || !order.demoId) return { state: 'unknown' };
+  const demo = await db.query.demos.findFirst({ where: eq(demos.id, order.demoId) });
+  if (!demo || demo.slug !== slug) return { state: 'unknown' };
+  const done = async (): Promise<ReturnState> => {
+    const o = await db.query.orders.findFirst({ where: eq(orders.id, order.id) });
+    const c = await db.query.customers.findFirst({ where: eq(customers.orderId, order.id) });
+    return { state: 'paid', customerToken: c?.accessToken ?? null, invoiceNumber: o?.invoiceNumber ?? null };
+  };
+  if (order.status === 'paid') return done();
+  if (order.status === 'processing') return { state: 'processing' };
+  const p = getProviders().payment;
+  if (!p.retrieveSession || p.name !== order.provider) return { state: 'open' };
+  const info = await p.retrieveSession(sessionId);
+  if (!info) return { state: 'unknown' };
+  if (info.paymentStatus === 'paid' || info.paymentStatus === 'no_payment_required') {
+    const r = await fulfillOrder(order.id, { paymentIntentId: info.paymentIntentId, amountTotal: info.amountTotal, currency: info.currency }, 'public:checkout-return');
+    return r.state === 'paid' ? done() : { state: 'processing' };
+  }
+  if (info.status === 'complete') {
+    await applyPaymentEvent({ eventId: `return-${sessionId}`, type: 'checkout.completed', rawType: 'return', sessionId, paymentStatus: 'unpaid', paymentIntentId: info.paymentIntentId }, 'public:checkout-return');
+    return { state: 'processing' };
+  }
+  return { state: 'open' };
+}
+
+/**
+ * Sicherheitsnetz (pipeline-tick): bezahlte Bestellungen ohne versendete Rechnung bzw. Kunden ohne
+ * Onboarding-Mail erneut einreihen (falls das Einreihen direkt nach der Zahlung fehlschlug).
+ */
+export async function sweepPaidOrders(): Promise<number> {
+  const db = getDb();
+  const stale = await db
+    .select({ id: orders.id })
+    .from(orders)
+    .where(and(eq(orders.status, 'paid'), isNull(orders.invoiceSentAt), lt(orders.paidAt, sql`now() - interval '10 minutes'`)))
+    .limit(20);
+  for (const o of stale) await enqueue(QUEUES.sendInvoice, { orderId: o.id }, { singletonKey: `invoice-${o.id}` });
+  const noOnboarding = await db
+    .select({ id: customers.id })
+    .from(customers)
+    .innerJoin(orders, eq(orders.id, customers.orderId))
+    .where(and(eq(orders.status, 'paid'), isNull(customers.onboardingMailSentAt), isNull(customers.siteId), lt(customers.createdAt, sql`now() - interval '10 minutes'`)))
+    .limit(20);
+  for (const c of noOnboarding) await enqueue(QUEUES.onboarding, { customerId: c.id }, { singletonKey: `onboarding-${c.id}` });
+  // Offene Bestellungen nach Ablauf der Session schließen (falls das Expired-Event fehlte)
+  await db
+    .update(orders)
+    .set({ status: 'expired', updatedAt: new Date() })
+    .where(and(eq(orders.status, 'pending'), lt(orders.checkoutExpiresAt, sql`now() - interval '1 hour'`)));
+  return stale.length + noOnboarding.length;
+}
+
+export async function orderWithCustomer(db: DbOrTx, orderId: string): Promise<{ order: Order; customer: Customer | undefined } | null> {
+  const order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+  if (!order) return null;
+  const customer = await db.query.customers.findFirst({ where: eq(customers.orderId, orderId) });
+  return { order, customer };
+}

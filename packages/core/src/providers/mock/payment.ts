@@ -27,7 +27,8 @@ export class MockPayment implements PaymentProvider {
     return JSON.parse(rawBody) as PaymentEvent;
   }
 
-  async refund(): Promise<void> {
-    // nichts zu tun
+  async refund(paymentIntentId: string, opts: { idempotencyKey: string }): Promise<{ refundId: string }> {
+    void paymentIntentId;
+    return { refundId: `re_mock_${opts.idempotencyKey}` };
   }
 }

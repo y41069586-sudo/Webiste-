@@ -232,11 +232,25 @@ export const orders = pgTable(
     stripeSessionId: text('stripe_session_id'),
     stripePaymentIntent: text('stripe_payment_intent'),
     amountCents: integer('amount_cents').notNull(),
+    /** Steueraufteilung zum Zeitpunkt der Bestellung (Rechnung unabhängig von späteren Config-Änderungen) */
+    netCents: integer('net_cents').notNull(),
+    vatCents: integer('vat_cents').default(0).notNull(),
+    vatRatePercent: doublePrecision('vat_rate_percent').default(0).notNull(),
     currency: text('currency').default('eur').notNull(),
     status: text('status').$type<OrderStatus>().default('pending').notNull(),
+    /** Stripe-Checkout-URL (für erneutes Öffnen bei Doppelklick) */
+    checkoutUrl: text('checkout_url'),
+    checkoutExpiresAt: ts('checkout_expires_at'),
     invoiceNumber: text('invoice_number'),
     invoicePdfKey: text('invoice_pdf_key'),
+    /** Unveränderlicher Stand der Rechnungsdaten (Verkäufer, Käufer, Positionen, Steuer) */
+    invoiceJson: jsonb('invoice_json').$type<Record<string, unknown> | null>(),
     invoiceSentAt: ts('invoice_sent_at'),
+    refundedCents: integer('refunded_cents').default(0).notNull(),
+    refundedAt: ts('refunded_at'),
+    cancellationNumber: text('cancellation_number'),
+    cancellationPdfKey: text('cancellation_pdf_key'),
+    cancellationSentAt: ts('cancellation_sent_at'),
     customerCompany: text('customer_company').notNull(),
     customerName: text('customer_name').notNull(),
     customerEmail: text('customer_email').notNull(),
@@ -254,7 +268,10 @@ export const orders = pgTable(
   (t) => [
     uniqueIndex('orders_session_uidx').on(t.stripeSessionId),
     uniqueIndex('orders_invoice_uidx').on(t.invoiceNumber),
+    uniqueIndex('orders_cancellation_uidx').on(t.cancellationNumber),
     index('orders_lead_idx').on(t.leadId),
+    index('orders_payment_intent_idx').on(t.stripePaymentIntent),
+    index('orders_status_idx').on(t.status),
   ],
 );
 
@@ -279,6 +296,7 @@ export const customers = pgTable(
     subscriptionId: text('subscription_id'),
     /** Token für Onboarding-/Vorschau-Links (zufällig) */
     accessToken: text('access_token').notNull(),
+    onboardingMailSentAt: ts('onboarding_mail_sent_at'),
     changeRoundsUsed: integer('change_rounds_used').default(0).notNull(),
     hostingUntil: ts('hosting_until'),
     renewalReminderSentAt: ts('renewal_reminder_sent_at'),
@@ -506,6 +524,30 @@ export const webhookEvents = pgTable(
     error: text('error'),
   },
   (t) => [primaryKey({ columns: [t.provider, t.eventId] })],
+);
+
+/** Ausgehende Transaktions-Mails (Idempotenz + Postausgang im Dashboard). */
+export const outboundEmails = pgTable(
+  'outbound_emails',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    kind: text('kind').notNull(),
+    idempotencyKey: text('idempotency_key').notNull(),
+    toEmail: text('to_email').notNull(),
+    subject: text('subject').notNull(),
+    orderId: uuid('order_id').references(() => orders.id, { onDelete: 'set null' }),
+    customerId: uuid('customer_id').references(() => customers.id, { onDelete: 'set null' }),
+    leadId: uuid('lead_id').references(() => leads.id, { onDelete: 'set null' }),
+    provider: text('provider').notNull(),
+    providerMessageId: text('provider_message_id'),
+    /** sending | sent | failed */
+    status: text('status').default('sending').notNull(),
+    error: text('error'),
+    attachmentNames: jsonb('attachment_names').$type<string[]>().default([]).notNull(),
+    createdAt: createdAt(),
+    sentAt: ts('sent_at'),
+  },
+  (t) => [uniqueIndex('outbound_emails_key_uidx').on(t.idempotencyKey), index('outbound_emails_created_idx').on(t.createdAt)],
 );
 
 export const counters = pgTable('counters', {

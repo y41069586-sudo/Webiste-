@@ -26,6 +26,9 @@ export * from './types';
 export { registerMockStructured, registerMockText } from './llm/mock';
 export { LlmRefusalError, LlmNoToolCallError } from './llm/anthropic';
 export { MockPayment } from './mock/payment';
+export { StripePayment } from './payment/stripe';
+export { ResendEmail } from './email/resend';
+export { PostmarkEmail } from './email/postmark';
 
 export interface Providers {
   storage: StorageProvider;
