@@ -28,3 +28,13 @@ export * from './services/suppression';
 export * from './services/lead-finder';
 export { GooglePlacesClient, GooglePlacesLeadSource, googlePlaceToRaw } from './providers/lead-source/google-places';
 export { OverpassLeadSource, buildOverpassQuery, osmElementToPlace } from './providers/lead-source/overpass';
+export * from './services/demo-review';
+export {
+  validateDemoContent,
+  normalizeContent,
+  DEMO_CONTENT_SCHEMA,
+  DEMO_SYSTEM_PROMPT,
+  type ContentFacts,
+  type RuleViolation,
+} from './demos/content';
+export { libraryContent, CONTENT_LIBRARY } from './demos/library';

@@ -1,0 +1,49 @@
+/* Tailwind v4 – nur Klassen aus den Template-Quellen, Farben über CSS-Variablen je Palette */
+@import 'tailwindcss' source(none);
+@source '../src';
+
+@theme inline {
+  --color-primary: var(--c-primary);
+  --color-primary-dark: var(--c-primary-dark);
+  --color-on-primary: var(--c-on-primary);
+  --color-accent: var(--c-accent);
+  --color-on-accent: var(--c-on-accent);
+  --color-surface: var(--c-surface);
+  --color-surface-alt: var(--c-surface-alt);
+  --color-ink: var(--c-ink);
+  --color-muted: var(--c-muted);
+  --color-line: var(--c-line);
+  --font-heading: var(--f-heading);
+  --font-body: var(--f-body);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  :focus-visible {
+    outline: 3px solid var(--c-primary);
+    outline-offset: 3px;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary {
+    list-style: none;
+  }
+  details summary::after {
+    content: '+';
+    float: right;
+    margin-left: 1rem;
+    font-weight: 400;
+  }
+  details[open] summary::after {
+    content: '–';
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
