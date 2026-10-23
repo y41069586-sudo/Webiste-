@@ -61,7 +61,7 @@ export type CheckoutContext =
       price: { grossCents: number; netCents: number; vatCents: number; label: string };
       prefill: { company: string; street: string; postalCode: string; city: string; domain: string };
     }
-  | { state: 'ordered'; customerToken: string | null }
+  | { state: 'ordered' }
   | { state: 'gone' }
   | { state: 'not_found' }
   | { state: 'disabled'; reason: string };
@@ -89,10 +89,8 @@ export async function getCheckoutContext(slug: string): Promise<CheckoutContext>
   }
   const db = getDb();
   const paid = await db.query.orders.findFirst({ where: and(eq(orders.leadId, found.lead.id), inArray(orders.status, ['paid', 'processing'])) });
-  if (paid) {
-    const c = await db.query.customers.findFirst({ where: eq(customers.orderId, paid.id) });
-    return { state: 'ordered', customerToken: c?.accessToken ?? null };
-  }
+  // Kein Onboarding-Link hier: der Demo-Link ist halböffentlich, der Link geht nur per E-Mail an den Käufer
+  if (paid) return { state: 'ordered' };
   if (!avail.ok) return { state: 'disabled', reason: avail.reason };
   const cfg = await getConfig();
   const a = packageAmounts(cfg);
@@ -118,9 +116,7 @@ async function orderedOrGone(slug: string): Promise<CheckoutContext> {
   const demo = await db.query.demos.findFirst({ where: eq(demos.slug, slug) });
   if (!demo) return { state: 'gone' };
   const paid = await db.query.orders.findFirst({ where: and(eq(orders.leadId, demo.leadId), inArray(orders.status, ['paid', 'processing'])) });
-  if (!paid) return { state: 'gone' };
-  const c = await db.query.customers.findFirst({ where: eq(customers.orderId, paid.id) });
-  return { state: 'ordered', customerToken: c?.accessToken ?? null };
+  return paid ? { state: 'ordered' } : { state: 'gone' };
 }
 
 export type StartCheckoutResult =
@@ -594,4 +590,44 @@ export async function orderWithCustomer(db: DbOrTx, orderId: string): Promise<{ 
   if (!order) return null;
   const customer = await db.query.customers.findFirst({ where: eq(customers.orderId, orderId) });
   return { order, customer };
+}
+
+// ---------------------------------------------------------------------------
+// Simulierte Zahlung (nur PAYMENT_PROVIDER=mock, nie in Produktion ohne ALLOW_MOCK_PAYMENT)
+// ---------------------------------------------------------------------------
+export type MockOutcome = 'paid' | 'sepa_processing' | 'sepa_failed' | 'cancel';
+
+export async function mockCheckoutInfo(sessionId: string): Promise<{ order: Order; slug: string } | null> {
+  const avail = checkoutAvailability();
+  if (!avail.ok || avail.mode !== 'mock') return null;
+  const db = getDb();
+  const order = await db.query.orders.findFirst({ where: eq(orders.stripeSessionId, sessionId) });
+  if (!order?.demoId) return null;
+  const demo = await db.query.demos.findFirst({ where: eq(demos.id, order.demoId) });
+  return demo ? { order, slug: demo.slug } : null;
+}
+
+/** Löst die gleichen (signierten) Webhook-Events aus wie Stripe – für Entwicklung und E2E-Tests. */
+export async function simulateMockPayment(sessionId: string, outcome: MockOutcome): Promise<string> {
+  const info = await mockCheckoutInfo(sessionId);
+  if (!info) throw new Error('Simulierte Zahlung nicht verfügbar');
+  const { order, slug } = info;
+  if (outcome === 'cancel') return appUrl(`/checkout/${slug}?abgebrochen=1`);
+  const p = getProviders().payment as unknown as PaymentProviderWithSign;
+  const fire = async (ev: Omit<PaymentEvent, 'eventId' | 'rawType'> & { rawType: string }) => {
+    const raw = JSON.stringify({ eventId: `evt_mock_${randomToken(16)}`, sessionId, clientReferenceId: order.id, amountTotal: order.amountCents, currency: 'eur', ...ev });
+    await processPaymentWebhook(raw, p.sign(raw));
+  };
+  const pi = `pi_mock_${order.id.replace(/-/g, '')}`;
+  if (outcome === 'paid') {
+    await fire({ type: 'checkout.completed', rawType: 'checkout.session.completed', paymentStatus: 'paid', paymentIntentId: pi });
+  } else {
+    await fire({ type: 'checkout.completed', rawType: 'checkout.session.completed', paymentStatus: 'unpaid', paymentIntentId: pi });
+    if (outcome === 'sepa_failed') await fire({ type: 'checkout.async_failed', rawType: 'checkout.session.async_payment_failed', paymentStatus: 'unpaid', paymentIntentId: pi });
+  }
+  return appUrl(`/checkout/${slug}/erfolg?session_id=${encodeURIComponent(sessionId)}`);
+}
+
+interface PaymentProviderWithSign {
+  sign(raw: string): string;
 }

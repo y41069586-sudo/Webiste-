@@ -93,3 +93,46 @@ Version 2.0.0) und des Hilfecenters (`https://help.pingen.com`).
   „PLZ Ort“ (5-stellig, ohne Land), nur lateinische Zeichen.
 - **Umsetzung:** `packages/templates/src/letter.ts` (Layout), `packages/core/src/render/pdf.ts`
   (PDF + Positionsprüfung mit pdf.js in mm), Test `packages/core/test/letters.test.ts`.
+
+## Stripe – Checkout und Zahlungseingang
+
+Geprüft am 23.10.2026: SDK `stripe` 23.0.1 (API-Version `2026-09-30.endive`, Typen im Paket),
+Doku „Fulfill orders“ (docs.stripe.com/checkout/fulfillment).
+
+- **Session:** `stripe.checkout.sessions.create` mit `mode: 'payment'`, `line_items[].price_data`
+  (EUR, Betrag aus der Bestellung), `client_reference_id` = Bestell-ID, `customer_email`, `metadata`,
+  `locale: 'de'`, `expires_at` (30 min – 24 h, Config `checkout.sessionMinutes`),
+  `success_url` mit Platzhalter `{CHECKOUT_SESSION_ID}`, `cancel_url`. Request-Option
+  `idempotencyKey: checkout-{orderId}`. Keine Stripe-Rechnung (`invoice_creation` aus) – die Rechnung
+  mit fortlaufender Nummer erstellen wir selbst. Zahlungsarten: dynamisch aus dem Stripe-Dashboard.
+- **Fulfillment** laut Doku „nur einmal pro Zahlung, auch bei mehrfachen/parallelen Aufrufen“:
+  `fulfillOrder` sperrt die Bestellzeile (`SELECT … FOR UPDATE`), prüft Betrag und Währung, vergibt
+  die Rechnungsnummer in derselben Transaktion. Auslöser: Webhook **und** Erfolgsseite
+  (`sessions.retrieve`, `payment_status` ≠ `unpaid`).
+- **Webhooks** (Endpunkt `/api/webhooks/stripe`): `checkout.session.completed`,
+  `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`,
+  `checkout.session.expired`, `charge.refunded`. Signaturprüfung mit
+  `stripe.webhooks.constructEvent(rawBody, Stripe-Signature, STRIPE_WEBHOOK_SECRET)` auf dem
+  unveränderten Body (Toleranz 300 s), Replay-Schutz über `webhook_events`.
+  Ungültige Signatur → 400, Verarbeitungsfehler → 500 (Stripe wiederholt automatisch).
+- **Erstattung:** `stripe.refunds.create({ payment_intent, amount })` mit Idempotency-Key; die
+  Stornorechnung entsteht beim `charge.refunded`-Event bzw. direkt bei der Admin-Aktion.
+- **Test:** `PAYMENT_PROVIDER=mock` simuliert die Bezahlseite (`/checkout/mock/…`) inkl. signierter
+  Events; in Produktion gesperrt (außer `ALLOW_MOCK_PAYMENT=true`). Stripe-Testmodus: `sk_test_…` und
+  `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.
+
+## Resend / Postmark – Transaktions-Mails
+
+Geprüft am 23.10.2026.
+
+- **Resend:** `POST https://api.resend.com/emails`, `Authorization: Bearer …`, Felder `from`, `to`,
+  `subject`, `text`, `html`, `reply_to`, `headers`, `tags[{name,value}]`, `attachments[{filename,
+  content(Base64)}]` (Typ aus dem Dateinamen), max. 40 MB. Header `Idempotency-Key` (≤ 256 Zeichen,
+  24 h gültig).
+- **Postmark:** `POST https://api.postmarkapp.com/email`, Header `X-Postmark-Server-Token`, Felder
+  `From`, `To`, `Subject`, `TextBody`, `HtmlBody`, `ReplyTo`, `Tag`, `Headers[{Name,Value}]`,
+  `Attachments[{Name,Content,ContentType}]`, `MessageStream: outbound`, `TrackOpens: false`,
+  `TrackLinks: None`. Antwort `ErrorCode` 0 = OK. Kein Idempotenz-Header.
+- **Doppelversand-Schutz** anbieterunabhängig über die Tabelle `outbound_emails`
+  (eindeutiger `idempotency_key`, z. B. `invoice:{orderId}`).
+- Absenderdomain beim Anbieter verifizieren (SPF, DKIM, DMARC) – siehe Go-Live-Checkliste.
