@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Einfacher Lasttest ohne Zusatzpakete: node scripts/load-test.mjs <BASE_URL> <demoSlug> <trackToken> [anzahl] [parallel]
 // Misst Latenzen (p50/p95/p99) und Fehlerquote der öffentlichen Routen (QR, Demo, Checkout, Health).
+import { performance } from 'node:perf_hooks';
+
 const [base, slug, token, totalArg = '600', concArg = '25'] = process.argv.slice(2);
 if (!base || !slug || !token) {
   console.error('Aufruf: node scripts/load-test.mjs <BASE_URL> <demoSlug> <trackToken> [anzahl] [parallel]');
