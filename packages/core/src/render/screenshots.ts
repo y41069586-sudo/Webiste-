@@ -34,9 +34,9 @@ export function compositeHtml(desktopJpeg: Buffer, mobileJpeg: Buffer): string {
   .cam{position:absolute;left:50%;top:14px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#3b4048}
   .base{height:34px;margin:0 -70px;background:linear-gradient(#d9dde2,#aeb4bb);border-radius:0 0 26px 26px}
   .notch{width:220px;height:12px;margin:0 auto;background:#9aa1a9;border-radius:0 0 12px 12px}
-  .phone{position:absolute;right:40px;bottom:30px;width:420px;background:#111418;border-radius:64px;padding:22px;box-shadow:0 30px 60px rgba(0,0,0,.28)}
+  .phone{position:absolute;right:40px;bottom:30px;width:420px;background:#111418;border-radius:64px;padding:34px 22px 22px;box-shadow:0 30px 60px rgba(0,0,0,.28)}
   .phone img{display:block;width:100%;border-radius:44px}
-  .speaker{position:absolute;left:50%;top:34px;width:110px;height:26px;margin-left:-55px;border-radius:14px;background:#111418}
+  .speaker{position:absolute;left:50%;top:13px;width:70px;height:9px;margin-left:-35px;border-radius:6px;background:#2a2f36}
 </style></head><body><div class="stage">
   <div class="laptop"><div class="lid"><span class="cam"></span><img src="${d}" alt=""></div><div class="base"><div class="notch"></div></div></div>
   <div class="phone"><img src="${m}" alt=""><span class="speaker"></span></div>

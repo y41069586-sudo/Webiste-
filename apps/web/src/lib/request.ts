@@ -43,3 +43,9 @@ export function shortUserAgent(ua: string | null): string {
 export function isBot(ua: string | null): boolean {
   return !ua || /bot|crawl|spider|slurp|facebookexternalhit|preview|headless|curl|wget|python|scanner/i.test(ua);
 }
+
+/** Anfrage-Metadaten für Tracking (ohne IP, ohne Cookies). */
+export function requestMetaFrom(h: Headers): { ua: string; ipHash: string; isBot: boolean } {
+  const ua = h.get('user-agent');
+  return { ua: shortUserAgent(ua), ipHash: dailyIpHash(clientIpFrom(h)), isBot: isBot(ua) };
+}

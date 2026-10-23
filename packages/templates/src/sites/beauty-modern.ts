@@ -75,7 +75,7 @@ export const beautyModern: TemplateDef = {
     <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-2">
       <div>
         <h2 id="zeiten-titel" class="font-heading text-4xl">Öffnungszeiten</h2>
-        <div class="mt-6 [&_dd]:text-on-primary [&_dd]:opacity-90 [&_dl]:divide-on-primary/20">${p.hoursList()}</div>
+        <div class="mt-6 [&_dl]:divide-on-primary/20">${p.hoursList({ mutedClass: 'text-on-primary opacity-90' })}</div>
       </div>
       <div>
         <h2 class="font-heading text-4xl">Anfahrt</h2>

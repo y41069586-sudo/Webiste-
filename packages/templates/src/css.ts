@@ -1,13 +1,15 @@
 import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 let cached: string | undefined;
 
 /** Pfad zur kompilierten Tailwind-CSS (pnpm --filter @wbm/templates build). */
 export function siteCssPath(): string {
-  // Basis-URL in Variable, damit Bundler den Pfad nicht als Asset auflösen
-  const base = import.meta.url;
-  return process.env.TEMPLATES_CSS_PATH ?? fileURLToPath(new URL('../dist/site.css', base));
+  if (process.env.TEMPLATES_CSS_PATH) return process.env.TEMPLATES_CSS_PATH;
+  // Bewusst kein `new URL(rel, import.meta.url)`, damit Bundler den Pfad nicht als Asset behandeln
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  return path.join(here, '..', 'dist', ['site', 'css'].join('.'));
 }
 
 export function readSiteCss(): string {

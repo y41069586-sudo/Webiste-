@@ -1,4 +1,5 @@
-import { ICON_KEYS, ICONS_BY_GROUP, type SiteContent } from '@wbm/templates';
+import { ICON_KEYS, ICONS_BY_GROUP } from '@wbm/templates/icons';
+import type { SiteContent } from '@wbm/templates/types';
 import type { BranchGroup } from '../types';
 
 /** Fakten, die das Modell kennen darf (alle aus den Lead-Daten, nichts erfunden). */

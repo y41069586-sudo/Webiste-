@@ -18,7 +18,7 @@ export interface SharedParts {
   /** Primärer CTA-Link (Anrufen, sonst Kontaktformular) */
   ctaHref: string;
   contactSection(opts: { sectionClass: string; cardClass: string; titleClass: string; buttonClass: string; inputClass: string }): string;
-  hoursList(opts?: { rowClass?: string; labelClass?: string }): string;
+  hoursList(opts?: { rowClass?: string; labelClass?: string; mutedClass?: string }): string;
   addressLines: string;
   mapsHref: string;
   faqList(opts: { itemClass: string; summaryClass: string; answerClass: string }): string;
@@ -104,14 +104,15 @@ ${jsonLd}
   const servicesNote = (cls = 'text-sm text-muted') =>
     isDemo ? `<p class="${cls}"><span aria-hidden="true">✎ </span>Beispiel-Leistungen – passen wir gemeinsam für Sie an.</p>` : '';
 
-  const hoursList = (opts: { rowClass?: string; labelClass?: string } = {}) => {
+  const hoursList = (opts: { rowClass?: string; labelClass?: string; mutedClass?: string } = {}) => {
+    const muted = opts.mutedClass ?? 'text-muted';
     if (!facts.openingLines.length) {
-      return `<p class="text-muted">Termine und Öffnungszeiten nach Vereinbarung${facts.phone ? ' – rufen Sie uns gern an' : ''}.</p>`;
+      return `<p class="${muted}">Termine und Öffnungszeiten nach Vereinbarung${facts.phone ? ' – rufen Sie uns gern an' : ''}.</p>`;
     }
     return `<dl class="divide-y divide-line">${facts.openingLines
       .map(
         (l) =>
-          `<div class="flex flex-wrap justify-between gap-x-4 gap-y-1 py-2 ${opts.rowClass ?? ''}"><dt class="font-medium ${opts.labelClass ?? ''}">${esc(l.label)}</dt><dd class="text-muted">${esc(l.value)}</dd></div>`,
+          `<div class="flex flex-wrap justify-between gap-x-4 gap-y-1 py-2 ${opts.rowClass ?? ''}"><dt class="font-medium ${opts.labelClass ?? ''}">${esc(l.label)}</dt><dd class="${muted}">${esc(l.value)}</dd></div>`,
       )
       .join('')}</dl>`;
   };

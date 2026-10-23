@@ -112,6 +112,8 @@ export const SECTIONS: SectionDef[] = [
       { path: 'timing.placesCacheDays', label: 'Places-Daten-Cache (Tage, max. 30)', type: 'number' },
       { path: 'review.manualReviewFirstN', label: 'Manuelle Prüfung der ersten N Demos', type: 'number' },
       { path: 'review.sampleRatePercent', label: 'Danach Stichprobe (%)', type: 'number' },
+      { path: 'review.qaLighthouse', label: 'Lighthouse in der Demo-QA', type: 'bool' },
+      { path: 'review.qaLlm', label: 'KI-Prüfung der Demo-Texte', type: 'bool' },
       { path: 'onboarding.includedChangeRounds', label: 'Inklusive Änderungsrunden', type: 'number' },
     ],
   },

@@ -70,12 +70,12 @@ export const handwerkSolid: TemplateDef = {
         <h2 id="ueber-titel" class="font-heading text-3xl font-bold">Über uns</h2>
         <div class="mt-4 space-y-4 text-lg leading-relaxed">${p.about()}</div>
       </div>
-      <aside class="rounded-xl bg-primary p-6 text-on-primary">
+      <div class="rounded-xl bg-primary p-6 text-on-primary">
         <p class="text-sm uppercase tracking-widest opacity-90">Ihr Betrieb vor Ort</p>
         <p class="mt-2 text-xl font-semibold">${esc(f.name)}</p>
         <p class="mt-3">${p.addressLines}</p>
         ${p.phoneLabel ? `<p class="mt-4"><a class="font-semibold underline underline-offset-4" href="${esc(p.callHref)}">${esc(p.phoneLabel)}</a></p>` : ''}
-      </aside>
+      </div>
     </div>
   </section>
 

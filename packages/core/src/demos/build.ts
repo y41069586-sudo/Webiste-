@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { renderSite, templatesForGroup, type BusinessFacts, type DemoOptions, type SiteContent, type SenderInfo } from '@wbm/templates';
 import { appUrl, demoUrl } from '../config/env';
 import { getConfig } from '../config/service';
@@ -101,15 +101,32 @@ export function demoOptions(slug: string, cfg: AppConfig): DemoOptions {
   };
 }
 
-/** Template + Palette deterministisch je Lead; bei Neugenerierung ein anderes Template. */
-export function chooseTemplate(lead: Pick<Lead, 'id' | 'branchGroup'>, previous: string[] = []): { templateId: string; palette: string } {
+/**
+ * Template + Palette: gleichmäßige Rotation (am seltensten genutzte Kombination zuerst,
+ * bei Gleichstand deterministisch je Lead). Bei Neugenerierung ein anderes Template.
+ */
+export function chooseTemplate(
+  lead: Pick<Lead, 'id' | 'branchGroup'>,
+  previous: string[] = [],
+  usage: Record<string, number> = {},
+): { templateId: string; palette: string } {
   const options = templatesForGroup(lead.branchGroup);
   const seed = seedFromId(lead.id);
   const fresh = options.filter((t) => !previous.includes(t.id));
   const pool = fresh.length ? fresh : options;
-  const tpl = pool[seed % pool.length]!;
-  const palette = tpl.palettes[Math.floor(seed / 7) % tpl.palettes.length]!;
+  const tplUse = (id: string) => Object.entries(usage).filter(([k]) => k.startsWith(`${id}/`)).reduce((s, [, n]) => s + n, 0);
+  const tpl = [...pool].sort((a, b) => tplUse(a.id) - tplUse(b.id) || ((seed + a.id.length) % 7) - ((seed + b.id.length) % 7))[0]!;
+  const palette = [...tpl.palettes].sort(
+    (a, b) => (usage[`${tpl.id}/${a}`] ?? 0) - (usage[`${tpl.id}/${b}`] ?? 0) || tpl.palettes.indexOf(a) - tpl.palettes.indexOf(b),
+  )[0]!;
   return { templateId: tpl.id, palette };
+}
+
+async function templateUsage(): Promise<Record<string, number>> {
+  const rows = await getDb().execute<{ k: string; n: number }>(
+    sql`SELECT template_id || '/' || palette AS k, count(*)::int AS n FROM demos GROUP BY 1`,
+  );
+  return Object.fromEntries(rows.rows.map((r) => [r.k, Number(r.n)]));
 }
 
 export interface GeneratedContent {
@@ -204,7 +221,7 @@ export async function buildDemo(leadId: string, opts: { regenerate?: boolean; ac
     throw new Error(`Lead im Status ${lead.status} – Demo nicht vorgesehen`);
   }
 
-  const { templateId, palette } = chooseTemplate(lead, existing.map((d) => d.templateId));
+  const { templateId, palette } = chooseTemplate(lead, existing.map((d) => d.templateId), await templateUsage());
   const generated = await generateDemoContent(lead, cfg);
   const facts = leadToFacts(lead, cfg);
   const slug = randomToken(24);

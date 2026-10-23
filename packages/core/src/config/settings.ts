@@ -140,6 +140,10 @@ export const appConfigSchema = z.object({
   review: z.object({
     manualReviewFirstN: z.number().int().min(0),
     sampleRatePercent: z.number().min(0).max(100),
+    /** Lighthouse in der Demo-QA (≈ 8 s je Demo) */
+    qaLighthouse: z.boolean(),
+    /** KI-Prüfung der Texte in der Demo-QA */
+    qaLlm: z.boolean(),
   }),
   onboarding: z.object({
     includedChangeRounds: z.number().int().min(0),
@@ -393,6 +397,8 @@ export const DEFAULT_CONFIG: AppConfig = {
   review: {
     manualReviewFirstN: 30,
     sampleRatePercent: 10,
+    qaLighthouse: true,
+    qaLlm: true,
   },
   onboarding: {
     includedChangeRounds: 2,

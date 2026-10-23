@@ -122,7 +122,10 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
 
   const passed = checks.every((c) => c.passed);
   const result: QaResult = { passed, checkedAt: new Date().toISOString(), checks };
-  const manual = passed ? await requiresManualReview(db) : true;
+  // Bereits freigegebene/veröffentlichte Demos behalten ihren Status (QA-Wiederholung)
+  const current = await db.query.demos.findFirst({ where: eq(demos.id, demoId), columns: { status: true } });
+  const decide = ['building', 'pending_review', 'qa_failed'].includes(current?.status ?? '');
+  const manual = passed && decide ? await requiresManualReview(db) : true;
   await db
     .update(demos)
     .set({
@@ -130,8 +133,7 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
       screenshotDesktopKey: `${base}/desktop.jpg`,
       screenshotMobileKey: `${base}/mobile.jpg`,
       compositeKey: `${base}/composite.jpg`,
-      status: passed ? 'pending_review' : 'qa_failed',
-      reviewRequired: manual,
+      ...(decide ? { status: passed ? ('pending_review' as const) : ('qa_failed' as const), reviewRequired: manual } : {}),
       updatedAt: new Date(),
     })
     .where(eq(demos.id, demoId));
@@ -142,14 +144,14 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
     actor,
     context: { failed: checks.filter((c) => !c.passed).map((c) => c.name) },
   });
-  if (!passed) {
+  if (!passed && decide) {
     await raiseAlert(db, {
       level: 'warn',
       code: `demo_qa_failed:${demoId}`,
       message: `Demo-QA fehlgeschlagen (${checks.filter((c) => !c.passed).map((c) => c.name).join(', ')}).`,
       context: { demoId, leadId: lead.id },
     });
-  } else if (!manual) {
+  } else if (decide && !manual) {
     // Automatische Freigabe (nur nach den ersten N manuellen Prüfungen und mit AUTO_APPROVE_DEMOS)
     await approveDemo(demoId, 'job:auto-approve', { manual: false });
   }

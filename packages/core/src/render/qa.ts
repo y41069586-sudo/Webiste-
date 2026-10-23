@@ -52,59 +52,58 @@ interface LayoutIssue {
   detail: string;
 }
 
-/** Läuft im Browser: horizontale Überläufe, abgeschnittener Text, überlappende Texte. */
-async function layoutIssues(page: Page): Promise<LayoutIssue[]> {
-  return page.evaluate(() => {
-    const issues: { kind: 'overflow-x' | 'offscreen' | 'overlap' | 'clipped'; detail: string }[] = [];
-    const vw = document.documentElement.clientWidth;
-    if (document.documentElement.scrollWidth > vw + 1) {
-      issues.push({ kind: 'overflow-x', detail: `scrollWidth ${document.documentElement.scrollWidth} > ${vw}` });
+/**
+ * Läuft im Browser: horizontale Überläufe, abgeschnittener Text, überlappende Texte.
+ * Als reiner JS-String, weil Transpiler (tsx/esbuild keepNames) sonst Hilfsfunktionen
+ * wie `__name` einfügen, die im Browser nicht existieren.
+ */
+const LAYOUT_SCRIPT = `(() => {
+  const issues = [];
+  const vw = document.documentElement.clientWidth;
+  if (document.documentElement.scrollWidth > vw + 1) {
+    issues.push({ kind: 'overflow-x', detail: 'scrollWidth ' + document.documentElement.scrollWidth + ' > ' + vw });
+  }
+  function isFixed(el) {
+    for (let e = el; e; e = e.parentElement) {
+      const pos = getComputedStyle(e).position;
+      if (pos === 'fixed' || pos === 'sticky') return true;
     }
-    const isFixed = (el: Element): boolean => {
-      for (let e: Element | null = el; e; e = e.parentElement) {
-        const pos = getComputedStyle(e).position;
-        if (pos === 'fixed' || pos === 'sticky') return true;
-      }
-      return false;
-    };
-    const visible = (el: Element): boolean => {
-      const s = getComputedStyle(el);
-      const r = el.getBoundingClientRect();
-      // Screenreader-Texte (1px) und Inhalte zugeklappter <details> zählen nicht
-      if (r.width <= 2 || r.height <= 2) return false;
-      if (el.closest('details:not([open])') && !el.closest('summary')) return false;
-      return s.display !== 'none' && s.visibility !== 'hidden';
-    };
-    const textEls = [...document.querySelectorAll('h1,h2,h3,p,li,a,button,label,dt,dd,summary,span')].filter(
-      (el) => visible(el) && [...el.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? '').trim().length > 0) && !isFixed(el),
-    );
-    for (const el of textEls) {
-      const r = el.getBoundingClientRect();
-      if (r.right > vw + 1 || r.left < -1) issues.push({ kind: 'offscreen', detail: `${el.tagName}: „${(el.textContent ?? '').trim().slice(0, 40)}“` });
-      const he = el as HTMLElement;
-      const ov = getComputedStyle(he).overflowX;
-      if ((ov === 'hidden' || ov === 'clip') && he.scrollWidth > he.clientWidth + 2) {
-        issues.push({ kind: 'clipped', detail: `${el.tagName}: „${(el.textContent ?? '').trim().slice(0, 40)}“` });
-      }
-    }
-    const rects = textEls.map((el) => ({ el, r: el.getBoundingClientRect() }));
-    for (let i = 0; i < rects.length && issues.length < 20; i++) {
-      for (let j = i + 1; j < rects.length; j++) {
-        const a = rects[i]!;
-        const b = rects[j]!;
-        if (a.el.contains(b.el) || b.el.contains(a.el)) continue;
-        const w = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
-        const h = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
-        if (w > 4 && h > 4) {
-          issues.push({
-            kind: 'overlap',
-            detail: `„${(a.el.textContent ?? '').trim().slice(0, 30)}“ ↔ „${(b.el.textContent ?? '').trim().slice(0, 30)}“`,
-          });
-        }
-      }
-    }
-    return issues;
+    return false;
+  }
+  function visible(el) {
+    const s = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    if (r.width <= 2 || r.height <= 2) return false;
+    if (el.closest('details:not([open])') && !el.closest('summary')) return false;
+    return s.display !== 'none' && s.visibility !== 'hidden';
+  }
+  function label(el, n) { return (el.textContent || '').trim().slice(0, n); }
+  const textEls = Array.from(document.querySelectorAll('h1,h2,h3,p,li,a,button,label,dt,dd,summary,span')).filter(function (el) {
+    return visible(el) && Array.from(el.childNodes).some(function (n) { return n.nodeType === 3 && (n.textContent || '').trim().length > 0; }) && !isFixed(el);
   });
+  for (const el of textEls) {
+    const r = el.getBoundingClientRect();
+    if (r.right > vw + 1 || r.left < -1) issues.push({ kind: 'offscreen', detail: el.tagName + ': „' + label(el, 40) + '“' });
+    const ov = getComputedStyle(el).overflowX;
+    if ((ov === 'hidden' || ov === 'clip') && el.scrollWidth > el.clientWidth + 2) {
+      issues.push({ kind: 'clipped', detail: el.tagName + ': „' + label(el, 40) + '“' });
+    }
+  }
+  const rects = textEls.map(function (el) { return { el: el, r: el.getBoundingClientRect() }; });
+  for (let i = 0; i < rects.length && issues.length < 20; i++) {
+    for (let j = i + 1; j < rects.length; j++) {
+      const a = rects[i], b = rects[j];
+      if (a.el.contains(b.el) || b.el.contains(a.el)) continue;
+      const w = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
+      const h = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
+      if (w > 4 && h > 4) issues.push({ kind: 'overlap', detail: '„' + label(a.el, 30) + '“ ↔ „' + label(b.el, 30) + '“' });
+    }
+  }
+  return issues;
+})()`;
+
+async function layoutIssues(page: Page): Promise<LayoutIssue[]> {
+  return (await page.evaluate(LAYOUT_SCRIPT)) as LayoutIssue[];
 }
 
 export interface BrowserQaOptions {

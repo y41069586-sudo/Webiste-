@@ -66,3 +66,16 @@ describe('Inhaltsregeln', () => {
     expect(n.about).toBe('Absatz eins.\n\nAbsatz zwei');
   });
 });
+
+describe('Template-Rotation', () => {
+  it('verteilt gleichmäßig über Templates und Paletten', async () => {
+    const { chooseTemplate } = await import('../src/demos/build');
+    const usage: Record<string, number> = {};
+    for (let i = 0; i < 9; i++) {
+      const c = chooseTemplate({ id: `00000000-0000-0000-0000-00000000000${i}`, branchGroup: 'beauty' }, [], usage);
+      usage[`${c.templateId}/${c.palette}`] = (usage[`${c.templateId}/${c.palette}`] ?? 0) + 1;
+    }
+    expect(Object.keys(usage)).toHaveLength(9);
+    expect(Object.values(usage).every((n) => n === 1)).toBe(true);
+  });
+});

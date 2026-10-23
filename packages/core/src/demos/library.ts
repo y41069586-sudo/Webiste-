@@ -1,4 +1,4 @@
-import type { IconKey, SiteContent } from '@wbm/templates';
+import type { IconKey, SiteContent } from '@wbm/templates/types';
 
 /**
  * Geprüfte Fallback-Texte je Branche (ohne Zahlen, ohne erfundene Fakten, Sie-Form).
