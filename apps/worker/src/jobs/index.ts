@@ -7,3 +7,4 @@ import './sending';
 import './orders';
 import './sites';
 import './support';
+import './optimizer';

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const NAV: { href: string; label: string }[] = [
   { href: '/admin', label: 'Übersicht' },
+  { href: '/admin/kpis', label: 'Kennzahlen' },
   { href: '/admin/leads', label: 'Leads' },
   { href: '/admin/demos', label: 'Demos (Review)' },
   { href: '/admin/letters', label: 'Briefe (Review)' },
@@ -16,7 +17,7 @@ const NAV: { href: string; label: string }[] = [
   { href: '/admin/jobs', label: 'Jobs & Steuerung' },
   { href: '/admin/settings', label: 'Einstellungen' },
   { href: '/admin/audit', label: 'Audit-Log' },
-  { href: '/admin/outbox', label: 'Postausgang (Test)' },
+  { href: '/admin/outbox', label: 'Postausgang' },
 ];
 
 export function AdminNav() {
