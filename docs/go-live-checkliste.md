@@ -25,6 +25,24 @@ Diese Liste muss vollständig abgehakt sein, **bevor** `DRY_RUN=false` gesetzt w
       Wochenbudget klein setzen → Versand stoppt; Not-Aus → Jobs mit Kostenfolge stoppen
 - [ ] **`DRY_RUN=false` erst nach deinem ausdrücklichen OK**
 
+## Stripe (Konto „Website“)
+
+Stand 23.10.2026, eingerichtet über die Stripe-Anbindung (nur Sandbox „Website sandbox“ erreichbar):
+
+- [x] Sandbox: Webhook-Endpunkt `https://seitenwerk.world/api/webhooks/stripe` (API-Version
+      `2026-09-30.endive`) mit den Events `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+      `checkout.session.async_payment_failed`, `checkout.session.expired`, `charge.refunded`, `invoice.paid`,
+      `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted`
+- [ ] Sandbox: Signing Secret aus dem Dashboard (Entwickler → Webhooks) in die Test-`.env` als `STRIPE_WEBHOOK_SECRET`;
+      Schlüssel `sk_test_…` als `STRIPE_SECRET_KEY`
+- [ ] Sandbox und Live: **SEPA-Lastschrift aktivieren** (Einstellungen → Zahlungsmethoden) – über die API nicht
+      möglich, aktuell nicht verfügbar; bis dahin bietet der Checkout nur Karte an
+- [ ] Sandbox und Live: **Smart Retries** für Abos einschalten (Billing → Einstellungen → Fehlgeschlagene Zahlungen),
+      danach „Abo als unbezahlt markieren“ (das Mahnverfahren übernimmt)
+- [ ] Live: denselben Webhook-Endpunkt mit denselben Events im Live-Modus anlegen (die Anbindung hat keinen
+      Live-Zugriff), Live-Secret und `sk_live_…` nur in die Server-`.env`
+- [ ] Live: Geschäftsdaten, Kontoauszugs-Bezeichnung „SEITENWERK“, Auszahlungskonto
+
 ## Technik vor dem Start
 
 - [ ] DNS für `APP_HOST`, `DEMO_DOMAIN`, `TRACK_DOMAIN` gesetzt, TLS aktiv
