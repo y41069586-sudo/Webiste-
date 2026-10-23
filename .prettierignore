@@ -8,7 +8,6 @@ backups
 apps/web/test-results
 apps/web/playwright-report
 # Wortlaut der Auftraggeber-Dokumente bleibt unverändert
-docs/AUFTRAG.md
 docs/spec-update-2.md
 packages/core/test/fixtures
 # wird von Next.js selbst geschrieben

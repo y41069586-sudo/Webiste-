@@ -74,11 +74,12 @@ export default async function KpiPage({ searchParams }: { searchParams: Promise<
     ...(sp.branche && opts.branches.includes(sp.branche) ? { branch: sp.branche } : {}),
     ...(sp.variante && opts.variants.some((v) => v.id === sp.variante) ? { variantId: sp.variante } : {}),
   };
-  const [s, bySegment, byVariant, byWeek] = await Promise.all([
+  const [s, bySegment, byVariant, byWeek, byLeadSegment] = await Promise.all([
     kpiSummary(f),
     kpiRows(f, 'segment'),
     kpiRows(f, 'variant'),
     kpiRows(f, 'week'),
+    kpiRows(f, 'lead_segment'),
   ]);
   return (
     <>
@@ -150,7 +151,7 @@ export default async function KpiPage({ searchParams }: { searchParams: Promise<
         <Stat
           label="Käufe"
           value={num(s.purchases)}
-          hint={`Kaufrate ${pct(s.purchaseRate, 2)} · Umsatz ${eur(s.revenueCents)}`}
+          hint={`Kaufrate ${pct(s.purchaseRate, 2)} · Umsatz ${eur(s.revenueCents)} · einmalig ${num(s.purchasesOneTime)} / monatlich ${num(s.purchasesMonthly)}${s.oneTimeShare !== null ? ` (${pct(s.oneTimeShare, 0)} einmalig)` : ''}`}
         />
         <Stat
           label="CAC / ROI"
@@ -162,6 +163,9 @@ export default async function KpiPage({ searchParams }: { searchParams: Promise<
       <div className="grid gap-6">
         <Card title="Nach Segment (Stadt : Gruppe : Branche)">
           <FunnelTable rows={bySegment} first="Segment" />
+        </Card>
+        <Card title="Nach Lead-Segment (neu / social_only / etabliert)">
+          <FunnelTable rows={byLeadSegment} first="Lead-Segment" />
         </Card>
         <Card title="Nach Briefvariante">
           <FunnelTable rows={byVariant} first="Variante" />

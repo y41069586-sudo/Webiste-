@@ -43,6 +43,44 @@ function faviconDataUri(letter: string, color: string): string {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
+/**
+ * „Seite übernehmen“: zwei gleichwertige Preiskarten (keine Vorauswahl, keine versteckten Kosten) und
+ * Vertrauensblock des Erstellers. Eigenes, neutrales Design – deutlich vom Entwurf des Betriebs abgesetzt.
+ */
+function offerSection(demo: NonNullable<RenderInput['demo']>): string {
+  const cards = demo.offers ?? [];
+  if (!cards.length && !demo.trust) return '';
+  const card = (
+    c: (typeof cards)[number],
+  ) => `<li class="flex flex-col rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] shadow-sm">
+      <h3 class="text-base font-semibold">${esc(c.title)}</h3>
+      <p class="mt-2"><span class="text-3xl font-bold tracking-tight">${esc(c.price)}</span> <span class="text-[#4b5563]">${esc(c.unit)}</span></p>
+      <ul class="mt-3 flex-1 space-y-1.5 text-sm text-[#374151]">${c.points.map((p) => `<li class="flex gap-2"><span aria-hidden="true" class="text-[#047857]">✓</span><span>${esc(p)}</span></li>`).join('')}</ul>
+      <a href="${esc(c.href)}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-4 py-2 font-semibold text-white hover:bg-[#1f2937] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827]">${esc(c.title)} wählen</a>
+    </li>`;
+  const t = demo.trust;
+  const trust = t
+    ? `<div class="mt-10 flex flex-col gap-4 rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] sm:flex-row sm:items-start">
+      ${t.photoDataUri ? `<img src="${t.photoDataUri}" alt="${esc(t.name)}" width="96" height="96" class="h-24 w-24 shrink-0 rounded-full object-cover">` : ''}
+      <div>
+        <h3 class="text-base font-semibold">Wer hat diesen Entwurf gebaut?</h3>
+        <p class="mt-1 font-medium">${esc(t.name)}</p>
+        ${t.intro ? `<p class="mt-2 text-sm text-[#374151]">${esc(t.intro)}</p>` : ''}
+        <p class="mt-3 text-sm text-[#374151]">${esc(t.email)}${t.phone ? ` · ${esc(t.phone)}` : ''} · <a class="underline" href="${esc(t.imprintUrl)}">Impressum</a></p>
+      </div>
+    </div>`
+    : '';
+  return `<section id="uebernehmen" aria-labelledby="uebernehmen-titel" class="border-t-4 border-[#fbbf24] bg-[#f3f4f6] py-12 text-[#111827]">
+  <div class="mx-auto max-w-4xl px-4">
+    <p class="text-sm font-medium text-[#4b5563]">Angebot von ${esc(demo.sender.company)} – nicht Teil der Website</p>
+    <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">Diese Seite übernehmen</h2>
+    ${cards.length ? `<ul class="mt-6 grid gap-4 ${cards.length > 1 ? 'sm:grid-cols-2' : ''}">${cards.map(card).join('')}</ul>` : ''}
+    ${demo.guaranteeNote ? `<p class="mt-4 text-sm text-[#374151]">${esc(demo.guaranteeNote)}</p>` : ''}
+    ${trust}
+  </div>
+</section>`;
+}
+
 export function buildParts(input: RenderInput): SharedParts {
   const { mode, content, facts, demo, live } = input;
   const palette = getPalette(input.palette);
@@ -93,8 +131,12 @@ ${jsonLd}
   <div class="mx-auto flex max-w-6xl flex-col gap-1.5 px-3 py-2 text-xs sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm md:flex-row md:items-center md:justify-between">
     <p class="leading-snug"><strong class="font-semibold">Unverbindlicher Entwurf</strong> von ${esc(demo.sender.company)} für ${esc(facts.name)}. Nicht öffentlich.</p>
     <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-      <a href="${esc(demo.checkoutUrl)}" class="inline-flex min-h-10 items-center rounded-md bg-[#fbbf24] px-2.5 py-1.5 sm:px-3 font-semibold text-[#111827] hover:bg-[#f59e0b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Für ${esc(demo.priceLabel)} übernehmen</a>
-      <a href="#frage" class="inline-flex min-h-10 items-center rounded-md border border-white/40 px-2.5 py-1.5 sm:px-3 font-medium text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Frage stellen</a>
+      <a href="${demo.offers?.length ? '#uebernehmen' : esc(demo.checkoutUrl)}" class="inline-flex min-h-10 items-center rounded-md bg-[#fbbf24] px-2.5 py-1.5 sm:px-3 font-semibold text-[#111827] hover:bg-[#f59e0b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Seite übernehmen</a>
+      ${
+        demo.whatsappUrl
+          ? `<a href="${esc(demo.whatsappUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-10 items-center rounded-md border border-white/40 px-2.5 py-1.5 sm:px-3 font-medium text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Frage per WhatsApp</a>`
+          : `<a href="#frage" class="inline-flex min-h-10 items-center rounded-md border border-white/40 px-2.5 py-1.5 sm:px-3 font-medium text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Frage stellen</a>`
+      }
       <form method="post" action="${esc(demo.optOutUrl)}" class="inline">
         <button type="submit" class="inline-flex min-h-10 items-center rounded-md px-2 py-1.5 sm:px-3 font-medium text-white underline underline-offset-2 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Kein Interesse</button>
       </form>
@@ -212,10 +254,10 @@ ${jsonLd}
   const footer = (o: { className: string; linkClass: string }) => {
     const year = new Date().getFullYear();
     if (isDemo && demo) {
-      return `<footer class="${o.className}">
+      return `${offerSection(demo)}<footer class="${o.className}">
   <div class="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:grid-cols-3">
     <div><p class="font-semibold">${esc(facts.name)}</p><p class="mt-2 text-sm opacity-90">${addressLines}</p></div>
-    <div class="text-sm opacity-90"><p>Dies ist ein unverbindlicher Entwurf. ${esc(facts.name)} hat diese Seite nicht beauftragt.</p><p class="mt-2">Der Entwurf wird ${esc(demo.expiresLabel)} automatisch gelöscht.</p></div>
+    <div class="text-sm opacity-90"><p>Dies ist ein unverbindlicher Entwurf. ${esc(facts.name)} hat diese Seite nicht beauftragt.</p><p class="mt-2">Der Entwurf ist bis ${esc(demo.expiresLabel.replace(/^am\s+/, ''))} online und wird danach automatisch gelöscht.</p></div>
     <div class="text-sm"><p class="opacity-90">Entwurf erstellt von ${esc(demo.sender.company)}</p>
       <ul class="mt-2 space-y-1"><li><a class="${o.linkClass}" href="${esc(demo.sender.imprintUrl)}">Impressum (Ersteller)</a></li><li><a class="${o.linkClass}" href="${esc(demo.sender.privacyUrl)}">Datenschutz (Ersteller)</a></li></ul>
     </div>

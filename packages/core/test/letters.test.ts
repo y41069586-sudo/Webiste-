@@ -109,7 +109,16 @@ describe('Brief-PDF (echter Browser)', () => {
     expect(check.addressBox!.y2).toBeLessThanOrEqual(85.5);
     const text = (await pdfTextItems(pdf)).items.map((i) => i.str).join(' ');
     expect(text).toMatch(/Ihre neue Website ist schon fertig|Ein Website-Entwurf für/);
-    expect(text).toContain('390 €');
+    expect(text).toContain('590 €');
+    // Beide Preisoptionen, Mindestlaufzeit direkt daneben, Garantie, „online bis …“, Kurz-URL
+    expect(text).toMatch(/49\s€ pro Monat/);
+    expect(text).toContain('12 Monate Mindestlaufzeit');
+    expect(text).toContain('Geld zurück');
+    expect(text).toMatch(/online bis \d{1,2}\. \p{L}+ \d{4}/u);
+    expect(text).not.toMatch(/nach \d+ Tagen automatisch gelöscht/);
+    const l = (await getDb().query.leads.findFirst({ where: eq(leads.id, lead!.id) }))!;
+    expect(l.shortCode).toMatch(/^[a-hjkmnp-z2-9]{6}$/);
+    expect(text.replace(/\s+/g, '')).toContain(`/${l.shortCode}`);
     expect(text).toContain('Art. 14 DSGVO');
     expect(text).toContain('Art. 21 DSGVO');
     expect(text).toContain('Kein Interesse');
@@ -188,11 +197,12 @@ describe('Alle Briefvarianten passen im ungünstigsten Fall auf eine Seite', () 
         rating: { rating: 4.9, count: 213 },
         compositeDataUri: `data:image/svg+xml;base64,${svg.toString('base64')}`,
         qrDataUri: await qrDataUri('https://go.example-websites.de/q/ABCDEFGHJKLMNPQRSTUVWXYZ'),
-        shortUrl: 'go.example-websites.de/q/ABCDEFGHJKLMNPQRSTUVWXYZ',
+        shortUrl: 'go.example-websites.de/k7m2xq',
+        expiresLabel: '23. November 2026',
         dateLine: 'Dortmund, 23. Oktober 2026',
         privacyNotice: privacyNoticeText(DEFAULT_CONFIG, 'osm', 'https://app.example-websites.de/datenschutz'),
         objectionNotice: objectionNoticeText('widerspruch@example-websites.de'),
-        priceLabel: '390 €',
+        priceLabel: '590 €',
       });
       const html = renderLetterHtml(data);
       const dom = await validateLetterDom(html, 'left');

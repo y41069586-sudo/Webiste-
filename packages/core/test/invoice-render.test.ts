@@ -87,7 +87,7 @@ describe('Rechnungs-PDF und Versand', () => {
     const { pages, items } = await pdfTextItems(pdf);
     expect(pages).toBe(1);
     const text = items.map((i) => i.str).join(' ');
-    for (const s of [o.invoiceNumber!, '§ 19 UStG', 'Elektro Beispiel GmbH', 'Steuernummer', 'Leistungszeitpunkt', '390,00'])
+    for (const s of [o.invoiceNumber!, '§ 19 UStG', 'Elektro Beispiel GmbH', 'Steuernummer', 'Leistungszeitpunkt', '590,00'])
       expect(text).toContain(s);
     const layout = await validateLetterPdf(pdf, {
       recipientLines: ['Elektro Beispiel GmbH', 'Max Beispiel', 'Hohe Straße 12', '44139 Dortmund'],
@@ -111,7 +111,7 @@ describe('Rechnungs-PDF und Versand', () => {
   it('Stornorechnung nach Erstattung mit eigener Nummer', async () => {
     const order = await paidOrder();
     await sendOrderInvoice(order.id);
-    await applyRefund(order.id, 39000, 'test');
+    await applyRefund(order.id, 59000, 'test');
     expect(await sendCancellationInvoice(order.id)).toBe('sent');
     expect(await sendCancellationInvoice(order.id)).toBe('already');
     const o = (await getDb().query.orders.findFirst({ where: eq(orders.id, order.id) }))!;
@@ -120,6 +120,6 @@ describe('Rechnungs-PDF und Versand', () => {
     const text = items.map((i) => i.str).join(' ');
     expect(text).toContain('Stornorechnung');
     expect(text).toContain(o.invoiceNumber!);
-    expect(text).toContain('-390,00');
+    expect(text).toContain('-590,00');
   });
 });

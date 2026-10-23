@@ -3,14 +3,14 @@ import { renderInvoiceHtml, type InvoiceData } from '@wbm/templates';
 import { appUrl } from '../config/env';
 import { getConfig } from '../config/service';
 import { getDb } from '../db/client';
-import { customers, orders } from '../db/schema';
-import { orderConfirmationEmail, refundEmail } from '../emails/templates';
+import { customers, orderPayments, orders } from '../db/schema';
+import { orderConfirmationEmail, recurringInvoiceEmail, refundEmail } from '../emails/templates';
 import { buildCancellationData, nextInvoiceNumber, orderAmounts } from '../invoices/build';
 import { logger } from '../logger';
 import { getProviders } from '../providers';
 import { audit } from '../services/audit';
 import { sendTransactionalEmail } from '../services/email';
-import { formatEuro } from '../util/time';
+import { formatDateDe, formatDateLongDe, formatEuro } from '../util/time';
 import { htmlToPdf } from './pdf';
 
 function invoiceKey(number: string, issued: Date): string {
@@ -51,6 +51,8 @@ export async function sendOrderInvoice(orderId: string): Promise<'sent' | 'alrea
     amount: formatEuro(order.amountCents),
     onboardingUrl: appUrl(`/onboarding/${customer.accessToken}`),
     domain: order.domainWish,
+    monthlyMinTermEnds: order.plan === 'monthly' && order.minTermEndsAt ? formatDateLongDe(order.minTermEndsAt) : null,
+    guaranteeUntil: order.guaranteeEndsAt ? formatDateLongDe(order.guaranteeEndsAt) : null,
   });
   await sendTransactionalEmail({
     ...mail,
@@ -129,5 +131,56 @@ export async function sendCancellationInvoice(orderId: string): Promise<'sent' |
   });
   await db.update(orders).set({ cancellationSentAt: new Date(), updatedAt: new Date() }).where(eq(orders.id, orderId));
   logger.info({ orderId }, 'Stornorechnung versendet');
+  return 'sent';
+}
+
+/** Rechnung zu einer Monatsrate bzw. „Hosting & Pflege“ erzeugen und senden (idempotent). */
+export async function sendPaymentInvoice(paymentId: string): Promise<'sent' | 'already' | 'skipped'> {
+  const db = getDb();
+  const cfg = await getConfig();
+  const { storage } = getProviders();
+  const pay = await db.query.orderPayments.findFirst({ where: eq(orderPayments.id, paymentId) });
+  if (!pay?.invoiceNumber || !pay.invoiceJson) return 'skipped';
+  if (pay.invoiceSentAt) return 'already';
+  const order = await db.query.orders.findFirst({ where: eq(orders.id, pay.orderId) });
+  if (!order) return 'skipped';
+  let key = pay.invoicePdfKey;
+  let pdf = key ? await storage.get(key) : null;
+  if (!pdf) {
+    pdf = await htmlToPdf(renderInvoiceHtml(pay.invoiceJson as unknown as InvoiceData));
+    key = invoiceKey(pay.invoiceNumber, pay.paidAt);
+    await storage.put(key, pdf, 'application/pdf');
+    await db.update(orderPayments).set({ invoicePdfKey: key }).where(eq(orderPayments.id, pay.id));
+  }
+  const customer = await db.query.customers.findFirst({ where: eq(customers.orderId, order.id) });
+  const period =
+    pay.periodStart && pay.periodEnd
+      ? `${formatDateDe(pay.periodStart)} bis ${formatDateDe(new Date(pay.periodEnd.getTime() - 86400_000))}`
+      : formatDateDe(pay.paidAt);
+  const mail = recurringInvoiceEmail(cfg, {
+    name: order.customerName,
+    invoiceNumber: pay.invoiceNumber,
+    amount: formatEuro(pay.amountCents),
+    period,
+    domain: customer?.domain ?? order.domainWish,
+  });
+  await sendTransactionalEmail({
+    ...mail,
+    kind: 'invoice',
+    idempotencyKey: `invoice:${order.id}:${pay.invoiceNumber}`,
+    to: customer?.email ?? order.customerEmail,
+    attachments: [{ filename: `Rechnung-${pay.invoiceNumber}.pdf`, content: pdf, contentType: 'application/pdf' }],
+    orderId: order.id,
+    customerId: customer?.id,
+    leadId: order.leadId,
+  });
+  await db.update(orderPayments).set({ invoiceSentAt: new Date() }).where(eq(orderPayments.id, pay.id));
+  await audit(db, {
+    entity: 'order',
+    entityId: order.id,
+    action: 'payment_invoice_sent',
+    actor: 'job:send-invoice',
+    context: { invoiceNumber: pay.invoiceNumber, sequence: pay.sequence },
+  });
   return 'sent';
 }

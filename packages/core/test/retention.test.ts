@@ -103,8 +103,8 @@ describe('Lösch-Job', () => {
     const buyer = await seedLead('paid', { letterMonthsAgo: 9, demoExpiresInDays: -5 });
     await db.insert(orders).values({
       leadId: buyer.lead.id,
-      amountCents: 39000,
-      netCents: 39000,
+      amountCents: 59000,
+      netCents: 59000,
       status: 'paid',
       customerCompany: 'K',
       customerName: 'N',
@@ -114,8 +114,8 @@ describe('Lösch-Job', () => {
       invoiceNumber: 'RE-2026-0001',
     });
     await db.insert(orders).values({
-      amountCents: 39000,
-      netCents: 39000,
+      amountCents: 59000,
+      netCents: 59000,
       status: 'expired',
       customerCompany: 'A',
       customerName: 'B',

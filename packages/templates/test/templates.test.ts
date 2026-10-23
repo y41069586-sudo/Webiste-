@@ -40,7 +40,18 @@ describe('Templates', () => {
         expect(html).toContain('<html lang="de">');
         expect(html).toContain('<meta name="robots" content="noindex, nofollow, noarchive">');
         expect(html).toContain('Unverbindlicher Entwurf');
-        expect(html).toContain('Für 390 € übernehmen');
+        expect(html).toContain('Seite übernehmen');
+        expect(html).toContain('href="#uebernehmen"');
+        expect(html).toContain('Frage per WhatsApp');
+        expect(html).toContain('https://wa.me/491701234567?text=');
+        // Zwei gleichwertige Karten, Mindestlaufzeit neben den 49 €, Folgepreis sichtbar
+        expect(html).toContain('id="uebernehmen"');
+        expect(html).toContain('590 €');
+        expect(html).toContain('49 €');
+        expect(html).toContain('12 Monate Mindestlaufzeit');
+        expect(html).toContain('Ab Monat 13 nur noch 19 €/Monat');
+        expect(html).toContain('Wer hat diesen Entwurf gebaut?');
+        expect(html).not.toContain('checked');
         expect(html).toContain('Kein Interesse');
         expect(html).toContain('Frage zu diesem Entwurf');
         expect(html).toContain('hat diese Seite nicht beauftragt');
@@ -80,6 +91,8 @@ describe('Templates', () => {
   it('Screenshot-Modus: ohne Banner, aber noindex', () => {
     const html = renderSite({ ...demoInput('beauty-soft', 'salbei', 'beauty'), mode: 'screenshot' });
     expect(html).not.toContain('Unverbindlicher Entwurf');
+    expect(html).not.toContain('id="uebernehmen"');
+    expect(html).not.toContain('wa.me');
     expect(html).toContain('noindex');
   });
 

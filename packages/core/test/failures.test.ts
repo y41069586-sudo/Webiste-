@@ -127,7 +127,7 @@ describe('Fehlertoleranz', () => {
       rawType: 'checkout.session.completed',
       sessionId: order.stripeSessionId,
       paymentStatus: 'paid',
-      amountTotal: 39000,
+      amountTotal: 59000,
       currency: 'eur',
     });
     expect(await processPaymentWebhook(raw, p.sign(raw))).toMatchObject({ duplicate: false, result: 'paid' });
@@ -199,7 +199,7 @@ describe('Fehlertoleranz', () => {
       rawType: 'x',
       sessionId: order.stripeSessionId,
       paymentStatus: 'paid',
-      amountTotal: 39000,
+      amountTotal: 59000,
       currency: 'eur',
     });
     await processPaymentWebhook(raw, p.sign(raw));

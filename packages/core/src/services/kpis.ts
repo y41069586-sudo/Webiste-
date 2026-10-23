@@ -10,7 +10,7 @@ export interface KpiFilter {
   variantId?: string;
 }
 
-export type KpiGroup = 'all' | 'segment' | 'variant' | 'week' | 'branch';
+export type KpiGroup = 'all' | 'segment' | 'variant' | 'week' | 'branch' | 'lead_segment';
 
 export interface KpiRow {
   key: string;
@@ -23,6 +23,12 @@ export interface KpiRow {
   ctaClicks: number;
   checkouts: number;
   purchases: number;
+  /** davon Option A (Einmalzahlung) bzw. Option B (monatlich) */
+  purchasesOneTime: number;
+  purchasesMonthly: number;
+  /** Anteil Einmalzahlung an allen Käufen (Update 2, A6) */
+  oneTimeShare: number | null;
+  /** Einnahmen inkl. bereits bezahlter Monatsraten, abzüglich Erstattungen */
   revenueCents: number;
   scanRate: number | null;
   ctaRate: number | null;
@@ -65,6 +71,8 @@ function groupExpr(g: KpiGroup): SQL {
       return sql`to_char(date_trunc('week', c.sent_at AT TIME ZONE 'Europe/Berlin'), 'IYYY-"KW"IW')`;
     case 'branch':
       return sql`c.branch`;
+    case 'lead_segment':
+      return sql`coalesce(c.lead_segment, 'ohne')`;
     default:
       return sql`'gesamt'`;
   }
@@ -79,6 +87,7 @@ type RawRow = {
   ctas: number;
   checkouts: number;
   purchases: number;
+  purchases_monthly: number;
   revenue: number;
 };
 
@@ -86,7 +95,7 @@ type RawRow = {
 export async function kpiRows(f: KpiFilter, group: KpiGroup, db: DbOrTx = getDb()): Promise<KpiRow[]> {
   const res = await db.execute<RawRow>(sql`
     WITH cohort AS (
-      SELECT l.lead_id, l.variant_id, l.sent_at, ld.segment_key, ld.branch
+      SELECT l.lead_id, l.variant_id, l.sent_at, ld.segment_key, ld.branch, ld.lead_segment
       FROM letters l JOIN leads ld ON ld.id = l.lead_id
       WHERE ${cohortWhere(f)}
     ),
@@ -98,7 +107,10 @@ export async function kpiRows(f: KpiFilter, group: KpiGroup, db: DbOrTx = getDb(
       FROM events e WHERE e.lead_id IN (SELECT lead_id FROM cohort) GROUP BY e.lead_id
     ),
     ord AS (
-      SELECT o.lead_id, sum(o.amount_cents - o.refunded_cents) AS revenue
+      SELECT o.lead_id,
+        sum(o.amount_cents - o.refunded_cents
+          + coalesce((SELECT sum(p.amount_cents - p.refunded_cents) FROM order_payments p WHERE p.order_id = o.id), 0)) AS revenue,
+        bool_or(o.plan = 'monthly') AS monthly
       FROM orders o WHERE o.status IN ('paid', 'refunded') AND o.lead_id IN (SELECT lead_id FROM cohort) GROUP BY o.lead_id
     ),
     lc AS (
@@ -114,6 +126,7 @@ export async function kpiRows(f: KpiFilter, group: KpiGroup, db: DbOrTx = getDb(
       (count(*) FILTER (WHERE ev.cta))::int AS ctas,
       (count(*) FILTER (WHERE ev.checkout))::int AS checkouts,
       count(ord.lead_id)::int AS purchases,
+      (count(ord.lead_id) FILTER (WHERE ord.monthly))::int AS purchases_monthly,
       coalesce(sum(ord.revenue), 0)::int AS revenue
     FROM cohort c
     LEFT JOIN ev ON ev.lead_id = c.lead_id
@@ -132,6 +145,9 @@ export async function kpiRows(f: KpiFilter, group: KpiGroup, db: DbOrTx = getDb(
     ctaClicks: r.ctas,
     checkouts: r.checkouts,
     purchases: r.purchases,
+    purchasesOneTime: r.purchases - r.purchases_monthly,
+    purchasesMonthly: r.purchases_monthly,
+    oneTimeShare: rate(r.purchases - r.purchases_monthly, r.purchases),
     revenueCents: r.revenue,
     scanRate: rate(r.scans, r.leads),
     ctaRate: rate(r.ctas, r.leads),
@@ -166,6 +182,9 @@ export async function kpiSummary(f: KpiFilter, db: DbOrTx = getDb()): Promise<Kp
     ctaClicks: 0,
     checkouts: 0,
     purchases: 0,
+    purchasesOneTime: 0,
+    purchasesMonthly: 0,
+    oneTimeShare: null,
     revenueCents: 0,
     scanRate: null,
     ctaRate: null,

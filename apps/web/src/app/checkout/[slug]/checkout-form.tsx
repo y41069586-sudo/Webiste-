@@ -1,16 +1,29 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
+import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from 'react';
 import { checkoutAction, type CheckoutState } from './actions';
 
 const input =
   'block w-full rounded-lg border bg-white px-3 py-2.5 text-base shadow-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 focus:outline-none sm:text-sm';
 
+export interface PlanOffer {
+  id: 'one_time' | 'monthly';
+  title: string;
+  price: string;
+  unit: string;
+  points: string[];
+  /** Kurzform für den Absende-Button, z. B. „590 €“ bzw. „49 € pro Monat“ */
+  buttonLabel: string;
+}
+
 interface Props {
   slug: string;
   prefill: { company: string; street: string; postalCode: string; city: string; domain: string };
-  priceLabel: string;
-  subscription: { enabled: boolean; label: string } | null;
+  plans: PlanOffer[];
+  /** Auf der Demo-Preiskarte selbst gewählte Option (sonst keine Vorauswahl) */
+  initialPlan: PlanOffer['id'] | null;
+  guaranteeNote: string | null;
+  minTermNote: string | null;
   termsVersion: string;
 }
 
@@ -68,10 +81,13 @@ function Field(props: {
   );
 }
 
-export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVersion }: Props) {
+export function CheckoutForm({ slug, prefill, plans, initialPlan, guaranteeNote, minTermNote, termsVersion }: Props) {
   const [state, action, pending] = useActionState<CheckoutState, FormData>(checkoutAction.bind(null, slug), {});
   const v = state.values ?? {};
   const fe = state.fieldErrors ?? {};
+  // Keine Vorauswahl: der Kunde wählt aktiv eine der beiden gleichwertigen Optionen
+  const [plan, setPlan] = useState<string>(v.plan ?? initialPlan ?? (plans.length === 1 ? plans[0]!.id : ''));
+  const chosen = plans.find((p) => p.id === plan);
   const [domain, setDomain] = useState(v.domain ?? prefill.domain);
   const [status, setStatus] = useState<DomainStatus>({ state: 'idle' });
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,11 +121,19 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
     return () => ctrl.abort();
   }, [domain, slug]);
 
+  // Eigenes Absenden: verhindert das automatische Zurücksetzen des Formulars durch React 19,
+  // das sonst die gesteuerte Plan-Auswahl und die Domain optisch leeren würde
+  const onSubmit = (ev: FormEvent<HTMLFormElement>) => {
+    ev.preventDefault();
+    const fd = new FormData(ev.currentTarget);
+    startTransition(() => action(fd));
+  };
+
   const domainError = fe.domain;
   const alternatives = status.state === 'result' && !status.available ? status.alternatives : (state.alternatives ?? []);
 
   return (
-    <form action={action} className="space-y-6" noValidate>
+    <form action={action} onSubmit={onSubmit} className="space-y-6" noValidate>
       {state.error ? (
         <div
           ref={errorRef}
@@ -120,6 +144,54 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
           {state.error}
         </div>
       ) : null}
+
+      <fieldset aria-describedby={fe.plan ? 'plan-fehler' : undefined}>
+        <legend className="mb-2 text-base font-semibold text-slate-900">Ihre Option</legend>
+        <div className={`grid gap-3 ${plans.length > 1 ? 'sm:grid-cols-2' : ''}`}>
+          {plans.map((p) => (
+            <label
+              key={p.id}
+              className={`flex cursor-pointer flex-col rounded-xl border-2 bg-white p-4 shadow-sm transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-300 ${
+                plan === p.id ? 'border-brand-600' : 'border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <span className="flex items-start gap-3">
+                <input
+                  type="radio"
+                  name="plan"
+                  value={p.id}
+                  checked={plan === p.id}
+                  onChange={() => setPlan(p.id)}
+                  required
+                  className="mt-1 h-5 w-5 shrink-0 accent-brand-600"
+                />
+                <span>
+                  <span className="block text-sm font-semibold text-slate-900">{p.title}</span>
+                  <span className="mt-1 block text-2xl font-semibold tracking-tight text-slate-900">
+                    {p.price} <span className="text-base font-normal text-slate-600">{p.unit}</span>
+                  </span>
+                </span>
+              </span>
+              <ul className="mt-3 space-y-1.5 pl-8 text-sm text-slate-700">
+                {p.points.map((t) => (
+                  <li key={t} className="flex gap-2">
+                    <span aria-hidden="true" className="text-emerald-600">
+                      ✓
+                    </span>
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </label>
+          ))}
+        </div>
+        {fe.plan ? (
+          <p id="plan-fehler" className="mt-2 text-sm text-red-700">
+            {fe.plan}
+          </p>
+        ) : null}
+        {guaranteeNote ? <p className="mt-3 text-sm text-slate-600">{guaranteeNote}</p> : null}
+      </fieldset>
 
       <fieldset className="space-y-4">
         <legend className="mb-2 text-base font-semibold text-slate-900">Rechnungsadresse</legend>
@@ -270,18 +342,10 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
               Datenschutzhinweise
             </a>{' '}
             gelesen.
+            {plan === 'monthly' && minTermNote ? <strong className="mt-1 block font-medium">{minTermNote}</strong> : null}
             {fe.terms ? <span className="mt-1 block text-red-700">{fe.terms}</span> : null}
           </span>
         </label>
-        {subscription?.enabled ? (
-          <label className="flex items-start gap-3 text-sm">
-            <input type="checkbox" name="subscription" className="mt-0.5 h-5 w-5 shrink-0 accent-brand-600" />
-            <span>
-              Optional: Nach Ablauf der 12 Monate automatisch mit <strong>{subscription.label}</strong> weitermachen (monatlich
-              kündbar). Wir erinnern Sie vorher per E-Mail.
-            </span>
-          </label>
-        ) : null}
       </fieldset>
 
       <button
@@ -289,10 +353,10 @@ export function CheckoutForm({ slug, prefill, priceLabel, subscription, termsVer
         disabled={pending}
         className="w-full rounded-xl bg-brand-600 px-4 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-brand-700 disabled:opacity-60"
       >
-        {pending ? 'Einen Moment …' : `Weiter zur Zahlung (${priceLabel})`}
+        {pending ? 'Einen Moment …' : chosen ? `Weiter zur Zahlung (${chosen.buttonLabel})` : 'Weiter zur Zahlung'}
       </button>
       <p className="text-center text-xs text-slate-500">
-        Sie werden zu unserem Zahlungsdienstleister Stripe weitergeleitet. Zahlung per Karte, Lastschrift u. a.
+        Sie werden zu unserem Zahlungsdienstleister Stripe weitergeleitet. Zahlung per Karte, SEPA-Lastschrift oder PayPal.
       </p>
     </form>
   );

@@ -79,13 +79,35 @@ ${htmlParts.join('\n')}
 
 export function orderConfirmationEmail(
   cfg: AppConfig,
-  d: { name: string; company: string; invoiceNumber: string; amount: string; onboardingUrl: string; domain: string | null },
+  d: {
+    name: string;
+    company: string;
+    invoiceNumber: string;
+    amount: string;
+    onboardingUrl: string;
+    domain: string | null;
+    /** Option B: Ende der Mindestlaufzeit (formatiert) */
+    monthlyMinTermEnds?: string | null;
+    /** Zufriedenheitsgarantie bis (formatiert) */
+    guaranteeUntil?: string | null;
+  },
 ): EmailContent {
+  const p = cfg.pricing;
+  const terms: Block[] = [];
+  if (d.monthlyMinTermEnds)
+    terms.push(
+      `Sie zahlen ${d.amount} pro Monat, die Mindestlaufzeit endet am ${d.monthlyMinTermEnds}. Danach kostet „${p.subscriptionName}“ automatisch nur noch ${formatEuro(p.subscriptionCents)} pro Monat und ist monatlich kündbar. Für jede Rate erhalten Sie eine eigene Rechnung.`,
+    );
+  if (d.guaranteeUntil)
+    terms.push(
+      `Zufriedenheitsgarantie: Sind Sie nicht zufrieden, antworten Sie bis zum ${d.guaranteeUntil} auf diese E-Mail – Sie bekommen Ihr Geld zurück${d.monthlyMinTermEnds ? ' und der Vertrag endet' : ''}.`,
+    );
   return renderEmail(cfg, {
-    subject: `Ihre Bestellung: ${cfg.pricing.packageName} für ${d.company} (Rechnung ${d.invoiceNumber})`,
+    subject: `Ihre Bestellung: ${d.monthlyMinTermEnds ? p.monthlyName : p.packageName} für ${d.company} (Rechnung ${d.invoiceNumber})`,
     name: d.name,
     blocks: [
       `vielen Dank für Ihre Bestellung – die Zahlung über ${d.amount} ist eingegangen. Die Rechnung ${d.invoiceNumber} finden Sie im Anhang.`,
+      ...terms,
       'Damit Ihre Website online gehen kann, brauchen wir noch ein paar Angaben von Ihnen: Impressum, gegebenenfalls Logo und Fotos, Ihre Leistungen und Öffnungszeiten. Das dauert etwa 10 Minuten.',
       { button: { href: d.onboardingUrl, label: 'Angaben für die Website eintragen' } },
       {
@@ -112,6 +134,80 @@ export function paymentFailedEmail(cfg: AppConfig, d: { name: string; retryUrl: 
       'Wenn Sie die Website weiterhin möchten, können Sie die Bestellung hier erneut abschließen:',
       { button: { href: d.retryUrl, label: 'Bestellung erneut abschließen' } },
       'Haben Sie Fragen? Antworten Sie einfach auf diese E-Mail.',
+    ],
+  });
+}
+
+/** Rechnung zu einer Monatsrate (Option B) bzw. zu „Hosting & Pflege“. */
+export function recurringInvoiceEmail(
+  cfg: AppConfig,
+  d: { name: string; invoiceNumber: string; amount: string; period: string; domain: string | null },
+): EmailContent {
+  return renderEmail(cfg, {
+    subject: `Ihre Rechnung ${d.invoiceNumber}${d.domain ? ` für ${d.domain}` : ''}`,
+    name: d.name,
+    blocks: [
+      `vielen Dank – die Zahlung über ${d.amount} für den Zeitraum ${d.period} ist eingegangen. Die Rechnung ${d.invoiceNumber} finden Sie im Anhang.`,
+      'Bei Fragen antworten Sie einfach auf diese E-Mail.',
+    ],
+  });
+}
+
+/** Monatsrate konnte nicht eingezogen werden (Stripe versucht es automatisch erneut). */
+export function subscriptionPaymentFailedEmail(
+  cfg: AppConfig,
+  d: { name: string; amount: string; payUrl: string | null; final: boolean; domain: string | null },
+): EmailContent {
+  const blocks: Block[] = [
+    `leider konnte die Monatsrate über ${d.amount}${d.domain ? ` für ${d.domain}` : ''} nicht eingezogen werden – zum Beispiel weil die Karte abgelaufen ist oder die Lastschrift zurückgegeben wurde.`,
+    d.final
+      ? 'Wir haben es mehrmals versucht. Damit keine weiteren Kosten entstehen, ist Ihre Website vorübergehend pausiert. Sobald die Zahlung eingegangen ist, ist sie automatisch wieder online.'
+      : 'Wir versuchen es in den nächsten Tagen automatisch noch einmal. Ihre Website bleibt bis dahin online.',
+  ];
+  if (d.payUrl)
+    blocks.push('Sie können die Rate auch direkt bezahlen oder Ihr Zahlungsmittel aktualisieren:', {
+      button: { href: d.payUrl, label: 'Rate bezahlen' },
+    });
+  blocks.push('Haben Sie Fragen? Antworten Sie einfach auf diese E-Mail.');
+  return renderEmail(cfg, {
+    subject: d.final ? 'Ihre Website ist pausiert – Zahlung ausstehend' : 'Ihre Monatsrate konnte nicht eingezogen werden',
+    name: d.name,
+    blocks,
+  });
+}
+
+/** Bestätigung der Rückabwicklung im Rahmen der Zufriedenheitsgarantie. */
+export function guaranteeRefundEmail(
+  cfg: AppConfig,
+  d: { name: string; amount: string; monthly: boolean; domainRegistered: string | null },
+): EmailContent {
+  return renderEmail(cfg, {
+    subject: 'Ihre Bestellung wurde rückabgewickelt (Zufriedenheitsgarantie)',
+    name: d.name,
+    blocks: [
+      `schade, dass die Website nicht gepasst hat. Wie versprochen erstatten wir Ihnen ${d.amount}${d.monthly ? ' und haben den Vertrag beendet – es werden keine weiteren Raten abgebucht' : ''}. Die Stornorechnung folgt in einer separaten E-Mail.`,
+      'Die Website ist offline genommen.',
+      d.domainRegistered
+        ? `Die Domain ${d.domainRegistered} ist auf Ihren Namen registriert. Möchten Sie sie behalten und zu einem anderen Anbieter umziehen, antworten Sie auf diese E-Mail – Sie erhalten dann den Code für den Umzug. Sonst kündigen wir sie für Sie.`
+        : 'Eine Domain wurde noch nicht registriert, es bleibt also nichts zu tun.',
+      'Vielen Dank, dass Sie es ausprobiert haben.',
+    ],
+  });
+}
+
+/** Einzige Erinnerung an einen Lead, der uns selbst mit E-Mail-Adresse kontaktiert hat (mit Abmeldelink). */
+export function demoReminderEmail(
+  cfg: AppConfig,
+  d: { name: string | null; demoUrl: string; expiresLabel: string; unsubscribeUrl: string },
+): EmailContent {
+  return renderEmail(cfg, {
+    subject: `Ihr Website-Entwurf ist noch bis ${d.expiresLabel} online`,
+    name: d.name ?? '',
+    blocks: [
+      `vielen Dank für Ihre Nachricht zu Ihrem Website-Entwurf. Kurz zur Erinnerung: Der Entwurf ist noch bis ${d.expiresLabel} online, danach wird er automatisch gelöscht.`,
+      { button: { href: d.demoUrl, label: 'Entwurf ansehen' } },
+      'Haben Sie noch Fragen? Antworten Sie einfach auf diese E-Mail. Dies ist die einzige Erinnerung – wir schreiben Ihnen danach nicht mehr.',
+      { small: `Keine Erinnerungen mehr erhalten: ${d.unsubscribeUrl}` },
     ],
   });
 }

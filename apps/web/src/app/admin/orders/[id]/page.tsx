@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { and, desc, eq } from 'drizzle-orm';
-import { getDb, schema } from '@wbm/core';
+import { getDb, guaranteeStatus, schema } from '@wbm/core';
 import { Card, PageHeader, StatusBadge, Table, Td, btn, input, label } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
-import { refundOrderAction, resendInvoiceAction } from '../actions';
+import { guaranteeRefundAction, refundOrderAction, resendInvoiceAction } from '../actions';
 
 export const metadata = { title: 'Bestellung' };
 export const dynamic = 'force-dynamic';
@@ -17,7 +17,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const db = getDb();
   const order = await db.query.orders.findFirst({ where: eq(schema.orders.id, id) });
   if (!order) notFound();
-  const [customer, mails, log] = await Promise.all([
+  const [customer, mails, log, payments, guarantee] = await Promise.all([
     db.query.customers.findFirst({ where: eq(schema.customers.orderId, id) }),
     db
       .select()
@@ -30,7 +30,10 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       .where(and(eq(schema.auditLog.entity, 'order'), eq(schema.auditLog.entityId, id)))
       .orderBy(desc(schema.auditLog.createdAt))
       .limit(50),
+    db.select().from(schema.orderPayments).where(eq(schema.orderPayments.orderId, id)).orderBy(desc(schema.orderPayments.paidAt)),
+    guaranteeStatus(order),
   ]);
+  const monthly = order.plan === 'monthly';
   const a = order.billingAddressJson;
   return (
     <>
@@ -68,8 +71,31 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <dd>
               {order.termsVersion ?? '–'} · {dt(order.termsAcceptedAt)}
             </dd>
-            <dt className="text-slate-500">Abo-Option</dt>
-            <dd>{order.subscriptionOptIn ? 'gewünscht' : 'nein'}</dd>
+            <dt className="text-slate-500">Plan</dt>
+            <dd>{monthly ? 'Monatlich (Option B)' : 'Einmalzahlung (Option A)'}</dd>
+            {monthly ? (
+              <>
+                <dt className="text-slate-500">Abo</dt>
+                <dd>
+                  <span className="font-mono text-xs break-all">{order.stripeSubscriptionId ?? '–'}</span>
+                  {order.subscriptionStatus ? <StatusBadge status={order.subscriptionStatus} /> : null}
+                </dd>
+                <dt className="text-slate-500">Zeitplan 49 € → 19 €</dt>
+                <dd className="font-mono text-xs break-all">{order.stripeScheduleId ?? 'noch nicht angelegt'}</dd>
+                <dt className="text-slate-500">Mindestlaufzeit bis</dt>
+                <dd>{dt(order.minTermEndsAt)}</dd>
+              </>
+            ) : null}
+            <dt className="text-slate-500">Garantie bis</dt>
+            <dd>{dt(order.guaranteeEndsAt)}</dd>
+            {order.endedAt ? (
+              <>
+                <dt className="text-slate-500">Vertrag beendet</dt>
+                <dd>
+                  {dt(order.endedAt)} · {order.endedReason}
+                </dd>
+              </>
+            ) : null}
           </dl>
         </Card>
         <Card title="Zahlung & Rechnung">
@@ -130,6 +156,48 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             </form>
           ) : null}
         </Card>
+        {payments.length ? (
+          <Card title="Weitere Zahlungen (Monatsraten / Hosting & Pflege)">
+            <Table head={['Bezahlt', 'Rate', 'Betrag', 'Rechnung']}>
+              {payments.map((p) => (
+                <tr key={p.id}>
+                  <Td>{dt(p.paidAt)}</Td>
+                  <Td>{p.sequence}</Td>
+                  <Td>{eur(p.amountCents)}</Td>
+                  <Td>
+                    {p.invoicePdfKey ? (
+                      <a href={`/admin/files/${p.invoicePdfKey}`} className="text-brand-700 underline">
+                        {p.invoiceNumber}
+                      </a>
+                    ) : (
+                      p.invoiceNumber
+                    )}{' '}
+                    · versendet {dt(p.invoiceSentAt)}
+                  </Td>
+                </tr>
+              ))}
+            </Table>
+          </Card>
+        ) : null}
+        {guarantee.available ? (
+          <Card title="Zufriedenheitsgarantie">
+            <form action={guaranteeRefundAction} className="space-y-3">
+              <input type="hidden" name="id" value={order.id} />
+              <p className="text-sm text-slate-600">
+                Gilt bis {dt(guarantee.endsAt)}. Erstattet {eur(order.amountCents - order.refundedCents)}
+                {monthly ? ' (erste Rate) und beendet den Monatsvertrag sofort' : ''}, nimmt die Seite offline und meldet eine
+                registrierte Domain zur Übertragung bzw. Kündigung. Löst eine echte Erstattung aus.
+              </p>
+              <div>
+                <label htmlFor="g-confirm" className={label}>
+                  Zur Bestätigung GARANTIE eintippen
+                </label>
+                <input id="g-confirm" name="confirm" required className={input} autoComplete="off" />
+              </div>
+              <button className={btn.danger}>Garantie ausführen</button>
+            </form>
+          </Card>
+        ) : null}
         {order.status === 'paid' ? (
           <Card title="Erstattung">
             <form action={refundOrderAction} className="space-y-3">

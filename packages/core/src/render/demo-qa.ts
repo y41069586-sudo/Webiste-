@@ -137,9 +137,10 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   const passed = checks.every((c) => c.passed);
   const result: QaResult = { passed, checkedAt: new Date().toISOString(), checks };
   // Bereits freigegebene/veröffentlichte Demos behalten ihren Status (QA-Wiederholung)
-  const current = await db.query.demos.findFirst({ where: eq(demos.id, demoId), columns: { status: true } });
+  const current = await db.query.demos.findFirst({ where: eq(demos.id, demoId), columns: { status: true, reviewNote: true } });
   const decide = ['building', 'pending_review', 'qa_failed'].includes(current?.status ?? '');
-  const manual = passed && decide ? await requiresManualReview(db) : true;
+  // Mit Prüfhinweis (z. B. Überarbeitung für Brief 3) immer manuell prüfen
+  const manual = passed && decide ? Boolean(current?.reviewNote) || (await requiresManualReview(db)) : true;
   await db
     .update(demos)
     .set({

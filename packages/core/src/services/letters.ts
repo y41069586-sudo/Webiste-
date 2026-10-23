@@ -17,7 +17,13 @@ export async function chooseLetterVariant(db: DbOrTx, sequence: number, random =
   const rows = await db
     .select()
     .from(variants)
-    .where(and(eq(variants.kind, 'letter'), eq(variants.active, true), eq(variants.sequence, sequence === 2 ? 2 : 1)));
+    .where(
+      and(
+        eq(variants.kind, 'letter'),
+        eq(variants.active, true),
+        eq(variants.sequence, sequence >= 1 && sequence <= 3 ? sequence : 1),
+      ),
+    );
   if (!rows.length) throw new Error(`Keine aktive Briefvariante für Sequenz ${sequence}`);
   const total = rows.reduce((s, r) => s + Math.max(0, r.weight), 0) || rows.length;
   let acc = 0;
@@ -79,7 +85,7 @@ export async function rejectLetter(letterId: string, actor: string, note: string
   if (regenerate && sequence >= 1) {
     await enqueue(
       QUEUES.generateLetter,
-      { leadId, sequence: sequence as 1 | 2, triggeredBy: actor, regenerate: true },
+      { leadId, sequence: sequence as 1 | 2 | 3, triggeredBy: actor, regenerate: true },
       { singletonKey: `letter:${leadId}:${sequence}:${Date.now()}` },
     );
   }

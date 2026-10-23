@@ -9,6 +9,7 @@ defineJob(
       const demoId = await buildDemo(data.leadId, {
         regenerate: data.regenerate,
         actor: `job:build-demo:${data.triggeredBy ?? 'system'}`,
+        reviewNote: data.reviewNote,
       });
       return { demoId };
     } catch (err) {

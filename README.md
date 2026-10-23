@@ -1,8 +1,11 @@
 # Website-Brief-Maschine
 
 Findet lokale Betriebe ohne eigene Website, baut für jeden einen Website-Entwurf, schickt einen
-personalisierten Brief mit QR-Code und verkauft das „Website-Paket“ (390 € einmalig inkl. Domain und
-12 Monaten Hosting) ohne Verkaufsgespräch: Demo → Checkout → Angaben → Vorschau → Go-Live.
+personalisierten Brief mit QR-Code und verkauft die fertige Website ohne Verkaufsgespräch:
+**590 € einmalig** (inkl. Domain und 12 Monaten Hosting, danach optional 19 €/Monat) **oder 49 €/Monat**
+(12 Monate Mindestlaufzeit, ab Monat 13 automatisch 19 €/Monat, monatlich kündbar), jeweils mit
+14-Tage-Zufriedenheitsgarantie. Ablauf: Demo → Checkout → Angaben → Vorschau → Go-Live.
+Maßgebliche Projektbeschreibung: [CLAUDE.md](CLAUDE.md).
 
 **Sicherheitsprinzip:** Standard ist immer `DRY_RUN=true`. Echte Briefe, echte Domainkäufe und der
 Wechsel auf echte Zahlungen passieren nur nach ausdrücklicher Freigabe (siehe
@@ -47,7 +50,7 @@ checkout_started → paid → onboarding → preview_approved → live` (Nebenzu
 | -------------------- | ------------------------------------------------------------------------------- | ------------------------------------------ |
 | Lead-Quelle          | OpenStreetMap/Overpass (Standard), Google Places (nur nach Compliance-Freigabe) | `LEAD_SOURCE`, Einstellungen → Lead-Quelle |
 | KI-Texte             | Anthropic Claude (`MODEL_CREATIVE`, `MODEL_BULK`)                               | `ANTHROPIC_API_KEY`                        |
-| Briefversand         | Pingen                                                                          | `MAIL_PROVIDER=pingen`, `PINGEN_ENV`       |
+| Briefversand         | LetterXpress (ab Baustein L3; bis dahin Mock), Pingen nur inaktive Alternative  | `MAIL_PROVIDER`, `LXP_*`                   |
 | Zahlung              | Stripe Checkout                                                                 | `PAYMENT_PROVIDER`, `STRIPE_*`             |
 | Domains              | INWX                                                                            | `REGISTRAR_PROVIDER`, `REGISTRAR_ENV`      |
 | Hosting Kundenseiten | Cloudflare (Workers Static Assets) oder Netlify                                 | `HOSTING_PROVIDER`                         |
@@ -101,8 +104,11 @@ Empfohlen: Hetzner Cloud (Standort Deutschland), z. B. CX32 (4 vCPU, 8 GB RAM), 
    - Stripe: Endpunkt `https://APP_HOST/api/webhooks/stripe` mit den Events
      `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
      `checkout.session.async_payment_failed`, `checkout.session.expired`, `charge.refunded`,
-     `customer.subscription.deleted`; Signing Secret in `STRIPE_WEBHOOK_SECRET`.
-   - Pingen: `docker compose exec worker node --import tsx src/cli.ts pingen:webhooks`
+     `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`,
+     `customer.subscription.deleted`; Signing Secret in `STRIPE_WEBHOOK_SECRET`. Zahlungsarten im
+     Stripe-Dashboard aktivieren: Karte, SEPA-Lastschrift, PayPal (für Abos ggf. Freischaltung beantragen);
+     Smart Retries für fehlgeschlagene Abo-Zahlungen einschalten.
+   - Briefdienst: LetterXpress hat keine Webhooks – der Status wird abgefragt (Baustein L3).
    - E-Mail-Eingang: IMAP-Zugang in `IMAP_*` **oder** Postmark-Inbound auf
      `https://APP_HOST/api/webhooks/email-inbound?token=EMAIL_INBOUND_SECRET`.
 5. **Monitoring:** externen Uptime-Check (z. B. UptimeRobot, Better Stack) auf
@@ -169,13 +175,26 @@ Dashboard) → 40 Briefe (20 Beauty, 20 Handwerk) freigeben und senden.
 
 **… etwas grundsätzlich schiefläuft (falsche Briefe, Kostenexplosion)?**
 Dashboard → Einstellungen → **Not-Aus**. Alle Jobs mit Kostenfolge stoppen sofort (Lead-Suche mit
-Google, KI, Briefversand, Domainkäufe). Danach Ursache klären, Not-Aus wieder lösen. Bereits an Pingen
-übergebene Briefe lassen sich im Pingen-Dashboard stornieren, solange sie nicht gedruckt sind.
+Google, KI, Briefversand, Domainkäufe). Danach Ursache klären, Not-Aus wieder lösen. Bereits an den
+Briefdienst übergebene Aufträge lassen sich dort stornieren, solange sie nicht gedruckt sind
+(LetterXpress: nur innerhalb von 15 Minuten).
+
+**… ein Kunde die Zufriedenheitsgarantie nutzt (innerhalb von 14 Tagen)?** Bestellungen → Bestellung →
+„Garantie ausführen“ (Bestätigung GARANTIE). Das erstattet die Zahlung (Option B: erste Rate und Vertrag
+endet sofort), nimmt die Seite offline und schickt dem Kunden eine Bestätigung. Ist die Domain schon
+registriert, erscheint eine Warnung: Auth-Code bei INWX erzeugen und dem Kunden geben oder die Domain kündigen.
+
+**… eine Monatsrate (Option B) nicht eingezogen werden kann?** Stripe versucht es automatisch erneut
+(Smart Retries); der Kunde bekommt eine Mail mit Bezahllink. Nach dem letzten Versuch geht die Seite in den
+Wartungsmodus (neutrale Ersatzseite) und du bekommst eine Meldung. Sobald die Rate bezahlt ist, ist die
+Seite automatisch wieder online. Endet ein Monatsvertrag vor Ablauf der Mindestlaufzeit, meldet das System
+die offene Restlaufzeit.
 
 **… das Wochenbudget erreicht ist?** Versand stoppt automatisch und setzt in der nächsten Woche fort.
 Budget unter Einstellungen → Budget anpassen (Briefe/Places/KI getrennt).
 
-**… ein Brief „failed“ ist?** Briefe → Fehler: Grund lesen (Pingen-Status, Layout-Prüfung). Bei
+**… ein Brief „failed“ ist?** Briefe → Fehler: Grund lesen (Status des Briefdienstes, Layout-Prüfung,
+„Ablaufdatum im Brief liegt zu nah“ → neu erzeugen). Bei
 Adressproblemen Lead verwerfen; bei Layoutfehlern Brief neu erzeugen.
 
 **… jemand widerspricht (Brief, Mail, Telefon)?** Per QR/„Kein Interesse“ und per Mail passiert das

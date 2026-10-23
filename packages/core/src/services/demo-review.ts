@@ -133,10 +133,18 @@ export async function currentDemoForLead(db: DbOrTx, leadId: string) {
   return rows[0] ?? null;
 }
 
-/** Ablauf verlängern, sobald der Brief tatsächlich versendet wurde (Versprechen im Brief). */
-export async function extendDemoExpiry(db: DbOrTx, leadId: string, from: Date): Promise<void> {
+/**
+ * Ablauf verlängern (nie verkürzen): nach dem Versand um die Demo-Laufzeit ab `from`, bzw. mindestens
+ * bis `until` (z. B. das im Brief genannte Datum „online bis …“).
+ */
+export async function extendDemoExpiry(db: DbOrTx, leadId: string, from: Date, until?: Date | null): Promise<void> {
   const cfg = await getConfig({ db });
-  const until = addDays(from, cfg.timing.demoExpiryDays);
+  const byDays = addDays(from, cfg.timing.demoExpiryDays);
+  const target = until && until > byDays ? until : byDays;
+  await extendDemoUntil(db, leadId, target);
+}
+
+export async function extendDemoUntil(db: DbOrTx, leadId: string, until: Date): Promise<void> {
   await db
     .update(demos)
     .set({ expiresAt: until })
@@ -147,5 +155,8 @@ export async function extendDemoExpiry(db: DbOrTx, leadId: string, from: Date): 
         sql`(${demos.expiresAt} IS NULL OR ${demos.expiresAt} < ${until})`,
       ),
     );
-  await db.update(leads).set({ expiresAt: until }).where(eq(leads.id, leadId));
+  await db
+    .update(leads)
+    .set({ expiresAt: until })
+    .where(and(eq(leads.id, leadId), sql`(${leads.expiresAt} IS NULL OR ${leads.expiresAt} < ${until})`));
 }

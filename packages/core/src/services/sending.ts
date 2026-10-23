@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNotNull, lt, notExists, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
 import { getEnv } from '../config/env';
 import { effectiveSwitches, getConfig } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
@@ -6,11 +6,10 @@ import { demos, leads, letters, webhookEvents } from '../db/schema';
 import { logger } from '../logger';
 import { getProviders } from '../providers';
 import type { LetterWebhookEvent, ProviderLetterStatus } from '../providers/types';
-import { enqueue, QUEUES } from '../queue';
-import { addDays } from '../util/time';
+import { addBusinessDays, addDays } from '../util/time';
 import { audit } from './audit';
 import { BudgetExceededError, KillSwitchError, raiseAlert, releaseReservation, reserveBudget, settleCost } from './budget';
-import { extendDemoExpiry } from './demo-review';
+import { extendDemoExpiry, extendDemoUntil } from './demo-review';
 import { transitionLead } from './lead-state';
 
 export class SendBlockedError extends Error {
@@ -59,6 +58,15 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
         .set({ status: 'cancelled', statusReason: 'Demo nicht (mehr lange genug) online' })
         .where(eq(letters.id, letterId));
       return { state: 'skipped', reason: 'Demo nicht verfügbar' };
+    }
+    // Das im Brief genannte „online bis …“ muss nach der Zustellung noch mindestens eine Woche gelten
+    const delivery = addBusinessDays(new Date(), getEnv().DELIVERY_BUSINESS_DAYS);
+    if (letter.statedExpiresAt && letter.statedExpiresAt < addDays(delivery, 7)) {
+      await db
+        .update(letters)
+        .set({ status: 'failed', statusReason: 'Ablaufdatum im Brief liegt zu nah – bitte neu erzeugen' })
+        .where(eq(letters.id, letterId));
+      return { state: 'skipped', reason: 'Brief veraltet' };
     }
   }
   const provider = getProviders().mail;
@@ -135,6 +143,7 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
           providerLetterId: res.providerLetterId,
           costCents: cost,
           sentAt: res.status === 'sent' ? now : null,
+          estimatedDeliveredAt: addBusinessDays(now, getEnv().DELIVERY_BUSINESS_DAYS),
           statusReason: null,
           updatedAt: now,
         })
@@ -145,8 +154,10 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
           .update(leads)
           .set({ lettersSent: sql`${leads.lettersSent} + 1`, contactedAt: now, updatedAt: now })
           .where(eq(leads.id, lead.id));
-        await transitionLead(tx, lead.id, letter.sequence === 2 ? 'followup_sent' : 'letter_sent', { actor, soft: true });
-        if (letter.sequence === 1) await extendDemoExpiry(tx, lead.id, now);
+        await transitionLead(tx, lead.id, letter.sequence >= 2 ? 'followup_sent' : 'letter_sent', { actor, soft: true });
+        // Erstbrief: Demo-Laufzeit ab Versand; immer mindestens bis zum im Brief genannten Datum
+        if (letter.sequence === 1) await extendDemoExpiry(tx, lead.id, now, letter.statedExpiresAt);
+        else if (letter.statedExpiresAt) await extendDemoUntil(tx, lead.id, letter.statedExpiresAt);
       }
       await audit(tx, {
         entity: 'letter',
@@ -324,40 +335,4 @@ export async function syncLetterStatuses(actor = 'job:sync-letter-status'): Prom
   return { checked: open.length + assume.length, changed };
 }
 
-/**
- * Follow-up: kein Scan 12 Tage nach Zustellung, Schalter an, Budget vorhanden,
- * höchstens 2 Briefe pro Lead → zweiter, kürzerer Brief (eigene Variante).
- */
-export async function scheduleFollowups(): Promise<{ queued: number }> {
-  const db = getDb();
-  const cfg = await getConfig({ fresh: true });
-  const sw = effectiveSwitches(cfg);
-  if (!sw.followupEnabled || sw.killSwitch || cfg.letter.maxLettersPerLead < 2) return { queued: 0 };
-  const cutoff = addDays(new Date(), -cfg.timing.followupAfterDays);
-  const due = await db
-    .select({ leadId: leads.id })
-    .from(leads)
-    .innerJoin(letters, and(eq(letters.leadId, leads.id), eq(letters.sequence, 1)))
-    .where(
-      and(
-        eq(leads.status, 'letter_delivered'),
-        lt(leads.lettersSent, cfg.letter.maxLettersPerLead),
-        lt(letters.deliveredAt, cutoff),
-        notExists(
-          db
-            .select({ x: letters.id })
-            .from(letters)
-            .where(and(eq(letters.leadId, leads.id), eq(letters.sequence, 2))),
-        ),
-      ),
-    )
-    .limit(200);
-  for (const d of due) {
-    await enqueue(
-      QUEUES.generateLetter,
-      { leadId: d.leadId, sequence: 2, triggeredBy: 'followup' },
-      { singletonKey: `letter:${d.leadId}:2` },
-    );
-  }
-  return { queued: due.length };
-}
+export { scheduleFollowups } from './followups';

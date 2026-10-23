@@ -88,21 +88,21 @@ async function checkout(slug: string, over: Partial<CheckoutInput> = {}) {
 
 describe('Beträge und Rechnungsdaten', () => {
   it('Kleinunternehmer: keine USt', () => {
-    expect(packageAmounts(DEFAULT_CONFIG)).toEqual({ grossCents: 39000, netCents: 39000, vatCents: 0, vatRatePercent: 0 });
+    expect(packageAmounts(DEFAULT_CONFIG)).toEqual({ grossCents: 59000, netCents: 59000, vatCents: 0, vatRatePercent: 0 });
   });
   it('Regelbesteuerung brutto: USt wird herausgerechnet', () => {
     const cfg = { ...DEFAULT_CONFIG, tax: { ...DEFAULT_CONFIG.tax, kleinunternehmer: false } };
-    expect(packageAmounts(cfg)).toEqual({ grossCents: 39000, netCents: 32773, vatCents: 6227, vatRatePercent: 19 });
+    expect(packageAmounts(cfg)).toEqual({ grossCents: 59000, netCents: 49580, vatCents: 9420, vatRatePercent: 19 });
   });
   it('Regelbesteuerung netto: USt kommt hinzu', () => {
     const cfg = { ...DEFAULT_CONFIG, tax: { ...DEFAULT_CONFIG.tax, kleinunternehmer: false, pricesAreGross: false } };
-    expect(packageAmounts(cfg)).toEqual({ grossCents: 46410, netCents: 39000, vatCents: 7410, vatRatePercent: 19 });
+    expect(packageAmounts(cfg)).toEqual({ grossCents: 70210, netCents: 59000, vatCents: 11210, vatRatePercent: 19 });
   });
   it('Rechnung enthält Pflichtangaben und § 19-Hinweis; Storno negiert die Beträge', () => {
     const amounts = packageAmounts(DEFAULT_CONFIG);
     const order = {
       id: '0f9c1d2e-0000-4000-8000-000000000001',
-      amountCents: 39000,
+      amountCents: 59000,
       customerCompany: 'Malerbetrieb Beispiel',
       customerName: 'Erika Beispiel',
       billingAddressJson: { street: 'Kampstraße 5', postalCode: '44137', city: 'Dortmund', country: 'DE' },
@@ -119,16 +119,16 @@ describe('Beträge und Rechnungsdaten', () => {
     expect(inv.vat).toBeNull();
     expect(inv.seller.taxNumber).toBe(DEFAULT_CONFIG.sender.taxNumber);
     expect(inv.serviceDate).toContain('20.10.2026');
-    expect(inv.gross).toBe('390,00 €');
+    expect(inv.gross).toBe('590,00 €');
     const storno = buildCancellationData(inv, {
       number: 'RE-2026-0002',
       issuedAt: new Date('2026-10-25T10:00:00Z'),
-      refundedCents: 39000,
+      refundedCents: 59000,
       amounts,
     });
     expect(storno.kind).toBe('cancellation');
     expect(storno.originalNumber).toBe('RE-2026-0001');
-    expect(storno.gross).toBe('-390,00 €');
+    expect(storno.gross).toBe('-590,00 €');
   });
 });
 
@@ -164,7 +164,7 @@ describe('Checkout und Zahlung', () => {
       city: 'Dortmund',
       domain: 'malerbetrieb-beispiel.de',
     });
-    expect(ctx.price.grossCents).toBe(39000);
+    expect(ctx.price.grossCents).toBe(59000);
   });
 
   it('Pflichtfelder und Checkboxen werden geprüft', async () => {
@@ -194,8 +194,8 @@ describe('Checkout und Zahlung', () => {
     const { res, order } = await checkout(demo.slug);
     expect(order).toMatchObject({
       status: 'pending',
-      amountCents: 39000,
-      netCents: 39000,
+      amountCents: 59000,
+      netCents: 59000,
       vatCents: 0,
       customerEmail: 'erika@example.org',
       domainWish: 'malerbetrieb-beispiel.de',
@@ -257,7 +257,7 @@ describe('Checkout und Zahlung', () => {
       rawType: 'x',
       sessionId: order.stripeSessionId,
       paymentStatus: 'paid',
-      amountTotal: 39000,
+      amountTotal: 59000,
       currency: 'eur',
     });
     expect((await processPaymentWebhook(raw, p.sign(raw))).duplicate).toBe(false);
@@ -277,9 +277,9 @@ describe('Checkout und Zahlung', () => {
     const b = await seedDemo('Betrieb B');
     const oa = (await checkout(a.demo.slug, { domain: 'betrieb-a.de' })).order;
     const ob = (await checkout(b.demo.slug, { domain: 'betrieb-b.de' })).order;
-    const results = await Promise.all([1, 2, 3].map(() => fulfillOrder(oa.id, { amountTotal: 39000, currency: 'eur' }, 'test')));
+    const results = await Promise.all([1, 2, 3].map(() => fulfillOrder(oa.id, { amountTotal: 59000, currency: 'eur' }, 'test')));
     expect(results.filter((r) => r.state === 'paid' && !r.alreadyPaid)).toHaveLength(1);
-    await fulfillOrder(ob.id, { amountTotal: 39000 }, 'test');
+    await fulfillOrder(ob.id, { amountTotal: 59000 }, 'test');
     const nums = (await getDb().select({ n: orders.invoiceNumber }).from(orders)).map((r) => r.n).sort();
     expect(nums.map((n) => n!.slice(-4))).toEqual(['0001', '0002']);
   });
@@ -321,9 +321,9 @@ describe('Checkout und Zahlung', () => {
     expect(await applyRefund(order.id, 10000, 'test')).toBe(true);
     expect((await getDb().query.orders.findFirst({ where: eq(orders.id, order.id) }))!.status).toBe('paid');
     expect(await applyRefund(order.id, 10000, 'test')).toBe(false);
-    expect(await applyRefund(order.id, 39000, 'test')).toBe(true);
+    expect(await applyRefund(order.id, 59000, 'test')).toBe(true);
     const o = await getDb().query.orders.findFirst({ where: eq(orders.id, order.id) });
-    expect(o).toMatchObject({ status: 'refunded', refundedCents: 39000 });
+    expect(o).toMatchObject({ status: 'refunded', refundedCents: 59000 });
   });
 
   it('Sweeper schließt abgelaufene offene Bestellungen', async () => {
@@ -344,7 +344,7 @@ describe('Checkout und Zahlung', () => {
     await simulateMockPayment(order.stripeSessionId!, 'paid');
     const o = await getDb().query.orders.findFirst({ where: eq(orders.id, order.id) });
     expect(o!.status).toBe('paid');
-    expect((o!.invoiceJson as { gross: string }).gross).toBe('390,00 €');
+    expect((o!.invoiceJson as { gross: string }).gross).toBe('590,00 €');
   });
 });
 

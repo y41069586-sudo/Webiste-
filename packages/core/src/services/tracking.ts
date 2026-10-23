@@ -9,6 +9,7 @@ import { currentDemoForLead } from './demo-review';
 import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
 import { optOutLead } from './suppression';
+import { SHORT_CODE_RE } from '../util/crypto';
 
 export interface RequestMeta {
   /** gekürzter User-Agent (Gerät/Browser-Familie) */
@@ -170,4 +171,18 @@ export async function handleDemoQuestion(slug: string, input: QuestionInput, req
   });
   await enqueue(QUEUES.supportInbound, { messageId: msg!.id });
   return { ok: true };
+}
+
+/**
+ * Kurz-URL aus dem Brief ({TRACK_DOMAIN}/{kurzcode}): QR-Token zum Kurzcode. Fehlversuche je Client
+ * sind begrenzt (kein Durchprobieren von Codes).
+ */
+export async function trackTokenForShortCode(code: string, meta: RequestMeta): Promise<string | null | 'rate_limited'> {
+  const c = code.toLowerCase();
+  if (!SHORT_CODE_RE.test(c)) return null;
+  const db = getDb();
+  const lead = await db.query.leads.findFirst({ where: eq(leads.shortCode, c), columns: { trackToken: true } });
+  if (lead) return lead.trackToken;
+  const rl = await rateLimit(db, `shortcode-miss:${meta.ipHash}`, 30, 600);
+  return rl.allowed ? null : 'rate_limited';
 }

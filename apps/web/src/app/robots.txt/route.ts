@@ -10,6 +10,7 @@ export function GET() {
     'Disallow: /mock-hosting/',
     'Disallow: /verlaengern',
     'Disallow: /api/',
+    'Disallow: /abmelden/',
     '',
   ].join('\n');
   return new Response(body, {

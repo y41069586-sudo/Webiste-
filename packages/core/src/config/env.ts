@@ -40,7 +40,11 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: optStr,
   STRIPE_WEBHOOK_SECRET: optStr,
 
-  MAIL_PROVIDER: z.enum(['pingen', 'mock']).default('mock'),
+  /** letterxpress ist der vorgesehene Briefdienst (Baustein L3); pingen bleibt nur als inaktive Alternative */
+  MAIL_PROVIDER: z.enum(['letterxpress', 'pingen', 'mock']).default('mock'),
+  LXP_USERNAME: optStr,
+  LXP_APIKEY: optStr,
+  LXP_MODE: z.enum(['test', 'live']).default('test'),
   PINGEN_CLIENT_ID: optStr,
   PINGEN_CLIENT_SECRET: optStr,
   PINGEN_ORGANISATION_ID: optStr,
@@ -86,6 +90,18 @@ const envSchema = z.object({
   FOLLOWUP_ENABLED: bool(false),
   AUTO_OPTIMIZE: bool(false),
   USE_RATING_IN_LETTER: bool(false),
+
+  // Lernsystem und Versandlaufzeit (Update 2, A6/B6)
+  /** Geschätzte Zustellung = Versand + so viele Werktage */
+  DELIVERY_BUSINESS_DAYS: z.coerce.number().int().min(1).max(10).default(3),
+  /** Mindestanzahl zugestellter Briefe je Variante, bevor ein Gewinner ausgerufen wird */
+  MIN_LETTERS_PER_ARM: z.coerce.number().int().min(1).default(100),
+  /** Vorschläge des Lern-Agents ohne Freigabe starten (nur Betreff, Nutzen-Satz, QR-Text) */
+  AUTO_ACTIVATE_VARIANTS: bool(false),
+  /** Kostenbremse: Kosten pro Kauf in Cent */
+  MAX_CAC_CENTS: z.coerce.number().int().min(0).default(20000),
+  /** Ein Brief gilt nach so vielen Tagen ab geschätzter Zustellung als ausgewertet */
+  EVALUATION_WINDOW_DAYS: z.coerce.number().int().min(1).default(45),
 
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 });

@@ -45,6 +45,7 @@ async function buyDemo(page: Page): Promise<string> {
     await page.getByLabel('Wunschdomain').fill(`e2e-${Date.now()}`);
     await expect(page.getByText(/ist frei/)).toBeVisible({ timeout: 5_000 });
   }).toPass({ timeout: 60_000 });
+  await page.getByRole('radio', { name: /Einmalzahlung/ }).check();
   await page.getByLabel('Ihr Name (Vor- und Nachname)').fill('Erika Beispiel');
   await page.getByLabel('E-Mail').fill('erika@example.org');
   await page.getByLabel(/als Unternehmer/).check();

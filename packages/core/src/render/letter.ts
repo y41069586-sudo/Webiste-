@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import QRCode from 'qrcode';
 import { renderLetterHtml } from '@wbm/templates';
 import { appUrl, getEnv, trackUrl } from '../config/env';
@@ -15,8 +15,10 @@ import { audit } from '../services/audit';
 import { raiseAlert } from '../services/budget';
 import { currentDemoForLead } from '../services/demo-review';
 import { transitionLead } from '../services/lead-state';
+import { extendDemoUntil } from '../services/demo-review';
 import { approveLetter, chooseLetterVariant } from '../services/letters';
-import { addDays, formatDateLongDe, formatEuroShort } from '../util/time';
+import { randomShortCode } from '../util/crypto';
+import { addBusinessDays, addDays, endOfDayBerlin, formatDateLongDe, formatEuroShort } from '../util/time';
 import { htmlToPdf, validateLetterDom, validateLetterPdf, type LayoutIssue } from './pdf';
 
 export async function qrDataUri(url: string): Promise<string> {
@@ -30,6 +32,43 @@ export async function qrDataUri(url: string): Promise<string> {
 
 function shortUrl(url: string): string {
   return url.replace(/^https?:\/\//, '');
+}
+
+/** Kurzcode für die Kurz-URL im Brief ({TRACK_DOMAIN}/{kurzcode}) – einmal je Lead, kollisionsfrei. */
+async function ensureShortCode(lead: typeof leads.$inferSelect): Promise<string> {
+  if (lead.shortCode) return lead.shortCode;
+  const db = getDb();
+  for (let i = 0; i < 8; i++) {
+    const code = randomShortCode();
+    const res = await db
+      .update(leads)
+      .set({ shortCode: code })
+      .where(and(eq(leads.id, lead.id), isNull(leads.shortCode)))
+      .returning({ code: leads.shortCode })
+      .catch(() => []);
+    if (res[0]?.code) return res[0].code;
+    const fresh = await db.query.leads.findFirst({ where: eq(leads.id, lead.id), columns: { shortCode: true } });
+    if (fresh?.shortCode) return fresh.shortCode;
+  }
+  throw new Error('Kurzcode konnte nicht vergeben werden');
+}
+
+/**
+ * Datum „online bis …“ im Brief. Erstbrief: Demo-Laufzeit ab heute (beim Versand wird ab Versanddatum
+ * verlängert, also nie kürzer). Folgebriefe: geschätzte Zustellung + Verlängerung (Standard 7 Tage), die Demo
+ * wird sofort mindestens bis dahin verlängert – damit die Aussage im Brief stimmt.
+ */
+export function statedExpiry(
+  sequence: number,
+  cfg: AppConfig,
+  demoExpiresAt: Date | null,
+  now = new Date(),
+  deliveryBusinessDays = getEnv().DELIVERY_BUSINESS_DAYS,
+): Date {
+  if (sequence <= 1) return endOfDayBerlin(addDays(now, cfg.timing.demoExpiryDays));
+  // +1 Werktag Puffer zwischen Erzeugung und Versand
+  const target = endOfDayBerlin(addDays(addBusinessDays(now, deliveryBusinessDays + 1), cfg.timing.followupExtendDays));
+  return demoExpiresAt && demoExpiresAt > target ? endOfDayBerlin(demoExpiresAt) : target;
 }
 
 export interface GenerateLetterOptions {
@@ -68,7 +107,7 @@ async function domainFor(lead: typeof leads.$inferSelect, cfg: AppConfig): Promi
  * Brief erzeugen: Variante, Domain-Vorschlag, QR-Code, Komposit, PDF (DIN 5008 Form B),
  * Layout-Prüfung (DOM + PDF), Kostenschätzung. Idempotent je Lead und Sequenz.
  */
-export async function generateLetter(leadId: string, sequence: 1 | 2, opts: GenerateLetterOptions): Promise<GeneratedLetter> {
+export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: GenerateLetterOptions): Promise<GeneratedLetter> {
   const db = getDb();
   const cfg = await getConfig({ fresh: true });
   const sw = effectiveSwitches(cfg);
@@ -119,6 +158,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2, opts: Gene
     throw new Error(opts.test ? 'Testempfänger in den Einstellungen unvollständig' : 'Anschrift unvollständig');
   }
   const url = trackUrl(`/q/${lead.trackToken}`);
+  const code = await ensureShortCode(lead);
+  const stated = statedExpiry(opts.test ? 1 : sequence, cfg, demo.expiresAt);
   const includePage2 = cfg.letter.includeScreenshotPage && demo.screenshotDesktopKey && demo.screenshotMobileKey;
   const screenshotPage = includePage2
     ? {
@@ -135,7 +176,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2, opts: Gene
     rating: useRating ? { rating: lead.rating!, count: lead.ratingCount! } : null,
     compositeDataUri: composite ? `data:image/jpeg;base64,${composite.toString('base64')}` : null,
     qrDataUri: await qrDataUri(url),
-    shortUrl: shortUrl(url),
+    shortUrl: shortUrl(trackUrl(`/${code}`)),
+    expiresLabel: formatDateLongDe(stated),
     dateLine: `${cfg.sender.city}, ${formatDateLongDe(new Date())}`,
     privacyNotice: privacyNoticeText(cfg, lead.source, appUrl('/datenschutz')),
     objectionNotice: objectionNoticeText(getEnv().OPTOUT_EMAIL),
@@ -175,6 +217,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2, opts: Gene
       demoId: demo.id,
       variantId: variant.id,
       sequence: seqDb,
+      format: 'letter',
+      statedExpiresAt: stated,
       pageCount: pdfCheck.pages,
       estimatedCostCents: estimate,
       status,
@@ -189,6 +233,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2, opts: Gene
     })
     .returning({ id: letters.id });
   const letterId = row!.id;
+  // Folgebriefe nennen ein neues Ablaufdatum – die Demo muss mindestens so lange online bleiben
+  if (!opts.test && sequence > 1) await extendDemoUntil(db, leadId, stated);
   const key = `letters/${leadId}/${letterId}.pdf`;
   await storage.put(key, pdf, 'application/pdf');
   await db.update(letters).set({ pdfStorageKey: key }).where(eq(letters.id, letterId));

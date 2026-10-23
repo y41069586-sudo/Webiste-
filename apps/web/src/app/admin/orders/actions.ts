@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
-import { audit, enqueue, getDb, QUEUES, refundOrder, schema } from '@wbm/core';
+import { audit, enqueue, getDb, guaranteeRefund, QUEUES, refundOrder, schema } from '@wbm/core';
 import { actorOf, requireAdmin } from '@/lib/auth';
 
 export async function resendInvoiceAction(form: FormData): Promise<void> {
@@ -29,5 +29,15 @@ export async function refundOrderAction(form: FormData): Promise<void> {
   const cents = euros ? Math.round(Number(euros) * 100) : undefined;
   if (cents !== undefined && (!Number.isFinite(cents) || cents <= 0)) throw new Error('Ungültiger Betrag');
   await refundOrder(id, actorOf(s), cents);
+  revalidatePath(`/admin/orders/${id}`);
+}
+
+/** Zufriedenheitsgarantie: Erstattung, Vertrag beenden, Seite offline – nur mit getippter Bestätigung. */
+export async function guaranteeRefundAction(form: FormData): Promise<void> {
+  const s = await requireAdmin();
+  const id = String(form.get('id'));
+  if (String(form.get('confirm')).trim().toUpperCase() !== 'GARANTIE')
+    throw new Error('Bitte zur Bestätigung GARANTIE eintippen.');
+  await guaranteeRefund(id, actorOf(s));
   revalidatePath(`/admin/orders/${id}`);
 }

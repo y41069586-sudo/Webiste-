@@ -97,14 +97,44 @@ export interface SenderInfo {
 
 export type SiteMode = 'demo' | 'screenshot' | 'preview' | 'live';
 
+export interface OfferCard {
+  title: string;
+  /** z. B. „590 €“ */
+  price: string;
+  /** z. B. „einmalig“ bzw. „pro Monat“ */
+  unit: string;
+  points: string[];
+  href: string;
+}
+
+export interface TrustInfo {
+  name: string;
+  /** Zwei Sätze vom Betreiber – nie erfundene Referenzen */
+  intro: string;
+  /** Eingebettetes Foto (data:-URI), sonst ohne Foto */
+  photoDataUri?: string | null;
+  email: string;
+  phone: string;
+  imprintUrl: string;
+}
+
 export interface DemoOptions {
   slug: string;
+  /** Einmalpreis (Kurzform) – für Altdaten/Fallback */
   priceLabel: string;
   checkoutUrl: string;
   questionUrl: string;
   optOutUrl: string;
   sender: SenderInfo;
   expiresLabel: string;
+  /** Zwei gleichwertige Preiskarten (ohne Vorauswahl), erreichbar über „Seite übernehmen“ */
+  offers?: OfferCard[];
+  /** Satz zur Zufriedenheitsgarantie (falls aktiv) */
+  guaranteeNote?: string | null;
+  /** wa.me-Link mit vorausgefülltem Text; fehlt = Frageformular statt WhatsApp */
+  whatsappUrl?: string | null;
+  /** Vertrauensblock „Wer hat diesen Entwurf gebaut?“ */
+  trust?: TrustInfo | null;
 }
 
 export interface LiveOptions {

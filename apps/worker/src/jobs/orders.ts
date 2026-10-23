@@ -1,7 +1,9 @@
-import { sendCancellationInvoice, sendOrderInvoice } from '@wbm/core/render';
+import { sendCancellationInvoice, sendOrderInvoice, sendPaymentInvoice } from '@wbm/core/render';
 import { defineJob } from '../runtime';
 
-/** Rechnung (PDF) erzeugen und mit der Bestellbestätigung senden bzw. Stornorechnung nach Erstattung. */
-defineJob('send-invoice', async (data) =>
-  data.kind === 'cancellation' ? sendCancellationInvoice(data.orderId) : sendOrderInvoice(data.orderId),
-);
+/** Rechnung (PDF) erzeugen und senden: Bestellung, Monatsrate bzw. Stornorechnung nach Erstattung. */
+defineJob('send-invoice', async (data) => {
+  if (data.kind === 'cancellation') return sendCancellationInvoice(data.orderId);
+  if (data.kind === 'payment' && data.paymentId) return sendPaymentInvoice(data.paymentId);
+  return sendOrderInvoice(data.orderId);
+});

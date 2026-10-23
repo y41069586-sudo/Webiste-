@@ -49,18 +49,52 @@ export const appConfigSchema = z.object({
     bankIban: z.string().default(''),
     bankBic: z.string().default(''),
     bankName: z.string().default(''),
+    /** WhatsApp-Nummer für „Frage per WhatsApp“ (international, nur Ziffern, z. B. 491701234567); leer = Button aus */
+    whatsappNumber: z
+      .string()
+      .regex(/^(\d{8,15})?$/, 'Nur Ziffern mit Ländervorwahl, ohne + und Leerzeichen')
+      .default(''),
+    /** Foto für den Vertrauensblock (öffentliche URL oder Pfad unter /public); leer = ohne Foto */
+    photoUrl: z.string().default(''),
+    /** Kurzvorstellung (zwei Sätze, keine erfundenen Referenzen) */
+    intro: z.string().max(400).default(''),
   }),
   pricing: z.object({
+    /** Option A „Einmalzahlung“ (Stripe mode=payment) */
     packageCents: z.number().int().positive(),
     packageName: z.string(),
     hostingMonthsIncluded: z.number().int().positive(),
+    /** Option A: Abo-Link in der Erinnerungs-Mail vor Ablauf des inklusiven Hostings */
     subscriptionEnabled: z.boolean(),
+    /** „Hosting & Pflege“ ab Monat 13 – gilt für Option A (optional) und Option B (automatisch) */
     subscriptionCents: z.number().int().positive(),
     subscriptionName: z.string(),
     subscriptionStartMonth: z.number().int().positive(),
+    /** Option B „Monatlich“ (Stripe mode=subscription), erste Rate sofort */
+    monthlyEnabled: z.boolean(),
+    monthlyCents: z.number().int().positive(),
+    monthlyName: z.string(),
+    /** Mindestlaufzeit von Option B in Monaten; danach automatisch subscriptionCents, monatlich kündbar */
+    minTermMonths: z.number().int().min(1).max(36),
     currency: z.literal('eur'),
     /** Leistungsbeschreibung (Checkout, Rechnung) */
     packageDescription: z.string(),
+  }),
+  guarantee: z.object({
+    /** 14-Tage-Zufriedenheitsgarantie: Erstattung per Admin-Button, Seite offline, Domain freigeben */
+    enabled: z.boolean(),
+    days: z.number().int().min(1).max(60),
+  }),
+  segments: z.object({
+    /** Segment „neu“: neu aufgetaucht mit so vielen Bewertungen (Mindestanzahl entfällt, Mindest-Rating bleibt) */
+    newMinRatings: z.number().int().min(0),
+    newMaxRatings: z.number().int().min(1),
+    /** „neu“ gilt so viele Tage ab dem ersten Auftauchen */
+    newWindowDays: z.number().int().min(7),
+    /** Ein Betrieb gilt als „neu aufgetaucht“, wenn das Segment schon einmal durchsucht wurde (Wochen-Lauf) */
+    scoreBonus: z.object({ neu: z.number(), social_only: z.number(), etabliert: z.number() }),
+    /** Lead-Finder automatisch wöchentlich (montags) */
+    weeklyLeadFinder: z.boolean(),
   }),
   tax: z.object({
     kleinunternehmer: z.boolean(),
@@ -148,6 +182,12 @@ export const appConfigSchema = z.object({
     /** Abgebrochene/unbezahlte Bestellungen (Checkout-Daten von Nicht-Käufern) */
     unpaidOrderRetentionMonths: z.number().int().min(1),
     renewalReminderDays: z.number().int().min(1),
+    /** Follow-up 2: Demo-Laufzeit wird um so viele Tage verlängert („nur noch 7 Tage online“) */
+    followupExtendDays: z.number().int().min(1).max(30),
+    /** Follow-up 3 (heißer Lead): so viele Tage nach Scan/Klick ohne Kauf */
+    hotLeadAfterDays: z.number().int().min(1),
+    /** Heißer Lead ab so vielen Demo-Aufrufen (alternativ: CTA-Klick) */
+    hotLeadMinViews: z.number().int().min(1),
     /** Ohne Zustellbestätigung gilt ein Brief nach X Tagen als zugestellt */
     assumeDeliveredAfterDays: z.number().int().min(1),
     /** Places-Inhalte (außer place_id) werden nach X Tagen neu geladen oder gelöscht */
@@ -172,8 +212,8 @@ export const appConfigSchema = z.object({
     includeScreenshotPage: z.boolean(),
     /** Position des Anschriftenfelds: left (DIN 5008 / DE) oder right (CH) */
     addressPosition: z.enum(['left', 'right']),
-    /** Max. Briefe pro Lead (inkl. Follow-up) */
-    maxLettersPerLead: z.number().int().min(1).max(2),
+    /** Max. Sendungen pro Lead (Erstbrief + bis zu zwei Folgebriefe) */
+    maxLettersPerLead: z.number().int().min(1).max(3),
     /** Test-Empfänger für den allerersten echten Brief */
     testRecipient: z.object({
       name: z.string(),
@@ -282,18 +322,36 @@ export const DEFAULT_CONFIG: AppConfig = {
     bankIban: '',
     bankBic: '',
     bankName: '',
+    whatsappNumber: '',
+    photoUrl: '',
+    intro: '',
   },
   pricing: {
-    packageCents: 39000,
+    packageCents: 59000,
     packageName: 'Website-Paket',
     hostingMonthsIncluded: 12,
-    subscriptionEnabled: false,
+    subscriptionEnabled: true,
     subscriptionCents: 1900,
     subscriptionName: 'Hosting & Pflege',
     subscriptionStartMonth: 13,
+    monthlyEnabled: true,
+    monthlyCents: 4900,
+    monthlyName: 'Website-Paket monatlich',
+    minTermMonths: 12,
     currency: 'eur',
     packageDescription:
       'Ihre Website auf Basis des Entwurfs, eigene Domain auf Ihren Namen, Hosting mit SSL für 12 Monate ab Veröffentlichung, bis zu 2 Änderungsrunden vor dem Start.',
+  },
+  guarantee: {
+    enabled: true,
+    days: 14,
+  },
+  segments: {
+    newMinRatings: 3,
+    newMaxRatings: 20,
+    newWindowDays: 90,
+    scoreBonus: { neu: 6, social_only: 3, etabliert: 0 },
+    weeklyLeadFinder: true,
   },
   tax: {
     kleinunternehmer: true,
@@ -414,6 +472,9 @@ export const DEFAULT_CONFIG: AppConfig = {
     supportRetentionMonths: 12,
     unpaidOrderRetentionMonths: 6,
     renewalReminderDays: 30,
+    followupExtendDays: 7,
+    hotLeadAfterDays: 7,
+    hotLeadMinViews: 2,
     assumeDeliveredAfterDays: 4,
     placesCacheDays: 30,
   },
@@ -436,7 +497,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     deliveryProduct: 'cheap',
     includeScreenshotPage: false,
     addressPosition: 'left',
-    maxLettersPerLead: 2,
+    maxLettersPerLead: 3,
     testRecipient: {
       name: '',
       street: '',

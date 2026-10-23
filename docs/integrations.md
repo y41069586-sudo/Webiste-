@@ -61,7 +61,10 @@ regularOpeningHours, nextPageToken`
 - **Kosten:** jede Anfrage wird mit Token-Zahlen im Budget-Ledger (Kategorie `llm`) gebucht.
 - Code: `packages/core/src/providers/llm/anthropic.ts`, `packages/core/src/services/llm.ts`
 
-## Pingen – Briefversand (Print & Mail)
+## Pingen – Briefversand (inaktive Alternative)
+
+> Laut Update 2 ist LetterXpress der vorgesehene Briefdienst (Baustein L3). Der Pingen-Code bleibt als
+> inaktive zweite `MailProvider`-Implementierung erhalten und wird nicht weiterentwickelt.
 
 Geprüft am 23.10.2026 anhand der offiziellen OpenAPI-Spezifikation (`https://api.pingen.com/documentation`,
 Version 2.0.0) und des Hilfecenters (`https://help.pingen.com`).
@@ -117,6 +120,36 @@ Doku „Fulfill orders“ (docs.stripe.com/checkout/fulfillment).
   Ungültige Signatur → 400, Verarbeitungsfehler → 500 (Stripe wiederholt automatisch).
 - **Erstattung:** `stripe.refunds.create({ payment_intent, amount })` mit Idempotency-Key; die
   Stornorechnung entsteht beim `charge.refunded`-Event bzw. direkt bei der Admin-Aktion.
+- **Option B „Monatlich“ (Update 2), geprüft am 23.10.2026** (docs.stripe.com/billing/subscriptions/subscription-schedules,
+  docs.stripe.com/payments/paypal, Typen von stripe-node 23.0.1):
+  - Checkout `mode: 'subscription'` mit `price_data.recurring.interval = 'month'` (49 €), erste Rate
+    sofort; `subscription_data.metadata` trägt die Bestell-ID. Kein `payment_intent_data`/`submit_type`
+    (nur im Modus „payment“).
+  - Nach Zahlung: `subscription_schedules.create({ from_subscription })`, danach `update` mit zwei
+    Phasen: Phase 1 = bisheriger Preis bis `start_date + 12 Kalendermonate` (`end_date`), Phase 2 =
+    `price_data` 19 €/Monat (gleiches Produkt) mit `duration: { interval: 'month', interval_count: 1 }`,
+    `end_behavior: 'release'` → das Abo läuft danach mit 19 € weiter und ist monatlich kündbar.
+    `phases[].iterations` gibt es in den aktuellen SDK-Typen nicht mehr; Stripe empfiehlt `duration`.
+    Alle Aufrufe mit Idempotency-Key, idempotent bei Wiederholung (vorhandener Zeitplan mit 2 Phasen
+    wird erkannt). Stripe erzwingt die Mindestlaufzeit nicht – sie steht in AGB/Checkout; eine Kündigung
+    vor Ablauf wird gemeldet.
+  - Webhooks zusätzlich: `invoice.paid` (Rate ab Monat 2 → eigene Rechnung mit fortlaufender Nummer;
+    `billing_reason = subscription_create` ist die erste Rate), `invoice.payment_failed`
+    (`next_payment_attempt = null` → letzter Versuch → Wartungsmodus), `customer.subscription.updated`
+    (`unpaid` → Wartungsmodus, `active` → wieder online), `customer.subscription.deleted`
+    (Vertragsende). Abo-ID der Rechnung: `invoice.parent.subscription_details.subscription`;
+    Leistungszeitraum aus `invoice.lines.data[0].period` (`invoice.period_*` beschreibt bei Abos den
+    Vorzeitraum).
+  - Erstattung der ersten Rate (Garantie): `invoices.retrieve(id, { expand: ['payments'] })` →
+    `payments.data[].payment.payment_intent` → `refunds.create`. Vertrag beenden:
+    `subscription_schedules.cancel` (beendet auch das Abo) bzw. `subscriptions.cancel`, jeweils ohne
+    anteilige Gutschrift.
+  - **Zahlungsarten:** keine feste Liste im Code, sondern dynamisch aus dem Dashboard. PayPal über Stripe
+    ist für Konten in Deutschland verfügbar (EUR), auch für Abos – „Recurring payments … might require
+    approval“: im Dashboard freischalten lassen. SEPA-Lastschrift: Zahlung kommt asynchron
+    (`processing`, danach `invoice.paid`).
+  - Fehlgeschlagene Raten: Smart Retries im Dashboard aktivieren; Endzustand nach den Versuchen
+    (Abo `unpaid` oder gekündigt) wird beides behandelt.
 - **Test:** `PAYMENT_PROVIDER=mock` simuliert die Bezahlseite (`/checkout/mock/…`) inkl. signierter
   Events; in Produktion gesperrt (außer `ALLOW_MOCK_PAYMENT=true`). Stripe-Testmodus: `sk_test_…` und
   `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.

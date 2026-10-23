@@ -22,6 +22,7 @@ export class MockEmail implements EmailProvider {
           html: mail.html,
           replyTo: mail.replyTo,
           tag: mail.tag,
+          headers: mail.headers ?? {},
           attachments: (mail.attachments ?? []).map((a) => ({
             filename: a.filename,
             contentType: a.contentType,

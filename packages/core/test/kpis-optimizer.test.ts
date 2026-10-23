@@ -48,8 +48,8 @@ async function lead(
   if (opts.buy) {
     await db.insert(orders).values({
       leadId: l!.id,
-      amountCents: 39000,
-      netCents: 39000,
+      amountCents: 59000,
+      netCents: 59000,
       status: 'paid',
       customerCompany: 'X',
       customerName: 'Y',
@@ -127,7 +127,7 @@ describe('KPIs und Wochenbericht', () => {
       scans: 2,
       ctaClicks: 1,
       purchases: 1,
-      revenueCents: 39000,
+      revenueCents: 59000,
       letterCostCents: 420,
       costPerLetterCents: 140,
     });
@@ -135,9 +135,9 @@ describe('KPIs und Wochenbericht', () => {
     const byVar = await kpiRows(f, 'variant');
     expect(byVar.find((r) => r.key === va)!.label).toBe(vs[0]!.name);
     const s = await kpiSummary(f);
-    expect(s).toMatchObject({ leads: 4, purchases: 1, revenueCents: 39000, acquisitionCostCents: 601 });
+    expect(s).toMatchObject({ leads: 4, purchases: 1, revenueCents: 59000, acquisitionCostCents: 601 });
     expect(s.cacCents).toBe(601);
-    expect(s.roi).toBeCloseTo((39000 - 601) / 601, 5);
+    expect(s.roi).toBeCloseTo((59000 - 601) / 601, 5);
     const onlyNails = await kpiSummary({ ...f, branch: 'nagelstudio' });
     expect(onlyNails.leads).toBe(1);
   });

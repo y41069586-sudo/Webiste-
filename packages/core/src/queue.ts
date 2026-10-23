@@ -33,17 +33,17 @@ export const QUEUES = {
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
 
 export interface QueuePayloads {
-  'find-leads': { cities?: string[]; branches?: string[]; triggeredBy: string };
-  'build-demo': { leadId: string; regenerate?: boolean; triggeredBy?: string };
+  'find-leads': { cities?: string[]; branches?: string[]; /** fehlt beim wöchentlichen Cron-Lauf */ triggeredBy?: string };
+  'build-demo': { leadId: string; regenerate?: boolean; triggeredBy?: string; reviewNote?: string };
   'qa-demo': { demoId: string };
   'publish-demo': { demoId: string };
-  'generate-letter': { leadId: string; sequence: 1 | 2; triggeredBy?: string; test?: boolean; regenerate?: boolean };
+  'generate-letter': { leadId: string; sequence: 1 | 2 | 3; triggeredBy?: string; test?: boolean; regenerate?: boolean };
   'send-letter': { letterId: string };
   'send-approved-letters': { triggeredBy: string; limit?: number };
   'sync-letter-status': Record<string, never>;
   followup: Record<string, never>;
   'process-payment': { orderId: string; eventId: string };
-  'send-invoice': { orderId: string; kind?: 'invoice' | 'cancellation' };
+  'send-invoice': { orderId: string; kind?: 'invoice' | 'cancellation' | 'payment'; paymentId?: string };
   onboarding: { customerId: string };
   'build-site': { siteId: string; changeRequestId?: string };
   'deploy-site': { siteId: string };

@@ -30,7 +30,7 @@ export interface InvoiceLine {
   quantity: number;
   title: string;
   description: string;
-  /** bereits formatiert, z. B. „390,00 €“ */
+  /** bereits formatiert, z. B. „590,00 €“ */
   unitPrice: string;
   total: string;
 }

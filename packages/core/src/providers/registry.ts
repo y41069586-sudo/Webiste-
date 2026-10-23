@@ -20,6 +20,10 @@ export const registry = {
     return [new OverpassLeadSource(env.OVERPASS_URL, `WebsiteBriefMaschine/0.1 (+${env.APP_URL})`)];
   },
   mail(kind: string, env: Env): MailProvider | undefined {
+    if (kind === 'letterxpress') {
+      // Wird mit Baustein L3 gebaut (nach Freigabe); bis dahin bewusst kein stiller Fallback auf Mock
+      throw new Error('MAIL_PROVIDER=letterxpress ist noch nicht angebunden (Baustein L3). Bis dahin MAIL_PROVIDER=mock.');
+    }
     if (kind !== 'pingen') return undefined;
     if (!env.PINGEN_CLIENT_ID || !env.PINGEN_CLIENT_SECRET || !env.PINGEN_ORGANISATION_ID) {
       throw new Error(

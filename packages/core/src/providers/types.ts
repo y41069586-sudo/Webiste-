@@ -314,6 +314,8 @@ export interface CheckoutSessionInput {
   idempotencyKey: string;
   /** Ablauf der Session (Minuten, Stripe: 30 min – 24 h) */
   expiresInMinutes?: number;
+  /** Gesetzt = monatliches Abo (Plan „monthly“, erste Rate sofort) statt Einmalzahlung */
+  recurring?: { interval: 'month' };
 }
 
 export interface CheckoutSession {
@@ -327,6 +329,9 @@ export type PaymentEventType =
   | 'checkout.async_failed'
   | 'checkout.expired'
   | 'charge.refunded'
+  | 'invoice.paid'
+  | 'invoice.payment_failed'
+  | 'subscription.updated'
   | 'subscription.deleted'
   | 'other';
 
@@ -349,6 +354,19 @@ export interface PaymentEvent {
   subscriptionId?: string;
   currency?: string;
   metadata?: Record<string, string>;
+  /** Abo-Rechnungen (invoice.*) */
+  invoiceId?: string;
+  /** subscription_create | subscription_cycle | subscription_update | manual … */
+  billingReason?: string;
+  periodStart?: Date;
+  periodEnd?: Date;
+  /** Link zur Rechnungsseite des Anbieters (Zahlungsmittel aktualisieren) */
+  hostedInvoiceUrl?: string;
+  attemptCount?: number;
+  /** Nächster automatischer Versuch (Smart Retries); fehlt = keine weiteren Versuche */
+  nextPaymentAttempt?: Date | null;
+  /** Abo-Status (active | past_due | unpaid | canceled | …) */
+  subscriptionStatus?: string;
 }
 
 export interface PaymentSessionInfo {
@@ -361,6 +379,9 @@ export interface PaymentSessionInfo {
   amountTotal?: number;
   currency?: string;
   metadata: Record<string, string>;
+  /** Abo-Modus: Abo und erste Rechnung */
+  subscriptionId?: string;
+  invoiceId?: string;
 }
 
 export interface SubscriptionCheckoutInput {
@@ -388,4 +409,16 @@ export interface PaymentProvider {
   /** Webhook verifizieren und normalisieren. Wirft bei ungültiger Signatur. */
   parseWebhook(rawBody: string, signatureHeader: string | null): Promise<PaymentEvent>;
   refund?(paymentIntentId: string, opts: { idempotencyKey: string; amountCents?: number }): Promise<{ refundId: string }>;
+  /**
+   * Plan „monthly“: Zeitplan an das Abo hängen – bis `minTermEndsAt` der bisherige Preis, danach
+   * `afterTermCents` pro Monat (monatlich kündbar). Idempotent: vorhandener Zeitplan wird wiederverwendet.
+   */
+  scheduleStepDown?(
+    subscriptionId: string,
+    input: { minTermMonths: number; afterTermCents: number; idempotencyKey: string },
+  ): Promise<{ scheduleId: string; minTermEndsAt: Date }>;
+  /** Abo sofort beenden (Garantie, Zahlungsausfall) – ohne anteilige Gutschrift */
+  cancelSubscription?(subscriptionId: string, opts: { idempotencyKey: string }): Promise<void>;
+  /** Zahlung einer Abo-Rechnung erstatten (z. B. erste Rate bei Garantie) */
+  refundInvoice?(invoiceId: string, opts: { idempotencyKey: string; amountCents?: number }): Promise<{ refundId: string }>;
 }

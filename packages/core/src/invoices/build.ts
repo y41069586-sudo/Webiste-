@@ -3,6 +3,7 @@ import type { InvoiceData } from '@wbm/templates/letter-types';
 import type { AppConfig } from '../config/settings';
 import type { DbOrTx } from '../db/client';
 import type { BillingAddress } from '../db/schema';
+import type { OrderPlan } from '../types';
 import { formatDateDe, formatEuro } from '../util/time';
 
 export interface Amounts {
@@ -14,7 +15,15 @@ export interface Amounts {
 
 /** Beträge aus der Config: Kleinunternehmer ohne USt, sonst Brutto/Netto je nach `pricesAreGross`. */
 export function packageAmounts(cfg: AppConfig): Amounts {
-  const base = cfg.pricing.packageCents;
+  return amountsFor(cfg, cfg.pricing.packageCents);
+}
+
+/** Beträge des gewählten Plans (Option A: Einmalpreis; Option B: erste Monatsrate). */
+export function planAmounts(cfg: AppConfig, plan: OrderPlan): Amounts {
+  return amountsFor(cfg, plan === 'monthly' ? cfg.pricing.monthlyCents : cfg.pricing.packageCents);
+}
+
+export function amountsFor(cfg: AppConfig, base: number): Amounts {
   if (cfg.tax.kleinunternehmer || cfg.tax.vatRatePercent === 0) {
     return { grossCents: base, netCents: base, vatCents: 0, vatRatePercent: 0 };
   }
@@ -49,6 +58,7 @@ export async function nextInvoiceNumber(tx: DbOrTx, cfg: AppConfig, at: Date): P
 
 export interface InvoiceOrder {
   id: string;
+  plan?: OrderPlan;
   amountCents: number;
   customerCompany: string;
   customerName: string;
@@ -60,17 +70,44 @@ export interface InvoiceOrder {
 export function buildInvoiceData(
   cfg: AppConfig,
   order: InvoiceOrder,
-  opts: { number: string; paidAt: Date; issuedAt: Date; amounts: Amounts },
+  opts: {
+    number: string;
+    paidAt: Date;
+    issuedAt: Date;
+    amounts: Amounts;
+    /**
+     * Wiederkehrende Zahlung mit Leistungszeitraum: Plan „monthly“ Rate n (Standard bei Plan „monthly“:
+     * erste Rate ab Zahlung) bzw. „Hosting & Pflege“ (kind care)
+     */
+    rate?: { sequence: number; periodStart: Date; periodEnd: Date; kind?: 'monthly' | 'care' };
+  },
 ): InvoiceData {
   const a = opts.amounts;
   const s = cfg.sender;
   const domain = order.domainWish ? ` (Domain: ${order.domainWish})` : '';
   const paid = formatDateDe(opts.paidAt);
+  const monthly = order.plan === 'monthly';
+  const rate =
+    opts.rate ?? (monthly ? { sequence: 1, periodStart: opts.paidAt, periodEnd: addOneMonth(opts.paidAt) } : undefined);
+  const p = cfg.pricing;
+  const inMinTerm = rate ? rate.kind !== 'care' && monthly && rate.sequence <= p.minTermMonths : false;
+  const line = rate
+    ? {
+        title: inMinTerm
+          ? `${p.monthlyName}${domain} – Monatsrate ${rate.sequence} von ${p.minTermMonths}`
+          : `${p.subscriptionName}${domain}`,
+        description: inMinTerm
+          ? `${p.packageDescription} Mindestlaufzeit ${p.minTermMonths} Monate, danach ${p.subscriptionName} für ${formatEuro(p.subscriptionCents)}/Monat, monatlich kündbar.`
+          : `Hosting, SSL und Pflege Ihrer Website, monatlich kündbar.`,
+      }
+    : { title: `${p.packageName}${domain}`, description: p.packageDescription };
   return {
     kind: 'invoice',
     number: opts.number,
     issueDate: formatDateDe(opts.issuedAt),
-    serviceDate: `Entgelt vereinnahmt am ${paid}; Leistungszeitraum: Erstellung ab ${paid}, Hosting ${cfg.pricing.hostingMonthsIncluded} Monate ab Veröffentlichung.`,
+    serviceDate: rate
+      ? `Leistungszeitraum ${formatDateDe(rate.periodStart)} bis ${formatDateDe(new Date(rate.periodEnd.getTime() - 86400_000))}; Entgelt vereinnahmt am ${paid}.`
+      : `Entgelt vereinnahmt am ${paid}; Leistungszeitraum: Erstellung ab ${paid}, Hosting ${p.hostingMonthsIncluded} Monate ab Veröffentlichung.`,
     orderRef: order.id.slice(0, 8).toUpperCase(),
     seller: {
       name: s.name,
@@ -98,8 +135,8 @@ export function buildInvoiceData(
     lines: [
       {
         quantity: 1,
-        title: `${cfg.pricing.packageName}${domain}`,
-        description: cfg.pricing.packageDescription,
+        title: line.title,
+        description: line.description,
         unitPrice: formatEuro(a.netCents),
         total: formatEuro(a.netCents),
       },
@@ -111,6 +148,16 @@ export function buildInvoiceData(
     taxNote: a.vatCents ? null : cfg.tax.kleinunternehmerNote,
     paymentNote: `Der Rechnungsbetrag wurde am ${paid} per Online-Zahlung beglichen. Es ist kein Betrag mehr offen.`,
   };
+}
+
+function addOneMonth(d: Date): Date {
+  const x = new Date(d);
+  const day = x.getUTCDate();
+  x.setUTCDate(1);
+  x.setUTCMonth(x.getUTCMonth() + 1);
+  const last = new Date(Date.UTC(x.getUTCFullYear(), x.getUTCMonth() + 1, 0)).getUTCDate();
+  x.setUTCDate(Math.min(day, last));
+  return x;
 }
 
 /** Stornorechnung zur ursprünglichen Rechnung (negative Beträge, eigene fortlaufende Nummer). */

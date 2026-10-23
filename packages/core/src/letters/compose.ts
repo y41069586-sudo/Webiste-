@@ -1,5 +1,6 @@
 import type { LetterData } from '@wbm/templates/letter-types';
 import type { AppConfig } from '../config/settings';
+import { formatEuroShort } from '../util/time';
 import type { LetterVariantContent } from './variants';
 
 export interface RecipientInput {
@@ -61,14 +62,35 @@ export interface ComposeInput {
   dateLine: string;
   privacyNotice: string;
   objectionNotice: string;
+  /** Option A, z. B. „590 €“ */
   priceLabel: string;
+  /** „online bis …“ (formatiertes Datum) */
+  expiresLabel: string;
   screenshotPage?: LetterData['screenshotPage'];
+}
+
+/** Beide Preisoptionen in einem Satzteil – die Mindestlaufzeit steht immer direkt neben der Monatsrate. */
+export function pricesPhrase(cfg: AppConfig, oneTimeLabel: string): string {
+  const p = cfg.pricing;
+  if (!p.monthlyEnabled) return `einmalig **${oneTimeLabel}**`;
+  return `**${oneTimeLabel} einmalig** oder **${formatEuroShort(p.monthlyCents)} pro Monat** (${p.minTermMonths} Monate Mindestlaufzeit)`;
+}
+
+export function guaranteeSentence(cfg: AppConfig): string {
+  if (!cfg.guarantee.enabled) return '';
+  return `Gefällt sie Ihnen nach dem Kauf nicht, gibt es ${cfg.guarantee.days} Tage lang das Geld zurück.`;
 }
 
 export function composeLetter(i: ComposeInput): LetterData {
   const vars: Record<string, string> = {
     firmenname: i.recipient.businessName,
     preis: i.priceLabel,
+    preise: pricesPhrase(i.cfg, i.priceLabel),
+    preis_monat: formatEuroShort(i.cfg.pricing.monthlyCents),
+    mindestlaufzeit: String(i.cfg.pricing.minTermMonths),
+    preis_pflege: formatEuroShort(i.cfg.pricing.subscriptionCents),
+    garantie_satz: guaranteeSentence(i.cfg),
+    ablaufdatum: i.expiresLabel,
     domain_vorschlag: i.domain ?? '',
     ablauf_tage: String(i.cfg.timing.demoExpiryDays),
     hosting_monate: String(i.cfg.pricing.hostingMonthsIncluded),
@@ -99,9 +121,9 @@ export function composeLetter(i: ComposeInput): LetterData {
     intro,
     compositeDataUri: i.compositeDataUri,
     qrDataUri: i.qrDataUri,
-    qrCaption: v.qrCaption,
+    qrCaption: fillPlaceholders(v.qrCaption, vars),
     shortUrl: i.shortUrl,
-    offer: fillPlaceholders(i.domain ? v.offerWithDomain : v.offerWithoutDomain, vars),
+    offer: fillPlaceholders(i.domain ? v.offerWithDomain : v.offerWithoutDomain, vars).trim(),
     noAction: fillPlaceholders(v.noAction, vars),
     closing: v.closing,
     signatureName: i.cfg.sender.name,

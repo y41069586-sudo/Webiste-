@@ -37,3 +37,4 @@ export function renderSite(input: RenderInput): string {
 export { renderLetterHtml, embeddedFontCss, LETTER_GEOMETRY, type LetterData, type LetterSender } from './letter';
 export { renderInvoiceHtml, type InvoiceData, type InvoiceLine, type InvoiceBuyer, type InvoiceSeller } from './invoice';
 export { renderSubpage } from './subpage';
+export { renderMaintenanceHtml } from './maintenance';

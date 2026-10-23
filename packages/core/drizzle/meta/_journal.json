@@ -22,6 +22,13 @@
       "when": 1792748243578,
       "tag": "0002_onboarding",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792769257103,
+      "tag": "0003_update2_plans_segments",
+      "breakpoints": true
     }
   ]
 }

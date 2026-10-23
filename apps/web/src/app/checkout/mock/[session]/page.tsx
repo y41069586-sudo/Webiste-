@@ -21,7 +21,9 @@ export default async function MockCheckoutPage({ params }: { params: Promise<{ s
         </p>
         <h1 className="mb-1 text-2xl font-semibold">Testzahlung</h1>
         <p className="mb-6 text-slate-600">
-          {cfg.pricing.packageName} · {formatEuro(info.order.amountCents)} · {info.order.domainWish}
+          {info.order.plan === 'monthly' ? cfg.pricing.monthlyName : cfg.pricing.packageName} ·{' '}
+          {formatEuro(info.order.amountCents)}
+          {info.order.plan === 'monthly' ? ' pro Monat' : ''} · {info.order.domainWish}
         </p>
         <form action={mockPayAction.bind(null, session)} className="space-y-3">
           <button name="outcome" value="paid" className={`${btn} bg-brand-600 text-white hover:bg-brand-700`}>

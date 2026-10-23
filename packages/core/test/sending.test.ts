@@ -184,7 +184,7 @@ describe('Versand', () => {
     expect((await scheduleFollowups()).queued).toBe(0);
     await updateConfig({ switches: { followupEnabled: true } }, 'test');
     expect((await scheduleFollowups()).queued).toBe(1);
-    await getDb().update(leads).set({ lettersSent: 2 }).where(eq(leads.id, lead.id));
+    await getDb().update(leads).set({ lettersSent: 3 }).where(eq(leads.id, lead.id));
     expect((await scheduleFollowups()).queued).toBe(0);
   });
 

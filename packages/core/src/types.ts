@@ -62,6 +62,17 @@ export type EventType = (typeof EVENT_TYPES)[number];
 
 export type VariantKind = 'letter' | 'demo_banner' | 'price';
 
+/** one_time = 590 € einmalig (mode=payment), monthly = 49 €/Monat mit Mindestlaufzeit (mode=subscription) */
+export const ORDER_PLANS = ['one_time', 'monthly'] as const;
+export type OrderPlan = (typeof ORDER_PLANS)[number];
+
+/** Priorität: neu > social_only > etabliert (Update 2, A2) */
+export const LEAD_SEGMENTS = ['neu', 'social_only', 'etabliert'] as const;
+export type LeadSegment = (typeof LEAD_SEGMENTS)[number];
+
+export const LETTER_FORMATS = ['letter', 'postcard'] as const;
+export type LetterFormat = (typeof LETTER_FORMATS)[number];
+
 export const ORDER_STATUSES = ['pending', 'processing', 'paid', 'failed', 'expired', 'refunded', 'cancelled'] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 

@@ -12,7 +12,11 @@ export class MockPayment implements PaymentProvider {
 
   async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSession> {
     const sessionId = `cs_mock_${randomToken(20)}`;
-    const params = new URLSearchParams({ order: input.orderId, amount: String(input.amountCents) });
+    const params = new URLSearchParams({
+      order: input.orderId,
+      amount: String(input.amountCents),
+      ...(input.recurring ? { plan: 'monthly' } : {}),
+    });
     return { sessionId, url: appUrl(`/checkout/mock/${sessionId}?${params.toString()}`) };
   }
 
@@ -29,7 +33,31 @@ export class MockPayment implements PaymentProvider {
     if (!signatureHeader || !safeEqual(signatureHeader, this.sign(rawBody))) {
       throw new Error('Ungültige Signatur');
     }
-    return JSON.parse(rawBody) as PaymentEvent;
+    const ev = JSON.parse(rawBody) as PaymentEvent;
+    // Datumsfelder kommen als ISO-Strings aus JSON
+    for (const k of ['periodStart', 'periodEnd', 'nextPaymentAttempt'] as const) {
+      const v = ev[k] as unknown;
+      if (typeof v === 'string') (ev as unknown as Record<string, unknown>)[k] = new Date(v);
+    }
+    return ev;
+  }
+
+  async scheduleStepDown(
+    subscriptionId: string,
+    input: { minTermMonths: number },
+  ): Promise<{ scheduleId: string; minTermEndsAt: Date }> {
+    const end = new Date();
+    end.setUTCMonth(end.getUTCMonth() + input.minTermMonths);
+    return { scheduleId: `sub_sched_mock_${subscriptionId.slice(-12)}`, minTermEndsAt: end };
+  }
+
+  async cancelSubscription(subscriptionId: string): Promise<void> {
+    void subscriptionId;
+  }
+
+  async refundInvoice(invoiceId: string, opts: { idempotencyKey: string }): Promise<{ refundId: string }> {
+    void invoiceId;
+    return { refundId: `re_mock_${opts.idempotencyKey}` };
   }
 
   async refund(paymentIntentId: string, opts: { idempotencyKey: string }): Promise<{ refundId: string }> {

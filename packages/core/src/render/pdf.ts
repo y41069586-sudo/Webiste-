@@ -152,6 +152,11 @@ export async function validateLetterDom(html: string, position: 'left' | 'right'
       const body = rect(document.getElementById('brieftext'));
       const small = rect(document.getElementById('kleingedrucktes'));
       if (body.y2 > small.y1 - 1) out.push({ check: 'ueberlappung', detail: 'Brieftext endet bei ' + body.y2.toFixed(1) + ' mm, Kleingedrucktes beginnt bei ' + small.y1.toFixed(1) + ' mm' });
+      // QR-Code mindestens 4 × 4 cm (Update 2, A3)
+      for (const q of first.querySelectorAll('img.qr')) {
+        const r = rect(q);
+        if (r.x2 - r.x1 < 39.5 || r.y2 - r.y1 < 39.5) out.push({ check: 'qr-groesse', detail: 'QR-Code ' + (r.x2 - r.x1).toFixed(1) + ' × ' + (r.y2 - r.y1).toFixed(1) + ' mm (mind. 40 × 40 mm)' });
+      }
       const a = rect(addr);
       return { issues: out, address: a };
     })()`;

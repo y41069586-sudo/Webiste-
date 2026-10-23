@@ -47,7 +47,7 @@ export function demoInput(templateId: string, palette: string, group: 'handwerk'
     renderedAt: 1700000000000,
     demo: {
       slug: 'abcdefghijklmnopqrstuvwx',
-      priceLabel: '390 €',
+      priceLabel: '590 €',
       checkoutUrl: 'https://entwurf.example.de/d/abcdefghijklmnopqrstuvwx/uebernehmen',
       questionUrl: 'https://entwurf.example.de/d/abcdefghijklmnopqrstuvwx/frage',
       optOutUrl: 'https://entwurf.example.de/d/abcdefghijklmnopqrstuvwx/kein-interesse',
@@ -62,6 +62,32 @@ export function demoInput(templateId: string, palette: string, group: 'handwerk'
         phone: '0231 000000',
         imprintUrl: 'https://app.example.de/impressum',
         privacyUrl: 'https://app.example.de/datenschutz',
+      },
+      offers: [
+        {
+          title: 'Einmalzahlung',
+          price: '590 €',
+          unit: 'einmalig',
+          points: ['Eigene Domain und 12 Monate Hosting inklusive', 'Danach optional 19 €/Monat, monatlich kündbar'],
+          href: 'https://entwurf.example.de/d/abcdefghijklmnopqrstuvwx/uebernehmen?plan=one_time',
+        },
+        {
+          title: 'Monatlich',
+          price: '49 €',
+          unit: 'pro Monat',
+          points: ['12 Monate Mindestlaufzeit', 'Ab Monat 13 nur noch 19 €/Monat, dann monatlich kündbar'],
+          href: 'https://entwurf.example.de/d/abcdefghijklmnopqrstuvwx/uebernehmen?plan=monthly',
+        },
+      ],
+      guaranteeNote: '14 Tage Zufriedenheitsgarantie: Geld zurück, wenn Ihnen die Website nicht gefällt.',
+      whatsappUrl: 'https://wa.me/491701234567?text=Frage%20zu%20meinem%20Website-Entwurf%20abcdefghijklmnopqrstuvwx',
+      trust: {
+        name: 'Max Muster',
+        intro: 'Ich baue Websites für Betriebe in Dortmund. Jeder Entwurf entsteht für genau einen Betrieb.',
+        photoDataUri: null,
+        email: 'hallo@example.de',
+        phone: '0231 000000',
+        imprintUrl: 'https://app.example.de/impressum',
       },
     },
   };

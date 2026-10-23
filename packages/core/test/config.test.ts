@@ -9,7 +9,7 @@ describe('Konfiguration', () => {
 
   it('liefert Standardwerte aus dem Auftrag', async () => {
     const cfg = await getConfig({ fresh: true });
-    expect(cfg.pricing.packageCents).toBe(39000);
+    expect(cfg.pricing.packageCents).toBe(59000);
     expect(cfg.pricing.subscriptionCents).toBe(1900);
     expect(cfg.filters.minRating).toBe(4.5);
     expect(cfg.filters.minRatingCount).toBe(30);

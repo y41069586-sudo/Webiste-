@@ -39,7 +39,7 @@ const SESSION = {
   payment_status: 'unpaid',
   client_reference_id: 'order-1',
   payment_intent: null,
-  amount_total: 39000,
+  amount_total: 59000,
   currency: 'eur',
   metadata: { orderId: 'order-1' },
 };
@@ -54,7 +54,7 @@ describe('Stripe', () => {
     });
     const res = await p.createCheckoutSession({
       orderId: 'order-1',
-      amountCents: 39000,
+      amountCents: 59000,
       currency: 'eur',
       productName: 'Website-Paket – beispiel.de',
       productDescription: 'Beschreibung',
@@ -75,7 +75,7 @@ describe('Stripe', () => {
     expect(body.get('mode')).toBe('payment');
     expect(body.get('locale')).toBe('de');
     expect(body.get('client_reference_id')).toBe('order-1');
-    expect(body.get('line_items[0][price_data][unit_amount]')).toBe('39000');
+    expect(body.get('line_items[0][price_data][unit_amount]')).toBe('59000');
     expect(body.get('line_items[0][price_data][currency]')).toBe('eur');
     expect(body.get('success_url')).toContain('{CHECKOUT_SESSION_ID}');
     const exp = Number(body.get('expires_at'));
@@ -98,10 +98,10 @@ describe('Stripe', () => {
       clientReferenceId: 'order-1',
       paymentStatus: 'paid',
       paymentIntentId: 'pi_123',
-      amountTotal: 39000,
+      amountTotal: 59000,
     });
     await expect(p.parseWebhook(payload, 't=1,v1=deadbeef')).rejects.toThrow();
-    await expect(p.parseWebhook(payload.replace('39000', '1'), p.testSignature(payload))).rejects.toThrow();
+    await expect(p.parseWebhook(payload.replace('59000', '1'), p.testSignature(payload))).rejects.toThrow();
   });
 
   it('Webhook: Erstattung', async () => {
@@ -114,8 +114,8 @@ describe('Stripe', () => {
         object: {
           id: 'ch_1',
           object: 'charge',
-          amount: 39000,
-          amount_refunded: 39000,
+          amount: 59000,
+          amount_refunded: 59000,
           currency: 'eur',
           payment_intent: 'pi_123',
           metadata: {},
@@ -125,7 +125,7 @@ describe('Stripe', () => {
     expect(await p.parseWebhook(payload, p.testSignature(payload))).toMatchObject({
       type: 'charge.refunded',
       paymentIntentId: 'pi_123',
-      amountRefunded: 39000,
+      amountRefunded: 59000,
     });
   });
 });

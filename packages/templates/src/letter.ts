@@ -120,11 +120,12 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .body{position:absolute;left:25mm;right:20mm;top:96mm}
 .subject{font-size:11.5pt;font-weight:700;margin:0 0 4mm;line-height:1.3}
 .body p{margin:0 0 2.4mm}
-.visual{display:flex;gap:7mm;align-items:center;margin:3mm 0 3mm}
-.composite{width:94mm;height:auto;display:block;border-radius:1.5mm}
+.visual{display:flex;gap:6mm;align-items:center;margin:2mm 0 2mm}
+.composite{width:88mm;height:auto;display:block;border-radius:1.5mm}
 .qrbox{flex:1;text-align:center;font-size:9pt}
-.qr{width:31mm;height:31mm;display:block;margin:0 auto 1.5mm}
-.qrbox strong{display:block;font-size:10pt}
+/* QR-Code mindestens 4 × 4 cm (gut scanbar, auch bei schwachem Licht) */
+.qr{width:41mm;height:41mm;display:block;margin:0 auto 1.5mm}
+.qrbox strong{display:block;font-size:9.5pt;line-height:1.3}
 .short{font-size:7.5pt;color:#4a5565;word-break:break-all}
 .sign{margin-top:3mm}
 .sign .name{font-weight:600}
@@ -138,7 +139,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .shots .desk{width:118mm;border:0.3mm solid #d9e0e8;border-radius:1.5mm}
 .shots .mob{width:38mm;border:0.3mm solid #d9e0e8;border-radius:3mm}
 .qrrow{display:flex;gap:6mm;align-items:center;margin-top:10mm;font-size:10pt}
-.qrrow .qr{margin:0}
+.qrrow .qr{margin:0;width:41mm;height:41mm}
 </style></head>
 <body>
 <section class="page" aria-label="Seite 1">

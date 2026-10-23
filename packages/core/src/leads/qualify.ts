@@ -1,5 +1,6 @@
 import type { AppConfig, BranchConfig } from '../config/settings';
 import type { RawPlace } from '../providers/types';
+import type { LeadSegment } from '../types';
 import { foldUmlauts, normalizeBusinessName } from './normalize';
 
 export const REJECTION_REASONS = [
@@ -84,6 +85,8 @@ export interface QualifyInput {
   isDuplicate?: boolean;
   /** Bewertung aus einer Quelle, deren Nutzung zulässig ist (nicht gespeichert) */
   rating?: RatingSignal | null;
+  /** Betrieb ist erst kürzlich in den Suchergebnissen aufgetaucht (Segment schon früher durchsucht) */
+  newAppearance?: boolean;
 }
 
 export interface QualifyResult {
@@ -91,6 +94,21 @@ export interface QualifyResult {
   reasons: RejectionReason[];
   score: number;
   website: WebsiteClass;
+  segment: LeadSegment;
+}
+
+/**
+ * Segment mit Priorität neu > social_only > etabliert (Update 2, A2). „neu“ verlangt ein Bewertungssignal
+ * mit 3–20 Bewertungen; ohne zulässige Bewertungsquelle (OSM) gibt es nur social_only und etabliert.
+ */
+export function leadSegment(
+  cfg: AppConfig,
+  input: { rating?: RatingSignal | null; newAppearance?: boolean; socialOnly: boolean },
+): LeadSegment {
+  const r = input.rating;
+  const s = cfg.segments;
+  if (input.newAppearance && r && r.ratingCount >= s.newMinRatings && r.ratingCount <= s.newMaxRatings) return 'neu';
+  return input.socialOnly ? 'social_only' : 'etabliert';
 }
 
 export function computeScore(input: {
@@ -117,9 +135,11 @@ export function qualify(input: QualifyInput): QualifyResult {
   if (website.hasWebsite) reasons.push('has_website');
   if (cfg.filters.requireOperational && place.businessStatus && place.businessStatus !== 'OPERATIONAL')
     reasons.push('not_operational');
+  const segment = leadSegment(cfg, { rating: input.rating, newAppearance: input.newAppearance, socialOnly: website.socialOnly });
   if (input.rating) {
     if (input.rating.rating < cfg.filters.minRating) reasons.push('rating_too_low');
-    if (input.rating.ratingCount < cfg.filters.minRatingCount) reasons.push('too_few_ratings');
+    // Für „neu“ entfällt die Mindestanzahl (3–20 Bewertungen reichen), das Mindest-Rating bleibt
+    if (segment !== 'neu' && input.rating.ratingCount < cfg.filters.minRatingCount) reasons.push('too_few_ratings');
   } else if (cfg.filters.requireRatingSignal) {
     reasons.push('no_rating_data');
   }
@@ -129,10 +149,12 @@ export function qualify(input: QualifyInput): QualifyResult {
   if (input.recentlyContacted) reasons.push('recently_contacted');
   if (input.chainByFrequency || matchesChainName(place.name, cfg.targeting.chainNames)) reasons.push('chain');
   if (input.isDuplicate) reasons.push('duplicate');
+  const base = computeScore({ branch: input.branch, place, rating: input.rating, website });
   return {
     qualified: reasons.length === 0,
     reasons,
-    score: computeScore({ branch: input.branch, place, rating: input.rating, website }),
+    score: Math.round((base + cfg.segments.scoreBonus[segment]) * 100) / 100,
     website,
+    segment,
   };
 }

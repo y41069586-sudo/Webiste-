@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { checkoutAvailability, demoUrl, formatEuro, getCheckoutContext, getConfig } from '@wbm/core';
 import { PublicCard, PublicShell } from '@/components/public/shell';
-import { CheckoutForm } from './checkout-form';
+import { CheckoutForm, type PlanOffer } from './checkout-form';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Website bestellen', robots: { index: false, follow: false } };
@@ -11,10 +11,10 @@ export default async function CheckoutPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ abgebrochen?: string }>;
+  searchParams: Promise<{ abgebrochen?: string; plan?: string }>;
 }) {
   const { slug } = await params;
-  const { abgebrochen } = await searchParams;
+  const { abgebrochen, plan: chosenPlan } = await searchParams;
   const cfg = await getConfig();
   const ctx = await getCheckoutContext(slug);
 
@@ -38,8 +38,45 @@ export default async function CheckoutPage({
   }
 
   const mode = checkoutAvailability();
-  const { lead, demo, price } = ctx;
-  const months = cfg.pricing.hostingMonthsIncluded;
+  const { lead, demo, price, monthly } = ctx;
+  const p = cfg.pricing;
+  const months = p.hostingMonthsIncluded;
+  const care = `${formatEuro(p.subscriptionCents)}/Monat`;
+  const plans: PlanOffer[] = [
+    {
+      id: 'one_time',
+      title: 'Einmalzahlung',
+      price: price.label,
+      unit: 'einmalig',
+      buttonLabel: price.label,
+      points: [
+        `Eigene Domain und ${months} Monate Hosting inklusive`,
+        `Danach optional „${p.subscriptionName}“ für ${care}, monatlich kündbar`,
+      ],
+    },
+    ...(monthly
+      ? [
+          {
+            id: 'monthly' as const,
+            title: 'Monatlich',
+            price: monthly.label,
+            unit: 'pro Monat',
+            buttonLabel: `${monthly.label} pro Monat`,
+            points: [
+              `${p.minTermMonths} Monate Mindestlaufzeit`,
+              `Ab Monat ${p.minTermMonths + 1} nur noch ${care}, dann monatlich kündbar`,
+              'Eigene Domain und Hosting inklusive',
+            ],
+          },
+        ]
+      : []),
+  ];
+  const guaranteeNote = cfg.guarantee.enabled
+    ? `${cfg.guarantee.days} Tage Zufriedenheitsgarantie: Gefällt Ihnen die Website nicht, bekommen Sie Ihr Geld zurück${monthly ? ' (bei monatlicher Zahlung endet der Vertrag sofort)' : ''}.`
+    : null;
+  const minTermNote = monthly
+    ? `Monatliche Zahlung: ${monthly.label} pro Monat, Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${care}, dann monatlich kündbar.`
+    : null;
   return (
     <PublicShell company={cfg.sender.company} wide>
       {mode.ok && mode.mode !== 'live' ? (
@@ -57,23 +94,18 @@ export default async function CheckoutPage({
         <div>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Ihre Website übernehmen</h1>
           <p className="mt-2 mb-6 text-slate-600">
-            Noch ein Schritt: Rechnungsadresse und Wunschdomain angeben, dann bezahlen. Danach tragen Sie Ihre Angaben für
-            Impressum, Leistungen und Öffnungszeiten ein.
+            Wählen Sie, wie Sie zahlen möchten – beide Optionen enthalten dasselbe. Danach Rechnungsadresse und Wunschdomain
+            angeben und bezahlen; anschließend tragen Sie Ihre Angaben für Impressum, Leistungen und Öffnungszeiten ein.
           </p>
           <PublicCard>
             <CheckoutForm
               slug={slug}
               prefill={ctx.prefill}
-              priceLabel={price.label}
+              plans={plans}
+              initialPlan={plans.some((x) => x.id === chosenPlan) ? (chosenPlan as PlanOffer['id']) : null}
+              guaranteeNote={guaranteeNote}
+              minTermNote={minTermNote}
               termsVersion={cfg.legal.termsVersion}
-              subscription={
-                cfg.pricing.subscriptionEnabled
-                  ? {
-                      enabled: true,
-                      label: `${cfg.pricing.subscriptionName} für ${formatEuro(cfg.pricing.subscriptionCents)}/Monat ab Monat ${cfg.pricing.subscriptionStartMonth}`,
-                    }
-                  : null
-              }
             />
           </PublicCard>
         </div>
@@ -100,7 +132,7 @@ export default async function CheckoutPage({
               {[
                 'Ihre Website auf Basis des Entwurfs – mit Ihren Texten, Leistungen und Öffnungszeiten',
                 'Eigene Domain, registriert auf Ihren Namen',
-                `Hosting mit SSL für ${months} Monate ab Veröffentlichung`,
+                'Hosting mit SSL',
                 `Bis zu ${cfg.onboarding.includedChangeRounds} Änderungsrunden vor dem Start`,
                 'Kontaktformular, das an Ihre E-Mail-Adresse geht',
               ].map((t) => (
@@ -112,26 +144,27 @@ export default async function CheckoutPage({
                 </li>
               ))}
             </ul>
-            <div className="mt-5 border-t border-slate-200 pt-4">
-              {price.vatCents ? (
-                <>
-                  <div className="flex justify-between text-sm text-slate-600">
-                    <span>Netto</span>
-                    <span>{formatEuro(price.netCents)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-slate-600">
-                    <span>USt. {cfg.tax.vatRatePercent} %</span>
-                    <span>{formatEuro(price.vatCents)}</span>
-                  </div>
-                </>
-              ) : null}
-              <div className="mt-1 flex justify-between text-lg font-semibold">
-                <span>Einmalig</span>
-                <span>{price.label}</span>
+            <div className="mt-5 space-y-1 border-t border-slate-200 pt-4 text-sm">
+              <div className="flex justify-between">
+                <span>Einmalzahlung</span>
+                <span className="font-semibold">{price.label}</span>
               </div>
-              <p className="mt-1 text-xs text-slate-500">
-                {price.vatCents ? 'inkl. Umsatzsteuer' : cfg.tax.kleinunternehmerNote} Keine laufenden Kosten in den ersten{' '}
-                {months} Monaten, kein Abo.
+              {monthly ? (
+                <div className="flex justify-between gap-3">
+                  <span>
+                    Monatlich
+                    <span className="block text-xs text-slate-500">
+                      {p.minTermMonths} Monate Mindestlaufzeit, danach {care}
+                    </span>
+                  </span>
+                  <span className="font-semibold whitespace-nowrap">{monthly.label}/Monat</span>
+                </div>
+              ) : null}
+              <p className="pt-1 text-xs text-slate-500">
+                {price.vatCents
+                  ? `inkl. ${cfg.tax.vatRatePercent} % Umsatzsteuer (${formatEuro(price.vatCents)} bei Einmalzahlung).`
+                  : cfg.tax.kleinunternehmerNote}{' '}
+                Keine versteckten Kosten.
               </p>
             </div>
           </PublicCard>

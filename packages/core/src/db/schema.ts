@@ -18,10 +18,13 @@ import type {
   BudgetCategory,
   DemoStatus,
   EventType,
+  LeadSegment,
   LeadSourceKind,
   LeadStatus,
+  LetterFormat,
   LetterStatus,
   OpeningHours,
+  OrderPlan,
   OrderStatus,
   SiteStatus,
   SupportClass,
@@ -79,6 +82,12 @@ export const leads = pgTable(
     /** Zeitpunkt, zu dem die Quelldaten zuletzt von der Quelle abgerufen wurden (Cache-Regeln) */
     sourceFetchedAt: ts('source_fetched_at'),
     lettersSent: integer('letters_sent').default(0).notNull(),
+    /** neu | social_only | etabliert (bei der Qualifizierung gesetzt) */
+    leadSegment: text('lead_segment').$type<LeadSegment>(),
+    /** Erstes Auftauchen in den Suchergebnissen (Grundlage für Segment „neu“) */
+    firstSeenAt: ts('first_seen_at').defaultNow(),
+    /** Kurzcode für die Kurz-URL im Brief ({TRACK_DOMAIN}/{kurzcode}), zufällig */
+    shortCode: text('short_code'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
     contactedAt: ts('contacted_at'),
@@ -89,6 +98,7 @@ export const leads = pgTable(
   (t) => [
     uniqueIndex('leads_source_uidx').on(t.source, t.sourceId),
     uniqueIndex('leads_track_token_uidx').on(t.trackToken),
+    uniqueIndex('leads_short_code_uidx').on(t.shortCode),
     index('leads_status_idx').on(t.status),
     index('leads_segment_idx').on(t.segmentKey),
     index('leads_score_idx').on(t.score),
@@ -172,7 +182,13 @@ export const letters = pgTable(
       .references(() => leads.id, { onDelete: 'cascade' }),
     demoId: uuid('demo_id').references(() => demos.id, { onDelete: 'set null' }),
     variantId: uuid('variant_id').references(() => variants.id, { onDelete: 'set null' }),
+    /** 1 = Erstbrief, 2 = „nur noch 7 Tage online“, 3 = „Wir haben Ihre Seite verbessert“ (0 = Testbrief) */
     sequence: integer('sequence').default(1).notNull(),
+    format: text('format').$type<LetterFormat>().default('letter').notNull(),
+    /** Im Brief genanntes Datum „online bis …“ – die Demo läuft mindestens bis dahin */
+    statedExpiresAt: ts('stated_expires_at'),
+    /** Versand + DELIVERY_BUSINESS_DAYS (Briefdienste ohne Zustellbestätigung) */
+    estimatedDeliveredAt: ts('estimated_delivered_at'),
     pdfStorageKey: text('pdf_storage_key'),
     pageCount: integer('page_count').default(1).notNull(),
     provider: text('provider'),
@@ -229,6 +245,7 @@ export const orders = pgTable(
     leadId: uuid('lead_id').references(() => leads.id, { onDelete: 'set null' }),
     demoId: uuid('demo_id').references(() => demos.id, { onDelete: 'set null' }),
     provider: text('provider').default('stripe').notNull(),
+    plan: text('plan').$type<OrderPlan>().default('one_time').notNull(),
     stripeSessionId: text('stripe_session_id'),
     stripePaymentIntent: text('stripe_payment_intent'),
     amountCents: integer('amount_cents').notNull(),
@@ -261,6 +278,17 @@ export const orders = pgTable(
     termsAcceptedAt: ts('terms_accepted_at'),
     termsVersion: text('terms_version'),
     subscriptionOptIn: boolean('subscription_opt_in').default(false).notNull(),
+    /** Nur Plan „monthly“: Abo, Zeitplan (12 × 49 € → 19 €) und erste Rechnung beim Anbieter */
+    stripeSubscriptionId: text('stripe_subscription_id'),
+    stripeScheduleId: text('stripe_schedule_id'),
+    stripeInvoiceId: text('stripe_invoice_id'),
+    /** active | past_due | unpaid | canceled … (Stand laut letztem Webhook) */
+    subscriptionStatus: text('subscription_status'),
+    minTermEndsAt: ts('min_term_ends_at'),
+    guaranteeEndsAt: ts('guarantee_ends_at'),
+    /** Vertrag beendet (Garantie, Kündigung nach Mindestlaufzeit, Zahlungsausfall) */
+    endedAt: ts('ended_at'),
+    endedReason: text('ended_reason'),
     paidAt: ts('paid_at'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -271,6 +299,7 @@ export const orders = pgTable(
     uniqueIndex('orders_cancellation_uidx').on(t.cancellationNumber),
     index('orders_lead_idx').on(t.leadId),
     index('orders_payment_intent_idx').on(t.stripePaymentIntent),
+    index('orders_subscription_idx').on(t.stripeSubscriptionId),
     index('orders_status_idx').on(t.status),
   ],
 );
@@ -310,6 +339,42 @@ export const customers = pgTable(
     updatedAt: updatedAt(),
   },
   (t) => [uniqueIndex('customers_order_uidx').on(t.orderId), uniqueIndex('customers_token_uidx').on(t.accessToken)],
+);
+
+/**
+ * Monatsraten (Plan „monthly“) ab der zweiten Rate und Raten von „Hosting & Pflege“: je Zahlung eine eigene
+ * Rechnung mit fortlaufender Nummer. Die erste Rate steckt in der Rechnung der Bestellung.
+ */
+export const orderPayments = pgTable(
+  'order_payments',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orderId: uuid('order_id')
+      .notNull()
+      .references(() => orders.id, { onDelete: 'restrict' }),
+    provider: text('provider').notNull(),
+    providerInvoiceId: text('provider_invoice_id').notNull(),
+    /** Laufende Nummer der Rate (2, 3, …) */
+    sequence: integer('sequence').notNull(),
+    amountCents: integer('amount_cents').notNull(),
+    netCents: integer('net_cents').notNull(),
+    vatCents: integer('vat_cents').default(0).notNull(),
+    vatRatePercent: doublePrecision('vat_rate_percent').default(0).notNull(),
+    periodStart: ts('period_start'),
+    periodEnd: ts('period_end'),
+    paidAt: ts('paid_at').notNull(),
+    invoiceNumber: text('invoice_number'),
+    invoiceJson: jsonb('invoice_json').$type<Record<string, unknown> | null>(),
+    invoicePdfKey: text('invoice_pdf_key'),
+    invoiceSentAt: ts('invoice_sent_at'),
+    refundedCents: integer('refunded_cents').default(0).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex('order_payments_invoice_uidx').on(t.provider, t.providerInvoiceId),
+    uniqueIndex('order_payments_number_uidx').on(t.invoiceNumber),
+    index('order_payments_order_idx').on(t.orderId),
+  ],
 );
 
 export interface ImpressumData {

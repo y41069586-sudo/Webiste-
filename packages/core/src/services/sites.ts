@@ -19,6 +19,7 @@ import {
 import { randomToken, sha256 } from '../util/crypto';
 import { audit } from './audit';
 import { checkDomain } from './domains';
+import { setSiteMaintenance } from './maintenance';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
@@ -594,18 +595,8 @@ export async function resolveChangeRequest(id: string, actor: string, note: stri
 
 /** Seite sperren (z. B. nach Erstattung oder Hosting-Ende); Formular-Endpunkt nimmt nichts mehr an. */
 export async function setSiteSuspended(siteId: string, suspended: boolean, actor: string): Promise<void> {
-  const db = getDb();
-  const site = await db.query.sites.findFirst({ where: eq(sites.id, siteId) });
-  if (!site) throw new Error('Seite nicht gefunden');
-  await db
-    .update(sites)
-    .set({
-      status: suspended ? 'suspended' : site.liveAt ? 'live' : 'preview',
-      statusReason: suspended ? 'gesperrt durch Betreiber' : null,
-      updatedAt: new Date(),
-    })
-    .where(eq(sites.id, siteId));
-  await audit(db, { entity: 'site', entityId: siteId, action: suspended ? 'suspended' : 'unsuspended', actor });
+  // Sperre durch den Betreiber = Wartungsmodus (Ersatzseite beim Hosting), Aufheben veröffentlicht neu
+  await setSiteMaintenance(siteId, suspended, 'admin', actor);
 }
 
 /** Admin: Wunschdomain eines Kunden ändern (nur solange noch nicht registriert; mit Verfügbarkeitsprüfung). */

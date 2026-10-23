@@ -116,3 +116,20 @@ export async function anonymizeLead(db: DbOrTx, leadId: string): Promise<void> {
     })
     .where(eq(leads.id, leadId));
 }
+
+/** Nur eine E-Mail-Adresse sperren (z. B. Abmeldelink in der Erinnerungs-Mail). */
+export async function suppressEmail(db: DbOrTx, email: string, reason: string): Promise<void> {
+  await db
+    .insert(suppressionList)
+    .values({ hash: emailHash(email), kind: 'email', reason })
+    .onConflictDoNothing({ target: suppressionList.hash });
+}
+
+export async function isEmailSuppressed(db: DbOrTx, email: string): Promise<boolean> {
+  const hit = await db
+    .select({ id: suppressionList.id })
+    .from(suppressionList)
+    .where(eq(suppressionList.hash, emailHash(email)))
+    .limit(1);
+  return hit.length > 0;
+}

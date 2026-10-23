@@ -45,6 +45,7 @@ export { domainCandidates, suggestDomain, isValidDeLabel } from './letters/domai
 export { recipientLines, composeLetter, lowerFirstWord } from './letters/compose';
 export { privacyNoticeText, objectionNoticeText } from './letters/notices';
 export * from './services/sending';
+export { unsubscribeSignature, unsubscribeUrl, type FollowupSummary } from './services/followups';
 export { PingenMailProvider, mapPingenStatus } from './providers/mail/pingen';
 export * from './services/email';
 export * from './services/domains';
@@ -52,6 +53,8 @@ export * from './services/orders';
 export * from './emails/templates';
 export {
   packageAmounts,
+  planAmounts,
+  amountsFor,
   orderAmounts,
   buildInvoiceData,
   buildCancellationData,
@@ -63,6 +66,9 @@ export * from './sites/onboarding-data';
 export { impressumHtml, privacyHtml } from './sites/legal';
 export { validateRevision, mergeCustomerTexts, REVISION_TOOL_NAME } from './sites/revision';
 export * from './services/renewals';
+export * from './services/recurring';
+export * from './services/guarantee';
+export * from './services/maintenance';
 export * from './services/support';
 export { isAutomated, OPT_OUT_RE } from './support/prompts';
 export * from './services/alerts';

@@ -17,6 +17,8 @@ async function main(): Promise<void> {
     { queue: QUEUES.pipelineTick, cron: '*/5 * * * *' },
     { queue: QUEUES.syncLetterStatus, cron: '15 */2 * * *' },
     { queue: QUEUES.followup, cron: '5 9 * * *' },
+    // Lead-Finder wöchentlich (montags früh); abschaltbar über segments.weeklyLeadFinder
+    { queue: QUEUES.findLeads, cron: '20 5 * * 1' },
     { queue: QUEUES.retention, cron: '15 3 * * *' },
     { queue: QUEUES.renewalReminders, cron: '10 8 * * *' },
     { queue: QUEUES.weeklyOptimizer, cron: '0 18 * * 0' },

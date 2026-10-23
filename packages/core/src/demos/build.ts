@@ -23,6 +23,7 @@ import { transitionLead } from '../services/lead-state';
 import { llmStructured } from '../services/llm';
 import { randomToken, sha256 } from '../util/crypto';
 import { formatEuroShort } from '../util/time';
+import { optimizeImage } from '../render/images';
 import {
   buildDemoPrompt,
   DEMO_CONTENT_SCHEMA,
@@ -96,16 +97,91 @@ export function senderInfo(cfg: AppConfig): SenderInfo {
   };
 }
 
-export function demoOptions(slug: string, cfg: AppConfig): DemoOptions {
+/** wa.me-Link auf die Nummer des Betreibers mit vorausgefülltem Text (kein Bot, der Betrieb schreibt uns). */
+export function whatsappUrl(cfg: AppConfig, slug: string): string | null {
+  const n = cfg.sender.whatsappNumber.replace(/\D/g, '');
+  if (!n) return null;
+  return `https://wa.me/${n}?text=${encodeURIComponent(`Frage zu meinem Website-Entwurf ${slug}`)}`;
+}
+
+export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string | null = null): DemoOptions {
+  const p = cfg.pricing;
+  const care = `${formatEuroShort(p.subscriptionCents)}/Monat`;
+  const take = (plan: 'one_time' | 'monthly') => demoUrl(`/d/${slug}/uebernehmen?plan=${plan}`);
+  const offers: NonNullable<DemoOptions['offers']> = [
+    {
+      title: 'Einmalzahlung',
+      price: formatEuroShort(p.packageCents),
+      unit: 'einmalig',
+      points: [
+        `Eigene Domain und ${p.hostingMonthsIncluded} Monate Hosting inklusive`,
+        `Danach optional ${care}, monatlich kündbar`,
+      ],
+      href: take('one_time'),
+    },
+  ];
+  if (p.monthlyEnabled)
+    offers.push({
+      title: 'Monatlich',
+      price: formatEuroShort(p.monthlyCents),
+      unit: 'pro Monat',
+      points: [
+        `${p.minTermMonths} Monate Mindestlaufzeit`,
+        `Ab Monat ${p.minTermMonths + 1} nur noch ${care}, dann monatlich kündbar`,
+        'Eigene Domain und Hosting inklusive',
+      ],
+      href: take('monthly'),
+    });
   return {
     slug,
-    priceLabel: formatEuroShort(cfg.pricing.packageCents),
+    priceLabel: formatEuroShort(p.packageCents),
     checkoutUrl: demoUrl(`/d/${slug}/uebernehmen`),
     questionUrl: demoUrl(`/d/${slug}/frage`),
     optOutUrl: demoUrl(`/d/${slug}/kein-interesse`),
     sender: senderInfo(cfg),
     expiresLabel: EXPIRES_PLACEHOLDER,
+    offers,
+    guaranteeNote: cfg.guarantee.enabled
+      ? `${cfg.guarantee.days} Tage Zufriedenheitsgarantie: Gefällt Ihnen die fertige Website nicht, bekommen Sie Ihr Geld zurück.`
+      : null,
+    whatsappUrl: whatsappUrl(cfg, slug),
+    trust: {
+      name: cfg.sender.name,
+      intro: cfg.sender.intro,
+      photoDataUri,
+      email: cfg.sender.email,
+      phone: cfg.sender.phone,
+      imprintUrl: appUrl('/impressum'),
+    },
   };
+}
+
+const photoCache = new Map<string, string | null>();
+
+/**
+ * Foto für den Vertrauensblock: data:-URI direkt, https-URL einmalig laden und verkleinert einbetten
+ * (die Demo-CSP erlaubt nur eingebettete Bilder). Fehler → ohne Foto.
+ */
+export async function senderPhotoDataUri(cfg: AppConfig): Promise<string | null> {
+  const src = cfg.sender.photoUrl.trim();
+  if (!src) return null;
+  if (/^data:image\/(jpeg|png|webp);base64,/.test(src)) return src;
+  if (!/^https:\/\//.test(src)) return null;
+  if (photoCache.has(src)) return photoCache.get(src)!;
+  let result: string | null = null;
+  try {
+    const res = await fetch(src, { signal: AbortSignal.timeout(10_000) });
+    const type = res.headers.get('content-type') ?? '';
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (!res.ok || !/^image\/(jpeg|png|webp)/.test(type) || buf.length > 3 * 1024 * 1024)
+      throw new Error(`Foto nicht nutzbar (HTTP ${res.status}, ${type}, ${buf.length} Bytes)`);
+    const small = await optimizeImage(buf, type.split(';')[0]!, { maxWidth: 192, format: 'jpeg', quality: 0.85 });
+    result = `data:image/jpeg;base64,${small.toString('base64')}`;
+  } catch (err) {
+    logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'Absenderfoto konnte nicht geladen werden');
+  }
+  photoCache.set(src, result);
+  return result;
 }
 
 /**
@@ -204,6 +280,7 @@ export function renderDemoHtml(input: {
   slug: string;
   cfg: AppConfig;
   mode?: 'demo' | 'screenshot';
+  photoDataUri?: string | null;
 }): string {
   return renderSite({
     templateId: input.templateId,
@@ -211,7 +288,7 @@ export function renderDemoHtml(input: {
     mode: input.mode ?? 'demo',
     content: input.content,
     facts: input.facts,
-    demo: demoOptions(input.slug, input.cfg),
+    demo: demoOptions(input.slug, input.cfg, input.photoDataUri ?? null),
   });
 }
 
@@ -224,7 +301,14 @@ export function demoHtmlKey(demoId: string): string {
  * Danach QA (Job qa-demo). Idempotent: existiert schon eine offene Demo, wird sie
  * zurückgegeben (außer bei regenerate).
  */
-export async function buildDemo(leadId: string, opts: { regenerate?: boolean; actor: string }): Promise<string> {
+export async function buildDemo(
+  leadId: string,
+  opts: {
+    regenerate?: boolean;
+    actor: string;
+    /** erzwingt die manuelle Prüfung (z. B. Überarbeitung für Brief 3) */ reviewNote?: string;
+  },
+): Promise<string> {
   const db = getDb();
   const cfg = await getConfig({ fresh: true });
   const lead = await db.query.leads.findFirst({ where: eq(leads.id, leadId) });
@@ -247,7 +331,15 @@ export async function buildDemo(leadId: string, opts: { regenerate?: boolean; ac
   const generated = await generateDemoContent(lead, cfg);
   const facts = leadToFacts(lead, cfg);
   const slug = randomToken(24);
-  const html = renderDemoHtml({ templateId, palette, content: generated.content, facts, slug, cfg });
+  const html = renderDemoHtml({
+    templateId,
+    palette,
+    content: generated.content,
+    facts,
+    slug,
+    cfg,
+    photoDataUri: await senderPhotoDataUri(cfg),
+  });
 
   const [demo] = await db
     .insert(demos)
@@ -257,6 +349,7 @@ export async function buildDemo(leadId: string, opts: { regenerate?: boolean; ac
       templateId,
       palette,
       status: 'building',
+      reviewNote: opts.reviewNote ?? null,
       contentJson: {
         ...generated.content,
         _meta: { source: generated.source, attempts: generated.attempts, violations: generated.violations },

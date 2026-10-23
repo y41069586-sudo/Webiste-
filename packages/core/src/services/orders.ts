@@ -6,20 +6,21 @@ import type { AppConfig } from '../config/settings';
 import { getDb, type DbOrTx } from '../db/client';
 import { customers, demos, events, leads, orders, webhookEvents } from '../db/schema';
 import { paymentFailedEmail } from '../emails/templates';
-import { buildInvoiceData, nextInvoiceNumber, orderAmounts, packageAmounts } from '../invoices/build';
+import { buildInvoiceData, nextInvoiceNumber, orderAmounts, planAmounts } from '../invoices/build';
 import { errInfo, logger } from '../logger';
 import { getProviders } from '../providers';
 import type { PaymentEvent } from '../providers/types';
 import { enqueue, QUEUES } from '../queue';
-import type { Actor } from '../types';
+import { ORDER_PLANS, type Actor, type OrderPlan } from '../types';
 import { randomToken } from '../util/crypto';
-import { formatEuro } from '../util/time';
+import { addDays, addMonths, formatEuro } from '../util/time';
 import { audit } from './audit';
 import { raiseAlert } from './budget';
 import { checkDomain } from './domains';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
+import { applyRecurringEvent } from './recurring';
 import { applySubscriptionEvent } from './renewals';
 import { findPublicDemo, recordEvent, type RequestMeta } from './tracking';
 
@@ -52,6 +53,8 @@ export const checkoutInputSchema = z.object({
   b2b: z.literal(true, 'Bitte bestätigen Sie, dass Sie als Unternehmer bestellen.'),
   terms: z.literal(true, 'Bitte stimmen Sie den AGB zu.'),
   subscription: z.boolean().optional().default(false),
+  /** Option A (einmalig) oder B (monatlich); die Oberfläche verlangt eine aktive Wahl ohne Vorauswahl */
+  plan: z.enum(ORDER_PLANS, 'Bitte wählen Sie eine der beiden Optionen.').optional().default('one_time'),
 });
 
 export type CheckoutInput = z.input<typeof checkoutInputSchema>;
@@ -62,7 +65,10 @@ export type CheckoutContext =
       lead: typeof leads.$inferSelect;
       demo: typeof demos.$inferSelect;
       cfg: AppConfig;
+      /** Option A (Einmalzahlung) */
       price: { grossCents: number; netCents: number; vatCents: number; label: string };
+      /** Option B (Monatsrate) – null, wenn abgeschaltet */
+      monthly: { grossCents: number; netCents: number; vatCents: number; label: string } | null;
       prefill: { company: string; street: string; postalCode: string; city: string; domain: string };
     }
   | { state: 'ordered' }
@@ -99,7 +105,8 @@ export async function getCheckoutContext(slug: string): Promise<CheckoutContext>
   if (paid) return { state: 'ordered' };
   if (!avail.ok) return { state: 'disabled', reason: avail.reason };
   const cfg = await getConfig();
-  const a = packageAmounts(cfg);
+  const a = planAmounts(cfg, 'one_time');
+  const m = planAmounts(cfg, 'monthly');
   const l = found.lead;
   return {
     state: 'ok',
@@ -107,6 +114,9 @@ export async function getCheckoutContext(slug: string): Promise<CheckoutContext>
     demo: found.demo,
     cfg,
     price: { grossCents: a.grossCents, netCents: a.netCents, vatCents: a.vatCents, label: formatEuro(a.grossCents) },
+    monthly: cfg.pricing.monthlyEnabled
+      ? { grossCents: m.grossCents, netCents: m.netCents, vatCents: m.vatCents, label: formatEuro(m.grossCents) }
+      : null,
     prefill: {
       company: l.anonymizedAt ? '' : l.businessName,
       street: [l.street, l.houseNumber].filter(Boolean).join(' '),
@@ -165,8 +175,15 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
   }
   const domain = dom.domain;
   const avail = checkoutAvailability();
-  const subscriptionOptIn = cfg.pricing.subscriptionEnabled && input.subscription;
-  const amounts = packageAmounts(cfg);
+  const plan: OrderPlan = input.plan;
+  if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
+    return {
+      ok: false,
+      error: 'Die monatliche Zahlung ist derzeit nicht verfügbar.',
+      fieldErrors: { plan: 'Bitte Einmalzahlung wählen.' },
+    };
+  const subscriptionOptIn = plan === 'one_time' && cfg.pricing.subscriptionEnabled && input.subscription;
+  const amounts = planAmounts(cfg, plan);
 
   // Doppelklick: gleiche offene Session wiederverwenden
   const reusable = await db.query.orders.findFirst({
@@ -175,6 +192,7 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
       eq(orders.status, 'pending'),
       eq(orders.customerEmail, input.email),
       eq(orders.domainWish, domain),
+      eq(orders.plan, plan),
       eq(orders.amountCents, amounts.grossCents),
       gt(orders.checkoutExpiresAt, new Date(Date.now() + 10 * 60 * 1000)),
     ),
@@ -190,6 +208,7 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
       leadId: lead.id,
       demoId: demo.id,
       provider: getProviders().payment.name,
+      plan,
       amountCents: amounts.grossCents,
       netCents: amounts.netCents,
       vatCents: amounts.vatCents,
@@ -222,24 +241,29 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
       entityId: order.id,
       action: 'checkout_started',
       actor: 'public:checkout',
-      context: { leadId: lead.id, amountCents: amounts.grossCents },
+      context: { leadId: lead.id, amountCents: amounts.grossCents, plan },
     });
   });
 
   try {
     const minutes = cfg.checkout.sessionMinutes;
+    const p = cfg.pricing;
     const session = await getProviders().payment.createCheckoutSession({
       orderId: order.id,
       amountCents: amounts.grossCents,
       currency: 'eur',
-      productName: `${cfg.pricing.packageName} – ${domain}`,
-      productDescription: cfg.pricing.packageDescription,
+      productName: `${plan === 'monthly' ? p.monthlyName : p.packageName} – ${domain}`,
+      productDescription:
+        plan === 'monthly'
+          ? `${p.packageDescription} Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
+          : p.packageDescription,
       customerEmail: input.email,
       successUrl: appUrl(`/checkout/${slug}/erfolg?session_id={CHECKOUT_SESSION_ID}`),
       cancelUrl: appUrl(`/checkout/${slug}?abgebrochen=1`),
-      metadata: { orderId: order.id, leadId: lead.id, demoId: demo.id },
+      metadata: { kind: 'order', orderId: order.id, leadId: lead.id, demoId: demo.id, plan },
       idempotencyKey: `checkout-${order.id}`,
       expiresInMinutes: minutes,
+      ...(plan === 'monthly' ? { recurring: { interval: 'month' as const } } : {}),
     });
     await db
       .update(orders)
@@ -306,7 +330,7 @@ export type FulfillResult =
  */
 export async function fulfillOrder(
   orderId: string,
-  info: { paymentIntentId?: string; amountTotal?: number; currency?: string },
+  info: { paymentIntentId?: string; amountTotal?: number; currency?: string; subscriptionId?: string; invoiceId?: string },
   actor: Actor | string,
 ): Promise<FulfillResult> {
   const db = getDb();
@@ -343,6 +367,7 @@ export async function fulfillOrder(
     const paidAt = new Date();
     const number = await nextInvoiceNumber(tx, cfg, paidAt);
     const invoice = buildInvoiceData(cfg, order, { number, paidAt, issuedAt: paidAt, amounts: orderAmounts(order) });
+    const monthly = order.plan === 'monthly';
     await tx
       .update(orders)
       .set({
@@ -351,6 +376,16 @@ export async function fulfillOrder(
         stripePaymentIntent: info.paymentIntentId ?? order.stripePaymentIntent,
         invoiceNumber: number,
         invoiceJson: invoice as unknown as Record<string, unknown>,
+        // Garantie gilt für beide Optionen ab Zahlung; Mindestlaufzeit nur für Option B
+        guaranteeEndsAt: cfg.guarantee.enabled ? addDays(paidAt, cfg.guarantee.days) : null,
+        ...(monthly
+          ? {
+              stripeSubscriptionId: info.subscriptionId ?? order.stripeSubscriptionId,
+              stripeInvoiceId: info.invoiceId ?? order.stripeInvoiceId,
+              subscriptionStatus: 'active',
+              minTermEndsAt: addMonths(paidAt, cfg.pricing.minTermMonths),
+            }
+          : {}),
         updatedAt: new Date(),
       })
       .where(eq(orders.id, orderId));
@@ -367,6 +402,8 @@ export async function fulfillOrder(
         domain: order.domainWish,
         domainStatus: order.domainWish ? 'available' : 'none',
         accessToken: randomToken(32),
+        // Option B: Hosting läuft mit dem Abo (keine Verlängerungs-Erinnerung)
+        subscriptionId: monthly ? (info.subscriptionId ?? order.stripeSubscriptionId) : null,
       })
       .onConflictDoNothing({ target: customers.orderId })
       .returning();
@@ -385,7 +422,7 @@ export async function fulfillOrder(
       entityId: order.id,
       action: 'paid',
       actor,
-      context: { invoiceNumber: number, amountCents: order.amountCents },
+      context: { invoiceNumber: number, amountCents: order.amountCents, plan: order.plan },
     });
     return { state: 'paid', orderId, customerId: cust.id, invoiceNumber: number, alreadyPaid: false };
   });
@@ -405,12 +442,64 @@ async function afterPaid(orderId: string, customerId: string): Promise<void> {
     logger.error({ orderId, ...errInfo(err) }, 'Folgejobs nach Zahlung nicht eingereiht');
   }
   const order = await getDb().query.orders.findFirst({ where: eq(orders.id, orderId) });
+  if (order?.plan === 'monthly') await ensureSubscriptionSchedule(orderId);
   await notifyAdmin({
     key: `order-paid:${orderId}`,
     title: `Neue Bestellung ${order?.invoiceNumber ?? ''}`,
-    lines: [`Betrag: ${formatEuro(order?.amountCents ?? 0)}`, `Domain-Wunsch: ${order?.domainWish ?? '–'}`],
+    lines: [
+      order?.plan === 'monthly'
+        ? `Plan: monatlich ${formatEuro(order.amountCents)} (Mindestlaufzeit bis ${order.minTermEndsAt?.toISOString().slice(0, 10) ?? '–'})`
+        : `Plan: einmalig ${formatEuro(order?.amountCents ?? 0)}`,
+      `Domain-Wunsch: ${order?.domainWish ?? '–'}`,
+    ],
     link: appUrl(`/admin/orders/${orderId}`),
   });
+}
+
+/**
+ * Plan „monthly“: Zeitplan beim Zahlungsanbieter anlegen (12 Monate Monatsrate, danach „Hosting & Pflege“).
+ * Idempotent; bei Fehler Warnung – der Sweeper im pipeline-tick versucht es erneut.
+ */
+export async function ensureSubscriptionSchedule(orderId: string): Promise<'created' | 'exists' | 'skipped' | 'failed'> {
+  const db = getDb();
+  const order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+  if (!order || order.plan !== 'monthly' || !order.stripeSubscriptionId || order.endedAt) return 'skipped';
+  if (order.stripeScheduleId) return 'exists';
+  const p = getProviders().payment;
+  if (!p.scheduleStepDown || p.name !== order.provider) return 'skipped';
+  const cfg = await getConfig();
+  try {
+    const r = await p.scheduleStepDown(order.stripeSubscriptionId, {
+      minTermMonths: cfg.pricing.minTermMonths,
+      afterTermCents: cfg.pricing.subscriptionCents,
+      idempotencyKey: `schedule-${order.id}`,
+    });
+    await db
+      .update(orders)
+      .set({ stripeScheduleId: r.scheduleId, minTermEndsAt: r.minTermEndsAt, updatedAt: new Date() })
+      .where(eq(orders.id, order.id));
+    await audit(db, {
+      entity: 'order',
+      entityId: order.id,
+      action: 'subscription_scheduled',
+      actor: 'system',
+      context: {
+        scheduleId: r.scheduleId,
+        minTermEndsAt: r.minTermEndsAt.toISOString(),
+        afterTermCents: cfg.pricing.subscriptionCents,
+      },
+    });
+    return 'created';
+  } catch (err) {
+    logger.error({ orderId, ...errInfo(err) }, 'Abo-Zeitplan konnte nicht angelegt werden');
+    await raiseAlert(db, {
+      level: 'error',
+      code: `subscription_schedule_${orderId}`,
+      message: 'Abo-Zeitplan (Preissenkung ab Monat 13) konnte nicht angelegt werden – wird automatisch wiederholt.',
+      context: { orderId },
+    });
+    return 'failed';
+  }
 }
 
 async function findOrderForEvent(ev: PaymentEvent): Promise<Order | undefined> {
@@ -431,9 +520,17 @@ async function findOrderForEvent(ev: PaymentEvent): Promise<Order | undefined> {
 /** Normalisiertes Zahlungs-Event anwenden (ohne Replay-Schutz – siehe processPaymentWebhook). */
 export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promise<string> {
   if (ev.type === 'other') return 'ignored';
-  if (ev.mode === 'subscription' || ev.metadata?.kind === 'subscription' || ev.type === 'subscription.deleted') {
-    return applySubscriptionEvent(ev, actor);
+  // Laufende Abos: Rechnungen und Statuswechsel – Plan „monthly“ oder „Hosting & Pflege“ (Option A)
+  if (
+    ev.type === 'invoice.paid' ||
+    ev.type === 'invoice.payment_failed' ||
+    ev.type === 'subscription.updated' ||
+    ev.type === 'subscription.deleted'
+  ) {
+    return applyRecurringEvent(ev, actor);
   }
+  // Abo-Abschluss „Hosting & Pflege“ über die Verlängerungsseite
+  if (ev.metadata?.kind === 'subscription') return applySubscriptionEvent(ev, actor);
   const order = await findOrderForEvent(ev);
   if (!order) {
     logger.warn({ eventId: ev.eventId, type: ev.rawType }, 'Zahlungs-Event ohne passende Bestellung');
@@ -446,7 +543,13 @@ export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promis
       if (ev.paymentStatus === 'paid' || ev.paymentStatus === 'no_payment_required') {
         const r = await fulfillOrder(
           order.id,
-          { paymentIntentId: ev.paymentIntentId, amountTotal: ev.amountTotal, currency: ev.currency },
+          {
+            paymentIntentId: ev.paymentIntentId,
+            amountTotal: ev.amountTotal,
+            currency: ev.currency,
+            subscriptionId: ev.subscriptionId,
+            invoiceId: ev.invoiceId,
+          },
           actor,
         );
         return r.state;
@@ -561,14 +664,21 @@ export async function refundOrder(orderId: string, actor: string, amountCents?: 
   const amount = Math.min(order.amountCents, amountCents ?? order.amountCents);
   if (amount <= 0) throw new Error('Ungültiger Betrag');
   const p = getProviders().payment;
-  if (!p.refund) throw new Error('Der Zahlungsanbieter unterstützt keine Erstattung über die API.');
   if (p.name !== order.provider) throw new Error(`Bestellung wurde über ${order.provider} bezahlt, aktiv ist ${p.name}.`);
-  if (!order.stripePaymentIntent && p.name !== 'mock')
-    throw new Error('Keine Zahlungs-ID gespeichert – Erstattung bitte im Stripe-Dashboard.');
-  await p.refund(order.stripePaymentIntent ?? `pi_mock_${order.id}`, {
-    idempotencyKey: `refund-${order.id}-${amount}`,
-    amountCents: amount,
-  });
+  if (order.plan === 'monthly' && !order.stripePaymentIntent) {
+    // Erste Monatsrate: Erstattung über die Abo-Rechnung
+    if (!p.refundInvoice) throw new Error('Der Zahlungsanbieter unterstützt keine Erstattung von Abo-Rechnungen.');
+    if (!order.stripeInvoiceId) throw new Error('Keine Rechnungs-ID gespeichert – Erstattung bitte im Stripe-Dashboard.');
+    await p.refundInvoice(order.stripeInvoiceId, { idempotencyKey: `refund-${order.id}-${amount}`, amountCents: amount });
+  } else {
+    if (!p.refund) throw new Error('Der Zahlungsanbieter unterstützt keine Erstattung über die API.');
+    if (!order.stripePaymentIntent && p.name !== 'mock')
+      throw new Error('Keine Zahlungs-ID gespeichert – Erstattung bitte im Stripe-Dashboard.');
+    await p.refund(order.stripePaymentIntent ?? `pi_mock_${order.id}`, {
+      idempotencyKey: `refund-${order.id}-${amount}`,
+      amountCents: amount,
+    });
+  }
   await applyRefund(order.id, order.refundedCents + amount, actor);
 }
 
@@ -647,7 +757,13 @@ export async function confirmCheckoutReturn(slug: string, sessionId: string): Pr
   if (info.paymentStatus === 'paid' || info.paymentStatus === 'no_payment_required') {
     const r = await fulfillOrder(
       order.id,
-      { paymentIntentId: info.paymentIntentId, amountTotal: info.amountTotal, currency: info.currency },
+      {
+        paymentIntentId: info.paymentIntentId,
+        amountTotal: info.amountTotal,
+        currency: info.currency,
+        subscriptionId: info.subscriptionId,
+        invoiceId: info.invoiceId,
+      },
       'public:checkout-return',
     );
     return r.state === 'paid' ? done() : { state: 'processing' };
@@ -695,6 +811,21 @@ export async function sweepPaidOrders(): Promise<number> {
     )
     .limit(20);
   for (const c of noOnboarding) await enqueue(QUEUES.onboarding, { customerId: c.id }, { singletonKey: `onboarding-${c.id}` });
+  // Plan „monthly“: fehlender Abo-Zeitplan (Preissenkung ab Monat 13)
+  const noSchedule = await db
+    .select({ id: orders.id })
+    .from(orders)
+    .where(
+      and(
+        eq(orders.status, 'paid'),
+        eq(orders.plan, 'monthly'),
+        isNull(orders.stripeScheduleId),
+        isNull(orders.endedAt),
+        lt(orders.paidAt, sql`now() - interval '10 minutes'`),
+      ),
+    )
+    .limit(20);
+  for (const o of noSchedule) await ensureSubscriptionSchedule(o.id);
   // Offene Bestellungen nach Ablauf der Session schließen (falls das Expired-Event fehlte)
   await db
     .update(orders)
@@ -746,7 +877,30 @@ export async function simulateMockPayment(sessionId: string, outcome: MockOutcom
     });
     await processPaymentWebhook(raw, p.sign(raw));
   };
-  const pi = `pi_mock_${order.id.replace(/-/g, '')}`;
+  const compact = order.id.replace(/-/g, '');
+  if (order.plan === 'monthly') {
+    // Abo: Karte bzw. SEPA – erste Rate über die Abo-Rechnung
+    const sub = {
+      mode: 'subscription' as const,
+      subscriptionId: `sub_mock_${compact}`,
+      invoiceId: `in_mock_${compact}`,
+      metadata: { kind: 'order', orderId: order.id, plan: 'monthly' },
+    };
+    if (outcome === 'paid') {
+      await fire({ type: 'checkout.completed', rawType: 'checkout.session.completed', paymentStatus: 'paid', ...sub });
+    } else {
+      await fire({ type: 'checkout.completed', rawType: 'checkout.session.completed', paymentStatus: 'unpaid', ...sub });
+      if (outcome === 'sepa_failed')
+        await fire({
+          type: 'checkout.async_failed',
+          rawType: 'checkout.session.async_payment_failed',
+          paymentStatus: 'unpaid',
+          ...sub,
+        });
+    }
+    return appUrl(`/checkout/${slug}/erfolg?session_id=${encodeURIComponent(sessionId)}`);
+  }
+  const pi = `pi_mock_${compact}`;
   if (outcome === 'paid') {
     await fire({ type: 'checkout.completed', rawType: 'checkout.session.completed', paymentStatus: 'paid', paymentIntentId: pi });
   } else {

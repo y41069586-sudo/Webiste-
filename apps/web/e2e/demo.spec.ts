@@ -17,7 +17,10 @@ test.describe('Demo: Ansicht, Frage, Opt-out', () => {
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
     const banner = page.getByRole('complementary', { name: 'Hinweis zum Entwurf' });
     await expect(banner).toContainText('Unverbindlicher Entwurf');
-    await expect(banner.getByRole('link', { name: /übernehmen/ })).toBeVisible();
+    await expect(banner.getByRole('link', { name: 'Seite übernehmen' })).toBeVisible();
+    await expect(page.locator('#uebernehmen')).toContainText('590');
+    await expect(page.locator('#uebernehmen')).toContainText('49');
+    await expect(page.getByRole('heading', { name: 'Wer hat diesen Entwurf gebaut?' })).toBeVisible();
     await expect(page.getByText('hat diese Seite nicht beauftragt')).toBeVisible();
     await expect(page.getByText('Beispiel-Leistungen')).toBeVisible();
 

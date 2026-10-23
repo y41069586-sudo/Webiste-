@@ -239,6 +239,18 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
   }
   summary.found = candidates.length;
   const chains = await chainNames(db, candidates, cfg.targeting.chainMinCities);
+  const firstScan = new Map<string, Date | null>();
+  /** Erstes Auftauchen eines Segments (vor diesem Lauf) – Grundlage für „neu aufgetaucht“ */
+  const segmentFirstSeen = async (key: string): Promise<Date | null> => {
+    if (!firstScan.has(key)) {
+      const r = await db.execute<{ first: Date | null }>(
+        sql`SELECT min(first_seen_at) AS first FROM leads WHERE segment_key = ${key}`,
+      );
+      firstScan.set(key, r.rows[0]?.first ? new Date(r.rows[0].first) : null);
+    }
+    return firstScan.get(key)!;
+  };
+  const runStart = new Date();
 
   // 2) Upsert + Qualifizierung
   for (const c of candidates) {
@@ -271,6 +283,15 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
     } else if (place.source === 'google_places' && place.rating !== undefined && place.ratingCount !== undefined) {
       rating = { rating: place.rating, ratingCount: place.ratingCount };
     }
+    // „neu aufgetaucht“: das Segment wurde schon früher (≥ 6 Tage vorher) durchsucht und der Betrieb kam erst später dazu
+    const segKey = segmentKey(city, branch.group, branch.key);
+    const segFirst = await segmentFirstSeen(segKey);
+    const seenAt = existing?.firstSeenAt ?? runStart;
+    const newAppearance = Boolean(
+      segFirst &&
+      seenAt.getTime() - segFirst.getTime() >= 6 * 86400_000 &&
+      runStart.getTime() - seenAt.getTime() <= cfg.segments.newWindowDays * 86400_000,
+    );
     const prelim = qualify({
       place,
       branch,
@@ -281,6 +302,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       chainByFrequency: chains.has(nameKey(place)),
       isDuplicate: Boolean(dup),
       rating,
+      newAppearance,
     });
     if (src.signal && prelim.qualified && place.street && place.houseNumber && place.postalCode) {
       try {
@@ -317,6 +339,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       chainByFrequency: chains.has(nameKey(place)),
       isDuplicate: Boolean(dup),
       rating,
+      newAppearance,
     });
 
     // Google-Inhalte (Bewertung, Website, Name/Anschrift) werden NICHT gespeichert – nur place_id
@@ -343,7 +366,8 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       primaryType: place.primaryType ?? null,
       rejectionReasons: result.reasons,
       score: result.score,
-      segmentKey: segmentKey(city, branch.group, branch.key),
+      leadSegment: result.segment,
+      segmentKey: segKey,
       searchQuery: c.query,
       identityHash: identity,
       googlePlaceId,

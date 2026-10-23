@@ -78,3 +78,15 @@ export function decrypt(payload: string): string {
   decipher.setAuthTag(Buffer.from(tagB64, 'base64'));
   return Buffer.concat([decipher.update(Buffer.from(dataB64, 'base64')), decipher.final()]).toString('utf8');
 }
+
+/** Gut abtippbar: ohne 0/o, 1/l/i */
+const SHORT_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
+export const SHORT_CODE_RE = /^[a-hjkmnp-z2-9]{6}$/;
+
+/** Kurzcode für Kurz-URLs (6 Zeichen, ca. 887 Mio. Kombinationen). */
+export function randomShortCode(length = 6): string {
+  const bytes = randomBytes(length);
+  let out = '';
+  for (let i = 0; i < length; i++) out += SHORT_ALPHABET[bytes[i]! % SHORT_ALPHABET.length];
+  return out;
+}
