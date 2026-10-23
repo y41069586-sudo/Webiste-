@@ -4,3 +4,5 @@ export * from './qa';
 export * from './screenshots';
 export * from './demo-qa';
 export * from '../demos/build';
+export * from './pdf';
+export * from './letter';

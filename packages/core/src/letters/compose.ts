@@ -1,0 +1,113 @@
+import type { LetterData } from '@wbm/templates/letter-types';
+import type { AppConfig } from '../config/settings';
+import type { LetterVariantContent } from './variants';
+
+export interface RecipientInput {
+  businessName: string;
+  street: string;
+  houseNumber: string;
+  postalCode: string;
+  city: string;
+}
+
+const MAX_LINE = 45;
+
+function wrap(text: string, max: number): string[] {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let cur = '';
+  for (const w of words) {
+    if (!cur) cur = w;
+    else if ((cur + ' ' + w).length <= max) cur += ' ' + w;
+    else {
+      lines.push(cur);
+      cur = w;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines.map((l) => (l.length > max ? `${l.slice(0, max - 1)}.` : l));
+}
+
+/**
+ * Anschrift nach DIN 5008 / Deutsche Post: „An das Team von {Firmenname}“, darunter
+ * Straße Hausnummer und „PLZ Ort“ (letzte Zeile, ohne Land), keine Leerzeilen, max. 5 Zeilen.
+ */
+export function recipientLines(r: RecipientInput): string[] {
+  const head = `An das Team von ${r.businessName.trim()}`;
+  const nameLines = head.length <= MAX_LINE ? [head] : ['An das Team von', ...wrap(r.businessName.trim(), MAX_LINE).slice(0, 2)];
+  return [...nameLines, `${r.street.trim()} ${r.houseNumber.trim()}`, `${r.postalCode.trim()} ${r.city.trim()}`];
+}
+
+export function fillPlaceholders(text: string, vars: Record<string, string>): string {
+  return text.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? vars[k]! : m));
+}
+
+const LOWER_START = /^(Wer|Wir|Ich|Vor|Deshalb|Mit|Seit|Gern|Gerne|Heute|Kürzlich|Als|Da|Damit|Weil)\b/;
+
+/** Nach der Anrede mit Komma beginnt der Text klein (außer Höflichkeitsform/Substantiv). */
+export function lowerFirstWord(text: string): string {
+  return text.replace(LOWER_START, (w) => w.charAt(0).toLowerCase() + w.slice(1));
+}
+
+export interface ComposeInput {
+  variant: LetterVariantContent;
+  cfg: AppConfig;
+  recipient: RecipientInput;
+  domain: string | null;
+  rating: { rating: number; count: number } | null;
+  compositeDataUri: string | null;
+  qrDataUri: string;
+  shortUrl: string;
+  dateLine: string;
+  privacyNotice: string;
+  objectionNotice: string;
+  priceLabel: string;
+  screenshotPage?: LetterData['screenshotPage'];
+}
+
+export function composeLetter(i: ComposeInput): LetterData {
+  const vars: Record<string, string> = {
+    firmenname: i.recipient.businessName,
+    preis: i.priceLabel,
+    domain_vorschlag: i.domain ?? '',
+    ablauf_tage: String(i.cfg.timing.demoExpiryDays),
+    hosting_monate: String(i.cfg.pricing.hostingMonthsIncluded),
+    absender_name: i.cfg.sender.name,
+    rating: i.rating ? i.rating.rating.toFixed(1).replace('.', ',') : '',
+    rating_count: i.rating ? String(i.rating.count) : '',
+  };
+  const v = i.variant;
+  const first = [i.rating && v.ratingSentence ? fillPlaceholders(v.ratingSentence, vars) : '', fillPlaceholders(v.hook, vars)]
+    .filter(Boolean)
+    .join(' ');
+  const intro = [lowerFirstWord(first), ...v.intro.map((p) => fillPlaceholders(p, vars))].filter(Boolean);
+  return {
+    sender: {
+      name: i.cfg.sender.name,
+      company: i.cfg.sender.company,
+      street: i.cfg.sender.street,
+      postalCode: i.cfg.sender.postalCode,
+      city: i.cfg.sender.city,
+      email: i.cfg.sender.email,
+      phone: i.cfg.sender.phone,
+      website: i.cfg.sender.website,
+    },
+    recipientLines: recipientLines(i.recipient),
+    dateLine: i.dateLine,
+    subject: fillPlaceholders(v.subject, vars),
+    greeting: fillPlaceholders(v.greeting, vars),
+    intro,
+    compositeDataUri: i.compositeDataUri,
+    qrDataUri: i.qrDataUri,
+    qrCaption: v.qrCaption,
+    shortUrl: i.shortUrl,
+    offer: fillPlaceholders(i.domain ? v.offerWithDomain : v.offerWithoutDomain, vars),
+    noAction: fillPlaceholders(v.noAction, vars),
+    closing: v.closing,
+    signatureName: i.cfg.sender.name,
+    privacyNotice: i.privacyNotice,
+    objectionNotice: i.objectionNotice,
+    addressPosition: i.cfg.letter.addressPosition,
+    screenshotPage: i.screenshotPage ?? null,
+  };
+}

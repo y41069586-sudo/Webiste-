@@ -37,7 +37,7 @@ export interface QueuePayloads {
   'build-demo': { leadId: string; regenerate?: boolean; triggeredBy?: string };
   'qa-demo': { demoId: string };
   'publish-demo': { demoId: string };
-  'generate-letter': { leadId: string; sequence: 1 | 2; triggeredBy?: string };
+  'generate-letter': { leadId: string; sequence: 1 | 2; triggeredBy?: string; test?: boolean; regenerate?: boolean };
   'send-letter': { letterId: string };
   'send-approved-letters': { triggeredBy: string; limit?: number };
   'sync-letter-status': Record<string, never>;

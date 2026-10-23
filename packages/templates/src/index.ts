@@ -34,3 +34,4 @@ export function renderSite(input: RenderInput): string {
   const parts = buildParts(input);
   return tpl.render({ ...input, parts });
 }
+export { renderLetterHtml, embeddedFontCss, LETTER_GEOMETRY, type LetterData, type LetterSender } from './letter';

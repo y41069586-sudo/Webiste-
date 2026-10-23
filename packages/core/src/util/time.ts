@@ -35,7 +35,8 @@ export function formatEuro(cents: number): string {
 
 /** 390 € statt 390,00 € für runde Beträge (Werbetext) */
 export function formatEuroShort(cents: number): string {
-  if (cents % 100 === 0) return `${new Intl.NumberFormat('de-DE').format(cents / 100)} €`;
+  // geschütztes Leerzeichen, damit „390 €“ nicht umbricht
+  if (cents % 100 === 0) return `${new Intl.NumberFormat('de-DE').format(cents / 100)}\u00a0€`;
   return formatEuro(cents);
 }
 

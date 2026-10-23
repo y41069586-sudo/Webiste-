@@ -60,3 +60,36 @@ eine Mock-Implementierung für Entwicklung, Tests und `DRY_RUN`. Prüfdatum alle
   `LLM_SERVER_FALLBACK=false`).
 - **Kosten:** jede Anfrage wird mit Token-Zahlen im Budget-Ledger (Kategorie `llm`) gebucht.
 - Code: `packages/core/src/providers/llm/anthropic.ts`, `packages/core/src/services/llm.ts`
+
+## Pingen – Briefversand (Print & Mail)
+
+Geprüft am 23.10.2026 anhand der offiziellen OpenAPI-Spezifikation (`https://api.pingen.com/documentation`,
+Version 2.0.0) und des Hilfecenters (`https://help.pingen.com`).
+
+- **Umgebungen:** Produktion `https://api.pingen.com` / `https://identity.pingen.com`; Staging (Sandbox)
+  `https://api-staging.pingen.com` / `https://identity-staging.pingen.com` – eigenes Konto und eigene
+  Zugangsdaten nötig. Auf Staging wird nichts gedruckt; Dateinamen steuern Simulationen
+  (`*_simulate_undeliverable.pdf`, `*_simulate_unprintable.pdf`, `*_simulate_cancellable.pdf`).
+- **Auth:** OAuth2 Client Credentials: `POST {identity}/auth/access-tokens` (form: `grant_type=client_credentials`,
+  `client_id`, `client_secret`), Token gültig 43 200 s, Header `Authorization: Bearer …`.
+- **Ablauf je Brief:** `GET /file-upload` → vorsignierte `url` + `url_signature`; PDF per `PUT` an `url`
+  hochladen; `POST /organisations/{org}/deliveries/letters` (JSON:API, `application/vnd.api+json`) mit
+  `file_original_name`, `file_url`, `file_url_signature`, `address_position` (`left`), `auto_send`,
+  `delivery_product` (`fast|cheap|bulk|premium|registered`), `print_mode` (`simplex|duplex`),
+  `print_spectrum` (`color|grayscale`), optional `meta_data.recipient/sender` (Name max. 45, Straße 40,
+  Ort 25 Zeichen).
+- **Idempotenz:** Header `Idempotency-Key` (1–64 Zeichen) für POST/PATCH, 24 h gültig → wir verwenden die
+  Brief-ID.
+- **Preis:** `POST /organisations/{org}/deliveries/letters/price-calculator` (`country`, `paper_types` je
+  Seite, `print_mode`, `print_spectrum`, `delivery_product`) → `price` in EUR. Wird vor jedem Versand für
+  den Budget-Guard abgefragt (außer im DRY_RUN).
+- **Limits:** 300 Requests/Minute; HTTP 429 mit `Retry-After`; 503 bei Wartung → Backoff.
+- **Webhooks:** je Kategorie (`issues`, `sent`, `undeliverable`, `delivered`) eine URL mit `signing_key`
+  (20–32 Zeichen). Header `Signature` = HMAC-SHA256(Hex) über den unveränderten Body. Wiederholungen nach
+  1 min, 5 min, 10 min, 1 h, 2 h, 4 h, solange keine 2xx-Antwort kommt.
+- **Layout (Fenster links):** Anschriftenfeld x = 22 mm, y = 60 mm, 85,5 × 25,5 mm; Zone x 20–109,5 mm,
+  y 40–87,5 mm sonst frei (Frankierung); 5 mm Rand; 15 mm Ecke unten links frei; Schrift 10–12 pt, min. 9 pt.
+- **Anschrift Deutschland:** mind. 3 Zeilen, keine Leerzeilen, „Straße Hausnummer“, letzte Zeile nur
+  „PLZ Ort“ (5-stellig, ohne Land), nur lateinische Zeichen.
+- **Umsetzung:** `packages/templates/src/letter.ts` (Layout), `packages/core/src/render/pdf.ts`
+  (PDF + Positionsprüfung mit pdf.js in mm), Test `packages/core/test/letters.test.ts`.

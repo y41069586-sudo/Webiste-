@@ -48,9 +48,9 @@ export const LETTER_VARIANT_B: LetterVariantContent = {
     'Ich habe Ihnen deshalb einen fertigen Entwurf gebaut: Leistungen, Öffnungszeiten, Anfahrt und Kontaktformular – übersichtlich und fürs Handy optimiert.',
   ],
   offerWithDomain:
-    'Mit dem Code unten sehen Sie den Entwurf sofort. Gefällt er Ihnen, übernehmen Sie ihn für einmalig **{preis}** – inklusive eigener Domain (z. B. **{domain_vorschlag}**) und {hosting_monate} Monaten Hosting. Anpassungen sind inklusive.',
+    'Mit dem QR-Code sehen Sie den Entwurf sofort. Gefällt er Ihnen, übernehmen Sie ihn für einmalig **{preis}** – inklusive eigener Domain (z. B. **{domain_vorschlag}**) und {hosting_monate} Monaten Hosting. Anpassungen sind inklusive.',
   offerWithoutDomain:
-    'Mit dem Code unten sehen Sie den Entwurf sofort. Gefällt er Ihnen, übernehmen Sie ihn für einmalig **{preis}** – inklusive eigener Domain und {hosting_monate} Monaten Hosting. Anpassungen sind inklusive.',
+    'Mit dem QR-Code sehen Sie den Entwurf sofort. Gefällt er Ihnen, übernehmen Sie ihn für einmalig **{preis}** – inklusive eigener Domain und {hosting_monate} Monaten Hosting. Anpassungen sind inklusive.',
   noAction: 'Kein Interesse? Dann müssen Sie nichts tun – der Entwurf wird nach {ablauf_tage} Tagen automatisch gelöscht.',
   closing: 'Viele Grüße',
   qrCaption: 'Entwurf ansehen',

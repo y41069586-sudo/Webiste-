@@ -40,3 +40,7 @@ export {
 export { libraryContent, CONTENT_LIBRARY } from './demos/library';
 export * from './services/tracking';
 export * from './services/pipeline';
+export * from './services/letters';
+export { domainCandidates, suggestDomain, isValidDeLabel } from './letters/domain';
+export { recipientLines, composeLetter, lowerFirstWord } from './letters/compose';
+export { privacyNoticeText, objectionNoticeText } from './letters/notices';
