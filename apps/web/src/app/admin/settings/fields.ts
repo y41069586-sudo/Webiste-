@@ -170,6 +170,7 @@ export const SWITCHES: { key: string; label: string; hint: string }[] = [
   { key: 'autoOptimize', label: 'AUTO_OPTIMIZE', hint: 'Optimizer setzt Budgetanteile automatisch' },
   { key: 'useRatingInLetter', label: 'USE_RATING_IN_LETTER', hint: 'Bewertungszeile im Brief – nur nach Compliance-Freigabe' },
   { key: 'realLettersUnlocked', label: 'Echte Briefe an Leads freigegeben', hint: 'Erst nach erfolgreichem Testbrief an dich selbst' },
+  { key: 'autoRegisterDomains', label: 'Domains automatisch registrieren', hint: 'Aus: jede Domain-Registrierung einzeln unter „Kunden & Seiten“ freigeben' },
 ];
 
 export function getPath(obj: unknown, path: string): unknown {

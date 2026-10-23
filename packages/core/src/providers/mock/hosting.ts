@@ -3,7 +3,7 @@ import type { DnsPlan, HostingDomainStatus, HostingProvider, SiteFile, StoragePr
 
 /**
  * Simuliertes Hosting: legt die Dateien im Storage ab. Die Web-App liefert sie unter
- * /_mock-hosting/{projectId}/ aus, damit Go-Live lokal end-to-end testbar ist.
+ * /mock-hosting/{projectId}/ aus, damit Go-Live lokal end-to-end testbar ist.
  */
 export class MockHosting implements HostingProvider {
   readonly name = 'mock';
@@ -11,7 +11,7 @@ export class MockHosting implements HostingProvider {
 
   async ensureProject(name: string): Promise<{ projectId: string; defaultUrl: string }> {
     const projectId = name.replace(/[^a-z0-9-]/g, '-').slice(0, 58);
-    return { projectId, defaultUrl: appUrl(`/_mock-hosting/${projectId}/`) };
+    return { projectId, defaultUrl: appUrl(`/mock-hosting/${projectId}/index.html`) };
   }
 
   async deploy(projectId: string, files: SiteFile[]): Promise<{ deploymentId: string; url: string }> {
@@ -19,7 +19,7 @@ export class MockHosting implements HostingProvider {
     for (const f of files) {
       await this.storage.put(`mock-hosting/${projectId}/${f.path.replace(/^\//, '')}`, f.content, f.contentType);
     }
-    return { deploymentId: `dep_${Date.now()}`, url: appUrl(`/_mock-hosting/${projectId}/`) };
+    return { deploymentId: `dep_${Date.now()}`, url: appUrl(`/mock-hosting/${projectId}/index.html`) };
   }
 
   async attachDomain(projectId: string, domain: string): Promise<DnsPlan> {

@@ -51,3 +51,8 @@ export * from './services/domains';
 export * from './services/orders';
 export * from './emails/templates';
 export { packageAmounts, orderAmounts, buildInvoiceData, buildCancellationData, nextInvoiceNumber, type Amounts } from './invoices/build';
+export * from './services/sites';
+export * from './sites/onboarding-data';
+export { impressumHtml, privacyHtml } from './sites/legal';
+export { validateRevision, mergeCustomerTexts, REVISION_TOOL_NAME } from './sites/revision';
+export * from './services/renewals';

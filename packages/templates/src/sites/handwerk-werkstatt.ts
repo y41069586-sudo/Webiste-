@@ -15,7 +15,7 @@ export const handwerkWerkstatt: TemplateDef = {
     const body = `
 <header class="bg-primary-dark text-on-primary">
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-    <a href="#inhalt" class="font-heading text-lg font-bold uppercase tracking-wide">${esc(f.name)}</a>
+    <a href="#inhalt" class="font-heading text-lg font-bold uppercase tracking-wide">${p.brand()}</a>
     ${p.phoneLabel ? `<a href="${esc(p.callHref)}" class="hidden items-center gap-2 text-sm font-semibold md:inline-flex">${icon('phone', 'h-4 w-4')}${esc(p.phoneLabel)}</a>` : ''}
   </div>
 </header>
@@ -66,6 +66,7 @@ export const handwerkWerkstatt: TemplateDef = {
     </div>
   </section>
 
+  ${p.gallery()}
   ${p.contactSection({
     sectionClass: 'py-16',
     cardClass: 'border-t-4 border-primary bg-surface-alt p-6',

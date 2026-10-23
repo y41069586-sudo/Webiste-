@@ -297,6 +297,12 @@ export const customers = pgTable(
     /** Token für Onboarding-/Vorschau-Links (zufällig) */
     accessToken: text('access_token').notNull(),
     onboardingMailSentAt: ts('onboarding_mail_sent_at'),
+    onboardingRemindedAt: ts('onboarding_reminded_at'),
+    /** Freigabe des Domainkaufs durch den Betreiber (solange autoRegisterDomains aus ist) */
+    domainApprovedAt: ts('domain_approved_at'),
+    domainApprovedBy: text('domain_approved_by'),
+    domainRegisteredAt: ts('domain_registered_at'),
+    domainExpiresAt: ts('domain_expires_at'),
     changeRoundsUsed: integer('change_rounds_used').default(0).notNull(),
     hostingUntil: ts('hosting_until'),
     renewalReminderSentAt: ts('renewal_reminder_sent_at'),
@@ -335,11 +341,18 @@ export const sites = pgTable(
     palette: text('palette').notNull(),
     hostingProvider: text('hosting_provider'),
     hostingProjectId: text('hosting_project_id'),
+    /** Standard-URL beim Hosting (z. B. *.workers.dev, *.netlify.app) */
+    hostingUrl: text('hosting_url'),
     productionUrl: text('production_url'),
     contentJson: jsonb('content_json').$type<Record<string, unknown>>().notNull(),
     impressumJson: jsonb('impressum_json').$type<ImpressumData | null>(),
     privacyText: text('privacy_text'),
     formTargetEmail: text('form_target_email'),
+    /** Angaben aus dem Onboarding-Formular (Entwurf bzw. abgesendeter Stand) */
+    onboardingJson: jsonb('onboarding_json').$type<Record<string, unknown> | null>(),
+    onboardingSubmittedAt: ts('onboarding_submitted_at'),
+    previewApprovedAt: ts('preview_approved_at'),
+    liveAt: ts('live_at'),
     /** Öffentliche ID für den Formular-Endpoint */
     formKey: text('form_key').notNull(),
     previewHtmlKey: text('preview_html_key'),

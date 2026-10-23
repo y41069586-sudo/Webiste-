@@ -1,5 +1,8 @@
 import type { Env } from '../config/env';
 import { PostmarkEmail } from './email/postmark';
+import { CloudflareHosting } from './hosting/cloudflare';
+import { NetlifyHosting } from './hosting/netlify';
+import { InwxRegistrar } from './registrar/inwx';
 import { ResendEmail } from './email/resend';
 import { OverpassLeadSource } from './lead-source/overpass';
 import { PingenMailProvider } from './mail/pingen';
@@ -30,13 +33,20 @@ export const registry = {
     });
   },
   registrar(kind: string, env: Env): RegistrarProvider | undefined {
-    void kind;
-    void env;
-    return undefined;
+    if (kind !== 'inwx') return undefined;
+    if (!env.REGISTRAR_USER || !env.REGISTRAR_PASSWORD) throw new Error('REGISTRAR_PROVIDER=inwx verlangt REGISTRAR_USER und REGISTRAR_PASSWORD (sonst mock).');
+    return new InwxRegistrar({ user: env.REGISTRAR_USER, password: env.REGISTRAR_PASSWORD, env: env.REGISTRAR_ENV, totpSecret: env.REGISTRAR_TOTP_SECRET });
   },
   hosting(kind: string, env: Env): HostingProvider | undefined {
-    void kind;
-    void env;
+    const formOrigin = new URL(env.APP_URL).origin;
+    if (kind === 'cloudflare') {
+      if (!env.CLOUDFLARE_API_TOKEN || !env.CLOUDFLARE_ACCOUNT_ID) throw new Error('HOSTING_PROVIDER=cloudflare verlangt CLOUDFLARE_API_TOKEN und CLOUDFLARE_ACCOUNT_ID.');
+      return new CloudflareHosting({ apiToken: env.CLOUDFLARE_API_TOKEN, accountId: env.CLOUDFLARE_ACCOUNT_ID, formOrigin });
+    }
+    if (kind === 'netlify') {
+      if (!env.NETLIFY_API_TOKEN) throw new Error('HOSTING_PROVIDER=netlify verlangt NETLIFY_API_TOKEN.');
+      return new NetlifyHosting({ apiToken: env.NETLIFY_API_TOKEN, formOrigin });
+    }
     return undefined;
   },
   email(kind: string, env: Env): EmailProvider | undefined {

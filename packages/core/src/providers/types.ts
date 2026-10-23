@@ -324,6 +324,7 @@ export type PaymentEventType =
   | 'checkout.async_failed'
   | 'checkout.expired'
   | 'charge.refunded'
+  | 'subscription.deleted'
   | 'other';
 
 export type PaymentStatus = 'paid' | 'unpaid' | 'no_payment_required';
@@ -340,6 +341,9 @@ export interface PaymentEvent {
   amountTotal?: number;
   /** charge.refunded: bisher erstatteter Betrag */
   amountRefunded?: number;
+  /** Checkout im Abo-Modus bzw. Abo-Events */
+  mode?: 'payment' | 'subscription';
+  subscriptionId?: string;
   currency?: string;
   metadata?: Record<string, string>;
 }
@@ -356,9 +360,24 @@ export interface PaymentSessionInfo {
   metadata: Record<string, string>;
 }
 
+export interface SubscriptionCheckoutInput {
+  customerRef: string;
+  customerEmail: string;
+  amountCents: number;
+  productName: string;
+  /** Erste Abbuchung erst ab diesem Zeitpunkt (Ende des inklusiven Hostings) */
+  billingStartsAt: Date;
+  successUrl: string;
+  cancelUrl: string;
+  metadata: Record<string, string>;
+  idempotencyKey: string;
+}
+
 export interface PaymentProvider {
   readonly name: string;
   createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSession>;
+  /** Monatliches Abo (z. B. „Hosting & Pflege“ ab Monat 13) */
+  createSubscriptionCheckout?(input: SubscriptionCheckoutInput): Promise<CheckoutSession>;
   /** Session beim Anbieter abfragen (für die Erfolgsseite, falls der Webhook noch fehlt). */
   retrieveSession?(sessionId: string): Promise<PaymentSessionInfo | null>;
   /** Offene Session vorzeitig beenden (z. B. wenn der Kunde neu startet). */

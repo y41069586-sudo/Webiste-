@@ -1,0 +1,127 @@
+import { createHash } from 'node:crypto';
+import { sleep } from '../../util/time';
+import { HttpError, withRetry } from '../../util/retry';
+import type { DnsPlan, HostingDomainStatus, HostingProvider, SiteFile } from '../types';
+
+/**
+ * Netlify API (geprüft 23.10.2026, docs.netlify.com „Get started with the API“):
+ * Basis https://api.netlify.com/api/v1/, Bearer-Token. Deploy per Datei-Digest (SHA1 je Pfad),
+ * danach nur die angeforderten Dateien hochladen (PUT /deploys/{id}/files/{pfad}).
+ * Eigene Domain: PATCH /sites/{id} {custom_domain}; externes DNS: Apex A 75.2.60.5, www CNAME {site}.netlify.app;
+ * SSL: POST /sites/{id}/ssl. Limit: 3 Deploys pro Minute, 100 pro Tag.
+ */
+const API = 'https://api.netlify.com/api/v1';
+export const NETLIFY_APEX_IP = '75.2.60.5';
+
+export interface NetlifyConfig {
+  apiToken: string;
+  formOrigin: string;
+}
+
+interface NetlifySite {
+  id: string;
+  name: string;
+  ssl_url?: string;
+  url?: string;
+  custom_domain?: string | null;
+  ssl?: boolean;
+}
+
+export function netlifyHeadersFile(formOrigin: string): string {
+  return `/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'none'; form-action ${formOrigin}; base-uri 'none'; frame-ancestors 'none'
+`;
+}
+
+export class NetlifyHosting implements HostingProvider {
+  readonly name = 'netlify';
+
+  constructor(
+    private readonly cfg: NetlifyConfig,
+    private readonly fetchImpl: typeof fetch = fetch,
+    private readonly pollMs = 2_000,
+  ) {}
+
+  private async api<T>(method: string, p: string, body?: unknown, raw?: { data: Buffer; contentType: string }): Promise<T> {
+    return withRetry(
+      async () => {
+        const res = await this.fetchImpl(`${API}${p}`, {
+          method,
+          headers: {
+            authorization: `Bearer ${this.cfg.apiToken}`,
+            'user-agent': 'WebsiteBriefMaschine/0.1',
+            ...(raw ? { 'content-type': raw.contentType } : body !== undefined ? { 'content-type': 'application/json' } : {}),
+          },
+          body: raw ? new Uint8Array(raw.data) : body !== undefined ? JSON.stringify(body) : undefined,
+          signal: AbortSignal.timeout(120_000),
+        });
+        const text = await res.text();
+        if (!res.ok) throw new HttpError(`Netlify ${method} ${p.split('?')[0]} HTTP ${res.status}`, res.status, text.slice(0, 500));
+        return (text ? JSON.parse(text) : {}) as T;
+      },
+      { retries: 3, baseDelayMs: 2_000 },
+    );
+  }
+
+  async ensureProject(name: string): Promise<{ projectId: string; defaultUrl: string }> {
+    const siteName = name.toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 60);
+    const found = await this.api<NetlifySite[]>('GET', `/sites?name=${encodeURIComponent(siteName)}&filter=all`);
+    const site = found.find((s) => s.name === siteName) ?? (await this.api<NetlifySite>('POST', '/sites', { name: siteName }));
+    return { projectId: site.id, defaultUrl: site.ssl_url ?? `https://${site.name}.netlify.app/` };
+  }
+
+  async deploy(projectId: string, files: SiteFile[]): Promise<{ deploymentId: string; url: string }> {
+    const all = [...files, { path: '_headers', content: netlifyHeadersFile(this.cfg.formOrigin), contentType: 'text/plain' }].map((f) => {
+      const content = Buffer.isBuffer(f.content) ? f.content : Buffer.from(f.content, 'utf8');
+      const p = `/${f.path.replace(/^\//, '')}`;
+      return { path: p, content, sha: createHash('sha1').update(content).digest('hex') };
+    });
+    const deploy = await this.api<{ id: string; required?: string[]; ssl_url?: string; deploy_ssl_url?: string }>('POST', `/sites/${projectId}/deploys`, {
+      files: Object.fromEntries(all.map((f) => [f.path, f.sha])),
+    });
+    const required = new Set(deploy.required ?? []);
+    for (const f of all) {
+      if (!required.has(f.sha)) continue;
+      required.delete(f.sha);
+      const encoded = f.path.split('/').map(encodeURIComponent).join('/');
+      await this.api('PUT', `/deploys/${deploy.id}/files${encoded}`, undefined, { data: f.content, contentType: 'application/octet-stream' });
+    }
+    for (let i = 0; i < 60; i++) {
+      const d = await this.api<{ state: string; ssl_url?: string; error_message?: string }>('GET', `/sites/${projectId}/deploys/${deploy.id}`);
+      if (d.state === 'ready') return { deploymentId: deploy.id, url: d.ssl_url ?? deploy.ssl_url ?? '' };
+      if (d.state === 'error') throw new Error(`Netlify-Deploy fehlgeschlagen: ${d.error_message ?? 'unbekannt'}`);
+      await sleep(this.pollMs);
+    }
+    throw new Error('Netlify-Deploy nicht rechtzeitig fertig');
+  }
+
+  async attachDomain(projectId: string, domain: string): Promise<DnsPlan> {
+    const site = await this.api<NetlifySite>('PATCH', `/sites/${projectId}`, { custom_domain: domain, domain_aliases: [`www.${domain}`] });
+    return {
+      records: [
+        { type: 'A', name: '@', value: NETLIFY_APEX_IP },
+        { type: 'CNAME', name: 'www', value: `${site.name}.netlify.app` },
+      ],
+    };
+  }
+
+  async getDomainStatus(projectId: string, domain: string): Promise<HostingDomainStatus> {
+    const site = await this.api<NetlifySite>('GET', `/sites/${projectId}`);
+    if (site.custom_domain !== domain) return { domain, active: false, ssl: 'unknown', details: 'Domain nicht am Projekt' };
+    try {
+      await this.api('POST', `/sites/${projectId}/ssl`);
+    } catch {
+      // DNS zeigt noch nicht auf Netlify – nächster Versuch im Live-Check
+      return { domain, active: false, ssl: 'pending', details: 'SSL noch nicht ausgestellt' };
+    }
+    return { domain, active: true, ssl: 'active' };
+  }
+
+  async deleteProject(projectId: string): Promise<void> {
+    await this.api('DELETE', `/sites/${projectId}`);
+  }
+}

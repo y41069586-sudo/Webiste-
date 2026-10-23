@@ -20,6 +20,7 @@ import { checkDomain } from './domains';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
+import { applySubscriptionEvent } from './renewals';
 import { findPublicDemo, recordEvent, type RequestMeta } from './tracking';
 
 export type Order = typeof orders.$inferSelect;
@@ -380,6 +381,9 @@ async function findOrderForEvent(ev: PaymentEvent): Promise<Order | undefined> {
 /** Normalisiertes Zahlungs-Event anwenden (ohne Replay-Schutz – siehe processPaymentWebhook). */
 export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promise<string> {
   if (ev.type === 'other') return 'ignored';
+  if (ev.mode === 'subscription' || ev.metadata?.kind === 'subscription' || ev.type === 'subscription.deleted') {
+    return applySubscriptionEvent(ev, actor);
+  }
   const order = await findOrderForEvent(ev);
   if (!order) {
     logger.warn({ eventId: ev.eventId, type: ev.rawType }, 'Zahlungs-Event ohne passende Bestellung');

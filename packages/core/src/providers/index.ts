@@ -29,6 +29,9 @@ export { MockPayment } from './mock/payment';
 export { StripePayment } from './payment/stripe';
 export { ResendEmail } from './email/resend';
 export { PostmarkEmail } from './email/postmark';
+export { InwxRegistrar, inwxPhone, INWX_DEFAULT_NS } from './registrar/inwx';
+export { CloudflareHosting, assetHash } from './hosting/cloudflare';
+export { NetlifyHosting } from './hosting/netlify';
 
 export interface Providers {
   storage: StorageProvider;

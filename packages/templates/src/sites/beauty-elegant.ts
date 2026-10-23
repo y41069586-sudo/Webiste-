@@ -15,7 +15,7 @@ export const beautyElegant: TemplateDef = {
     const body = `
 <header class="border-b border-line bg-surface">
   <div class="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-5 md:flex-row md:justify-between">
-    <a href="#inhalt" class="font-heading text-2xl italic tracking-wide">${esc(f.name)}</a>
+    <a href="#inhalt" class="font-heading text-2xl italic tracking-wide">${p.brand()}</a>
     <nav aria-label="Hauptnavigation"><ul class="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm uppercase tracking-widest text-muted">
       <li><a class="hover:text-ink" href="#leistungen">Behandlungen</a></li>
       <li><a class="hover:text-ink" href="#ueber-uns">Über uns</a></li>
@@ -79,6 +79,7 @@ export const beautyElegant: TemplateDef = {
     </div>
   </section>
 
+  ${p.gallery()}
   ${p.contactSection({
     sectionClass: 'bg-surface-alt py-16',
     cardClass: 'rounded-2xl bg-surface p-6 ring-1 ring-line',

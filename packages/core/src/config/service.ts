@@ -87,6 +87,7 @@ export interface EffectiveSwitches {
   useRatingInLetter: boolean;
   killSwitch: boolean;
   realLettersUnlocked: boolean;
+  autoRegisterDomains: boolean;
 }
 
 /**

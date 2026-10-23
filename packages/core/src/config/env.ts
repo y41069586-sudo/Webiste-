@@ -51,6 +51,7 @@ const envSchema = z.object({
   REGISTRAR_USER: optStr,
   REGISTRAR_PASSWORD: optStr,
   REGISTRAR_ENV: z.enum(['sandbox', 'production']).default('sandbox'),
+  REGISTRAR_TOTP_SECRET: optStr,
 
   HOSTING_PROVIDER: z.enum(['cloudflare', 'netlify', 'mock']).default('mock'),
   CLOUDFLARE_API_TOKEN: optStr,

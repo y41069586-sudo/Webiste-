@@ -34,12 +34,24 @@ const nextConfig: NextConfig = {
     '/*': ['../../packages/core/drizzle/**/*', '../../packages/templates/dist/**/*'],
   },
   turbopack: { root },
+  experimental: {
+    // Onboarding-Formular (lange Datenschutzerklärung); Bilder laufen über eine eigene Route
+    serverActions: { bodySizeLimit: '2mb' },
+  },
   async headers() {
     return [
       { source: '/:path*', headers: securityHeaders },
       {
         source: '/d/:path*',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
+      },
+      {
+        source: '/(onboarding|preview|verlaengern|checkout)/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+          { key: 'Cache-Control', value: 'no-store' },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+        ],
       },
       {
         source: '/admin/:path*',

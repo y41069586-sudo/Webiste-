@@ -26,6 +26,10 @@ export interface SharedParts {
   /** Inhalt von „Über uns“ als Absätze */
   about(cls?: string): string;
   jsonLd: string;
+  /** Logo (falls vorhanden) + Firmenname für den Seitenkopf */
+  brand(): string;
+  /** Bildergalerie mit Kundenfotos (leer, wenn keine Fotos) */
+  gallery(opts?: { sectionClass?: string; titleClass?: string }): string;
 }
 
 function faviconDataUri(letter: string, color: string): string {
@@ -232,6 +236,24 @@ ${jsonLd}
     footer,
     about: (cls = '') => paragraphs(content.about, cls),
     jsonLd,
+    brand: () => {
+      // Kundenlogo/-fotos gibt es nur nach dem Onboarding – Demos zeigen nie Material des Betriebs
+      const logo = !isDemo && facts.logoSrc ? `<img src="${esc(facts.logoSrc)}" alt="" class="h-8 w-auto max-w-28 object-contain sm:h-10 sm:max-w-40" height="40">` : '';
+      // Auf schmalen Bildschirmen nur das Logo (Name bleibt für Screenreader erhalten)
+      return logo ? `<span class="inline-flex min-w-0 items-center gap-3">${logo}<span class="sr-only sm:not-sr-only">${esc(facts.name)}</span></span>` : esc(facts.name);
+    },
+    gallery: (o = {}) => {
+      const photos = isDemo ? [] : (facts.photos ?? []);
+      if (!photos.length) return '';
+      return `<section id="einblicke" aria-labelledby="einblicke-titel" class="${o.sectionClass ?? 'py-16 md:py-20'}">
+  <div class="mx-auto max-w-6xl px-4">
+    <h2 id="einblicke-titel" class="${o.titleClass ?? 'text-2xl font-bold md:text-3xl'}">Einblicke</h2>
+    <ul class="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">${photos
+      .map((ph) => `<li><img src="${esc(ph.src)}" alt="${esc(ph.alt)}" loading="lazy" class="aspect-[4/3] w-full rounded-lg object-cover" width="600" height="450"></li>`)
+      .join('')}</ul>
+  </div>
+</section>`;
+    },
   };
 }
 

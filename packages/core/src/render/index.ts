@@ -7,3 +7,5 @@ export * from '../demos/build';
 export * from './pdf';
 export * from './letter';
 export * from './invoice';
+export * from './site';
+export * from './images';

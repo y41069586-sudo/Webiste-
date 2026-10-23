@@ -15,7 +15,7 @@ export const beautySoft: TemplateDef = {
     const body = `
 <header class="bg-surface">
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5">
-    <a href="#inhalt" class="font-heading text-xl font-semibold">${esc(f.name)}</a>
+    <a href="#inhalt" class="font-heading text-xl font-semibold">${p.brand()}</a>
     <a href="${esc(p.ctaHref)}" class="inline-flex min-h-11 items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-on-accent">${icon(p.callHref ? 'phone' : 'calendar', 'h-4 w-4')}Termin</a>
   </div>
 </header>
@@ -76,6 +76,7 @@ export const beautySoft: TemplateDef = {
     </div>
   </section>
 
+  ${p.gallery()}
   ${p.contactSection({
     sectionClass: 'py-12',
     cardClass: 'rounded-3xl bg-surface-alt p-6',

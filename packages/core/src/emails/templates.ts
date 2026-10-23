@@ -155,3 +155,41 @@ export function adminNotificationEmail(cfg: AppConfig, d: { title: string; lines
     blocks: [...d.lines, ...(d.link ? [{ button: { href: d.link, label: 'Im Dashboard öffnen' } }] : [])],
   });
 }
+
+export function previewReadyEmail(cfg: AppConfig, d: { name: string; previewUrl: string; summary: string | null; roundsLeft: number; firstVersion: boolean }): EmailContent {
+  return renderEmail(cfg, {
+    subject: d.firstVersion ? 'Ihre Website-Vorschau ist fertig' : 'Ihre geänderte Website-Vorschau ist fertig',
+    name: d.name,
+    blocks: [
+      d.firstVersion
+        ? 'Ihre Website ist fertig vorbereitet – mit Ihren Angaben, Texten und Bildern. Bitte schauen Sie sich die Vorschau in Ruhe an.'
+        : 'wir haben Ihre Änderungswünsche eingearbeitet. Bitte schauen Sie sich die neue Vorschau an.',
+      ...(d.summary ? [d.summary] : []),
+      { button: { href: d.previewUrl, label: 'Vorschau ansehen' } },
+      `Passt alles, geben Sie die Seite mit einem Klick frei – dann registrieren wir Ihre Domain und schalten die Website live. Möchten Sie noch etwas ändern, beschreiben Sie es einfach auf der Vorschauseite (noch ${d.roundsLeft} Änderungsrunde${d.roundsLeft === 1 ? '' : 'n'} inklusive).`,
+    ],
+  });
+}
+
+export function liveHandoverEmail(
+  cfg: AppConfig,
+  d: { name: string; url: string; domain: string | null; hostingUntil: string; formTarget: string },
+): EmailContent {
+  return renderEmail(cfg, {
+    subject: `Ihre Website ist online: ${d.domain ?? d.url}`,
+    name: d.name,
+    blocks: [
+      `Ihre Website ist ab sofort online: ${d.url}`,
+      {
+        list: [
+          d.domain ? `Die Domain ${d.domain} ist auf Sie registriert und gehört Ihnen.` : 'Ihre Website ist unter der oben genannten Adresse erreichbar.',
+          `Nachrichten aus dem Kontaktformular gehen an ${d.formTarget}.`,
+          `Hosting und SSL-Verschlüsselung sind bis ${d.hostingUntil} enthalten. Wir erinnern Sie rechtzeitig vor Ablauf.`,
+          'Impressum und Datenschutzerklärung stammen aus Ihren Angaben – bitte halten Sie sie aktuell und geben Sie uns Bescheid, wenn sich etwas ändert.',
+        ],
+      },
+      'Kleine Textänderungen oder neue Öffnungszeiten? Antworten Sie einfach auf diese E-Mail.',
+      'Vielen Dank für Ihr Vertrauen!',
+    ],
+  });
+}

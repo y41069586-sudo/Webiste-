@@ -15,7 +15,7 @@ export const handwerkKlar: TemplateDef = {
     const body = `
 <header class="border-b border-line bg-surface">
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-    <a href="#inhalt" class="flex items-center gap-2 text-lg font-bold"><span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary text-on-primary">${icon(c.services[0]?.icon ?? 'house', 'h-5 w-5')}</span>${esc(f.name)}</a>
+    <a href="#inhalt" class="flex items-center gap-2 text-lg font-bold"><span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary text-on-primary">${icon(c.services[0]?.icon ?? 'house', 'h-5 w-5')}</span>${p.brand()}</a>
     <nav aria-label="Hauptnavigation" class="hidden md:block"><ul class="flex gap-6 text-sm text-muted">
       <li><a class="hover:text-ink" href="#leistungen">Leistungen</a></li>
       <li><a class="hover:text-ink" href="#ueber-uns">Über uns</a></li>
@@ -84,6 +84,7 @@ export const handwerkKlar: TemplateDef = {
     </div>
   </section>
 
+  ${p.gallery()}
   ${p.contactSection({
     sectionClass: 'py-16',
     cardClass: 'rounded-2xl bg-surface-alt p-6 ring-1 ring-line',

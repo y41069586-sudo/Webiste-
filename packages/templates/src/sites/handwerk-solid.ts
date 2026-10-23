@@ -16,7 +16,7 @@ export const handwerkSolid: TemplateDef = {
     const body = `
 <header class="bg-primary text-on-primary">
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-    <a href="#inhalt" class="text-lg font-bold tracking-tight">${esc(f.name)}</a>
+    <a href="#inhalt" class="text-lg font-bold tracking-tight">${p.brand()}</a>
     <nav aria-label="Hauptnavigation" class="hidden md:block"><ul class="flex gap-6 text-sm font-medium">
       <li><a class="hover:underline" href="#leistungen">Leistungen</a></li>
       <li><a class="hover:underline" href="#ueber-uns">Über uns</a></li>
@@ -93,6 +93,7 @@ export const handwerkSolid: TemplateDef = {
     </div>
   </section>
 
+  ${p.gallery()}
   ${p.contactSection({
     sectionClass: 'bg-surface-alt py-16',
     cardClass: 'rounded-2xl bg-surface p-6 shadow-sm ring-1 ring-line',

@@ -136,3 +136,52 @@ Geprüft am 23.10.2026.
 - **Doppelversand-Schutz** anbieterunabhängig über die Tabelle `outbound_emails`
   (eindeutiger `idempotency_key`, z. B. `invoice:{orderId}`).
 - Absenderdomain beim Anbieter verifizieren (SPF, DKIM, DMARC) – siehe Go-Live-Checkliste.
+
+## INWX – Domainregistrierung
+
+Geprüft am 23.10.2026 (account.inwx.de/en/help/apidoc, Kapitel 1.2, 2.1, 2.6, 2.9, 2.15, 3, 4).
+
+- **Endpunkte:** Produktion `https://api.domrobot.com/jsonrpc/`, Test (OT&E) `https://api.ote.domrobot.com/jsonrpc/`
+  (`REGISTRAR_ENV=sandbox|production`). Anfrage `{method, params}`, Antwort `{code, msg, resData}`.
+- **Codes:** 1000 OK, 1001 OK/ausstehend, 1500 OK/Sitzungsende, 2302 Objekt existiert, 2303 existiert nicht,
+  2400 Befehl fehlgeschlagen. Alles ≥ 2000 wird als Fehler behandelt.
+- **Anmeldung:** `account.login {user, pass}`; Sitzung über das zurückgegebene Cookie. Ist im Konto 2FA aktiv
+  (`resData.tfa`), folgt `account.unlock {tan}` mit TOTP aus `REGISTRAR_TOTP_SECRET`.
+- **Ablauf beim Go-Live:** `domain.check {domain[]}` (avail, price, premium) → `domain.info` (Idempotenz: liegt die
+  Domain schon in unserem Konto?) → `contact.create {type ORG|PERSON, name, org, street, city, pc, cc, voice
+  (+49.2311234), email}` mit den **Impressumsdaten des Kunden** (Domain-Inhaber = Kunde) → `domain.create {domain,
+  period '1Y', registrant, ns, renewalMode 'AUTOEXPIRE', transferLock}`.
+- **DNS (nur bei Netlify):** `nameserver.create {domain, type 'MASTER', ns, ignoreExisting}`, `nameserver.info`,
+  `nameserver.deleteRecord`, `nameserver.createRecord {domain, type, name, content, ttl}`.
+- **Kosten:** Preis aus `domain.create` (sonst Schätzung `costs.domainPerYearCents`) → Budget-Ledger „domain“.
+- **Freigabe:** Ohne `switches.autoRegisterDomains` wartet jede Registrierung auf die Freigabe im Dashboard
+  („Kunden & Seiten“); bei `DRY_RUN` wird nie echt registriert.
+
+## Cloudflare – Hosting der Kundenseiten (Workers Static Assets)
+
+Geprüft am 23.10.2026 (developers.cloudflare.com: „Direct Uploads“ für Workers Static Assets, API „Attach Worker
+Domain“, „Create Zone“). Cloudflare **Pages** Direct Upload dokumentiert das Hochladen der Dateien selbst nicht (nur
+das Manifest), daher nutzen wir die dokumentierte Workers-Variante – technisch dieselbe Infrastruktur.
+
+1. `POST /accounts/{id}/workers/scripts/{name}/assets-upload-session {manifest: {"/pfad": {hash, size}}}` →
+   `{jwt, buckets}`; Hash = SHA-256 über Base64-Inhalt + Dateiendung, erste 32 Hex-Zeichen (wie im offiziellen Beispiel).
+2. Je Bucket `POST /accounts/{id}/workers/assets/upload?base64=true` (Bearer = Upload-JWT, multipart, Feld = Hash)
+   → Completion-JWT.
+3. `PUT /accounts/{id}/workers/scripts/{name}` (multipart: `metadata` mit `main_module`, `assets.jwt`,
+   `assets.config`, Binding `ASSETS`; Modul `worker.js` setzt Sicherheits-Header inkl. CSP und leitet www → Apex).
+4. Domain: Zone im eigenen Konto (`POST /zones {name, account.id, type 'full'}`) → `name_servers` gehen an INWX →
+   nach Aktivierung `PUT /accounts/{id}/workers/domains {hostname, service, zone_id}` für Apex und www
+   (Zertifikat automatisch). Der Live-Check wiederholt die Bindung, bis die Zone aktiv ist.
+
+Token-Rechte: Workers Scripts Write, Zone Edit/DNS Edit (für die Kundenzonen), Account-ID in `CLOUDFLARE_ACCOUNT_ID`.
+
+## Netlify – Alternative für das Hosting
+
+Geprüft am 23.10.2026 (docs.netlify.com „Get started with the Netlify API“, „Configure external DNS“).
+
+- `POST /api/v1/sites {name}`; Deploy per Digest: `POST /api/v1/sites/{id}/deploys {files: {"/pfad": sha1}}` →
+  `required` → `PUT /api/v1/deploys/{deploy}/files/{pfad}` (octet-stream) → Status abfragen bis `ready`.
+  Sicherheits-Header über die Datei `_headers`. Limit: 3 Deploys/Minute, 100/Tag.
+- Eigene Domain: `PATCH /api/v1/sites/{id} {custom_domain, domain_aliases}`; DNS bei INWX: Apex `A 75.2.60.5`,
+  `www CNAME {site}.netlify.app`; SSL: `POST /api/v1/sites/{id}/ssl`.
+- Umschalten mit `HOSTING_PROVIDER=netlify` und `NETLIFY_API_TOKEN`.

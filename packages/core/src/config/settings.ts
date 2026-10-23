@@ -191,6 +191,8 @@ export const appConfigSchema = z.object({
     killSwitch: z.boolean(),
     /** Echte Briefe an Leads freigegeben (erst nach erfolgreichem Testbrief) */
     realLettersUnlocked: z.boolean(),
+    /** Domains nach Vorschau-Freigabe ohne weitere Admin-Freigabe registrieren */
+    autoRegisterDomains: z.boolean(),
   }),
   support: z.object({
     autoReplyClasses: z.array(z.enum(SUPPORT_CLASSES)),
@@ -447,6 +449,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     useRatingInLetter: false,
     killSwitch: false,
     realLettersUnlocked: false,
+    autoRegisterDomains: false,
   },
   support: {
     autoReplyClasses: [],

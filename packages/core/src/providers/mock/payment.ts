@@ -1,6 +1,6 @@
 import { appUrl } from '../../config/env';
 import { hmacSha256, randomToken, safeEqual } from '../../util/crypto';
-import type { CheckoutSession, CheckoutSessionInput, PaymentEvent, PaymentProvider } from '../types';
+import type { CheckoutSession, CheckoutSessionInput, PaymentEvent, PaymentProvider, SubscriptionCheckoutInput } from '../types';
 
 /**
  * Simulierte Zahlung für Entwicklung und E2E-Tests (ohne Stripe-Konto).
@@ -14,6 +14,11 @@ export class MockPayment implements PaymentProvider {
     const sessionId = `cs_mock_${randomToken(20)}`;
     const params = new URLSearchParams({ order: input.orderId, amount: String(input.amountCents) });
     return { sessionId, url: appUrl(`/checkout/mock/${sessionId}?${params.toString()}`) };
+  }
+
+  async createSubscriptionCheckout(input: SubscriptionCheckoutInput): Promise<CheckoutSession> {
+    const sessionId = `cs_mock_sub_${randomToken(20)}`;
+    return { sessionId, url: appUrl(`/verlaengern/mock/${sessionId}?ref=${encodeURIComponent(input.customerRef)}`) };
   }
 
   sign(rawBody: string): string {

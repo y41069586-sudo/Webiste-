@@ -77,8 +77,10 @@ export interface BusinessFacts {
   openingLines: OpeningLine[];
   /** Externe Links (z. B. Instagram), nur wenn vom Kunden bestätigt */
   socialLinks?: { label: string; href: string }[];
-  logoDataUri?: string | null;
-  photoDataUris?: string[];
+  /** Logo des Kunden (nur Live/Vorschau; nie in Demos) */
+  logoSrc?: string | null;
+  /** Fotos des Kunden (nur Live/Vorschau; nie in Demos) */
+  photos?: { src: string; alt: string }[];
 }
 
 export interface SenderInfo {

@@ -14,7 +14,7 @@ export const beautyModern: TemplateDef = {
     const body = `
 <header class="bg-surface">
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5">
-    <a href="#inhalt" class="text-lg font-bold uppercase tracking-[0.2em]">${esc(f.name)}</a>
+    <a href="#inhalt" class="text-lg font-bold uppercase tracking-[0.2em]">${p.brand()}</a>
     <nav aria-label="Hauptnavigation" class="hidden md:block"><ul class="flex gap-6 text-sm font-medium">
       <li><a class="hover:underline" href="#leistungen">Leistungen</a></li>
       <li><a class="hover:underline" href="#ueber-uns">Studio</a></li>
@@ -85,6 +85,7 @@ export const beautyModern: TemplateDef = {
     </div>
   </section>
 
+  ${p.gallery()}
   ${p.contactSection({
     sectionClass: 'py-16',
     cardClass: 'bg-surface-alt p-6 ring-1 ring-line',

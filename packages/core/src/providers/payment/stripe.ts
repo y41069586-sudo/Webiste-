@@ -1,5 +1,14 @@
 import Stripe from 'stripe';
-import type { CheckoutSession, CheckoutSessionInput, PaymentEvent, PaymentEventType, PaymentProvider, PaymentSessionInfo, PaymentStatus } from '../types';
+import type {
+  CheckoutSession,
+  CheckoutSessionInput,
+  PaymentEvent,
+  PaymentEventType,
+  PaymentProvider,
+  PaymentSessionInfo,
+  PaymentStatus,
+  SubscriptionCheckoutInput,
+} from '../types';
 
 /** Geprüft gegen stripe-node 23.0.1 (API-Version 2026-09-30.endive), siehe docs/integrations.md. */
 const EVENT_TYPES: Record<string, PaymentEventType> = {
@@ -8,6 +17,7 @@ const EVENT_TYPES: Record<string, PaymentEventType> = {
   'checkout.session.async_payment_failed': 'checkout.async_failed',
   'checkout.session.expired': 'checkout.expired',
   'charge.refunded': 'charge.refunded',
+  'customer.subscription.deleted': 'subscription.deleted',
 };
 
 function paymentStatus(v: string | null | undefined): PaymentStatus {
@@ -84,6 +94,28 @@ export class StripePayment implements PaymentProvider {
     return { sessionId: session.id, url: session.url };
   }
 
+  /** Abo mit Testphase bis zum Ende des inklusiven Hostings (Stripe: trial_end ≥ 48 h in der Zukunft). */
+  async createSubscriptionCheckout(input: SubscriptionCheckoutInput): Promise<CheckoutSession> {
+    const minTrial = Math.floor(Date.now() / 1000) + 49 * 3600;
+    const trialEnd = Math.max(minTrial, Math.floor(input.billingStartsAt.getTime() / 1000));
+    const session = await this.stripe.checkout.sessions.create(
+      {
+        mode: 'subscription',
+        locale: 'de',
+        client_reference_id: input.customerRef,
+        customer_email: input.customerEmail,
+        line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: input.amountCents, recurring: { interval: 'month' }, product_data: { name: input.productName } } }],
+        subscription_data: { trial_end: trialEnd, metadata: input.metadata },
+        metadata: input.metadata,
+        success_url: input.successUrl,
+        cancel_url: input.cancelUrl,
+      },
+      { idempotencyKey: input.idempotencyKey },
+    );
+    if (!session.url) throw new Error('Stripe hat keine Checkout-URL geliefert');
+    return { sessionId: session.id, url: session.url };
+  }
+
   async retrieveSession(sessionId: string): Promise<PaymentSessionInfo | null> {
     if (!/^cs_[A-Za-z0-9_]+$/.test(sessionId)) return null;
     try {
@@ -132,7 +164,13 @@ export class StripePayment implements PaymentProvider {
         amountTotal: s.amount_total ?? undefined,
         currency: s.currency ?? undefined,
         metadata: metadataOf(s.metadata),
+        mode: s.mode === 'subscription' ? 'subscription' : 'payment',
+        subscriptionId: idOf(s.subscription),
       };
+    }
+    if (event.type === 'customer.subscription.deleted') {
+      const sub = event.data.object as Stripe.Subscription;
+      return { ...base, subscriptionId: sub.id, metadata: metadataOf(sub.metadata), mode: 'subscription' };
     }
     if (event.type === 'charge.refunded') {
       const c = event.data.object as Stripe.Charge;

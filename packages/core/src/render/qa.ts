@@ -160,8 +160,14 @@ async function freePort(): Promise<number> {
   });
 }
 
-export async function lighthouseCheck(liveHtml: string, minScore = 0.9): Promise<Check> {
+export async function lighthouseCheck(liveHtml: string, minScore = 0.9, assets: { path: string; content: Buffer | string; contentType?: string }[] = []): Promise<Check> {
   const server = createServer((req, res) => {
+    const asset = assets.find((a) => `/${a.path.replace(/^\//, '')}` === req.url);
+    if (asset) {
+      res.writeHead(200, { 'content-type': asset.contentType ?? 'application/octet-stream', 'cache-control': 'max-age=600' });
+      res.end(asset.content);
+      return;
+    }
     if (req.url === '/robots.txt') {
       res.writeHead(200, { 'content-type': 'text/plain' });
       res.end('User-agent: *\nAllow: /\n');
