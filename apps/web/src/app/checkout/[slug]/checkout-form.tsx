@@ -151,7 +151,7 @@ export function CheckoutForm({ slug, prefill, plans, initialPlan, guaranteeNote,
           {plans.map((p) => (
             <label
               key={p.id}
-              className={`flex cursor-pointer flex-col rounded-xl border-2 bg-white p-4 shadow-sm transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-300 ${
+              className={`flex cursor-pointer flex-col rounded-[8px] border-2 bg-white p-5 shadow-sm transition-colors duration-300 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-300 ${
                 plan === p.id ? 'border-brand-600' : 'border-slate-200 hover:border-slate-300'
               }`}
             >
@@ -309,7 +309,7 @@ export function CheckoutForm({ slug, prefill, plans, initialPlan, guaranteeNote,
         <p className="mt-2 text-xs text-slate-500">Die Domain wird auf Ihren Namen registriert und gehört Ihnen.</p>
       </fieldset>
 
-      <fieldset className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <fieldset className="space-y-3 rounded-[8px] border border-slate-200 bg-slate-50 p-4">
         <legend className="sr-only">Bestätigungen</legend>
         <label className="flex items-start gap-3 text-sm">
           <input
@@ -348,11 +348,7 @@ export function CheckoutForm({ slug, prefill, plans, initialPlan, guaranteeNote,
         </label>
       </fieldset>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-xl bg-brand-600 px-4 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-brand-700 disabled:opacity-60"
-      >
+      <button type="submit" disabled={pending} className="btn-site btn-primary w-full text-base disabled:opacity-60">
         {pending ? 'Einen Moment …' : chosen ? `Weiter zur Zahlung (${chosen.buttonLabel})` : 'Weiter zur Zahlung'}
       </button>
       <p className="text-center text-xs text-slate-500">

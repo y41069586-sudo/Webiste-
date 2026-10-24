@@ -133,6 +133,20 @@ stehen am Ende.
 | Einwände            | Support-Agent liefert zusätzlich `objection` (10 Kategorien); WhatsApp-Fragen werden von Hand erfasst und klassifiziert; Text 90 Tage, Kategorie dauerhaft; bei Widerspruch nur Kategorie ohne Text und ohne Lead                                                                                     | B7; WhatsApp ohne Anbindung (nur Link)                                      |
 | Ohne API-Key        | Deterministischer Mock (Probelauf `docs/lern-agent-probelauf.md`); fällt das Sprachmodell aus, entsteht der Bericht ohne Text und ohne Vorschläge                                                                                                                                                     | Abnahme L6 ohne Kosten reproduzierbar                                       |
 
+## Firmen-Website und Kauf-Strecke (umgesetzt)
+
+| Thema           | Entscheidung                                                                                                                                                                      | Grund                                                                  |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Design          | Nach der vom Betreiber gelieferten DESIGN.md („Studio“): Fläche #EEEEEE, Text/Buttons #222222, Inter/Inter Tight, Display -0,04em, Radien 8px/4px, keine farbigen UI-Akzente      | Letzte Vorgabe des Betreibers; ersetzt die vorherige Blau-Weiß-Vorgabe |
+| Schriften       | Inter und Inter Tight lokal über `@fontsource-variable` (keine Anfrage an Google)                                                                                                 | DSGVO, Performance                                                     |
+| Farbe           | Kommt nur aus den Beispiel-Websites (Collage, Karussell); die Kauf-Strecke nutzt dieselbe Palette über Token-Umschaltung in `.theme-site`                                         | DESIGN.md „Let portfolio artwork provide the color“                    |
+| Animationen     | Nur `transform`/`opacity`, Easing cubic-bezier(0.22, 1, 0.36, 1); Inhalte oberhalb der Falz per CSS (ohne JS, gut für LCP), darunter Scroll-Einblendung; `prefers-reduced-motion` | Vorgabe „ultra smooth“, Lighthouse ≥ 90                                |
+| Beispiele       | Erfundene Musterbetriebe („… Muster“), sichtbar als „Beispiel“ markiert, Bilder aus den eigenen Templates (`scripts/example-shots.ts`)                                            | Keine erfundenen Referenzen                                            |
+| Preise          | Umschalter zeigt Details, Vergleichstabelle zeigt beide Wege gleichwertig; Kauf ohne Vorauswahl bleibt im Checkout                                                                | „zwei gleichwertige Optionen, keine Vorauswahl“                        |
+| Markenname      | Firmenname aus den Einstellungen; solange dort der Platzhalter steht „Seitenwerk“. Persönlicher Name, Foto und Kurzvorstellung kommen aus den Einstellungen                       | Name des Betreibers liegt noch nicht vor                               |
+| Indexierung     | Firmen-Website erst mit `SITE_INDEXABLE=true` indexierbar (nach echten Rechtstexten); Demos, Checkout, Onboarding immer noindex                                                   | Keine Platzhalter-Rechtstexte in Suchmaschinen                         |
+| Kontaktformular | Geht wie Demo-Fragen in die Support-Queue (Honeypot, Zeitfalle, 5 je Stunde); Spam bekommt dieselbe Antwort                                                                       | Einheitlicher Support-Ablauf                                           |
+
 ## Offene Entscheidungen des Betreibers
 
 Siehe die gesammelten Fragen in der Rückmeldung zu Update 2 (Preisdarstellung brutto/netto, Daten für

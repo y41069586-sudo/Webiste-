@@ -37,7 +37,7 @@ interface Props {
 
 function Section({ id, title, intro, children }: { id: string; title: string; intro?: ReactNode; children: ReactNode }) {
   return (
-    <section aria-labelledby={`${id}-titel`} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section aria-labelledby={`${id}-titel`} className="rounded-[8px] border border-slate-200 bg-white p-6 shadow-sm">
       <h2 id={`${id}-titel`} className="text-lg font-semibold">
         {title}
       </h2>
@@ -572,7 +572,7 @@ export function OnboardingForm({ token, initial, photos }: Props) {
         </Section>
       ) : null}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-[8px] border border-slate-200 bg-white p-6 shadow-sm">
         <label className="flex items-start gap-3 text-sm">
           <input
             type="checkbox"
@@ -593,7 +593,7 @@ export function OnboardingForm({ token, initial, photos }: Props) {
             name="intent"
             value="save"
             disabled={pending}
-            className="rounded-xl border border-slate-300 bg-white px-4 py-3 font-medium shadow-sm hover:bg-slate-50 disabled:opacity-60"
+            className="rounded-[8px] border border-slate-300 bg-white px-4 py-3 font-medium shadow-sm hover:bg-slate-50 disabled:opacity-60"
           >
             Zwischenspeichern
           </button>
@@ -602,7 +602,7 @@ export function OnboardingForm({ token, initial, photos }: Props) {
             name="intent"
             value="submit"
             disabled={pending}
-            className="flex-1 rounded-xl bg-brand-600 px-4 py-3 font-semibold text-white shadow-sm hover:bg-brand-700 disabled:opacity-60"
+            className="btn-site btn-primary flex-1 disabled:opacity-60"
           >
             {pending ? 'Einen Moment …' : 'Angaben absenden – Vorschau erstellen'}
           </button>

@@ -94,7 +94,7 @@ export default async function PreviewPage({
       {ctx.lastSummary ? (
         <p className="mb-4 rounded-lg bg-slate-100 px-4 py-3 text-sm text-slate-700">Zuletzt geändert: {ctx.lastSummary}</p>
       ) : null}
-      <div className="mb-6 overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm">
+      <div className="mb-6 overflow-hidden rounded-[8px] border border-slate-300 bg-white shadow-sm">
         <iframe
           src={`/preview/${token}/site?v=${ctx.site.version}`}
           title="Vorschau Ihrer Website"

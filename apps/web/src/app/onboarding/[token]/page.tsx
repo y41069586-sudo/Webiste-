@@ -64,7 +64,7 @@ export default async function OnboardingPage({
       <section
         id="bilder"
         aria-labelledby="bilder-titel"
-        className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        className="mb-6 rounded-[8px] border border-slate-200 bg-white p-6 shadow-sm"
       >
         <h2 id="bilder-titel" className="text-lg font-semibold">
           1. Logo und Fotos <span className="text-sm font-normal text-slate-500">(optional)</span>

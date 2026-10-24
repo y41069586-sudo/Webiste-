@@ -38,3 +38,287 @@ body {
 .prose-legal a {
   @apply text-brand-600 underline;
 }
+
+/* ---------------------------------------------------------------------------
+ * Firmen-Website und Kauf-Strecke – Design nach DESIGN.md („Studio“):
+ * Studio Canvas #eeeeee, Paper White #ffffff, Charcoal Ink #222222, Graphite #333333, Soft Ash #555555,
+ * Inter / Inter Tight, Display -0.04em, Radien 8px (Buttons, Karten) und 4px (kompakt, Bilder).
+ * Keine farbigen UI-Akzente – Farbe kommt nur aus den Beispiel-Arbeiten.
+ * ------------------------------------------------------------------------- */
+.theme-site {
+  --canvas: #eeeeee;
+  --paper: #ffffff;
+  --ink: #222222;
+  --graphite: #333333;
+  --ash: #555555;
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  /* bestehende Utility-Farben der Kauf-Strecke auf die Studio-Palette legen */
+  --color-brand-50: #f5f5f5;
+  --color-brand-100: #e6e6e6;
+  --color-brand-200: #d4d4d4;
+  --color-brand-300: #bdbdbd;
+  --color-brand-500: #222222;
+  --color-brand-600: #222222;
+  --color-brand-700: #222222;
+  --color-slate-50: #eeeeee;
+  --color-slate-100: #e6e6e6;
+  --color-slate-200: #dddddd;
+  --color-slate-300: #cccccc;
+  --color-slate-400: #8a8a8a;
+  --color-slate-500: #555555;
+  --color-slate-600: #555555;
+  --color-slate-700: #333333;
+  --color-slate-800: #222222;
+  --color-slate-900: #222222;
+  /* keine farbigen Akzente (DESIGN.md): Häkchen und Hinweise einfarbig */
+  --color-emerald-500: #222222;
+  --color-emerald-600: #222222;
+  --color-emerald-700: #222222;
+  --font-sans: 'Inter Variable', Inter, Arial, 'Helvetica Neue', sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: 'palt';
+}
+.theme-site :focus-visible {
+  outline: 2px solid #222222;
+  outline-offset: 3px;
+}
+.font-tight {
+  font-family: 'Inter Tight Variable', 'Inter Tight', 'Inter Variable', Inter, Arial, sans-serif;
+}
+.text-hero {
+  font-size: clamp(2.75rem, 7.4vw, 5rem);
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+.text-editor {
+  font-size: clamp(2.25rem, 5.6vw, 4rem);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+.text-section {
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+.text-strong {
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+.text-nav {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.text-legal {
+  font-size: 0.75rem;
+  line-height: 1.66;
+}
+
+/* Buttons: 8px Radius, 12px 24px; Hover-Lift mit dem einen erlaubten Schatten (über opacity) */
+.btn-site {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 2.875rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.4;
+  letter-spacing: -0.04em;
+  transition: transform 450ms var(--ease-smooth);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-site::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 2px 15px 0 rgb(0 0 0 / 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 450ms var(--ease-smooth);
+}
+.btn-site:hover {
+  transform: translateY(-2px);
+}
+.btn-site:hover::after {
+  opacity: 1;
+}
+.btn-site:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 120ms;
+}
+.btn-site .arrow {
+  transition: transform 450ms var(--ease-smooth);
+}
+.btn-site:hover .arrow {
+  transform: translateX(3px);
+}
+.btn-primary {
+  background: #222222;
+  color: #ffffff;
+}
+.btn-secondary {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #222222;
+}
+.on-dark .btn-primary {
+  background: #ffffff;
+  color: #333333;
+}
+.on-dark .btn-secondary {
+  background: transparent;
+  color: #ffffff;
+  border-color: rgb(255 255 255 / 0.4);
+}
+.btn-compact {
+  border-radius: 4px;
+  padding: 0.75rem 1.25rem 0.75rem 1.5rem;
+}
+
+/* Flächen */
+.card-site {
+  position: relative;
+  background: #ffffff;
+  border-radius: 8px;
+}
+.card-hover {
+  transition: transform 500ms var(--ease-smooth);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+}
+.tile {
+  overflow: hidden;
+  border-radius: 4px;
+  background: #000;
+}
+.tile img {
+  transition: transform 900ms var(--ease-smooth);
+}
+.tile:hover img {
+  transform: scale(1.03);
+}
+
+/* Scroll-Einblendung: nur mit JS (Klasse .js am <html>), sonst sofort sichtbar */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 650ms var(--ease-smooth),
+    transform 650ms var(--ease-smooth);
+  transition-delay: var(--d, 0ms);
+}
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes site-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.page-fade {
+  animation: site-fade 380ms var(--ease-smooth) both;
+}
+
+/* Hero: Collage und Beispiel-Website bauen sich auf */
+@keyframes build-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes build-scale {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.build {
+  animation: build-in 700ms var(--ease-smooth) both;
+  animation-delay: var(--t, 0ms);
+}
+.build-scale {
+  animation: build-scale 900ms var(--ease-smooth) both;
+  animation-delay: var(--t, 0ms);
+}
+
+@keyframes price-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.price-in {
+  animation: price-in 450ms var(--ease-smooth) both;
+}
+
+.carousel {
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+.carousel > * {
+  scroll-snap-align: start;
+}
+.carousel.is-dragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
+}
+
+.theme-site .prose-legal h1 {
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  margin-bottom: 1.5rem;
+}
+.theme-site .prose-legal a {
+  color: #222222;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-site *,
+  .theme-site *::before,
+  .theme-site *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}

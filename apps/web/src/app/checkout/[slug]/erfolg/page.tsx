@@ -38,10 +38,7 @@ export default async function SuccessPage({
               dauert etwa 10 Minuten. Den Link finden Sie auch in der E-Mail.
             </p>
             {res.customerToken ? (
-              <a
-                href={`/onboarding/${res.customerToken}`}
-                className="mt-5 inline-flex rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white shadow-sm hover:bg-brand-700"
-              >
+              <a href={`/onboarding/${res.customerToken}`} className="btn-site btn-primary mt-5">
                 Jetzt Angaben eintragen
               </a>
             ) : null}

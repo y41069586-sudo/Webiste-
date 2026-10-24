@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/inter-tight';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -14,7 +16,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="de">
+    <html lang="de" suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );

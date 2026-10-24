@@ -12,7 +12,7 @@ export default async function MockCheckoutPage({ params }: { params: Promise<{ s
   const info = await mockCheckoutInfo(session);
   if (!info) notFound();
   const cfg = await getConfig();
-  const btn = 'w-full rounded-xl px-4 py-3 text-left font-medium shadow-sm';
+  const btn = 'w-full rounded-[8px] px-4 py-3 text-left font-medium shadow-sm';
   return (
     <PublicShell company={cfg.sender.company}>
       <PublicCard>

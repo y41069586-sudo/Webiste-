@@ -235,3 +235,35 @@ export async function trackTokenForShortCode(code: string, meta: RequestMeta): P
   const rl = await rateLimit(db, `shortcode-miss:${meta.ipHash}`, 30, 600);
   return rl.allowed ? null : 'rate_limited';
 }
+
+/** Kontaktformular der Firmen-Website: geht wie jede Frage in die Support-Queue (ohne Lead-Bezug). */
+export async function handleContactForm(input: QuestionInput, req: RequestMeta): Promise<QuestionResult> {
+  if (looksLikeSpam(input)) return { ok: false, reason: 'spam' };
+  if (!input.consent || !EMAIL_RE.test(input.email.trim()) || input.message.trim().length < 5 || input.name.trim().length < 2) {
+    return { ok: false, reason: 'invalid' };
+  }
+  const db = getDb();
+  const rl = await rateLimit(db, `contact:${req.ipHash}`, 5, 3600);
+  if (!rl.allowed) return { ok: false, reason: 'rate_limited' };
+  const [msg] = await db
+    .insert(supportMessages)
+    .values({
+      direction: 'in',
+      channel: 'form',
+      fromEmail: input.email.trim().toLowerCase().slice(0, 200),
+      subject: 'Kontaktformular Website',
+      body: [
+        `Name: ${input.name.trim().slice(0, 120)}`,
+        input.phone ? `Telefon: ${input.phone.trim().slice(0, 40)}` : '',
+        '',
+        input.message.trim().slice(0, 4000),
+      ]
+        .filter((l, i) => l || i > 1)
+        .join('\n'),
+      status: 'new',
+    })
+    .returning({ id: supportMessages.id });
+  await audit(db, { entity: 'support_message', entityId: msg!.id, action: 'received', actor: 'public:contact-form' });
+  await enqueue(QUEUES.supportInbound, { messageId: msg!.id });
+  return { ok: true };
+}

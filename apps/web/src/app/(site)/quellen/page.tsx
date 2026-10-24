@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { sourcesPageClaims } from '@wbm/core';
 
 export const dynamic = 'force-dynamic';
@@ -13,26 +12,21 @@ const day = (d: Date) => new Intl.DateTimeFormat('de-DE', { dateStyle: 'long', t
 export default async function QuellenPage() {
   const rows = await sourcesPageClaims();
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
-      <p className="mb-6 text-sm">
-        <Link href="/" className="text-brand-600 underline">
-          ← Startseite
-        </Link>
-      </p>
-      <h1 className="text-2xl font-semibold tracking-tight">Quellen zu den Zahlen in unseren Briefen</h1>
+    <div className="mx-auto max-w-[90rem] px-5 py-14 sm:px-8 sm:py-24">
+      <h1 className="text-hero max-w-[18ch] text-[#222222]">Quellen zu den Zahlen in unseren Briefen</h1>
       <p className="mt-3 max-w-[70ch] text-slate-700">
         In unseren Briefen verwenden wir nur Zahlen aus veröffentlichten Studien. Hier steht jede Aussage im Wortlaut, mit
         Herausgeber, Datum und Stichprobe. Die Zahlen beschreiben das Verhalten von Kundinnen und Kunden – sie sind kein
         Versprechen, dass eine Website mehr Umsatz bringt.
       </p>
       {rows.length === 0 ? (
-        <p className="mt-8 rounded-xl border border-slate-200 bg-white p-6 text-slate-700">
+        <p className="mt-8 rounded-[8px] bg-white p-7 text-[#333333]">
           Derzeit verwenden wir in unseren Briefen keine Statistiken.
         </p>
       ) : (
         <ol className="mt-8 space-y-4">
           {rows.map((c) => (
-            <li key={c.id} id={c.id.toLowerCase()} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <li key={c.id} id={c.id.toLowerCase()} className="rounded-[8px] bg-white p-7">
               <p className="max-w-[70ch] text-base text-slate-900">„{c.textDe}“</p>
               <dl className="mt-3 grid gap-1 text-sm text-slate-700">
                 <div>
@@ -67,6 +61,6 @@ export default async function QuellenPage() {
           ))}
         </ol>
       )}
-    </main>
+    </div>
   );
 }

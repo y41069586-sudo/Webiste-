@@ -98,6 +98,8 @@ const envSchema = z.object({
   MIN_LETTERS_PER_ARM: z.coerce.number().int().min(1).default(100),
   /** Vorschläge des Lern-Agents ohne Freigabe starten (nur Betreff, Nutzen-Satz, QR-Text) */
   AUTO_ACTIVATE_VARIANTS: bool(false),
+  /** Firmen-Website in Suchmaschinen (erst nach Livegang mit echten Rechtstexten); Demos bleiben immer noindex */
+  SITE_INDEXABLE: bool(false),
   /** Kostenbremse: Kosten pro Kauf in Cent */
   MAX_CAC_CENTS: z.coerce.number().int().min(0).default(20000),
   /** Ein Brief gilt nach so vielen Tagen ab geschätzter Zustellung als ausgewertet */

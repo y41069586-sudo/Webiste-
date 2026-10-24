@@ -1,15 +1,10 @@
-import Link from 'next/link';
 import { markdownToHtml } from '@wbm/core';
 
+/** Rechtstexte innerhalb der Firmen-Website (Kopf und Fuß kommen aus dem Layout). */
 export function LegalPage({ title, markdown, placeholder }: { title: string; markdown: string; placeholder: string }) {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
-      <p className="mb-6 text-sm">
-        <Link href="/" className="text-brand-600 underline">
-          ← Startseite
-        </Link>
-      </p>
-      <article className="prose-legal rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="mx-auto max-w-[90rem] px-5 py-14 sm:px-8 sm:py-24">
+      <article className="prose-legal max-w-[70ch] text-[#333333]">
         {markdown.trim() ? (
           <div dangerouslySetInnerHTML={{ __html: markdownToHtml(markdown) }} />
         ) : (
@@ -19,6 +14,6 @@ export function LegalPage({ title, markdown, placeholder }: { title: string; mar
           </>
         )}
       </article>
-    </main>
+    </div>
   );
 }

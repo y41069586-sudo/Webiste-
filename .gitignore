@@ -16,3 +16,4 @@ next-env.d.ts
 .DS_Store
 .pnpm-store/
 docs/muster-briefe/
+docs/screenshots-website/

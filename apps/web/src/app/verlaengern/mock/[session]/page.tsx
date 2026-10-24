@@ -40,7 +40,7 @@ export default async function MockSubscriptionPage({
         <p className="mb-2 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">Testmodus</p>
         <h1 className="mb-4 text-2xl font-semibold">Test-Abo abschließen</h1>
         <form action={confirm}>
-          <button className="rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white">Abo simulieren</button>
+          <button className="rounded-[8px] bg-brand-600 px-5 py-3 font-semibold text-white">Abo simulieren</button>
         </form>
       </PublicCard>
     </PublicShell>

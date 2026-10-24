@@ -1,0 +1,3 @@
+Bilder der Hero-Animation: CC0 1.0 (gemeinfrei), Quellen und Prüfung siehe
+packages/templates/assets/images/manifest.json (gastronomie/cafetisch.jpg, cappuccino.jpg, backwaren.jpg).
+Die Lizenzangaben stehen zusätzlich in den EXIF-Daten jeder Datei.

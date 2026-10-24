@@ -149,6 +149,15 @@ Wichtige Schalter:
 
 ---
 
+## Firmen-Website
+
+Startseite, „So funktioniert’s“, Preise, Garantie, Beispiele, Über mich, Kontakt sowie Impressum, Datenschutz, AGB und
+Quellen liegen unter `apps/web/src/app/(site)` (Design nach DESIGN.md). Inhalte kommen aus den Einstellungen: Absender
+(Name, Firma, Foto, Kurzvorstellung, Kontakt), Preise und Garantie. Beispielbilder neu erzeugen:
+`pnpm --filter @wbm/core exec tsx scripts/example-shots.ts`. Screenshots aller Seiten (Desktop und Handy):
+`SHOTS_DIR=… pnpm --filter @wbm/web exec playwright test e2e/screenshots.spec.ts`. Indexierung erst mit
+`SITE_INDEXABLE=true`.
+
 ## Täglicher Betrieb
 
 **Takte (Worker, Zeitzone Europe/Berlin):** Pipeline alle 5 Min., Briefstatus alle 30 Min., Follow-ups

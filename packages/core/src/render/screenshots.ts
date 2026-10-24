@@ -7,7 +7,7 @@ export interface Screenshots {
 }
 
 /** Wartet, bis alle Bilder dekodiert sind – sonst fehlen eingebettete Fotos im Screenshot. */
-async function imagesPainted(page: Page): Promise<void> {
+export async function imagesPainted(page: Page): Promise<void> {
   await page.evaluate(() => Promise.all([...document.images].map((i) => i.decode().catch(() => undefined))));
 }
 

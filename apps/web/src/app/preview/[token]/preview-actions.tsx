@@ -16,7 +16,7 @@ export function PreviewActions({
   const [cState, changes, cPending] = useActionState<PreviewState, FormData>(changesAction.bind(null, token), {});
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <form action={approve} className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+      <form action={approve} className="rounded-[8px] border border-emerald-200 bg-emerald-50 p-5">
         <h2 className="text-lg font-semibold text-emerald-950">Alles passt?</h2>
         <p className="mt-1 text-sm text-emerald-900">
           Mit der Freigabe registrieren wir Ihre Domain und schalten die Website live. Das dauert je nach Domain wenige Stunden.
@@ -32,12 +32,12 @@ export function PreviewActions({
         ) : null}
         <button
           disabled={aPending}
-          className="mt-4 w-full rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
+          className="mt-4 w-full rounded-[8px] bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
         >
           {aPending ? 'Einen Moment …' : 'Freigeben und veröffentlichen'}
         </button>
       </form>
-      <form action={changes} className="rounded-2xl border border-slate-200 bg-white p-5">
+      <form action={changes} className="rounded-[8px] border border-slate-200 bg-white p-5">
         <h2 className="text-lg font-semibold">Änderungen wünschen</h2>
         <p className="mt-1 text-sm text-slate-600">
           {roundsLeft > 0
@@ -62,7 +62,7 @@ export function PreviewActions({
         ) : null}
         <button
           disabled={cPending}
-          className="mt-4 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-medium shadow-sm hover:bg-slate-50 disabled:opacity-60"
+          className="mt-4 w-full rounded-[8px] border border-slate-300 bg-white px-4 py-3 font-medium shadow-sm hover:bg-slate-50 disabled:opacity-60"
         >
           {cPending ? 'Wird gesendet …' : 'Änderungswunsch senden'}
         </button>
