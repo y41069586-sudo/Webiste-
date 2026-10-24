@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { getConfig, updateConfig } from '../src/config/service';
 import { getDb } from '../src/db/client';
-import { budgetLedger, events, leads, letters, orders, reports, variants } from '../src/db/schema';
+import { armAllocations, budgetLedger, events, leads, letters, orders, reports, variants } from '../src/db/schema';
 import { stopBoss } from '../src/queue';
 import { kpiRows, kpiSummary } from '../src/services/kpis';
 import { applyReport, betaSample, runWeeklyOptimizer, seededRandom, thompsonAllocation } from '../src/services/optimizer';
@@ -142,7 +142,7 @@ describe('KPIs und Wochenbericht', () => {
     expect(onlyNails.leads).toBe(1);
   });
 
-  it('Wochenbericht: Vorschlag ohne AUTO_OPTIMIZE, Übernahme setzt Anteile und Gewichte', async () => {
+  it('Wochenbericht: Vorschlag ohne AUTO_OPTIMIZE, Übernahme setzt Segment-Anteile und Zuteilung je Branche', async () => {
     const db = getDb();
     const vs = await db.select().from(variants).where(eq(variants.sequence, 1));
     for (let i = 0; i < 6; i++) await lead('dortmund:handwerk:maler', 'maler', vs[0]!.id, { scan: i < 3, buy: i === 0 });
@@ -162,8 +162,12 @@ describe('KPIs und Wochenbericht', () => {
     await applyReport(r.reportId, 'admin:test');
     const cfg = await getConfig({ fresh: true });
     expect(cfg.budget.segmentShares['dortmund:handwerk:maler']).toBeCloseTo(maler.share, 3);
-    const w = (await db.select().from(variants).where(eq(variants.id, vs[0]!.id)))[0]!.weight;
-    expect(w).toBeCloseTo(r.variants.find((x) => x.key === vs[0]!.id)!.share, 3);
+    // L5: Briefvarianten je Branche mit Kontrolle ≥ 15 % – Übernahme schreibt die Zuteilung
+    expect(r.markdown).toContain('Briefvarianten je Branche');
+    const alloc = await db.select().from(armAllocations).where(eq(armAllocations.industry, 'handwerk'));
+    expect(alloc.length).toBeGreaterThanOrEqual(2);
+    expect(alloc.reduce((a, x) => a + x.share, 0)).toBeCloseTo(1, 2);
+    expect(alloc.find((x) => x.isControl)!.share).toBeGreaterThanOrEqual(0.15);
 
     await updateConfig({ switches: { autoOptimize: true } }, 'test');
     expect((await runWeeklyOptimizer(new Date(), seededRandom(12))).applied).toBe(true);

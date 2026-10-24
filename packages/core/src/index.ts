@@ -94,3 +94,8 @@ export {
 export * from './services/truth-check';
 export * from './services/measurement';
 export * from './services/funnel';
+export * from './services/arms';
+export * from './services/safety-nets';
+export * from './stats/bayes';
+export * from './stats/model';
+export * from './stats/simulate';

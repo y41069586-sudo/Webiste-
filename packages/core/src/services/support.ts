@@ -24,6 +24,7 @@ import { audit } from './audit';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { llmStructured } from './llm';
 import { optOutLead } from './suppression';
+import { DECEPTION_RE } from './safety-nets';
 
 export type SupportMessage = typeof supportMessages.$inferSelect;
 
@@ -330,7 +331,9 @@ export async function processSupportMessage(id: string): Promise<{ status: strin
   }
   // Beschwerde als Ereignis am Lead (Funnel, Sicherheitsnetz B6.7)
   if (c.class === 'beschwerde' && msg.leadId) {
-    await db.insert(events).values({ leadId: msg.leadId, type: 'complaint', metaJson: { messageId: id } });
+    // Nur das Ergebnis der Erkennung speichern, nicht den Text (Sicherheitsnetz „Abzocke/Täuschung“)
+    const deception = DECEPTION_RE.test(`${msg.subject ?? ''} ${msg.body}`);
+    await db.insert(events).values({ leadId: msg.leadId, type: 'complaint', metaJson: { messageId: id, deception } });
   }
   const sw = effectiveSwitches(cfg);
   const escalate = c.class === 'beschwerde' || (c.class === 'opt_out' && isCustomer) || draft.needsHuman || !draft.reply;

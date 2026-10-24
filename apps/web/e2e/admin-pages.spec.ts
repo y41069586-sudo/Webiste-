@@ -13,6 +13,8 @@ test('alle Admin-Seiten laden ohne Fehler', async ({ page }) => {
     ['/admin/demos', 'Demos'],
     ['/admin/letters', 'Briefe'],
     ['/admin/claims', 'Claims'],
+    ['/admin/funnel', 'Funnel'],
+    ['/admin/optimizer', 'Optimizer'],
     ['/admin/orders', 'Bestellungen'],
     ['/admin/customers', 'Kunden & Seiten'],
     ['/admin/support', 'Support'],
@@ -30,6 +32,9 @@ test('alle Admin-Seiten laden ohne Fehler', async ({ page }) => {
   }
   await page.goto('/admin/kpis?von=2026-01-01&bis=2026-12-31&branche=maler');
   await expect(page.getByText('Nach Segment')).toBeVisible();
+  // Power-Rechner (B6.3)
+  await page.goto('/admin/optimizer?p1=2&p2=3&proWoche=20');
+  await expect(page.getByText(/Briefe pro Variante/)).toBeVisible();
   expect(errors).toEqual([]);
 });
 

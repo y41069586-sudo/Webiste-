@@ -272,12 +272,19 @@ export const appConfigSchema = z.object({
     realLettersUnlocked: z.boolean(),
     /** Domains nach Vorschau-Freigabe ohne weitere Admin-Freigabe registrieren */
     autoRegisterDomains: z.boolean(),
+    /** Versand pausiert (Sicherheitsnetz „unzustellbar“, B6.7) – Briefe bleiben freigegeben liegen */
+    sendingPaused: z.boolean().default(false),
   }),
   support: z.object({
     autoReplyClasses: z.array(z.enum(SUPPORT_CLASSES)),
   }),
   optimizer: z.object({
+    /** Exploration (B6.4: mindestens 20 %, kleinere Werte werden auf 20 % angehoben) */
     explorationShare: z.number().min(0).max(1),
+    /** Fester Anteil der Kontrollvariante je Branche (B6.3: mindestens 15 %) */
+    controlShare: z.number().min(0).max(0.5).default(0.15),
+    /** Kontrollvariante je Branche (Variant-ID); ohne Eintrag die neutrale Variante ohne Statistik */
+    controlVariants: z.record(z.string(), z.string()).default({}),
     minLettersForSignal: z.number().int().min(0),
     samples: z.number().int().min(100),
   }),
@@ -633,12 +640,15 @@ export const DEFAULT_CONFIG: AppConfig = {
     killSwitch: false,
     realLettersUnlocked: false,
     autoRegisterDomains: false,
+    sendingPaused: false,
   },
   support: {
     autoReplyClasses: [],
   },
   optimizer: {
     explorationShare: 0.2,
+    controlShare: 0.15,
+    controlVariants: {},
     minLettersForSignal: 10,
     samples: 4000,
   },

@@ -227,8 +227,14 @@ export const SECTIONS: SectionDef[] = [
         type: 'multi',
         options: SUPPORT_CLASSES,
       },
-      { path: 'optimizer.explorationShare', label: 'Exploration (Anteil 0–1)', type: 'number' },
-      { path: 'optimizer.minLettersForSignal', label: 'Mindestbriefe je Segment für Signal', type: 'number' },
+      { path: 'optimizer.explorationShare', label: 'Exploration (Anteil 0–1, mindestens 0,2)', type: 'number' },
+      { path: 'optimizer.controlShare', label: 'Kontrollgruppe je Branche (Anteil 0–0,5, mindestens 0,15)', type: 'number' },
+      {
+        path: 'optimizer.controlVariants',
+        label: 'Kontrollvariante je Branche (JSON: Branche → Varianten-ID; leer = neutrale Variante)',
+        type: 'json',
+      },
+      { path: 'optimizer.minLettersForSignal', label: 'Mindestbriefe je Arm, bevor Thompson Sampling verteilt', type: 'number' },
       { path: 'optimizer.samples', label: 'Thompson-Samples', type: 'number' },
     ],
   },
@@ -262,6 +268,11 @@ export const SWITCHES: { key: string; label: string; hint: string }[] = [
     key: 'autoRegisterDomains',
     label: 'Domains automatisch registrieren',
     hint: 'Aus: jede Domain-Registrierung einzeln unter „Kunden & Seiten“ freigeben',
+  },
+  {
+    key: 'sendingPaused',
+    label: 'Versand pausiert',
+    hint: 'Setzt das Sicherheitsnetz „unzustellbar“ (über 3 % Rückläufer); erst nach Prüfung der Lead-Qualität wieder ausschalten',
   },
 ];
 

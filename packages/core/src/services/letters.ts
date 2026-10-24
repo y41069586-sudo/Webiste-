@@ -1,12 +1,15 @@
-import { and, eq, inArray, isNull, or } from 'drizzle-orm';
+import { and, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm';
 import { usableClaims, type ClaimRow } from '../claims/library';
+import { getConfig } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
-import { leads, letters, variants } from '../db/schema';
+import { armAllocations, leads, letters, variants } from '../db/schema';
 import { claimRefs, type LetterSlots } from '../letters/slots';
 import type { LetterVariantContent } from '../letters/variants';
 import { getPlaybook } from '../playbooks';
 import { enqueue, QUEUES } from '../queue';
+import { nextByQuota } from '../stats/bayes';
 import type { Industry } from '../types';
+import { startOfIsoWeek } from '../util/time';
 import { audit } from './audit';
 import { transitionLead } from './lead-state';
 
@@ -69,19 +72,35 @@ export async function eligibleLetterVariants(
   return out;
 }
 
-/** Variante nach Gewicht zufällig wählen (Gewichte setzt der Optimizer). */
+/**
+ * Variante wählen. Mit gespeicherter Zuteilung der Branche (L5): Quote der laufenden Woche – der Arm mit
+ * dem größten Rückstand zu seinem Zielanteil bekommt den Brief. Sonst zufällig nach Gewicht.
+ */
 export async function chooseLetterVariant(db: DbOrTx, sequence: number, opts: ChooseVariantOptions = {}): Promise<ChosenVariant> {
   const rows = await eligibleLetterVariants(db, sequence, opts);
   if (!rows.length) throw new Error(`Keine aktive Briefvariante für Sequenz ${sequence}`);
   const random = opts.random ?? Math.random();
-  const total = rows.reduce((s, r) => s + Math.max(0, r.row.weight), 0) || rows.length;
   let pick = rows[rows.length - 1]!;
-  let acc = 0;
-  for (const r of rows) {
-    acc += (Math.max(0, r.row.weight) || (total === rows.length ? 1 : 0)) / total;
-    if (random < acc) {
-      pick = r;
-      break;
+  const targets =
+    opts.industry && sequence === 1
+      ? await allocationTargets(
+          db,
+          opts.industry,
+          rows.map((r) => r.row.id),
+        )
+      : null;
+  if (targets) {
+    const arm = nextByQuota(targets, await assignedThisWeek(db, opts.industry!, opts.now), random);
+    pick = rows.find((r) => r.row.id === arm) ?? pick;
+  } else {
+    const total = rows.reduce((s, r) => s + Math.max(0, r.row.weight), 0) || rows.length;
+    let acc = 0;
+    for (const r of rows) {
+      acc += (Math.max(0, r.row.weight) || (total === rows.length ? 1 : 0)) / total;
+      if (random < acc) {
+        pick = r;
+        break;
+      }
     }
   }
   return {
@@ -92,6 +111,41 @@ export async function chooseLetterVariant(db: DbOrTx, sequence: number, opts: Ch
     industry: pick.row.industry ?? null,
     claims: pick.claims,
   };
+}
+
+/**
+ * Zielanteile der nutzbaren Varianten einer Branche (null = keine Zuteilung gespeichert → Gewichte).
+ * Varianten ohne gespeicherten Anteil (z. B. neu aktiviert) bekommen den Explorationsanteil, bis der
+ * nächste Lauf rechnet.
+ */
+async function allocationTargets(
+  db: DbOrTx,
+  industry: Industry,
+  eligibleIds: string[],
+): Promise<{ arm: string; share: number }[] | null> {
+  const rows = await db.select().from(armAllocations).where(eq(armAllocations.industry, industry));
+  if (!rows.length) return null;
+  const cfg = await getConfig();
+  const explore = Math.max(0.2, cfg.optimizer.explorationShare) / Math.max(1, eligibleIds.length);
+  const targets = eligibleIds.map((id) => ({ arm: id, share: rows.find((r) => r.variantId === id)?.share ?? explore }));
+  return targets.some((t) => t.share > 0) ? targets : null;
+}
+
+/** Erstbriefe dieser Woche je Variante in der Branche (für die Quote der Charge). */
+async function assignedThisWeek(db: DbOrTx, industry: Industry, now = new Date()): Promise<Record<string, number>> {
+  const res = await db
+    .select({ variantId: letters.variantId, n: sql<number>`count(*)::int` })
+    .from(letters)
+    .where(
+      and(
+        eq(letters.sequence, 1),
+        eq(letters.isTest, false),
+        eq(letters.industry, industry),
+        gte(letters.createdAt, startOfIsoWeek(now)),
+      ),
+    )
+    .groupBy(letters.variantId);
+  return Object.fromEntries(res.filter((r) => r.variantId).map((r) => [r.variantId!, Number(r.n)]));
 }
 
 /** Brief freigeben (einzeln oder per Bulk). */

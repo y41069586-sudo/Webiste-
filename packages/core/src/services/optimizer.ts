@@ -3,11 +3,15 @@ import { appUrl, getEnv } from '../config/env';
 import { effectiveSwitches, getConfig, updateConfig } from '../config/service';
 import { getDb } from '../db/client';
 import { reports, variants } from '../db/schema';
+import { betaSample, seededRandom, VERDICT_LABEL } from '../stats/bayes';
+import type { IndustryEvaluation } from '../stats/model';
 import { renderEmail } from '../emails/templates';
 import { logger } from '../logger';
 import { addDays, formatDateDe, formatEuro, startOfIsoWeek } from '../util/time';
 import { audit } from './audit';
 import { sendTransactionalEmail } from './email';
+import { refreshFunnel } from './funnel';
+import { allocationsFrom, applyAllocations, evaluateIndustries, type IndustryAllocation } from './arms';
 import { kpiRows, kpiSummary } from './kpis';
 
 export interface ArmStats {
@@ -26,47 +30,7 @@ export interface ArmResult extends ArmStats {
   share: number;
 }
 
-/** Deterministischer Zufall (Mulberry32) – reproduzierbare Berichte und Tests. */
-export function seededRandom(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function normal(rng: () => number): number {
-  let u = 0;
-  while (u === 0) u = rng();
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng());
-}
-
-/** Gamma(k, 1) nach Marsaglia & Tsang. */
-function gamma(k: number, rng: () => number): number {
-  if (k < 1) return gamma(k + 1, rng) * Math.pow(rng() || 1e-12, 1 / k);
-  const d = k - 1 / 3;
-  const c = 1 / Math.sqrt(9 * d);
-  for (;;) {
-    let x: number;
-    let v: number;
-    do {
-      x = normal(rng);
-      v = 1 + c * x;
-    } while (v <= 0);
-    v = v * v * v;
-    const u = rng();
-    if (u < 1 - 0.0331 * x ** 4 || Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
-  }
-}
-
-export function betaSample(a: number, b: number, rng: () => number): number {
-  const x = gamma(a, rng);
-  const y = gamma(b, rng);
-  return x / (x + y);
-}
+export { betaSample, seededRandom } from '../stats/bayes';
 
 /**
  * Thompson Sampling auf der Kaufrate. Prior je Arm: geglättete Scan-Rate des Arms × globale
@@ -119,6 +83,22 @@ export function thompsonAllocation(
 const pct = (v: number | null | undefined, d = 1) =>
   v === null || v === undefined ? '–' : `${(v * 100).toFixed(d).replace('.', ',')} %`;
 
+const span = (i: { lo: number; hi: number }, d = 1) => `${pct(i.lo, d)} – ${pct(i.hi, d)}`;
+
+/** Tabelle einer Branche: Spannen statt Einzelwerte, Urteil nach der Entscheidungsregel (B6.3). */
+function industryTable(ind: IndustryEvaluation): string {
+  return [
+    `### ${ind.industry} – Steuerung über ${ind.signal === 'scan' ? 'Scan-Rate (noch < 5 Käufe je Arm)' : 'Umsatz pro Brief'}${ind.equalSplit ? ', noch Gleichverteilung' : ''}`,
+    '',
+    '| Variante | zugestellt | Scans | Scan-Rate (Spanne) | ausgewertet | Käufe | Kaufrate (Spanne) | P(besser als Kontrolle) | Urteil | Anteil neu |',
+    '|---|---:|---:|---|---:|---:|---|---:|---|---:|',
+    ...ind.arms.map(
+      (a) =>
+        `| ${a.label ?? a.arm}${a.eligible ? '' : ' (pausiert)'} | ${a.delivered} | ${a.scans} | ${span(a.scan)} | ${a.evaluated} | ${a.purchases} | ${span(a.purchase, 2)} | ${pct(a.pBetterThanControl, 0)} | ${VERDICT_LABEL[a.verdict]} | ${pct(a.share, 0)} |`,
+    ),
+  ].join('\n');
+}
+
 /** Segmente: alle mit Briefen in der Lernphase plus alle mit freien Leads im Pool. */
 async function segmentArms(from: Date, to: Date): Promise<ArmStats[]> {
   const db = getDb();
@@ -133,30 +113,19 @@ async function segmentArms(from: Date, to: Date): Promise<ArmStats[]> {
   });
 }
 
-async function variantArms(from: Date, to: Date): Promise<ArmStats[]> {
-  const db = getDb();
-  const rows = await kpiRows({ from, to }, 'variant', db);
-  const active = await db
-    .select()
-    .from(variants)
-    .where(sql`${variants.kind} = 'letter' AND ${variants.active} = true AND ${variants.sequence} = 1`);
-  return active.map((v) => {
-    const r = rows.find((x) => x.key === v.id);
-    return { key: v.id, label: v.name, n: r?.leads ?? 0, scans: r?.scans ?? 0, purchases: r?.purchases ?? 0 };
-  });
-}
-
 export interface OptimizerResult {
   reportId: string;
   applied: boolean;
   segments: ArmResult[];
-  variants: ArmResult[];
+  /** Briefvarianten je Branche (L5: Partial Pooling, Kontrolle, Exploration) */
+  industries: IndustryEvaluation[];
   markdown: string;
 }
 
 /**
- * Wochenlauf (sonntags): Kennzahlen der Woche, Thompson Sampling für Segment-Budgetanteile und
- * Briefvarianten, Bericht speichern und mailen. Übernahme nur mit AUTO_OPTIMIZE, sonst Vorschlag.
+ * Wochenlauf (sonntags): Kennzahlen der Woche, Thompson Sampling für Segment-Budgetanteile und (L5) für
+ * die Briefvarianten je Branche mit Spannen, Kontrollgruppe und Exploration. Bericht speichern und mailen.
+ * Übernahme nur mit AUTO_OPTIMIZE, sonst Vorschlag.
  */
 export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): Promise<OptimizerResult> {
   const cfg = await getConfig({ fresh: true });
@@ -168,7 +137,9 @@ export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): 
   const random = rng ?? seededRandom(seed);
   const opts = { exploration: cfg.optimizer.explorationShare, samples: cfg.optimizer.samples, rng: random };
   const seg = thompsonAllocation(await segmentArms(learnFrom, learnTo), opts);
-  const vars = thompsonAllocation(await variantArms(learnFrom, learnTo), opts);
+  await refreshFunnel();
+  const industries = await evaluateIndustries({ now, rng: random });
+  const industryAllocations = allocationsFrom(industries);
   const week = await kpiSummary({ from: weekStart, to: now });
   const total = await kpiSummary({ from: learnFrom, to: now });
   const minN = cfg.optimizer.minLettersForSignal;
@@ -184,11 +155,6 @@ export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): 
     ].join('\n');
   const curShares = cfg.budget.segmentShares;
   const curShareSum = Object.values(curShares).reduce((a, b) => a + b, 0);
-  const activeVariants = await getDb()
-    .select()
-    .from(variants)
-    .where(sql`${variants.kind} = 'letter' AND ${variants.active} = true AND ${variants.sequence} = 1`);
-  const wSum = activeVariants.reduce((a, v) => a + v.weight, 0) || 1;
   const sw = effectiveSwitches(cfg);
 
   const markdown = [
@@ -206,8 +172,8 @@ export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): 
     `## Budgetanteile je Segment (Thompson Sampling, Exploration ${pct(Math.max(0.2, cfg.optimizer.explorationShare), 0)})`,
     seg.length ? table(seg, (k) => (curShareSum ? (curShares[k] ?? 0) / curShareSum : undefined)) : 'Noch keine Segmente.',
     '',
-    '## Briefvarianten',
-    vars.length ? table(vars, (k) => (activeVariants.find((v) => v.id === k)?.weight ?? 0) / wSum) : 'Keine aktiven Varianten.',
+    '## Briefvarianten je Branche (Spannen mit 90 % Wahrscheinlichkeit)',
+    industries.length ? industries.map(industryTable).join('\n\n') : 'Keine aktiven Varianten.',
     '',
     sw.autoOptimize
       ? '**AUTO_OPTIMIZE ist an – die neuen Anteile wurden übernommen.**'
@@ -218,8 +184,8 @@ export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): 
 
   const allocation = {
     segmentShares: Object.fromEntries(seg.map((r) => [r.key, Number(r.share.toFixed(4))])),
-    variantWeights: Object.fromEntries(vars.map((r) => [r.key, Number(r.share.toFixed(4))])),
-    arms: { segments: seg, variants: vars },
+    industryAllocations,
+    arms: { segments: seg },
   };
   const db = getDb();
   const [row] = await db
@@ -262,7 +228,7 @@ export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): 
   } catch (err) {
     logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'Wochenbericht nicht gemailt');
   }
-  return { reportId: row!.id, applied, segments: seg, variants: vars, markdown };
+  return { reportId: row!.id, applied, segments: seg, industries, markdown };
 }
 
 /** Vorschlag eines Berichts übernehmen: Segment-Anteile in die Config, Gewichte an die Varianten. */
@@ -270,9 +236,15 @@ export async function applyReport(reportId: string, actor: string): Promise<void
   const db = getDb();
   const r = await db.query.reports.findFirst({ where: eq(reports.id, reportId) });
   if (!r) throw new Error('Bericht nicht gefunden');
-  const a = r.allocationJson as { segmentShares?: Record<string, number>; variantWeights?: Record<string, number> };
+  const a = r.allocationJson as {
+    segmentShares?: Record<string, number>;
+    variantWeights?: Record<string, number>;
+    industryAllocations?: IndustryAllocation[];
+  };
   if (a.segmentShares && Object.keys(a.segmentShares).length)
     await updateConfig({ budget: { segmentShares: a.segmentShares } }, actor);
+  if (a.industryAllocations?.length) await applyAllocations(a.industryAllocations, actor, reportId, db);
+  // Berichte vor L5: globale Gewichte
   for (const [id, w] of Object.entries(a.variantWeights ?? {})) {
     await db
       .update(variants)

@@ -7,6 +7,7 @@ const NAV: { href: string; label: string }[] = [
   { href: '/admin', label: 'Übersicht' },
   { href: '/admin/kpis', label: 'Kennzahlen' },
   { href: '/admin/funnel', label: 'Funnel' },
+  { href: '/admin/optimizer', label: 'Optimizer' },
   { href: '/admin/leads', label: 'Leads' },
   { href: '/admin/demos', label: 'Demos (Review)' },
   { href: '/admin/letters', label: 'Briefe (Review)' },

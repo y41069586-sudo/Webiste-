@@ -68,6 +68,10 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
   const letter = await db.query.letters.findFirst({ where: eq(letters.id, letterId) });
   if (!letter) return { state: 'skipped', reason: 'nicht gefunden' };
   if (letter.status !== 'approved') return { state: 'skipped', reason: `Status ${letter.status}` };
+  // Sicherheitsnetz „unzustellbar“ (B6.7): Versand an Leads pausiert, Testbriefe an den Betreiber bleiben möglich
+  if (sw.sendingPaused && !letter.isTest) {
+    throw new SendBlockedError('Versand pausiert (Sicherheitsnetz) – Lead-Qualität prüfen und unter Einstellungen freigeben.');
+  }
   const lead = await db.query.leads.findFirst({ where: eq(leads.id, letter.leadId) });
   if (!lead || lead.anonymizedAt || lead.status === 'suppressed') {
     await db.update(letters).set({ status: 'cancelled', statusReason: 'Lead gesperrt/gelöscht' }).where(eq(letters.id, letterId));

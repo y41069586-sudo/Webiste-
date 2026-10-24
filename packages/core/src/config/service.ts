@@ -88,6 +88,7 @@ export interface EffectiveSwitches {
   killSwitch: boolean;
   realLettersUnlocked: boolean;
   autoRegisterDomains: boolean;
+  sendingPaused: boolean;
 }
 
 /**

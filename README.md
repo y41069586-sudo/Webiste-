@@ -151,9 +151,10 @@ Wichtige Schalter:
 
 ## Täglicher Betrieb
 
-**Takte (Worker, Zeitzone Europe/Berlin):** Pipeline alle 5 Min., Briefstatus alle 2 Std., Follow-ups
+**Takte (Worker, Zeitzone Europe/Berlin):** Pipeline alle 5 Min., Briefstatus alle 30 Min., Follow-ups
 9:05, Erinnerungen (Onboarding, Hosting-Ende) 8:10, Lösch-Job 3:15, Wochenbericht So 18:00,
-Watchdog + Fehler-Mail alle 15 Min., IMAP-Abruf alle 5 Min., Claims-Abgleich und Ablaufprüfung 6:25.
+Watchdog + Fehler-Mail alle 15 Min., IMAP-Abruf alle 5 Min., Claims-Abgleich und Ablaufprüfung 6:25,
+Funnel-Sicht und Sicherheitsnetze :10 und :40.
 
 **Deine Aufgaben im Dashboard:**
 
@@ -163,16 +164,25 @@ Watchdog + Fehler-Mail alle 15 Min., IMAP-Abruf alle 5 Min., Claims-Abgleich und
 4. **Support** – Entwürfe prüfen, anpassen, senden. Widersprüche werden automatisch umgesetzt.
 5. **Kunden & Seiten** – Domainkäufe freigeben, Änderungswünsche außerhalb der Runden bearbeiten.
 6. **Bestellungen** – Zahlungen, Rechnungen, Erstattungen (mit Bestätigung).
-7. **Wochenberichte** (sonntags) – Vorschlag für Budgetanteile übernehmen oder nicht.
+7. **Wochenberichte** (sonntags) – Vorschlag für Budgetanteile und Varianten-Zuteilung je Branche übernehmen oder nicht.
 8. **Claims & Playbooks** – Statistiken für Briefe nach eigener Prüfung freigeben; abgelaufene Quellen ersetzen.
+9. **Optimizer** – Spannen je Branche und Variante, Urteil („Gewinner“ erst ab 90 % und 100 Briefen je Arm),
+   Power-Rechner, Kostenbremse, ausgelöste Sicherheitsnetze; pausierte Varianten nach Prüfung wieder aktivieren.
 
 **Erste echte Charge:** [docs/go-live-checkliste.md](docs/go-live-checkliste.md) vollständig abhaken,
 dann Testbrief an dich → Schalter „Echte Briefe freigegeben“ → `DRY_RUN=false` (in `.env` **und** im
-Dashboard) → 40 Briefe (20 Beauty, 20 Handwerk) freigeben und senden.
+Dashboard) → 40 Briefe (je ca. 13 Gastronomie, Handwerk, Beauty; je Branche 50/50 Startvariante gegen die neutrale
+Kontrolle) freigeben und senden.
 
 ---
 
 ## Betriebshandbuch: Was tun, wenn …
+
+**… ein Sicherheitsnetz ausgelöst hat (Mail „Sicherheitsnetz: …“)?** Opt-out- oder Beschwerde-Bremse: Variante ist
+pausiert – Brieftext und Beschwerde lesen, ggf. Variante verwerfen; sonst im Optimizer „wieder aktivieren“.
+Unzustellbar-Bremse: Versand pausiert – Rückläufer im Lead-Detail ansehen (Anschriftenquelle?), dann unter
+Einstellungen „Versand pausiert“ ausschalten. Kostenbremse: Wochenbudget wurde halbiert – Funnel und Optimizer prüfen,
+Budget nur bewusst wieder erhöhen.
 
 **… etwas grundsätzlich schiefläuft (falsche Briefe, Kostenexplosion)?**
 Dashboard → Einstellungen → **Not-Aus**. Alle Jobs mit Kostenfolge stoppen sofort (Lead-Suche mit

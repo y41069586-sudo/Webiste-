@@ -64,6 +64,13 @@
       "when": 1792823397218,
       "tag": "0008_funnel_views",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792825086995,
+      "tag": "0009_optimizer_safety",
+      "breakpoints": true
     }
   ]
 }

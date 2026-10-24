@@ -792,4 +792,39 @@ export const playbooks = pgTable('playbooks', {
   updatedAt: updatedAt(),
 });
 
+// ---------------------------------------------------------------------------
+// L5: Optimizer und Sicherheitsnetze
+// ---------------------------------------------------------------------------
+
+/** Zielanteile der Briefvarianten je Branche (Thompson Sampling mit Kontrolle und Exploration, B6.4). */
+export const armAllocations = pgTable(
+  'arm_allocations',
+  {
+    industry: text('industry').$type<Industry>().notNull(),
+    variantId: uuid('variant_id')
+      .notNull()
+      .references(() => variants.id, { onDelete: 'cascade' }),
+    share: doublePrecision('share').notNull(),
+    isControl: boolean('is_control').default(false).notNull(),
+    /** Bericht, aus dem die Zuteilung stammt (null = manuell im Dashboard) */
+    reportId: uuid('report_id'),
+    updatedAt: updatedAt(),
+  },
+  (t) => [primaryKey({ columns: [t.industry, t.variantId] })],
+);
+
+/** Ausgelöste Sicherheitsnetze (B6.7) – je Auslöser genau einmal (Schlüssel eindeutig). */
+export const safetyActions = pgTable(
+  'safety_actions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    kind: text('kind').$type<'opt_out' | 'complaint' | 'undeliverable' | 'cost'>().notNull(),
+    key: text('key').notNull(),
+    action: text('action').notNull(),
+    context: jsonb('context').$type<Record<string, unknown>>().default({}).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('safety_actions_key_uidx').on(t.key), index('safety_actions_kind_idx').on(t.kind, t.createdAt)],
+);
+
 export const sqlNow = sql`now()`;
