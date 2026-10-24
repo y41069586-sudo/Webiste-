@@ -93,6 +93,16 @@ export const handwerkSolid: TemplateDef = {
     </div>
   </section>
 
+  ${p.industrySections({
+    sectionClass: 'bg-surface-alt py-16',
+    cardClass: 'rounded-2xl bg-surface p-6 shadow-sm ring-1 ring-line',
+    titleClass: 'font-heading text-3xl font-bold',
+    buttonClass:
+      'inline-flex min-h-12 items-center rounded-lg bg-primary px-6 py-3 font-semibold text-on-primary disabled:opacity-60',
+    inputClass:
+      'block w-full rounded-lg border border-line bg-surface px-3 py-2.5 focus:border-primary focus:outline-2 focus:outline-primary',
+    altSectionClass: 'py-16',
+  })}
   ${p.gallery()}
   ${p.contactSection({
     sectionClass: 'bg-surface-alt py-16',

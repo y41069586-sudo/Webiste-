@@ -76,6 +76,15 @@ export const beautySoft: TemplateDef = {
     </div>
   </section>
 
+  ${p.industrySections({
+    sectionClass: 'py-12',
+    cardClass: 'rounded-3xl bg-surface-alt p-6',
+    titleClass: 'font-heading text-3xl font-semibold',
+    buttonClass:
+      'inline-flex min-h-12 items-center rounded-full bg-primary px-6 py-3 font-semibold text-on-primary disabled:opacity-60',
+    inputClass: 'block w-full rounded-2xl border border-line bg-surface px-4 py-2.5 focus:outline-2 focus:outline-primary',
+    altSectionClass: 'bg-surface-alt py-16',
+  })}
   ${p.gallery()}
   ${p.contactSection({
     sectionClass: 'py-12',

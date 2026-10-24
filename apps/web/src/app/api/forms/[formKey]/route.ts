@@ -4,6 +4,19 @@ import { requestMetaFrom } from '@/lib/request';
 
 export const dynamic = 'force-dynamic';
 
+/** Branchenformulare (Termin-, Reservierungs-, Probestunden-Anfrage): Anliegen und Wunsch vor die Nachricht */
+function withRequestFields(form: FormData): string {
+  const message = String(form.get('message') ?? '');
+  const subject = String(form.get('anliegen') ?? '')
+    .trim()
+    .slice(0, 60);
+  const wish = String(form.get('wunsch') ?? '')
+    .trim()
+    .slice(0, 300);
+  const head = [subject ? `Anliegen: ${subject}` : '', wish ? `Wunsch: ${wish}` : ''].filter(Boolean).join('\n');
+  return head ? `${head}\n\n${message}` : message;
+}
+
 /**
  * Kontaktformular der Kundenseiten (statische Seiten posten hierher). Wir leiten die Nachricht
  * per E-Mail an den Kunden weiter und speichern den Inhalt nicht. Spam: Honeypot, Link-Grenze, Ratenlimit.
@@ -23,7 +36,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ formKey
         name: String(form.get('name') ?? ''),
         email: String(form.get('email') ?? ''),
         phone: String(form.get('phone') ?? ''),
-        message: String(form.get('message') ?? ''),
+        message: withRequestFields(form),
         consent: form.get('consent') === 'on',
         honeypot: String(form.get('website') ?? ''),
       },

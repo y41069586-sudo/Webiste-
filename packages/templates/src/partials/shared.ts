@@ -2,7 +2,7 @@ import { readSiteCss } from '../css';
 import { esc, mapsLink, paragraphs } from '../html';
 import { icon } from '../icons';
 import { getPalette, paletteCssVars } from '../palettes';
-import type { RenderInput } from '../types';
+import type { IndustryKey, RenderInput } from '../types';
 
 export interface SharedParts {
   /** Vollständiges <head>-Element */
@@ -36,7 +36,63 @@ export interface SharedParts {
   brand(): string;
   /** Bildergalerie mit Kundenfotos (leer, wenn keine Fotos) */
   gallery(opts?: { sectionClass?: string; titleClass?: string }): string;
+  /** Playbook-Branche des Betriebs */
+  industry: IndustryKey;
+  /**
+   * Branchen-Abschnitte (B3): Speisekarte, Einzugsgebiet, „Wir stellen ein“, Kursplan und Vorschau der
+   * Anfrageformulare. Nur im Entwurf (Demo/Screenshot) – Platzhalter gehen nie live.
+   */
+  industrySections(opts: IndustrySectionClasses): string;
 }
+
+export interface IndustrySectionClasses {
+  sectionClass: string;
+  altSectionClass: string;
+  titleClass: string;
+  cardClass: string;
+  inputClass: string;
+  buttonClass: string;
+}
+
+/** Anfrageformular je Branche (Live: Zusatzfeld „wunsch“ geht als eigene Zeile in die Mail an den Kunden) */
+export const REQUEST_FORMS: Record<IndustryKey, { title: string; wish: string | null; button: string; intro: string }> = {
+  gastronomie: {
+    title: 'Reservierungsanfrage',
+    wish: 'Datum, Uhrzeit und Personenzahl',
+    button: 'Reservierung anfragen',
+    intro: 'Fragen Sie Ihren Tisch an – wir bestätigen die Reservierung so bald wie möglich.',
+  },
+  beauty: {
+    title: 'Terminanfrage',
+    wish: 'Wunschtermin und Leistung',
+    button: 'Termin anfragen',
+    intro: 'Fragen Sie Ihren Wunschtermin an – auch außerhalb der Öffnungszeiten. Wir melden uns mit einer Bestätigung.',
+  },
+  einzelhandel: {
+    title: 'Vorab reservieren',
+    wish: 'Welchen Artikel möchten Sie reservieren?',
+    button: 'Reservierung anfragen',
+    intro: 'Fragen Sie an, ob ein Artikel vorrätig ist, und lassen Sie ihn für sich zurücklegen.',
+  },
+  kurse_training: {
+    title: 'Probestunde anfragen',
+    wish: 'Kurs und Wunschtermin',
+    button: 'Probestunde anfragen',
+    intro: 'Fragen Sie eine Probestunde an – ganz ohne Anruf. Wir melden uns mit einem Termin.',
+  },
+  handwerk: {
+    title: 'Anfrage',
+    wish: 'Worum geht es? (Leistung, Ort, Zeitraum)',
+    button: 'Anfrage senden',
+    intro: 'Beschreiben Sie kurz Ihr Vorhaben – wir melden uns mit einem Rückruf oder einem Termin vor Ort.',
+  },
+  dienstleistung: {
+    title: 'Kontakt',
+    wish: null,
+    button: 'Nachricht senden',
+    intro: 'Schreiben Sie uns – wir melden uns schnellstmöglich bei Ihnen.',
+  },
+};
 
 function faviconDataUri(letter: string, color: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="${color}"/><text x="16" y="22" font-family="Arial,sans-serif" font-size="18" font-weight="700" text-anchor="middle" fill="#fff">${letter}</text></svg>`;
@@ -83,6 +139,8 @@ function offerSection(demo: NonNullable<RenderInput['demo']>): string {
 
 export function buildParts(input: RenderInput): SharedParts {
   const { mode, content, facts, demo, live } = input;
+  const industry: IndustryKey = facts.industry ?? facts.group;
+  const request = REQUEST_FORMS[industry];
   const palette = getPalette(input.palette);
   const isDemo = mode === 'demo';
   const isLive = mode === 'live';
@@ -153,10 +211,13 @@ ${jsonLd}
   const mapsHref = mapsLink(facts.street, facts.houseNumber, facts.postalCode, facts.city);
   const addressLines = `${esc(facts.street)} ${esc(facts.houseNumber)}<br>${esc(facts.postalCode)} ${esc(facts.city)}`;
 
+  const priceHint = industry === 'beauty' ? ' Preise auf Anfrage.' : '';
   const servicesNote = (cls = 'text-sm text-muted') =>
     isDemo
-      ? `<p class="${cls}"><span aria-hidden="true">✎ </span>Beispiel-Leistungen – passen wir gemeinsam für Sie an.</p>`
-      : '';
+      ? `<p class="${cls}"><span aria-hidden="true">✎ </span>Beispiel-Leistungen – passen wir gemeinsam für Sie an.${priceHint}</p>`
+      : priceHint
+        ? `<p class="${cls}">${priceHint.trim()}</p>`
+        : '';
 
   const hoursList = (opts: { rowClass?: string; labelClass?: string; mutedClass?: string } = {}) => {
     const muted = opts.mutedClass ?? 'text-muted';
@@ -200,6 +261,8 @@ ${jsonLd}
     } else if (isLive && live) {
       action = live.formAction;
       privacyHref = live.privacyPath;
+      title = request.title;
+      intro = request.intro;
     } else {
       disabled = true;
       if (mode === 'preview') intro = 'Das Formular wird mit der Veröffentlichung aktiviert.';
@@ -231,6 +294,15 @@ ${jsonLd}
           <label for="f-phone" class="mb-1 block text-sm font-medium">Telefon <span class="font-normal text-muted">(optional)</span></label>
           <input id="f-phone" name="phone" type="tel" autocomplete="tel" maxlength="40" class="${o.inputClass}"${dis}>
         </div>
+        ${
+          !isDemo && request.wish
+            ? `<div class="sm:col-span-2">
+          <label for="f-wish" class="mb-1 block text-sm font-medium">${esc(request.wish)}</label>
+          <input id="f-wish" name="wunsch" type="text" maxlength="300" class="${o.inputClass}"${dis}>
+          <input type="hidden" name="anliegen" value="${esc(request.title)}">
+        </div>`
+            : ''
+        }
         <div class="sm:col-span-2">
           <label for="f-msg" class="mb-1 block text-sm font-medium">Nachricht</label>
           <textarea id="f-msg" name="message" rows="5" required maxlength="4000" class="${o.inputClass}"${dis}></textarea>
@@ -245,7 +317,7 @@ ${jsonLd}
           <label for="f-consent">Ich bin einverstanden, dass meine Angaben zur Beantwortung meiner Anfrage verarbeitet werden. Hinweise in der <a class="underline" href="${esc(privacyHref)}">Datenschutzerklärung</a>.</label>
         </div>
       </div>
-      <button type="submit" class="${o.buttonClass} mt-5"${dis}>Nachricht senden</button>
+      <button type="submit" class="${o.buttonClass} mt-5"${dis}>${isDemo ? 'Nachricht senden' : esc(request.button)}</button>
     </form>
   </div>
 </section>`;
@@ -275,9 +347,102 @@ ${jsonLd}
 </footer>`;
   };
 
+  const draft = mode === 'demo' || mode === 'screenshot';
+  const example = (text: string) => `<p class="mt-2 text-sm text-muted"><span aria-hidden="true">✎ </span>${text}</p>`;
+
+  /** Vorschau eines Anfrageformulars (im Entwurf nicht aktiv – Fragen gehen dort an den Ersteller) */
+  const requestPreview = (o: IndustrySectionClasses) => {
+    if (!request.wish) return '';
+    const field = (id: string, label: string, type = 'text') =>
+      `<div><label for="v-${id}" class="mb-1 block text-sm font-medium">${esc(label)}</label><input id="v-${id}" type="${type}" class="${o.inputClass}" disabled></div>`;
+    return `<section id="anfrage" aria-labelledby="anfrage-titel" class="${o.altSectionClass}">
+  <div class="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-5">
+    <div class="md:col-span-2">
+      <h2 id="anfrage-titel" class="${o.titleClass}">${esc(request.title)}</h2>
+      <p class="mt-3 text-muted">${esc(request.intro)}</p>
+      ${example('Vorschau: Im Entwurf ist dieses Formular noch nicht aktiv. Nach dem Start kommen Anfragen direkt per E-Mail zu Ihnen.')}
+    </div>
+    <div class="${o.cardClass} md:col-span-3" role="group" aria-label="${esc(request.title)} (Vorschau, nicht aktiv)">
+      <fieldset disabled class="grid gap-4 sm:grid-cols-2">
+        <legend class="sr-only">${esc(request.title)} (Vorschau, nicht aktiv)</legend>
+        ${field('name', 'Name')}
+        ${field('email', 'E-Mail', 'email')}
+        <div class="sm:col-span-2">${field('wish', request.wish)}</div>
+        <div class="sm:col-span-2"><label for="v-msg" class="mb-1 block text-sm font-medium">Nachricht</label><textarea id="v-msg" rows="3" class="${o.inputClass}"></textarea></div>
+        <div class="sm:col-span-2"><button type="button" class="${o.buttonClass}">${esc(request.button)}</button></div>
+      </fieldset>
+    </div>
+  </div>
+</section>`;
+  };
+
+  const industrySections = (o: IndustrySectionClasses): string => {
+    if (!draft) return '';
+    const out: string[] = [];
+    if (industry === 'gastronomie') {
+      out.push(`<section id="speisekarte" aria-labelledby="speisekarte-titel" class="${o.sectionClass}">
+  <div class="mx-auto max-w-6xl px-4">
+    <h2 id="speisekarte-titel" class="${o.titleClass}">Speisekarte</h2>
+    ${example('Beispiel-Speisekarte: Ihre echten Gerichte und Preise trage ich für Sie ein.')}
+    <ul class="mt-8 grid gap-6 md:grid-cols-2">${content.services
+      .map(
+        (s) => `<li class="${o.cardClass}">
+      <h3 class="text-lg font-semibold">${esc(s.title)}</h3>
+      <p class="mt-1 text-muted">${esc(s.text)}</p>
+      <ul class="mt-4 space-y-2 text-muted" aria-label="Platzhalter für Gerichte">${['Ihr Gericht', 'Ihr Gericht', 'Ihr Gericht']
+        .map(
+          (g) =>
+            `<li class="flex items-end justify-between gap-3"><span>${g}</span><span aria-hidden="true" class="mb-1 flex-1 border-b border-dashed border-line"></span><span>–,– €</span></li>`,
+        )
+        .join('')}</ul>
+    </li>`,
+      )
+      .join('')}</ul>
+  </div>
+</section>`);
+    }
+    if (industry === 'handwerk') {
+      out.push(`<section id="einzugsgebiet" aria-labelledby="gebiet-titel" class="${o.sectionClass}">
+  <div class="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-2">
+    <div>
+      <h2 id="gebiet-titel" class="${o.titleClass}">Einzugsgebiet</h2>
+      <p class="mt-3 text-lg">${esc(facts.city)} und Umgebung</p>
+      ${example('Beispiel – Ihr tatsächliches Einzugsgebiet tragen wir gemeinsam ein.')}
+    </div>
+    <div class="${o.cardClass}">
+      <h2 id="jobs-titel" class="${o.titleClass}">Wir stellen ein</h2>
+      <p class="mt-3">Hier stellen Sie offene Stellen und Ausbildungsplätze vor, zum Beispiel für Gesellinnen und Gesellen oder Auszubildende (m/w/d). Bewerbungen kommen direkt per Formular zu Ihnen.</p>
+      ${example('Optionaler Bereich – nur wenn Sie möchten.')}
+    </div>
+  </div>
+</section>`);
+    }
+    if (industry === 'kurse_training') {
+      out.push(`<section id="kursplan" aria-labelledby="kursplan-titel" class="${o.sectionClass}">
+  <div class="mx-auto max-w-6xl px-4">
+    <h2 id="kursplan-titel" class="${o.titleClass}">Kursplan</h2>
+    ${example('Platzhalter: Ihre Kurszeiten tragen wir gemeinsam ein.')}
+    <div class="mt-6"><table class="w-full text-left">
+      <thead><tr class="border-b border-line text-sm text-muted"><th scope="col" class="py-2 pr-4 font-medium">Kurs</th><th scope="col" class="py-2 pr-4 font-medium">Tag</th><th scope="col" class="py-2 font-medium">Uhrzeit</th></tr></thead>
+      <tbody>${content.services
+        .map(
+          (s) =>
+            `<tr class="border-b border-line"><th scope="row" class="py-3 pr-4 font-semibold">${esc(s.title)}</th><td class="py-3 pr-4 text-muted">nach Ihrem Plan</td><td class="py-3 text-muted">folgt</td></tr>`,
+        )
+        .join('')}</tbody>
+    </table></div>
+  </div>
+</section>`);
+    }
+    out.push(requestPreview(o));
+    return out.join('\n');
+  };
+
   return {
     head,
     top: `${skip}${banner}`,
+    industry,
+    industrySections,
     isDemo,
     isLive,
     servicesNote,

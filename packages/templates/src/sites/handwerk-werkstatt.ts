@@ -66,6 +66,15 @@ export const handwerkWerkstatt: TemplateDef = {
     </div>
   </section>
 
+  ${p.industrySections({
+    sectionClass: 'py-16',
+    cardClass: 'border-t-4 border-primary bg-surface-alt p-6',
+    titleClass: 'font-heading text-3xl font-black uppercase tracking-wide',
+    buttonClass:
+      'inline-flex min-h-12 items-center bg-primary px-6 py-3 font-bold uppercase tracking-wide text-on-primary disabled:opacity-60',
+    inputClass: 'block w-full border border-line bg-surface px-3 py-2.5 focus:outline-2 focus:outline-primary',
+    altSectionClass: 'bg-surface-alt py-16',
+  })}
   ${p.gallery()}
   ${p.contactSection({
     sectionClass: 'py-16',

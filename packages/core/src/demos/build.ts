@@ -57,6 +57,7 @@ export function leadToFacts(lead: Lead, cfg: AppConfig): BusinessFacts {
       ? `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(lead.googlePlaceId)}`
       : null,
     group: lead.branchGroup,
+    industry: lead.industry ?? lead.branchGroup,
     street: lead.street ?? '',
     houseNumber: lead.houseNumber ?? '',
     postalCode: lead.postalCode ?? '',

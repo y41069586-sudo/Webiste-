@@ -2,6 +2,9 @@
 
 export type BranchGroup = 'handwerk' | 'beauty';
 
+/** Playbook-Branche (Update 2, B3) – steuert branchenspezifische Abschnitte und Formulare */
+export type IndustryKey = 'gastronomie' | 'handwerk' | 'beauty' | 'einzelhandel' | 'kurse_training' | 'dienstleistung';
+
 export type IconKey =
   | 'brush'
   | 'roller'
@@ -67,6 +70,8 @@ export interface BusinessFacts {
   name: string;
   branchLabel: string;
   group: BranchGroup;
+  /** Playbook-Branche; ohne Angabe die Gruppe */
+  industry?: IndustryKey;
   street: string;
   houseNumber: string;
   postalCode: string;

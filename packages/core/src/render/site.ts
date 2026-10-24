@@ -191,6 +191,7 @@ function factsFor(ctx: Ctx, assets: PreparedAssets, mode: 'preview' | 'live'): B
     name: b.name,
     branchLabel: branch?.label ?? ctx.lead?.branch ?? '',
     group: ctx.lead?.branchGroup ?? (ctx.site.templateId.startsWith('beauty') ? 'beauty' : 'handwerk'),
+    industry: ctx.lead?.industry ?? ctx.lead?.branchGroup ?? undefined,
     street: b.street,
     houseNumber: b.houseNumber,
     postalCode: b.postalCode,

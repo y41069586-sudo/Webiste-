@@ -77,3 +77,68 @@ describe('Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Date
     }
   }
 });
+
+describe('Branchen-Abschnitte (B3): axe, HTML, Layout; Live ohne Platzhalter', () => {
+  afterAll(closeBrowser);
+  const industries = ['gastronomie', 'handwerk', 'beauty', 'einzelhandel', 'kurse_training', 'dienstleistung'] as const;
+  const render = (industry: (typeof industries)[number], mode: 'demo' | 'live') => {
+    const t = TEMPLATES[0]!;
+    return renderSite({
+      templateId: t.id,
+      palette: t.palettes[0]!,
+      mode,
+      content: libraryContent('elektriker', t.group, { name: fullFacts.name, stadt: 'Dortmund', branche: 'Betrieb' }, 1),
+      facts: { ...fullFacts, group: t.group, industry },
+      demo:
+        mode === 'demo'
+          ? {
+              slug: 'abcdefghijklmnopqrstuvwx',
+              priceLabel: '590 €',
+              checkoutUrl: '/x',
+              questionUrl: '/y',
+              optOutUrl: '/z',
+              expiresLabel: 'am 21.11.2026',
+              sender,
+            }
+          : undefined,
+      live:
+        mode === 'live'
+          ? { formAction: '/api/forms/x', imprintPath: 'impressum.html', privacyPath: 'datenschutz.html' }
+          : undefined,
+    });
+  };
+  for (const industry of industries) {
+    it(`${industry}: Abschnitte im Entwurf sind barrierefrei`, async () => {
+      const html = render(industry, 'demo');
+      const checks = [await validateHtml(html), ...(await browserChecks({ html }))];
+      const failed = checks.filter((c) => !c.passed);
+      expect(failed, JSON.stringify(failed, null, 1)).toEqual([]);
+    }, 60_000);
+  }
+
+  it('Demo zeigt den Aufhänger des Briefs, Live zeigt keine Platzhalter', () => {
+    const g = render('gastronomie', 'demo');
+    expect(g).toContain('id="speisekarte"');
+    expect(g).toContain('Reservierungsanfrage');
+    expect(g).toContain('Beispiel-Speisekarte');
+    const h = render('handwerk', 'demo');
+    expect(h).toContain('id="einzugsgebiet"');
+    expect(h).toContain('Wir stellen ein');
+    expect(render('beauty', 'demo')).toContain('Terminanfrage');
+    expect(render('beauty', 'demo')).toContain('Preise auf Anfrage');
+    expect(render('einzelhandel', 'demo')).toContain('Vorab reservieren');
+    const k = render('kurse_training', 'demo');
+    expect(k).toContain('id="kursplan"');
+    expect(k).toContain('Probestunde anfragen');
+    expect(render('dienstleistung', 'demo')).not.toContain('id="anfrage"');
+    for (const i of industries) {
+      const live = render(i, 'live');
+      expect(live, i).not.toMatch(/Ihr Gericht|Platzhalter|id="speisekarte"|id="kursplan"|id="einzugsgebiet"/);
+    }
+    // Live: Branchenformular mit Zusatzfeld
+    const liveG = render('gastronomie', 'live');
+    expect(liveG).toContain('name="wunsch"');
+    expect(liveG).toContain('value="Reservierungsanfrage"');
+    expect(render('dienstleistung', 'live')).not.toContain('name="wunsch"');
+  });
+});
