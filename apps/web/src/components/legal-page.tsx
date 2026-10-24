@@ -5,11 +5,11 @@ export function LegalPage({ title, markdown, placeholder }: { title: string; mar
   return (
     <div className="mx-auto max-w-[90rem] px-5 py-14 sm:px-8 sm:py-24">
       <article className="prose-legal max-w-[70ch] text-[#3c4454]">
+        <h1>{title}</h1>
         {markdown.trim() ? (
-          <div dangerouslySetInnerHTML={{ __html: markdownToHtml(markdown) }} />
+          <div dangerouslySetInnerHTML={{ __html: markdownToHtml(markdown.replace(/^#\s+[^\n]+\n*/, '')) }} />
         ) : (
           <>
-            <h1>{title}</h1>
             <p className="text-slate-600">{placeholder}</p>
           </>
         )}

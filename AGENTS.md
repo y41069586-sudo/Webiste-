@@ -1,0 +1,152 @@
+# SeitenWerk – dauerhafte Anweisungen für Codex
+
+## Auftrag und Quellen
+
+Bestehendes Projekt übernehmen und gezielt weiterentwickeln. **Nichts erneut bauen, was bereits
+existiert.** Vor jeder Änderung Implementierung, Tests, Git-Verlauf und Entscheidungen prüfen.
+Mit dem Betreiber auf Deutsch kommunizieren. Entscheidungen und technische Grenzen offen benennen;
+„implementiert“, „getestet“, „abgenommen“ und „live“ sind verschiedene Zustände.
+
+Rangfolge: aktuelle ausdrückliche Betreiberanweisung → neueste dokumentierte Betreiberentscheidung
+→ diese Übernahmevorgaben → `docs/spec-update-2.md` → `CLAUDE.md` → ältere Beschreibungen in README.
+Unaufgelöste fachliche Widersprüche gesammelt klären; unabhängige sichere Arbeit fortsetzen.
+Die neueren Entscheidungen unten ersetzen ausdrücklich die alten Foto- und VPS-Vorgaben.
+Historische Aufforderungen zum Start einer bereits abgeschlossenen Phase nicht erneut ausführen.
+
+Beim Einstieg lesen: diese Datei, `CLAUDE.md`, `README.md`, `docs/spec-update-2.md`,
+`docs/entscheidungen.md`, `docs/projektuebernahme-codex.md`. Je Aufgabe die Compliance-, Integrations-,
+Claims-, AGB- und Betriebsdokumente in `docs/` ergänzen. Unter `apps/web` gilt zusätzlich die dortige
+`AGENTS.md`: vor Next.js-Codeänderungen relevante lokale Next.js-Dokumentation lesen.
+
+## Neueste Betreiberentscheidungen (24.10.2026)
+
+- **Kein persönliches Foto.** Keine Fotoanforderung an den Betreiber, kein erfundenes Porträt.
+  Vertrauensblock mit Name/Firma, Kurzvorstellung, Kontakt und Impressum gestalten.
+  Die frühere Foto-Pflicht im Livegang-Check ist entfernt; andere Freigaben bleiben erforderlich.
+- **Plakat-Vorlage behalten**, einschließlich Registrierung und Paletten für alle fünf Template-Gruppen.
+  Die ruhigeren Hero-Beispiele sind eine separate Präsentationsentscheidung.
+- **VPS später.** Docker/Caddy/Backup-Code behalten, jetzt keinen Server provisionieren oder deployen.
+  Die öffentliche Firmenwebsite hat bereits einen statischen Netlify-Export. Das ist nicht das Hosting
+  der gesamten Anwendung: Admin, Demos, Checkout, Worker und DB brauchen weiterhin eine Laufzeit.
+- **Supabase verbunden.** Projekt `Webiste-` (`nfecpmamgrcgnnyulioy`, EU Irland), bestehende 11 Drizzle-Migrationen übernommen; siehe `docs/supabase-anbindung.md`. Für weitere Anbindungen den vorhandenen
+  PostgreSQL-/Drizzle-/pg-boss-Bestand weiterverwenden; kein paralleles Backend. Eine öffentliche, auf Website-Inhalte begrenzte Edge Function ist eingerichtet.
+  Neue Logins hat der Betreiber ausdrücklich wieder verworfen; bestehenden internen Admin erhalten. Worker, Chromium/PDFs und Dateispeicher
+  brauchen auch bei einer verwalteten Datenbank eine gesonderte Betriebsplanung.
+- **Resend verbunden**; Kontaktadresse `support@seitenwerk.world`. Domain einschließlich DKIM/SPF/MX verifiziert; Support-Inbox am 24.10.2026 angelegt und per Connector bestätigt. Bestehenden Resend-Provider verwenden; Verbindung im Chat
+  bedeutet nicht automatisch, dass die App `EMAIL_API_KEY`, verifizierte Domain und Inbound hat.
+  Keine erneute Anbieterwahl, keine Test-Mail ohne entsprechenden Auftrag.
+- **Stripe und DNS übernimmt der Betreiber.** Bestehenden Stripe-Code behalten; offene Einrichtung
+  präzise dokumentieren. Keine Änderungen an Stripe-Konto, Webhooks, Zahlungsmethoden, DNS oder Domains.
+
+## Sicherheitsgrenzen
+
+- **`DRY_RUN=true` beibehalten**, in Umgebung und wirksamen Einstellungen. Keine echten Briefe,
+  Zahlungen, Erstattungen, Domainkäufe, Produktionslöschungen oder Live-Deployments auslösen.
+  Eine Codeänderung oder ein früherer Phasenabschluss ist keine Live-Freigabe.
+- Automatische Schalter nicht eigenständig freischalten: insbesondere `AUTO_SEND`, `AUTO_REPLY`,
+  `AUTO_OPTIMIZE`, `AUTO_ACTIVATE_VARIANTS`, Domainregistrierung und Echtbrief-Freigabe.
+  `LXP_MODE=test`, Registrar-Sandbox und `SITE_INDEXABLE=false` bis zur passenden Freigabe belassen.
+- **DRY_RUN ist kein universeller Offline-Modus.** `effectiveSwitches` sperrt per ENV das Abschalten
+  des Dry-Runs, aber Provider können weiterhin externe Aufrufe ausführen. E-Mail-Versand hat keinen
+  generellen Dry-Run-Guard; Zahlung richtet sich auch nach dem Stripe-Key. LLM-Aufrufe, Hosting und
+  LetterXpress-Testaufträge sind ebenfalls nicht pauschal ausgeschlossen.
+- Für lokale Abläufe alle externen Provider ausdrücklich auf Mock setzen (`LLM_PROVIDER`,
+  `LEAD_SOURCE`, `MAIL_PROVIDER`, `PAYMENT_PROVIDER`, `REGISTRAR_PROVIDER`, `HOSTING_PROVIDER`,
+  `EMAIL_PROVIDER`), lokalen Speicher und eine isolierte lokale Datenbank verwenden. Worker nicht
+  unbesehen starten: Start führt standardmäßig Migrationen/Seeds aus und aktiviert Cron-Jobs.
+- Secrets weder ausgeben noch ins Repository schreiben. Keine vollständigen IPs oder PII in Logs.
+  Keine fremden Änderungen überschreiben. Keine produktiven Daten für Test-Seeds verwenden.
+- Core-Testsetup löscht und erstellt die Ziel-DB aus `TEST_DATABASE_URL` neu, E2E hat ebenfalls
+  DB-Setup. Vor Ausführung dedizierte Wegwerf-Testdatenbank prüfen; nie Produktions-/Supabase-DB
+  als Testziel verwenden. Vorhandene Testfälle dürfen abweichende Schalter ausschließlich isoliert testen.
+
+## Produktregeln
+
+- Lokale Betriebe ohne eigene Website; Start Dortmund. Akquise nur per adressiertem Postbrief,
+  keine Kalt-E-Mails, Kaltanrufe, SMS oder ausgehenden WhatsApp-Nachrichten. WhatsApp nur `wa.me`.
+  E-Mails nur an selbst bereitgestellte Adressen; maximal eine Demo-Erinnerung mit Abmeldelink.
+- Zwei gleichwertige Angebote ohne Vorauswahl: **590 € einmalig** inkl. Domain und 12 Monate Hosting,
+  danach optional 19 €/Monat; **49 €/Monat**, erste Rate sofort, 12 Monate Mindestlaufzeit, danach
+  automatisch 19 €/Monat und monatlich kündbar. Preise/Laufzeiten aus Config, nicht duplizieren.
+  Zahlungsarten Karte/SEPA; PayPal laut späterer Entscheidung vorerst nicht.
+- 14-Tage-Garantie nach dokumentierter neuerer Regel: ab Go-Live, spätestens ab Tag 14 nach Zahlung
+  bei Kundenverzögerung; siehe `guarantee.ts`, AGB-Anforderungen und Entscheidungs-Commit `f6c815b`.
+  Rechnungen je Zahlung, B2B- und AGB-Bestätigung, Versionierung und Mindestlaufzeit erhalten.
+- Demos: keine erfundenen Fakten, Referenzen, Bewertungen oder Kundenlogos. Beispielinhalte und
+  Stockfotos kennzeichnen, live nur Kundenfotos. Kein persönliches Betreiberfoto voraussetzen.
+  Demo noindex, Ablauf standardmäßig 30 Tage, Opt-out sofort sperren und Daten bereinigen.
+- Briefe: DIN 5008, kein Rechnungs-Look, Art. 14/21 DSGVO, QR mindestens 40 × 40 mm, Kurz-URL,
+  beide Preisoptionen/Mindestlaufzeit, wahrheitsgemäßes „online bis …“. Höchstens drei Sendungen;
+  Folgebrief 3 erst nach tatsächlicher Demo-Überarbeitung und manueller Prüfung.
+- Zahlen/Wirkungsbehauptungen nur aus freigegebenen Claims mit Fußnoten und Quellenseite.
+  Wahrheits-Check blockiert Freigabe und Versand; keine Claims selbst freigeben. Quellenablauf nach
+  24 Monaten beachten. Gastro-Claims derzeit laut Prüfprotokoll abgelaufen/ohne Primärquelle.
+- Lead-Quelle standardmäßig OSM; Google-Signal nur mit dokumentierter Rechtsprüfung, Google als
+  Primärquelle gesperrt ohne Genehmigung. Keine gespeicherten Google-Bewertungen. OSM liefert keine
+  Ratings: Ratingfilter und Segment „neu“ nicht als im Standardmodus verfügbar darstellen.
+- Keine Tracking-Cookies/vollen IPs; Engagement-Beacon ist abschaltbar, Rechtsprüfung § 25 TDDDG offen.
+
+## Architektur und Bestand
+
+- pnpm-Monorepo, TypeScript strict, Node ≥ 22.12, vorgesehen **pnpm 10.28.0** laut `packageManager`.
+- `apps/web`: Next.js 16.4.2/React 19, Admin mit Passwort/TOTP, Firmenwebsite, Demos/QR/Kurz-URL,
+  direkter gehosteter Stripe-Checkout, Onboarding/Vorschau, Opt-out und Webhooks.
+- `apps/worker`: langlebiger Node-Prozess mit pg-boss, Cron, Retries/Dead-Letter; Jobmodule unter
+  `src/jobs`, fachliche Logik überwiegend in Core.
+- `packages/core`: PostgreSQL 16/Drizzle, Schema und additive Migrationen `0000`–`0010`, Services,
+  Auth, Queue, Provider-Interfaces/Registry, Rendering per Playwright/Chromium, Claims/Playbooks.
+- `packages/templates`: bestehende Website-, Brief-, Rechnungs- und Wartungslayouts. Fünf Gruppen
+  mit je drei Basislayouts plus Plakat; zentrale Registry/Paletten erhalten. `dienstleistung` ist Fallback.
+- Externe Anbieter hinter vorhandenen Interfaces: Anthropic, OSM/optionales Google, LetterXpress,
+  Stripe, INWX, Cloudflare/Netlify, Resend/Postmark, lokaler/S3-Speicher. Pingen nur inaktive Alternative.
+  Kein zweites Interface/Schema für bereits abgebildete Information erfinden.
+- Konfiguration: `.env.example`, `src/config/env.ts`, `settings.ts`, `service.ts`; fachliche Werte in
+  DB, Secrets aus Umgebung. Idempotenz, Audit-Log, Budget-Ledger und Freigaben erhalten.
+- Phasen 1–10 und L1–L6 sind im Repository vorhanden; nicht neu starten. Abnahmen/Produktionsbetrieb
+  sind gesondert offen. B6.6 Demo-/Preisvarianten nicht vollständig ausgeliefert; L7 bleibt bis
+  mindestens 300 ausgewerteten Briefen zurückgestellt. Details im Übernahmebericht.
+- Vor externer API-Implementierung aktuelle offizielle Doku prüfen und `docs/integrations.md`
+  aktualisieren; historische Preise/Modellnamen/SDK-Felder nicht ungeprüft übernehmen.
+
+## Arbeits- und Prüfablauf
+
+1. `git status`, relevante Dateien/Tests und `git log` prüfen. Bestehende Services erweitern,
+   Änderungen möglichst klein; Migrationen additiv, keine fertigen Phasen neu implementieren.
+2. Passende Prüfung: `pnpm lint`, `pnpm typecheck`; Core-/Template-Tests mit `pnpm test`, E2E mit
+   `pnpm test:e2e` nur unter den oben genannten Isolationsbedingungen. Dokumentationsänderungen
+   brauchen keine neue Testsuite. `pnpm format` nicht ungefragt auf das ganze Repository anwenden.
+3. Bei abweichender pnpm-Version keine automatische Neuinstallation/Lockfile-Migration akzeptieren.
+   Bestehende lokale Binaries können für Lint/TypeScript benutzt werden; Einschränkungen berichten.
+4. Dokumentation bei Änderungen pflegen. Neue Entscheidungen in `docs/entscheidungen.md` festhalten.
+   Abschluss: Änderung, Prüfung, verbleibende Aufgaben und Live-Grenzen präzise benennen. Keine
+   bestandenen Tests, externen Verbindungen oder Deployments behaupten, die nicht verifiziert wurden.
+
+Die in älteren Dateien erwähnte `DESIGN.md` fehlt im Git-Bestand der Übernahme. Nicht erfinden;
+vorhandene Komponenten, CSS, Bilder und die dokumentierten späteren Designentscheidungen verwenden.
+
+Aktuelle Firmenangaben: Doaa Attia, Seitenwerk, Wilhelm-Diess-Weg 3a, 94081 Fürstenzell,
++4915219682134 (auch WhatsApp). Öffentliche Kurzvorstellung in `packages/core/src/config/operator.ts`.
+Rechtstexte sind eigene gekennzeichnete Entwürfe, kein eRecht24-Export; nicht automatisch in die
+freigegebenen `legal.*`-Felder oder den Live-Checkout übernehmen. Supabase-Einrichtung und die
+Support-Adresse sind inzwischen ausdrücklich beauftragt; Brief-/Zahlungs-/Domain-Sperren gelten weiter.
+
+## Aktuelle Arbeitsrichtung
+
+Rechtstext-Arbeit wurde vom Betreiber gestoppt. Keine weiteren Generator-, Konto- oder Marketingaktionen. Bestehenden internen Admin zugänglich machen; neue Firmenwebsite-Logins bleiben verworfen. Status und noch nicht verifizierte Verbindung unter `docs/admin-zugang.md`. Private Zugangsdaten ausschließlich unter ignoriertem `data/`, nie ins Git oder in einen Website-Export.
+
+## Admin-Weiterentwicklung
+
+Betreiber wünscht deutlich übersichtlichere, moderne Admin-Oberfläche und flüssigere Eingaben.
+Bestehende 20 Bereiche erhalten, gruppierte Navigation und lokale Suche. Umsetzungs- und Prüfstand
+in `docs/admin-modernisierung.md`. Session-Caching ausschließlich anfragebezogen; keine
+benutzerübergreifende Auth-Zwischenspeicherung. Keine Netzwerkmutation pro Tastendruck.
+
+### Aktualisierung: Rechtstexte und Integrationen wieder beauftragt
+
+Die jüngste Betreiberanweisung hebt die vorherige Pause für Rechtstexte auf. Eigene Texte aus
+bestätigten Firmenangaben erstellen und gegen tatsächlichen Betrieb prüfen; keine Generator- oder
+anwaltliche Freigabe behaupten. Betreiber kennt §19-Status und W-IdNr. nicht: nichts erfinden,
+Live-Verkauf bleibt gesperrt. Dateispeicher, Resend und Stripe-Anbindung nun ausdrücklich beauftragt;
+Stripe-Connector hat nur Sandbox. Keine echten Zahlungen/Briefe. Demo-Test und Worker bleiben später.
+Automatische Sicherheitsprüfung lehnte ungeschützte Speicherung von Resend-API-Key in Netlify ab;
+nicht über Umwege umgehen. Details docs/integrationen-abschluss.md und docs/recht/pruefprotokoll.md.

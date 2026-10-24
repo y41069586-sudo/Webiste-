@@ -1,0 +1,5 @@
+project_id = "seitenwerk"
+
+[functions.seitenwerk-site-config]
+# Public, read-only, explicitly allowlisted website content.
+verify_jwt = false

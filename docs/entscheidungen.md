@@ -157,3 +157,42 @@ stehen am Ende.
 Siehe die gesammelten Fragen in der Rückmeldung zu Update 2 (Preisdarstellung brutto/netto, Daten für
 WhatsApp/Foto/Kurzvorstellung, AGB-Klauseln zu Mindestlaufzeit und Garantie, Bewertungsquelle für das
 Segment „neu“ u. a.).
+
+## Codex-Fortsetzung: Supabase und Firmenangaben (24.10.2026)
+
+- Projekt `Webiste-` in Supabase verwenden, EU Irland. Bestehende 11 Drizzle-Migrationen und deren Historie übernehmen, alle 32 Tabellen hinter RLS und ohne Browserrechte. Öffentliche Website-Inhalte über die schmale Edge Function `seitenwerk-site-config`.
+- Neue Website-Logins nach ausdrücklicher Korrektur des Betreibers nicht einbauen; vorhandener interner Admin bleibt. Keine neue Supabase-Auth-Oberfläche.
+- Doaa Attia, Seitenwerk, Wilhelm-Diess-Weg 3a, 94081 Fürstenzell, Telefon/WhatsApp +4915219682134. Kein persönliches Foto; Foto-Pflicht im Readiness-Check entfernt.
+- Gewünschte Geschäftsadresse: `support@seitenwerk.world`. Resend-Connector meldet weiterhin DKIM pending und lehnt Inbox-Erstellung ab; DNS bleibt beim Betreiber. Keine E-Mail versendet.
+- Impressum-, Datenschutz- und AGB-Entwürfe aus tatsächlichen Projektfunktionen, ausdrücklich nicht von eRecht24 erzeugt oder juristisch freigegeben. Leere freigegebene `legal.*`-Felder bleiben leer; Entwürfe entsperren keinen Verkauf.
+- Statische Firmenwebsite liest Supabase beim Export. Einstellungen werden erst nach erneutem Export/Deployment öffentlich aktualisiert. VPS/Worker später, Stripe und DNS beim Betreiber, DRY_RUN=true.
+
+### Resend-Nachprüfung 24.10.2026, 17:53 UTC
+
+Domain nun vollständig verifiziert (DKIM/SPF/MX). Gewünschte Inbox `support@seitenwerk.world` erfolgreich angelegt und über `get_inbox` bestätigt. Keine Test-Mail und keine DNS-Änderung. Frühere Meldung „pending/422“ ist überholt.
+
+### Rechtsform bestätigt
+
+Betreiber bestätigt am 24.10.2026: Einzelunternehmen ohne Registereintrag und ohne USt-ID. eRecht24-Impressumformular mit diesen Angaben bis zum letzten Downloadschritt ausgefüllt; dort sind kostenlose Kontoanlage und Einwilligung in regelmäßige Angebots-/Update-E-Mails gekoppelt. Diese Einwilligung wird nicht ungefragt erteilt; Betreiber wurde konkret danach gefragt. Kein Generatorergebnis als fertig behaupten, solange es nicht ausgeliefert wurde.
+
+### Richtungswechsel: Admin-Zugang statt Rechtstexte
+
+Betreiber stoppt Rechtstextarbeit ausdrücklich. Bestehende Netlify-Admin-App verwenden. Dedizierter DB-Login und Admin mit TOTP eingerichtet; sichere Laufzeitkonfiguration hinterlegt. Kein neuer Deploy über verfügbare Tools möglich; Verbindung/Login noch nicht end-to-end bestätigt. Siehe `admin-zugang.md`.
+
+### Aktueller Gesamtstand nach Admin-Deploy
+
+Siehe `projektstand-aktuell.md` (24.10.2026). Admin-Modernisierung veröffentlicht; Transaction-Pooler
+aktiv, DB-Health positiv. Statische öffentliche Domain enthält nach direkter Prüfung weiterhin
+alte Kontakt-/Impressumsplatzhalter. Vorrang haben Daten-/Deploymentabgleich, privater Dateispeicher
+und kontrollierter Demo-Test. Rechtsarbeit pausiert, VPS später, DRY_RUN bleibt true.
+
+### Rechtstexte und Integrationen erneut beauftragt
+
+Betreiber beauftragt Impressum/Datenschutz/AGB aus seinen Angaben, Supabase-Dateispeicher,
+Resend-Anbindung und Stripe-Sandbox. Demo-Probelauf/Worker ausdrücklich später. Betreiber kennt
+W-IdNr. und §19-Steuerstatus nicht; entsprechende Angaben bleiben ungeklärt, keine Nummer oder
+Steuerbefreiung erfinden. Eigene Arbeitsfassungen, keine Generator-/Anwaltsfreigabe. Privater
+Supabase-Bucket angelegt; S3-Zugangsdaten fehlen. Stripe-Connector nur Sandbox; richtiger App-
+Webhook angelegt, Anwendungsschlüssel fehlt. Beide neuen Webhooks bis sicherer Konfiguration
+pausiert. Netlify-Secretspeicherung von automatischer Sicherheitsprüfung abgelehnt; nicht umgehen.
+Siehe integrations-abschluss.md und recht/pruefprotokoll.md.

@@ -300,3 +300,19 @@ der Beispielfotos (kein Laufzeit-Zugriff): `GET /v1/images/?q=…&license=cc0&so
 Details `GET /v1/images/{id}/` (Felder `license`, `license_version`, `license_url`, `foreign_landing_url`,
 `creator`, `url`). Ergebnis und Lizenz je Bild in `packages/templates/assets/images/manifest.json` und in den
 EXIF-Daten (Copyright, Artist, ImageDescription). Neue Bilder: nur CC0, ohne erkennbare Personen und Marken.
+
+## Ergänzung 24.10.2026: Resend-Inbox und Supabase-Dateispeicher
+
+- Resend-SDK 6.34.1 genau gepinnt; Webhookverify verwendet `webhookSecret` und normalisierte
+  Header `id/timestamp/signature` des SDK, nicht die veralteten Feldnamen aus älteren Beispielen.
+- `inbox.email.received`: `data.inbox_id/thread_id/email_id`; Text über
+  `resend.inboxes.threads.emails.get`. Standard `email.received` über receiving.get.
+  API-geladene Mail und korrekten Empfänger prüfen, keine Anhänge/HTML/Auto-Antworten.
+- Webhooksignatur und Zeitfenster geprüft; Message-ID für Duplikate; Support wird mit
+  `queueProcessing=false` manuell eskaliert. Kein Workerstart.
+- Supabase S3: Endpoint `<ref>.storage.supabase.co/storage/v1/s3`, Region eu-west-1,
+  Bucket seitenwerk-private privat. Vorhandenen S3Storage wiederverwenden. S3-Schlüssel
+  müssen im Supabase-Storage-Dashboard erzeugt und serverseitig geschützt hinterlegt werden.
+- Stripe: vorhandene Sandbox beibehalten, neuer Webhook auf dynamische Netlify-App.
+  Pluginzugriff ersetzt keinen STRIPE_SECRET_KEY in der App; kein Live-Key zugänglich/verwendet.
+- Details, Quellen und noch fehlende Secrets: `integrationen-abschluss.md`.

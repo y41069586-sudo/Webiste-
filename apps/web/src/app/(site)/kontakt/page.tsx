@@ -1,11 +1,12 @@
-import { getConfig, getEnv } from '@wbm/core';
+import { getSiteConfig } from '@/lib/site-config';
+import { getEnv } from '@wbm/core';
 import { PageIntro } from '@/components/site/section';
 import { ContactForm } from './contact-form';
 
 export const metadata = { title: 'Kontakt', description: 'Fragen zum Entwurf, zum Ablauf oder zu den Preisen.' };
 
 export default async function ContactPage() {
-  const cfg = await getConfig();
+  const cfg = await getSiteConfig();
   const s = cfg.sender;
   // Statischer Export (Netlify): kein Server für das Formular – dann nur die direkten Wege
   const formOn = !getEnv().SITE_STATIC;

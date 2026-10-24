@@ -1,4 +1,4 @@
-import { sourcesPageClaims } from '@wbm/core';
+import { getSiteSources } from '@/lib/site-config';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
@@ -10,7 +10,7 @@ const day = (d: Date) => new Intl.DateTimeFormat('de-DE', { dateStyle: 'long', t
 
 /** Öffentliche Quellenseite (Update 2, B5.5) – automatisch aus der Claims-Tabelle. */
 export default async function QuellenPage() {
-  const rows = await sourcesPageClaims();
+  const rows = await getSiteSources();
   return (
     <div className="mx-auto max-w-[90rem] px-5 py-14 sm:px-8 sm:py-24">
       <h1 className="text-hero max-w-[18ch] text-[#0f172a]">Quellen zu den Zahlen in unseren Briefen</h1>

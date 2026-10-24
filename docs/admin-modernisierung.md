@@ -42,3 +42,14 @@ und Wiederherstellungstest eines Backups. VPS weiterhin später. Resend-Inbox vo
 Anwendung nutzt noch Mock-E-Mail; bestehender Inbound-Webhook erwartet Postmark/generisches JSON,
 kein ungeprüftes direktes Anstecken von Resend-Events. Stripe/DNS beim Betreiber. Rechtstextarbeit
 pausiert; Freigabesperren und DRY_RUN bleiben erhalten.
+
+## Veröffentlichung beauftragt
+
+Betreiber hat „Deploy“ ausdrücklich freigegeben. Alle elf vorgesehenen Dateien als atomarer
+Commit `5d9a2b5633fc49808f22ce6878b599d3bb4e248e` auf
+`claude/website-brief-maschine-0d0s37` veröffentlicht, mit geprüftem Vorgänger `ab1bbdb`.
+Andere lokale Firmenwebsite-/Rechtstextänderungen nicht übertragen; keine Secrets enthalten.
+Remote per git fetch bestätigt. Noch kein neuer veröffentlichter Netlify-Deploy bestätigt;
+zuletzt weiterhin `6add2452c850a2d93bdc4a41`. GitHub-Status bisher leer. Der Netlify-Connector
+hat keine Start-/Retry-Build-Funktion; falls Git-CD nicht auslöst, ist Trigger deploy → Deploy site
+im bestehenden Projekt nötig. Nicht als live behaupten.

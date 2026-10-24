@@ -1,5 +1,5 @@
+import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
-import { getConfig } from '@wbm/core';
 import { PriceToggle, type PlanView } from '@/components/site/price-toggle';
 import { DarkBand, PageIntro } from '@/components/site/section';
 import { sitePricing } from '@/lib/site';
@@ -7,7 +7,7 @@ import { sitePricing } from '@/lib/site';
 export const metadata = { title: 'Preise', description: 'Einmalig oder monatlich – offene Endpreise ohne Einrichtungsgebühr.' };
 
 export default async function PricesPage() {
-  const cfg = await getConfig();
+  const cfg = await getSiteConfig();
   const p = sitePricing(cfg);
   const plans: PlanView[] = [
     {
@@ -110,10 +110,8 @@ export default async function PricesPage() {
           </table>
         </div>
         <p data-reveal className="mt-4 text-sm leading-relaxed text-slate-600">
-          {!cfg.tax.kleinunternehmer
-            ? 'Alle Preise zuzüglich gesetzlicher Umsatzsteuer.'
-            : 'Endpreise. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.'}{' '}
-          Das Angebot richtet sich an Unternehmen.
+          Steuerstatus und steuerliche Preisangaben sind noch nicht abschließend bestätigt. Der echte Verkauf ist derzeit nicht
+          freigeschaltet. Das Angebot richtet sich an Unternehmen.
           {p.guarantee ? (
             <>
               {' '}

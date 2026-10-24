@@ -1,5 +1,5 @@
+import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
-import { getConfig } from '@wbm/core';
 import { Check, DarkBand, PageIntro } from '@/components/site/section';
 import { sitePricing } from '@/lib/site';
 
@@ -9,7 +9,7 @@ export const metadata = {
 };
 
 export default async function GuaranteePage() {
-  const cfg = await getConfig();
+  const cfg = await getSiteConfig();
   const p = sitePricing(cfg);
   if (!p.guarantee) {
     return (

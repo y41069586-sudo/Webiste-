@@ -1,7 +1,8 @@
+import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
-import { getConfig, getEnv } from '@wbm/core';
+import { getEnv } from '@wbm/core';
 import { RevealObserver } from '@/components/site/reveal-observer';
 import { SiteHeader } from '@/components/site/site-header';
 import { brandName, SITE_NAV } from '@/lib/site';
@@ -15,7 +16,7 @@ export function generateMetadata(): Metadata {
 
 /** Firmen-Website im Studio-Stil (DESIGN.md): graue Fläche, Charcoal-Typografie, Farbe nur aus den Beispielen. */
 export default async function SiteLayout({ children }: { children: ReactNode }) {
-  const cfg = await getConfig();
+  const cfg = await getSiteConfig();
   const s = cfg.sender;
   const brand = brandName(s.company);
   return (

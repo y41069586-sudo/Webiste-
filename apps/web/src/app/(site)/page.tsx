@@ -1,5 +1,5 @@
+import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
-import { getConfig } from '@wbm/core';
 import { ExamplesCascade } from '@/components/site/examples';
 import { PriceCards } from '@/components/site/price-cards';
 import { Arrow, Check, DarkBand, delay, ICONS, SectionHead, t } from '@/components/site/section';
@@ -22,7 +22,7 @@ const STEPS = [
 ];
 
 export default async function Home() {
-  const cfg = await getConfig();
+  const cfg = await getSiteConfig();
   const p = sitePricing(cfg);
   return (
     <>

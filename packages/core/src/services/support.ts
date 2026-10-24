@@ -53,6 +53,7 @@ export function stripQuoted(text: string): string {
 /** Eingehende E-Mail speichern (Duplikate über die Message-ID) und Verarbeitung anstoßen. */
 export async function ingestInboundEmail(
   mail: InboundEmail & { headers?: Record<string, string> },
+  options: { queueProcessing?: boolean } = {},
 ): Promise<{ id: string; duplicate: boolean }> {
   const db = getDb();
   const from = plainAddress(mail.from);
@@ -71,7 +72,10 @@ export async function ingestInboundEmail(
       customerId: link.customerId,
       leadId: link.leadId,
       inReplyToId: link.inReplyToId,
-      status: automated ? 'ignored' : 'new',
+      status: automated ? 'ignored' : options.queueProcessing === false ? 'escalated' : 'new',
+      ...(options.queueProcessing === false && !automated
+        ? { escalationReason: 'Manuelle Prüfung: E-Mail-Eingang ohne automatische Verarbeitung' }
+        : {}),
       ...(automated ? { classification: 'spam' as SupportClass, escalationReason: 'automatische Nachricht' } : {}),
     })
     .onConflictDoNothing({ target: supportMessages.providerMessageId })
@@ -90,7 +94,8 @@ export async function ingestInboundEmail(
     actor: 'system',
     context: { channel: 'email', automated, linked: Boolean(link.customerId || link.leadId) },
   });
-  if (!automated) await enqueue(QUEUES.supportInbound, { messageId: id }, { singletonKey: `support-${id}` });
+  if (!automated && options.queueProcessing !== false)
+    await enqueue(QUEUES.supportInbound, { messageId: id }, { singletonKey: `support-${id}` });
   return { id, duplicate: false };
 }
 

@@ -7,6 +7,15 @@ personalisierten Brief mit QR-Code und verkauft die fertige Website ohne Verkauf
 14-Tage-Zufriedenheitsgarantie. Ablauf: Demo → Checkout → Angaben → Vorschau → Go-Live.
 Maßgebliche Projektbeschreibung: [CLAUDE.md](CLAUDE.md).
 
+**Codex-Übernahme:** Dauerhafte Arbeitsanweisungen und neueste Betreiberentscheidungen stehen in
+[AGENTS.md](AGENTS.md). Der [Übernahmebericht](docs/projektuebernahme-codex.md) enthält den geprüften
+Entwicklungsstand, offene Aufgaben und Abweichungen älterer Dokumente (kein persönliches Foto,
+VPS später, Supabase bevorzugt, Resend verbunden; Stripe und DNS beim Betreiber).
+
+**Aktueller Betriebsstand:** [Gesamtübersicht](docs/projektstand-aktuell.md),
+[Integrationen und ausstehende Schlüssel](docs/integrationen-abschluss.md),
+[Rechtsprüfung und offene Tatsachen](docs/recht/pruefprotokoll.md).
+
 **Sicherheitsprinzip:** Standard ist immer `DRY_RUN=true`. Echte Briefe, echte Domainkäufe und der
 Wechsel auf echte Zahlungen passieren nur nach ausdrücklicher Freigabe (siehe
 [Go-Live-Checkliste](docs/go-live-checkliste.md)).
@@ -150,6 +159,8 @@ Wichtige Schalter:
 ---
 
 ## Firmen-Website
+
+Aktuelle [Supabase-Anbindung und Betriebsgrenzen](docs/supabase-anbindung.md): öffentliche Inhalte per Edge Function, keine neuen Logins, `support@seitenwerk.world` als bestätigte Resend-Support-Inbox.
 
 Startseite, „So funktioniert’s“, Preise, Garantie, Beispiele, Über mich, Kontakt sowie Impressum, Datenschutz, AGB und
 Quellen liegen unter `apps/web/src/app/(site)` (Design nach DESIGN.md). Inhalte kommen aus den Einstellungen: Absender

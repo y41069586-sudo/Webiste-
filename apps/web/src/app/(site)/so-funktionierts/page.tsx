@@ -1,5 +1,5 @@
+import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
-import { getConfig } from '@wbm/core';
 import { DarkBand, ICONS, PageIntro } from '@/components/site/section';
 import { Steps } from '@/components/site/steps';
 import { sitePricing } from '@/lib/site';
@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 export default async function HowPage() {
-  const cfg = await getConfig();
+  const cfg = await getSiteConfig();
   const p = sitePricing(cfg);
   return (
     <>

@@ -25,7 +25,6 @@ export function goLiveBlockers(cfg: AppConfig): GoLiveBlocker[] {
   if (!s.taxNumber.trim() || /^0+\/0+\/0+$/.test(s.taxNumber.trim()))
     out.push({ key: 'sender.taxNumber', label: 'Steuernummer' });
   if (!s.whatsappNumber.trim()) out.push({ key: 'sender.whatsappNumber', label: 'WhatsApp-Nummer' });
-  if (!s.photoUrl.trim()) out.push({ key: 'sender.photoUrl', label: 'Foto für den Vertrauensblock' });
   if (!s.intro.trim()) out.push({ key: 'sender.intro', label: 'Kurzvorstellung (2 Sätze)' });
   if (!s.bankIban.trim()) out.push({ key: 'sender.bankIban', label: 'Bankverbindung (Rechnungen, Forderungsbriefe)' });
   if (!cfg.legal.impressumMarkdown.trim()) out.push({ key: 'legal.impressumMarkdown', label: 'Impressum' });

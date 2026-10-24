@@ -1,12 +1,12 @@
+import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
-import { getConfig } from '@wbm/core';
 import { brandName } from '@/lib/site';
 import { DarkBand, PageIntro } from '@/components/site/section';
 
 export const metadata = { title: 'Über mich', description: 'Wer hinter den Website-Entwürfen steht.' };
 
 export default async function AboutPage() {
-  const cfg = await getConfig();
+  const cfg = await getSiteConfig();
   const s = cfg.sender;
   const brand = brandName(s.company);
   // Platzhalter aus der Grundkonfiguration nicht als Personennamen zeigen
