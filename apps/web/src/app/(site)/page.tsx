@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { getConfig } from '@wbm/core';
 import { ExamplesCascade } from '@/components/site/examples';
-import { HeroBuild } from '@/components/site/hero-build';
 import { PriceCards } from '@/components/site/price-cards';
 import { Arrow, Check, DarkBand, delay, ICONS, SectionHead, t } from '@/components/site/section';
 import { sitePricing } from '@/lib/site';
@@ -27,21 +26,20 @@ export default async function Home() {
   const p = sitePricing(cfg);
   return (
     <>
-      {/* Hero: asymmetrisch – große Aussage links, Collage Mitte/rechts, kurzer Text mit Button unten rechts */}
+      {/* Hero: Titel oben links, Beispiel-Treppe diagonal, kurzer Text mit Buttons unten rechts */}
       <section className="hero-field">
-        <div className="mx-auto max-w-[90rem] px-5 pt-10 pb-20 sm:px-8 sm:pt-16 lg:pb-28">
-          <div className="grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-6">
-            <div className="lg:pt-10">
-              <p className="build font-tight text-nav text-[#5b6475]">Für Betriebe in {cfg.sender.city} ohne eigene Website</p>
-              <h1 style={t(60)} className="build text-hero mt-4 max-w-[11ch] text-[#0f172a]">
-                Ihre Website ist schon fertig.
-              </h1>
-            </div>
-            <HeroBuild />
-          </div>
-          <div className="mt-10 grid gap-6 lg:mt-4 lg:grid-cols-[1fr_1.15fr] lg:gap-6">
-            <div className="hidden lg:block" />
-            <div style={t(900)} className="build max-w-[46ch] lg:ml-auto">
+        <div className="mx-auto max-w-[90rem]">
+          <ExamplesCascade
+            head={
+              <>
+                <p className="build font-tight text-nav text-[#5b6475]">Für Betriebe in {cfg.sender.city} ohne eigene Website</p>
+                <h1 style={t(60)} className="build text-hero mt-4 max-w-[11ch] text-[#0f172a]">
+                  Ihre Website ist schon fertig.
+                </h1>
+              </>
+            }
+          >
+            <div style={t(500)} className="build">
               <p className="text-[1.0625rem] leading-relaxed text-[#3c4454]">
                 Wir bauen Ihrem Betrieb einen fertigen Website-Entwurf und schicken ihn per Brief. Gefällt er Ihnen, geht er auf
                 Ihrer eigenen Domain online – ohne Termin und ohne Verkaufsgespräch.
@@ -59,7 +57,7 @@ export default async function Home() {
                 {p.guarantee ? ` · ${p.guarantee.days} Tage Garantie` : ''}
               </p>
             </div>
-          </div>
+          </ExamplesCascade>
         </div>
       </section>
 
@@ -89,18 +87,6 @@ export default async function Home() {
               Der Ablauf im Detail <Arrow />
             </Link>
           </p>
-        </div>
-      </section>
-
-      {/* Beispiele: diagonale Treppe, Bilder liefern die Farbe */}
-      <section className="mx-auto max-w-[90rem] px-5 py-20 sm:px-8 sm:py-28">
-        <div data-reveal>
-          <ExamplesCascade title="Beispiele je Branche.">
-            <p>Erfundene Musterbetriebe, damit Sie sehen, wie ein Entwurf aussieht. Ihr Entwurf nutzt Ihre eigenen Angaben.</p>
-            <Link href="/beispiele" className="btn-site btn-primary btn-compact mt-4">
-              Alle Beispiele <Arrow />
-            </Link>
-          </ExamplesCascade>
         </div>
       </section>
 

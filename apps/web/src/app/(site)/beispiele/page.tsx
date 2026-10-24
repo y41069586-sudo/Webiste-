@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ExamplesCascade } from '@/components/site/examples';
+import { ExamplesGrid } from '@/components/site/examples';
 import { DarkBand, PageIntro } from '@/components/site/section';
 
 export const metadata = { title: 'Beispiele', description: 'Beispiel-Websites für erfundene Musterbetriebe aus fünf Branchen.' };
@@ -12,9 +12,10 @@ export default function ExamplesPage() {
         Angaben; Leistungen sind darin als Beispiel gekennzeichnet, bis Sie Ihre eigenen eintragen.
       </PageIntro>
       <section className="mx-auto max-w-[90rem] px-5 pb-20 sm:px-8 sm:pb-28">
-        <ExamplesCascade title="Fünf Branchen, fünf Entwürfe.">
-          <p>Fotos in den Beispielen sind lizenzfreie Symbolbilder. In Ihrer Website stehen nur Ihre eigenen Fotos.</p>
-        </ExamplesCascade>
+        <ExamplesGrid />
+        <p data-reveal className="mt-10 text-sm text-[#5b6475]">
+          Fotos in den Beispielen sind lizenzfreie Symbolbilder. In Ihrer Website stehen nur Ihre eigenen Fotos.
+        </p>
       </section>
       <DarkBand
         title="Ihr Betrieb hat noch keine Website?"

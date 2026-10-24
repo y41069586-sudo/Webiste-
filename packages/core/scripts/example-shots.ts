@@ -3,7 +3,7 @@
  * Musterbetrieb (Name „… Muster“), ohne Demo-Banner. Ausgabe nach apps/web/public/beispiele.
  * Dazu kompakte WebP-Varianten für die Website: `{id}-karte.webp` (960 × 600, nur der Kopfbereich bei 1024 px
  * Breite in doppelter Auflösung – groß lesbar statt kleiner Gesamtansicht) und `{id}-hoch.webp` (420 × 525).
- * Für Handwerk und Beauty (ohne Beispielfotos) die farbstärkste Vorlage, damit die Vorschau auffällt.
+ * Für Handwerk und Beauty (ohne Beispielfotos) eine kräftige Vorlage, die farblich zu den Foto-Beispielen passt.
  * Aufruf: pnpm --filter @wbm/core exec tsx scripts/example-shots.ts
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -29,7 +29,7 @@ export const EXAMPLES: {
     label: 'Malerbetrieb',
     name: 'Malerei Muster',
     templateId: 'handwerk-solid',
-    palette: 'werkblau',
+    palette: 'anthrazit',
   },
   {
     id: 'beauty',

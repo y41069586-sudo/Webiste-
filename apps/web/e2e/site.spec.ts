@@ -44,16 +44,23 @@ test.describe('Firmen-Website', () => {
     await expect(table).toContainText('19 €/Monat');
   });
 
-  test('Beispiele: Treppe läuft, lässt sich anhalten, klar als Beispiel gekennzeichnet', async ({ page }) => {
-    await page.goto('/beispiele');
-    const list = page.getByRole('list', { name: 'Beispiel-Websites je Branche' });
-    await expect(list.getByRole('listitem')).toHaveCount(5);
-    await expect(list.getByText(/erfundener Musterbetrieb/)).toHaveCount(5);
+  test('Startseite: Beispiel-Treppe im Kopfbereich läuft und lässt sich anhalten', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ihre Website ist schon fertig.');
     const track = page.locator('.cascade-track');
-    await expect(track.getByText('Beispiel', { exact: true })).toHaveCount(10);
+    await expect(track.getByText('Beispiel', { exact: true })).toHaveCount(15);
     await expect(track).toHaveCSS('animation-play-state', 'running');
     await page.getByLabel('Bewegung anhalten').check();
     await expect(track).toHaveCSS('animation-play-state', 'paused');
+    await expect(page.getByText('Beispiele je Branche.')).toHaveCount(0);
+  });
+
+  test('Beispiele: fünf erfundene Musterbetriebe, klar gekennzeichnet', async ({ page }) => {
+    await page.goto('/beispiele');
+    const list = page.getByRole('list', { name: 'Beispiel-Websites je Branche' });
+    await expect(list.getByRole('listitem')).toHaveCount(5);
+    await expect(list.getByText('Beispiel', { exact: true })).toHaveCount(5);
+    await expect(list.getByRole('img').first()).toHaveAttribute('alt', /erfundenen Betrieb/);
   });
 
   test('Kontaktformular: Pflichtfelder, dann Danke (landet im Support)', async ({ page }) => {

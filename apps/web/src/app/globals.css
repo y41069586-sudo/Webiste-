@@ -304,57 +304,65 @@ body {
   animation: price-in 450ms var(--ease-smooth) both;
 }
 
-/* Beispiel-Treppe: Reihen aus Vorschau + Farbfeld, diagonal versetzt, laufen endlos nach rechts oben.
-   Geometrie in Container-Einheiten; nur transform wird animiert. */
+/* Beispiel-Treppe (Hero): Reihen aus Vorschau + quadratischem Farbfeld, je Reihe um genau eine Feldbreite
+   nach links versetzt (45°). So stoßen die Farbfelder Ecke an Ecke, und ihre Streifen bilden eine durchgehende
+   Linie. Die Reihen laufen endlos nach rechts oben; Geometrie in Container-Einheiten, animiert wird nur transform. */
 .cascade {
   container-type: inline-size;
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
-  border: 1px solid #e8ebf1;
-  background-color: #f7f8fa;
-  background-image: radial-gradient(rgb(15 23 42 / 0.09) 1px, transparent 1.2px);
-  background-size: 22px 22px;
 }
 .cascade-stage {
-  --w: 64cqw;
-  --h: calc(var(--w) * 0.625);
-  /* schmal: Treppe nach rechts versetzt, damit sie die ganze Höhe füllt (oberstes Farbfeld läuft hinaus) */
-  --x0: calc(100cqw - var(--w) - var(--h) * 0.4);
+  --h: 30cqw;
+  --w: calc(var(--h) * 1.6);
+  --x0: calc(100cqw - var(--w) - var(--h) * 0.75);
   position: relative;
   overflow: hidden;
-  height: calc(var(--h) * 2.1);
+  height: calc(var(--h) * 3.2);
 }
-/* Überschrift oben links, Text unten rechts – mobil im Fluss, breit in den freien Ecken der Treppe */
+/* Kopf oben links, Text unten rechts – schmal im Fluss, breit in den freien Ecken der Treppe */
 .cascade-head {
   position: relative;
   z-index: 2;
-  padding: 1.75rem 1.25rem 1.25rem;
+  padding: 2.5rem 1.25rem 1.5rem;
 }
 .cascade-foot {
   position: relative;
   z-index: 2;
-  padding: 1.25rem;
+  padding: 1.5rem 1.25rem 2.5rem;
+}
+@container (min-width: 600px) {
+  .cascade-stage {
+    --h: 21cqw;
+    --x0: calc(100cqw - var(--w) - var(--h));
+    height: calc(var(--h) * 3.4);
+  }
+  .cascade-head,
+  .cascade-foot {
+    padding-inline: 2rem;
+  }
 }
 @container (min-width: 960px) {
+  /* Felder so groß und so weit links, dass die laufenden Ecken Titel und Text nie berühren:
+     Titel frei für x < x0 − y, Text frei für x + y > x0 + w + 2h (Bühnenkoordinaten) */
   .cascade-stage {
-    --w: 30cqw;
-    --x0: calc(100cqw - var(--w) - var(--h));
-    height: calc(var(--h) * 3);
+    --h: 12cqw;
+    --x0: 64cqw;
+    height: calc(var(--h) * 4.8);
   }
   .cascade-head {
     position: absolute;
     top: 0;
     left: 0;
-    max-width: 33cqw;
-    padding: 2.6cqw;
+    max-width: 46cqw;
+    padding: 3.5cqw 2.2cqw;
   }
   .cascade-foot {
     position: absolute;
     right: 0;
     bottom: 0;
-    width: 33cqw;
-    padding: 2.6cqw;
+    width: 27cqw;
+    padding: 2.2cqw;
   }
 }
 .cascade-track {
@@ -363,18 +371,18 @@ body {
   animation: cascade calc(var(--n) * 6.5s) linear infinite;
   will-change: transform;
 }
-.cascade:hover .cascade-track,
+.cascade:has(.cascade-stage:hover) .cascade-track,
 .cascade:has(.cascade-pause:checked) .cascade-track {
   animation-play-state: paused;
 }
 @keyframes cascade {
   to {
-    transform: translate3d(calc(var(--n) * var(--w)), calc(var(--n) * var(--h) * -1), 0);
+    transform: translate3d(calc(var(--n) * var(--h)), calc(var(--n) * var(--h) * -1), 0);
   }
 }
 .cascade-row {
   position: absolute;
-  left: calc(var(--x0) - (var(--i) - 1) * var(--w));
+  left: calc(var(--x0) - (var(--i) - 1) * var(--h));
   top: calc((var(--i) - 1) * var(--h));
   display: flex;
   height: var(--h);
@@ -399,32 +407,42 @@ body {
   height: 100%;
   overflow: hidden;
   color: #fff;
-  padding: clamp(0.6rem, 1.4cqw, 1.25rem);
+  padding: clamp(0.6rem, 1.3cqw, 1.2rem);
 }
-/* Diagonaler Streifen im Farbfeld */
+/* Streifen genau durch die Ecken unten links und oben rechts – setzt sich im nächsten Feld fort */
 .cascade-panel::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, transparent 50%, rgb(255 255 255 / 0.9) 50%, rgb(255 255 255 / 0.9) 64%, transparent 64%);
+  background: linear-gradient(
+    135deg,
+    transparent 43.5%,
+    rgb(255 255 255 / 0.9) 43.5%,
+    rgb(255 255 255 / 0.9) 56.5%,
+    transparent 56.5%
+  );
 }
 .cascade-name {
   position: relative;
   z-index: 1;
   display: block;
-  max-width: 70%;
+  max-width: 56%;
   font-family: 'Inter Tight Variable', 'Inter Tight', 'Inter Variable', Inter, Arial, sans-serif;
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.05;
-  font-size: clamp(0.85rem, 2.1cqw, 1.6rem);
+  font-size: clamp(0.78rem, 1.45cqw, 1.2rem);
 }
+/* Branche unten rechts – unterhalb des Streifens */
 .cascade-label {
-  position: relative;
+  position: absolute;
   z-index: 1;
-  display: block;
-  margin-top: 0.35em;
-  font-size: clamp(0.65rem, 1.05cqw, 0.85rem);
+  right: clamp(0.6rem, 1.3cqw, 1.2rem);
+  bottom: clamp(0.5rem, 1.1cqw, 1rem);
+  max-width: 62%;
+  text-align: right;
+  line-height: 1.2;
+  font-size: clamp(0.62rem, 0.95cqw, 0.8rem);
   opacity: 0.85;
 }
 @media (prefers-reduced-motion: reduce) {

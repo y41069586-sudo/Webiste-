@@ -30,7 +30,7 @@ export const INDUSTRY_EXAMPLES = [
     label: 'Handwerk',
     name: 'Malerei Muster',
     hook: 'Leistungen, Einzugsgebiet, Anfrageformular',
-    color: '#1e4c96',
+    color: '#2b3038',
   },
   {
     id: 'beauty',
