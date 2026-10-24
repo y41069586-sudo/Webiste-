@@ -1,5 +1,5 @@
 import { PgBoss, type SendOptions } from 'pg-boss';
-import { getEnv } from './config/env';
+import { getDatabaseConnectionConfig } from './db/client';
 import { logger } from './logger';
 
 /** Alle Queues mit Standardoptionen (Retries mit Backoff, Dead-Letter). */
@@ -122,7 +122,7 @@ export function getBoss(): Promise<PgBoss> {
   if (!g.__wbmBoss) {
     g.__wbmBoss = (async () => {
       const boss = new PgBoss({
-        connectionString: getEnv().DATABASE_URL,
+        ...getDatabaseConnectionConfig(),
         schema: 'pgboss',
         max: Number(process.env.BOSS_POOL_MAX ?? 4),
         application_name: `${process.env.APP_NAME ?? 'wbm'}-boss`,

@@ -39,23 +39,27 @@ interface DbGlobal {
 }
 const g = globalThis as unknown as DbGlobal;
 
+/** Shared TLS settings for application queries and the pg-boss connection. */
+export function getDatabaseConnectionConfig(): Pick<pg.PoolConfig, 'connectionString' | 'ssl'> {
+  let connectionString = getEnv().DATABASE_URL;
+  const host = new URL(connectionString).hostname;
+  const isSupabase = /^(?:db\.[a-z0-9]+\.supabase\.co|[a-z0-9-]+\.pooler\.supabase\.com)$/.test(host);
+  const ca = process.env.DATABASE_SSL_CA?.replace(/\\n/g, '\n') ?? (isSupabase ? SUPABASE_ROOT_CA : undefined);
+  if (ca) {
+    // pg otherwise replaces the explicit TLS options with URL SSL parameters.
+    const url = new URL(connectionString);
+    for (const key of ['ssl', 'sslmode', 'sslrootcert', 'sslcert', 'sslkey', 'uselibpqcompat']) {
+      url.searchParams.delete(key);
+    }
+    connectionString = url.toString();
+  }
+  return { connectionString, ...(ca ? { ssl: { ca, rejectUnauthorized: true } } : {}) };
+}
+
 export function getPool(): pg.Pool {
   if (!g.__wbmPool) {
-    let connectionString = getEnv().DATABASE_URL;
-    const host = new URL(connectionString).hostname;
-    const isSupabase = /^(?:db\.[a-z0-9]+\.supabase\.co|[a-z0-9-]+\.pooler\.supabase\.com)$/.test(host);
-    const ca = process.env.DATABASE_SSL_CA?.replace(/\\n/g, '\n') ?? (isSupabase ? SUPABASE_ROOT_CA : undefined);
-    if (ca) {
-      // pg otherwise replaces the explicit TLS options with URL SSL parameters.
-      const url = new URL(connectionString);
-      for (const key of ['ssl', 'sslmode', 'sslrootcert', 'sslcert', 'sslkey', 'uselibpqcompat']) {
-        url.searchParams.delete(key);
-      }
-      connectionString = url.toString();
-    }
     g.__wbmPool = new pg.Pool({
-      connectionString,
-      ...(ca ? { ssl: { ca, rejectUnauthorized: true } } : {}),
+      ...getDatabaseConnectionConfig(),
       max: Number(process.env.DB_POOL_MAX ?? 10),
       idleTimeoutMillis: 30_000,
       application_name: process.env.APP_NAME ?? 'wbm',

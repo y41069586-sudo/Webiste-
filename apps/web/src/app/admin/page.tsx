@@ -1,3 +1,5 @@
+import { AdminArrow } from '@/components/admin-arrow';
+import Link from 'next/link';
 import { desc, isNull, sql } from 'drizzle-orm';
 import { budgetStatus, getConfig, getDb, goLiveBlockers, schema, systemHealth } from '@wbm/core';
 import { Card, Notice, PageHeader, Stat, StatusBadge } from '@/components/ui';
@@ -27,10 +29,51 @@ export default async function Dashboard() {
   const total = byStatus.reduce((a, r) => a + r.n, 0);
   return (
     <>
-      <PageHeader title="Übersicht" subtitle="Pipeline-Status, Budget der laufenden Woche und offene Meldungen." />
+      <PageHeader title="Dein Überblick" subtitle="Alles im Blick. Ein klarer nächster Schritt." />
+      <section className="admin-welcome">
+        <div>
+          <p className="admin-eyebrow">DEIN SEITENWERK</p>
+          <h2>
+            Gute Websites.
+            <br />
+            Klarer Workflow.
+          </h2>
+          <p>Vom ersten Kontakt bis zur fertigen Website. Hier steuerst du jeden Schritt.</p>
+          <Link href="/admin/leads" prefetch={false} className="admin-welcome-cta">
+            Leads öffnen{' '}
+            <span aria-hidden="true">
+              <AdminArrow />
+            </span>
+          </Link>
+        </div>
+        <div className="admin-welcome-summary">
+          <span>Deine Pipeline</span>
+          <strong>{num(total)}</strong>
+          <span>Leads insgesamt</span>
+          <div>
+            <span className="admin-status-dot" /> {num(counts['demo_published'] ?? 0)} Demos veröffentlicht
+          </div>
+        </div>
+      </section>
+      <div className="admin-shortcuts">
+        {[
+          ['demos', 'Demos prüfen', 'Entwürfe ansehen & freigeben'],
+          ['orders', 'Bestellungen', 'Aufträge im Blick behalten'],
+          ['support', 'Support', 'Kundenanfragen bearbeiten'],
+          ['settings', 'Einstellungen', 'Dein Unternehmen verwalten'],
+        ].map(([path, title, description]) => (
+          <Link href={`/admin/${path}`} prefetch={false} key={path}>
+            <span className="admin-shortcut-arrow" aria-hidden="true">
+              <AdminArrow />
+            </span>
+            <strong>{title}</strong>
+            <span>{description}</span>
+          </Link>
+        ))}
+      </div>
       {health.problems.length ? (
         <div className="mb-6">
-          <Notice kind="error">
+          <Notice kind={health.status === 'down' ? 'error' : 'warn'}>
             <strong>Systemzustand:</strong> {health.problems.join(' · ')}
           </Notice>
         </div>
@@ -89,14 +132,15 @@ export default async function Dashboard() {
             {Object.entries(counts)
               .sort((a, b) => b[1] - a[1])
               .map(([status, n]) => (
-                <a
+                <Link
+                  prefetch={false}
                   key={status}
                   href={`/admin/leads?status=${status}`}
                   className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50"
                 >
                   <StatusBadge status={status} />
                   <span className="font-semibold tabular-nums">{num(n)}</span>
-                </a>
+                </Link>
               ))}
           </div>
         )}
