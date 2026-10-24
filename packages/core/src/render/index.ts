@@ -6,6 +6,7 @@ export * from './demo-qa';
 export * from '../demos/build';
 export * from './pdf';
 export * from './letter';
+export * from './letter-preview';
 export * from './invoice';
 export * from './site';
 export * from './images';

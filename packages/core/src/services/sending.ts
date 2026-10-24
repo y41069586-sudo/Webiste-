@@ -51,6 +51,28 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     await db.update(letters).set({ status: 'cancelled', statusReason: 'Lead gesperrt/gelöscht' }).where(eq(letters.id, letterId));
     return { state: 'skipped', reason: 'Lead gesperrt' };
   }
+  // Wahrheits-Check (B5.4): kein Versand ohne passed; verwendete Claims müssen noch gültig sein
+  if ((letter.truthCheckJson as { passed?: boolean } | null)?.passed !== true) {
+    await db
+      .update(letters)
+      .set({ status: 'failed', statusReason: 'Wahrheits-Check fehlt oder nicht bestanden – bitte neu erzeugen' })
+      .where(eq(letters.id, letterId));
+    return { state: 'skipped', reason: 'Wahrheits-Check' };
+  }
+  const staleClaims = await db.execute<{ claim_id: string }>(
+    sql`SELECT u.claim_id FROM claim_usages u JOIN claims c ON c.id = u.claim_id
+        WHERE u.letter_id = ${letterId} AND (c.status <> 'approved' OR c.expires_at <= now())`,
+  );
+  if (staleClaims.rows.length) {
+    await db
+      .update(letters)
+      .set({
+        status: 'failed',
+        statusReason: `Claim inzwischen gesperrt/abgelaufen (${staleClaims.rows.map((r) => r.claim_id).join(', ')}) – bitte neu erzeugen`,
+      })
+      .where(eq(letters.id, letterId));
+    return { state: 'skipped', reason: 'Claim gesperrt' };
+  }
   if (!letter.isTest) {
     const demo = letter.demoId ? await db.query.demos.findFirst({ where: eq(demos.id, letter.demoId) }) : null;
     if (!demo || demo.status !== 'published' || (demo.expiresAt && demo.expiresAt < addDays(new Date(), 7))) {

@@ -33,7 +33,9 @@ import type {
   SiteStatus,
   SupportClass,
   SupportStatus,
+  VariantCreator,
   VariantKind,
+  VariantStatus,
 } from '../types';
 
 const ts = (name: string) => timestamp(name, { withTimezone: true, mode: 'date' });
@@ -171,9 +173,18 @@ export const variants = pgTable(
     weight: doublePrecision('weight').default(1).notNull(),
     /** 1 = Erstbrief, 2 = Follow-up */
     sequence: integer('sequence').default(1).notNull(),
+    /** Playbook-Branche; leer = für alle Branchen (neutrale Kontrollvariante) */
+    industry: text('industry').$type<Industry>(),
+    /** Slot-Template (B5.3): subject, opening, claim_slot_1/2, benefit, offer, risk_reversal, qr_label */
+    slotsJson: jsonb('slots_json').$type<Record<string, string>>(),
+    parentVariantId: uuid('parent_variant_id'),
+    changedSlot: text('changed_slot'),
+    hypothesis: text('hypothesis'),
+    status: text('status').$type<VariantStatus>().default('active').notNull(),
+    createdBy: text('created_by').$type<VariantCreator>().default('human').notNull(),
     createdAt: createdAt(),
   },
-  (t) => [uniqueIndex('variants_kind_name_uidx').on(t.kind, t.name)],
+  (t) => [uniqueIndex('variants_kind_name_uidx').on(t.kind, t.name), index('variants_industry_idx').on(t.industry)],
 );
 
 // ---------------------------------------------------------------------------
@@ -209,6 +220,10 @@ export const letters = pgTable(
     approvedAt: ts('approved_at'),
     sentAt: ts('sent_at'),
     deliveredAt: ts('delivered_at'),
+    /** Playbook-Branche des Leads beim Erzeugen (B7) */
+    industry: text('industry').$type<Industry>(),
+    /** Ergebnis des Wahrheits-Checks (B5.4) – kein Versand ohne passed */
+    truthCheckJson: jsonb('truth_check_json').$type<Record<string, unknown>>(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

@@ -73,6 +73,11 @@ export type EventType = (typeof EVENT_TYPES)[number];
 
 export type VariantKind = 'letter' | 'demo_banner' | 'price';
 
+/** Lebenszyklus einer Variante (B7); `active` am Datensatz spiegelt status === 'active' */
+export const VARIANT_STATUSES = ['proposed', 'active', 'paused', 'retired'] as const;
+export type VariantStatus = (typeof VARIANT_STATUSES)[number];
+export type VariantCreator = 'human' | 'learning_agent';
+
 /** one_time = 590 € einmalig (mode=payment), monthly = 49 €/Monat mit Mindestlaufzeit (mode=subscription) */
 export const ORDER_PLANS = ['one_time', 'monthly'] as const;
 export type OrderPlan = (typeof ORDER_PLANS)[number];

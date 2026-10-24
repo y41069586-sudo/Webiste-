@@ -5,8 +5,12 @@ import { appUrl, getEnv, trackUrl } from '../config/env';
 import { effectiveSwitches, getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
 import { getDb } from '../db/client';
-import { leads, letters } from '../db/schema';
-import { composeLetter, recipientLines, type RecipientInput } from '../letters/compose';
+import { claimUsages, leads, letters } from '../db/schema';
+import { composeLetter, placeholderValues, recipientLines, type ComposeInput, type RecipientInput } from '../letters/compose';
+import { renderSlots } from '../letters/slots';
+import type { TruthCheckResult } from '../letters/truth-check';
+import { getPlaybook } from '../playbooks';
+import { runTruthCheck } from '../services/truth-check';
 import { suggestDomain } from '../letters/domain';
 import { objectionNoticeText, privacyNoticeText } from '../letters/notices';
 import { logger } from '../logger';
@@ -85,6 +89,7 @@ export interface GeneratedLetter {
   status: 'generated' | 'approved' | 'failed';
   issues: LayoutIssue[];
   pages: number;
+  truthCheck?: TruthCheckResult;
 }
 
 async function domainFor(lead: typeof leads.$inferSelect, cfg: AppConfig): Promise<string | null> {
@@ -137,7 +142,15 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   if (!demo) throw new Error('Keine veröffentlichte Demo für den Lead');
   const storage = getProviders().storage;
   const composite = demo.compositeKey ? await storage.get(demo.compositeKey) : null;
-  const variant = await chooseLetterVariant(db, sequence);
+  const variant = await chooseLetterVariant(db, sequence, { industry: lead.industry });
+  const sourcesLabel = shortUrl(trackUrl('/quellen'));
+  const slotRender = variant.slots
+    ? renderSlots(
+        variant.slots,
+        new Map(variant.claims.map((c) => [c.id, { id: c.id, textDe: c.textDe, footnoteDe: c.footnoteDe }])),
+        sourcesLabel,
+      )
+    : null;
   const domain = await domainFor(lead, cfg);
 
   const recipient: RecipientInput = opts.test
@@ -169,8 +182,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       }
     : null;
   const useRating = sw.useRatingInLetter && lead.rating && lead.ratingCount;
-  const data = composeLetter({
-    variant: variant.content,
+  const composeInput: ComposeInput = {
+    variant: slotRender?.content ?? variant.content,
     cfg,
     recipient,
     domain,
@@ -184,7 +197,9 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     objectionNotice: objectionNoticeText(getEnv().OPTOUT_EMAIL),
     priceLabel: formatEuroShort(cfg.pricing.packageCents),
     screenshotPage,
-  });
+    footnotes: slotRender?.footnotes,
+  };
+  const data = composeLetter(composeInput);
   const html = renderLetterHtml(data);
   const pdf = await htmlToPdf(html);
   const expectedPages = screenshotPage ? 2 : 1;
@@ -195,6 +210,23 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     expectedPages,
   });
   const issues = [...domIssues, ...pdfCheck.issues];
+
+  // Wahrheits-Check (B5.4) – blockierend; ohne passed keine Freigabe
+  const truth: TruthCheckResult = await runTruthCheck(
+    {
+      letter: data,
+      claimSpans: slotRender?.claimSpans ?? [],
+      claims: variant.claims,
+      allowedClaimIds: lead.industry ? getPlaybook(lead.industry).allowed_claims : [],
+      industry: lead.industry ?? null,
+      placeholderValues: placeholderValues(composeInput),
+      sourcesLabel,
+      extraBlocklist: cfg.letter.truthCheckBlocklist,
+      maxStatistics: cfg.letter.maxStatistics,
+    },
+    { leadId, checkSourcesPage: !sw.dryRun, idempotencyKey: `truth:${leadId}:${seqDb}:${Date.now()}` },
+  );
+  const truthIssues = truth.violations.map((v) => `wahrheits_check/${v.rule}: ${v.detail}`);
 
   // Kosten schätzen (im DRY_RUN ohne API-Aufruf)
   let estimate = cfg.costs.letterEstimateCents;
@@ -210,7 +242,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     if (est !== null) estimate = est;
   }
 
-  const status: GeneratedLetter['status'] = issues.length ? 'failed' : 'generated';
+  const status: GeneratedLetter['status'] = issues.length || !truth.passed ? 'failed' : 'generated';
   const [row] = await db
     .insert(letters)
     .values({
@@ -223,17 +255,23 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       pageCount: pdfCheck.pages,
       estimatedCostCents: estimate,
       status,
-      statusReason: issues.length
-        ? issues
-            .map((i) => `${i.check}: ${i.detail}`)
-            .join(' | ')
-            .slice(0, 1000)
-        : null,
+      statusReason:
+        issues.length || truthIssues.length
+          ? [...issues.map((i) => `${i.check}: ${i.detail}`), ...truthIssues].join(' | ').slice(0, 1000)
+          : null,
+      industry: lead.industry ?? null,
+      truthCheckJson: truth as unknown as Record<string, unknown>,
       isTest: Boolean(opts.test),
       dryRun: sw.dryRun,
     })
     .returning({ id: letters.id });
   const letterId = row!.id;
+  if (truth.claims.length) {
+    await db
+      .insert(claimUsages)
+      .values(truth.claims.map((claimId) => ({ letterId, claimId })))
+      .onConflictDoNothing();
+  }
   // Folgebriefe nennen ein neues Ablaufdatum – die Demo muss mindestens so lange online bleiben
   if (!opts.test && sequence > 1) await extendDemoUntil(db, leadId, stated);
   const key = `letters/${leadId}/${letterId}.pdf`;
@@ -251,9 +289,20 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       domain,
       pages: pdfCheck.pages,
       issues: issues.length,
+      truthCheck: truth.passed ? 'passed' : 'failed',
+      claims: truth.claims,
       test: Boolean(opts.test),
     },
   });
+  if (!truth.passed) {
+    await raiseAlert(db, {
+      level: 'error',
+      code: `letter_truth:${letterId}`,
+      message: 'Wahrheits-Check hat einen Brief blockiert.',
+      context: { letterId, violations: truth.violations },
+    });
+    return { letterId, status: 'failed', issues, pages: pdfCheck.pages, truthCheck: truth };
+  }
   if (issues.length) {
     await raiseAlert(db, {
       level: 'error',
@@ -261,7 +310,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       message: 'Brief-Layout verletzt die Vorgaben des Briefdienstes.',
       context: { letterId, issues },
     });
-    return { letterId, status, issues, pages: pdfCheck.pages };
+    return { letterId, status, issues, pages: pdfCheck.pages, truthCheck: truth };
   }
   if (!opts.test && sequence === 1) {
     await db.transaction((tx) => transitionLead(tx, leadId, 'letter_generated', { actor: opts.actor, soft: true }));
@@ -269,11 +318,11 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   // Brief 3: nach den ersten N vom Betreiber geprüften Briefen automatisch freigeben (Wahrheits-Check grün)
   if (sequence === 3 && !opts.test && (await reviewedImprovements()) >= cfg.review.letter3ManualFirstN) {
     await approveLetter(letterId, 'job:auto-letter3');
-    return { letterId, status: 'approved', issues, pages: pdfCheck.pages };
+    return { letterId, status: 'approved', issues, pages: pdfCheck.pages, truthCheck: truth };
   }
   if (sw.autoSend && !opts.test) {
     await approveLetter(letterId, 'job:auto-send');
-    return { letterId, status: 'approved', issues, pages: pdfCheck.pages };
+    return { letterId, status: 'approved', issues, pages: pdfCheck.pages, truthCheck: truth };
   }
-  return { letterId, status, issues, pages: pdfCheck.pages };
+  return { letterId, status, issues, pages: pdfCheck.pages, truthCheck: truth };
 }

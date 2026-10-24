@@ -56,6 +56,8 @@ export interface LetterData {
   signatureName: string;
   privacyNotice: string;
   objectionNotice: string;
+  /** Quellenangaben zu Statistiken (B1.3), z. B. „¹ Bitkom Research 2025, …“, zuletzt „Quellen: …/quellen“ */
+  footnotes?: string[];
   addressPosition: 'left' | 'right';
   /** Optionale Seite 2 mit großen Screenshots */
   screenshotPage?: { desktopDataUri: string; mobileDataUri: string } | null;
@@ -132,6 +134,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .small{position:absolute;left:25mm;right:20mm;bottom:16mm;font-size:7pt;line-height:1.38;color:#4a5565;border-top:0.25mm solid #d9e0e8;padding-top:2mm}
 .small p{margin:0 0 1.2mm}
 .small strong{color:#1d232b}
+.small .fn{color:#1d232b}
 .p2{position:absolute;left:25mm;right:20mm;top:25mm}
 .p2 h2{font-size:15pt;margin:0 0 2mm;color:#1d4e89}
 .muted{color:#4a5565}
@@ -169,6 +172,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
     <div class="sign"><div>${esc(d.closing)}</div><div class="name">${esc(d.signatureName)}</div></div>
   </main>
   <footer class="small" id="kleingedrucktes">
+    ${d.footnotes?.length ? `<p class="fn" id="fussnoten">${d.footnotes.map((f) => esc(f)).join(' ')}</p>` : ''}
     <p>${boldMd(d.privacyNotice)}</p>
     <p>${boldMd(d.objectionNotice)}</p>
   </footer>

@@ -275,6 +275,7 @@ describe('Folgesendungen, Kurz-URL, Erinnerungs-Mail', () => {
         status: 'approved',
         pdfStorageKey: key,
         statedExpiresAt: addDays(new Date(), 4),
+        truthCheckJson: { passed: true },
       })
       .returning();
     expect((await sendLetter(stale!.id, 'test')).state).toBe('skipped');
@@ -283,7 +284,15 @@ describe('Folgesendungen, Kurz-URL, Erinnerungs-Mail', () => {
     const stated = endOfDayBerlin(addDays(new Date(), 16));
     const [fresh] = await db
       .insert(letters)
-      .values({ leadId: lead.id, demoId: demo.id, sequence: 2, status: 'approved', pdfStorageKey: key, statedExpiresAt: stated })
+      .values({
+        leadId: lead.id,
+        demoId: demo.id,
+        sequence: 2,
+        status: 'approved',
+        pdfStorageKey: key,
+        statedExpiresAt: stated,
+        truthCheckJson: { passed: true },
+      })
       .returning();
     expect((await sendLetter(fresh!.id, 'test')).state).toBe('sent');
     const sentLetter = (await db.query.letters.findFirst({ where: eq(letters.id, fresh!.id) }))!;

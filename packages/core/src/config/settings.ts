@@ -234,6 +234,10 @@ export const appConfigSchema = z.object({
     addressPosition: z.enum(['left', 'right']),
     /** Max. Sendungen pro Lead (Erstbrief + bis zu zwei Folgebriefe) */
     maxLettersPerLead: z.number().int().min(1).max(3),
+    /** Wahrheits-Check (B5.4): zusätzliche Sperrmuster (Regex, ohne Groß-/Kleinschreibung) */
+    truthCheckBlocklist: z.array(z.string()).default([]),
+    /** Höchstens so viele Statistiken pro Brief (B4: 2) */
+    maxStatistics: z.number().int().min(0).max(2).default(2),
     /** Test-Empfänger für den allerersten echten Brief */
     testRecipient: z.object({
       name: z.string(),
@@ -526,6 +530,8 @@ export const DEFAULT_CONFIG: AppConfig = {
     includeScreenshotPage: false,
     addressPosition: 'left',
     maxLettersPerLead: 3,
+    truthCheckBlocklist: [],
+    maxStatistics: 2,
     testRecipient: {
       name: '',
       street: '',

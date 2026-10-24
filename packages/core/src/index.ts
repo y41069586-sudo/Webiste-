@@ -82,3 +82,13 @@ export * from './services/retention';
 export * from './services/monitoring';
 export * from './claims/library';
 export * from './playbooks';
+export * from './letters/slots';
+export {
+  checkLetterTruth,
+  DEFAULT_BLOCKLIST,
+  TRUTH_CHECK_VERSION,
+  type TruthCheckInput,
+  type TruthCheckResult,
+  type TruthViolation,
+} from './letters/truth-check';
+export * from './services/truth-check';

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { and, desc, eq } from 'drizzle-orm';
-import { getDb, schema } from '@wbm/core';
+import { getDb, schema, type TruthCheckResult } from '@wbm/core';
 import { Badge, Card, PageHeader, StatusBadge, btn, input } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
@@ -22,6 +22,7 @@ export default async function LetterDetail({ params }: { params: Promise<{ id: s
     .from(schema.auditLog)
     .where(and(eq(schema.auditLog.entity, 'letter'), eq(schema.auditLog.entityId, id)))
     .orderBy(desc(schema.auditLog.id));
+  const truth = letter.truthCheckJson as unknown as TruthCheckResult | null;
   return (
     <>
       <PageHeader
@@ -54,7 +55,7 @@ export default async function LetterDetail({ params }: { params: Promise<{ id: s
           )}
         </Card>
         <div className="space-y-6">
-          {letter.status === 'generated' ? (
+          {letter.status === 'generated' && truth?.passed ? (
             <Card title="Entscheidung">
               <form action={approveLetterAction}>
                 <input type="hidden" name="id" value={letter.id} />
@@ -77,6 +78,32 @@ export default async function LetterDetail({ params }: { params: Promise<{ id: s
               </form>
             </Card>
           ) : null}
+          <Card title="Wahrheits-Check">
+            {!truth ? (
+              <p className="text-sm text-red-800">Nicht geprüft – Brief kann nicht freigegeben werden.</p>
+            ) : (
+              <div className="space-y-2 text-sm">
+                <p>
+                  {truth.passed ? <Badge color="green">bestanden</Badge> : <Badge color="red">blockiert</Badge>}{' '}
+                  <span className="text-xs text-slate-500">{dt(truth.checkedAt)}</span>
+                </p>
+                <p className="text-xs text-slate-600">
+                  Claims: {truth.claims.length ? truth.claims.join(', ') : 'keine (Brief ohne Statistik)'} · Quellenseite:{' '}
+                  {truth.sourcesPage ?? '–'} · LLM:{' '}
+                  {truth.llm?.skipped ?? truth.llm?.error ?? (truth.llm?.unbackedEffectClaim ? 'Fund' : 'ok')}
+                </p>
+                {truth.violations.length ? (
+                  <ul className="list-disc space-y-1 pl-5 text-xs text-red-800">
+                    {truth.violations.map((v, i) => (
+                      <li key={i}>
+                        <span className="font-mono">{v.rule}</span>: {v.detail}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            )}
+          </Card>
           {letter.statusReason ? (
             <Card title="Hinweis">
               <p className="text-sm break-words text-red-800">{letter.statusReason}</p>

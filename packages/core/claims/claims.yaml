@@ -214,7 +214,7 @@
 
 - id: TERMIN_ONLINE_GEWOHNT
   text_de: '64 % der Menschen in Deutschland haben schon einmal einen Arzttermin online vereinbart – 2023 waren es noch 36 %.'
-  footnote_de: 'Bitkom Research 2025, 1.145 Befragte ab 16 Jahren, telefonisch, repräsentativ'
+  footnote_de: 'Bitkom Research 2025 zu Arztterminen, 1.145 Befragte ab 16 Jahren, telefonisch'
   source_publisher: Bitkom e. V.
   source_title: 'Zwei Drittel vereinbaren Arzttermine online'
   source_url: https://www.bitkom.org/Presse/Presseinformation/Zwei-Drittel-vereinbaren-Arzttermine-online

@@ -328,3 +328,30 @@ export async function usableClaims(
     .orderBy(asc(claims.id));
   return rows;
 }
+
+/**
+ * Claims für die öffentliche Quellenseite (B5.5): alles, was in Briefen steht oder gerade
+ * verwendet werden darf (freigegeben und in einer aktiven Variante referenziert).
+ */
+export async function sourcesPageClaims(db: DbOrTx = getDb()): Promise<(ClaimRow & { inUse: boolean })[]> {
+  const rows = await db.execute<{ id: string; in_use: boolean }>(sql`
+    SELECT c.id,
+           (c.status = 'approved' AND c.expires_at > now() AND EXISTS (
+              SELECT 1 FROM variants v
+              WHERE v.active AND v.status = 'active' AND v.slots_json::text LIKE '%{CLAIM:' || c.id || '}%'
+           )) AS in_use
+    FROM claims c
+    WHERE EXISTS (SELECT 1 FROM claim_usages u WHERE u.claim_id = c.id)
+       OR (c.status = 'approved' AND c.expires_at > now() AND EXISTS (
+              SELECT 1 FROM variants v
+              WHERE v.active AND v.status = 'active' AND v.slots_json::text LIKE '%{CLAIM:' || c.id || '}%'
+           ))`);
+  if (!rows.rows.length) return [];
+  const inUse = new Map(rows.rows.map((r) => [r.id, r.in_use]));
+  const full = await db
+    .select()
+    .from(claims)
+    .where(inArray(claims.id, [...inUse.keys()]))
+    .orderBy(asc(claims.id));
+  return full.map((c) => ({ ...c, inUse: Boolean(inUse.get(c.id)) }));
+}

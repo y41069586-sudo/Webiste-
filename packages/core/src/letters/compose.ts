@@ -68,6 +68,8 @@ export interface ComposeInput {
   /** „online bis …“ (formatiertes Datum) */
   expiresLabel: string;
   screenshotPage?: LetterData['screenshotPage'];
+  /** Quellenangaben der eingesetzten Claims (Slot-Varianten) */
+  footnotes?: string[];
 }
 
 /** Beide Preisoptionen in einem Satzteil – die Mindestlaufzeit steht immer direkt neben der Monatsrate. */
@@ -84,8 +86,8 @@ export function guaranteeSentence(cfg: AppConfig): string {
   return `Gefällt sie Ihnen nach dem Kauf nicht, gibt es ${cfg.guarantee.days} Tage lang das Geld zurück.`;
 }
 
-export function composeLetter(i: ComposeInput): LetterData {
-  const vars: Record<string, string> = {
+function composeVars(i: ComposeInput): Record<string, string> {
+  return {
     firmenname: i.recipient.businessName,
     preis: i.priceLabel,
     preise: pricesPhrase(i.cfg, i.priceLabel),
@@ -101,6 +103,22 @@ export function composeLetter(i: ComposeInput): LetterData {
     rating: i.rating ? i.rating.rating.toFixed(1).replace('.', ',') : '',
     rating_count: i.rating ? String(i.rating.count) : '',
   };
+}
+
+/**
+ * Ausgefüllte Platzhalter, die Ziffern enthalten dürfen (für den Wahrheits-Check): Firmenname, Domain,
+ * Datum, Preise, Garantie, Absender und – nur mit USE_RATING_IN_LETTER – der Bewertungssatz.
+ */
+export function placeholderValues(i: ComposeInput): string[] {
+  const vars = composeVars(i);
+  const keys = ['firmenname', 'domain_vorschlag', 'ablaufdatum', 'preise', 'garantie_satz', 'absender_name'];
+  const out = keys.map((k) => vars[k]!).filter(Boolean);
+  if (i.rating && i.variant.ratingSentence) out.push(fillPlaceholders(i.variant.ratingSentence, vars));
+  return out;
+}
+
+export function composeLetter(i: ComposeInput): LetterData {
+  const vars = composeVars(i);
   const v = i.variant;
   const first = [i.rating && v.ratingSentence ? fillPlaceholders(v.ratingSentence, vars) : '', fillPlaceholders(v.hook, vars)]
     .filter(Boolean)
@@ -132,6 +150,7 @@ export function composeLetter(i: ComposeInput): LetterData {
     signatureName: i.cfg.sender.name,
     privacyNotice: i.privacyNotice,
     objectionNotice: i.objectionNotice,
+    footnotes: i.footnotes?.length ? i.footnotes : undefined,
     addressPosition: i.cfg.letter.addressPosition,
     screenshotPage: i.screenshotPage ?? null,
   };

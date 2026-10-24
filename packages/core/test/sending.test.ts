@@ -61,6 +61,7 @@ async function seed(opts: { status?: string; letterStatus?: string } = {}) {
       pdfStorageKey: key,
       status: (opts.letterStatus ?? 'approved') as never,
       estimatedCostCents: 135,
+      truthCheckJson: { passed: true },
     })
     .returning();
   return { lead: lead!, demo: demo!, letter: letter! };
