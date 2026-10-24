@@ -23,30 +23,30 @@ export const INDUSTRY_EXAMPLES = [
     label: 'Gastronomie',
     name: 'Trattoria Muster',
     hook: 'Speisekarte, Öffnungszeiten, Anfahrt',
-    color: '#5b2bd6',
+    color: '#8a3b2a',
   },
   {
     id: 'handwerk',
     label: 'Handwerk',
     name: 'Malerei Muster',
     hook: 'Leistungen, Einzugsgebiet, Anfrageformular',
-    color: '#161616',
+    color: '#2f5d46',
   },
   {
     id: 'beauty',
     label: 'Beauty',
     name: 'Kosmetik Muster',
     hook: 'Behandlungen, Terminanfrage, Öffnungszeiten',
-    color: '#d90429',
+    color: '#a2566b',
   },
   {
     id: 'einzelhandel',
     label: 'Einzelhandel',
     name: 'Blumen Muster',
     hook: 'Sortiment, Öffnungszeiten, Anfahrt',
-    color: '#b5179e',
+    color: '#5b4a7a',
   },
-  { id: 'kurse', label: 'Kurse & Training', name: 'Tanzschule Muster', hook: 'Kursplan, Probestunde, Kontakt', color: '#1b1464' },
+  { id: 'kurse', label: 'Kurse & Training', name: 'Tanzschule Muster', hook: 'Kursplan, Probestunde, Kontakt', color: '#1f6f78' },
 ] as const;
 
 export { SITE_NAV } from './site-nav';

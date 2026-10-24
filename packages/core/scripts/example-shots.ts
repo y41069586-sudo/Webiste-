@@ -2,8 +2,8 @@
  * Bilder für „Beispiele“ der Firmen-Website: je Branchengruppe ein Template mit einem klar fiktiven
  * Musterbetrieb (Name „… Muster“), ohne Demo-Banner. Ausgabe nach apps/web/public/beispiele.
  * Ausgabe: `{id}-karte.webp` (960 × 600) – nur der Kopfbereich bei 1024 px Breite in doppelter Auflösung,
- * groß lesbar statt kleiner Gesamtansicht. Alle in der Vorlage „Plakat“ mit je einer anderen knalligen Palette,
- * damit sich die Beispiele in der Hero-Treppe deutlich unterscheiden.
+ * groß lesbar statt kleiner Gesamtansicht. Je Branche ein anderes Layout in einer ruhigen, natürlichen Palette,
+ * damit sich die Beispiele in der Hero-Treppe unterscheiden, ohne grell zu wirken.
  * Aufruf: pnpm --filter @wbm/core exec tsx scripts/example-shots.ts
  */
 import { mkdirSync } from 'node:fs';
@@ -28,8 +28,8 @@ export const EXAMPLES: {
     branch: 'restaurant',
     label: 'Restaurant',
     name: 'Trattoria Muster',
-    templateId: 'gastronomie-plakat',
-    palette: 'paprika',
+    templateId: 'gastronomie-split',
+    palette: 'tomate',
   },
   {
     id: 'handwerk',
@@ -37,8 +37,8 @@ export const EXAMPLES: {
     branch: 'maler',
     label: 'Malerbetrieb',
     name: 'Malerei Muster',
-    templateId: 'handwerk-plakat',
-    palette: 'signalgelb',
+    templateId: 'handwerk-klar',
+    palette: 'waldgruen',
   },
   {
     id: 'beauty',
@@ -46,8 +46,8 @@ export const EXAMPLES: {
     branch: 'kosmetikstudio',
     label: 'Kosmetikstudio',
     name: 'Kosmetik Muster',
-    templateId: 'beauty-plakat',
-    palette: 'pink',
+    templateId: 'beauty-modern',
+    palette: 'rose',
   },
   {
     id: 'einzelhandel',
@@ -55,8 +55,8 @@ export const EXAMPLES: {
     branch: 'blumenladen',
     label: 'Blumenladen',
     name: 'Blumen Muster',
-    templateId: 'einzelhandel-plakat',
-    palette: 'limette',
+    templateId: 'einzelhandel-foto',
+    palette: 'flieder',
   },
   {
     id: 'kurse',
@@ -64,8 +64,8 @@ export const EXAMPLES: {
     branch: 'tanzschule',
     label: 'Tanzschule',
     name: 'Tanzschule Muster',
-    templateId: 'kurse-plakat',
-    palette: 'tuerkis',
+    templateId: 'kurse-magazin',
+    palette: 'lagune',
   },
 ];
 

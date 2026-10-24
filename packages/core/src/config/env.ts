@@ -100,6 +100,8 @@ const envSchema = z.object({
   AUTO_ACTIVATE_VARIANTS: bool(false),
   /** Firmen-Website in Suchmaschinen (erst nach Livegang mit echten Rechtstexten); Demos bleiben immer noindex */
   SITE_INDEXABLE: bool(false),
+  /** Statischer Export der Firmen-Website (z. B. Netlify): ohne Server, Kontakt nur direkt statt per Formular */
+  SITE_STATIC: bool(false),
   /** Kostenbremse: Kosten pro Kauf in Cent */
   MAX_CAC_CENTS: z.coerce.number().int().min(0).default(20000),
   /** Ein Brief gilt nach so vielen Tagen ab geschätzter Zustellung als ausgewertet */

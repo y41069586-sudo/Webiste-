@@ -158,6 +158,19 @@ Quellen liegen unter `apps/web/src/app/(site)` (Design nach DESIGN.md). Inhalte 
 `SHOTS_DIR=… pnpm --filter @wbm/web exec playwright test e2e/screenshots.spec.ts`. Indexierung erst mit
 `SITE_INDEXABLE=true`.
 
+**Statisch auf Netlify (Projekt `seitenwerk-website`):** Die Firmen-Website läuft dort ohne Server und ohne
+Datenbank; Admin, Demos, Checkout und Worker bleiben auf dem VPS. Ablauf:
+
+1. `pnpm --filter @wbm/web exec next build`
+2. Produktions-Instanz mit echten Einstellungen und `SITE_STATIC=true` starten (Kontaktformular aus, nur direkte
+   Kontaktwege), z. B. `next start -p 3200`
+3. `node apps/web/scripts/export-site.mjs http://localhost:3200` → `apps/web/out/` (mit `_headers`, `robots.txt`,
+   `404.html`; ohne `SITE_INDEXABLE=true` per Header und robots.txt noindex)
+4. `out/` hochladen (Netlify-Projekt ohne Build-Befehl, `publish = "out"`)
+
+Preise, Absenderdaten und Rechtstexte werden beim Export eingefroren – nach jeder Änderung in den Einstellungen
+neu exportieren und hochladen.
+
 ## Täglicher Betrieb
 
 **Takte (Worker, Zeitzone Europe/Berlin):** Pipeline alle 5 Min., Briefstatus alle 30 Min., Follow-ups

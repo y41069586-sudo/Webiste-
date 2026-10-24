@@ -313,7 +313,7 @@ body {
   overflow: hidden;
 }
 .cascade-stage {
-  --h: 30cqw;
+  --h: 34cqw;
   --w: calc(var(--h) * 1.6);
   --x0: calc(100cqw - var(--w) - var(--h) * 0.75);
   position: relative;
@@ -333,7 +333,7 @@ body {
 }
 @container (min-width: 600px) {
   .cascade-stage {
-    --h: 21cqw;
+    --h: 24cqw;
     --x0: calc(100cqw - var(--w) - var(--h));
     height: calc(var(--h) * 3.4);
   }
@@ -346,9 +346,9 @@ body {
   /* Felder so groß und so weit links, dass die laufenden Ecken Titel und Text nie berühren:
      Titel frei für x < x0 − y, Text frei für x + y > x0 + w + 2h (Bühnenkoordinaten) */
   .cascade-stage {
-    --h: 12cqw;
-    --x0: 64cqw;
-    height: calc(var(--h) * 4.8);
+    --h: 14cqw;
+    --x0: 61.5cqw;
+    height: calc(var(--h) * 4.5);
   }
   .cascade-head {
     position: absolute;
@@ -361,7 +361,7 @@ body {
     position: absolute;
     right: 0;
     bottom: 0;
-    width: 27cqw;
+    width: 26cqw;
     padding: 2.2cqw;
   }
 }

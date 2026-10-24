@@ -17,3 +17,6 @@ next-env.d.ts
 .pnpm-store/
 docs/muster-briefe/
 docs/screenshots-website/
+
+# Statischer Export der Firmen-Website (Netlify)
+apps/web/out/

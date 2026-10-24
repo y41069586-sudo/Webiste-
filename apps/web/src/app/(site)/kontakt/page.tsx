@@ -1,4 +1,4 @@
-import { getConfig } from '@wbm/core';
+import { getConfig, getEnv } from '@wbm/core';
 import { PageIntro } from '@/components/site/section';
 import { ContactForm } from './contact-form';
 
@@ -7,15 +7,19 @@ export const metadata = { title: 'Kontakt', description: 'Fragen zum Entwurf, zu
 export default async function ContactPage() {
   const cfg = await getConfig();
   const s = cfg.sender;
+  // Statischer Export (Netlify): kein Server für das Formular – dann nur die direkten Wege
+  const formOn = !getEnv().SITE_STATIC;
   return (
     <>
       <PageIntro eyebrow="Kontakt" title="Schreiben Sie mir.">
         Fragen zum Entwurf, zum Ablauf oder zu den Preisen – ich antworte persönlich.
       </PageIntro>
-      <section className="mx-auto grid max-w-6xl gap-8 px-5 pb-24 lg:grid-cols-[1.5fr_1fr]">
-        <div data-reveal>
-          <ContactForm />
-        </div>
+      <section className={`mx-auto grid gap-8 px-5 pb-24 ${formOn ? 'max-w-6xl lg:grid-cols-[1.5fr_1fr]' : 'max-w-3xl'}`}>
+        {formOn ? (
+          <div data-reveal>
+            <ContactForm />
+          </div>
+        ) : null}
         <aside data-reveal style={{ '--d': '100ms' } as React.CSSProperties} className="space-y-4">
           <div className="card-site p-7">
             <h2 className="font-semibold tracking-[-0.03em] text-[#0f172a]">Direkt</h2>
