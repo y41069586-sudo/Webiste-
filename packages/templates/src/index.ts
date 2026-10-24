@@ -6,6 +6,7 @@ import { handwerkKlar } from './sites/handwerk-klar';
 import { handwerkSolid } from './sites/handwerk-solid';
 import { handwerkWerkstatt } from './sites/handwerk-werkstatt';
 import { PHOTO_TEMPLATES } from './sites/photo-layouts';
+import { PLAKAT_TEMPLATES } from './sites/plakat';
 import type { BranchGroup, RenderInput, TemplateDef } from './types';
 
 export * from './types';
@@ -23,6 +24,7 @@ export const TEMPLATES: TemplateDef[] = [
   beautySoft,
   beautyModern,
   ...PHOTO_TEMPLATES,
+  ...PLAKAT_TEMPLATES,
 ];
 
 export function getTemplate(id: string): TemplateDef {

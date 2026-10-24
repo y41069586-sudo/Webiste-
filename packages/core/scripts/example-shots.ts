@@ -1,12 +1,12 @@
 /**
  * Bilder für „Beispiele“ der Firmen-Website: je Branchengruppe ein Template mit einem klar fiktiven
  * Musterbetrieb (Name „… Muster“), ohne Demo-Banner. Ausgabe nach apps/web/public/beispiele.
- * Dazu kompakte WebP-Varianten für die Website: `{id}-karte.webp` (960 × 600, nur der Kopfbereich bei 1024 px
- * Breite in doppelter Auflösung – groß lesbar statt kleiner Gesamtansicht) und `{id}-hoch.webp` (420 × 525).
- * Für Handwerk und Beauty (ohne Beispielfotos) eine kräftige Vorlage, die farblich zu den Foto-Beispielen passt.
+ * Ausgabe: `{id}-karte.webp` (960 × 600) – nur der Kopfbereich bei 1024 px Breite in doppelter Auflösung,
+ * groß lesbar statt kleiner Gesamtansicht. Alle in der Vorlage „Plakat“ mit je einer anderen knalligen Palette,
+ * damit sich die Beispiele in der Hero-Treppe deutlich unterscheiden.
  * Aufruf: pnpm --filter @wbm/core exec tsx scripts/example-shots.ts
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { renderSite, TEMPLATES, type BranchGroup } from '@wbm/templates';
@@ -23,13 +23,22 @@ export const EXAMPLES: {
   palette?: string;
 }[] = [
   {
+    id: 'gastronomie',
+    group: 'gastronomie',
+    branch: 'restaurant',
+    label: 'Restaurant',
+    name: 'Trattoria Muster',
+    templateId: 'gastronomie-plakat',
+    palette: 'paprika',
+  },
+  {
     id: 'handwerk',
     group: 'handwerk',
     branch: 'maler',
     label: 'Malerbetrieb',
     name: 'Malerei Muster',
-    templateId: 'handwerk-solid',
-    palette: 'anthrazit',
+    templateId: 'handwerk-plakat',
+    palette: 'signalgelb',
   },
   {
     id: 'beauty',
@@ -37,24 +46,31 @@ export const EXAMPLES: {
     branch: 'kosmetikstudio',
     label: 'Kosmetikstudio',
     name: 'Kosmetik Muster',
-    templateId: 'beauty-modern',
-    palette: 'rose',
+    templateId: 'beauty-plakat',
+    palette: 'pink',
   },
-  { id: 'gastronomie', group: 'gastronomie', branch: 'cafe', label: 'Café', name: 'Café Muster', templateId: 'gastronomie-foto' },
   {
     id: 'einzelhandel',
     group: 'einzelhandel',
     branch: 'blumenladen',
     label: 'Blumenladen',
     name: 'Blumen Muster',
-    templateId: '',
+    templateId: 'einzelhandel-plakat',
+    palette: 'limette',
   },
-  { id: 'kurse', group: 'kurse', branch: 'tanzschule', label: 'Tanzschule', name: 'Tanzschule Muster', templateId: '' },
+  {
+    id: 'kurse',
+    group: 'kurse',
+    branch: 'tanzschule',
+    label: 'Tanzschule',
+    name: 'Tanzschule Muster',
+    templateId: 'kurse-plakat',
+    palette: 'tuerkis',
+  },
 ];
 
 interface SharpPipeline {
   resize(w: number, h: number): SharpPipeline;
-  extract(r: { left: number; top: number; width: number; height: number }): SharpPipeline;
   webp(o: { quality: number }): SharpPipeline;
   toFile(p: string): Promise<unknown>;
 }
@@ -85,30 +101,16 @@ async function main(): Promise<void> {
         openingLines: [{ label: 'Montag – Freitag', value: '09:00 – 18:00 Uhr' }],
       },
     });
-    for (const [kind, vp] of [
-      ['desktop', { width: 1280, height: 800, deviceScaleFactor: 1 }],
-      ['karte', { width: 1024, height: 640, deviceScaleFactor: 2 }],
-      ['mobil', { width: 390, height: 780, deviceScaleFactor: 2, isMobile: true }],
-    ] as const) {
-      const shot = await withPage(vp, async (page) => {
-        await page.setContent(html, { waitUntil: 'load' });
-        await imagesPainted(page);
-        return page.screenshot({ type: 'jpeg', quality: kind === 'karte' ? 90 : 72 });
-      });
-      if (kind !== 'karte') writeFileSync(path.join(out, `${ex.id}-${kind}.jpg`), shot);
-      if (kind === 'karte')
-        await sharp(shot)
-          .resize(960, 600)
-          .webp({ quality: 74 })
-          .toFile(path.join(out, `${ex.id}-karte.webp`));
-      else if (kind === 'mobil')
-        await sharp(shot)
-          .extract({ left: 0, top: 0, width: 780, height: 975 })
-          .resize(420, 525)
-          .webp({ quality: 74 })
-          .toFile(path.join(out, `${ex.id}-hoch.webp`));
-      console.log(`${ex.id}-${kind}.jpg ${Math.round(shot.length / 1024)} KB (${t.id})`);
-    }
+    const shot = await withPage({ width: 1024, height: 640, deviceScaleFactor: 2 }, async (page) => {
+      await page.setContent(html, { waitUntil: 'load' });
+      await imagesPainted(page);
+      return page.screenshot({ type: 'jpeg', quality: 90 });
+    });
+    await sharp(shot)
+      .resize(960, 600)
+      .webp({ quality: 76 })
+      .toFile(path.join(out, `${ex.id}-karte.webp`));
+    console.log(`${ex.id}-karte.webp (${t.id} / ${ex.palette ?? t.palettes[0]})`);
   }
   await closeBrowser();
 }

@@ -24,10 +24,11 @@ describe('Paletten (WCAG 2.1 AA)', () => {
 });
 
 describe('Templates', () => {
-  it('3 Templates je Branchengruppe mit je 3 Paletten', () => {
+  it('mindestens 3 Templates je Branchengruppe (5.2) mit je 3 Paletten, darunter „Plakat“', () => {
     for (const g of ['handwerk', 'beauty', 'gastronomie', 'einzelhandel', 'kurse'] as const) {
       const ts = TEMPLATES.filter((t) => t.group === g);
-      expect(ts).toHaveLength(3);
+      expect(ts.length).toBeGreaterThanOrEqual(3);
+      expect(ts.map((t) => t.id)).toContain(`${g}-plakat`);
       for (const t of ts) expect(t.palettes).toHaveLength(3);
     }
   });
