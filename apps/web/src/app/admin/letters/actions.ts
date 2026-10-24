@@ -2,7 +2,19 @@
 
 import { revalidatePath } from 'next/cache';
 import { desc, eq } from 'drizzle-orm';
-import { approveLetter, audit, bulkApproveLetters, enqueue, getConfig, getDb, QUEUES, rejectLetter, schema } from '@wbm/core';
+import {
+  approveLetter,
+  audit,
+  bulkApproveLetters,
+  enqueue,
+  getConfig,
+  getDb,
+  QUEUES,
+  rejectLetter,
+  schema,
+  submitLxpTestJob,
+} from '@wbm/core';
+import { redirect } from 'next/navigation';
 import { actorOf, requireAdmin } from '@/lib/auth';
 
 export async function approveLetterAction(form: FormData): Promise<void> {
@@ -47,4 +59,19 @@ export async function sendApprovedNowAction(): Promise<void> {
   await enqueue(QUEUES.sendApprovedLetters, { triggeredBy: actorOf(s) }, { singletonKey: 'send-approved' });
   await audit(getDb(), { entity: 'job', entityId: QUEUES.sendApprovedLetters, action: 'enqueue', actor: actorOf(s) });
   revalidatePath('/admin/letters');
+}
+
+/** Testauftrag im LetterXpress-Testmodus (Postbox, kein Druck, keine Kosten – auch bei DRY_RUN). */
+export async function lxpTestJobAction(form: FormData): Promise<void> {
+  const s = await requireAdmin();
+  const id = String(form.get('id'));
+  let msg: string;
+  try {
+    const r = await submitLxpTestJob(id, actorOf(s));
+    msg = `Testauftrag ${r.jobId} in der LetterXpress-Postbox (Status ${r.status}). Bisher ${r.count} Testaufträge.`;
+  } catch (err) {
+    msg = `Testauftrag fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`;
+  }
+  revalidatePath(`/admin/letters/${id}`);
+  redirect(`/admin/letters/${id}?hinweis=${encodeURIComponent(msg)}`);
 }

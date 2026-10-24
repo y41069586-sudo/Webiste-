@@ -15,7 +15,8 @@ async function main(): Promise<void> {
   await startWorkers(boss);
   await scheduleCrons(boss, [
     { queue: QUEUES.pipelineTick, cron: '*/5 * * * *' },
-    { queue: QUEUES.syncLetterStatus, cron: '15 */2 * * *' },
+    // Briefstatus alle 30 Minuten (LetterXpress ohne Webhooks, B5.2)
+    { queue: QUEUES.syncLetterStatus, cron: '*/30 * * * *' },
     { queue: QUEUES.followup, cron: '5 9 * * *' },
     // Lead-Finder wöchentlich (montags früh); abschaltbar über segments.weeklyLeadFinder
     { queue: QUEUES.findLeads, cron: '20 5 * * 1' },

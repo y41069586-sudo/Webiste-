@@ -50,6 +50,13 @@
       "when": 1792789460841,
       "tag": "0006_l2_slots_truthcheck",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792818698972,
+      "tag": "0007_l3_delivery",
+      "breakpoints": true
     }
   ]
 }

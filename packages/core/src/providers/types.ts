@@ -108,6 +108,10 @@ export interface MailProvider {
   send(pdf: Buffer, opts: LetterSendOptions): Promise<LetterSendResult>;
   getStatus(providerLetterId: string): Promise<{ status: ProviderLetterStatus; costCents?: number }>;
   cancel?(providerLetterId: string): Promise<void>;
+  /** Guthaben beim Anbieter (Guthaben-Wächter vor jeder Charge) */
+  getBalance?(): Promise<{ balanceCents: number; currency: string }>;
+  /** test = nur Postbox/Staging, live = echter Druck */
+  readonly mode?: 'test' | 'live';
   verifyWebhook(rawBody: string, headers: Headers): boolean;
   parseWebhook(rawBody: string): LetterWebhookEvent[];
 }

@@ -1,17 +1,25 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { and, desc, eq } from 'drizzle-orm';
-import { getDb, schema, type TruthCheckResult } from '@wbm/core';
+import { getDb, getProviders, schema, type TruthCheckResult } from '@wbm/core';
 import { Badge, Card, PageHeader, StatusBadge, btn, input } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
-import { approveLetterAction, rejectLetterAction } from '../actions';
+import { approveLetterAction, lxpTestJobAction, rejectLetterAction } from '../actions';
 
 export const metadata = { title: 'Brief' };
 
-export default async function LetterDetail({ params }: { params: Promise<{ id: string }> }) {
+export default async function LetterDetail({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ hinweis?: string }>;
+}) {
   await requireAdmin();
   const { id } = await params;
+  const { hinweis } = await searchParams;
+  const mail = getProviders().mail;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const db = getDb();
   const letter = await db.query.letters.findFirst({ where: eq(schema.letters.id, id) });
@@ -75,6 +83,24 @@ export default async function LetterDetail({ params }: { params: Promise<{ id: s
                     Verwerfen
                   </button>
                 </div>
+              </form>
+            </Card>
+          ) : null}
+          {hinweis ? (
+            <Card title="Hinweis">
+              <p className="text-sm">{hinweis}</p>
+            </Card>
+          ) : null}
+          {mail.name === 'letterxpress' && mail.mode === 'test' && truth?.passed && letter.pdfStorageKey ? (
+            <Card title="LetterXpress-Testmodus">
+              <p className="mb-3 text-sm text-slate-600">
+                Überträgt dieses PDF in die Postbox – kein Druck, keine Kosten, nach 7 Tagen gelöscht.
+              </p>
+              <form action={lxpTestJobAction}>
+                <input type="hidden" name="id" value={letter.id} />
+                <button className={btn.secondary} type="submit">
+                  Testauftrag an LetterXpress
+                </button>
               </form>
             </Card>
           ) : null}

@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const sw = effectiveSwitches(await getConfig());
   return (
     <div className="min-h-screen lg:flex">
-      <aside className="border-b border-slate-200 bg-white lg:sticky lg:top-0 lg:h-screen lg:w-60 lg:shrink-0 lg:border-r lg:border-b-0">
+      <aside className="border-b border-slate-200 bg-white lg:sticky lg:top-0 lg:h-screen lg:w-60 lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-b-0">
         <div className="flex items-center justify-between px-4 py-4">
           <Link href="/admin" className="font-semibold tracking-tight">
             Website-Brief

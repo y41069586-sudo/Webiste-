@@ -222,6 +222,10 @@ export const letters = pgTable(
     deliveredAt: ts('delivered_at'),
     /** Playbook-Branche des Leads beim Erzeugen (B7) */
     industry: text('industry').$type<Industry>(),
+    /** Scan vor der geschätzten Zustellung korrigiert die Schätzung (B5.2) */
+    deliveryCorrectedAt: ts('delivery_corrected_at'),
+    /** Rücksendung „unzustellbar“, manuell erfasst (B6.1) */
+    undeliverable: boolean('undeliverable').default(false).notNull(),
     /** Ergebnis des Wahrheits-Checks (B5.4) – kein Versand ohne passed */
     truthCheckJson: jsonb('truth_check_json').$type<Record<string, unknown>>(),
     createdAt: createdAt(),

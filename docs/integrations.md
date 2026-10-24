@@ -61,6 +61,53 @@ regularOpeningHours, nextPageToken`
 - **Kosten:** jede Anfrage wird mit Token-Zahlen im Budget-Ledger (Kategorie `llm`) gebucht.
 - Code: `packages/core/src/providers/llm/anthropic.ts`, `packages/core/src/services/llm.ts`
 
+## LetterXpress – Briefversand (aktiv ab L3, nur Testmodus freigegeben)
+
+Geprüft am 24.10.2026: offizielle PDF-Dokumentation `https://www.letterxpress.de/storage/files/lxp-api_dokumentation.pdf`
+(„Stand Juli 2026“, 35 Seiten, vollständig gelesen) und Formblatt `https://www.letterxpress.de/storage/files/formblatt-letterxpress-pdf.pdf`
+(Stand 20.11.2025). Erreichbarkeit geprüft: `GET https://api.letterxpress.de/v3/balance` ohne gültige Daten → `401 {"message":"Unauthorized."}`.
+
+- **Allgemein:** JSON (`Content-Type: application/json`), Basis `https://api.letterxpress.de/v3`, 50 MB je PDF/Request,
+  **120 Requests/Minute** (wir: höchstens 100/Minute, Sliding Window). Das Objekt `auth: { username, apikey, mode }`
+  gehört in **jeden** Request – auch in GET-Requests als JSON-Body (daher `node:https`, `fetch` erlaubt keinen GET-Body).
+  API-Key im Kundenbereich unter _Mein Konto → Zugangsdaten → LXP API_.
+- **Modi:** `test` legt Aufträge in die Postbox (Status `draft`), dort prüfen, löschen oder von Hand versenden; nach
+  7 Tagen automatisch gelöscht. `live` überträgt direkt.
+- **Endpunkte (genutzt):** `GET /balance` (Guthaben), `GET /price` (Preis; `letter.specification` mit `pages`, `color`,
+  `mode`, `shipping` national/international), `GET /printjobs?filter=queue|hold|done|canceled|draft` (neu → alt,
+  15 je Seite), `POST /printjobs` (Auftrag), `GET /printjobs/{id}` (Einzelauftrag), `DELETE /printjobs/{id}` (nur
+  innerhalb von 15 Minuten, nicht bei `done`).
+- **Endpunkte (nicht genutzt):** `PUT /printjobs/{id}` (nur Optionen, nicht das PDF, 15 Minuten), `/emailjobs*`
+  (SMART@MAIL), `/journal`, `/transactions`, `/invoices`.
+- **Letter-Objekt (genutzt):** `base64_file`, `base64_file_checksum` (MD5 des Base64-Strings), `specification`
+  `{ color: "1"|"4", mode: "simplex"|"duplex", shipping: "national"|"international"|"auto" }`,
+  `filename_original`, `notice` (max. 255 Zeichen – unsere Referenz `wbm-{letterId}` für die Idempotenz).
+  Optional `dispatch_date` (yyyy-mm-dd, Zukunft; für das Timing in L7).
+- **Bewusst nicht genutzt:** `bank_form` (Überweisungsträger), `terms_and_conditions` (AGB-Seiten) – Rechnungs-Look;
+  `registered` (Einschreiben), `serial_letter`, `email_letter`, `backgrounds`, `base64_attachments`.
+- **Antwort:** `data` mit `id`, `status` (`queue`, `hold`, `done`, `canceled`, `draft`), `notice`, `items[]` mit
+  `amount` und `vat` (Euro) sowie `status` (`queue`/`sent`); `tracking_code`/`tracking_status` nur bei Einschreiben.
+- **Statusabbildung:** `draft`/`queue`/`hold` → `queued`, `done` oder Position `sent` → `sent`, `canceled` → `cancelled`.
+  Kosten = Summe `amount + vat` (als Kleinunternehmer ohne Vorsteuerabzug zählt brutto).
+- **Nicht dokumentiert:** Webhooks, Zustellbestätigung, Postkarten. Ob `GET /price` brutto oder netto liefert, steht nicht
+  in der Dokumentation – beim ersten Testauftrag mit `items.amount + vat` vergleichen; bis dahin dient der Preis nur
+  als Schätzung, gebucht werden die Positionskosten.
+- **Statuscodes:** 200, 400, 401, 403, 404, 405, 500. Wiederholung (Backoff) nur bei 429/5xx und nur für Abfragen –
+  `POST` wird nie automatisch wiederholt; vor jedem `POST` sucht der Provider einen Auftrag mit gleicher `notice`
+  (Testmodus: `draft`, live: `queue`/`hold`/`done`, jeweils erste Seite).
+- **Anschrift (Formblatt):** Empfängeranschrift in der Box 20 mm von links, 45 mm von oben, 85 × 45 mm; linksbündig,
+  ohne Leerzeilen, Versalhöhe 2,3–4,7 mm, 10–12 pt, Durchschuss 0,5–2,5 mm, heller Hintergrund; 3 mm nicht druckbarer
+  Rand; Bereich des Datamatrix-Codes links unter dem 1. Falz (102 mm) frei lassen. Unser Layout: Anschrift
+  x 25–104,5 mm, y 61–85,5 mm, 10 pt, links bis 25 mm frei → innerhalb der Vorgaben.
+- **Laufzeit:** Postgesetz seit 01.01.2025 – 95 % der Inlandsbriefe am 3. Werktag nach Einlieferung, 99 % am 4.
+  Werktag (Bundesnetzagentur, Qualitätsmonitoring). Daher `DELIVERY_BUSINESS_DAYS=3`; ein QR-Scan vor diesem Datum
+  korrigiert die Schätzung (`letters.delivery_corrected_at`), die beobachtete Laufzeit erscheint unter _Briefe_.
+- **Ablauf vor dem ersten echten Versand (B5.2):** 3 Testaufträge (Brief-Detail → „Testauftrag an LetterXpress“,
+  geht auch bei `DRY_RUN=true`, nur mit bestandenem Wahrheits-Check) → in der LetterXpress-Postbox prüfen →
+  `LXP_MODE=live` (erst nach deinem OK) → 1 echter Testbrief an dich → Schalter „Echte Briefe freigegeben“.
+  Das System sperrt `live` ohne 3 Testaufträge, auch für den Testbrief.
+- Code: `packages/core/src/providers/mail/letterxpress.ts`, `packages/core/src/services/sending.ts`
+
 ## Pingen – Briefversand (inaktive Alternative)
 
 > Laut Update 2 ist LetterXpress der vorgesehene Briefdienst (Baustein L3). Der Pingen-Code bleibt als

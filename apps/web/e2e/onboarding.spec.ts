@@ -71,6 +71,8 @@ test.describe('Onboarding bis Go-Live', () => {
     await page.getByRole('button', { name: 'Logo hochladen' }).click();
     await expect(page.getByText('Bild gespeichert.')).toBeVisible();
     await expect(page.getByRole('img', { name: 'Ihr Logo' })).toBeVisible();
+    // Nach dem Neuladen erst hydrieren lassen, sonst greift die Formularprüfung im Browser nicht
+    await page.waitForLoadState('networkidle');
 
     // Absenden ohne Pflichtangaben → Fehler
     await page.getByRole('button', { name: /Angaben absenden/ }).click();
@@ -130,9 +132,12 @@ test.describe('Onboarding bis Go-Live', () => {
     await page.goto(liveUrl);
     await page.getByLabel('Name').fill('Max Muster');
     await page.getByLabel('E-Mail').fill('max@example.net');
+    // Branchenformular (L2b): Titel, Zusatzfeld und Knopf hängen von der Branche ab
+    const wish = page.locator('#f-wish');
+    if (await wish.count()) await wish.fill('Nächste Woche, vormittags');
     await page.getByLabel('Nachricht').fill('Bitte um Rückruf.');
     await page.getByLabel(/Ich bin einverstanden/).check();
-    await page.getByRole('button', { name: 'Nachricht senden' }).click();
+    await page.locator('#frage button[type="submit"]').click();
     await expect(page.getByRole('heading', { name: 'Vielen Dank für Ihre Nachricht' })).toBeVisible();
   });
 });

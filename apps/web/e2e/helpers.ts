@@ -55,7 +55,8 @@ export async function loginAsAdmin(page: Page): Promise<void> {
     await page.getByLabel('2FA-Code').fill(totpNow(s.secret));
     await page.getByRole('button', { name: 'Anmelden' }).click();
     try {
-      await page.waitForURL('**/admin', { timeout: 20_000 });
+      // Kalter Dev-Server kompiliert /admin beim ersten Aufruf – großzügig warten
+      await page.waitForURL('**/admin', { timeout: 60_000 });
       return;
     } catch {
       // nächster Versuch mit neuem Code

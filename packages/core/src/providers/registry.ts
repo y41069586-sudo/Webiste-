@@ -5,6 +5,7 @@ import { NetlifyHosting } from './hosting/netlify';
 import { InwxRegistrar } from './registrar/inwx';
 import { ResendEmail } from './email/resend';
 import { OverpassLeadSource } from './lead-source/overpass';
+import { LetterXpressMailProvider } from './mail/letterxpress';
 import { PingenMailProvider } from './mail/pingen';
 import { StripePayment } from './payment/stripe';
 import type { EmailProvider, HostingProvider, LeadSource, MailProvider, PaymentProvider, RegistrarProvider } from './types';
@@ -21,8 +22,10 @@ export const registry = {
   },
   mail(kind: string, env: Env): MailProvider | undefined {
     if (kind === 'letterxpress') {
-      // Wird mit Baustein L3 gebaut (nach Freigabe); bis dahin bewusst kein stiller Fallback auf Mock
-      throw new Error('MAIL_PROVIDER=letterxpress ist noch nicht angebunden (Baustein L3). Bis dahin MAIL_PROVIDER=mock.');
+      if (!env.LXP_USERNAME || !env.LXP_APIKEY) {
+        throw new Error('MAIL_PROVIDER=letterxpress verlangt LXP_USERNAME und LXP_APIKEY (sonst MAIL_PROVIDER=mock).');
+      }
+      return new LetterXpressMailProvider({ username: env.LXP_USERNAME, apikey: env.LXP_APIKEY, mode: env.LXP_MODE });
     }
     if (kind !== 'pingen') return undefined;
     if (!env.PINGEN_CLIENT_ID || !env.PINGEN_CLIENT_SECRET || !env.PINGEN_ORGANISATION_ID) {

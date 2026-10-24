@@ -379,24 +379,24 @@ ${jsonLd}
   /** Vorschau eines Anfrageformulars (im Entwurf nicht aktiv – Fragen gehen dort an den Ersteller) */
   const requestPreview = (o: IndustrySectionClasses) => {
     if (!request.wish) return '';
-    const field = (id: string, label: string, type = 'text') =>
-      `<div><label for="v-${id}" class="mb-1 block text-sm font-medium">${esc(label)}</label><input id="v-${id}" type="${type}" class="${o.inputClass}" disabled></div>`;
+    // Bild eines Formulars statt echter Felder: keine doppelten Beschriftungen neben dem Frageformular
+    const field = (label: string, tall = false) =>
+      `<div><span class="mb-1 block text-sm font-medium">${esc(label)}</span><span class="block w-full rounded-lg border border-line bg-surface ${tall ? 'h-20' : 'h-11'}"></span></div>`;
     return `<section id="anfrage" aria-labelledby="anfrage-titel" class="${o.altSectionClass}">
   <div class="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-5">
     <div class="md:col-span-2">
       <h2 id="anfrage-titel" class="${o.titleClass}">${esc(request.title)}</h2>
       <p class="mt-3 text-muted">${esc(request.intro)}</p>
-      ${example('Vorschau: Im Entwurf ist dieses Formular noch nicht aktiv. Nach dem Start kommen Anfragen direkt per E-Mail zu Ihnen.')}
+      ${example(`Vorschau: Formular mit Name, E-Mail, „${esc(request.wish)}“ und Nachricht. Im Entwurf noch nicht aktiv – nach dem Start kommen Anfragen direkt per E-Mail zu Ihnen.`)}
     </div>
-    <div class="${o.cardClass} md:col-span-3" role="group" aria-label="${esc(request.title)} (Vorschau, nicht aktiv)">
-      <fieldset disabled class="grid gap-4 sm:grid-cols-2">
-        <legend class="sr-only">${esc(request.title)} (Vorschau, nicht aktiv)</legend>
-        ${field('name', 'Name')}
-        ${field('email', 'E-Mail', 'email')}
-        <div class="sm:col-span-2">${field('wish', request.wish)}</div>
-        <div class="sm:col-span-2"><label for="v-msg" class="mb-1 block text-sm font-medium">Nachricht</label><textarea id="v-msg" rows="3" class="${o.inputClass}"></textarea></div>
-        <div class="sm:col-span-2"><button type="button" class="${o.buttonClass}">${esc(request.button)}</button></div>
-      </fieldset>
+    <div class="${o.cardClass} md:col-span-3" aria-hidden="true">
+      <div class="grid gap-4 sm:grid-cols-2">
+        ${field('Name')}
+        ${field('E-Mail')}
+        <div class="sm:col-span-2">${field(request.wish)}</div>
+        <div class="sm:col-span-2">${field('Nachricht', true)}</div>
+        <div class="sm:col-span-2"><span class="${o.buttonClass}">${esc(request.button)}</span></div>
+      </div>
     </div>
   </div>
 </section>`;

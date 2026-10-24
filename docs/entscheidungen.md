@@ -67,6 +67,20 @@ stehen am Ende.
 | Suchbranchen                                | Restaurant und Café aktiv (erste Charge B10: Gastronomie, Handwerk, Beauty); Blumenladen, Modegeschäft, Yogastudio, Tanzschule angelegt, aber aus | B10                                                                             |
 | Dienstleistung                              | Kein eigenes Template; nutzt die Gruppe der Suchbranche                                                                                           | Fallback-Branche ohne eigene Suche                                              |
 
+## Baustein L3: LetterXpress (umgesetzt, nur Testmodus)
+
+| Thema             | Entscheidung                                                                                                                                                                | Grund                                                                                          |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Transport         | `node:https` statt `fetch`                                                                                                                                                  | Die API verlangt `auth` als JSON-Body auch bei GET                                             |
+| Idempotenz        | Referenz `wbm-{letterId}` in `notice`; vor jedem POST Suche nach gleicher Referenz in der ersten Seite der passenden Liste; POST wird nie automatisch wiederholt            | Keine Doppelbriefe bei Absturz oder Zeitüberschreitung                                         |
+| Rate-Limit        | Sliding Window 100/Minute im Prozess                                                                                                                                        | Puffer zum Limit von 120/Minute                                                                |
+| Testaufträge      | Eigene Aktion, auch bei `DRY_RUN=true`, nur mit `LXP_MODE=test` und bestandenem Wahrheits-Check; Zähler `lxp_test_jobs`                                                     | Testmodus druckt nichts und kostet nichts; Postbox-Aufträge ließen sich aber von Hand absenden |
+| Live-Sperre       | `LXP_MODE=live` verlangt 3 Testaufträge (auch für den Testbrief) und für echte Leads die Freischaltung                                                                      | B5.2: 3 Testaufträge → 1 echter Brief an dich → echte Leads                                    |
+| Guthaben-Wächter  | Vor jeder Charge: Guthaben ≥ Summe der geschätzten Kosten, sonst Stopp + Meldung                                                                                            | B5.2                                                                                           |
+| Zustellung        | Polling alle 30 Minuten; `done` → versendet, geschätzte Zustellung = Versand + 3 Werktage; danach gilt der Brief als zugestellt; ein früherer Scan korrigiert die Schätzung | B5.2, PostG-Laufzeiten                                                                         |
+| `lxp_job_id` (B7) | Nicht als eigene Spalte – `letters.provider_letter_id` mit `provider = 'letterxpress'`                                                                                      | Gleiche Information, kein Doppelfeld                                                           |
+| Postkarten        | Nicht gebaut                                                                                                                                                                | In der Dokumentation (Juli 2026) nicht vorhanden                                               |
+
 ## Offene Entscheidungen des Betreibers
 
 Siehe die gesammelten Fragen in der Rückmeldung zu Update 2 (Preisdarstellung brutto/netto, Daten für

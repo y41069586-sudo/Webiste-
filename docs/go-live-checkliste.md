@@ -43,6 +43,16 @@ Stand 23.10.2026, eingerichtet über die Stripe-Anbindung (nur Sandbox „Websit
       Live-Zugriff), Live-Secret und `sk_live_…` nur in die Server-`.env`
 - [ ] Live: Geschäftsdaten, Kontoauszugs-Bezeichnung „SEITENWERK“, Auszahlungskonto
 
+## LetterXpress (Briefdienst)
+
+- [ ] LetterXpress-Konto, API-Key unter _Mein Konto → Zugangsdaten → LXP API_ erzeugen
+- [ ] `.env`: `MAIL_PROVIDER=letterxpress`, `LXP_USERNAME`, `LXP_APIKEY`, `LXP_MODE=test`
+- [ ] Guthaben aufladen (Dashboard → Briefe zeigt das Guthaben; der Versand stoppt, wenn es nicht reicht)
+- [ ] 3 Testaufträge über _Brief-Detail → „Testauftrag an LetterXpress“_; in der LetterXpress-Postbox Anschrift,
+      Layout, QR-Code und Preis (`amount` + `vat`) prüfen
+- [ ] Erst nach ausdrücklichem OK: `LXP_MODE=live`, 1 echter Testbrief an die eigene Adresse, QR-Code scannen
+- [ ] Schalter „Echte Briefe freigegeben“ setzen
+
 ## Technik vor dem Start
 
 - [ ] DNS für `APP_HOST`, `DEMO_DOMAIN`, `TRACK_DOMAIN` gesetzt, TLS aktiv

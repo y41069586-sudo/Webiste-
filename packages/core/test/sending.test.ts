@@ -171,7 +171,12 @@ describe('Versand', () => {
     if (sent.state !== 'sent') throw new Error('nicht gesendet');
     await getDb()
       .update(letters)
-      .set({ status: 'sent', sentAt: addDays(new Date(), -5), provider: 'other' })
+      .set({
+        status: 'sent',
+        sentAt: addDays(new Date(), -5),
+        estimatedDeliveredAt: addDays(new Date(), -2),
+        provider: 'other',
+      })
       .where(eq(letters.id, letter.id));
     const r = await syncLetterStatuses();
     expect(r.changed).toBeGreaterThanOrEqual(1);

@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { getEnv } from '../config/env';
 import { effectiveSwitches, getConfig } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
@@ -26,12 +26,34 @@ export type SendResult =
   | { state: 'skipped'; reason: string };
 
 /** Echte Briefe an Leads erst nach erfolgreichem Testbrief (Schalter im Dashboard). */
-export function realLettersGate(providerName: string, isTest: boolean, unlocked: boolean): string | null {
-  if (isTest) return null;
+/** Mindestzahl erfolgreicher Testaufträge im LetterXpress-Testmodus vor dem ersten echten Brief (B5.2) */
+export const LXP_REQUIRED_TEST_JOBS = 3;
+
+/**
+ * Freigabe-Reihenfolge für echte Briefe: (LetterXpress) 3 Testaufträge im Testmodus → 1 echter Testbrief an
+ * den Betreiber → erst nach Freischaltung echte Leads.
+ */
+export function realLettersGate(
+  providerName: string,
+  isTest: boolean,
+  unlocked: boolean,
+  providerMode?: 'test' | 'live',
+  lxpTestJobs = 0,
+): string | null {
   const env = getEnv();
-  const production = providerName === 'pingen' && env.PINGEN_ENV === 'production';
+  const lxpLive = providerName === 'letterxpress' && providerMode === 'live';
+  const production = (providerName === 'pingen' && env.PINGEN_ENV === 'production') || lxpLive;
+  if (lxpLive && lxpTestJobs < LXP_REQUIRED_TEST_JOBS) {
+    return `Erst ${LXP_REQUIRED_TEST_JOBS} Testaufträge im LetterXpress-Testmodus prüfen (bisher ${lxpTestJobs}).`;
+  }
+  if (isTest) return null;
   if (production && !unlocked) return 'Echte Briefe an Leads sind noch gesperrt (erst Testbrief an dich, dann freischalten).';
   return null;
+}
+
+export async function lxpTestJobCount(db: DbOrTx = getDb()): Promise<number> {
+  const r = await db.execute<{ value: number }>(sql`SELECT value FROM counters WHERE name = 'lxp_test_jobs'`);
+  return Number(r.rows[0]?.value ?? 0);
 }
 
 /**
@@ -93,7 +115,13 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     }
   }
   const provider = getProviders().mail;
-  const gate = realLettersGate(provider.name, letter.isTest, sw.realLettersUnlocked);
+  const gate = realLettersGate(
+    provider.name,
+    letter.isTest,
+    sw.realLettersUnlocked,
+    provider.mode,
+    provider.name === 'letterxpress' ? await lxpTestJobCount(db) : 0,
+  );
   if (gate) throw new SendBlockedError(gate);
   // Echte Briefe an Leads erst, wenn Absenderdaten, Rechtstexte und AGB vollständig sind
   if (!letter.isTest && !sw.dryRun) {
@@ -222,6 +250,18 @@ export async function sendApprovedLetters(
     .orderBy(sql`${letters.isTest} DESC`, asc(letters.approvedAt))
     .limit(limit);
   const out = { sent: 0, dryRun: 0, skipped: 0 } as { sent: number; dryRun: number; skipped: number; stoppedBy?: string };
+  // Guthaben-Wächter (B5.2): vor der Charge prüfen, ob das Guthaben beim Briefdienst reicht
+  const cfg = await getConfig({ fresh: true });
+  if (rows.length && !effectiveSwitches(cfg).dryRun) {
+    const guard = await balanceGuard(
+      db,
+      rows.map((r) => r.id),
+    );
+    if (guard) {
+      await raiseAlert(db, { level: 'error', code: 'mail_balance_low', message: guard.message, context: guard.context });
+      return { ...out, stoppedBy: 'BalanceTooLow' };
+    }
+  }
   for (const r of rows) {
     try {
       const res = await sendLetter(r.id, actor);
@@ -241,6 +281,71 @@ export async function sendApprovedLetters(
     }
   }
   return out;
+}
+
+/** Reicht das Guthaben für die geschätzten Kosten der Briefe? null = ja oder Anbieter ohne Guthabenabfrage. */
+export async function balanceGuard(
+  db: DbOrTx,
+  letterIds: string[],
+): Promise<{ message: string; context: Record<string, unknown> } | null> {
+  const provider = getProviders().mail;
+  if (!provider.getBalance) return null;
+  const cfg = await getConfig();
+  const rows = await db.select({ cents: letters.estimatedCostCents }).from(letters).where(inArray(letters.id, letterIds));
+  const needed = rows.reduce((s, r) => s + (r.cents ?? cfg.costs.letterEstimateCents), 0);
+  const { balanceCents } = await provider.getBalance();
+  if (balanceCents >= needed) return null;
+  return {
+    message: `Guthaben beim Briefdienst reicht nicht: ${(balanceCents / 100).toFixed(2)} € verfügbar, ${(needed / 100).toFixed(2)} € nötig. Versand gestoppt – bitte aufladen.`,
+    context: { balanceCents, neededCents: needed, letters: letterIds.length },
+  };
+}
+
+/**
+ * Testauftrag im LetterXpress-Testmodus (B5.2): Brief-PDF in die Postbox übertragen – kein Druck, keine
+ * Kosten, nach 7 Tagen gelöscht. Erlaubt auch bei DRY_RUN, weil im Testmodus nichts versendet wird.
+ * Ändert den Brief nicht; zählt für die Freigabe-Reihenfolge (3 Testaufträge).
+ */
+export async function submitLxpTestJob(
+  letterId: string,
+  actor: string,
+): Promise<{ jobId: string; status: string; count: number }> {
+  const db = getDb();
+  const cfg = await getConfig({ fresh: true });
+  if (effectiveSwitches(cfg).killSwitch) throw new KillSwitchError();
+  const provider = getProviders().mail;
+  if (provider.name !== 'letterxpress' || provider.mode !== 'test') {
+    throw new SendBlockedError('Testaufträge nur mit MAIL_PROVIDER=letterxpress und LXP_MODE=test.');
+  }
+  const letter = await db.query.letters.findFirst({ where: eq(letters.id, letterId) });
+  if (!letter?.pdfStorageKey) throw new Error('Brief oder PDF nicht gefunden');
+  // Aufträge in der Postbox lassen sich beim Anbieter von Hand absenden – daher auch hier nur geprüfte Briefe
+  if ((letter.truthCheckJson as { passed?: boolean } | null)?.passed !== true) {
+    throw new SendBlockedError('Nur Briefe mit bestandenem Wahrheits-Check.');
+  }
+  const pdf = await getProviders().storage.get(letter.pdfStorageKey);
+  if (!pdf) throw new Error('Brief-PDF fehlt');
+  const count = (await lxpTestJobCount(db)) + 1;
+  const res = await provider.send(pdf, {
+    color: cfg.letter.color,
+    deliveryProduct: cfg.letter.deliveryProduct,
+    addressPosition: cfg.letter.addressPosition,
+    recipientCountry: 'DE',
+    pages: letter.pageCount,
+    idempotencyKey: `lxp-test-${letterId}-${count}`,
+    reference: `wbm-test-${letterId}-${count}`,
+  });
+  await db.execute(
+    sql`INSERT INTO counters (name, value) VALUES ('lxp_test_jobs', 1) ON CONFLICT (name) DO UPDATE SET value = counters.value + 1`,
+  );
+  await audit(db, {
+    entity: 'letter',
+    entityId: letterId,
+    action: 'lxp_test_job',
+    actor,
+    context: { jobId: res.providerLetterId, status: res.status, costCents: res.costCents ?? null, count },
+  });
+  return { jobId: res.providerLetterId, status: res.status, count };
 }
 
 const RANK: Record<string, number> = { generated: 0, approved: 1, queued: 2, sent: 3, delivered: 4 };
@@ -281,11 +386,13 @@ export async function applyLetterStatus(
   }
   const target = status === 'delivered' ? 'delivered' : status === 'sent' ? 'sent' : null;
   if (!target || (RANK[letter.status] ?? -1) >= RANK[target]!) return false;
+  // Geschätzte Zustellung ab dem tatsächlichen Druck/Versand (Briefdienste ohne Zustellbestätigung)
+  const sentAt = letter.status === 'sent' ? (letter.sentAt ?? at) : at;
   await db
     .update(letters)
     .set({
       status: target,
-      ...(target === 'sent' ? { sentAt: letter.sentAt ?? at } : {}),
+      ...(target === 'sent' ? { sentAt, estimatedDeliveredAt: addBusinessDays(sentAt, getEnv().DELIVERY_BUSINESS_DAYS) } : {}),
       ...(target === 'delivered' ? { deliveredAt: at, sentAt: letter.sentAt ?? at } : {}),
       updatedAt: new Date(),
     })
@@ -343,24 +450,66 @@ export async function syncLetterStatuses(actor = 'job:sync-letter-status'): Prom
       logger.warn({ letterId: l.id, err: err instanceof Error ? err.message : String(err) }, 'Statusabgleich fehlgeschlagen');
     }
   }
-  const cutoff = addDays(new Date(), -cfg.timing.assumeDeliveredAfterDays);
+  // Ohne Zustellmeldung: zugestellt ab geschätzter Zustellung (Versand + DELIVERY_BUSINESS_DAYS), sonst nach X Tagen
+  const now = new Date();
+  const cutoff = addDays(now, -cfg.timing.assumeDeliveredAfterDays);
   const assume = await db
     .select()
     .from(letters)
-    .where(and(eq(letters.status, 'sent'), lt(letters.sentAt, cutoff), isNotNull(letters.providerLetterId)));
+    .where(
+      and(
+        eq(letters.status, 'sent'),
+        isNotNull(letters.providerLetterId),
+        sql`(${letters.estimatedDeliveredAt} <= ${now} OR (${letters.estimatedDeliveredAt} IS NULL AND ${letters.sentAt} < ${cutoff}))`,
+      ),
+    );
   for (const l of assume) {
-    if (
-      await applyLetterStatus(
-        db,
-        l.providerLetterId!,
-        'delivered',
-        addDays(l.sentAt!, cfg.timing.assumeDeliveredAfterDays),
-        `${actor}:angenommen`,
-      )
-    )
-      changed++;
+    const at = l.estimatedDeliveredAt ?? addDays(l.sentAt!, cfg.timing.assumeDeliveredAfterDays);
+    if (await applyLetterStatus(db, l.providerLetterId!, 'delivered', at, `${actor}:angenommen`)) changed++;
   }
   return { checked: open.length + assume.length, changed };
 }
 
 export { scheduleFollowups } from './followups';
+
+export interface MailProviderOverview {
+  provider: string;
+  mode: 'test' | 'live' | null;
+  balanceCents: number | null;
+  balanceError: string | null;
+  openJobs: number;
+  avgCostCents: number | null;
+  lxpTestJobs: number;
+  requiredTestJobs: number;
+}
+
+/** Überblick für das Dashboard (B8): Guthaben, offene Aufträge, Kosten pro Brief, Testaufträge. */
+export async function mailProviderOverview(): Promise<MailProviderOverview> {
+  const db = getDb();
+  const provider = getProviders().mail;
+  let balanceCents: number | null = null;
+  let balanceError: string | null = null;
+  if (provider.getBalance) {
+    try {
+      balanceCents = (await provider.getBalance()).balanceCents;
+    } catch (err) {
+      balanceError = err instanceof Error ? err.message : String(err);
+    }
+  }
+  const stats = await db.execute<{ open: number; avg: number | null }>(sql`
+    SELECT count(*) FILTER (WHERE status = 'queued')::int AS open,
+           avg(cost_cents) FILTER (WHERE status IN ('sent', 'delivered') AND NOT is_test AND cost_cents IS NOT NULL
+                                   AND sent_at > now() - interval '60 days') AS avg
+    FROM letters`);
+  const s = stats.rows[0];
+  return {
+    provider: provider.name,
+    mode: provider.mode ?? null,
+    balanceCents,
+    balanceError,
+    openJobs: Number(s?.open ?? 0),
+    avgCostCents: s?.avg !== null && s?.avg !== undefined ? Math.round(Number(s.avg)) : null,
+    lxpTestJobs: await lxpTestJobCount(db),
+    requiredTestJobs: LXP_REQUIRED_TEST_JOBS,
+  };
+}

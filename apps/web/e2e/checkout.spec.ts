@@ -20,6 +20,8 @@ test.describe('Checkout', () => {
     await expect(page.getByRole('heading', { name: 'Ihre Website übernehmen' })).toBeVisible();
     await expect(page.getByRole('radio', { name: /Einmalzahlung/ })).toBeChecked();
     await expect(page.getByText('Testmodus')).toBeVisible();
+    // Live-Domainprüfung läuft im Browser – erst nach der Hydrierung tippen
+    await page.waitForLoadState('networkidle');
 
     // Ohne Pflicht-Checkboxen → Fehlermeldungen
     await page.getByLabel('Ihr Name (Vor- und Nachname)').fill('Erika Beispiel');

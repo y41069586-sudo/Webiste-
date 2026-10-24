@@ -15,6 +15,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: 'standalone',
   poweredByHeader: false,
+  // Schwebendes Dev-Symbol verdeckt sonst unten links die Seitenleiste (nur Entwicklung)
+  devIndicators: false,
   transpilePackages: ['@wbm/core', '@wbm/templates'],
   serverExternalPackages: [
     'pg',

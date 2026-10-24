@@ -1,6 +1,15 @@
 import Link from 'next/link';
 import { desc, eq, inArray, sql } from 'drizzle-orm';
-import { budgetStatus, effectiveSwitches, getConfig, getDb, schema, type LetterStatus } from '@wbm/core';
+import {
+  budgetStatus,
+  effectiveSwitches,
+  getConfig,
+  getDb,
+  mailProviderOverview,
+  observedTransit,
+  schema,
+  type LetterStatus,
+} from '@wbm/core';
 import { Badge, Card, Notice, PageHeader, StatusBadge, Table, Td, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
@@ -22,7 +31,7 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
   const db = getDb();
   const cfg = await getConfig();
   const sw = effectiveSwitches(cfg);
-  const [rows, counts, budget] = await Promise.all([
+  const [rows, counts, budget, mail, transit] = await Promise.all([
     db
       .select({
         letter: schema.letters,
@@ -40,6 +49,8 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
       .from(schema.letters)
       .groupBy(schema.letters.status),
     budgetStatus('letter'),
+    mailProviderOverview(),
+    observedTransit(),
   ]);
   const countFor = (t: (typeof TABS)[number]) => counts.filter((c) => t.statuses.includes(c.status)).reduce((s, c) => s + c.n, 0);
   const pendingCost = rows
@@ -77,6 +88,41 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
           </Notice>
         </div>
       ) : null}
+      <section aria-label="Briefdienst" className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <p className="text-xs text-slate-500">Briefdienst</p>
+          <p className="mt-1 font-semibold">
+            {mail.provider}
+            {mail.mode ? (
+              <Badge color={mail.mode === 'live' ? 'red' : 'yellow'}>{mail.mode === 'live' ? 'Live' : 'Testmodus'}</Badge>
+            ) : null}
+          </p>
+          {mail.provider === 'letterxpress' ? (
+            <p className="mt-1 text-xs text-slate-600">
+              Testaufträge: {mail.lxpTestJobs} von {mail.requiredTestJobs}
+            </p>
+          ) : null}
+        </Card>
+        <Card>
+          <p className="text-xs text-slate-500">Guthaben</p>
+          <p className="mt-1 font-semibold">{mail.balanceCents !== null ? eur(mail.balanceCents) : '–'}</p>
+          {mail.balanceError ? <p className="mt-1 text-xs text-red-700">{mail.balanceError}</p> : null}
+        </Card>
+        <Card>
+          <p className="text-xs text-slate-500">Offene Aufträge</p>
+          <p className="mt-1 font-semibold">{mail.openJobs}</p>
+        </Card>
+        <Card>
+          <p className="text-xs text-slate-500">Kosten pro Brief (60 Tage)</p>
+          <p className="mt-1 font-semibold">{mail.avgCostCents !== null ? eur(mail.avgCostCents) : '–'}</p>
+          <p className="mt-1 text-xs text-slate-600">
+            Laufzeit beobachtet:{' '}
+            {transit.medianBusinessDays !== null
+              ? `${transit.medianBusinessDays} Werktage (n = ${transit.samples})`
+              : 'noch keine Daten'}
+          </p>
+        </Card>
+      </section>
       <nav className="mb-4 flex flex-wrap gap-2" aria-label="Filter">
         {TABS.map((t) => (
           <Link key={t.key} href={`/admin/letters?tab=${t.key}`} className={t.key === tab.key ? btn.primary : btn.secondary}>

@@ -1,13 +1,14 @@
-import { and, eq, gte, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, gte, inArray, isNotNull, sql } from 'drizzle-orm';
 import { demoUrl } from '../config/env';
 import { getDb, type DbOrTx } from '../db/client';
-import { demos, events, leads, supportMessages } from '../db/schema';
+import { demos, events, leads, letters, supportMessages } from '../db/schema';
 import { enqueue, QUEUES } from '../queue';
 import type { EventType, LeadStatus } from '../types';
 import { audit } from './audit';
 import { currentDemoForLead } from './demo-review';
 import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
+import { applyLetterStatus } from './sending';
 import { optOutLead } from './suppression';
 import { SHORT_CODE_RE } from '../util/crypto';
 
@@ -81,6 +82,48 @@ export async function findPublicDemo(slug: string, now = new Date()): Promise<De
   return { state: 'ok', demo, lead };
 }
 
+/**
+ * Ein Scan beweist, dass der Brief angekommen ist: liegt die geschätzte Zustellung noch in der Zukunft,
+ * wird sie auf den Scan-Zeitpunkt korrigiert und der Brief als zugestellt markiert (B5.2). Die
+ * korrigierten Briefe liefern die beobachtete Laufzeit (observedTransit).
+ */
+export async function correctDeliveryEstimate(db: DbOrTx, leadId: string, at: Date): Promise<boolean> {
+  const rows = await db
+    .select()
+    .from(letters)
+    .where(
+      and(
+        eq(letters.leadId, leadId),
+        eq(letters.isTest, false),
+        inArray(letters.status, ['queued', 'sent']),
+        isNotNull(letters.providerLetterId),
+        gt(letters.estimatedDeliveredAt, at),
+      ),
+    )
+    .orderBy(desc(letters.sequence))
+    .limit(1);
+  const l = rows[0];
+  if (!l) return false;
+  await db
+    .update(letters)
+    .set({ estimatedDeliveredAt: at, deliveryCorrectedAt: at, sentAt: l.sentAt ?? at })
+    .where(eq(letters.id, l.id));
+  await applyLetterStatus(db, l.providerLetterId!, 'delivered', at, 'public:scan');
+  return true;
+}
+
+/** Beobachtete Laufzeit aus korrigierten Briefen (Werktage zwischen Versand und erstem Scan). */
+export async function observedTransit(db: DbOrTx = getDb()): Promise<{ samples: number; medianBusinessDays: number | null }> {
+  const rows = await db.execute<{ days: number }>(sql`
+    SELECT (SELECT count(*) FROM generate_series(sent_at::date + 1, delivery_corrected_at::date, interval '1 day') d
+            WHERE extract(isodow FROM d) < 6)::int AS days
+    FROM letters WHERE delivery_corrected_at IS NOT NULL AND sent_at IS NOT NULL AND delivery_corrected_at >= sent_at`);
+  const days = rows.rows.map((r) => Number(r.days)).sort((a, b) => a - b);
+  if (!days.length) return { samples: 0, medianBusinessDays: null };
+  const mid = Math.floor(days.length / 2);
+  return { samples: days.length, medianBusinessDays: days.length % 2 ? days[mid]! : (days[mid - 1]! + days[mid]!) / 2 };
+}
+
 /** QR-Scan: Event + Weiterleitung zur aktuellen Demo. */
 export async function handleScan(
   token: string,
@@ -92,7 +135,11 @@ export async function handleScan(
   if (!lead) return { notFound: true };
   const demo = await currentDemoForLead(db, lead.id);
   if (!demo || (demo.expiresAt && demo.expiresAt < new Date()) || lead.status === 'suppressed') return { gone: true };
-  await db.transaction((tx) => recordEvent(tx, { leadId: lead.id, type: 'scan', req, dedupeDaily: true }));
+  await db.transaction(async (tx) => {
+    if (await recordEvent(tx, { leadId: lead.id, type: 'scan', req, dedupeDaily: true })) {
+      await correctDeliveryEstimate(tx, lead.id, new Date());
+    }
+  });
   return { redirect: demoUrl(`/d/${demo.slug}`) };
 }
 
