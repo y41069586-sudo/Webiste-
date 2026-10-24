@@ -150,7 +150,8 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
     guaranteeNote: cfg.guarantee.enabled
       ? `${cfg.guarantee.days} Tage Zufriedenheitsgarantie: Gefällt Ihnen die fertige Website nicht, bekommen Sie Ihr Geld zurück.`
       : null,
-    whatsappUrl: whatsappUrl(cfg, slug),
+    // Über unsere Weiterleitung, damit der Klick gezählt wird (B6.1); Ziel bleibt der wa.me-Link
+    whatsappUrl: whatsappUrl(cfg, slug) ? demoUrl(`/d/${slug}/whatsapp`) : null,
     trust: {
       name: cfg.sender.name,
       intro: cfg.sender.intro,

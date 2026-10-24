@@ -92,3 +92,5 @@ export {
   type TruthViolation,
 } from './letters/truth-check';
 export * from './services/truth-check';
+export * from './services/measurement';
+export * from './services/funnel';

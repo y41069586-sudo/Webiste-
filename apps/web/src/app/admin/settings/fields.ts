@@ -152,6 +152,16 @@ export const SECTIONS: SectionDef[] = [
     ],
   },
   {
+    id: 'metrics',
+    title: 'Messung',
+    description:
+      'Bewertung eines Monatsplans im „Umsatz pro Brief“ (B6.2): 12 Monate × Rate plus erwartete Pflegemonate × 19 € × (1 − Kündigungsquote). Annahmen – mit echten Daten anpassen.',
+    fields: [
+      { path: 'metrics.expectedFollowMonths', label: 'Erwartete Pflegemonate nach der Mindestlaufzeit', type: 'number' },
+      { path: 'metrics.expectedChurnRate', label: 'Erwartete Kündigungsquote nach der Mindestlaufzeit (0–1)', type: 'number' },
+    ],
+  },
+  {
     id: 'leadsource',
     title: 'Lead-Quelle & Compliance',
     description:

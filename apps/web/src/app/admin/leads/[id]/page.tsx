@@ -2,10 +2,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { formatOpeningHours, getConfig, getDb, REJECTION_LABELS, schema, type RejectionReason } from '@wbm/core';
-import { Badge, Card, PageHeader, StatusBadge, Table, Td, btn } from '@/components/ui';
+import { Badge, Card, PageHeader, StatusBadge, Table, Td, btn, input } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
-import { rejectLead, requalifyLead, suppressLead } from '../actions';
+import { markUndeliverableAction, rejectLead, requalifyLead, suppressLead } from '../actions';
 
 export const metadata = { title: 'Lead' };
 
@@ -180,7 +180,7 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
             </Table>
           </Card>
           <Card title={`Briefe (${letters.length})`}>
-            <Table head={['#', 'Status', 'Anbieter', 'Kosten', 'Versendet', 'Zugestellt']} empty="Noch kein Brief">
+            <Table head={['#', 'Status', 'Anbieter', 'Kosten', 'Versendet', 'Zugestellt', '']} empty="Noch kein Brief">
               {letters.map((l) => (
                 <tr key={l.id}>
                   <Td>
@@ -195,7 +195,29 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
                   <Td>{l.provider ?? '–'}</Td>
                   <Td>{eur(l.costCents ?? l.estimatedCostCents)}</Td>
                   <Td>{dt(l.sentAt)}</Td>
-                  <Td>{dt(l.deliveredAt)}</Td>
+                  <Td>
+                    {dt(l.deliveredAt)}
+                    {l.deliveryCorrectedAt ? <div className="text-xs text-slate-500">per Scan bestätigt</div> : null}
+                  </Td>
+                  <Td>
+                    {l.undeliverable ? (
+                      <Badge color="red">unzustellbar</Badge>
+                    ) : !l.isTest && ['sent', 'delivered'].includes(l.status) ? (
+                      <form action={markUndeliverableAction} className="flex items-center gap-2">
+                        <input type="hidden" name="letterId" value={l.id} />
+                        <input type="hidden" name="leadId" value={l.leadId} />
+                        <input
+                          name="confirm"
+                          aria-label="Zur Bestätigung UNZUSTELLBAR eintippen"
+                          placeholder="UNZUSTELLBAR"
+                          className={`${input} w-36 text-xs`}
+                        />
+                        <button type="submit" className={btn.secondary}>
+                          Rücksendung erfassen
+                        </button>
+                      </form>
+                    ) : null}
+                  </Td>
                 </tr>
               ))}
             </Table>

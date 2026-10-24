@@ -69,6 +69,12 @@ export const EVENT_TYPES = [
   'onboarding_submitted',
   'preview_approved',
   'live',
+  // L4 Messung (B6.1)
+  'demo_engagement',
+  'whatsapp_click',
+  'checkout_abandoned',
+  'complaint',
+  'undeliverable',
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 

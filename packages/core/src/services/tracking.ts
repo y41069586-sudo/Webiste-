@@ -128,6 +128,8 @@ export async function observedTransit(db: DbOrTx = getDb()): Promise<{ samples: 
 export async function handleScan(
   token: string,
   req: RequestMeta,
+  /** Kanal: QR-Code oder abgetippte Kurz-URL (B6.1) */
+  via: 'qr' | 'kurz' = 'qr',
 ): Promise<{ redirect: string } | { gone: true } | { notFound: true }> {
   if (!/^[A-Za-z0-9]{16,64}$/.test(token)) return { notFound: true };
   const db = getDb();
@@ -136,7 +138,7 @@ export async function handleScan(
   const demo = await currentDemoForLead(db, lead.id);
   if (!demo || (demo.expiresAt && demo.expiresAt < new Date()) || lead.status === 'suppressed') return { gone: true };
   await db.transaction(async (tx) => {
-    if (await recordEvent(tx, { leadId: lead.id, type: 'scan', req, dedupeDaily: true })) {
+    if (await recordEvent(tx, { leadId: lead.id, type: 'scan', meta: { via }, req, dedupeDaily: true })) {
       await correctDeliveryEstimate(tx, lead.id, new Date());
     }
   });

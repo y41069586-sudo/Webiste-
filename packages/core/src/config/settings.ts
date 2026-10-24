@@ -97,6 +97,15 @@ export const appConfigSchema = z.object({
     /** Zahlungsziel im Forderungsbrief (Tage) */
     claimDueDays: z.number().int().min(7).max(60),
   }),
+  /** Messung (B6.2): Bewertung eines Monatsplans im Umsatz pro Brief */
+  metrics: z
+    .object({
+      /** erwartete Monate „Hosting & Pflege“ nach der Mindestlaufzeit */
+      expectedFollowMonths: z.number().int().min(0).max(60),
+      /** erwarteter Anteil, der nach der Mindestlaufzeit kündigt (0–1) */
+      expectedChurnRate: z.number().min(0).max(1),
+    })
+    .default({ expectedFollowMonths: 12, expectedChurnRate: 0.5 }),
   segments: z.object({
     /** Segment „neu“: neu aufgetaucht mit so vielen Bewertungen (Mindestanzahl entfällt, Mindest-Rating bleibt) */
     newMinRatings: z.number().int().min(0),
@@ -446,6 +455,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     maintenanceAfterDays: 7,
     claimDueDays: 14,
   },
+  metrics: { expectedFollowMonths: 12, expectedChurnRate: 0.5 },
   segments: {
     newMinRatings: 3,
     newMaxRatings: 20,

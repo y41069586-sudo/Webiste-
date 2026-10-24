@@ -419,7 +419,11 @@ export async function fulfillOrder(
     if (order.leadId) {
       await tx
         .insert(events)
-        .values({ leadId: order.leadId, type: 'paid', metaJson: { orderId: order.id, amountCents: order.amountCents } });
+        .values({
+          leadId: order.leadId,
+          type: 'paid',
+          metaJson: { orderId: order.id, amountCents: order.amountCents, plan: order.plan },
+        });
       await transitionLead(tx, order.leadId, 'paid', { actor, soft: true, context: { orderId: order.id } });
     }
     // Gekaufte Demo läuft nicht mehr ab (dient als Grundlage der Kundenseite)
@@ -582,6 +586,12 @@ export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promis
         .set({ status: 'expired', updatedAt: new Date() })
         .where(and(eq(orders.id, order.id), eq(orders.status, 'pending')))
         .returning({ id: orders.id });
+      // Checkout abgebrochen (B6.1) – zählt im Funnel
+      if (res.length && order.leadId) {
+        await db
+          .insert(events)
+          .values({ leadId: order.leadId, type: 'checkout_abandoned', metaJson: { orderId: order.id, plan: order.plan } });
+      }
       return res.length ? 'expired' : 'unchanged';
     }
     case 'charge.refunded':

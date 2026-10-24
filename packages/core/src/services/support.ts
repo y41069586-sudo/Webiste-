@@ -1,7 +1,7 @@
 import { and, desc, eq, or } from 'drizzle-orm';
 import { getConfig, effectiveSwitches } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
-import { changeRequests, customers, leads, orders, sites, supportMessages, suppressionList } from '../db/schema';
+import { changeRequests, customers, events, leads, orders, sites, supportMessages, suppressionList } from '../db/schema';
 import { renderEmail } from '../emails/templates';
 import { emailHash, normalizeBusinessName } from '../leads/normalize';
 import { errInfo, logger } from '../logger';
@@ -327,6 +327,10 @@ export async function processSupportMessage(id: string): Promise<{ status: strin
   } catch (err) {
     logger.warn({ messageId: id, ...errInfo(err) }, 'support: Entwurf fehlgeschlagen');
     draft = { reply: '', needsHuman: true, reason: 'Entwurf fehlgeschlagen' };
+  }
+  // Beschwerde als Ereignis am Lead (Funnel, Sicherheitsnetz B6.7)
+  if (c.class === 'beschwerde' && msg.leadId) {
+    await db.insert(events).values({ leadId: msg.leadId, type: 'complaint', metaJson: { messageId: id } });
   }
   const sw = effectiveSwitches(cfg);
   const escalate = c.class === 'beschwerde' || (c.class === 'opt_out' && isCustomer) || draft.needsHuman || !draft.reply;

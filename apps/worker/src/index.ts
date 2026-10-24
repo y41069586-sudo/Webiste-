@@ -25,6 +25,8 @@ async function main(): Promise<void> {
     { queue: QUEUES.dunning, cron: '40 8 * * *' },
     // Claims: Abgleich mit der Datei und Sperre abgelaufener Quellen (B2)
     { queue: QUEUES.claims, cron: '25 6 * * *' },
+    // Funnel-Sichten (L4) auffrischen
+    { queue: QUEUES.refreshFunnel, cron: '10,40 * * * *' },
     { queue: QUEUES.weeklyOptimizer, cron: '0 18 * * 0' },
     { queue: QUEUES.alertMails, cron: '*/15 * * * *' },
     { queue: QUEUES.imapPoll, cron: '*/5 * * * *', enabled: () => Boolean(env.IMAP_HOST && env.IMAP_USER) },
