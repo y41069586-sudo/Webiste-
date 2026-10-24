@@ -41,6 +41,7 @@ export function sanitizeEngagement(raw: unknown): EngagementPayload | null {
 /** Beacon der Demo-Seite: Verweildauer, Scrolltiefe, angeklickte Abschnitte. */
 export async function recordDemoEngagement(slug: string, raw: unknown, req: RequestMeta): Promise<boolean> {
   if (req.isBot) return false;
+  if (!(await getConfig()).metrics.engagementBeacon) return false;
   const payload = sanitizeEngagement(raw);
   if (!payload) return false;
   const found = await findPublicDemo(slug);

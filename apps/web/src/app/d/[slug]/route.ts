@@ -12,7 +12,7 @@ const EXPIRES_PLACEHOLDER = '__WBM_EXPIRES_LABEL__';
  * /d/{slug}/beacon – keine Speicherung im Browser, keine Kennungen. Erlaubt per CSP-Hash, sonst kein Skript.
  */
 const BEACON_SCRIPT =
-  "(function(){var s=Date.now(),m=0,c={},d=false;function p(){var h=document.documentElement,v=(window.scrollY+window.innerHeight)/Math.max(1,h.scrollHeight);if(v>m)m=v}" +
+  '(function(){var s=Date.now(),m=0,c={},d=false;function p(){var h=document.documentElement,v=(window.scrollY+window.innerHeight)/Math.max(1,h.scrollHeight);if(v>m)m=v}' +
   "window.addEventListener('scroll',p,{passive:true});p();" +
   "document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href^=\"#\"]');if(a){var id=a.getAttribute('href').slice(1);if(/^[a-z0-9-]{1,40}$/.test(id))c[id]=1}});" +
   "function send(){if(d||!navigator.sendBeacon)return;d=true;navigator.sendBeacon(location.pathname.replace(/\\/$/,'')+'/beacon',JSON.stringify({t:Math.round((Date.now()-s)/1000),s:Math.round(m*100),c:Object.keys(c)}))}" +
@@ -42,11 +42,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   }
   const html = await getProviders().storage.get(found.demo.htmlStorageKey ?? '');
   if (!html) return simplePage('Nicht verfügbar', '<p>Der Entwurf ist vorübergehend nicht verfügbar.</p>', 503);
+  const cfg = await getConfig();
   const label = found.demo.expiresAt ? `am ${formatDateDe(found.demo.expiresAt)}` : 'nach Ablauf der Frist';
   await recordEvent(getDb(), { leadId: found.lead.id, type: 'demo_view', req: requestMetaFrom(req.headers), dedupeDaily: true });
   const page = html
     .toString('utf8')
     .replaceAll(EXPIRES_PLACEHOLDER, label)
-    .replace('</body>', `<script>${BEACON_SCRIPT}</script></body>`);
+    .replace('</body>', cfg.metrics.engagementBeacon ? `<script>${BEACON_SCRIPT}</script></body>` : '</body>');
   return new Response(page, { status: 200, headers: DEMO_HEADERS });
 }

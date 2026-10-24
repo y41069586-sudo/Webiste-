@@ -417,13 +417,11 @@ export async function fulfillOrder(
     const cust = customer ?? (await tx.query.customers.findFirst({ where: eq(customers.orderId, order.id) }))!;
 
     if (order.leadId) {
-      await tx
-        .insert(events)
-        .values({
-          leadId: order.leadId,
-          type: 'paid',
-          metaJson: { orderId: order.id, amountCents: order.amountCents, plan: order.plan },
-        });
+      await tx.insert(events).values({
+        leadId: order.leadId,
+        type: 'paid',
+        metaJson: { orderId: order.id, amountCents: order.amountCents, plan: order.plan },
+      });
       await transitionLead(tx, order.leadId, 'paid', { actor, soft: true, context: { orderId: order.id } });
     }
     // Gekaufte Demo läuft nicht mehr ab (dient als Grundlage der Kundenseite)

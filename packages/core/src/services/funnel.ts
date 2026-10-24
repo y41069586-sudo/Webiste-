@@ -81,7 +81,7 @@ const DIM_SQL: Record<FunnelDimension, string> = {
   industry: 'industry',
   variant: 'variant_key',
   segment: 'segment',
-  week: "to_char(week, 'IYYY-\"KW\"IW')",
+  week: 'to_char(week, \'IYYY-"KW"IW\')',
 };
 
 export async function funnelRows(filter: FunnelFilter = {}, db: DbOrTx = getDb()): Promise<FunnelRow[]> {
@@ -114,8 +114,7 @@ export async function funnelRows(filter: FunnelFilter = {}, db: DbOrTx = getDb()
       segment: r.segment !== undefined ? String(r.segment) : undefined,
       week: r.week !== undefined ? String(r.week) : undefined,
       revenueCents:
-        row.purchases_one_time * purchaseValueCents(cfg, 'one_time') +
-        row.purchases_monthly * purchaseValueCents(cfg, 'monthly'),
+        row.purchases_one_time * purchaseValueCents(cfg, 'one_time') + row.purchases_monthly * purchaseValueCents(cfg, 'monthly'),
     };
   });
 }

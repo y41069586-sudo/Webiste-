@@ -15,7 +15,9 @@ import { OPERATOR_TEST_CONFIG, resetDb } from './helpers';
 
 const req: RequestMeta = { ua: 'mobil/safari', ipHash: 'abc123', isBot: false };
 
-async function seedSentLetter(opts: { industry?: 'handwerk' | 'gastronomie'; segment?: 'neu' | 'etabliert'; sentDaysAgo?: number } = {}) {
+async function seedSentLetter(
+  opts: { industry?: 'handwerk' | 'gastronomie'; segment?: 'neu' | 'etabliert'; sentDaysAgo?: number } = {},
+) {
   const db = getDb();
   const sentAt = addDays(new Date(), -(opts.sentDaysAgo ?? 5));
   const [lead] = await db
@@ -96,7 +98,9 @@ describe('Messung und Funnel (L4)', () => {
     // Scan über die Kurz-URL (Kanal wird mitgespeichert)
     expect('redirect' in (await handleScan(lead.trackToken, req, 'kurz'))).toBe(true);
     await recordEvent(db, { leadId: lead.id, type: 'demo_view', req });
-    expect(await recordDemoEngagement(demo.slug, { t: 74, s: 83, c: ['speisekarte', 'uebernehmen', 'BÖSE<script>'] }, req)).toBe(true);
+    expect(await recordDemoEngagement(demo.slug, { t: 74, s: 83, c: ['speisekarte', 'uebernehmen', 'BÖSE<script>'] }, req)).toBe(
+      true,
+    );
     expect(await whatsappRedirect(demo.slug, req)).toMatch(/^https:\/\/wa\.me\/491701234567\?text=/);
     await recordEvent(db, { leadId: lead.id, type: 'cta_click', meta: { plan: 'monthly' }, req });
     const res = await startCheckout(demo.slug, { ...checkoutInput, plan: 'monthly' } as CheckoutInput, req);

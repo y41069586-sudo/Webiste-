@@ -208,7 +208,7 @@ Alerts per E-Mail, tägliche Backups mit Wiederherstellungstest, README mit Betr
 | 4b    | **L2** Branchen-Briefe, Slot-Templates, Wahrheits-Check, Quellenseite, Branchen-Demo-Abschnitte                               | fertig (Muster-PDFs zur Abnahme verschickt)                |
 | 5     | Versand → ersetzt durch **L3** LetterXpress (Provider, Rate-Limiter, Polling, Laufzeitschätzung, Guthaben-Wächter, Testmodus) | fertig im Testmodus; live erst nach 3 Testaufträgen und OK |
 | 6     | Checkout und Rechnung (inkl. Update 2 Teil A: 590 € / 49 €-Plan, Garantie, Abo-Webhooks)                                      | fertig                                                     |
-| 6a    | **L4** Messung (alle Events B6.1, Funnel-Sicht, Zeitfenster, Dashboard-Funnel)                                                | freigegeben                                                |
+| 6a    | **L4** Messung (alle Events B6.1, Funnel-Sicht, Zeitfenster, Dashboard-Funnel)                                                | fertig (Mess-Skript: Rechtsprüfung § 25 TDDDG offen)       |
 | 7     | Onboarding und Go-Live                                                                                                        | fertig                                                     |
 | 8     | Support-Agent                                                                                                                 | fertig                                                     |
 | 9     | KPIs; Optimizer → ersetzt durch **L5** (Optimizer und Statistik) und **L6** (Lern-Agent)                                      | KPIs fertig, L5/L6 freigegeben                             |

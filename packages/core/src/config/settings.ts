@@ -104,8 +104,10 @@ export const appConfigSchema = z.object({
       expectedFollowMonths: z.number().int().min(0).max(60),
       /** erwarteter Anteil, der nach der Mindestlaufzeit kündigt (0–1) */
       expectedChurnRate: z.number().min(0).max(1),
+      /** Verweildauer/Scrolltiefe per Skript auf der Demo messen (abschaltbar, falls die Rechtsprüfung zu § 25 TDDDG es verlangt) */
+      engagementBeacon: z.boolean().default(true),
     })
-    .default({ expectedFollowMonths: 12, expectedChurnRate: 0.5 }),
+    .default({ expectedFollowMonths: 12, expectedChurnRate: 0.5, engagementBeacon: true }),
   segments: z.object({
     /** Segment „neu“: neu aufgetaucht mit so vielen Bewertungen (Mindestanzahl entfällt, Mindest-Rating bleibt) */
     newMinRatings: z.number().int().min(0),
@@ -455,7 +457,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     maintenanceAfterDays: 7,
     claimDueDays: 14,
   },
-  metrics: { expectedFollowMonths: 12, expectedChurnRate: 0.5 },
+  metrics: { expectedFollowMonths: 12, expectedChurnRate: 0.5, engagementBeacon: true },
   segments: {
     newMinRatings: 3,
     newMaxRatings: 20,

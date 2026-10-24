@@ -159,6 +159,11 @@ export const SECTIONS: SectionDef[] = [
     fields: [
       { path: 'metrics.expectedFollowMonths', label: 'Erwartete Pflegemonate nach der Mindestlaufzeit', type: 'number' },
       { path: 'metrics.expectedChurnRate', label: 'Erwartete Kündigungsquote nach der Mindestlaufzeit (0–1)', type: 'number' },
+      {
+        path: 'metrics.engagementBeacon',
+        label: 'Verweildauer und Scrolltiefe auf der Demo messen (Skript, ohne Cookies)',
+        type: 'bool',
+      },
     ],
   },
   {

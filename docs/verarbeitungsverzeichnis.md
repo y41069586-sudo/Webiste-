@@ -36,6 +36,21 @@ Audit-Log für alle Statuswechsel und Löschungen, Löschfristen automatisiert (
 | Rechtsgrundlage | Art. 6 Abs. 1 lit. f DSGVO; keine Cookies, kein Zugriff auf Endgeräte (§ 25 TDDDG nicht berührt)   |
 | Löschfrist      | IP-Hash und Gerätetyp nach 30 Tagen entfernt; Ereignisse ohne diese Angaben bleiben für Kennzahlen |
 
+**Ergänzung L4 (Messung, B6.1):** Zusätzlich zu Scan und Aufruf werden pro Brief gezählt: Kurz-URL statt
+QR (`via`), grobe Verweildauer (5-Sekunden-Stufen, max. 30 Minuten), maximale Scrolltiefe (10-%-Stufen),
+angeklickte Abschnitte der Demo (nur Anker-IDs wie `leistungen`), Klick auf „Seite übernehmen“ und auf
+„Frage per WhatsApp“, Formular-Frage, Checkout gestartet/abgebrochen, Kauf (mit Plan), Opt-out, Beschwerde,
+Rücksendung (unzustellbar). Verweildauer und Scrolltiefe misst ein kleines eingebettetes Skript, das beim
+Verlassen der Seite einmal per `sendBeacon` an die eigene Domain sendet – keine Cookies, kein
+`localStorage`, keine Kennung, keine Drittanbieter; Zuordnung nur über den Pfad der Demo.
+
+> **Zur Rechtsprüfung (§ 25 TDDDG):** Das Skript liest Scroll-Position und Fensterhöhe im Browser aus. Ob
+> das schon ein „Zugriff auf Informationen in der Endeinrichtung“ ist, wird unterschiedlich bewertet; man
+> kann es als für den vom Nutzer gewünschten Dienst nicht unbedingt erforderlich ansehen. Bis zur Klärung
+> ist es eingeschaltet, lässt sich aber unter Einstellungen → Messung abschalten
+> (`metrics.engagementBeacon`) – dann entfallen nur Verweildauer und Scrolltiefe, alle übrigen Ereignisse
+> entstehen serverseitig.
+
 ## 3. Fragen über das Formular der Entwurfsseite und E-Mail-Support
 
 |                 |                                                                                 |
@@ -90,3 +105,4 @@ Audit-Log für alle Statuswechsel und Löschungen, Löschfristen automatisiert (
 - AV-Verträge mit allen Dienstleistern abschließen (siehe [auftragsverarbeiter.md](auftragsverarbeiter.md)).
 - AV-Vertrag für das Kontaktformular der Kundenseiten in AGB/Onboarding aufnehmen.
 - Interessenabwägung zur Briefwerbung dokumentieren (Vorlage: Abschnitt 1).
+- Mess-Skript auf der Demo (Abschnitt 2, Ergänzung L4) rechtlich prüfen lassen: § 25 TDDDG ja/nein.

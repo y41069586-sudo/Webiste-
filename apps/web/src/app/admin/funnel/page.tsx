@@ -60,9 +60,7 @@ function Row({ r }: { r: FunnelRow }) {
       </Td>
       <Td>
         {eur(r.cost_cents)}
-        <div className="text-xs text-slate-500">
-          {r.purchases ? `${eur(Math.round(r.cost_cents / r.purchases))}/Kauf` : '–'}
-        </div>
+        <div className="text-xs text-slate-500">{r.purchases ? `${eur(Math.round(r.cost_cents / r.purchases))}/Kauf` : '–'}</div>
       </Td>
       <Td>{r.letters ? eur(Math.round(r.revenueCents / r.letters)) : '–'}</Td>
     </tr>
@@ -213,8 +211,8 @@ export default async function FunnelPage({
                 ))}
               </Table>
               <p className="mt-3 text-xs text-slate-500">
-                Raten sind Punktwerte ohne Spanne – bei wenigen Briefen überwiegend Zufall. Spannen und Entscheidungsregeln
-                kommen mit dem Optimizer (L5).
+                Raten sind Punktwerte ohne Spanne – bei wenigen Briefen überwiegend Zufall. Spannen und Entscheidungsregeln kommen
+                mit dem Optimizer (L5).
               </p>
             </Card>
           </div>

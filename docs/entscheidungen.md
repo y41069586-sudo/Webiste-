@@ -81,6 +81,20 @@ stehen am Ende.
 | `lxp_job_id` (B7) | Nicht als eigene Spalte – `letters.provider_letter_id` mit `provider = 'letterxpress'`                                                                                      | Gleiche Information, kein Doppelfeld                                                           |
 | Postkarten        | Nicht gebaut                                                                                                                                                                | In der Dokumentation (Juli 2026) nicht vorhanden                                               |
 
+## Baustein L4: Messung (umgesetzt)
+
+| Thema                 | Entscheidung                                                                                                                              | Grund                                                                   |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Zuordnung             | Alle Ereignisse am Lead; Brief und Variante über den Erstbrief (Sequenz 1) des Leads                                                      | Der QR-Token gehört zum Lead; Folgebriefe verwässern den Arm sonst      |
+| Auswertungsfenster    | 45 Tage nach (geschätzter oder per Scan korrigierter) Zustellung, fest in der Sicht; `EVALUATION_WINDOW_DAYS` ≠ 45 erzeugt eine Warnung   | B6.2; materialisierte Sichten lassen sich nicht parametrisieren         |
+| „ausgewertet“         | Brief zählt erst als ausgewertet, wenn sein Fenster abgelaufen ist (`evaluated`, `purchases_evaluated`); Kaufrate im Dashboard nur darauf | Sonst sehen junge Arme schlechter aus, als sie sind                     |
+| Abbruch               | `checkout_abandoned` beim Ablauf der Stripe-Session; zählt, wenn er im Fenster liegt und im Fenster kein Kauf folgt                       | Ein späterer Kauf außerhalb des Fensters soll den Abbruch nicht löschen |
+| Umsatz pro Brief      | Einmalig = 590 €; Monatlich = 12 × 49 € + erwartete Pflegemonate × 19 € × (1 − Kündigungsquote), Annahmen in den Einstellungen            | B6.2                                                                    |
+| Verweildauer/Scroll   | Eingebettetes Skript (CSP-Hash), `sendBeacon` einmal beim Verlassen, Werte grob gestuft; abschaltbar (`metrics.engagementBeacon`)         | Keine Cookies, keine Kennung; Rechtsprüfung § 25 TDDDG offen            |
+| WhatsApp-Klick        | Link auf `/d/{slug}/whatsapp` → Ereignis → 302 auf `wa.me`                                                                                | Ohne Skript messbar                                                     |
+| Unzustellbar          | Rücksendung von Hand im Lead-Detail erfassen (LetterXpress meldet keine Rückläufer)                                                       | Grundlage der Unzustellbar-Bremse (L5)                                  |
+| Auffrischen der Sicht | Job alle 30 Minuten (`REFRESH … CONCURRENTLY`) und Button im Dashboard                                                                    | Dashboard bleibt beim Auffrischen lesbar                                |
+
 ## Offene Entscheidungen des Betreibers
 
 Siehe die gesammelten Fragen in der Rückmeldung zu Update 2 (Preisdarstellung brutto/netto, Daten für
