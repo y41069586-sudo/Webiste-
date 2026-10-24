@@ -1,6 +1,7 @@
 /** Eingabedaten für alle Website-Templates (ohne Abhängigkeit zu @wbm/core). */
 
-export type BranchGroup = 'handwerk' | 'beauty';
+/** Template-Gruppe (Design-Familie); Gastronomie, Einzelhandel und Kurse seit L2 */
+export type BranchGroup = 'handwerk' | 'beauty' | 'gastronomie' | 'einzelhandel' | 'kurse';
 
 /** Playbook-Branche (Update 2, B3) – steuert branchenspezifische Abschnitte und Formulare */
 export type IndustryKey = 'gastronomie' | 'handwerk' | 'beauty' | 'einzelhandel' | 'kurse_training' | 'dienstleistung';
@@ -35,7 +36,19 @@ export type IconKey =
   | 'mail'
   | 'chat'
   | 'eye'
-  | 'flower';
+  | 'flower'
+  | 'cup'
+  | 'plate'
+  | 'bread'
+  | 'glass'
+  | 'bag'
+  | 'tag'
+  | 'gift'
+  | 'book'
+  | 'dumbbell'
+  | 'music'
+  | 'car'
+  | 'mat';
 
 export interface ServiceItem {
   title: string;

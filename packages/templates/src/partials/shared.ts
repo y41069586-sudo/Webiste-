@@ -2,7 +2,8 @@ import { readSiteCss } from '../css';
 import { esc, mapsLink, paragraphs } from '../html';
 import { icon } from '../icons';
 import { getPalette, paletteCssVars } from '../palettes';
-import type { IndustryKey, RenderInput } from '../types';
+import { stockPhotoDataUri, stockPhotos } from '../photos';
+import type { BranchGroup, IndustryKey, RenderInput } from '../types';
 
 export interface SharedParts {
   /** Vollständiges <head>-Element */
@@ -38,6 +39,15 @@ export interface SharedParts {
   gallery(opts?: { sectionClass?: string; titleClass?: string }): string;
   /** Playbook-Branche des Betriebs */
   industry: IndustryKey;
+  /** Entwurf (Demo/Screenshot): Platzhalter und Beispielfotos erlaubt */
+  draft: boolean;
+  /**
+   * Fotos für die Gestaltung: Kundenfotos (Vorschau/Live) oder – nur im Entwurf – lizenzfreie
+   * Beispielfotos der Gruppe. `example` = als „Beispielfoto“ kennzeichnen.
+   */
+  photos(n: number): { src: string; alt: string; example: boolean }[];
+  /** Bild mit Kennzeichnung „Beispielfoto“ (im Entwurf) */
+  figure(photo: { src: string; alt: string; example: boolean }, imgClass: string, figClass?: string): string;
   /**
    * Branchen-Abschnitte (B3): Speisekarte, Einzugsgebiet, „Wir stellen ein“, Kursplan und Vorschau der
    * Anfrageformulare. Nur im Entwurf (Demo/Screenshot) – Platzhalter gehen nie live.
@@ -137,9 +147,25 @@ function offerSection(demo: NonNullable<RenderInput['demo']>): string {
 </section>`;
 }
 
+const GROUP_INDUSTRY: Record<BranchGroup, IndustryKey> = {
+  handwerk: 'handwerk',
+  beauty: 'beauty',
+  gastronomie: 'gastronomie',
+  einzelhandel: 'einzelhandel',
+  kurse: 'kurse_training',
+};
+
+const SCHEMA_TYPE: Record<BranchGroup, string> = {
+  handwerk: 'HomeAndConstructionBusiness',
+  beauty: 'BeautySalon',
+  gastronomie: 'Restaurant',
+  einzelhandel: 'Store',
+  kurse: 'SportsActivityLocation',
+};
+
 export function buildParts(input: RenderInput): SharedParts {
   const { mode, content, facts, demo, live } = input;
-  const industry: IndustryKey = facts.industry ?? facts.group;
+  const industry: IndustryKey = facts.industry ?? GROUP_INDUSTRY[facts.group];
   const request = REQUEST_FORMS[industry];
   const palette = getPalette(input.palette);
   const isDemo = mode === 'demo';
@@ -151,7 +177,7 @@ export function buildParts(input: RenderInput): SharedParts {
   const jsonLd = isLive
     ? `<script type="application/ld+json">${JSON.stringify({
         '@context': 'https://schema.org',
-        '@type': facts.group === 'beauty' ? 'BeautySalon' : 'HomeAndConstructionBusiness',
+        '@type': SCHEMA_TYPE[facts.group],
         name: facts.name,
         address: {
           '@type': 'PostalAddress',
@@ -438,10 +464,28 @@ ${jsonLd}
     return out.join('\n');
   };
 
+  const seed = [...(demo?.slug ?? facts.name)].reduce((a, ch) => a + ch.charCodeAt(0), 0);
+  const photos = (n: number) => {
+    const own = (facts.photos ?? []).filter(() => !isDemo).map((ph) => ({ src: ph.src, alt: ph.alt, example: false }));
+    if (own.length || !draft) return own.slice(0, n);
+    return stockPhotos(facts.group, seed, facts.branchLabel)
+      .slice(0, n)
+      .map((ph) => ({ src: stockPhotoDataUri(ph), alt: ph.alt, example: true }));
+  };
+  const figure = (ph: { src: string; alt: string; example: boolean }, imgClass: string, figClass = '') =>
+    `<figure class="${/\babsolute\b/.test(figClass) ? figClass : `relative ${figClass}`}"><img src="${ph.src}" alt="${esc(ph.alt)}" class="${imgClass}" width="1000" height="750">${
+      ph.example
+        ? '<figcaption class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs font-medium text-white">Beispielfoto</figcaption>'
+        : ''
+    }</figure>`;
+
   return {
     head,
     top: `${skip}${banner}`,
     industry,
+    draft,
+    photos,
+    figure,
     industrySections,
     isDemo,
     isLive,

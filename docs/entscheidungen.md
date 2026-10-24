@@ -53,6 +53,20 @@ stehen am Ende.
 | Doppelte Sperre     | `approveLetter` und `sendLetter` verlangen `passed`; der Versand prüft zusätzlich, dass die verwendeten Claims noch freigegeben und gültig sind                                                                                                                                                                                                            | „Kein Versand ohne passed“                   |
 | Quellenseite        | `/quellen`, automatisch aus `claims` + `claim_usages`: verwendete und gerade nutzbare Claims; nicht mehr genutzte bleiben mit Hinweis sichtbar                                                                                                                                                                                                             | B5.5                                         |
 
+## Baustein L2b/L2c: Branchen-Demos und neue Templates (umgesetzt)
+
+| Thema                                       | Entscheidung                                                                                                                                      | Grund                                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Speisekarte, Sortiment                      | Kategorien als Struktur mit Platzhalterzeilen („Ihr Gericht … –,– €“), Hinweis „Beispiel-Speisekarte“; keine erfundenen Gerichte oder Preise      | Demo zeigt den Aufhänger (B3) ohne erfundene Fakten (5.2)                       |
+| Einzugsgebiet, „Wir stellen ein“, Kursplan  | Deutlich als Beispiel/Platzhalter markiert, nur im Entwurf                                                                                        | Brief verspricht diese Abschnitte                                               |
+| Termin-/Reservierungs-/Probestunden-Anfrage | Im Entwurf als nicht aktive Vorschau (Fragen gehen dort an uns); live wird das Kontaktformular zum Branchenformular mit Zusatzfeld                | keine Anfragen an Betriebe, die nichts beauftragt haben                         |
+| Template-Gruppen                            | Neu: `gastronomie`, `einzelhandel`, `kurse` mit je 3 Templates (Layouts „Foto“, „Split“, „Magazin“) × 3 Paletten (WCAG AA)                        | 5.2: ≥ 3 Templates je Gruppe × 3 Paletten                                       |
+| Fotos                                       | 12 CC0-Fotos über Openverse (StockSnap, Rawpixel), ohne Personen und Marken; Lizenz, Urheber, Quelle in EXIF und `assets/images/manifest.json`    | Antwort 7: nur lizenzfreie Bilder, Metadaten am Bild                            |
+| Fotos live                                  | Nur im Entwurf (als „Beispielfoto“ gekennzeichnet); Vorschau und Live zeigen nur Fotos des Kunden                                                 | Fremde Essensfotos auf einer echten Restaurantseite wären irreführend (§ 5 UWG) |
+| Lizenzprüfung                               | Über den Openverse-Katalog; die Quellseiten blockieren automatische Abrufe – Stichprobe im Browser empfohlen                                      | „Nichts raten“: Prüfweg offen dokumentiert                                      |
+| Suchbranchen                                | Restaurant und Café aktiv (erste Charge B10: Gastronomie, Handwerk, Beauty); Blumenladen, Modegeschäft, Yogastudio, Tanzschule angelegt, aber aus | B10                                                                             |
+| Dienstleistung                              | Kein eigenes Template; nutzt die Gruppe der Suchbranche                                                                                           | Fallback-Branche ohne eigene Suche                                              |
+
 ## Offene Entscheidungen des Betreibers
 
 Siehe die gesammelten Fragen in der Rückmeldung zu Update 2 (Preisdarstellung brutto/netto, Daten für

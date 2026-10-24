@@ -26,7 +26,8 @@ export const LEAD_STATUSES = [
 ] as const;
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
 
-export const BRANCH_GROUPS = ['handwerk', 'beauty'] as const;
+/** Template-Gruppen (Design-Familien); Gastronomie, Einzelhandel und Kurse seit L2 */
+export const BRANCH_GROUPS = ['handwerk', 'beauty', 'gastronomie', 'einzelhandel', 'kurse'] as const;
 export type BranchGroup = (typeof BRANCH_GROUPS)[number];
 
 /** Branchen-Playbooks (Update 2, B3). Gesundheit und Recht sind ausgeschlossen. */

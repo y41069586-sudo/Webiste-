@@ -77,6 +77,15 @@ HARTE REGELN (jeder Verstoß macht den Text unbrauchbar):
 
 FORMAT: Liefere die Inhalte ausschließlich über das Tool „${DEMO_TOOL_NAME}“. Icons wählst du passend zur Leistung aus der vorgegebenen Liste.`;
 
+/** Was „Leistungen“ je Gruppe bedeuten – ohne erfundene Einzelheiten (B3) */
+const GROUP_HINTS: Partial<Record<BranchGroup, string>> = {
+  gastronomie:
+    'Bereiche des Angebots (z. B. Frühstück, Mittagstisch, Kaffee und Kuchen, Getränke) – keine einzelnen Gerichte, keine Zutaten, keine Preise. Sie erscheinen als Kategorien der Speisekarte.',
+  einzelhandel: 'Sortimentsbereiche und Service (z. B. Beratung, Vorab reservieren) – keine Marken, keine Preise.',
+  kurse:
+    'Kursarten und Angebote (z. B. Kurse für Einsteiger, Probestunde) – keine Uhrzeiten, keine Namen, keine Abschlüsse oder Lizenzen.',
+};
+
 const TONES = ['herzlich und nahbar', 'ruhig und sachlich', 'modern und klar', 'warm und einladend', 'bodenständig und direkt'];
 
 export function buildDemoPrompt(f: ContentFacts, seed: number, feedback?: string[]): string {
@@ -90,7 +99,9 @@ export function buildDemoPrompt(f: ContentFacts, seed: number, feedback?: string
     `Öffnungszeiten bekannt: ${f.hasOpeningHours ? 'ja (werden automatisch eingefügt)' : 'nein'}`,
     `Online bisher nur über soziale Netzwerke präsent: ${f.socialOnly ? 'ja' : 'nein'}`,
     `Gewünschte Tonalität: ${TONES[seed % TONES.length]}`,
+    `Design-Gruppe: ${f.group}`,
     `Passende Icons (bevorzugt): ${icons}`,
+    ...(GROUP_HINTS[f.group] ? [`Hinweis zu den Leistungen: ${GROUP_HINTS[f.group]}`] : []),
     `Button-Text: ${f.phone ? 'Aufforderung zum Anrufen oder zur Terminanfrage' : 'Aufforderung zur Anfrage über das Kontaktformular'}`,
   ];
   let prompt = `Erstelle die Texte für den Website-Entwurf dieses Betriebs:\n\n${lines.join('\n')}\n\nAnforderungen: 4–6 Leistungen, 3–4 FAQ, „Über uns“ in zwei kurzen Absätzen.`;

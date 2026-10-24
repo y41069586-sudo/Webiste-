@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { INDUSTRIES, SUPPORT_CLASSES } from '../types';
+import { BRANCH_GROUPS, INDUSTRIES, SUPPORT_CLASSES } from '../types';
 
 /**
  * Fachliche Konfiguration („config.ts“ aus dem Auftrag). Standardwerte stehen hier,
@@ -10,7 +10,7 @@ import { INDUSTRIES, SUPPORT_CLASSES } from '../types';
 export const branchSchema = z.object({
   /** technischer Schlüssel, z. B. `nagelstudio` */
   key: z.string().regex(/^[a-z0-9_-]+$/),
-  group: z.enum(['handwerk', 'beauty']),
+  group: z.enum(BRANCH_GROUPS),
   /** Playbook-Branche (B3); ohne Angabe gilt die Gruppe (handwerk → handwerk, beauty → beauty) */
   industry: z.enum(INDUSTRIES).optional(),
   label: z.string(),
@@ -328,6 +328,76 @@ export const DEFAULT_BRANCHES: BranchConfig[] = [
     googleTypes: ['electrician'],
     weight: 1.1,
     active: true,
+  },
+  // Gastronomie (erste Charge, B10) – Einzelhandel und Kurse zunächst inaktiv
+  {
+    key: 'restaurant',
+    group: 'gastronomie',
+    industry: 'gastronomie',
+    label: 'Restaurant',
+    queries: ['Restaurant'],
+    osmTags: [{ key: 'amenity', value: 'restaurant' }],
+    googleTypes: ['restaurant'],
+    weight: 1,
+    active: true,
+  },
+  {
+    key: 'cafe',
+    group: 'gastronomie',
+    industry: 'gastronomie',
+    label: 'Café',
+    queries: ['Café'],
+    osmTags: [{ key: 'amenity', value: 'cafe' }],
+    googleTypes: ['cafe', 'coffee_shop'],
+    weight: 1,
+    active: true,
+  },
+  {
+    key: 'blumenladen',
+    group: 'einzelhandel',
+    industry: 'einzelhandel',
+    label: 'Blumenladen',
+    queries: ['Blumenladen'],
+    osmTags: [{ key: 'shop', value: 'florist' }],
+    googleTypes: ['florist'],
+    weight: 1,
+    active: false,
+  },
+  {
+    key: 'modegeschaeft',
+    group: 'einzelhandel',
+    industry: 'einzelhandel',
+    label: 'Modegeschäft',
+    queries: ['Boutique', 'Modegeschäft'],
+    osmTags: [{ key: 'shop', value: 'clothes' }],
+    googleTypes: ['clothing_store'],
+    weight: 1,
+    active: false,
+  },
+  {
+    key: 'yogastudio',
+    group: 'kurse',
+    industry: 'kurse_training',
+    label: 'Yogastudio',
+    queries: ['Yogastudio'],
+    osmTags: [{ key: 'sport', value: 'yoga' }],
+    googleTypes: ['yoga_studio'],
+    weight: 1,
+    active: false,
+  },
+  {
+    key: 'tanzschule',
+    group: 'kurse',
+    industry: 'kurse_training',
+    label: 'Tanzschule',
+    queries: ['Tanzschule'],
+    osmTags: [
+      { key: 'amenity', value: 'dancing_school' },
+      { key: 'leisure', value: 'dance' },
+    ],
+    googleTypes: ['dance_school'],
+    weight: 1,
+    active: false,
   },
 ];
 

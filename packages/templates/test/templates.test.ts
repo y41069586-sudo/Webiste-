@@ -25,7 +25,7 @@ describe('Paletten (WCAG 2.1 AA)', () => {
 
 describe('Templates', () => {
   it('3 Templates je Branchengruppe mit je 3 Paletten', () => {
-    for (const g of ['handwerk', 'beauty'] as const) {
+    for (const g of ['handwerk', 'beauty', 'gastronomie', 'einzelhandel', 'kurse'] as const) {
       const ts = TEMPLATES.filter((t) => t.group === g);
       expect(ts).toHaveLength(3);
       for (const t of ts) expect(t.palettes).toHaveLength(3);
@@ -55,13 +55,15 @@ describe('Templates', () => {
         expect(html).toContain('Kein Interesse');
         expect(html).toContain('Frage zu diesem Entwurf');
         expect(html).toContain('hat diese Seite nicht beauftragt');
-        expect(html).toContain('Beispiel-Leistungen');
-        for (const id of ['leistungen', 'ueber-uns', 'oeffnungszeiten', 'frage']) expect(html).toContain(`id="${id}"`);
+        // Gastronomie: im Entwurf ersetzt die Beispiel-Speisekarte den Angebotsabschnitt
+        const offerId = t.group === 'gastronomie' ? 'speisekarte' : 'leistungen';
+        expect(html).toContain(t.group === 'gastronomie' ? 'Beispiel-Speisekarte' : 'Beispiel-Leistungen');
+        for (const id of [offerId, 'ueber-uns', 'oeffnungszeiten', 'frage']) expect(html).toContain(`id="${id}"`);
         expect(html).toContain('openstreetmap.org/search');
         expect(html).not.toMatch(/maps\.google|googleapis|<script(?! type="application\/ld\+json")/);
         expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
         for (const s of sampleContent.services) expect(html).toContain(s.title);
-        expect(html).not.toMatch(/undefined|\[object Object\]|NaN/);
+        expect(html.replace(/data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+/g, '')).not.toMatch(/undefined|\[object Object\]|NaN/);
       });
     }
   }
@@ -104,5 +106,49 @@ describe('Templates', () => {
     expect(html).not.toContain('<script>alert(1)</script>');
     expect(html).not.toContain('<img src=x');
     expect(html).toContain('&lt;script&gt;');
+  });
+});
+
+describe('Beispielfotos (lizenzfrei, nur im Entwurf)', () => {
+  it('Manifest: jede Datei vorhanden, CC0, Quelle, Lizenz auch in den EXIF-Daten', async () => {
+    const { readFileSync } = await import('node:fs');
+    const path = await import('node:path');
+    const { imagesDir, stockPhotoManifest } = await import('../src');
+    const list = stockPhotoManifest();
+    expect(list.length).toBeGreaterThanOrEqual(9);
+    for (const g of ['gastronomie', 'einzelhandel', 'kurse'] as const)
+      expect(list.filter((p) => p.group === g).length, g).toBeGreaterThanOrEqual(3);
+    for (const p of list) {
+      expect(p.license, p.file).toMatch(/^CC0/);
+      expect(p.sourceUrl).toMatch(/^https:\/\//);
+      expect(p.alt.length).toBeGreaterThan(5);
+      const bytes = readFileSync(path.join(imagesDir(), p.file));
+      expect(bytes.length, p.file).toBeLessThan(150_000);
+      expect(bytes.toString('latin1'), `${p.file}: EXIF`).toContain('CC0');
+      expect(bytes.toString('latin1')).toContain(p.sourceUrl);
+    }
+  });
+
+  it('Entwurf zeigt gekennzeichnete Beispielfotos; Vorschau und Live nie', () => {
+    const t = TEMPLATES.find((x) => x.id === 'gastronomie-foto')!;
+    const demo = renderSite(demoInput(t.id, t.palettes[0]!, 'gastronomie'));
+    expect(demo).toContain('data:image/jpeg;base64,');
+    expect(demo).toContain('Beispielfoto');
+    for (const mode of ['preview', 'live'] as const) {
+      const html = renderSite({
+        ...demoInput(t.id, t.palettes[0]!, 'gastronomie'),
+        mode,
+        demo: undefined,
+        live: { formAction: '/api/forms/x', imprintPath: 'impressum.html', privacyPath: 'datenschutz.html' },
+      });
+      expect(html, mode).not.toContain('Beispielfoto');
+      expect(html, mode).not.toContain('data:image/jpeg;base64,');
+    }
+  });
+
+  it('passende Fotos zuerst (Tanzschule → Ballettschuhe)', async () => {
+    const { stockPhotos } = await import('../src');
+    expect(stockPhotos('kurse', 0, 'Tanzschule')[0]!.file).toBe('kurse/ballettschuhe.jpg');
+    expect(stockPhotos('kurse', 0, 'Yogastudio')[0]!.file).toBe('kurse/yogamatte.jpg');
   });
 });

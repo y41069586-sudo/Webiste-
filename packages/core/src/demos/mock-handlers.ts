@@ -1,3 +1,4 @@
+import type { BranchGroup } from '@wbm/templates/types';
 import { registerMockStructured } from '../providers/llm/mock';
 import { DEMO_TOOL_NAME, QA_TOOL_NAME } from './content';
 import { libraryContent } from './library';
@@ -18,7 +19,7 @@ registerMockStructured(DEMO_TOOL_NAME, (req) => {
   const branche = line(req.prompt, 'Branche');
   const key = line(req.prompt, 'Branchen-Schlüssel');
   const stadt = line(req.prompt, 'Stadt');
-  const group = ['nagelstudio', 'kosmetikstudio'].includes(key) ? 'beauty' : 'handwerk';
+  const group = (line(req.prompt, 'Design-Gruppe') || 'handwerk') as BranchGroup;
   return libraryContent(key, group, { name, stadt, branche }, seedOf(name));
 });
 

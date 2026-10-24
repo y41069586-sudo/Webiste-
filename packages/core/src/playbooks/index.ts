@@ -150,7 +150,13 @@ export function exclusionFor(place: RawPlace): ExclusionHit | null {
 }
 
 /** Standard-Branche einer Suchbranche (Template-Gruppe), falls sie keine eigene angibt. */
-const GROUP_INDUSTRY: Record<BranchGroup, Industry> = { handwerk: 'handwerk', beauty: 'beauty' };
+const GROUP_INDUSTRY: Record<BranchGroup, Industry> = {
+  handwerk: 'handwerk',
+  beauty: 'beauty',
+  gastronomie: 'gastronomie',
+  einzelhandel: 'einzelhandel',
+  kurse: 'kurse_training',
+};
 
 export function branchIndustry(branch: Pick<BranchConfig, 'group' | 'industry'>): Industry {
   return branch.industry ?? GROUP_INDUSTRY[branch.group];

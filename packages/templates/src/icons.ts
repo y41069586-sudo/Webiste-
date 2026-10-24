@@ -1,9 +1,22 @@
-import type { IconKey } from './types';
+import type { BranchGroup, IconKey } from './types';
 
 /**
  * Eigene, einfache Linien-Icons (24×24, stroke = currentColor). Frei von Lizenzen Dritter.
  */
 const PATHS: Record<IconKey, string> = {
+  cup: '<path d="M4 8h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3c-.6 1 .6 2 0 3M12 3c-.6 1 .6 2 0 3"/>',
+  plate:
+    '<circle cx="12" cy="13" r="7"/><circle cx="12" cy="13" r="3.5"/><path d="M3 3v6a2 2 0 0 0 2 2M5 3v18M21 3c-1.5 1-2 3-2 5s.5 3 2 3v10"/>',
+  bread: '<path d="M5 11a4 4 0 0 1 0-8h14a4 4 0 0 1 0 8v9H5z"/><path d="M9 7v2M12 7v2M15 7v2"/>',
+  glass: '<path d="M7 3h10l-1 7a4 4 0 0 1-8 0z"/><path d="M12 14v6M8 21h8"/>',
+  bag: '<path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
+  gift: '<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h14v-8M12 8v13"/><path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8c3 0 6-.5 6-2.5S14 4 12 8z"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h6"/>',
+  dumbbell: '<path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/>',
+  music: '<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
+  car: '<path d="M5 16l1.5-6A2 2 0 0 1 8.4 8.5h7.2a2 2 0 0 1 1.9 1.5L19 16"/><rect x="3" y="14" width="18" height="5" rx="1.5"/><path d="M7 19v2M17 19v2"/>',
+  mat: '<rect x="3" y="6" width="14" height="12" rx="1"/><path d="M17 8a3 3 0 0 1 0 6"/><path d="M20 9v4"/>',
   brush:
     '<path d="M14.5 3.5l6 6-7.5 7.5-6-6z"/><path d="M7 11l-2.5 2.5a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L13 17"/><path d="M4 20l2-2"/>',
   roller:
@@ -50,7 +63,10 @@ export function icon(key: IconKey | string, cls = 'h-6 w-6'): string {
 }
 
 /** Icons, die zu einer Branchengruppe passen (für Prompt und Fallback). */
-export const ICONS_BY_GROUP: Record<'handwerk' | 'beauty', IconKey[]> = {
+export const ICONS_BY_GROUP: Record<BranchGroup, IconKey[]> = {
+  gastronomie: ['cup', 'plate', 'bread', 'glass', 'leaf', 'heart', 'calendar', 'clock', 'check', 'sparkle'],
+  einzelhandel: ['bag', 'tag', 'gift', 'book', 'flower', 'leaf', 'heart', 'sparkle', 'check', 'clock'],
+  kurse: ['dumbbell', 'mat', 'music', 'car', 'heart', 'leaf', 'calendar', 'clock', 'check', 'sparkle'],
   handwerk: [
     'brush',
     'roller',

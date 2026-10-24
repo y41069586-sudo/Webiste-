@@ -5,6 +5,7 @@ import { beautySoft } from './sites/beauty-soft';
 import { handwerkKlar } from './sites/handwerk-klar';
 import { handwerkSolid } from './sites/handwerk-solid';
 import { handwerkWerkstatt } from './sites/handwerk-werkstatt';
+import { PHOTO_TEMPLATES } from './sites/photo-layouts';
 import type { BranchGroup, RenderInput, TemplateDef } from './types';
 
 export * from './types';
@@ -12,8 +13,17 @@ export * from './palettes';
 export { ICON_KEYS, ICONS_BY_GROUP, icon } from './icons';
 export { esc, boldMd } from './html';
 export { readSiteCss, siteCssPath } from './css';
+export { stockPhotoManifest, stockPhotos, imagesDir, type StockPhoto } from './photos';
 
-export const TEMPLATES: TemplateDef[] = [handwerkSolid, handwerkKlar, handwerkWerkstatt, beautyElegant, beautySoft, beautyModern];
+export const TEMPLATES: TemplateDef[] = [
+  handwerkSolid,
+  handwerkKlar,
+  handwerkWerkstatt,
+  beautyElegant,
+  beautySoft,
+  beautyModern,
+  ...PHOTO_TEMPLATES,
+];
 
 export function getTemplate(id: string): TemplateDef {
   const t = TEMPLATES.find((x) => x.id === id);

@@ -36,6 +36,7 @@ const nextConfig: NextConfig = {
       '../../packages/core/claims/**/*',
       '../../packages/core/playbooks/**/*',
       '../../packages/templates/dist/**/*',
+      '../../packages/templates/assets/**/*',
     ],
   },
   turbopack: { root },

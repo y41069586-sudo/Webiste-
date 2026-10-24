@@ -47,8 +47,15 @@ describe('Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Date
         ['minimal', minimalFacts],
       ] as const) {
         it(`${t.id} / ${palette} / ${label}`, async () => {
+          const branchFor = {
+            beauty: 'kosmetikstudio',
+            handwerk: 'elektriker',
+            gastronomie: 'cafe',
+            einzelhandel: 'blumenladen',
+            kurse: 'tanzschule',
+          };
           const content = libraryContent(
-            t.group === 'beauty' ? 'kosmetikstudio' : 'elektriker',
+            branchFor[t.group],
             t.group,
             { name: facts.name, stadt: 'Dortmund', branche: facts.branchLabel },
             3,

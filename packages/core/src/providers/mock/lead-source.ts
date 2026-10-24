@@ -55,6 +55,15 @@ const NAME_PARTS: Record<string, string[]> = {
   ],
 };
 
+Object.assign(NAME_PARTS, {
+  restaurant: ['Trattoria am Markt', 'Gasthaus Lindenhof', 'Bistro Kreuzviertel', 'Taverna Olymp', 'Küche & Tisch', 'Zum Hafen'],
+  cafe: ['Café Pause', 'Kaffeehaus Ruhrblick', 'Café Zuckerstück', 'Bohne & Blatt', 'Café am Park', 'Kaffeeklatsch'],
+  blumenladen: ['Blumen Vogt', 'Blütenzauber', 'Grünwerk Floristik', 'Blumen am Eck', 'Zweig & Blüte', 'Floristik Rose'],
+  modegeschaeft: ['Boutique Elena', 'Kleiderei', 'Modehaus am Markt', 'Stoffwechsel', 'Lieblingsstück', 'Boutique Mira'],
+  yogastudio: ['Yoga Raum', 'Atemzug Yoga', 'Studio Balance', 'Yoga am Hafen', 'Lotus Studio', 'Yogaloft'],
+  tanzschule: ['Tanzschule Takt', 'Tanzwerk', 'Schritt für Schritt', 'Tanzstudio Rhythmus', 'Tanzhaus Süd', 'Studio Tango'],
+});
+
 function pick<T>(arr: readonly T[], n: number): T {
   return arr[n % arr.length]!;
 }

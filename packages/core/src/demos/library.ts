@@ -1,4 +1,4 @@
-import type { IconKey, SiteContent } from '@wbm/templates/types';
+import type { BranchGroup, IconKey, SiteContent } from '@wbm/templates/types';
 
 /**
  * Geprüfte Fallback-Texte je Branche (ohne Zahlen, ohne erfundene Fakten, Sie-Form).
@@ -155,11 +155,157 @@ export const CONTENT_LIBRARY: Record<string, LibraryEntry> = {
       },
     ],
   },
+  restaurant: {
+    headlines: ['Gut essen in {stadt}', 'Willkommen bei {name}', 'Zeit für einen schönen Abend'],
+    sublines: [
+      'Frisch gekocht und mit Freude serviert – bei {name} in {stadt}.',
+      'Ob Mittagspause oder Abendessen: Bei uns nehmen Sie sich Zeit für gutes Essen.',
+    ],
+    services: [
+      { title: 'Mittagstisch', text: 'Wechselnde Gerichte für die Mittagspause.', icon: 'plate' },
+      { title: 'Abendkarte', text: 'Gerichte für einen entspannten Abend mit Familie und Freunden.', icon: 'glass' },
+      { title: 'Vorspeisen und Salate', text: 'Leichte Gerichte zum Teilen oder als Auftakt.', icon: 'leaf' },
+      { title: 'Desserts', text: 'Süßes zum Abschluss.', icon: 'heart' },
+      { title: 'Getränke', text: 'Kalte und warme Getränke passend zum Essen.', icon: 'cup' },
+      {
+        title: 'Feiern und Gruppen',
+        text: 'Sprechen Sie uns an, wenn Sie mit einer größeren Gruppe kommen möchten.',
+        icon: 'calendar',
+      },
+    ],
+    about: [
+      'Bei {name} in {stadt} steht gutes Essen im Mittelpunkt. Wir freuen uns, wenn Sie sich bei uns wohlfühlen und gern wiederkommen.\n\nReservieren Sie Ihren Tisch oder kommen Sie einfach vorbei.',
+    ],
+    cta: ['Tisch reservieren', 'Jetzt anfragen'],
+    faq: [
+      { q: 'Kann ich einen Tisch reservieren?', a: 'Gern – rufen Sie uns an oder nutzen Sie die Reservierungsanfrage.' },
+      { q: 'Gibt es vegetarische Gerichte?', a: 'Fragen Sie uns gern, wir beraten Sie zu unserer aktuellen Karte.' },
+      { q: 'Können wir mit einer Gruppe kommen?', a: 'Sprechen Sie uns an, wir besprechen die Möglichkeiten gemeinsam.' },
+    ],
+  },
+  cafe: {
+    headlines: ['Ihr Café in {stadt}', 'Zeit für eine Pause', 'Willkommen bei {name}'],
+    sublines: [
+      'Kaffee, Kuchen und eine ruhige Ecke für Ihre Pause – bei {name} in {stadt}.',
+      'Kommen Sie vorbei und genießen Sie Ihre Auszeit bei uns.',
+    ],
+    services: [
+      { title: 'Kaffeespezialitäten', text: 'Von klassisch bis mit Milchschaum.', icon: 'cup' },
+      { title: 'Kuchen und Torten', text: 'Süßes für den Nachmittag.', icon: 'heart' },
+      { title: 'Frühstück', text: 'Ein guter Start in den Tag.', icon: 'bread' },
+      { title: 'Kleine Gerichte', text: 'Herzhaftes für zwischendurch.', icon: 'plate' },
+      { title: 'Zum Mitnehmen', text: 'Kaffee und Gebäck für unterwegs.', icon: 'leaf' },
+    ],
+    about: [
+      '{name} ist ein Ort zum Ankommen und Durchatmen in {stadt}. Bei uns können Sie in Ruhe Kaffee trinken, sich verabreden oder einfach eine Pause machen.\n\nWir freuen uns auf Ihren Besuch.',
+    ],
+    cta: ['Tisch anfragen', 'Jetzt anfragen'],
+    faq: [
+      { q: 'Kann ich einen Tisch reservieren?', a: 'Gern – nutzen Sie die Reservierungsanfrage oder rufen Sie uns an.' },
+      { q: 'Gibt es Kaffee zum Mitnehmen?', a: 'Fragen Sie uns gern vor Ort.' },
+      { q: 'Kann ich Kuchen vorbestellen?', a: 'Sprechen Sie uns an – wir klären gemeinsam, was möglich ist.' },
+    ],
+  },
+  blumenladen: {
+    headlines: ['Blumen für jeden Anlass', 'Ihr Blumenladen in {stadt}', 'Frische Blumen bei {name}'],
+    sublines: [
+      'Sträuße, Pflanzen und Gestecke – mit Liebe zusammengestellt bei {name} in {stadt}.',
+      'Ob Geburtstag, Dankeschön oder einfach so: Wir finden die passenden Blumen.',
+    ],
+    services: [
+      { title: 'Sträuße', text: 'Gebunden nach Ihren Wünschen und der Saison.', icon: 'flower' },
+      { title: 'Topfpflanzen', text: 'Grün für Wohnung, Balkon und Büro.', icon: 'leaf' },
+      { title: 'Gestecke', text: 'Für Feiern, Tische und besondere Momente.', icon: 'sparkle' },
+      { title: 'Geschenke', text: 'Kleine Aufmerksamkeiten passend zu den Blumen.', icon: 'gift' },
+      { title: 'Vorbestellung', text: 'Fragen Sie Ihren Strauß vorab an und holen Sie ihn ab.', icon: 'calendar' },
+    ],
+    about: [
+      'Bei {name} in {stadt} dreht sich alles um Blumen und Pflanzen. Wir beraten Sie gern und stellen Sträuße zusammen, die zu Ihrem Anlass passen.\n\nSchauen Sie vorbei oder fragen Sie Ihren Strauß vorab an.',
+    ],
+    cta: ['Strauß anfragen', 'Jetzt anfragen'],
+    faq: [
+      { q: 'Kann ich einen Strauß vorbestellen?', a: 'Gern – nutzen Sie das Anfrageformular oder rufen Sie uns an.' },
+      { q: 'Beraten Sie mich zur Pflege?', a: 'Ja, wir erklären Ihnen gern, wie Ihre Blumen lange schön bleiben.' },
+      { q: 'Gibt es Blumen für besondere Anlässe?', a: 'Sprechen Sie uns an, wir besprechen Ihre Wünsche gemeinsam.' },
+    ],
+  },
+  modegeschaeft: {
+    headlines: ['Mode für jeden Tag', 'Ihr Modegeschäft in {stadt}', 'Neues entdecken bei {name}'],
+    sublines: [
+      'Ausgewählte Mode und persönliche Beratung – bei {name} in {stadt}.',
+      'Kommen Sie vorbei, stöbern Sie in Ruhe und lassen Sie sich beraten.',
+    ],
+    services: [
+      { title: 'Damenmode', text: 'Kleidung für Alltag und besondere Anlässe.', icon: 'tag' },
+      { title: 'Herrenmode', text: 'Von lässig bis elegant.', icon: 'bag' },
+      { title: 'Accessoires', text: 'Taschen, Schals und kleine Begleiter.', icon: 'sparkle' },
+      { title: 'Persönliche Beratung', text: 'Wir nehmen uns Zeit für Ihre Fragen.', icon: 'chat' },
+      { title: 'Vorab reservieren', text: 'Fragen Sie an, ob Ihr Wunschteil vorrätig ist.', icon: 'calendar' },
+    ],
+    about: [
+      '{name} ist ein Modegeschäft in {stadt}. Wir freuen uns, wenn Sie bei uns stöbern und etwas Passendes finden.\n\nKommen Sie vorbei oder fragen Sie einen Artikel vorab an.',
+    ],
+    cta: ['Artikel anfragen', 'Jetzt anfragen'],
+    faq: [
+      { q: 'Kann ich einen Artikel zurücklegen lassen?', a: 'Gern – nutzen Sie die Anfrage oder rufen Sie uns an.' },
+      { q: 'Beraten Sie auch zu Größen und Passform?', a: 'Ja, sprechen Sie uns im Geschäft gern an.' },
+      { q: 'Gibt es Gutscheine?', a: 'Fragen Sie uns gern, wir beraten Sie vor Ort.' },
+    ],
+  },
+  yogastudio: {
+    headlines: ['Yoga in {stadt}', 'Zeit für Bewegung und Ruhe', 'Willkommen bei {name}'],
+    sublines: [
+      'Kurse für Einsteiger und Geübte – in ruhiger Atmosphäre bei {name} in {stadt}.',
+      'Finden Sie Ihren Kurs und fragen Sie eine Probestunde an.',
+    ],
+    services: [
+      { title: 'Kurse für Einsteiger', text: 'Ein ruhiger Einstieg in die Grundlagen.', icon: 'mat' },
+      { title: 'Kurse für Geübte', text: 'Für alle, die ihre Praxis vertiefen möchten.', icon: 'leaf' },
+      { title: 'Entspannung', text: 'Ruhige Stunden zum Abschalten.', icon: 'heart' },
+      { title: 'Probestunde', text: 'Lernen Sie uns unverbindlich kennen.', icon: 'calendar' },
+      { title: 'Einzelstunden', text: 'Auf Anfrage abgestimmt auf Ihre Wünsche.', icon: 'chat' },
+    ],
+    about: [
+      'Bei {name} in {stadt} finden Sie Zeit für Bewegung und Ruhe. Unsere Kurse sind für unterschiedliche Erfahrungen gedacht.\n\nFragen Sie eine Probestunde an – wir melden uns mit einem Termin.',
+    ],
+    cta: ['Probestunde anfragen', 'Jetzt anfragen'],
+    faq: [
+      { q: 'Brauche ich Vorerfahrung?', a: 'Nein, es gibt Kurse für Einsteiger. Fragen Sie uns gern.' },
+      { q: 'Was soll ich mitbringen?', a: 'Bequeme Kleidung genügt. Alles Weitere besprechen wir bei der Anfrage.' },
+      { q: 'Kann ich eine Probestunde machen?', a: 'Gern – nutzen Sie die Anfrage zur Probestunde.' },
+    ],
+  },
+  tanzschule: {
+    headlines: ['Tanzen lernen in {stadt}', 'Willkommen bei {name}', 'Gemeinsam in Bewegung'],
+    sublines: [
+      'Kurse für Paare, Kinder und Erwachsene – bei {name} in {stadt}.',
+      'Finden Sie den passenden Kurs und fragen Sie eine Probestunde an.',
+    ],
+    services: [
+      { title: 'Kurse für Paare', text: 'Gemeinsam die Grundlagen lernen.', icon: 'music' },
+      { title: 'Kinder und Jugendliche', text: 'Bewegung und Spaß in der Gruppe.', icon: 'heart' },
+      { title: 'Kurse für Erwachsene', text: 'Für Einsteiger und Fortgeschrittene.', icon: 'sparkle' },
+      { title: 'Probestunde', text: 'Lernen Sie uns unverbindlich kennen.', icon: 'calendar' },
+      { title: 'Vorbereitung auf Feiern', text: 'Auf Anfrage für besondere Anlässe.', icon: 'chat' },
+    ],
+    about: [
+      '{name} ist Ihre Tanzschule in {stadt}. Bei uns steht die Freude an der Bewegung im Vordergrund.\n\nFragen Sie eine Probestunde an – wir melden uns mit einem Termin.',
+    ],
+    cta: ['Probestunde anfragen', 'Jetzt anfragen'],
+    faq: [
+      { q: 'Kann ich ohne Partner kommen?', a: 'Sprechen Sie uns an, wir finden gemeinsam den passenden Kurs.' },
+      { q: 'Gibt es Kurse für Einsteiger?', a: 'Ja, fragen Sie uns gern nach dem passenden Einstieg.' },
+      { q: 'Kann ich eine Probestunde machen?', a: 'Gern – nutzen Sie die Anfrage zur Probestunde.' },
+    ],
+  },
 };
 
-const GENERIC: Record<'handwerk' | 'beauty', LibraryEntry> = {
+const GENERIC: Record<BranchGroup, LibraryEntry> = {
   handwerk: CONTENT_LIBRARY.maler!,
   beauty: CONTENT_LIBRARY.kosmetikstudio!,
+  gastronomie: CONTENT_LIBRARY.restaurant!,
+  einzelhandel: CONTENT_LIBRARY.blumenladen!,
+  kurse: CONTENT_LIBRARY.yogastudio!,
 };
 
 function fill(s: string, vars: Record<string, string>): string {
@@ -173,7 +319,7 @@ function pick<T>(arr: T[], seed: number, offset = 0): T {
 /** Deterministischer Fallback-Inhalt (seed = Hash der Lead-ID). */
 export function libraryContent(
   branch: string,
-  group: 'handwerk' | 'beauty',
+  group: BranchGroup,
   vars: { name: string; stadt: string; branche: string },
   seed: number,
 ): SiteContent {

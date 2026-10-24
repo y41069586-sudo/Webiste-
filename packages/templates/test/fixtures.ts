@@ -37,7 +37,7 @@ export const sampleFacts: BusinessFacts = {
   ],
 };
 
-export function demoInput(templateId: string, palette: string, group: 'handwerk' | 'beauty' = 'handwerk'): RenderInput {
+export function demoInput(templateId: string, palette: string, group: BusinessFacts['group'] = 'handwerk'): RenderInput {
   return {
     templateId,
     palette,

@@ -231,3 +231,11 @@ Geprüft am 23.10.2026.
   `EMAIL_INBOUND_SECRET` als `?token=` oder als Basic-Auth-Passwort in der Webhook-URL. Antwort 403 stoppt
   Postmark-Wiederholungen.
 - Automatische Antworten (Auto-Submitted, Abwesenheit, Mailer-Daemon) werden erkannt und nie beantwortet.
+
+## Openverse (Beispielfotos, einmalig)
+
+Geprüft am 24.10.2026: API-Schema `https://api.openverse.org/v1/schema/`. Genutzt nur einmalig zum Auswählen
+der Beispielfotos (kein Laufzeit-Zugriff): `GET /v1/images/?q=…&license=cc0&source=stocksnap,rawpixel`,
+Details `GET /v1/images/{id}/` (Felder `license`, `license_version`, `license_url`, `foreign_landing_url`,
+`creator`, `url`). Ergebnis und Lizenz je Bild in `packages/templates/assets/images/manifest.json` und in den
+EXIF-Daten (Copyright, Artist, ImageDescription). Neue Bilder: nur CC0, ohne erkennbare Personen und Marken.

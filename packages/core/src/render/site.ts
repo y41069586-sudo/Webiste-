@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { renderSite, renderSubpage, type BusinessFacts, type RenderInput, type SiteContent } from '@wbm/templates';
+import { getTemplate, renderSite, renderSubpage, type BusinessFacts, type RenderInput, type SiteContent } from '@wbm/templates';
 import { appUrl } from '../config/env';
 import { effectiveSwitches, getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
@@ -190,8 +190,8 @@ function factsFor(ctx: Ctx, assets: PreparedAssets, mode: 'preview' | 'live'): B
   return {
     name: b.name,
     branchLabel: branch?.label ?? ctx.lead?.branch ?? '',
-    group: ctx.lead?.branchGroup ?? (ctx.site.templateId.startsWith('beauty') ? 'beauty' : 'handwerk'),
-    industry: ctx.lead?.industry ?? ctx.lead?.branchGroup ?? undefined,
+    group: ctx.lead?.branchGroup ?? getTemplate(ctx.site.templateId).group,
+    industry: ctx.lead?.industry ?? undefined,
     street: b.street,
     houseNumber: b.houseNumber,
     postalCode: b.postalCode,

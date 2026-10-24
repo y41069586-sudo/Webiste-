@@ -14,9 +14,9 @@ describe('Lead-Finder (Mock-Quelle)', () => {
   it('findet, qualifiziert und begründet Ablehnungen', async () => {
     const s = await findLeads({ actor: 'job:test' });
     expect(s.source).toBe('mock');
-    expect(s.queries).toBe(4); // Dortmund × 4 Branchen
-    expect(s.found).toBe(24);
-    expect(s.qualified + s.rejected).toBe(24);
+    expect(s.queries).toBe(6); // Dortmund × 6 aktive Branchen (Beauty, Handwerk, Gastronomie)
+    expect(s.found).toBe(36);
+    expect(s.qualified + s.rejected).toBe(36);
     expect(s.byReason.has_website).toBeGreaterThan(0);
     expect(s.byReason.incomplete_address).toBeGreaterThan(0);
     const rows = await getDb().select().from(leads);
@@ -24,7 +24,7 @@ describe('Lead-Finder (Mock-Quelle)', () => {
     expect(qualified.length).toBe(s.qualified);
     for (const r of rows.filter((x) => x.status === 'rejected')) expect(r.rejectionReasons.length).toBeGreaterThan(0);
     expect(rows.every((r) => r.trackToken.length >= 24)).toBe(true);
-    expect(rows[0]!.segmentKey).toMatch(/^dortmund:(beauty|handwerk):/);
+    expect(rows[0]!.segmentKey).toMatch(/^dortmund:(beauty|handwerk|gastronomie):/);
     const social = rows.find((r) => r.socialOnly);
     expect(social?.status).not.toBe('rejected');
   });

@@ -1,3 +1,4 @@
+import type { Page } from 'playwright';
 import { withPage } from './browser';
 
 export interface Screenshots {
@@ -5,14 +6,21 @@ export interface Screenshots {
   mobile: Buffer;
 }
 
+/** Wartet, bis alle Bilder dekodiert sind – sonst fehlen eingebettete Fotos im Screenshot. */
+async function imagesPainted(page: Page): Promise<void> {
+  await page.evaluate(() => Promise.all([...document.images].map((i) => i.decode().catch(() => undefined))));
+}
+
 /** Screenshots ohne Banner (Screenshot-Modus): Desktop 1440×900, Mobil 390×844 (2×). */
 export async function takeScreenshots(html: string): Promise<Screenshots> {
   const desktop = await withPage({ width: 1440, height: 900 }, async (page) => {
     await page.setContent(html, { waitUntil: 'load' });
+    await imagesPainted(page);
     return page.screenshot({ type: 'jpeg', quality: 88, fullPage: false });
   });
   const mobile = await withPage({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true }, async (page) => {
     await page.setContent(html, { waitUntil: 'load' });
+    await imagesPainted(page);
     return page.screenshot({ type: 'jpeg', quality: 88, fullPage: false });
   });
   return { desktop, mobile };

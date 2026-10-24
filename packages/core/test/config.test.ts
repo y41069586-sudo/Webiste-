@@ -19,11 +19,20 @@ describe('Konfiguration', () => {
     expect(cfg.timing.followupAfterDays).toBe(12);
     expect(cfg.review.manualReviewFirstN).toBe(30);
     expect(cfg.targeting.cities).toEqual(['Dortmund']);
-    expect(cfg.targeting.branches.map((b) => b.queries[0])).toEqual([
+    // Erste Charge (B10): Beauty, Handwerk, Gastronomie aktiv; Einzelhandel und Kurse vorbereitet, aber aus
+    expect(cfg.targeting.branches.filter((b) => b.active).map((b) => b.queries[0])).toEqual([
       'Nagelstudio',
       'Kosmetikstudio',
       'Malerbetrieb',
       'Elektriker',
+      'Restaurant',
+      'Café',
+    ]);
+    expect(cfg.targeting.branches.filter((b) => !b.active).map((b) => b.group)).toEqual([
+      'einzelhandel',
+      'einzelhandel',
+      'kurse',
+      'kurse',
     ]);
   });
 
