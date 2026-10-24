@@ -1,6 +1,19 @@
 import { z } from 'zod';
 import { BRANCH_GROUPS, INDUSTRIES, SUPPORT_CLASSES } from '../types';
 
+/** Versprechen von Funktionen, die es (noch) nicht gibt – Vorschläge damit werden verworfen. */
+export const DEFAULT_UNSUPPORTED_PROMISES = [
+  'domain\\s+(mitnehmen|übertragen|umziehen)',
+  'vorhandene\\s+domain',
+  'online-?shop',
+  'buchungssystem',
+  'kassensystem',
+  '\\bvideo',
+  'paypal',
+  'kostenlos',
+  'gratis',
+];
+
 /**
  * Fachliche Konfiguration („config.ts“ aus dem Auftrag). Standardwerte stehen hier,
  * Änderungen aus dem Dashboard liegen in der Tabelle `settings` (Schlüssel `app_config`)
@@ -288,6 +301,10 @@ export const appConfigSchema = z.object({
     minLettersForSignal: z.number().int().min(0),
     samples: z.number().int().min(100),
   }),
+  /** Lern-Agent (L6): Versprechen, die Vorschläge nicht enthalten dürfen (Funktionen, die es nicht gibt; Regex) */
+  learning: z
+    .object({ unsupportedPromises: z.array(z.string()) })
+    .default({ unsupportedPromises: [...DEFAULT_UNSUPPORTED_PROMISES] }),
   legal: z.object({
     /** Markdown-Texte, vom Betreiber geliefert. Leer = Platzhalterseite. */
     impressumMarkdown: z.string(),
@@ -652,6 +669,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     minLettersForSignal: 10,
     samples: 4000,
   },
+  learning: { unsupportedPromises: [...DEFAULT_UNSUPPORTED_PROMISES] },
   legal: {
     impressumMarkdown: '',
     privacyMarkdown: '',

@@ -115,6 +115,37 @@ export type SiteStatus = (typeof SITE_STATUSES)[number];
 export const SUPPORT_CLASSES = ['frage', 'aenderungswunsch', 'beschwerde', 'opt_out', 'rechnung', 'spam'] as const;
 export type SupportClass = (typeof SUPPORT_CLASSES)[number];
 
+/** Einwand-Kategorien (L6, B6.5) – vom Support-Agent zusätzlich zur Klasse erkannt */
+export const OBJECTION_CATEGORIES = [
+  'zu_teuer',
+  'habe_social_media',
+  'wer_sind_sie',
+  'domain_vorhanden',
+  'website_vorhanden',
+  'kein_bedarf',
+  'keine_zeit',
+  'laufzeit_vertrag',
+  'angaben_falsch',
+  'sonstiges',
+] as const;
+export type ObjectionCategory = (typeof OBJECTION_CATEGORIES)[number];
+
+export const OBJECTION_LABEL: Record<ObjectionCategory, string> = {
+  zu_teuer: '„zu teuer“',
+  habe_social_media: '„habe schon Instagram/Facebook“',
+  wer_sind_sie: '„wer sind Sie?“ (Vertrauen)',
+  domain_vorhanden: '„Domain schon vorhanden“',
+  website_vorhanden: '„Website vorhanden oder in Arbeit“',
+  kein_bedarf: '„brauche keine Website“',
+  keine_zeit: '„keine Zeit / später“',
+  laufzeit_vertrag: '„Mindestlaufzeit / Abo“',
+  angaben_falsch: '„Angaben im Entwurf falsch“',
+  sonstiges: 'sonstiger Einwand',
+};
+
+export type ExperimentDecision =
+  'proposed' | 'rejected' | 'running' | 'auto_activated' | 'winner' | 'paused_worse' | 'stopped' | 'no_difference';
+
 export type SupportStatus = 'new' | 'classified' | 'drafted' | 'approved' | 'sent' | 'escalated' | 'done' | 'ignored';
 
 export type BudgetCategory = 'letter' | 'places_api' | 'llm' | 'domain' | 'hosting' | 'other';

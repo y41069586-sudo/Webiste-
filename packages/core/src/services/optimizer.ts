@@ -94,7 +94,7 @@ function industryTable(ind: IndustryEvaluation): string {
     '|---|---:|---:|---|---:|---:|---|---:|---|---:|',
     ...ind.arms.map(
       (a) =>
-        `| ${a.label ?? a.arm}${a.eligible ? '' : ' (pausiert)'} | ${a.delivered} | ${a.scans} | ${span(a.scan)} | ${a.evaluated} | ${a.purchases} | ${span(a.purchase, 2)} | ${pct(a.pBetterThanControl, 0)} | ${VERDICT_LABEL[a.verdict]} | ${pct(a.share, 0)} |`,
+        `| ${a.label ?? a.arm}${a.eligible ? '' : ' (pausiert)'} | ${a.delivered} | ${a.scans} | ${a.delivered ? span(a.scan) : '–'} | ${a.evaluated} | ${a.purchases} | ${a.evaluated ? span(a.purchase, 2) : '–'} | ${pct(a.pBetterThanControl, 0)} | ${VERDICT_LABEL[a.verdict]} | ${pct(a.share, 0)} |`,
     ),
   ].join('\n');
 }

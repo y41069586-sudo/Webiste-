@@ -17,13 +17,14 @@ import {
   REPLY_TOOL,
   replySystemPrompt,
 } from '../support/prompts';
-import type { SupportClass } from '../types';
+import type { ObjectionCategory, SupportClass } from '../types';
 import { formatDateLongDe, formatEuro } from '../util/time';
 import { appUrl } from '../config/env';
 import { audit } from './audit';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { llmStructured } from './llm';
 import { optOutLead } from './suppression';
+import { recordObjection } from './objections';
 import { DECEPTION_RE } from './safety-nets';
 
 export type SupportMessage = typeof supportMessages.$inferSelect;
@@ -122,6 +123,7 @@ interface Classification {
   confidence: number;
   reason: string;
   company_name: string;
+  objection?: ObjectionCategory | 'keiner';
 }
 
 async function classify(msg: SupportMessage): Promise<Classification> {
@@ -144,7 +146,7 @@ async function classify(msg: SupportMessage): Promise<Classification> {
     });
   } catch (err) {
     logger.warn({ messageId: msg.id, ...errInfo(err) }, 'support: Klassifizierung fehlgeschlagen');
-    c = { class: 'frage', confidence: 0, reason: 'Klassifizierung fehlgeschlagen', company_name: '' };
+    c = { class: 'frage', confidence: 0, reason: 'Klassifizierung fehlgeschlagen', company_name: '', objection: 'keiner' };
   }
   if (ruleOptOut && c.class !== 'opt_out')
     c = { ...c, class: 'opt_out', confidence: Math.max(c.confidence, 0.9), reason: `Regel: Widerspruch erkannt. ${c.reason}` };
@@ -255,6 +257,17 @@ export async function processSupportMessage(id: string): Promise<{ status: strin
     .set({ classification: c.class, classificationConfidence: c.confidence, status: 'classified', updatedAt: new Date() })
     .where(eq(supportMessages.id, id));
 
+  // Einwand für den Lern-Agent (L6); bei Widerspruch nur die Kategorie, ohne Text und ohne Lead-Bezug
+  if (c.class !== 'spam' && c.objection && c.objection !== 'keiner') {
+    await recordObjection(db, {
+      leadId: c.class === 'opt_out' ? null : msg.leadId,
+      industryFromLeadId: msg.leadId,
+      source: msg.channel === 'form' ? 'form' : 'email',
+      category: c.objection,
+      text: c.class === 'opt_out' ? null : stripQuoted(msg.body),
+      supportMessageId: msg.id,
+    });
+  }
   if (c.class === 'spam') {
     await db.update(supportMessages).set({ status: 'ignored', updatedAt: new Date() }).where(eq(supportMessages.id, id));
     return { status: 'ignored', class: c.class };

@@ -21,12 +21,14 @@ import type {
   ClaimStatus,
   DemoStatus,
   EventType,
+  ExperimentDecision,
   Industry,
   LeadSegment,
   LeadSourceKind,
   LeadStatus,
   LetterFormat,
   LetterStatus,
+  ObjectionCategory,
   OpeningHours,
   OrderPlan,
   OrderStatus,
@@ -825,6 +827,70 @@ export const safetyActions = pgTable(
     createdAt: createdAt(),
   },
   (t) => [uniqueIndex('safety_actions_key_uidx').on(t.key), index('safety_actions_kind_idx').on(t.kind, t.createdAt)],
+);
+
+// ---------------------------------------------------------------------------
+// L6: Lern-Agent – Experimente, Einwände, Wochenberichte (B7)
+// ---------------------------------------------------------------------------
+
+/** Experiment-Logbuch: jede Hypothese mit Varianten, Laufzeit, Ergebnis und Entscheidung (B6.5). */
+export const experiments = pgTable(
+  'experiments',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    industry: text('industry').$type<Industry>(),
+    hypothesis: text('hypothesis').notNull(),
+    variantIds: uuid('variant_ids')
+      .array()
+      .default(sql`'{}'::uuid[]`)
+      .notNull(),
+    controlVariantId: uuid('control_variant_id'),
+    /** geänderter Slot (Ein-Slot-Regel) */
+    changedSlot: text('changed_slot'),
+    startedAt: ts('started_at'),
+    endedAt: ts('ended_at'),
+    resultJson: jsonb('result_json').$type<Record<string, unknown>>().default({}).notNull(),
+    decision: text('decision').$type<ExperimentDecision>().default('proposed').notNull(),
+    notes: text('notes'),
+    createdBy: text('created_by').$type<VariantCreator>().default('learning_agent').notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index('experiments_industry_idx').on(t.industry, t.createdAt)],
+);
+
+/** Einwände aus Formular, E-Mail und WhatsApp (Kategorie bleibt, Text wird nach 90 Tagen gelöscht). */
+export const objections = pgTable(
+  'objections',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    leadId: uuid('lead_id').references(() => leads.id, { onDelete: 'set null' }),
+    industry: text('industry').$type<Industry>(),
+    source: text('source').$type<'whatsapp' | 'form' | 'email'>().notNull(),
+    category: text('category').$type<ObjectionCategory>().notNull(),
+    textHash: text('text_hash').notNull(),
+    /** Originaltext (gekürzt) – nach 90 Tagen gelöscht */
+    text: text('text'),
+    supportMessageId: uuid('support_message_id'),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index('objections_industry_idx').on(t.industry, t.createdAt),
+    uniqueIndex('objections_support_msg_uidx').on(t.supportMessageId),
+  ],
+);
+
+/** Wochenbericht des Lern-Agents (B6.5) – einer je ISO-Woche. */
+export const weeklyReports = pgTable(
+  'weekly_reports',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    week: text('week').notNull(),
+    markdown: text('markdown').notNull(),
+    metricsJson: jsonb('metrics_json').$type<Record<string, unknown>>().default({}).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('weekly_reports_week_uidx').on(t.week)],
 );
 
 export const sqlNow = sql`now()`;

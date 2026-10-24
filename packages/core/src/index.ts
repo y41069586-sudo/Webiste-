@@ -96,6 +96,17 @@ export * from './services/measurement';
 export * from './services/funnel';
 export * from './services/arms';
 export * from './services/safety-nets';
+export * from './services/objections';
+export * from './services/learning';
+export {
+  AUTO_ACTIVATE_SLOTS,
+  MAX_ACTIVE_PER_INDUSTRY,
+  PROPOSAL_SLOTS,
+  SLOT_LABEL,
+  proposalViolations,
+  type LearningAnswer,
+  type ProposalSlot,
+} from './learning/agent';
 export * from './stats/bayes';
 export * from './stats/model';
 export * from './stats/simulate';

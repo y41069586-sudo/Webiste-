@@ -28,6 +28,8 @@ async function main(): Promise<void> {
     // Funnel-Sichten (L4) auffrischen
     { queue: QUEUES.refreshFunnel, cron: '10,40 * * * *' },
     { queue: QUEUES.weeklyOptimizer, cron: '0 18 * * 0' },
+    // Lern-Agent (L6) nach dem Optimizer
+    { queue: QUEUES.learningAgent, cron: '30 18 * * 0' },
     { queue: QUEUES.alertMails, cron: '*/15 * * * *' },
     { queue: QUEUES.imapPoll, cron: '*/5 * * * *', enabled: () => Boolean(env.IMAP_HOST && env.IMAP_USER) },
   ]);

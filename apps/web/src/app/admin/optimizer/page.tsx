@@ -187,11 +187,11 @@ export default async function OptimizerPage({
                       {num(a.scans)}
                       <div className="text-xs text-slate-500">roh {pct(a.delivered ? a.scans / a.delivered : null)}</div>
                     </Td>
-                    <Td className="whitespace-nowrap">{span(a.scan)}</Td>
+                    <Td className="whitespace-nowrap">{a.delivered ? span(a.scan) : '–'}</Td>
                     <Td>
                       {num(a.purchases)} / {num(a.evaluated)}
                     </Td>
-                    <Td className="whitespace-nowrap">{span(a.purchase, 2)}</Td>
+                    <Td className="whitespace-nowrap">{a.evaluated ? span(a.purchase, 2) : 'noch nicht ausgewertet'}</Td>
                     <Td>{a.isControl ? '–' : pct(a.pBetterThanControl, 0)}</Td>
                     <Td>
                       <Badge color={VERDICT_COLOR[a.verdict]}>{VERDICT_LABEL[a.verdict]}</Badge>
@@ -205,60 +205,74 @@ export default async function OptimizerPage({
           );
         })}
 
-        <Card title="Power-Rechner">
-          <form method="get" className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            <div>
-              <label className={label} htmlFor="p1">
-                Rate Kontrolle (%)
-              </label>
-              <input id="p1" name="p1" className={input} defaultValue={String(p1 * 100).replace('.', ',')} inputMode="decimal" />
-            </div>
-            <div>
-              <label className={label} htmlFor="p2">
-                erwartete Rate Variante (%)
-              </label>
-              <input id="p2" name="p2" className={input} defaultValue={String(p2 * 100).replace('.', ',')} inputMode="decimal" />
-            </div>
-            <div>
-              <label className={label} htmlFor="proWoche">
-                Briefe pro Woche je Variante
-              </label>
-              <input id="proWoche" name="proWoche" className={input} defaultValue={String(perWeek)} inputMode="numeric" />
-            </div>
-            <div>
-              <label className={label} htmlFor="alpha">
-                Irrtum (%, zweiseitig)
-              </label>
-              <input id="alpha" name="alpha" className={input} defaultValue={String(alpha * 100)} inputMode="decimal" />
-            </div>
-            <div>
-              <label className={label} htmlFor="power">
-                Teststärke (%)
-              </label>
-              <input id="power" name="power" className={input} defaultValue={String(power * 100)} inputMode="decimal" />
-            </div>
-            <div className="sm:col-span-2 lg:col-span-5">
-              <button type="submit" className={btn.secondary}>
-                Berechnen
-              </button>
-            </div>
-          </form>
-          {powerResult ? (
-            <p className="text-sm">
-              Um einen Unterschied von <strong>{pct(p1)}</strong> auf <strong>{pct(p2)}</strong> sicher zu erkennen, brauchst du
-              ca. <strong>{num(powerResult.perArm)} Briefe pro Variante</strong> ({num(powerResult.total)} insgesamt)
-              {powerResult.weeks !== null ? (
-                <>
-                  {' '}
-                  – bei {num(perWeek)} Briefen pro Woche und Variante etwa <strong>{num(powerResult.weeks)} Wochen</strong>
-                </>
-              ) : null}
-              .
-            </p>
-          ) : (
-            <Notice kind="warn">{powerError}</Notice>
-          )}
-        </Card>
+        <div id="power" className="scroll-mt-6">
+          <Card title="Power-Rechner">
+            <form method="get" className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              <div>
+                <label className={label} htmlFor="p1">
+                  Rate Kontrolle (%)
+                </label>
+                <input
+                  id="p1"
+                  name="p1"
+                  className={input}
+                  defaultValue={String(p1 * 100).replace('.', ',')}
+                  inputMode="decimal"
+                />
+              </div>
+              <div>
+                <label className={label} htmlFor="p2">
+                  erwartete Rate Variante (%)
+                </label>
+                <input
+                  id="p2"
+                  name="p2"
+                  className={input}
+                  defaultValue={String(p2 * 100).replace('.', ',')}
+                  inputMode="decimal"
+                />
+              </div>
+              <div>
+                <label className={label} htmlFor="proWoche">
+                  Briefe pro Woche je Variante
+                </label>
+                <input id="proWoche" name="proWoche" className={input} defaultValue={String(perWeek)} inputMode="numeric" />
+              </div>
+              <div>
+                <label className={label} htmlFor="alpha">
+                  Irrtum (%, zweiseitig)
+                </label>
+                <input id="alpha" name="alpha" className={input} defaultValue={String(alpha * 100)} inputMode="decimal" />
+              </div>
+              <div>
+                <label className={label} htmlFor="power">
+                  Teststärke (%)
+                </label>
+                <input id="power" name="power" className={input} defaultValue={String(power * 100)} inputMode="decimal" />
+              </div>
+              <div className="sm:col-span-2 lg:col-span-5">
+                <button type="submit" className={btn.secondary}>
+                  Berechnen
+                </button>
+              </div>
+            </form>
+            {powerResult ? (
+              <p className="text-sm">
+                Um einen Unterschied von <strong>{pct(p1)}</strong> auf <strong>{pct(p2)}</strong> sicher zu erkennen, brauchst du
+                ca. <strong>{num(powerResult.perArm)} Briefe pro Variante</strong> ({num(powerResult.total)} insgesamt)
+                {powerResult.weeks !== null ? (
+                  <>
+                    {' '}
+                    – bei {num(perWeek)} Briefen pro Woche und Variante etwa <strong>{num(powerResult.weeks)} Wochen</strong>
+                  </>
+                ) : null}
+                .
+              </p>
+            ) : (
+              <Notice kind="warn">{powerError}</Notice>
+            )}
+          </Card>
+        </div>
 
         <Card title="Kostenbremse (Kosten pro Kauf, ausgewertete Versandwochen)">
           <p className="mb-3 text-sm text-slate-600">

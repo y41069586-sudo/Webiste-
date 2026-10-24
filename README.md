@@ -154,7 +154,7 @@ Wichtige Schalter:
 **Takte (Worker, Zeitzone Europe/Berlin):** Pipeline alle 5 Min., Briefstatus alle 30 Min., Follow-ups
 9:05, Erinnerungen (Onboarding, Hosting-Ende) 8:10, Lösch-Job 3:15, Wochenbericht So 18:00,
 Watchdog + Fehler-Mail alle 15 Min., IMAP-Abruf alle 5 Min., Claims-Abgleich und Ablaufprüfung 6:25,
-Funnel-Sicht und Sicherheitsnetze :10 und :40.
+Funnel-Sicht und Sicherheitsnetze :10 und :40, Lern-Agent So 18:30.
 
 **Deine Aufgaben im Dashboard:**
 
@@ -168,6 +168,9 @@ Funnel-Sicht und Sicherheitsnetze :10 und :40.
 8. **Claims & Playbooks** – Statistiken für Briefe nach eigener Prüfung freigeben; abgelaufene Quellen ersetzen.
 9. **Optimizer** – Spannen je Branche und Variante, Urteil („Gewinner“ erst ab 90 % und 100 Briefen je Arm),
    Power-Rechner, Kostenbremse, ausgelöste Sicherheitsnetze; pausierte Varianten nach Prüfung wieder aktivieren.
+10. **Lern-Agent / Varianten-Labor** (sonntags) – Wochenbericht lesen, Vorschläge in der Review-Queue (Diff je Slot)
+    freigeben oder mit Grund ablehnen; Logbuch als Markdown herunterladen.
+11. **Einwände** – Top-Einwände je Branche; WhatsApp-Fragen dort von Hand erfassen (ohne Namen/Telefonnummer).
 
 **Erste echte Charge:** [docs/go-live-checkliste.md](docs/go-live-checkliste.md) vollständig abhaken,
 dann Testbrief an dich → Schalter „Echte Briefe freigegeben“ → `DRY_RUN=false` (in `.env` **und** im

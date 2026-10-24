@@ -8,10 +8,9 @@ import { applyAllocations, evaluateIndustries } from '../src/services/arms';
 import { refreshFunnel } from '../src/services/funnel';
 import { chooseLetterVariant } from '../src/services/letters';
 import { costWeeks, DECEPTION_RE, runSafetyNets } from '../src/services/safety-nets';
-import { seedDefaults } from '../src/services/seed';
 import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
-import { resetDb } from './helpers';
+import { resetDb, resetVariants } from './helpers';
 
 async function neutralControl() {
   const db = getDb();
@@ -73,7 +72,7 @@ async function sentLetter(
 describe('Optimizer je Branche (L5)', () => {
   beforeEach(async () => {
     await resetDb();
-    await seedDefaults(getDb());
+    await resetVariants();
   });
   afterAll(async () => {
     await stopBoss();
@@ -162,7 +161,7 @@ describe('Optimizer je Branche (L5)', () => {
 describe('Sicherheitsnetze (B6.7)', () => {
   beforeEach(async () => {
     await resetDb();
-    await seedDefaults(getDb());
+    await resetVariants();
   });
 
   it('Opt-out-Bremse: über 5 % der Scans → Variante pausiert, genau einmal', async () => {

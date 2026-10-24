@@ -21,6 +21,7 @@ import { raiseAlert } from './budget';
 import { transitionLead } from './lead-state';
 import { cleanupRateLimits } from './rate-limit';
 import { anonymizeLead } from './suppression';
+import { purgeObjectionTexts } from './objections';
 
 /** Leads, die (noch) Kunden sind oder kaufen – deren Daten löscht der Job nie. */
 const CUSTOMER_STATUSES = ['checkout_started', 'paid', 'onboarding', 'preview_approved', 'live'] as const;
@@ -36,6 +37,8 @@ export interface RetentionResult {
   eventsStripped: number;
   /** Aus Google-Signalen abgeleitete Werte (Segment „neu“, Score-Anteil) nach max. 30 Tagen zurückgesetzt */
   googleDerivedReset: number;
+  /** Einwand-Texte nach 90 Tagen gelöscht (Kategorie bleibt, L6) */
+  objectionTextsPurged: number;
   housekeeping: number;
 }
 
@@ -59,6 +62,7 @@ export async function runRetention(now = new Date(), actor = 'job:retention'): P
     emailsDeleted: 0,
     eventsStripped: 0,
     googleDerivedReset: 0,
+    objectionTextsPurged: 0,
     housekeeping: 0,
   };
 
@@ -234,6 +238,9 @@ export async function runRetention(now = new Date(), actor = 'job:retention'): P
     WHERE google_checked_at IS NOT NULL AND google_checked_at < ${addDays(now, -cfg.timing.placesCacheDays)}
   `);
   r.googleDerivedReset = g.rowCount ?? 0;
+
+  // 7c) Einwände: Texte nach 90 Tagen löschen, Kategorien behalten (B7)
+  r.objectionTextsPurged = await purgeObjectionTexts(now, db);
 
   // 8) Aufräumen: Webhook-Replay-Tabelle, Sitzungen, Rate-Limits, alte quittierte Meldungen
   const wh = await db

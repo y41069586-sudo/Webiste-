@@ -71,6 +71,13 @@
       "when": 1792825086995,
       "tag": "0009_optimizer_safety",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792826585613,
+      "tag": "0010_learning_agent",
+      "breakpoints": true
     }
   ]
 }

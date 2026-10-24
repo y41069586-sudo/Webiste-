@@ -7,7 +7,8 @@ export async function resetDb(): Promise<void> {
   const db = getDb();
   await db.execute(sql`TRUNCATE leads, demos, letters, events, orders, customers, sites, change_requests,
     support_messages, suppression_list, budget_ledger, settings, audit_log, admin_users, admin_sessions,
-    rate_limits, webhook_events, reports, alerts, outbound_emails, order_payments, dunning_letters, arm_allocations, safety_actions RESTART IDENTITY CASCADE`);
+    rate_limits, webhook_events, reports, alerts, outbound_emails, order_payments, dunning_letters, arm_allocations, safety_actions,
+    experiments, objections, weekly_reports RESTART IDENTITY CASCADE`);
   await db.execute(sql`UPDATE counters SET value = 0`);
   invalidateConfigCache();
 }
@@ -32,3 +33,11 @@ export const OPERATOR_TEST_CONFIG = {
   },
   legal: { impressumMarkdown: '# Impressum', privacyMarkdown: '# Datenschutz', termsMarkdown: '# AGB' },
 };
+
+/** Briefvarianten auf den Auslieferungszustand zurücksetzen (Tests, die Varianten anlegen oder pausieren). */
+export async function resetVariants(): Promise<void> {
+  const db = getDb();
+  await db.execute(sql`DELETE FROM variants`);
+  const { seedDefaults } = await import('../src/services/seed');
+  await seedDefaults(db);
+}

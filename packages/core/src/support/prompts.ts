@@ -1,6 +1,6 @@
 import type { AppConfig } from '../config/settings';
 import { registerMockStructured } from '../providers/llm/mock';
-import { SUPPORT_CLASSES, type SupportClass } from '../types';
+import { OBJECTION_CATEGORIES, SUPPORT_CLASSES, type ObjectionCategory, type SupportClass } from '../types';
 import { formatEuro, formatEuroShort } from '../util/time';
 
 export const CLASSIFY_TOOL = 'support_klassifizierung';
@@ -9,9 +9,14 @@ export const REPLY_TOOL = 'support_antwort';
 export const CLASSIFY_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['class', 'confidence', 'reason', 'company_name'],
+  required: ['class', 'confidence', 'reason', 'company_name', 'objection'],
   properties: {
     class: { type: 'string', enum: [...SUPPORT_CLASSES] },
+    objection: {
+      type: 'string',
+      enum: [...OBJECTION_CATEGORIES, 'keiner'],
+      description: 'Hauptgrund, warum der Betrieb (noch) nicht kauft – „keiner“, wenn die Nachricht keinen Einwand enthält.',
+    },
     confidence: { type: 'number', description: '0 bis 1' },
     reason: { type: 'string', description: 'Ein Satz Begründung (ohne personenbezogene Daten).' },
     company_name: { type: 'string', description: 'Firmenname, falls die Nachricht ihn nennt (sonst leer).' },
@@ -28,7 +33,20 @@ Klassen:
 - rechnung: Fragen zu Rechnung, Zahlung, Erstattung, Kündigung, Verlängerung.
 - spam: Werbung, automatische Antworten (Abwesenheitsnotiz, Zustellfehler), Phishing, Inhalte ohne Bezug.
 
-Im Zweifel zwischen opt_out und einer anderen Klasse: opt_out. Im Zweifel zwischen beschwerde und frage: beschwerde.`;
+Im Zweifel zwischen opt_out und einer anderen Klasse: opt_out. Im Zweifel zwischen beschwerde und frage: beschwerde.
+
+Zusätzlich der Einwand (objection), falls die Nachricht einen Grund gegen den Kauf nennt oder andeutet:
+- zu_teuer: Preis zu hoch, kein Budget, Rabattwunsch.
+- habe_social_media: Instagram, Facebook, Google-Profil o. Ä. reiche aus.
+- wer_sind_sie: Zweifel, wer dahintersteckt, ob das seriös ist, woher die Daten stammen.
+- domain_vorhanden: Es gibt schon eine Domain oder E-Mail-Adresse mit eigener Domain.
+- website_vorhanden: Eine Website existiert bereits oder ist bei jemand anderem in Arbeit.
+- kein_bedarf: braucht keine Website, Auftragslage gut, Kundschaft kommt über Empfehlung.
+- keine_zeit: später, gerade keine Zeit, nach der Saison.
+- laufzeit_vertrag: Bedenken wegen Mindestlaufzeit, Abo, Kündigung.
+- angaben_falsch: Öffnungszeiten, Leistungen oder Name im Entwurf stimmen nicht.
+- sonstiges: anderer Grund gegen den Kauf.
+- keiner: kein Einwand (z. B. reine Frage zum Ablauf, Kaufabsicht, Rechnung).`;
 
 export const REPLY_SCHEMA = {
   type: 'object',
@@ -94,8 +112,23 @@ registerMockStructured(CLASSIFY_TOOL, (req) => {
   else if (/rechnung|erstatt|zahlung|kündig/.test(text)) cls = 'rechnung';
   else if (/ändern|änderung|bitte statt|öffnungszeit/.test(text)) cls = 'aenderungswunsch';
   else if (/viagra|krypto|seo-angebot|backlinks/.test(text)) cls = 'spam';
-  return { class: cls, confidence: 0.9, reason: 'Mock-Klassifizierung', company_name: '' };
+  return { class: cls, confidence: 0.9, reason: 'Mock-Klassifizierung', company_name: '', objection: mockObjection(text) };
 });
+
+/** Deterministische Einwand-Erkennung für Mock und Tests. */
+export function mockObjection(text: string): ObjectionCategory | 'keiner' {
+  const t = text.toLowerCase();
+  if (/zu teuer|preis.*hoch|kein budget|günstiger|rabatt/.test(t)) return 'zu_teuer';
+  if (/instagram|facebook|tiktok|google-profil|social media/.test(t)) return 'habe_social_media';
+  if (/wer sind sie|seriös|woher haben sie|woher kennen sie/.test(t)) return 'wer_sind_sie';
+  if (/domain (habe|hab) ich|eigene domain|schon eine domain/.test(t)) return 'domain_vorhanden';
+  if (/schon eine website|website in arbeit|neffe|webdesigner/.test(t)) return 'website_vorhanden';
+  if (/mindestlaufzeit|abo|kündigungsfrist|vertragsbindung/.test(t)) return 'laufzeit_vertrag';
+  if (/keine zeit|später|nach der saison/.test(t)) return 'keine_zeit';
+  if (/brauche keine|brauchen keine|kein bedarf|läuft auch so/.test(t)) return 'kein_bedarf';
+  if (/falsch|stimmt nicht|stimmen nicht/.test(t)) return 'angaben_falsch';
+  return 'keiner';
+}
 
 registerMockStructured(REPLY_TOOL, (req) => {
   const human = /rabatt|günstiger|anwalt|frist|bis wann/i.test(req.prompt);

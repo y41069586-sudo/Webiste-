@@ -23,6 +23,7 @@ export const QUEUES = {
   supportSend: 'support-send',
   imapPoll: 'imap-poll',
   weeklyOptimizer: 'weekly-optimizer',
+  learningAgent: 'learning-agent',
   retention: 'retention',
   renewalReminders: 'renewal-reminders',
   dunning: 'dunning',
@@ -55,6 +56,7 @@ export interface QueuePayloads {
   'support-send': { messageId: string };
   'imap-poll': Record<string, never>;
   'weekly-optimizer': { periodEnd?: string };
+  'learning-agent': { force?: boolean; triggeredBy?: string };
   retention: Record<string, never>;
   'renewal-reminders': Record<string, never>;
   dunning: Record<string, never>;
@@ -80,6 +82,7 @@ export const QUEUE_DEFS: Partial<Record<QueueName, Partial<QueueDef>>> = {
   'send-letter': { retryLimit: 3, retryDelay: 120 },
   'send-approved-letters': { policy: 'singleton', retryLimit: 1 },
   'weekly-optimizer': { policy: 'singleton', retryLimit: 2 },
+  'learning-agent': { policy: 'singleton', retryLimit: 1, expireInSeconds: 30 * 60 },
   retention: { policy: 'singleton', retryLimit: 2 },
   dunning: { policy: 'singleton', retryLimit: 2 },
   claims: { policy: 'singleton', retryLimit: 2 },

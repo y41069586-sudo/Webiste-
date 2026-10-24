@@ -99,6 +99,16 @@ Verlassen der Seite einmal per `sendBeacon` an die eigene Domain sendet – kein
 
 ---
 
+## 8. Einwände und Lern-Agent (L6)
+
+|                 |                                                                                                                                                        |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Zweck           | Verstehen, warum Betriebe nicht kaufen; Briefvarianten verbessern                                                                                      |
+| Daten           | Einwand-Kategorie, Branche, Quelle, Hash des Texts; Text (gekürzt) 90 Tage; bei Widerspruch nur Kategorie ohne Text und ohne Lead-Bezug                |
+| Empfänger       | Sprachmodell (Anthropic, Auftragsverarbeiter): Klassifizierung des Texts; der wöchentliche Lern-Agent erhält nur Aggregate ohne Namen, Texte, Kontakte |
+| Rechtsgrundlage | Art. 6 Abs. 1 lit. f DSGVO (Verbesserung des eigenen Angebots); der Betrieb hat uns selbst geschrieben                                                 |
+| Löschfrist      | Texte nach 90 Tagen (nächtlicher Lösch-Job), Kategorien dauerhaft ohne Personenbezug                                                                   |
+
 ### Offene Punkte für dich
 
 - Datenschutzerklärung der eigenen Seiten (Impressum, Datenschutz, AGB) liefern und im Dashboard hinterlegen.
