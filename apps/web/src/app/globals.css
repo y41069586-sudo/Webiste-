@@ -40,40 +40,35 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
- * Firmen-Website und Kauf-Strecke – Design nach DESIGN.md („Studio“):
- * Studio Canvas #eeeeee, Paper White #ffffff, Charcoal Ink #222222, Graphite #333333, Soft Ash #555555,
- * Inter / Inter Tight, Display -0.04em, Radien 8px (Buttons, Karten) und 4px (kompakt, Bilder).
- * Keine farbigen UI-Akzente – Farbe kommt nur aus den Beispiel-Arbeiten.
+ * Firmen-Website und Kauf-Strecke: Weiß mit blauem Akzent (#1F4FD8), Text #0F172A,
+ * Nebentext #5B6475. Typografie und Formen nach DESIGN.md (Inter / Inter Tight,
+ * Display -0.04em, Radien 8px/4px). Grün nur für Erfolg, Rot nur für Fehler.
  * ------------------------------------------------------------------------- */
 .theme-site {
-  --canvas: #eeeeee;
-  --paper: #ffffff;
-  --ink: #222222;
-  --graphite: #333333;
-  --ash: #555555;
+  --canvas: #ffffff;
+  --soft: #f7f8fa;
+  --ink: #0f172a;
+  --muted: #5b6475;
+  --blue: #1f4fd8;
+  --blue-soft: #eef3ff;
   --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
-  /* bestehende Utility-Farben der Kauf-Strecke auf die Studio-Palette legen */
-  --color-brand-50: #f5f5f5;
-  --color-brand-100: #e6e6e6;
-  --color-brand-200: #d4d4d4;
-  --color-brand-300: #bdbdbd;
-  --color-brand-500: #222222;
-  --color-brand-600: #222222;
-  --color-brand-700: #222222;
-  --color-slate-50: #eeeeee;
-  --color-slate-100: #e6e6e6;
-  --color-slate-200: #dddddd;
-  --color-slate-300: #cccccc;
-  --color-slate-400: #8a8a8a;
-  --color-slate-500: #555555;
-  --color-slate-600: #555555;
-  --color-slate-700: #333333;
-  --color-slate-800: #222222;
-  --color-slate-900: #222222;
-  /* keine farbigen Akzente (DESIGN.md): Häkchen und Hinweise einfarbig */
-  --color-emerald-500: #222222;
-  --color-emerald-600: #222222;
-  --color-emerald-700: #222222;
+  --color-brand-50: #eef3ff;
+  --color-brand-100: #e1e9ff;
+  --color-brand-200: #c5d4fd;
+  --color-brand-300: #a9c0fb;
+  --color-brand-500: #1f4fd8;
+  --color-brand-600: #1f4fd8;
+  --color-brand-700: #1a42b5;
+  --color-slate-50: #f7f8fa;
+  --color-slate-100: #eef0f4;
+  --color-slate-200: #e3e7ee;
+  --color-slate-300: #cfd5df;
+  --color-slate-400: #8a93a3;
+  --color-slate-500: #5b6475;
+  --color-slate-600: #5b6475;
+  --color-slate-700: #3c4454;
+  --color-slate-800: #1e2533;
+  --color-slate-900: #0f172a;
   --font-sans: 'Inter Variable', Inter, Arial, 'Helvetica Neue', sans-serif;
   background: var(--canvas);
   color: var(--ink);
@@ -81,8 +76,40 @@ body {
   font-feature-settings: 'palt';
 }
 .theme-site :focus-visible {
-  outline: 2px solid #222222;
+  outline: 2px solid #1f4fd8;
   outline-offset: 3px;
+}
+
+/* Kopfbereich: helles Weiß-Grau mit feinem Punkteraster und leichtem blauem Schimmer (läuft nach unten aus) */
+.hero-field {
+  position: relative;
+  isolation: isolate;
+  background: #f8f8fb;
+}
+.hero-field::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: radial-gradient(rgb(15 23 42 / 0.11) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  background-position: 11px 11px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent);
+  mask-image: linear-gradient(to bottom, #000 70%, transparent);
+}
+.hero-field::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: -6%;
+  top: -18%;
+  width: 72%;
+  height: 85%;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side at 50% 50%, rgb(31 79 216 / 0.15), transparent 72%),
+    radial-gradient(closest-side at 72% 38%, rgb(120 150 255 / 0.12), transparent 75%);
+  filter: blur(36px);
 }
 .font-tight {
   font-family: 'Inter Tight Variable', 'Inter Tight', 'Inter Variable', Inter, Arial, sans-serif;
@@ -143,7 +170,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: 0 2px 15px 0 rgb(0 0 0 / 0.1);
+  box-shadow: 0 6px 22px 0 rgb(15 23 42 / 0.12);
   opacity: 0;
   pointer-events: none;
   transition: opacity 450ms var(--ease-smooth);
@@ -165,22 +192,17 @@ body {
   transform: translateX(3px);
 }
 .btn-primary {
-  background: #222222;
+  background: #1f4fd8;
   color: #ffffff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12);
+}
+.btn-primary::after {
+  box-shadow: 0 10px 30px rgb(31 79 216 / 0.38);
 }
 .btn-secondary {
   background: #ffffff;
-  color: #333333;
-  border: 1px solid #222222;
-}
-.on-dark .btn-primary {
-  background: #ffffff;
-  color: #333333;
-}
-.on-dark .btn-secondary {
-  background: transparent;
-  color: #ffffff;
-  border-color: rgb(255 255 255 / 0.4);
+  color: #0f172a;
+  border: 1px solid #e3e7ee;
 }
 .btn-compact {
   border-radius: 4px;
@@ -191,6 +213,7 @@ body {
 .card-site {
   position: relative;
   background: #ffffff;
+  border: 1px solid #e8ebf1;
   border-radius: 8px;
 }
 .card-hover {
@@ -202,7 +225,7 @@ body {
 .tile {
   overflow: hidden;
   border-radius: 4px;
-  background: #000;
+  background: #e3e7ee;
 }
 .tile img {
   transition: transform 900ms var(--ease-smooth);
@@ -305,7 +328,7 @@ body {
   margin-bottom: 1.5rem;
 }
 .theme-site .prose-legal a {
-  color: #222222;
+  color: #1f4fd8;
 }
 
 @media (prefers-reduced-motion: reduce) {

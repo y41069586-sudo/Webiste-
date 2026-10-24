@@ -51,7 +51,7 @@ export default async function PricesPage() {
         <PriceToggle plans={plans} cta={{ href: '/so-funktionierts', label: 'So kommen Sie zu Ihrer Website' }} />
       </section>
       <section className="mx-auto max-w-[90rem] px-5 sm:px-8 py-16">
-        <h2 data-reveal className="text-section text-[#222222]">
+        <h2 data-reveal className="text-section text-[#0f172a]">
           Beide Wege im Vergleich
         </h2>
         <div data-reveal className="card-site mt-6 overflow-x-auto">
@@ -60,11 +60,11 @@ export default async function PricesPage() {
             <thead>
               <tr className="border-b border-slate-100 text-sm text-slate-600">
                 <th scope="col" className="p-4 font-medium" />
-                <th scope="col" className="p-4 font-semibold tracking-[-0.03em] text-[#222222]">
+                <th scope="col" className="p-4 font-semibold tracking-[-0.03em] text-[#0f172a]">
                   Einmalig
                 </th>
                 {p.monthlyEnabled ? (
-                  <th scope="col" className="p-4 font-semibold tracking-[-0.03em] text-[#222222]">
+                  <th scope="col" className="p-4 font-semibold tracking-[-0.03em] text-[#0f172a]">
                     Monatlich
                   </th>
                 ) : null}
@@ -118,7 +118,7 @@ export default async function PricesPage() {
             <>
               {' '}
               Mit{' '}
-              <Link href="/garantie" className="text-[#222222] underline underline-offset-4">
+              <Link href="/garantie" className="text-[#0f172a] underline underline-offset-4">
                 {p.guarantee.days} Tagen Zufriedenheitsgarantie
               </Link>
               .

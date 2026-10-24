@@ -196,6 +196,20 @@ Doku „Fulfill orders“ (docs.stripe.com/checkout/fulfillment).
     aktivieren. SEPA-Lastschrift: Zahlung kommt asynchron (`processing`, danach `invoice.paid`).
   - Fehlgeschlagene Raten: Smart Retries im Dashboard aktivieren; Endzustand nach den Versuchen
     (Abo `unpaid` oder gekündigt) wird beides behandelt.
+- **Gehosteter Checkout ohne eigene Bestellseite (24.10.2026, Wunsch des Betreibers)**, geprüft gegen die
+  API-Referenz `POST /v1/checkout/sessions` (OpenAPI 2026-09-30) und die Typen von stripe-node 23.0.1:
+  - „Seite übernehmen“ → Preiskarte → `/d/{slug}/uebernehmen?plan=…` → Session → 303 zur Stripe-Bezahlseite.
+  - Stripe erfasst: `name_collection.business` und `.individual` (beide Pflicht), `billing_address_collection:
+'required'`, `phone_number_collection.enabled`, E-Mail (Standard). Eigene Felder `custom_fields` (max. 3):
+    `wunschdomain` (Text, 4–63 Zeichen, vorbelegt mit dem Domainvorschlag), `unternehmer` und `agb` (Dropdown mit
+    genau einer Option „Ja“, Pflichtfeld). `custom_text.submit` nennt Preis, Mindestlaufzeit, Garantie und den
+    AGB-Link. Bewusst **nicht** `consent_collection.terms_of_service`: das verlangt eine AGB-URL in den
+    Dashboard-Einstellungen und die Session-Erstellung schlägt sonst fehl.
+  - Webhook/Erfolgsseite: `collected_information.business_name`/`individual_name`, `customer_details`
+    (E-Mail, Telefon, Adresse) und `custom_fields[].text|dropdown.value` → Bestellung (vor der Verbuchung).
+    Die Wunschdomain wird erneut geprüft; ist sie vergeben, bleibt sie leer und wird im Onboarding gewählt
+    (dort mit Live-Prüfung). Fehlt eine Bestätigung, geht eine Meldung an den Betreiber.
+  - `cancel_url` führt zurück zu den Preiskarten des Entwurfs (`/d/{slug}#uebernehmen`).
 - **Test:** `PAYMENT_PROVIDER=mock` simuliert die Bezahlseite (`/checkout/mock/…`) inkl. signierter
   Events; in Produktion gesperrt (außer `ALLOW_MOCK_PAYMENT=true`). Stripe-Testmodus: `sk_test_…` und
   `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.

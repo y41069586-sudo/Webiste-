@@ -63,7 +63,7 @@ export default async function HowPage() {
             ['Domain und Start', 'Wir registrieren Ihre Wunschdomain auf Ihren Namen und schalten die Seite frei.'],
           ].map(([t, d], i) => (
             <div key={t} data-reveal style={{ '--d': `${i * 100}ms` } as React.CSSProperties} className="card-site p-7">
-              <h2 className="text-[1.375rem] font-semibold tracking-[-0.04em] text-[#222222]">{t}</h2>
+              <h2 className="text-[1.375rem] font-semibold tracking-[-0.04em] text-[#0f172a]">{t}</h2>
               <p className="mt-2 leading-relaxed text-slate-600">{d}</p>
             </div>
           ))}

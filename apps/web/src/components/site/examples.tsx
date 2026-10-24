@@ -18,15 +18,15 @@ export function ExamplesCarousel() {
               draggable={false}
               className="block h-full w-full object-cover object-top"
             />
-            <span className="font-tight absolute top-3 left-3 rounded-[4px] bg-white px-2 py-1 text-xs font-medium text-[#222222]">
+            <span className="font-tight absolute top-3 left-3 rounded-[4px] bg-white px-2 py-1 text-xs font-medium text-[#0f172a]">
               Beispiel
             </span>
           </div>
           <figcaption className="mt-4 flex items-baseline justify-between gap-4">
-            <span className="text-strong text-[#222222]">{ex.name}</span>
-            <span className="font-tight text-nav text-[#555555]">{ex.label}</span>
+            <span className="text-strong text-[#0f172a]">{ex.name}</span>
+            <span className="font-tight text-nav text-[#5b6475]">{ex.label}</span>
           </figcaption>
-          <p className="mt-1 text-sm text-[#555555]">{ex.hook}</p>
+          <p className="mt-1 text-sm text-[#5b6475]">{ex.hook}</p>
         </figure>
       ))}
     </Carousel>

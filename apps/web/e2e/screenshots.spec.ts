@@ -1,6 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Browser } from '@playwright/test';
+import { payOnMockCheckout } from './helpers';
 import { seedPublishedDemo } from './seed';
 
 /**
@@ -45,28 +46,16 @@ test.describe('Screenshots', () => {
     test.setTimeout(600_000);
     mkdirSync(DIR!, { recursive: true });
     for (const p of SITE) await shoot(browser, p, `site-${name(p)}`);
-    // Kauf-Strecke: Demo → Checkout → Testzahlung → Danke → Angaben
+    // Kauf-Strecke: Demo → Bezahlseite (Stripe, simuliert) → Danke → Angaben
     const demo = seedPublishedDemo();
     await shoot(browser, `/d/${demo.slug}`, 'kauf-1-entwurf');
-    await shoot(browser, `/checkout/${demo.slug}`, 'kauf-2-checkout');
-    await page.goto(`/checkout/${demo.slug}`);
-    await page.waitForLoadState('networkidle');
-    await expect(async () => {
-      await page.getByLabel('Wunschdomain').fill(`screens-${Date.now()}`);
-      await expect(page.getByText(/ist frei/)).toBeVisible({ timeout: 5_000 });
-    }).toPass({ timeout: 60_000 });
-    await page.getByRole('radio', { name: /Einmalzahlung/ }).check();
-    await page.getByLabel('Ihr Name (Vor- und Nachname)').fill('Erika Beispiel');
-    await page.getByLabel('E-Mail').fill('erika@example.org');
-    await page.getByLabel(/als Unternehmer/).check();
-    await page.getByLabel(/Ich akzeptiere die/).check();
-    await page.getByRole('button', { name: /Weiter zur Zahlung/ }).click();
+    await page.goto(`/d/${demo.slug}/uebernehmen?plan=one_time`);
     await expect(page.getByRole('heading', { name: 'Testzahlung' })).toBeVisible();
-    await shoot(browser, page.url(), 'kauf-3-zahlung');
-    await page.getByRole('button', { name: 'Erfolgreich bezahlen (Karte)' }).click();
+    await shoot(browser, page.url(), 'kauf-2-bezahlseite');
+    await payOnMockCheckout(page);
     const link = page.getByRole('link', { name: 'Jetzt Angaben eintragen' });
     await expect(link).toBeVisible();
-    await shoot(browser, page.url(), 'kauf-4-danke');
-    await shoot(browser, (await link.getAttribute('href'))!, 'kauf-5-angaben');
+    await shoot(browser, page.url(), 'kauf-3-danke');
+    await shoot(browser, (await link.getAttribute('href'))!, 'kauf-4-angaben');
   });
 });

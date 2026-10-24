@@ -5,7 +5,7 @@ import { useActionState, useState } from 'react';
 import { sendContactAction, type ContactState } from './actions';
 
 const field =
-  'mt-1.5 block w-full rounded-[8px] border border-[#dddddd] bg-white px-4 py-3 text-[1rem] text-slate-900 transition-colors duration-300 placeholder:text-slate-400 focus:border-brand-600 focus:outline-none';
+  'mt-1.5 block w-full rounded-[8px] border border-[#e3e7ee] bg-white px-4 py-3 text-[1rem] text-slate-900 transition-colors duration-300 placeholder:text-slate-400 focus:border-brand-600 focus:outline-none';
 
 export function ContactForm() {
   const [state, action, pending] = useActionState<ContactState, FormData>(sendContactAction, { status: 'idle' });
@@ -13,7 +13,7 @@ export function ContactForm() {
   if (state.status === 'sent') {
     return (
       <div className="price-in card-site p-8 text-center" role="status">
-        <span className="mx-auto grid h-12 w-12 place-items-center rounded-[4px] bg-[#222222] text-white">
+        <span className="mx-auto grid h-12 w-12 place-items-center rounded-[8px] bg-emerald-50 text-emerald-600">
           <svg aria-hidden="true" viewBox="0 0 20 20" className="h-6 w-6" fill="currentColor">
             <path d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.8 3.8 6.8-6.8a1 1 0 0 1 1.4 0Z" />
           </svg>
@@ -50,7 +50,7 @@ export function ContactForm() {
         <textarea name="message" required minLength={5} rows={5} className={field} />
       </label>
       <label className="flex gap-3 text-sm leading-relaxed text-slate-600">
-        <input name="consent" type="checkbox" required className="mt-1 h-4 w-4 shrink-0 accent-[#222222]" />
+        <input name="consent" type="checkbox" required className="mt-1 h-4 w-4 shrink-0 accent-[#1f4fd8]" />
         <span>
           Ich bin einverstanden, dass meine Angaben zur Beantwortung meiner Anfrage gespeichert werden. Details in der{' '}
           <Link href="/datenschutz" className="text-brand-700 underline underline-offset-4">

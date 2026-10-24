@@ -16,13 +16,13 @@ export default function ExamplesPage() {
         <ExamplesCarousel />
       </section>
       <section className="mx-auto max-w-[90rem] px-5 sm:px-8 py-16">
-        <h2 data-reveal className="text-section text-[#222222]">
+        <h2 data-reveal className="text-section text-[#0f172a]">
           Was je Branche dazugehört
         </h2>
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {INDUSTRY_EXAMPLES.map((ex, i) => (
             <div key={ex.id} data-reveal style={{ '--d': `${(i % 3) * 90}ms` } as React.CSSProperties} className="card-site p-7">
-              <p className="font-tight text-nav text-[#555555]">{ex.label}</p>
+              <p className="font-tight text-nav text-[#5b6475]">{ex.label}</p>
               <p className="mt-2 leading-relaxed text-slate-700">{ex.hook}</p>
             </div>
           ))}

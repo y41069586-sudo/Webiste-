@@ -9,7 +9,7 @@ import { paymentFailedEmail } from '../emails/templates';
 import { buildInvoiceData, nextInvoiceNumber, orderAmounts, planAmounts } from '../invoices/build';
 import { errInfo, logger } from '../logger';
 import { getProviders } from '../providers';
-import type { PaymentEvent } from '../providers/types';
+import { CHECKOUT_FIELDS, type CollectedCustomer, type PaymentEvent } from '../providers/types';
 import { enqueue, QUEUES } from '../queue';
 import { ORDER_PLANS, type Actor, type OrderPlan } from '../types';
 import { randomToken } from '../util/crypto';
@@ -297,6 +297,219 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
   }
 }
 
+/**
+ * Gehosteter Checkout (Stripe): „Seite übernehmen“ → Plan → direkt zur Bezahlseite des Anbieters.
+ * Firmenname, Name, E-Mail, Rechnungsadresse, Telefon, Wunschdomain, Bestätigung „Unternehmer“ und
+ * AGB-Zustimmung erfasst der Anbieter; übernommen werden sie vor der Verbuchung (applyCollectedCustomer).
+ */
+export async function startHostedCheckout(slug: string, planRaw: string, meta: RequestMeta): Promise<StartCheckoutResult> {
+  const ctx = await getCheckoutContext(slug);
+  if (ctx.state === 'ordered') return { ok: false, error: 'Für diesen Entwurf liegt bereits eine Bestellung vor.' };
+  if (ctx.state === 'disabled') return { ok: false, error: ctx.reason };
+  if (ctx.state !== 'ok') return { ok: false, error: 'Dieser Entwurf ist nicht mehr verfügbar.' };
+  const plan = (ORDER_PLANS as readonly string[]).includes(planRaw) ? (planRaw as OrderPlan) : null;
+  if (!plan) return { ok: false, error: 'Bitte wählen Sie eine der beiden Optionen.' };
+  const { cfg, lead, demo } = ctx;
+  if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
+    return { ok: false, error: 'Die monatliche Zahlung ist derzeit nicht verfügbar.' };
+  const db = getDb();
+  const rl = await rateLimit(db, `checkout:${meta.ipHash}`, 10, 3600);
+  const rlLead = await rateLimit(db, `checkout-lead:${lead.id}`, 20, 86400);
+  if (!rl.allowed || !rlLead.allowed)
+    return { ok: false, error: 'Zu viele Versuche. Bitte versuchen Sie es in einer Stunde erneut.' };
+  const amounts = planAmounts(cfg, plan);
+
+  // Zurück-Taste / Doppelklick: offene Session desselben Plans wiederverwenden
+  const reusable = await db.query.orders.findFirst({
+    where: and(
+      eq(orders.leadId, lead.id),
+      eq(orders.status, 'pending'),
+      eq(orders.plan, plan),
+      eq(orders.customerEmail, ''),
+      eq(orders.amountCents, amounts.grossCents),
+      gt(orders.checkoutExpiresAt, new Date(Date.now() + 10 * 60 * 1000)),
+    ),
+    orderBy: desc(orders.createdAt),
+  });
+  if (reusable?.checkoutUrl) return { ok: true, url: reusable.checkoutUrl, orderId: reusable.id };
+  await cancelOpenOrders(lead.id, 'neuer Checkout');
+
+  const avail = checkoutAvailability();
+  const [order] = await db
+    .insert(orders)
+    .values({
+      leadId: lead.id,
+      demoId: demo.id,
+      provider: getProviders().payment.name,
+      plan,
+      amountCents: amounts.grossCents,
+      netCents: amounts.netCents,
+      vatCents: amounts.vatCents,
+      vatRatePercent: amounts.vatRatePercent,
+      currency: 'eur',
+      status: 'pending',
+      // Vorbelegung aus dem Lead; die verbindlichen Angaben kommen aus dem Checkout des Anbieters
+      customerCompany: lead.anonymizedAt ? '' : lead.businessName,
+      customerName: '',
+      customerEmail: '',
+      billingAddressJson: {
+        street: ctx.prefill.street,
+        postalCode: ctx.prefill.postalCode,
+        city: ctx.prefill.city,
+        country: 'DE',
+      },
+      domainWish: null,
+      b2bConfirmed: false,
+      termsVersion: cfg.legal.termsVersion,
+    })
+    .returning();
+  if (!order) throw new Error('Bestellung konnte nicht angelegt werden');
+  await db.transaction(async (tx) => {
+    await recordEvent(tx, {
+      leadId: lead.id,
+      type: 'checkout_started',
+      meta: { orderId: order.id, mode: avail.ok ? avail.mode : 'n/a', plan, hosted: true },
+      req: { ...meta, isBot: false },
+    });
+    await audit(tx, {
+      entity: 'order',
+      entityId: order.id,
+      action: 'checkout_started',
+      actor: 'public:checkout',
+      context: { leadId: lead.id, amountCents: amounts.grossCents, plan, hosted: true },
+    });
+  });
+
+  try {
+    const minutes = cfg.checkout.sessionMinutes;
+    const p = cfg.pricing;
+    const g = cfg.guarantee;
+    const note = [
+      plan === 'monthly'
+        ? `${formatEuro(p.monthlyCents)} pro Monat, erste Rate sofort. Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
+        : `Einmalig ${formatEuro(p.packageCents)} inklusive Domain und ${p.hostingMonthsIncluded} Monaten Hosting.`,
+      g.enabled ? `${g.days} Tage Zufriedenheitsgarantie.` : '',
+      'Rechnung per E-Mail, danach tragen Sie Ihre Angaben für die Website ein.',
+    ]
+      .filter(Boolean)
+      .join(' ');
+    const session = await getProviders().payment.createCheckoutSession({
+      orderId: order.id,
+      amountCents: amounts.grossCents,
+      currency: 'eur',
+      productName:
+        `${plan === 'monthly' ? p.monthlyName : p.packageName} – ${lead.anonymizedAt ? 'Website' : lead.businessName}`.slice(
+          0,
+          250,
+        ),
+      productDescription:
+        plan === 'monthly'
+          ? `${p.packageDescription} Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
+          : p.packageDescription,
+      collect: {
+        domainDefault: lead.domainSuggestion ?? undefined,
+        termsUrl: appUrl('/agb'),
+        termsVersion: cfg.legal.termsVersion,
+        submitNote: note,
+      },
+      successUrl: appUrl(`/checkout/${slug}/erfolg?session_id={CHECKOUT_SESSION_ID}`),
+      cancelUrl: appUrl(`/d/${slug}#uebernehmen`),
+      metadata: { kind: 'order', orderId: order.id, leadId: lead.id, demoId: demo.id, plan, hosted: '1' },
+      idempotencyKey: `checkout-${order.id}`,
+      expiresInMinutes: minutes,
+      paymentMethods: cfg.checkout.paymentMethods,
+      ...(plan === 'monthly' ? { recurring: { interval: 'month' as const } } : {}),
+    });
+    await db
+      .update(orders)
+      .set({
+        stripeSessionId: session.sessionId,
+        checkoutUrl: session.url,
+        checkoutExpiresAt: new Date(Date.now() + minutes * 60 * 1000),
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, order.id));
+    return { ok: true, url: session.url, orderId: order.id };
+  } catch (err) {
+    logger.error({ orderId: order.id, ...errInfo(err) }, 'Checkout-Session fehlgeschlagen');
+    await db.update(orders).set({ status: 'failed', updatedAt: new Date() }).where(eq(orders.id, order.id));
+    await raiseAlert(db, {
+      level: 'error',
+      code: 'checkout_failed',
+      message: 'Checkout-Session konnte nicht erstellt werden',
+      context: { orderId: order.id },
+    });
+    return {
+      ok: false,
+      error: 'Die Bezahlseite ist gerade nicht erreichbar. Bitte versuchen Sie es in ein paar Minuten erneut.',
+    };
+  }
+}
+
+/**
+ * Im gehosteten Checkout erfasste Angaben in die Bestellung übernehmen (vor der Verbuchung, idempotent).
+ * Die Wunschdomain wird erneut geprüft; ist sie vergeben, bleibt sie leer und wird im Onboarding gewählt.
+ */
+export async function applyCollectedCustomer(orderId: string, c: CollectedCustomer | undefined, actor: string): Promise<void> {
+  if (!c) return;
+  const db = getDb();
+  const order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+  if (!order || order.status === 'paid' || order.status === 'refunded') return;
+  const cfg = await getConfig();
+  const f = c.customFields;
+  const b2b = f[CHECKOUT_FIELDS.b2b] === 'ja';
+  const terms = f[CHECKOUT_FIELDS.terms] === 'ja';
+  let domainWish: string | null = order.domainWish;
+  let domainNote: string | null = null;
+  const wish = f[CHECKOUT_FIELDS.domain]?.trim();
+  if (wish) {
+    const lead = order.leadId ? await db.query.leads.findFirst({ where: eq(leads.id, order.leadId) }) : undefined;
+    const dom = await checkDomain(wish, {
+      businessName: lead?.businessName ?? '',
+      city: lead?.city ?? '',
+      branch: lead?.branch ?? '',
+    });
+    if (dom.valid && dom.available && dom.domain) domainWish = dom.domain;
+    else {
+      domainWish = null;
+      domainNote = dom.message;
+    }
+  }
+  const a = c.address;
+  const street = [a?.line1, a?.line2].filter(Boolean).join(', ');
+  await db
+    .update(orders)
+    .set({
+      customerCompany: (c.businessName ?? order.customerCompany).slice(0, 120),
+      customerName: (c.name ?? order.customerName).slice(0, 120),
+      customerEmail: (c.email ?? order.customerEmail).trim().toLowerCase().slice(0, 254),
+      customerPhone: c.phone ? c.phone.slice(0, 40) : order.customerPhone,
+      billingAddressJson: a
+        ? { street, postalCode: a.postalCode ?? '', city: a.city ?? '', country: a.country ?? 'DE' }
+        : order.billingAddressJson,
+      domainWish,
+      b2bConfirmed: b2b,
+      termsAcceptedAt: terms ? (order.termsAcceptedAt ?? new Date()) : order.termsAcceptedAt,
+      termsVersion: cfg.legal.termsVersion,
+      updatedAt: new Date(),
+    })
+    .where(eq(orders.id, orderId));
+  await audit(db, {
+    entity: 'order',
+    entityId: orderId,
+    action: 'customer_collected',
+    actor,
+    context: { b2b, terms, domain: domainWish, domainNote },
+  });
+  if (!b2b || !terms)
+    await raiseAlert(db, {
+      level: 'warn',
+      code: `checkout_consent_${orderId}`,
+      message: 'Bestellung ohne Bestätigung „Unternehmer“ oder AGB-Zustimmung – bitte prüfen.',
+      context: { orderId, b2b, terms },
+    });
+}
+
 /** Offene Bestellungen eines Leads beenden (Session beim Anbieter ablaufen lassen). */
 export async function cancelOpenOrders(leadId: string, reason: string): Promise<number> {
   const db = getDb();
@@ -549,6 +762,7 @@ export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promis
   switch (ev.type) {
     case 'checkout.completed':
     case 'checkout.async_succeeded': {
+      await applyCollectedCustomer(order.id, ev.customer, actor);
       if (ev.paymentStatus === 'paid' || ev.paymentStatus === 'no_payment_required') {
         const r = await fulfillOrder(
           order.id,
@@ -769,6 +983,7 @@ export async function confirmCheckoutReturn(slug: string, sessionId: string): Pr
   if (!p.retrieveSession || p.name !== order.provider) return { state: 'open' };
   const info = await p.retrieveSession(sessionId);
   if (!info) return { state: 'unknown' };
+  await applyCollectedCustomer(order.id, info.customer, 'public:checkout-return');
   if (info.paymentStatus === 'paid' || info.paymentStatus === 'no_payment_required') {
     const r = await fulfillOrder(
       order.id,
@@ -864,22 +1079,31 @@ export async function orderWithCustomer(
 // ---------------------------------------------------------------------------
 export type MockOutcome = 'paid' | 'sepa_processing' | 'sepa_failed' | 'cancel';
 
-export async function mockCheckoutInfo(sessionId: string): Promise<{ order: Order; slug: string } | null> {
+export async function mockCheckoutInfo(
+  sessionId: string,
+): Promise<{ order: Order; slug: string; hosted: boolean; domainDefault: string } | null> {
   const avail = checkoutAvailability();
   if (!avail.ok || avail.mode !== 'mock') return null;
   const db = getDb();
   const order = await db.query.orders.findFirst({ where: eq(orders.stripeSessionId, sessionId) });
   if (!order?.demoId) return null;
   const demo = await db.query.demos.findFirst({ where: eq(demos.id, order.demoId) });
-  return demo ? { order, slug: demo.slug } : null;
+  if (!demo) return null;
+  const lead = order.leadId ? await db.query.leads.findFirst({ where: eq(leads.id, order.leadId) }) : undefined;
+  // Gehosteter Checkout: Kundendaten werden erst auf der Bezahlseite erfasst
+  return { order, slug: demo.slug, hosted: order.customerEmail === '', domainDefault: lead?.domainSuggestion ?? '' };
 }
 
 /** Löst die gleichen (signierten) Webhook-Events aus wie Stripe – für Entwicklung und E2E-Tests. */
-export async function simulateMockPayment(sessionId: string, outcome: MockOutcome): Promise<string> {
+export async function simulateMockPayment(
+  sessionId: string,
+  outcome: MockOutcome,
+  customer?: CollectedCustomer,
+): Promise<string> {
   const info = await mockCheckoutInfo(sessionId);
   if (!info) throw new Error('Simulierte Zahlung nicht verfügbar');
   const { order, slug } = info;
-  if (outcome === 'cancel') return appUrl(`/checkout/${slug}?abgebrochen=1`);
+  if (outcome === 'cancel') return appUrl(info.hosted ? `/d/${slug}#uebernehmen` : `/checkout/${slug}?abgebrochen=1`);
   const p = getProviders().payment as unknown as PaymentProviderWithSign;
   const fire = async (ev: Omit<PaymentEvent, 'eventId' | 'rawType'> & { rawType: string }) => {
     const raw = JSON.stringify({
@@ -888,6 +1112,7 @@ export async function simulateMockPayment(sessionId: string, outcome: MockOutcom
       clientReferenceId: order.id,
       amountTotal: order.amountCents,
       currency: 'eur',
+      ...(customer && ev.type === 'checkout.completed' ? { customer } : {}),
       ...ev,
     });
     await processPaymentWebhook(raw, p.sign(raw));

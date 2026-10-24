@@ -1,10 +1,59 @@
 {
   "version": 0.6,
   "elements": [
-    { "type": "node", "id": 1001, "lat": 51.51, "lon": 7.46, "tags": { "shop": "beauty", "beauty": "nails", "name": "Nagelstudio Testglanz", "addr:street": "Kampstraße", "addr:housenumber": "12", "addr:postcode": "44137", "addr:city": "Dortmund", "phone": "+49 231 9876543", "opening_hours": "Mo-Fr 10:00-19:00; Sa 10:00-16:00" } },
-    { "type": "node", "id": 1002, "tags": { "shop": "beauty", "beauty": "nails", "name": "Nails Online", "addr:street": "Hansastraße", "addr:housenumber": "3", "addr:postcode": "44137", "website": "https://nails-online.example" } },
-    { "type": "way", "id": 2001, "center": { "lat": 51.5, "lon": 7.4 }, "tags": { "craft": "painter", "name": "Malerbetrieb Beispiel", "addr:street": "Hohe Straße", "addr:housenumber": "7", "addr:postcode": "44139", "contact:instagram": "maler_beispiel" } },
-    { "type": "node", "id": 3001, "tags": { "craft": "electrician", "name": "Elektro Ohne Hausnummer", "addr:street": "Kreuzstraße", "addr:postcode": "44139" } },
+    {
+      "type": "node",
+      "id": 1001,
+      "lat": 51.51,
+      "lon": 7.46,
+      "tags": {
+        "shop": "beauty",
+        "beauty": "nails",
+        "name": "Nagelstudio Testglanz",
+        "addr:street": "Kampstraße",
+        "addr:housenumber": "12",
+        "addr:postcode": "44137",
+        "addr:city": "Dortmund",
+        "phone": "+49 231 9876543",
+        "opening_hours": "Mo-Fr 10:00-19:00; Sa 10:00-16:00"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1002,
+      "tags": {
+        "shop": "beauty",
+        "beauty": "nails",
+        "name": "Nails Online",
+        "addr:street": "Hansastraße",
+        "addr:housenumber": "3",
+        "addr:postcode": "44137",
+        "website": "https://nails-online.example"
+      }
+    },
+    {
+      "type": "way",
+      "id": 2001,
+      "center": { "lat": 51.5, "lon": 7.4 },
+      "tags": {
+        "craft": "painter",
+        "name": "Malerbetrieb Beispiel",
+        "addr:street": "Hohe Straße",
+        "addr:housenumber": "7",
+        "addr:postcode": "44139",
+        "contact:instagram": "maler_beispiel"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3001,
+      "tags": {
+        "craft": "electrician",
+        "name": "Elektro Ohne Hausnummer",
+        "addr:street": "Kreuzstraße",
+        "addr:postcode": "44139"
+      }
+    },
     { "type": "node", "id": 4001, "tags": { "craft": "electrician" } }
   ]
 }

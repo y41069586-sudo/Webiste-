@@ -8,21 +8,21 @@ export function PriceCards({ p }: { p: SitePricing }) {
     <div>
       <div className="grid gap-4 md:grid-cols-2">
         <div data-reveal className="card-site card-hover p-7 sm:p-9">
-          <p className="font-tight text-nav text-[#555555]">Einmalig</p>
-          <p className="text-editor mt-3 text-[#222222]">{p.oneTime}</p>
-          <ul className="mt-7 space-y-3 border-t border-[#eeeeee] pt-6 text-[#333333]">
+          <p className="font-tight text-nav text-[#5b6475]">Einmalig</p>
+          <p className="text-editor mt-3 text-[#0f172a]">{p.oneTime}</p>
+          <ul className="mt-7 space-y-3 border-t border-[#eef0f4] pt-6 text-[#3c4454]">
             <Check>Website, eigene Domain und {p.hostingMonths} Monate Hosting inklusive</Check>
             <Check>Danach optional {p.follow}/Monat für Hosting &amp; Pflege, monatlich kündbar</Check>
           </ul>
         </div>
         {p.monthlyEnabled ? (
           <div data-reveal style={delay(100)} className="card-site card-hover p-7 sm:p-9">
-            <p className="font-tight text-nav text-[#555555]">Monatlich</p>
-            <p className="text-editor mt-3 text-[#222222]">
+            <p className="font-tight text-nav text-[#5b6475]">Monatlich</p>
+            <p className="text-editor mt-3 text-[#0f172a]">
               {p.monthly}
-              <span className="ml-2 align-baseline text-base font-normal tracking-normal text-[#555555]">/Monat</span>
+              <span className="ml-2 align-baseline text-base font-normal tracking-normal text-[#5b6475]">/Monat</span>
             </p>
-            <ul className="mt-7 space-y-3 border-t border-[#eeeeee] pt-6 text-[#333333]">
+            <ul className="mt-7 space-y-3 border-t border-[#eef0f4] pt-6 text-[#3c4454]">
               <Check>{p.minTerm} Monate Mindestlaufzeit</Check>
               <Check>
                 Ab Monat {p.followFromMonth} nur noch {p.follow}/Monat, dann monatlich kündbar
@@ -31,9 +31,9 @@ export function PriceCards({ p }: { p: SitePricing }) {
           </div>
         ) : null}
       </div>
-      <p data-reveal className="mt-6 text-sm text-[#555555]">
+      <p data-reveal className="mt-6 text-sm text-[#5b6475]">
         Endpreise, keine Einrichtungsgebühr.{' '}
-        <Link href="/preise" className="text-[#222222] underline underline-offset-4">
+        <Link href="/preise" className="text-[#0f172a] underline underline-offset-4">
           Alle Details zu den Preisen
         </Link>
       </p>

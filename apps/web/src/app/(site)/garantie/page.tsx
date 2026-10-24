@@ -40,14 +40,14 @@ export default async function GuaranteePage() {
               style={{ '--d': `${i * 100}ms` } as React.CSSProperties}
               className="card-site card-hover p-6"
             >
-              <h2 className="text-[1.375rem] font-semibold tracking-[-0.04em] text-[#222222]">{t}</h2>
+              <h2 className="text-[1.375rem] font-semibold tracking-[-0.04em] text-[#0f172a]">{t}</h2>
               <p className="mt-2 leading-relaxed text-slate-600">{d}</p>
             </div>
           ))}
         </div>
       </section>
       <section className="mx-auto max-w-[90rem] px-5 sm:px-8 py-12">
-        <h2 data-reveal className="text-section text-[#222222]">
+        <h2 data-reveal className="text-section text-[#0f172a]">
           Im Einzelnen
         </h2>
         <ul data-reveal className="mt-6 space-y-3 leading-relaxed text-slate-700">
@@ -62,7 +62,7 @@ export default async function GuaranteePage() {
         </ul>
         <p data-reveal className="mt-6 text-sm text-slate-600">
           Die genauen Bedingungen stehen in den{' '}
-          <Link href="/agb" className="text-[#222222] underline underline-offset-4">
+          <Link href="/agb" className="text-[#0f172a] underline underline-offset-4">
             AGB
           </Link>
           .

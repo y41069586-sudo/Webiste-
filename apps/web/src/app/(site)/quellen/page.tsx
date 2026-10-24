@@ -13,14 +13,14 @@ export default async function QuellenPage() {
   const rows = await sourcesPageClaims();
   return (
     <div className="mx-auto max-w-[90rem] px-5 py-14 sm:px-8 sm:py-24">
-      <h1 className="text-hero max-w-[18ch] text-[#222222]">Quellen zu den Zahlen in unseren Briefen</h1>
+      <h1 className="text-hero max-w-[18ch] text-[#0f172a]">Quellen zu den Zahlen in unseren Briefen</h1>
       <p className="mt-3 max-w-[70ch] text-slate-700">
         In unseren Briefen verwenden wir nur Zahlen aus veröffentlichten Studien. Hier steht jede Aussage im Wortlaut, mit
         Herausgeber, Datum und Stichprobe. Die Zahlen beschreiben das Verhalten von Kundinnen und Kunden – sie sind kein
         Versprechen, dass eine Website mehr Umsatz bringt.
       </p>
       {rows.length === 0 ? (
-        <p className="mt-8 rounded-[8px] bg-white p-7 text-[#333333]">
+        <p className="mt-8 rounded-[8px] bg-white p-7 text-[#3c4454]">
           Derzeit verwenden wir in unseren Briefen keine Statistiken.
         </p>
       ) : (

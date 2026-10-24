@@ -50,21 +50,21 @@ export function HeroBuild() {
         className="build-scale absolute top-[22%] left-[16%] w-[62%] overflow-hidden rounded-[8px] bg-white shadow-[0_2px_15px_0_rgb(0_0_0/0.1)]"
         style={t(600)}
       >
-        <div className="flex items-center gap-1.5 border-b border-[#eeeeee] px-3 py-2">
-          <span className="h-2 w-2 rounded-full bg-[#dddddd]" />
-          <span className="h-2 w-2 rounded-full bg-[#dddddd]" />
-          <span className="h-2 w-2 rounded-full bg-[#dddddd]" />
-          <span className="font-tight ml-2 truncate text-[0.65rem] text-[#555555]">cafe-muster.de</span>
+        <div className="flex items-center gap-1.5 border-b border-[#eef0f4] px-3 py-2">
+          <span className="h-2 w-2 rounded-full bg-[#e3e7ee]" />
+          <span className="h-2 w-2 rounded-full bg-[#e3e7ee]" />
+          <span className="h-2 w-2 rounded-full bg-[#e3e7ee]" />
+          <span className="font-tight ml-2 truncate text-[0.65rem] text-[#5b6475]">cafe-muster.de</span>
         </div>
         <div className="p-3">
           <div className="flex items-center justify-between">
-            <span className="build flex items-center gap-1.5 text-[0.72rem] font-semibold text-[#222222]" style={t(1100)}>
+            <span className="build flex items-center gap-1.5 text-[0.72rem] font-semibold text-[#0f172a]" style={t(1100)}>
               <span className="h-4 w-4 rounded-full bg-[#5b3a29]" />
               Café Muster
             </span>
             <span className="build flex gap-1.5" style={t(1300)}>
-              <span className="h-1.5 w-7 rounded-sm bg-[#dddddd]" />
-              <span className="h-1.5 w-7 rounded-sm bg-[#dddddd]" />
+              <span className="h-1.5 w-7 rounded-sm bg-[#e3e7ee]" />
+              <span className="h-1.5 w-7 rounded-sm bg-[#e3e7ee]" />
             </span>
           </div>
           <div className="build relative mt-2.5 overflow-hidden rounded-[4px]" style={t(1500)}>
@@ -88,9 +88,10 @@ export function HeroBuild() {
       </div>
       {/* Hinweis */}
       <div
-        className="build font-tight absolute top-[13%] left-[20%] sm:top-[15%] rounded-[4px] bg-[#222222] px-3 py-2 text-[0.8rem] font-medium text-white"
+        className="build font-tight absolute top-[13%] left-[20%] sm:top-[15%] flex items-center gap-2 rounded-[8px] border border-[#e3e7ee] bg-white px-3 py-2 text-[0.8rem] font-medium text-[#0f172a] shadow-[0_6px_22px_rgb(15_23_42/0.1)]"
         style={t(2600)}
       >
+        <span className="h-2 w-2 rounded-full bg-emerald-500" />
         Entwurf fertig · Beispiel
       </div>
     </div>

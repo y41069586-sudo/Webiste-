@@ -32,21 +32,21 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       <main id="inhalt" className="flex-1">
         {children}
       </main>
-      <footer className="bg-[#eeeeee]">
+      <footer className="bg-white">
         <div className="mx-auto max-w-[90rem] px-5 pt-16 pb-10 sm:px-8">
-          <div className="grid gap-10 border-t border-[#cccccc] pt-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
+          <div className="grid gap-10 border-t border-[#e3e7ee] pt-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
-              <p className="text-section text-[#222222]">{brand}</p>
-              <p className="mt-4 max-w-[34ch] text-[0.95rem] leading-relaxed text-[#333333]">
+              <p className="text-section text-[#0f172a]">{brand}</p>
+              <p className="mt-4 max-w-[34ch] text-[0.95rem] leading-relaxed text-[#3c4454]">
                 Fertige Websites für lokale Betriebe ohne eigene Website – mit eigener Domain und Hosting. Aus {s.city}.
               </p>
             </div>
             <nav aria-label="Seiten">
-              <p className="text-strong text-[#222222]">Seiten</p>
+              <p className="text-strong text-[#0f172a]">Seiten</p>
               <ul className="font-tight text-nav mt-3 space-y-2">
                 {SITE_NAV.map((n) => (
                   <li key={n.href}>
-                    <Link href={n.href} className="text-[#222222] transition-opacity duration-300 hover:opacity-60">
+                    <Link href={n.href} className="text-[#0f172a] transition-opacity duration-300 hover:opacity-60">
                       {n.label}
                     </Link>
                   </li>
@@ -54,7 +54,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
               </ul>
             </nav>
             <nav aria-label="Rechtliches">
-              <p className="text-strong text-[#222222]">Rechtliches</p>
+              <p className="text-strong text-[#0f172a]">Rechtliches</p>
               <ul className="font-tight text-nav mt-3 space-y-2">
                 {[
                   ['/impressum', 'Impressum'],
@@ -63,7 +63,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
                   ['/quellen', 'Quellen'],
                 ].map(([href, label]) => (
                   <li key={href}>
-                    <Link href={href!} className="text-[#222222] transition-opacity duration-300 hover:opacity-60">
+                    <Link href={href!} className="text-[#0f172a] transition-opacity duration-300 hover:opacity-60">
                       {label}
                     </Link>
                   </li>
@@ -71,21 +71,21 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
               </ul>
             </nav>
             <div>
-              <p className="text-strong text-[#222222]">Kontakt</p>
-              <ul className="font-tight text-nav mt-3 space-y-2 text-[#222222]">
+              <p className="text-strong text-[#0f172a]">Kontakt</p>
+              <ul className="font-tight text-nav mt-3 space-y-2 text-[#0f172a]">
                 <li>
                   <a href={`mailto:${s.email}`} className="transition-opacity duration-300 hover:opacity-60">
                     {s.email}
                   </a>
                 </li>
                 {s.phone ? <li>{s.phone}</li> : null}
-                <li className="text-[#555555]">
+                <li className="text-[#5b6475]">
                   {s.street}, {s.postalCode} {s.city}
                 </li>
               </ul>
             </div>
           </div>
-          <p className="text-legal mt-14 text-[#555555]">
+          <p className="text-legal mt-14 text-[#5b6475]">
             © {new Date().getFullYear()} {brand}. Alle Beispiel-Betriebe auf dieser Website sind erfunden.
           </p>
         </div>

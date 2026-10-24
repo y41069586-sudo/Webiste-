@@ -1,7 +1,9 @@
 import Stripe from 'stripe';
+import { CHECKOUT_FIELDS } from '../types';
 import type {
   CheckoutSession,
   CheckoutSessionInput,
+  CollectedCustomer,
   PaymentEvent,
   PaymentEventType,
   PaymentProvider,
@@ -72,6 +74,69 @@ export interface StripePaymentConfig {
  * erstellen wir selbst (fortlaufende Nummer, § 19 UStG). Fulfillment ausschließlich idempotent über
  * Webhooks + Abfrage auf der Erfolgsseite.
  */
+/** Gehosteter Checkout: Firmenname, Name, Adresse, Telefon und eigene Felder (Stripe API, geprüft siehe docs/integrations.md). */
+function collectionParams(input: CheckoutSessionInput): Partial<Stripe.Checkout.SessionCreateParams> {
+  const c = input.collect;
+  if (!c) return {};
+  return {
+    billing_address_collection: 'required',
+    name_collection: { business: { enabled: true, optional: false }, individual: { enabled: true, optional: false } },
+    phone_number_collection: { enabled: true },
+    custom_fields: [
+      {
+        key: CHECKOUT_FIELDS.domain,
+        label: { type: 'custom', custom: 'Wunschdomain (z. B. ihr-betrieb.de)' },
+        type: 'text',
+        text: { ...(c.domainDefault ? { default_value: c.domainDefault } : {}), minimum_length: 4, maximum_length: 63 },
+      },
+      {
+        key: CHECKOUT_FIELDS.b2b,
+        label: { type: 'custom', custom: 'Bestellung als Unternehmer (§ 14 BGB)' },
+        type: 'dropdown',
+        dropdown: { options: [{ label: 'Ja, ich bestelle für meinen Betrieb', value: 'ja' }] },
+      },
+      {
+        key: CHECKOUT_FIELDS.terms,
+        label: { type: 'custom', custom: `AGB (Stand ${c.termsVersion}) gelesen und akzeptiert`.slice(0, 100) },
+        type: 'dropdown',
+        dropdown: { options: [{ label: 'Ja, ich akzeptiere die AGB', value: 'ja' }] },
+      },
+    ],
+    custom_text: {
+      submit: { message: `${c.submitNote} AGB: ${c.termsUrl}`.slice(0, 1200) },
+    },
+  };
+}
+
+/** Erfasste Kundendaten aus der Session (nur gehosteter Checkout). */
+function collectedCustomer(s: Stripe.Checkout.Session): CollectedCustomer | undefined {
+  const fields: Record<string, string> = {};
+  for (const f of s.custom_fields ?? []) {
+    const v = f.text?.value ?? f.dropdown?.value ?? f.numeric?.value ?? null;
+    if (v) fields[f.key] = v;
+  }
+  const d = s.customer_details;
+  const business = s.collected_information?.business_name ?? d?.business_name ?? undefined;
+  const individual = s.collected_information?.individual_name ?? d?.individual_name ?? undefined;
+  if (!Object.keys(fields).length && !business) return undefined;
+  return {
+    businessName: business ?? undefined,
+    name: individual ?? d?.name ?? undefined,
+    email: d?.email ?? undefined,
+    phone: d?.phone ?? undefined,
+    address: d?.address
+      ? {
+          line1: d.address.line1 ?? undefined,
+          line2: d.address.line2 ?? undefined,
+          postalCode: d.address.postal_code ?? undefined,
+          city: d.address.city ?? undefined,
+          country: d.address.country ?? undefined,
+        }
+      : undefined,
+    customFields: fields,
+  };
+}
+
 export class StripePayment implements PaymentProvider {
   readonly name = 'stripe';
   private readonly stripe: Stripe;
@@ -98,7 +163,8 @@ export class StripePayment implements PaymentProvider {
           locale: 'de',
           allowed_payment_method_types: input.paymentMethods ?? DEFAULT_PAYMENT_METHODS,
           client_reference_id: input.orderId,
-          customer_email: input.customerEmail,
+          ...(input.customerEmail ? { customer_email: input.customerEmail } : {}),
+          ...collectionParams(input),
           line_items: [
             {
               quantity: 1,
@@ -115,12 +181,16 @@ export class StripePayment implements PaymentProvider {
           success_url: input.successUrl,
           cancel_url: input.cancelUrl,
           expires_at: Math.floor(Date.now() / 1000) + minutes * 60,
-          custom_text: {
-            submit: {
-              message:
-                'Die erste Monatsrate wird sofort fällig. Die Rechnung kommt per E-Mail, danach geht es direkt mit Ihren Angaben weiter.',
-            },
-          },
+          ...(input.collect
+            ? {}
+            : {
+                custom_text: {
+                  submit: {
+                    message:
+                      'Die erste Monatsrate wird sofort fällig. Die Rechnung kommt per E-Mail, danach geht es direkt mit Ihren Angaben weiter.',
+                  },
+                },
+              }),
         },
         { idempotencyKey: input.idempotencyKey },
       );
@@ -133,7 +203,7 @@ export class StripePayment implements PaymentProvider {
       allowed_payment_method_types: input.paymentMethods ?? DEFAULT_PAYMENT_METHODS,
       submit_type: 'pay',
       client_reference_id: input.orderId,
-      customer_email: input.customerEmail,
+      ...(input.customerEmail ? { customer_email: input.customerEmail } : {}),
       line_items: [
         {
           quantity: 1,
@@ -152,6 +222,7 @@ export class StripePayment implements PaymentProvider {
       custom_text: {
         submit: { message: 'Die Rechnung kommt per E-Mail. Danach geht es direkt mit Ihren Angaben für die Website weiter.' },
       },
+      ...collectionParams(input),
     };
     const session = await this.stripe.checkout.sessions.create(params, { idempotencyKey: input.idempotencyKey });
     if (!session.url) throw new Error('Stripe hat keine Checkout-URL geliefert');
@@ -205,6 +276,7 @@ export class StripePayment implements PaymentProvider {
         metadata: metadataOf(s.metadata),
         subscriptionId: idOf(s.subscription),
         invoiceId: idOf(s.invoice),
+        customer: collectedCustomer(s),
       };
     } catch (err) {
       if (err instanceof Stripe.errors.StripeInvalidRequestError && err.statusCode === 404) return null;
@@ -242,6 +314,7 @@ export class StripePayment implements PaymentProvider {
         metadata: metadataOf(s.metadata),
         mode: s.mode === 'subscription' ? 'subscription' : 'payment',
         subscriptionId: idOf(s.subscription),
+        customer: collectedCustomer(s),
       };
     }
     if (event.type === 'customer.subscription.deleted' || event.type === 'customer.subscription.updated') {

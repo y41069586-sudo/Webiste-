@@ -313,7 +313,19 @@ export interface CheckoutSessionInput {
   currency: 'eur';
   productName: string;
   productDescription: string;
-  customerEmail: string;
+  /** Bekannte E-Mail (vorausgefüllt); fehlt sie, erfasst der Anbieter sie selbst */
+  customerEmail?: string;
+  /**
+   * Gehosteter Checkout erfasst die Kundendaten selbst (Stripe): Firmenname, Name, Rechnungsadresse,
+   * Telefon sowie Wunschdomain, Bestätigung „Unternehmer“ und AGB-Zustimmung als eigene Felder.
+   */
+  collect?: {
+    domainDefault?: string;
+    termsUrl: string;
+    termsVersion: string;
+    /** Hinweis neben dem Bezahlknopf (Mindestlaufzeit, Garantie …) */
+    submitNote: string;
+  };
   successUrl: string;
   cancelUrl: string;
   metadata: Record<string, string>;
@@ -345,6 +357,20 @@ export type PaymentEventType =
 
 export type PaymentStatus = 'paid' | 'unpaid' | 'no_payment_required';
 
+/** Im gehosteten Checkout erfasste Kundendaten (checkout.session.completed). */
+export interface CollectedCustomer {
+  businessName?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: { line1?: string; line2?: string; postalCode?: string; city?: string; country?: string };
+  /** Eigene Felder: wunschdomain, unternehmer, agb */
+  customFields: Record<string, string>;
+}
+
+/** Schlüssel der eigenen Felder im gehosteten Checkout */
+export const CHECKOUT_FIELDS = { domain: 'wunschdomain', b2b: 'unternehmer', terms: 'agb' } as const;
+
 export interface PaymentEvent {
   eventId: string;
   type: PaymentEventType;
@@ -375,6 +401,8 @@ export interface PaymentEvent {
   nextPaymentAttempt?: Date | null;
   /** Abo-Status (active | past_due | unpaid | canceled | …) */
   subscriptionStatus?: string;
+  /** Gehosteter Checkout: erfasste Kundendaten */
+  customer?: CollectedCustomer;
 }
 
 export interface PaymentSessionInfo {
@@ -390,6 +418,8 @@ export interface PaymentSessionInfo {
   /** Abo-Modus: Abo und erste Rechnung */
   subscriptionId?: string;
   invoiceId?: string;
+  /** Gehosteter Checkout: erfasste Kundendaten */
+  customer?: CollectedCustomer;
 }
 
 export interface SubscriptionCheckoutInput {

@@ -104,6 +104,79 @@ describe('Stripe', () => {
     await expect(p.parseWebhook(payload.replace('59000', '1'), p.testSignature(payload))).rejects.toThrow();
   });
 
+  it('Gehosteter Checkout: Stripe erfasst Firma, Name, Adresse, Telefon und eigene Felder; Webhook liefert sie', async () => {
+    const { fn, calls } = fakeFetch(() => ({ json: SESSION }));
+    const p = new StripePayment({
+      secretKey: 'sk_test_abc',
+      webhookSecret: 'whsec_test_secret',
+      httpClient: Stripe.createFetchHttpClient(fn),
+    });
+    await p.createCheckoutSession({
+      orderId: 'order-1',
+      amountCents: 4900,
+      currency: 'eur',
+      productName: 'Website-Paket monatlich',
+      productDescription: 'Beschreibung',
+      collect: {
+        domainDefault: 'beispiel.de',
+        termsUrl: 'https://app.example/agb',
+        termsVersion: 'v1',
+        submitNote: 'Mindestlaufzeit 12 Monate.',
+      },
+      successUrl: 'https://app.example/checkout/x/erfolg?session_id={CHECKOUT_SESSION_ID}',
+      cancelUrl: 'https://app.example/d/x#uebernehmen',
+      metadata: { orderId: 'order-1' },
+      idempotencyKey: 'checkout-order-1',
+      recurring: { interval: 'month' },
+    });
+    const body = new URLSearchParams(calls[0]!.body);
+    expect(body.get('mode')).toBe('subscription');
+    expect(body.get('customer_email')).toBeNull();
+    expect(body.get('billing_address_collection')).toBe('required');
+    expect(body.get('name_collection[business][enabled]')).toBe('true');
+    expect(body.get('name_collection[individual][enabled]')).toBe('true');
+    expect(body.get('phone_number_collection[enabled]')).toBe('true');
+    expect(body.get('custom_fields[0][key]')).toBe('wunschdomain');
+    expect(body.get('custom_fields[0][text][default_value]')).toBe('beispiel.de');
+    expect(body.get('custom_fields[1][key]')).toBe('unternehmer');
+    expect(body.get('custom_fields[2][key]')).toBe('agb');
+    expect(body.get('custom_text[submit][message]')).toContain('Mindestlaufzeit 12 Monate.');
+
+    const payload = JSON.stringify({
+      id: 'evt_3',
+      object: 'event',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          ...SESSION,
+          status: 'complete',
+          payment_status: 'paid',
+          collected_information: { business_name: 'Malerei GmbH', individual_name: 'Erika Beispiel', shipping_details: null },
+          customer_details: {
+            email: 'erika@example.org',
+            name: 'Erika B.',
+            phone: '+49231123',
+            address: { line1: 'Kampstraße 5', line2: null, postal_code: '44137', city: 'Dortmund', country: 'DE', state: null },
+          },
+          custom_fields: [
+            { key: 'wunschdomain', type: 'text', text: { value: 'malerei.de' } },
+            { key: 'unternehmer', type: 'dropdown', dropdown: { value: 'ja' } },
+            { key: 'agb', type: 'dropdown', dropdown: { value: 'ja' } },
+          ],
+        },
+      },
+    });
+    const ev = await p.parseWebhook(payload, p.testSignature(payload));
+    expect(ev.customer).toEqual({
+      businessName: 'Malerei GmbH',
+      name: 'Erika Beispiel',
+      email: 'erika@example.org',
+      phone: '+49231123',
+      address: { line1: 'Kampstraße 5', line2: undefined, postalCode: '44137', city: 'Dortmund', country: 'DE' },
+      customFields: { wunschdomain: 'malerei.de', unternehmer: 'ja', agb: 'ja' },
+    });
+  });
+
   it('Webhook: Erstattung', async () => {
     const p = new StripePayment({ secretKey: 'sk_test_abc', webhookSecret: 'whsec_test_secret' });
     const payload = JSON.stringify({

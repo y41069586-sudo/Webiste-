@@ -44,7 +44,7 @@ export default async function AboutPage() {
           </div>
           <div data-reveal style={{ '--d': '100ms' } as React.CSSProperties} className="space-y-6">
             <div className="card-site p-7">
-              <h2 className="text-[1.375rem] font-semibold tracking-[-0.04em] text-[#222222]">So arbeite ich</h2>
+              <h2 className="text-[1.375rem] font-semibold tracking-[-0.04em] text-[#0f172a]">So arbeite ich</h2>
               <ul className="mt-3 space-y-2 leading-relaxed text-slate-600">
                 <li>Ich schreibe nur per Post. Keine Anrufe, keine Werbe-E-Mails, keine Nachrichten über Messenger.</li>
                 <li>Jeder Entwurf entsteht mit öffentlich bekannten Angaben – keine erfundenen Bewertungen oder Referenzen.</li>
@@ -52,7 +52,7 @@ export default async function AboutPage() {
               </ul>
             </div>
             <div className="card-site p-7">
-              <h2 className="text-[1.375rem] font-semibold tracking-[-0.04em] text-[#222222]">Kontakt</h2>
+              <h2 className="text-[1.375rem] font-semibold tracking-[-0.04em] text-[#0f172a]">Kontakt</h2>
               <dl className="mt-3 grid gap-2 text-slate-700 sm:grid-cols-[8rem_1fr]">
                 <dt className="text-slate-500">Firma</dt>
                 <dd>{brand}</dd>
@@ -62,7 +62,7 @@ export default async function AboutPage() {
                 </dd>
                 <dt className="text-slate-500">E-Mail</dt>
                 <dd>
-                  <a href={`mailto:${s.email}`} className="text-[#222222] underline underline-offset-4">
+                  <a href={`mailto:${s.email}`} className="text-[#0f172a] underline underline-offset-4">
                     {s.email}
                   </a>
                 </dd>
@@ -74,7 +74,7 @@ export default async function AboutPage() {
                 ) : null}
               </dl>
               <p className="mt-4 text-sm">
-                <Link href="/impressum" className="text-[#222222] underline underline-offset-4">
+                <Link href="/impressum" className="text-[#0f172a] underline underline-offset-4">
                   Impressum
                 </Link>
               </p>

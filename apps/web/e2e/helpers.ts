@@ -34,6 +34,23 @@ export function e2eState(): { email: string; password: string; secret: string } 
   return JSON.parse(readFileSync(path.join(os.tmpdir(), 'wbm-e2e-state.json'), 'utf8'));
 }
 
+/**
+ * Navigation, die einen Neuladen des Dev-Servers übersteht (nach dem Erstkompilieren lädt Next die Seite
+ * einmal neu – eine gleichzeitige Navigation endet dann mit ERR_ABORTED).
+ */
+export async function gotoStable(page: Page, url: string): Promise<void> {
+  for (let i = 0; ; i++) {
+    try {
+      await page.goto(url, { waitUntil: 'load' });
+      await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined);
+      return;
+    } catch (err) {
+      if (i >= 5 || !/ERR_ABORTED|interrupted by another navigation/.test(String(err))) throw err;
+      await page.waitForTimeout(1500);
+    }
+  }
+}
+
 let usedStep = 0;
 /**
  * Meldet den Admin an (wartet ggf. auf den nächsten TOTP-Schritt – Replay-Schutz).
@@ -48,7 +65,7 @@ export async function loginAsAdmin(page: Page): Promise<void> {
       step = Math.floor(Date.now() / 30000);
     }
     usedStep = step;
-    await page.goto('/login', { waitUntil: 'load' });
+    await gotoStable(page, '/login');
     await page.getByRole('button', { name: 'Anmelden' }).waitFor();
     await page.getByLabel('E-Mail').fill(s.email);
     await page.getByLabel('Passwort').fill(s.password);
@@ -63,4 +80,19 @@ export async function loginAsAdmin(page: Page): Promise<void> {
     }
   }
   throw new Error('Admin-Anmeldung fehlgeschlagen');
+}
+
+/** Simulierte Stripe-Bezahlseite ausfüllen (Angaben erfasst der Anbieter) und bezahlen. */
+export async function payOnMockCheckout(
+  page: import('@playwright/test').Page,
+  o: { name?: string; email?: string; domain?: string; outcome?: string } = {},
+): Promise<void> {
+  const { expect } = await import('@playwright/test');
+  await expect(page.getByRole('heading', { name: 'Testzahlung' })).toBeVisible();
+  await page.getByLabel('Ihr Name').fill(o.name ?? 'Erika Beispiel');
+  await page.getByLabel('E-Mail').fill(o.email ?? 'erika@example.org');
+  await page.getByLabel('Wunschdomain').fill(o.domain ?? `e2e-${Date.now()}.de`);
+  await page.getByLabel(/als Unternehmer/).check();
+  await page.getByLabel(/AGB/).check();
+  await page.getByRole('button', { name: o.outcome ?? 'Erfolgreich bezahlen (Karte)' }).click();
 }

@@ -28,62 +28,64 @@ export default async function Home() {
   return (
     <>
       {/* Hero: asymmetrisch – große Aussage links, Collage Mitte/rechts, kurzer Text mit Button unten rechts */}
-      <section className="mx-auto max-w-[90rem] px-5 pt-10 pb-20 sm:px-8 sm:pt-16 lg:pb-28">
-        <div className="grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-6">
-          <div className="lg:pt-10">
-            <p className="build font-tight text-nav text-[#555555]">Für Betriebe in {cfg.sender.city} ohne eigene Website</p>
-            <h1 style={t(60)} className="build text-hero mt-4 max-w-[11ch] text-[#222222]">
-              Ihre Website ist schon fertig.
-            </h1>
-          </div>
-          <HeroBuild />
-        </div>
-        <div className="mt-10 grid gap-6 lg:mt-4 lg:grid-cols-[1fr_1.15fr] lg:gap-6">
-          <div className="hidden lg:block" />
-          <div style={t(900)} className="build max-w-[46ch] lg:ml-auto">
-            <p className="text-[1.0625rem] leading-relaxed text-[#333333]">
-              Wir bauen Ihrem Betrieb einen fertigen Website-Entwurf und schicken ihn per Brief. Gefällt er Ihnen, geht er auf
-              Ihrer eigenen Domain online – ohne Termin und ohne Verkaufsgespräch.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/so-funktionierts" className="btn-site btn-primary btn-compact">
-                So funktioniert’s <Arrow />
-              </Link>
-              <Link href="/preise" className="btn-site btn-secondary">
-                Preise
-              </Link>
+      <section className="hero-field">
+        <div className="mx-auto max-w-[90rem] px-5 pt-10 pb-20 sm:px-8 sm:pt-16 lg:pb-28">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-6">
+            <div className="lg:pt-10">
+              <p className="build font-tight text-nav text-[#5b6475]">Für Betriebe in {cfg.sender.city} ohne eigene Website</p>
+              <h1 style={t(60)} className="build text-hero mt-4 max-w-[11ch] text-[#0f172a]">
+                Ihre Website ist schon fertig.
+              </h1>
             </div>
-            <p className="font-tight text-nav mt-5 text-[#555555]">
-              {p.oneTime} einmalig{p.monthlyEnabled ? ` oder ${p.monthly}/Monat (${p.minTerm} Monate Mindestlaufzeit)` : ''}
-              {p.guarantee ? ` · ${p.guarantee.days} Tage Garantie` : ''}
-            </p>
+            <HeroBuild />
+          </div>
+          <div className="mt-10 grid gap-6 lg:mt-4 lg:grid-cols-[1fr_1.15fr] lg:gap-6">
+            <div className="hidden lg:block" />
+            <div style={t(900)} className="build max-w-[46ch] lg:ml-auto">
+              <p className="text-[1.0625rem] leading-relaxed text-[#3c4454]">
+                Wir bauen Ihrem Betrieb einen fertigen Website-Entwurf und schicken ihn per Brief. Gefällt er Ihnen, geht er auf
+                Ihrer eigenen Domain online – ohne Termin und ohne Verkaufsgespräch.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/so-funktionierts" className="btn-site btn-primary btn-compact">
+                  So funktioniert’s <Arrow />
+                </Link>
+                <Link href="/preise" className="btn-site btn-secondary">
+                  Preise
+                </Link>
+              </div>
+              <p className="font-tight text-nav mt-5 text-[#5b6475]">
+                {p.oneTime} einmalig{p.monthlyEnabled ? ` oder ${p.monthly}/Monat (${p.minTerm} Monate Mindestlaufzeit)` : ''}
+                {p.guarantee ? ` · ${p.guarantee.days} Tage Garantie` : ''}
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Drei Schritte auf dunklem Band */}
-      <section className="bg-[#222222] text-white">
+      {/* Drei Schritte */}
+      <section className="bg-[#f7f8fa]">
         <div className="mx-auto max-w-[90rem] px-5 py-20 sm:px-8 sm:py-28">
           <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-end">
-            <h2 data-reveal className="text-section max-w-[16ch]">
+            <h2 data-reveal className="text-section max-w-[16ch] text-[#0f172a]">
               Drei Schritte. Kein Termin.
             </h2>
-            <p data-reveal style={delay(100)} className="max-w-[44ch] leading-relaxed text-[#dddddd]">
+            <p data-reveal style={delay(100)} className="max-w-[44ch] leading-relaxed text-[#3c4454]">
               Sie müssen nichts vorbereiten. Den Entwurf gibt es schon, bevor wir uns kennen.
             </p>
           </div>
-          <ol className="mt-14 grid gap-px overflow-hidden rounded-[8px] bg-[#333333] md:grid-cols-3">
+          <ol className="mt-14 grid gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
-              <li key={s.title} data-reveal style={delay(i * 120)} className="bg-[#222222] p-7 sm:p-9">
-                <span className="grid h-11 w-11 place-items-center rounded-[4px] bg-white text-[#222222]">{s.icon}</span>
-                <p className="font-tight text-nav mt-8 text-[#bbbbbb]">Schritt {i + 1}</p>
-                <h3 className="mt-1 text-[1.75rem] font-semibold tracking-[-0.04em]">{s.title}</h3>
-                <p className="mt-3 leading-relaxed text-[#dddddd]">{s.text}</p>
+              <li key={s.title} data-reveal style={delay(i * 120)} className="card-site card-hover p-7 sm:p-9">
+                <span className="grid h-11 w-11 place-items-center rounded-[8px] bg-[#eef3ff] text-[#1f4fd8]">{s.icon}</span>
+                <p className="font-tight text-nav mt-8 text-[#5b6475]">Schritt {i + 1}</p>
+                <h3 className="mt-1 text-[1.75rem] font-semibold tracking-[-0.04em] text-[#0f172a]">{s.title}</h3>
+                <p className="mt-3 leading-relaxed text-[#3c4454]">{s.text}</p>
               </li>
             ))}
           </ol>
           <p data-reveal className="mt-10">
-            <Link href="/so-funktionierts" className="btn-site btn-compact bg-white text-[#333333]">
+            <Link href="/so-funktionierts" className="btn-site btn-compact bg-white text-[#3c4454]">
               Der Ablauf im Detail <Arrow />
             </Link>
           </p>
@@ -109,7 +111,7 @@ export default async function Home() {
         <ul
           data-reveal
           style={delay(120)}
-          className="card-site mt-12 grid gap-x-10 gap-y-4 p-7 text-[#333333] sm:grid-cols-2 sm:p-10 lg:grid-cols-4"
+          className="card-site mt-12 grid gap-x-10 gap-y-4 p-7 text-[#3c4454] sm:grid-cols-2 sm:p-10 lg:grid-cols-4"
         >
           <Check>Eigene Domain inklusive</Check>
           <Check>Hosting und SSL inklusive</Check>
@@ -136,10 +138,10 @@ export default async function Home() {
         title="Fragen? Schreiben Sie mir direkt."
         text={`Persönlich, ohne Callcenter.${p.guarantee ? ` Und mit ${p.guarantee.days} Tagen Zufriedenheitsgarantie nach dem Start.` : ''}`}
       >
-        <Link href="/kontakt" className="btn-site btn-compact bg-white text-[#333333]">
+        <Link href="/kontakt" className="btn-site btn-compact bg-white text-[#3c4454]">
           Kontakt aufnehmen <Arrow />
         </Link>
-        <Link href="/ueber-mich" className="btn-site border border-white/40 text-white">
+        <Link href="/ueber-mich" className="btn-site btn-secondary">
           Wer steckt dahinter?
         </Link>
       </DarkBand>

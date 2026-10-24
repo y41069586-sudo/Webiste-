@@ -42,6 +42,9 @@ Stand 23.10.2026, eingerichtet über die Stripe-Anbindung (nur Sandbox „Websit
 - [ ] Live: denselben Webhook-Endpunkt mit denselben Events im Live-Modus anlegen (die Anbindung hat keinen
       Live-Zugriff), Live-Secret und `sk_live_…` nur in die Server-`.env`
 - [ ] Live: Geschäftsdaten, Kontoauszugs-Bezeichnung „SEITENWERK“, Auszahlungskonto
+- [ ] Sandbox und Live: Branding der Bezahlseite (Einstellungen → Branding): Logo, Akzentfarbe **#1F4FD8**,
+      Hintergrund Weiß – die Bezahlseite ist jetzt die einzige Bestellseite (Angaben, Domain, AGB erfasst Stripe)
+- [ ] Testkauf in der Sandbox: Firmenname, Adresse, Wunschdomain, „Unternehmer“ und „AGB“ erscheinen in der Bestellung
 
 ## LetterXpress (Briefdienst)
 

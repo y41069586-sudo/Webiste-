@@ -7,9 +7,9 @@ export function PublicShell({ company, children, wide = false }: { company: stri
   const w = wide ? 'max-w-6xl' : 'max-w-3xl';
   return (
     <div className="theme-site flex min-h-screen flex-col">
-      <header className="bg-[#eeeeee]">
+      <header className="bg-white">
         <div className={`mx-auto flex h-16 items-center justify-between gap-4 px-5 ${w}`}>
-          <Link href="/" className="text-strong font-tight text-[1.05rem] text-[#222222]">
+          <Link href="/" className="text-strong font-tight text-[1.05rem] text-[#0f172a]">
             {brandName(company)}
           </Link>
           <span className="flex items-center gap-1.5 text-xs text-slate-600">
@@ -21,9 +21,9 @@ export function PublicShell({ company, children, wide = false }: { company: stri
         </div>
       </header>
       <main className={`page-fade mx-auto w-full flex-1 px-5 py-10 ${w}`}>{children}</main>
-      <footer className="bg-[#eeeeee]">
+      <footer className="bg-white">
         <div
-          className={`font-tight text-nav mx-auto flex flex-wrap gap-x-6 gap-y-2 border-t border-[#cccccc] px-5 py-8 text-[#222222] ${w}`}
+          className={`font-tight text-nav mx-auto flex flex-wrap gap-x-6 gap-y-2 border-t border-[#e3e7ee] px-5 py-8 text-[#0f172a] ${w}`}
         >
           <Link href="/impressum" className="hover:text-slate-900">
             Impressum

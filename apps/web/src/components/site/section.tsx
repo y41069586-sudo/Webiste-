@@ -23,17 +23,19 @@ export function Arrow() {
 /** Seitenkopf: große, eng gesetzte Überschrift links, kurze Erklärung rechts (asymmetrisch). */
 export function PageIntro({ eyebrow, title, children }: { eyebrow: string; title: string; children?: ReactNode }) {
   return (
-    <section className="mx-auto max-w-[90rem] px-5 pt-14 pb-14 sm:px-8 sm:pt-24 sm:pb-20">
-      <p className="build font-tight text-nav text-[#555555]">{eyebrow}</p>
-      <div className="mt-4 grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-end">
-        <h1 style={t(60)} className="build text-hero max-w-[16ch] text-balance text-[#222222]">
-          {title}
-        </h1>
-        {children ? (
-          <div style={t(160)} className="build max-w-[46ch] text-[1.0625rem] leading-relaxed text-[#333333]">
-            {children}
-          </div>
-        ) : null}
+    <section className="hero-field">
+      <div className="mx-auto max-w-[90rem] px-5 pt-14 pb-16 sm:px-8 sm:pt-24 sm:pb-24">
+        <p className="build font-tight text-nav text-[#5b6475]">{eyebrow}</p>
+        <div className="mt-4 grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-end">
+          <h1 style={t(60)} className="build text-hero max-w-[16ch] text-balance text-[#0f172a]">
+            {title}
+          </h1>
+          {children ? (
+            <div style={t(160)} className="build max-w-[46ch] text-[1.0625rem] leading-relaxed text-[#3c4454]">
+              {children}
+            </div>
+          ) : null}
+        </div>
       </div>
     </section>
   );
@@ -42,11 +44,11 @@ export function PageIntro({ eyebrow, title, children }: { eyebrow: string; title
 export function SectionHead({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-end">
-      <h2 data-reveal className="text-section max-w-[20ch] text-balance text-[#222222]">
+      <h2 data-reveal className="text-section max-w-[20ch] text-balance text-[#0f172a]">
         {title}
       </h2>
       {children ? (
-        <div data-reveal style={delay(100)} className="max-w-[46ch] leading-relaxed text-[#333333]">
+        <div data-reveal style={delay(100)} className="max-w-[46ch] leading-relaxed text-[#3c4454]">
           {children}
         </div>
       ) : null}
@@ -60,7 +62,7 @@ export function Check({ children, dark = false }: { children: ReactNode; dark?: 
       <svg
         aria-hidden="true"
         viewBox="0 0 20 20"
-        className={`mt-0.5 h-5 w-5 shrink-0 ${dark ? 'text-white' : 'text-[#222222]'}`}
+        className={`mt-0.5 h-5 w-5 shrink-0 ${dark ? 'text-white' : 'text-[#1f4fd8]'}`}
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
@@ -72,17 +74,19 @@ export function Check({ children, dark = false }: { children: ReactNode; dark?: 
   );
 }
 
-/** Dunkles Band (#222222) als Abschluss vor dem Footer. */
+/** Abschluss-Band vor dem Footer: helles Blau mit Punkteraster. */
 export function DarkBand({ title, text, children }: { title: string; text: string; children: ReactNode }) {
   return (
-    <section className="on-dark bg-[#222222] text-white">
-      <div className="mx-auto grid max-w-[90rem] gap-10 px-5 py-20 sm:px-8 sm:py-28 lg:grid-cols-[1.6fr_1fr] lg:items-end">
-        <h2 data-reveal className="text-section max-w-[18ch] text-balance">
-          {title}
-        </h2>
-        <div data-reveal style={delay(120)}>
-          <p className="max-w-[44ch] leading-relaxed text-[#dddddd]">{text}</p>
-          <div className="mt-7 flex flex-wrap gap-3">{children}</div>
+    <section className="px-5 pb-20 sm:px-8 sm:pb-28">
+      <div className="hero-field mx-auto max-w-[90rem] overflow-hidden rounded-[12px] border border-[#e3e7ee]">
+        <div className="grid gap-10 px-6 py-16 sm:px-12 sm:py-20 lg:grid-cols-[1.6fr_1fr] lg:items-end">
+          <h2 data-reveal className="text-section max-w-[18ch] text-balance text-[#0f172a]">
+            {title}
+          </h2>
+          <div data-reveal style={delay(120)}>
+            <p className="max-w-[44ch] leading-relaxed text-[#3c4454]">{text}</p>
+            <div className="mt-7 flex flex-wrap gap-3">{children}</div>
+          </div>
         </div>
       </div>
     </section>

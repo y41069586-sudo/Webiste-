@@ -1,5 +1,6 @@
 import { deflateSync } from 'node:zlib';
 import { expect, test, type Page } from '@playwright/test';
+import { payOnMockCheckout } from './helpers';
 import { seedPublishedDemo } from './seed';
 
 /** Kleines gültiges PNG für den Logo-Upload. */
@@ -38,20 +39,8 @@ function png(w = 60, h = 20): Buffer {
 
 async function buyDemo(page: Page): Promise<string> {
   const demo = seedPublishedDemo();
-  await page.goto(`/checkout/${demo.slug}`);
-  // Next-Dev kompiliert beim ersten Aufruf nach – bis die Seite stabil ist, Eingaben wiederholen
-  await page.waitForLoadState('networkidle');
-  await expect(async () => {
-    await page.getByLabel('Wunschdomain').fill(`e2e-${Date.now()}`);
-    await expect(page.getByText(/ist frei/)).toBeVisible({ timeout: 5_000 });
-  }).toPass({ timeout: 60_000 });
-  await page.getByRole('radio', { name: /Einmalzahlung/ }).check();
-  await page.getByLabel('Ihr Name (Vor- und Nachname)').fill('Erika Beispiel');
-  await page.getByLabel('E-Mail').fill('erika@example.org');
-  await page.getByLabel(/als Unternehmer/).check();
-  await page.getByLabel(/Ich akzeptiere die/).check();
-  await page.getByRole('button', { name: /Weiter zur Zahlung/ }).click();
-  await page.getByRole('button', { name: 'Erfolgreich bezahlen (Karte)' }).click();
+  await page.goto(`/d/${demo.slug}/uebernehmen?plan=one_time`);
+  await payOnMockCheckout(page);
   const link = page.getByRole('link', { name: 'Jetzt Angaben eintragen' });
   await expect(link).toBeVisible();
   const href = (await link.getAttribute('href'))!;
