@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getConfig } from '@wbm/core';
-import { ExamplesCarousel } from '@/components/site/examples';
+import { ExamplesCascade } from '@/components/site/examples';
 import { HeroBuild } from '@/components/site/hero-build';
 import { PriceCards } from '@/components/site/price-cards';
 import { Arrow, Check, DarkBand, delay, ICONS, SectionHead, t } from '@/components/site/section';
@@ -92,13 +92,15 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Beispiele: Bilder liefern die Farbe */}
+      {/* Beispiele: diagonale Treppe, Bilder liefern die Farbe */}
       <section className="mx-auto max-w-[90rem] px-5 py-20 sm:px-8 sm:py-28">
-        <SectionHead title="Beispiele je Branche.">
-          Erfundene Musterbetriebe, damit Sie sehen, wie ein Entwurf aussieht. Ihr Entwurf nutzt Ihre eigenen Angaben.
-        </SectionHead>
-        <div data-reveal style={delay(120)} className="mt-12">
-          <ExamplesCarousel />
+        <div data-reveal>
+          <ExamplesCascade title="Beispiele je Branche.">
+            <p>Erfundene Musterbetriebe, damit Sie sehen, wie ein Entwurf aussieht. Ihr Entwurf nutzt Ihre eigenen Angaben.</p>
+            <Link href="/beispiele" className="btn-site btn-primary btn-compact mt-4">
+              Alle Beispiele <Arrow />
+            </Link>
+          </ExamplesCascade>
         </div>
       </section>
 

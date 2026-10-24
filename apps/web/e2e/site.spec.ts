@@ -44,11 +44,16 @@ test.describe('Firmen-Website', () => {
     await expect(table).toContainText('19 €/Monat');
   });
 
-  test('Beispiele: Karussell, klar als Beispiel gekennzeichnet', async ({ page }) => {
+  test('Beispiele: Treppe läuft, lässt sich anhalten, klar als Beispiel gekennzeichnet', async ({ page }) => {
     await page.goto('/beispiele');
-    const region = page.getByRole('region', { name: 'Beispiel-Websites je Branche' });
-    await expect(region.getByText('Beispiel', { exact: true })).toHaveCount(5);
-    await expect(region.getByRole('img').first()).toHaveAttribute('alt', /erfundenen Betrieb/);
+    const list = page.getByRole('list', { name: 'Beispiel-Websites je Branche' });
+    await expect(list.getByRole('listitem')).toHaveCount(5);
+    await expect(list.getByText(/erfundener Musterbetrieb/)).toHaveCount(5);
+    const track = page.locator('.cascade-track');
+    await expect(track.getByText('Beispiel', { exact: true })).toHaveCount(10);
+    await expect(track).toHaveCSS('animation-play-state', 'running');
+    await page.getByLabel('Bewegung anhalten').check();
+    await expect(track).toHaveCSS('animation-play-state', 'paused');
   });
 
   test('Kontaktformular: Pflichtfelder, dann Danke (landet im Support)', async ({ page }) => {

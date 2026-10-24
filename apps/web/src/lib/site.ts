@@ -18,11 +18,35 @@ export function sitePricing(cfg: AppConfig) {
 export type SitePricing = ReturnType<typeof sitePricing>;
 
 export const INDUSTRY_EXAMPLES = [
-  { id: 'gastronomie', label: 'Gastronomie', name: 'Café Muster', hook: 'Speisekarte, Öffnungszeiten, Anfahrt' },
-  { id: 'handwerk', label: 'Handwerk', name: 'Malerei Muster', hook: 'Leistungen, Einzugsgebiet, Anfrageformular' },
-  { id: 'beauty', label: 'Beauty', name: 'Kosmetik Muster', hook: 'Behandlungen, Terminanfrage, Öffnungszeiten' },
-  { id: 'einzelhandel', label: 'Einzelhandel', name: 'Blumen Muster', hook: 'Sortiment, Öffnungszeiten, Anfahrt' },
-  { id: 'kurse', label: 'Kurse & Training', name: 'Tanzschule Muster', hook: 'Kursplan, Probestunde, Kontakt' },
+  {
+    id: 'gastronomie',
+    label: 'Gastronomie',
+    name: 'Café Muster',
+    hook: 'Speisekarte, Öffnungszeiten, Anfahrt',
+    color: '#6b4430',
+  },
+  {
+    id: 'handwerk',
+    label: 'Handwerk',
+    name: 'Malerei Muster',
+    hook: 'Leistungen, Einzugsgebiet, Anfrageformular',
+    color: '#1e4c96',
+  },
+  {
+    id: 'beauty',
+    label: 'Beauty',
+    name: 'Kosmetik Muster',
+    hook: 'Behandlungen, Terminanfrage, Öffnungszeiten',
+    color: '#a63e5f',
+  },
+  {
+    id: 'einzelhandel',
+    label: 'Einzelhandel',
+    name: 'Blumen Muster',
+    hook: 'Sortiment, Öffnungszeiten, Anfahrt',
+    color: '#15645a',
+  },
+  { id: 'kurse', label: 'Kurse & Training', name: 'Tanzschule Muster', hook: 'Kursplan, Probestunde, Kontakt', color: '#c2410c' },
 ] as const;
 
 export { SITE_NAV } from './site-nav';

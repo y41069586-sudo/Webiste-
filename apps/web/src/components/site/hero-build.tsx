@@ -19,8 +19,8 @@ export function HeroBuild() {
         <img
           src="/beispiele/handwerk-karte.webp"
           alt=""
-          width={720}
-          height={450}
+          width={960}
+          height={600}
           className="block h-auto w-full"
           fetchPriority="high"
         />

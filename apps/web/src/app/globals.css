@@ -304,20 +304,133 @@ body {
   animation: price-in 450ms var(--ease-smooth) both;
 }
 
-.carousel {
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
+/* Beispiel-Treppe: Reihen aus Vorschau + Farbfeld, diagonal versetzt, laufen endlos nach rechts oben.
+   Geometrie in Container-Einheiten; nur transform wird animiert. */
+.cascade {
+  container-type: inline-size;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #e8ebf1;
+  background-color: #f7f8fa;
+  background-image: radial-gradient(rgb(15 23 42 / 0.09) 1px, transparent 1.2px);
+  background-size: 22px 22px;
 }
-.carousel::-webkit-scrollbar {
-  display: none;
+.cascade-stage {
+  --w: 64cqw;
+  --h: calc(var(--w) * 0.625);
+  /* schmal: Treppe nach rechts versetzt, damit sie die ganze Höhe füllt (oberstes Farbfeld läuft hinaus) */
+  --x0: calc(100cqw - var(--w) - var(--h) * 0.4);
+  position: relative;
+  overflow: hidden;
+  height: calc(var(--h) * 2.1);
 }
-.carousel > * {
-  scroll-snap-align: start;
+/* Überschrift oben links, Text unten rechts – mobil im Fluss, breit in den freien Ecken der Treppe */
+.cascade-head {
+  position: relative;
+  z-index: 2;
+  padding: 1.75rem 1.25rem 1.25rem;
 }
-.carousel.is-dragging {
-  scroll-snap-type: none;
-  cursor: grabbing;
+.cascade-foot {
+  position: relative;
+  z-index: 2;
+  padding: 1.25rem;
+}
+@container (min-width: 960px) {
+  .cascade-stage {
+    --w: 30cqw;
+    --x0: calc(100cqw - var(--w) - var(--h));
+    height: calc(var(--h) * 3);
+  }
+  .cascade-head {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: 33cqw;
+    padding: 2.6cqw;
+  }
+  .cascade-foot {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 33cqw;
+    padding: 2.6cqw;
+  }
+}
+.cascade-track {
+  position: absolute;
+  inset: 0;
+  animation: cascade calc(var(--n) * 6.5s) linear infinite;
+  will-change: transform;
+}
+.cascade:hover .cascade-track,
+.cascade:has(.cascade-pause:checked) .cascade-track {
+  animation-play-state: paused;
+}
+@keyframes cascade {
+  to {
+    transform: translate3d(calc(var(--n) * var(--w)), calc(var(--n) * var(--h) * -1), 0);
+  }
+}
+.cascade-row {
+  position: absolute;
+  left: calc(var(--x0) - (var(--i) - 1) * var(--w));
+  top: calc((var(--i) - 1) * var(--h));
+  display: flex;
+  height: var(--h);
+}
+.cascade-shot {
+  position: relative;
+  width: var(--w);
+  height: 100%;
+  overflow: hidden;
+  background: #e3e7ee;
+}
+.cascade-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.cascade-panel {
+  position: relative;
+  width: var(--h);
+  height: 100%;
+  overflow: hidden;
+  color: #fff;
+  padding: clamp(0.6rem, 1.4cqw, 1.25rem);
+}
+/* Diagonaler Streifen im Farbfeld */
+.cascade-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 50%, rgb(255 255 255 / 0.9) 50%, rgb(255 255 255 / 0.9) 64%, transparent 64%);
+}
+.cascade-name {
+  position: relative;
+  z-index: 1;
+  display: block;
+  max-width: 70%;
+  font-family: 'Inter Tight Variable', 'Inter Tight', 'Inter Variable', Inter, Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  font-size: clamp(0.85rem, 2.1cqw, 1.6rem);
+}
+.cascade-label {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 0.35em;
+  font-size: clamp(0.65rem, 1.05cqw, 0.85rem);
+  opacity: 0.85;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cascade-track {
+    animation: none !important;
+  }
 }
 
 .theme-site .prose-legal h1 {
