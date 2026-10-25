@@ -17,7 +17,9 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
-    "admin:create": "tsx scripts/create-admin.ts"
+    "admin:create": "tsx scripts/create-admin.ts",
+    "queue:prepare": "tsx scripts/prepare-queue.ts",
+    "storage:backup": "tsx scripts/backup-storage.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.1.0",

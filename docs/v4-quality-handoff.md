@@ -79,3 +79,62 @@ Aktueller Status: **bereit für interne Weiterentwicklung und isolierte Tests; k
   ESLint. Erste Testfehler (Regex-Großschreibung, Syntax im Test) korrigiert, vollständiger Nachlauf grün.
 - Weiter offen: komplette Regression/E2E, reale Sandbox-Abnahme, asynchrone Erstattungsbewertung,
   Betriebs-/Queue-/Backup-Härtung, zehn echte Demo-Render und Design-/Brief-/Website-Prüfung.
+
+## Zwischenstand Paket 2/3 – 25.10.2026
+
+Letzter gesicherter Featurecommit: **312aba8**. Danach weiterhin uncommitted:
+Worker-/Queue-/Backup-Härtung, neue Qualitätsgates und zehnfache Browsermatrix, Demo-/Home-Design,
+fünf statische Muster, RLS-Migration 0015 und bestätigte Erstattungszustände 0016.
+
+Belegte neue Prüfungen:
+- 10 fiktive Demos durch buildDemo/qaDemo, 20 Desktop-/Mobilbilder unter
+  `data/exports/v5-quality/`, Kontaktbögen tatsächlich betrachtet; alle zehn technische QA grün.
+  Fallback nach zwei kaputten KI-Antworten explizit geprüft. Kein echter Anthropic-Aufruf.
+- Sichtbarer Mobilfehler bei langen Firmennamen (schmale umgebrochene Headerbuttons) korrigiert;
+  finale Matrix nach Korrektur noch ausführen. Café-Fotos künftig nur passende Treffer.
+- Storage-Dateien lokal binär gesichert/zurückgelesen, Hashfehler erkannt. Root-Listing-Bug
+  im vorhandenen LocalStorage behoben.
+- Echte lokale Queue: Job/Retry/Dead-Letter/Cron nach Testkorrektur grün. Vorheriger Test nutzte
+  verzögert aktualisierte Stats; direkter Dead-Letter-Fetch ist der belastbare Nachweis.
+- Echte Stripe-Sandbox: Basis 1900 und Care+ 9900 bezahlt, jeweils vollständig erstattet und Abos
+  beendet; Endzustände per GET bestätigt. IDs in stripe-v5-sandbox-abnahme.md.
+  **default_incomplete war ungeeignet** für automatischen Erstmonat; allow_incomplete+off_session
+  wurde real getestet und im Code korrigiert.
+- Neues Erstattungs-Pending-Verhalten: zwei Regressionen + sechs Provider-Tests + Queue-Test grün.
+  Pending ist kein Geldabgang; kein zweiter Request bei Wiederholung; bestätigte Events monoton.
+
+Noch laufend: vollständige Core-Suite `/tmp/seitenwerk-v5-core-full.log`, Docker-Build
+`/tmp/seitenwerk-v5-docker-build.log`. Erster V4-Browserlauf scheiterte am wegen laufender
+Codeänderungen zurückgesetzten Mock-Zahlformular (kein POST, Bestellung pending); stabilisierte
+Hydration im Helper und erneuter Lauf erforderlich. 60 Template-Assertions verwenden noch das alte
+Bannerwort; konkrete neue Kennzeichnung angepasst, Suite erneut ausführen. Keine Fehler verschweigen.
+
+Nächste Schritte: laufende Tests auswerten, PDF/QR neu rendern, vollständige E2E ohne parallele
+Source-Änderungen, isolierter DB-Restore, Screenshots final ansehen, Prüfergebnisse dokumentieren
+und zusammenhängende Änderungen committen. Produktions-/Rechts-/Provider-Sperren bleiben bestehen.
+
+## Paket 2 – Betrieb lokal nachgewiesen
+
+- Worker-Image mit Node 22 und ausschließlich Chromium gebaut; keine WebKit/Firefox-Last.
+  Tatsächlicher Starttest entdeckte restriktive COPY-Dateirechte. COPY gehört nun dem
+  nicht privilegierten node-Benutzer; korrigiertes Testimage startet mit read-only Rootfs.
+- Echte lokale Healthantwort DB/Queue ok, PNG 9424 Bytes, PDF 8052 Bytes,
+  SIGTERM beendet mit Exit 0. Internes Testnetz, sämtliche Provider Mock; Container/Netz bereinigt.
+- Queue mit eigener beschränkter Rolle ohne Superuser/CREATEDB/BYPASSRLS tatsächlich geprüft:
+  Start ohne Migration, Job senden/holen/abschließen, Cron und drei neue RLS-Tabellen erreichbar.
+- Read-only Managed-Dump und Restore in NEUE lokale Test-DB: 49 Tabellen einschließlich
+  Datenprüfsummen gleich. Standardschema-Kollision beim ersten Versuch behoben; bestehende
+  Restore-Ziele werden nicht mehr automatisch gelöscht. Kein produktiver Backup-Status verändert.
+- Resend erneut gelesen: Domain verifiziert, Senden/Empfangen aktiviert, Support-Inbox und
+  aktivierter Eingangswebhook vorhanden. Keine Nachricht gesendet; echter Nachrichtenfluss offen.
+- Vollständige Core-Suite ohne separat geprüfte Browsermatrix: 292/292 grün. Zuvor 127/127
+  Template-Browserprüfungen grün. Template-Paket 97/97, Types aller vier Pakete und ESLint grün.
+- Vollständiger E2E-Lauf: 20 bestanden, 1 übersprungen, 1 veraltete Dashboard-Überschrift erwartet.
+  Erwartung aktualisiert; Nachlauf noch offen. V4-Kauf bis Mock-Go-Live/Abo/Kündigung bestanden.
+- Bei echter PDF-Sichtprüfung A noch mit Fertig-Versprechen entdeckt. V4-A wird ehrlich korrigiert,
+  bestehende gespeicherte Varianten werden nicht überschrieben; Wahrheitsgate sperrt alte Zusagen.
+  Korrigierte 15 PDFs und V4-Garantie-/Vertragstexte werden erneut geprüft.
+
+Temporärer Docker-Speicherfehler (ENOSPC) hat einen Zwischenlauf ungültig gemacht. Ausschließlich
+IDs des eigenen Buildcaches bereinigt, keine Datenbanken/Volumes gelöscht; danach 18 GB frei und
+Core-Nachlauf grün. Keine Produktionsabnahme aus lokalen Nachweisen ableiten.

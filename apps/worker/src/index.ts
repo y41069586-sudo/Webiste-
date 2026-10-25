@@ -1,12 +1,12 @@
 import { createServer } from 'node:http';
-import { closeDb, getBoss, getEnv, logger, pingDb, runMigrations, seedDefaults, stopBoss, QUEUES } from '@wbm/core';
+import { closeBrowser, closeDb, getBoss, getEnv, logger, pingDb, runMigrations, seedDefaults, stopBoss, QUEUES } from '@wbm/core';
 import { scheduleCrons, startWorkers } from './runtime';
 import './jobs';
 
 async function main(): Promise<void> {
   process.env.APP_NAME ??= 'wbm-worker';
   const env = getEnv();
-  if (process.env.RUN_MIGRATIONS !== 'false') {
+  if (process.env.RUN_MIGRATIONS === 'true' || (env.NODE_ENV !== 'production' && process.env.RUN_MIGRATIONS !== 'false')) {
     await runMigrations();
     await seedDefaults();
     logger.info('Migrationen ausgeführt');
@@ -35,6 +35,7 @@ async function main(): Promise<void> {
   ]);
   logger.info({ dryRun: env.DRY_RUN }, 'Worker gestartet');
 
+  let stopping = false;
   // Optionaler Health-Endpoint (Docker-Healthcheck, E2E-Tests)
   const healthPort = Number(process.env.WORKER_HEALTH_PORT ?? 0);
   if (healthPort > 0) {
@@ -44,20 +45,24 @@ async function main(): Promise<void> {
         return;
       }
       // Lebenszeichen inkl. Datenbank-Erreichbarkeit
-      void pingDb().then((ok) =>
-        res
-          .writeHead(ok ? 200 : 503, { 'content-type': 'application/json' })
-          .end(JSON.stringify({ status: ok ? 'ok' : 'db_down' })),
-      );
+      void pingDb()
+        .then(async (dbOk) => {
+          const queueOk = boss.isInstalled ? await boss.isInstalled().catch(() => false) : false;
+          const ok = dbOk && queueOk && !stopping;
+          return res
+            .writeHead(ok ? 200 : 503, { 'content-type': 'application/json' })
+            .end(JSON.stringify({ status: ok ? 'ok' : 'unavailable', db: dbOk, queue: queueOk }));
+        })
+        .catch(() => res.writeHead(503).end());
     }).listen(healthPort, process.env.WORKER_HEALTH_HOST ?? '127.0.0.1');
   }
 
-  let stopping = false;
   const shutdown = async (signal: string) => {
     if (stopping) return;
     stopping = true;
     logger.info({ signal }, 'Worker wird beendet …');
     await stopBoss().catch(() => undefined);
+    await closeBrowser().catch(() => undefined);
     await closeDb().catch(() => undefined);
     process.exit(0);
   };

@@ -60,7 +60,8 @@ export class LocalStorage implements StorageProvider {
   }
 
   async list(prefix: string): Promise<string[]> {
-    const base = this.resolve(prefix.replace(/\/$/, '') || '.');
+    const normalized = prefix.replace(/\/$/, '');
+    const base = normalized ? this.resolve(normalized) : this.root;
     const out: string[] = [];
     const walk = async (dir: string): Promise<void> => {
       let entries: import('node:fs').Dirent[];

@@ -1,5 +1,5 @@
 import { PgBoss, type SendOptions } from 'pg-boss';
-import { getDatabaseConnectionConfig } from './db/client';
+import { queueRuntimeConfig } from './queue-config';
 import { logger } from './logger';
 
 /** Alle Queues mit Standardoptionen (Retries mit Backoff, Dead-Letter). */
@@ -121,15 +121,16 @@ export async function createQueues(boss: PgBoss): Promise<void> {
 export function getBoss(): Promise<PgBoss> {
   if (!g.__wbmBoss) {
     g.__wbmBoss = (async () => {
+      const { create, ...connection } = queueRuntimeConfig();
       const boss = new PgBoss({
-        ...getDatabaseConnectionConfig(),
+        ...connection,
         schema: 'pgboss',
         max: Number(process.env.BOSS_POOL_MAX ?? 4),
         application_name: `${process.env.APP_NAME ?? 'wbm'}-boss`,
       });
       boss.on('error', (err: Error) => logger.error({ err: err.message }, 'pg-boss Fehler'));
       await boss.start();
-      await createQueues(boss);
+      if (create) await createQueues(boss);
       return boss;
     })();
     g.__wbmBoss.catch(() => {

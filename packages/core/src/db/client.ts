@@ -40,8 +40,8 @@ interface DbGlobal {
 const g = globalThis as unknown as DbGlobal;
 
 /** Shared TLS settings for application queries and the pg-boss connection. */
-export function getDatabaseConnectionConfig(): Pick<pg.PoolConfig, 'connectionString' | 'ssl'> {
-  let connectionString = getEnv().DATABASE_URL;
+export function getDatabaseConnectionConfig(url = getEnv().DATABASE_URL): Pick<pg.PoolConfig, 'connectionString' | 'ssl'> {
+  let connectionString = url;
   const host = new URL(connectionString).hostname;
   const isSupabase = /^(?:db\.[a-z0-9]+\.supabase\.co|[a-z0-9-]+\.pooler\.supabase\.com)$/.test(host);
   const ca = process.env.DATABASE_SSL_CA?.replace(/\\n/g, '\n') ?? (isSupabase ? SUPABASE_ROOT_CA : undefined);

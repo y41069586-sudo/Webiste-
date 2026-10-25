@@ -122,3 +122,5 @@ export * from './services/billing-v4';
 export * from './services/tariffs-v4';
 export * from './services/care-v4';
 export * from './services/economics-v4';
+
+export { closeBrowser } from './render/browser';

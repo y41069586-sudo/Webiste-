@@ -20,3 +20,7 @@ docs/screenshots-website/
 
 # Statischer Export der Firmen-Website (Netlify)
 apps/web/out/
+
+# Worker secrets stay local; only the empty example is versioned.
+.env.worker
+!.env.worker.example

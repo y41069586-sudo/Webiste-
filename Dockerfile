@@ -2,28 +2,28 @@
 # Multi-Stage-Build für Web (Next.js standalone) und Worker (pg-boss + Playwright).
 
 ARG NODE_IMAGE=node:22-bookworm-slim
-ARG PLAYWRIGHT_IMAGE=mcr.microsoft.com/playwright:v1.56.1-noble
 
 # ---------------------------------------------------------------------------
 FROM ${NODE_IMAGE} AS base
-ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true NEXT_TELEMETRY_DISABLED=1
-RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
+ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true NEXT_TELEMETRY_DISABLED=1 NODE_USE_ENV_PROXY=1
+RUN --mount=type=secret,id=proxy_ca \
+    if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi; \
+    corepack enable && corepack prepare pnpm@10.28.0 --activate
 WORKDIR /repo
 
 # ---------------------------------------------------------------------------
 FROM base AS deps
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY apps/web/package.json apps/web/
-COPY apps/worker/package.json apps/worker/
-COPY packages/core/package.json packages/core/
-COPY packages/templates/package.json packages/templates/
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+COPY . .
+RUN --mount=type=secret,id=proxy_ca --mount=type=cache,id=pnpm,target=/pnpm/store \
+    if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi; \
+    pnpm install --frozen-lockfile
 
 # ---------------------------------------------------------------------------
-FROM deps AS build
-COPY . .
-RUN pnpm --filter @wbm/templates build \
- && pnpm --filter @wbm/web build
+FROM deps AS templates-build
+RUN pnpm --filter @wbm/templates build
+
+FROM templates-build AS build
+RUN pnpm --filter @wbm/web build
 
 # ---------------------------------------------------------------------------
 # Web: Next.js standalone (enthält nur die benötigten node_modules)
@@ -41,22 +41,18 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s \
 CMD ["node", "apps/web/server.js"]
 
 # ---------------------------------------------------------------------------
-# Worker: Playwright-Image (Chromium für PDFs/Screenshots/QA) + tsx
-FROM ${PLAYWRIGHT_IMAGE} AS worker
-ENV NODE_ENV=production PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true APP_NAME=wbm-worker \
-    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright MIGRATIONS_DIR=/repo/packages/core/drizzle
-RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
-WORKDIR /repo
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY apps/worker/package.json apps/worker/
-COPY packages/core/package.json packages/core/
-COPY packages/templates/package.json packages/templates/
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --prod --filter "@wbm/worker..."
-COPY packages/core packages/core
-COPY packages/templates packages/templates
-COPY apps/worker apps/worker
-COPY --from=build /repo/packages/templates/dist packages/templates/dist
-RUN mkdir -p /data/storage /backups && chown -R pwuser:pwuser /data /backups
-USER pwuser
+# Worker: only Chromium is needed; avoid shipping WebKit/Firefox with the worker.
+FROM base AS worker
+ENV NODE_ENV=production APP_NAME=wbm-worker MIGRATIONS_DIR=/repo/packages/core/drizzle \
+    CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
+RUN apt-get update && apt-get install -y --no-install-recommends chromium fonts-liberation ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY --chown=node:node . .
+RUN --mount=type=secret,id=proxy_ca --mount=type=cache,id=pnpm,target=/pnpm/store \
+    if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi; \
+    pnpm install --frozen-lockfile --prod --filter "@wbm/worker..."
+COPY --from=templates-build --chown=node:node /repo/packages/templates/dist packages/templates/dist
+RUN mkdir -p /data/storage /backups && chown -R node:node /data /backups
+USER node
 WORKDIR /repo/apps/worker
 CMD ["node", "--import", "tsx", "src/index.ts"]
