@@ -17,6 +17,7 @@ import { maintenanceReasonOf, setSiteMaintenance } from './maintenance';
 import { fulfillOrder, type Order } from './orders';
 import { applySubscriptionEvent } from './renewals';
 import { assertV4BillingReady } from './offers-v4';
+import { reconcileTariffV4 } from './tariffs-v4';
 
 /** monthly = Option B (49 €/Monat, Mindestlaufzeit), care = „Hosting & Pflege“ nach Option A */
 type RecurringKind = 'monthly' | 'care' | 'v4';
@@ -50,7 +51,7 @@ async function findTarget(ev: PaymentEvent): Promise<Target | null> {
       order?.offerSnapshot &&
       customer?.id === ev.metadata.customerId &&
       ev.subscriptionId &&
-      order.recurringCheckoutSessionId &&
+      (order.recurringCheckoutSessionId || order.offerSnapshot.billingMode === 'saved_mandate') &&
       order.status === 'paid' &&
       !order.endedAt &&
       (!order.stripeSubscriptionId || order.stripeSubscriptionId === ev.subscriptionId)
@@ -77,6 +78,9 @@ export async function applyRecurringEvent(ev: PaymentEvent, actor: string): Prom
     if (ev.type === 'subscription.deleted') return applySubscriptionEvent(ev, actor);
     logger.warn({ eventId: ev.eventId, type: ev.rawType }, 'Abo-Event ohne passende Bestellung');
     return 'no_order';
+  }
+  if (t.kind === 'v4' && (await reconcileTariffV4(t.order.id, ev.subscriptionPriceId))) {
+    t.order = (await getDb().query.orders.findFirst({ where: eq(orders.id, t.order.id) }))!;
   }
   switch (ev.type) {
     case 'invoice.paid':
@@ -109,7 +113,10 @@ async function recordRecurringPayment(t: Target, ev: PaymentEvent, actor: string
   }
   // 0-€-Rechnungen (z. B. Testphase bis Hosting-Ende) brauchen keine eigene Rechnung
   if (amount <= 0) return 'zero_amount';
-  if (t.kind === 'v4' && (amount !== t.order.offerSnapshot!.monthlyCents || ev.currency !== 'eur' || t.order.endedAt))
+  if (
+    t.kind === 'v4' &&
+    (amount !== (t.order.activeOfferSnapshot ?? t.order.offerSnapshot)!.monthlyCents || ev.currency !== 'eur' || t.order.endedAt)
+  )
     throw new Error('V4-Monatsrechnung stimmt nicht mit dem Vertrag überein; manuelle Prüfung erforderlich.');
   if (t.kind === 'v4') {
     const site = t.customer
@@ -159,7 +166,11 @@ async function recordRecurringPayment(t: Target, ev: PaymentEvent, actor: string
     const periodEnd = ev.periodEnd ?? new Date(paidAt.getTime() + 30 * 86400_000);
     const invoice = buildInvoiceData(
       cfg,
-      { ...t.order, domainWish: t.customer?.domain ?? t.order.domainWish },
+      {
+        ...t.order,
+        ...(t.kind === 'v4' ? { plan: (t.order.activeOfferSnapshot ?? t.order.offerSnapshot)!.tier } : {}),
+        domainWish: t.customer?.domain ?? t.order.domainWish,
+      },
       {
         number,
         paidAt,
@@ -187,7 +198,10 @@ async function recordRecurringPayment(t: Target, ev: PaymentEvent, actor: string
       })
       .returning({ id: orderPayments.id });
     if (t.kind === 'monthly' || t.kind === 'v4')
-      await tx.update(orders).set({ subscriptionStatus: 'active', updatedAt: new Date() }).where(eq(orders.id, t.order.id));
+      await tx
+        .update(orders)
+        .set({ subscriptionStatus: 'active', billingActionUrl: null, updatedAt: new Date() })
+        .where(eq(orders.id, t.order.id));
     if (t.kind === 'v4' && ev.subscriptionId && t.customer) {
       if (
         (t.order.stripeSubscriptionId && t.order.stripeSubscriptionId !== ev.subscriptionId) ||
@@ -294,7 +308,15 @@ async function handleStatusChange(t: Target, ev: PaymentEvent, actor: string): P
   const db = getDb();
   const status = ev.subscriptionStatus ?? 'unknown';
   if (t.kind === 'monthly' || t.kind === 'v4')
-    await db.update(orders).set({ subscriptionStatus: status, updatedAt: new Date() }).where(eq(orders.id, t.order.id));
+    await db
+      .update(orders)
+      .set({
+        subscriptionStatus: status,
+        ...(ev.cancelAtPeriodEnd !== undefined ? { cancelAtPeriodEnd: ev.cancelAtPeriodEnd } : {}),
+        ...(ev.hostedInvoiceUrl ? { billingActionUrl: ev.hostedInvoiceUrl } : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, t.order.id));
   if (status === 'unpaid') {
     await startDunning(t.order.id, actor);
     return 'dunning';

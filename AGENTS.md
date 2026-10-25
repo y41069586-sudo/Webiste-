@@ -155,15 +155,18 @@ nicht über Umwege umgehen. Details docs/integrationen-abschluss.md und docs/rec
 ## Verbindliche Aktualisierung V4 (25.10.2026)
 
 Aktuelle Betreiberanweisung und `docs/master-implementation-v4.md` ersetzen frühere Neukundenpreise.
-Maßgeblicher Umsetzungsstand: `docs/conversion-optimization-v4.md`.
+Fortlaufender Umsetzungsstand: `docs/v4-quality-handoff.md`; früherer Prüfstand: `docs/conversion-optimization-v4.md`.
 
 - Für **neue** Bestellungen genau Basis 597 € + 19 €/Monat oder Care+ 597 € + insgesamt 99 €/Monat.
   Care+ enthält die Basisgebühr vollständig, inklusive höchstens 60 Minuten kleiner Änderungen monatlich ohne Übertrag.
 - Preise ausschließlich aus `offers-v4.ts`. `cfg.pricing` mit 590/49/19 ist der erhaltene Legacy-Bestand, kein V4-Preisformular.
   Angebotssnapshot an der Bestellung erhalten; historische Rechnungen, Abos und Verträge nicht neu berechnen.
 - Monatsabrechnung erst nach bezahlter Einrichtung, dokumentierter Tarifzustimmung und tatsächlich bestätigtem Go-Live.
-  Sicherer V4-Prozess: separater Abo-Checkout nach Go-Live, keine automatische Off-Session-Abbuchung und keine
-  Rückdatierung. Hosting bis zum Kundenabschluss muss betrieblich überwacht werden.
+  Neue V4-Bestellungen speichern nach ausdrücklicher Zustimmung ein Stripe-Zahlungsmittel/Mandat bei der
+  Einrichtung. Genau ein Monatsabo startet erst nach bestätigtem Go-Live, ohne Rückdatierung.
+  Alte V4-Snapshots ohne billingMode oder mit manual_checkout behalten den separaten Abo-Checkout.
+  Zahlungsbestätigung kommt über invoice.paid; active allein ist kein Geldeingang. Incomplete/SEPA/SCA
+  dürfen kein zweites Abo auslösen. V4 bleibt ausschließlich Sandbox.
 - Keine zwölfmonatige Standardbindung für V4. Tarifwechsel nur als bestätigter Wechsel zum nächsten Periodenende
   ohne Proration vorbereiten; keine zweite Subscription erzeugen. Rechts-/Kündigungsdetails bleiben freigabepflichtig.
 - Stripe-Plugin wurde für **Sandbox** ausdrücklich beauftragt. Drei Produkte/Preise und blaues Branding sind vorhanden:

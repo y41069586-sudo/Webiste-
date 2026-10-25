@@ -71,7 +71,7 @@ export async function guaranteeRefund(orderId: string, actor: string): Promise<{
     .set({
       endedAt: now,
       endedReason: 'Zufriedenheitsgarantie',
-      ...(order.plan === 'monthly' ? { subscriptionStatus: 'canceled' } : {}),
+      ...(order.plan === 'monthly' || order.offerSnapshot ? { subscriptionStatus: 'canceled' } : {}),
       updatedAt: now,
     })
     .where(eq(orders.id, order.id));

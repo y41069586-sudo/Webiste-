@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CustomerOperations } from '../operations';
 import { notFound } from 'next/navigation';
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { appUrl, effectiveSwitches, getConfig, getDb, schema } from '@wbm/core';
@@ -139,7 +140,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
             <dt className="text-slate-500">Hosting bis</dt>
             <dd>{dt(c.hostingUntil)}</dd>
             <dt className="text-slate-500">Abo</dt>
-            <dd>{c.subscriptionId ? <Badge color="green">aktiv</Badge> : 'nein'}</dd>
+            <dd>{c.subscriptionId ? <Badge>{order?.subscriptionStatus ?? 'eingerichtet'}</Badge> : 'nein'}</dd>
             <dt className="text-slate-500">Domain</dt>
             <dd>
               {c.domain ?? '–'} · registriert {dt(c.domainRegisteredAt)} · läuft ab {dt(c.domainExpiresAt)}
@@ -267,6 +268,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
             </form>
           </Card>
         ) : null}
+        {order?.offerSnapshot ? <CustomerOperations customerId={c.id} order={order} /> : null}
         <Card title="E-Mails">
           <Table head={['Zeit', 'Art', 'Status']} empty="Keine">
             {mails.map((m) => (

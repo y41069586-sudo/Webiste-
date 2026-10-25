@@ -117,3 +117,8 @@ export * from './services/contribution-v4';
 
 export * from './services/finance-v4';
 export * from './services/funnel-v4';
+
+export * from './services/billing-v4';
+export * from './services/tariffs-v4';
+export * from './services/care-v4';
+export * from './services/economics-v4';

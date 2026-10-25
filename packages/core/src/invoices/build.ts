@@ -116,7 +116,7 @@ export function buildInvoiceData(
     line.title = `SeitenWerk ${care ? 'Care+' : 'Basis'}${domain}${rate ? ' – Monatstarif' : ' – Einrichtung'}`;
     line.description = rate
       ? `Domain, Hosting, SSL und technische Betreuung${care ? '; zusätzlich bis zu 60 Minuten kleine Inhaltsänderungen im Monat' : '; Inhaltsänderungen separat nach Freigabe'}. Monatlich kündbar. Keine weitere Basisgebühr.`
-      : 'Erstellung und Einrichtung der Website. Monatstarif wird erst nach bestätigtem Go-Live separat abgeschlossen; kein Hosting-Jahrespaket im Einrichtungspreis.';
+      : 'Erstellung und Einrichtung der Website. Monatsabrechnung beginnt erst nach bestätigtem Go-Live gemäß vereinbartem Tarif; kein Hosting-Jahrespaket im Einrichtungspreis.';
   }
   return {
     kind: 'invoice',

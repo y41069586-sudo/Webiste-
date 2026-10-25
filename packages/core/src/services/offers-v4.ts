@@ -13,12 +13,17 @@ export interface V4OfferSnapshot {
   includedChangeMinutes: number;
   consentVersion: string;
   consentAt: string | null;
+  billingMode?: 'saved_mandate' | 'manual_checkout';
 }
 export const V4_PRICES = { setupCents: 59700, basisCents: 1900, carePlusCents: 9900 } as const;
 export function isV4Tier(plan: string): plan is V4Tier {
   return V4_TIERS.includes(plan as V4Tier);
 }
-export function v4Offer(tier: V4Tier, consentAt: string | null = null): V4OfferSnapshot {
+export function v4Offer(
+  tier: V4Tier,
+  consentAt: string | null = null,
+  billingMode: V4OfferSnapshot['billingMode'] = 'saved_mandate',
+): V4OfferSnapshot {
   return {
     version: 'v4',
     tier,
@@ -29,6 +34,7 @@ export function v4Offer(tier: V4Tier, consentAt: string | null = null): V4OfferS
     includedChangeMinutes: tier === 'care_plus' ? 60 : 0,
     consentVersion: 'v4-2026-10-25',
     consentAt,
+    billingMode,
   };
 }
 export function v4FirstYearCents(tier: V4Tier): number {
@@ -41,7 +47,7 @@ export function v4PriceText(): string {
 /** Exact selected contract, also visible when both tiers share the same one-time Stripe price. */
 export function v4CheckoutTerms(tier: V4Tier): string {
   const offer = v4Offer(tier);
-  return `Sie wählen SeitenWerk ${tier === 'basis' ? 'Basis' : 'Care+'}: jetzt ${formatEuroShort(offer.setupCents)} einmalig für die Einrichtung. Danach insgesamt ${formatEuroShort(offer.monthlyCents)}/Monat, erst nach bestätigtem Go-Live und gesondertem Aboabschluss. Monatlich kündbar, keine zwölfmonatige Mindestbindung und keine zusätzliche Basisgebühr.`;
+  return `Sie wählen SeitenWerk ${tier === 'basis' ? 'Basis' : 'Care+'}: jetzt ${formatEuroShort(offer.setupCents)} einmalig für die Einrichtung. Danach insgesamt ${formatEuroShort(offer.monthlyCents)}/Monat, ab dem bestätigten Go-Live. Mit dem Kauf stimmen Sie dem wiederkehrenden Einzug über das bei Stripe gespeicherte Zahlungsmittel ausdrücklich zu. Monatlich kündbar, keine zwölfmonatige Mindestbindung und keine zusätzliche Basisgebühr.`;
 }
 /** No session/mandate/Go-Live inference: missing evidence always blocks monthly billing. */
 export function assertV4BillingReady(input: {

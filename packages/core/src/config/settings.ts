@@ -74,7 +74,12 @@ export const appConfigSchema = z.object({
     /** Kurzvorstellung (zwei Sätze, keine erfundenen Referenzen) */
     intro: z.string().max(400).default(''),
   }),
-  offers: z.object({ activeVersion: z.enum(['v4', 'legacy']).default('v4') }).default({ activeVersion: 'v4' }),
+  offers: z
+    .object({
+      activeVersion: z.enum(['v4', 'legacy']).default('v4'),
+      billingMode: z.enum(['saved_mandate', 'manual_checkout']).optional(),
+    })
+    .default({ activeVersion: 'v4' }),
   pricing: z.object({
     /** Option A „Einmalzahlung“ (Stripe mode=payment) */
     packageCents: z.number().int().positive(),

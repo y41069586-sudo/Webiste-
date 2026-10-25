@@ -316,6 +316,10 @@ export const orders = pgTable(
     stripeInvoiceId: text('stripe_invoice_id'),
     /** active | past_due | unpaid | canceled … (Stand laut letztem Webhook) */
     subscriptionStatus: text('subscription_status'),
+    billingStartedAt: ts('billing_started_at'),
+    billingActionUrl: text('billing_action_url'),
+    cancelAtPeriodEnd: boolean('cancel_at_period_end').default(false).notNull(),
+    activeOfferSnapshot: jsonb('active_offer_snapshot').$type<V4OfferSnapshot | null>(),
     minTermEndsAt: ts('min_term_ends_at'),
     guaranteeEndsAt: ts('guarantee_ends_at'),
     /** Vertrag beendet (Garantie, Kündigung nach Mindestlaufzeit, Zahlungsausfall) */
@@ -576,6 +580,8 @@ export const budgetLedger = pgTable(
     /** Bruchteile von Cent (z. B. LLM-Kosten) in Mikro-Cent für genaue Summen */
     amountMicroCents: integer('amount_micro_cents').default(0).notNull(),
     leadId: uuid('lead_id').references(() => leads.id, { onDelete: 'set null' }),
+    customerId: uuid('customer_id').references(() => customers.id, { onDelete: 'set null' }),
+    incurredAt: ts('incurred_at'),
     ref: text('ref'),
     /** Verhindert Doppelbuchungen bei Job-Wiederholungen */
     idempotencyKey: text('idempotency_key'),
@@ -588,6 +594,77 @@ export const budgetLedger = pgTable(
     index('budget_created_idx').on(t.createdAt),
     index('budget_lead_idx').on(t.leadId),
   ],
+);
+
+/** Actual work, tied to an existing customer/change workflow. No automatic customer charge. */
+export const careWork = pgTable(
+  'care_work',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    customerId: uuid('customer_id')
+      .notNull()
+      .references(() => customers.id, { onDelete: 'cascade' }),
+    changeRequestId: uuid('change_request_id').references(() => changeRequests.id, { onDelete: 'set null' }),
+    kind: text('kind').$type<'included_content' | 'technical' | 'extra_content'>().notNull(),
+    minutes: integer('minutes').notNull(),
+    hourlyCostCents: integer('hourly_cost_cents'),
+    costCents: integer('cost_cents'),
+    workedAt: ts('worked_at').notNull(),
+    periodStart: ts('period_start').notNull(),
+    periodEnd: ts('period_end').notNull(),
+    note: text('note').notNull(),
+    extraApproved: boolean('extra_approved').default(false).notNull(),
+    voidedAt: ts('voided_at'),
+    idempotencyKey: text('idempotency_key').notNull(),
+    createdBy: text('created_by').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('care_work_idem_uidx').on(t.idempotencyKey), index('care_work_period_idx').on(t.customerId, t.periodStart)],
+);
+
+export const careChecks = pgTable(
+  'care_checks',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    customerId: uuid('customer_id')
+      .notNull()
+      .references(() => customers.id, { onDelete: 'cascade' }),
+    month: text('month').notNull(),
+    status: text('status').$type<'due' | 'passed' | 'needs_review' | 'reviewed'>().default('due').notNull(),
+    checks: jsonb('checks').$type<Record<string, boolean | string>>().default({}).notNull(),
+    simulated: boolean('simulated').default(false).notNull(),
+    checkedAt: ts('checked_at'),
+    reviewedAt: ts('reviewed_at'),
+    reviewedBy: text('reviewed_by'),
+    reviewNote: text('review_note'),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('care_checks_month_uidx').on(t.customerId, t.month)],
+);
+
+export const tariffChanges = pgTable(
+  'tariff_changes',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orderId: uuid('order_id')
+      .notNull()
+      .references(() => orders.id, { onDelete: 'cascade' }),
+    fromTier: text('from_tier').$type<'basis' | 'care_plus'>().notNull(),
+    toTier: text('to_tier').$type<'basis' | 'care_plus'>().notNull(),
+    status: text('status')
+      .$type<'requested' | 'scheduled' | 'applied' | 'rejected' | 'cancelled'>()
+      .default('requested')
+      .notNull(),
+    consentAt: ts('consent_at').notNull(),
+    consentVersion: text('consent_version').notNull(),
+    effectiveAt: ts('effective_at'),
+    scheduleId: text('schedule_id'),
+    approvedBy: text('approved_by'),
+    approvedAt: ts('approved_at'),
+    appliedAt: ts('applied_at'),
+    createdAt: createdAt(),
+  },
+  (t) => [index('tariff_changes_order_idx').on(t.orderId)],
 );
 
 // ---------------------------------------------------------------------------

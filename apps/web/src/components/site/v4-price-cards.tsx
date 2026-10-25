@@ -41,8 +41,9 @@ export function V4PriceCards() {
         );
       })}
       <p className="text-sm text-[#5b6475] md:col-span-2">
-        Die Monatsgebühr beginnt erst nach tatsächlichem Go-Live und bestätigtem Aboabschluss. Steuerstatus und verbindliche
-        Steuerangaben sind noch zu klären; der echte Verkauf bleibt gesperrt. Keine Zahlung durch bloßes Ansehen einer Demo.
+        Die Monatsgebühr beginnt erst nach dem bestätigten Go-Live über das beim Kauf ausdrücklich vereinbarte Zahlungsmittel.
+        Steuerstatus und verbindliche Steuerangaben sind noch zu klären; der echte Verkauf bleibt gesperrt. Keine Zahlung durch
+        bloßes Ansehen einer Demo.
       </p>
     </section>
   );

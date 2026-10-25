@@ -15,7 +15,7 @@ export async function realizedFinanceV4(db: DbOrTx = getDb()) {
       (SELECT coalesce(sum(amount_cents),0) FROM orders WHERE paid_at IS NOT NULL) AS setup,
       (SELECT coalesce(sum(amount_cents),0) FROM order_payments) AS monthly,
       ((SELECT coalesce(sum(refunded_cents),0) FROM orders)+(SELECT coalesce(sum(refunded_cents),0) FROM order_payments)) AS refunds,
-      (SELECT coalesce(sum((offer_snapshot->>'monthlyCents')::int),0) FROM orders WHERE offer_snapshot IS NOT NULL AND subscription_status='active' AND ended_at IS NULL) AS mrr,
+      (SELECT coalesce(sum((coalesce(active_offer_snapshot,offer_snapshot)->>'monthlyCents')::int),0) FROM orders WHERE offer_snapshot IS NOT NULL AND subscription_status='active' AND ended_at IS NULL) AS mrr,
       (SELECT count(*) FROM orders WHERE paid_at IS NOT NULL) AS buyers,
       (SELECT count(*) FROM orders WHERE paid_at IS NOT NULL AND offer_snapshot->>'tier'='care_plus') AS care,
       (SELECT count(*) FROM orders WHERE paid_at IS NOT NULL AND offer_snapshot IS NOT NULL) AS v4buyers`);

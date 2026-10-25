@@ -84,6 +84,12 @@ export async function startSubscriptionCheckout(token: string): Promise<Subscrip
       }
       if (customer.subscriptionId || current.stripeSubscriptionId)
         return { ok: false, error: 'Ihr Abo ist bereits eingerichtet.' };
+      if (current.offerSnapshot?.billingMode === 'saved_mandate')
+        return {
+          ok: false,
+          error:
+            'Ihr Monatstarif wird automatisch nach bestätigtem Go-Live gestartet. Bei Zahlungsrückfragen bitte die Tarifverwaltung nutzen.',
+        };
       const provider = getProviders().payment;
       if (!provider.createSubscriptionCheckout) return { ok: false, error: 'Abo-Abschluss nicht eingerichtet.' };
       if (current.recurringCheckoutSessionId) {

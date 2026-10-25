@@ -90,14 +90,14 @@ export function orderConfirmationEmail(
     monthlyMinTermEnds?: string | null;
     /** Zufriedenheitsgarantie bis (formatiert) */
     guaranteeUntil?: string | null;
-    v4?: { tier: 'basis' | 'care_plus'; monthlyCents: number };
+    v4?: { tier: 'basis' | 'care_plus'; monthlyCents: number; billingMode?: 'saved_mandate' | 'manual_checkout' };
   },
 ): EmailContent {
   const p = cfg.pricing;
   const terms: Block[] = [];
   if (d.v4)
     terms.push(
-      `Einmalige Einrichtung: ${d.amount}. Ihr gewählter Tarif ${d.v4.tier === 'basis' ? 'Basis' : 'Care+'} kostet insgesamt ${formatEuro(d.v4.monthlyCents)} pro Monat. Das Monatsabo schließen Sie erst nach bestätigtem Go-Live gesondert ab. Keine Monatsabbuchung vor Go-Live und keine zwölfmonatige Mindestbindung.`,
+      `Einmalige Einrichtung: ${d.amount}. Ihr gewählter Tarif ${d.v4.tier === 'basis' ? 'Basis' : 'Care+'} kostet insgesamt ${formatEuro(d.v4.monthlyCents)} pro Monat. ${d.v4.billingMode === 'saved_mandate' ? 'Das Monatsabo startet automatisch nach bestätigtem Go-Live über das ausdrücklich vereinbarte, bei Stripe gespeicherte Zahlungsmittel.' : 'Das Monatsabo schließen Sie erst nach bestätigtem Go-Live gesondert ab.'} Keine Monatsabbuchung vor Go-Live und keine zwölfmonatige Mindestbindung.`,
     );
   if (d.monthlyMinTermEnds)
     terms.push(
@@ -312,7 +312,7 @@ export function liveHandoverEmail(
     domain: string | null;
     hostingUntil: string;
     formTarget: string;
-    monthlyOffer?: { amountCents: number; url: string };
+    monthlyOffer?: { amountCents: number; url: string; automatic?: boolean };
   },
 ): EmailContent {
   return renderEmail(cfg, {
@@ -327,12 +327,23 @@ export function liveHandoverEmail(
             : 'Ihre Website ist unter der oben genannten Adresse erreichbar.',
           `Nachrichten aus dem Kontaktformular gehen an ${d.formTarget}.`,
           d.monthlyOffer
-            ? `Ihr Monatstarif kostet insgesamt ${formatEuro(d.monthlyOffer.amountCents)}. Bitte bestätigen Sie jetzt den separaten Aboabschluss; erst damit beginnt die monatliche Zahlung. Es gibt keine rückwirkende Abbuchung für die Vorschauzeit.`
+            ? d.monthlyOffer.automatic
+              ? `Ihr gewählter Monatstarif von insgesamt ${formatEuro(d.monthlyOffer.amountCents)} wird nach bestätigtem Go-Live über das vereinbarte Zahlungsmittel gestartet. Zahlungsstatus, Tarifwechsel und Kündigung finden Sie über den Verwaltungslink. Die Vorschauzeit bleibt unberechnet.`
+              : `Ihr Monatstarif kostet insgesamt ${formatEuro(d.monthlyOffer.amountCents)}. Bitte bestätigen Sie jetzt den separaten Aboabschluss; erst damit beginnt die monatliche Zahlung. Es gibt keine rückwirkende Abbuchung für die Vorschauzeit.`
             : `Hosting und SSL-Verschlüsselung sind bis ${d.hostingUntil} enthalten. Wir erinnern Sie rechtzeitig vor Ablauf.`,
           'Impressum und Datenschutzerklärung stammen aus Ihren Angaben – bitte halten Sie sie aktuell und geben Sie uns Bescheid, wenn sich etwas ändert.',
         ],
       },
-      ...(d.monthlyOffer ? [{ button: { href: d.monthlyOffer.url, label: 'Monatstarif bestätigen' } }] : []),
+      ...(d.monthlyOffer
+        ? [
+            {
+              button: {
+                href: d.monthlyOffer.url,
+                label: d.monthlyOffer.automatic ? 'Tarif verwalten' : 'Monatstarif bestätigen',
+              },
+            },
+          ]
+        : []),
       'Kleine Textänderungen oder neue Öffnungszeiten? Antworten Sie einfach auf diese E-Mail.',
       'Vielen Dank für Ihr Vertrauen!',
     ],

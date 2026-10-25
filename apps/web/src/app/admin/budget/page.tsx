@@ -1,3 +1,4 @@
+import { FinanceOperations } from './finance';
 import { desc } from 'drizzle-orm';
 import { budgetStatus, getDb, schema, type BudgetCategory } from '@wbm/core';
 import { Badge, Card, PageHeader, Stat, Table, Td } from '@/components/ui';
@@ -14,7 +15,8 @@ const CATS: { key: BudgetCategory; label: string }[] = [
   { key: 'domain', label: 'Domains' },
 ];
 
-export default async function BudgetPage() {
+export default async function BudgetPage({ searchParams }: { searchParams: Promise<{ from?: string; to?: string }> }) {
+  const period = await searchParams;
   await requireAdmin();
   const [statuses, entries] = await Promise.all([
     Promise.all(CATS.map(async (c) => ({ ...c, s: await budgetStatus(c.key) }))),
@@ -36,6 +38,7 @@ export default async function BudgetPage() {
           />
         ))}
       </div>
+      <FinanceOperations from={period.from} to={period.to} />
       <Card title="Buchungen">
         <Table head={['Zeit', 'Kategorie', 'Betrag', 'Bezug', 'Art']} empty="Noch keine Buchungen">
           {entries.map((e) => (

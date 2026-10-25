@@ -51,8 +51,90 @@ export class MockPayment implements PaymentProvider {
     return { scheduleId: `sub_sched_mock_${subscriptionId.slice(-12)}`, minTermEndsAt: end };
   }
 
+  private async mockState(id: string) {
+    const { getSetting } = await import('../../config/service');
+    const state = await getSetting<
+      (import('../types').SubscriptionState & { scheduled?: { priceId: string; at: string; scheduleId: string } }) | null
+    >(`mock:sub:${id}`, null);
+    if (!state) throw new Error('Mock-Abo nicht gefunden');
+    state.periodStart = new Date(state.periodStart);
+    state.periodEnd = new Date(state.periodEnd);
+    if (state.scheduled && new Date(state.scheduled.at) <= new Date()) {
+      state.priceId = state.scheduled.priceId;
+      state.periodStart = new Date(state.scheduled.at);
+      const { addMonths } = await import('../../util/time');
+      state.periodEnd = addMonths(state.periodStart, 1);
+      delete state.scheduled;
+      await this.saveMock(state);
+    }
+    return state;
+  }
+  private async saveMock(state: import('../types').SubscriptionState) {
+    const { setSetting } = await import('../../config/service');
+    await setSetting(`mock:sub:${state.id}`, state, 'mock:provider');
+  }
   async cancelSubscription(subscriptionId: string): Promise<void> {
-    void subscriptionId;
+    try {
+      const sub = await this.mockState(subscriptionId);
+      sub.status = 'canceled';
+      await this.saveMock(sub);
+    } catch {
+      /* Legacy mocks may not persist subscriptions. */
+    }
+  }
+  async startSavedSubscription(input: Parameters<NonNullable<PaymentProvider['startSavedSubscription']>>[0]) {
+    const id = `sub_mock_v4_${input.orderId.replaceAll('-', '')}`;
+    try {
+      return await this.mockState(id);
+    } catch {
+      /* first creation */
+    }
+    const { stripeV4Price } = await import('../../config/stripe-v4-prices');
+    const { addMonths } = await import('../../util/time');
+    const now = new Date();
+    const sub = {
+      id,
+      status: 'active',
+      priceId: stripeV4Price(input.tier, true, input.amountCents, 'eur'),
+      periodStart: now,
+      periodEnd: addMonths(now, 1),
+      cancelAtPeriodEnd: false,
+    };
+    await this.saveMock(sub);
+    return sub;
+  }
+  async subscriptionState(id: string) {
+    return this.mockState(id);
+  }
+  async scheduleTariffChange(input: Parameters<NonNullable<PaymentProvider['scheduleTariffChange']>>[0]) {
+    const sub = await this.mockState(input.subscriptionId);
+    if (sub.status !== 'active' || sub.cancelAtPeriodEnd) throw new Error('Mock-Abo nicht wechselbereit');
+    const { stripeV4Price } = await import('../../config/stripe-v4-prices');
+    const { setSetting } = await import('../../config/service');
+    const id = `sched_mock_${input.idempotencyKey.replaceAll('-', '')}`;
+    sub.scheduled = {
+      priceId: stripeV4Price(input.tier, true, input.amountCents, 'eur'),
+      at: sub.periodEnd.toISOString(),
+      scheduleId: id,
+    };
+    await this.saveMock(sub);
+    await setSetting(`mock:schedule:${id}`, { subscriptionId: sub.id }, 'mock:provider');
+    return { scheduleId: id, effectiveAt: sub.periodEnd };
+  }
+  async releaseTariffSchedule(id: string): Promise<void> {
+    const { getSetting } = await import('../../config/service');
+    const ref = await getSetting<{ subscriptionId: string } | null>(`mock:schedule:${id}`, null);
+    if (ref) {
+      const sub = await this.mockState(ref.subscriptionId);
+      delete sub.scheduled;
+      await this.saveMock(sub);
+    }
+  }
+  async cancelAtPeriodEnd(id: string): Promise<void> {
+    const sub = await this.mockState(id);
+    delete sub.scheduled;
+    sub.cancelAtPeriodEnd = true;
+    await this.saveMock(sub);
   }
 
   async refundInvoice(invoiceId: string, opts: { idempotencyKey: string }): Promise<{ refundId: string }> {

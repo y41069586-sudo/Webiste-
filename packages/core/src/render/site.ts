@@ -17,6 +17,7 @@ import { enqueue, QUEUES } from '../queue';
 import { audit } from '../services/audit';
 import { guaranteeEndFor } from '../services/guarantee';
 import { assertNotHalted, raiseAlert, recordCost } from '../services/budget';
+import { startBillingV4 } from '../services/billing-v4';
 import { notifyAdmin, sendTransactionalEmail } from '../services/email';
 import { transitionLead } from '../services/lead-state';
 import { llmStructured } from '../services/llm';
@@ -700,7 +701,7 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
   await db.transaction(async (tx) => {
     await tx
       .update(sites)
-      .set({ status: 'live', liveAt: now, productionUrl: url, statusReason: null, updatedAt: now })
+      .set({ status: 'live', liveAt: ctx.site.liveAt ?? now, productionUrl: url, statusReason: null, updatedAt: now })
       .where(eq(sites.id, siteId));
     await tx
       .update(customers)
@@ -708,10 +709,10 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
       .where(eq(customers.id, ctx.customer.id));
     // Garantie läuft ab Go-Live (höchstens bis zum spätesten Beginn laut Zahlung)
     const order = await tx.query.orders.findFirst({ where: eq(orders.id, ctx.customer.orderId) });
-    if (order?.offerSnapshot && order.paidAt && ctx.cfg.guarantee.enabled) {
+    if (order?.offerSnapshot && order.paidAt && !order.guaranteeEndsAt && ctx.cfg.guarantee.enabled) {
       await tx
         .update(orders)
-        .set({ guaranteeEndsAt: v4AddDays(now, ctx.cfg.guarantee.days), updatedAt: now })
+        .set({ guaranteeEndsAt: v4AddDays(ctx.site.liveAt ?? now, ctx.cfg.guarantee.days), updatedAt: now })
         .where(eq(orders.id, order.id));
     }
     if (order?.paidAt && order.guaranteeEndsAt && !order.offerSnapshot) {
@@ -731,16 +732,30 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
       context: { url, simulated: !useDomain },
     });
   });
+  if (ctx.order.offerSnapshot?.billingMode === 'saved_mandate') {
+    try {
+      await startBillingV4(ctx.order.id, 'job:live-check');
+    } catch {
+      await raiseAlert(db, {
+        level: 'error',
+        code: `v4_billing_start_${ctx.order.id}`,
+        message: 'Website live; Monatsabo-Start ausstehend. Zahlung/Mandat im Admin prüfen.',
+        context: { orderId: ctx.order.id },
+      });
+    }
+  }
   const mail = liveHandoverEmail(ctx.cfg, {
     name: ctx.customer.contactName,
     url,
     domain: useDomain ? domain : null,
-    hostingUntil: hostingUntil
-      ? formatDateLongDe(hostingUntil)
-      : 'monatlicher Tarif ab Go-Live – separater Aboabschluss erforderlich',
+    hostingUntil: hostingUntil ? formatDateLongDe(hostingUntil) : 'Monatstarif ab bestätigtem Go-Live',
     formTarget: ctx.site.formTargetEmail ?? ctx.customer.email,
     monthlyOffer: ctx.order.offerSnapshot
-      ? { amountCents: ctx.order.offerSnapshot.monthlyCents, url: appUrl(`/verlaengern/${ctx.customer.accessToken}`) }
+      ? {
+          amountCents: ctx.order.offerSnapshot.monthlyCents,
+          url: appUrl(`/verlaengern/${ctx.customer.accessToken}`),
+          automatic: ctx.order.offerSnapshot.billingMode === 'saved_mandate',
+        }
       : undefined,
   });
   await sendTransactionalEmail({

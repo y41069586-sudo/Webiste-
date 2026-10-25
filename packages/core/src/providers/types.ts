@@ -402,6 +402,8 @@ export interface PaymentEvent {
   nextPaymentAttempt?: Date | null;
   /** Abo-Status (active | past_due | unpaid | canceled | …) */
   subscriptionStatus?: string;
+  subscriptionPriceId?: string;
+  cancelAtPeriodEnd?: boolean;
   /** Gehosteter Checkout: erfasste Kundendaten */
   customer?: CollectedCustomer;
 }
@@ -443,6 +445,25 @@ export interface PaymentProvider {
   createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSession>;
   /** Monatliches Abo (z. B. „Hosting & Pflege“ ab Monat 13) */
   createSubscriptionCheckout?(input: SubscriptionCheckoutInput): Promise<CheckoutSession>;
+  startSavedSubscription?(input: {
+    orderId: string;
+    customerId: string;
+    setupSessionId: string;
+    tier: 'basis' | 'care_plus';
+    amountCents: number;
+    liveAt: Date;
+    idempotencyKey: string;
+  }): Promise<SubscriptionState>;
+  subscriptionState?(subscriptionId: string): Promise<SubscriptionState>;
+  scheduleTariffChange?(input: {
+    subscriptionId: string;
+    tier: 'basis' | 'care_plus';
+    amountCents: number;
+    expectedPriceId?: string;
+    idempotencyKey: string;
+  }): Promise<{ scheduleId: string; effectiveAt: Date }>;
+  cancelAtPeriodEnd?(subscriptionId: string, idempotencyKey: string): Promise<void>;
+  releaseTariffSchedule?(scheduleId: string, idempotencyKey: string): Promise<void>;
   /** Session beim Anbieter abfragen (für die Erfolgsseite, falls der Webhook noch fehlt). */
   retrieveSession?(sessionId: string): Promise<PaymentSessionInfo | null>;
   /** Offene Session vorzeitig beenden (z. B. wenn der Kunde neu startet). */
@@ -462,4 +483,14 @@ export interface PaymentProvider {
   cancelSubscription?(subscriptionId: string, opts: { idempotencyKey: string }): Promise<void>;
   /** Zahlung einer Abo-Rechnung erstatten (z. B. erste Rate bei Garantie) */
   refundInvoice?(invoiceId: string, opts: { idempotencyKey: string; amountCents?: number }): Promise<{ refundId: string }>;
+}
+
+export interface SubscriptionState {
+  id: string;
+  status: string;
+  priceId: string;
+  periodStart: Date;
+  periodEnd: Date;
+  hostedInvoiceUrl?: string | null;
+  cancelAtPeriodEnd?: boolean;
 }

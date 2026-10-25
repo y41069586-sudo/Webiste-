@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import type { Metadata } from 'next';
 import { getDb, schema, customerByToken, formatDateLongDe, formatEuro, getConfig } from '@wbm/core';
 import { PublicCard, PublicShell } from '@/components/public/shell';
+import { TariffPanel } from './tariff-panel';
 import { SubscribeButton } from './subscribe-button';
 
 export const dynamic = 'force-dynamic';
@@ -23,17 +24,7 @@ export default async function RenewPage({
     return (
       <PublicShell company={cfg.sender.company}>
         <PublicCard>
-          <h1 className="text-2xl font-semibold">SeitenWerk {order.offerSnapshot.tier === 'basis' ? 'Basis' : 'Care+'}</h1>
-          <p className="my-4">
-            {formatEuro(order.offerSnapshot.monthlyCents)} pro Monat insgesamt. Monatlich kündbar. Keine zusätzliche Basisgebühr.
-            Der Abschluss ist erst nach tatsächlichem Go-Live möglich; mit dem bestätigten Abo-Checkout beginnt die monatliche
-            Zahlung.
-          </p>
-          {c.subscriptionId ? (
-            <p>Ihr Tarif ist bereits aktiv.</p>
-          ) : (
-            <SubscribeButton token={token} label="Monatstarif ausdrücklich bestätigen" />
-          )}
+          <TariffPanel token={token} customer={c} order={order} email={cfg.sender.email} />
         </PublicCard>
       </PublicShell>
     );

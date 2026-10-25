@@ -13,6 +13,7 @@ import type {
   PaymentSessionInfo,
   PaymentStatus,
   SubscriptionCheckoutInput,
+  SubscriptionState,
 } from '../types';
 
 /** Geprüft gegen stripe-node 23.0.1 (API-Version 2026-09-30.endive), siehe docs/integrations.md. */
@@ -250,6 +251,12 @@ export class StripePayment implements PaymentProvider {
       ],
       metadata: input.metadata,
       payment_intent_data: { description: input.productName, metadata: input.metadata },
+      ...(v4
+        ? {
+            customer_creation: 'always',
+            payment_intent_data: { description: input.productName, metadata: input.metadata, setup_future_usage: 'off_session' },
+          }
+        : {}),
       success_url: input.successUrl,
       cancel_url: input.cancelUrl,
       expires_at: Math.floor(Date.now() / 1000) + minutes * 60,
@@ -345,6 +352,136 @@ export class StripePayment implements PaymentProvider {
     }
   }
 
+  private subscriptionInfo(sub: Stripe.Subscription): SubscriptionState {
+    const item = sub.items.data[0];
+    if (!item || sub.items.data.length !== 1) throw new Error('V4 erwartet genau eine Abo-Position.');
+    const invoice = typeof sub.latest_invoice === 'object' ? sub.latest_invoice : null;
+    return {
+      id: sub.id,
+      status: sub.status,
+      priceId: item.price.id,
+      periodStart: new Date(item.current_period_start * 1000),
+      periodEnd: new Date(item.current_period_end * 1000),
+      hostedInvoiceUrl: invoice?.hosted_invoice_url,
+      cancelAtPeriodEnd: sub.cancel_at_period_end,
+    };
+  }
+
+  async subscriptionState(id: string): Promise<SubscriptionState> {
+    if (!this.testMode) throw new Error('V4-Aboverwaltung bisher nur in der Sandbox freigegeben.');
+    return this.subscriptionInfo(await this.stripe.subscriptions.retrieve(id, { expand: ['latest_invoice'] }));
+  }
+
+  async startSavedSubscription(
+    input: Parameters<NonNullable<PaymentProvider['startSavedSubscription']>>[0],
+  ): Promise<SubscriptionState> {
+    const price = stripeV4Price(input.tier, this.testMode, input.amountCents, 'eur');
+    if (!Number.isFinite(input.liveAt.getTime()) || input.liveAt > new Date()) throw new Error('Bestätigter Go-Live fehlt.');
+    const session = await this.stripe.checkout.sessions.retrieve(input.setupSessionId, {
+      expand: ['payment_intent.payment_method'],
+    });
+    if (session.mode !== 'payment' || session.payment_status !== 'paid' || session.metadata?.orderId !== input.orderId)
+      throw new Error('Einrichtungszahlung ist nicht bestätigt oder falsch zugeordnet.');
+    const customer = idOf(session.customer);
+    const intent = typeof session.payment_intent === 'object' ? session.payment_intent : null;
+    const method = intent && typeof intent.payment_method === 'object' ? intent.payment_method : null;
+    if (
+      !customer ||
+      !intent ||
+      intent.setup_future_usage !== 'off_session' ||
+      !method ||
+      idOf(method.customer) !== customer ||
+      !['card', 'sepa_debit'].includes(method.type)
+    )
+      throw new Error('Wiederverwendbares Zahlungsmittel/Mandat fehlt; manuelle Prüfung erforderlich.');
+    // Recover a crash after Stripe succeeded but before our DB commit, even after Stripe's idempotency TTL.
+    for await (const existing of this.stripe.subscriptions.list({ customer, status: 'all', limit: 100 })) {
+      if (existing.metadata.orderId === input.orderId && existing.metadata.offerVersion === 'v4')
+        return this.subscriptionInfo(existing);
+    }
+    const sub = await this.stripe.subscriptions.create(
+      {
+        customer,
+        default_payment_method: method.id,
+        items: [{ price }],
+        payment_behavior: 'default_incomplete',
+        payment_settings: { save_default_payment_method: 'on_subscription' },
+        metadata: {
+          kind: 'subscription',
+          offerVersion: 'v4',
+          tier: input.tier,
+          orderId: input.orderId,
+          customerId: input.customerId,
+        },
+        expand: ['latest_invoice'],
+      },
+      { idempotencyKey: input.idempotencyKey },
+    );
+    return this.subscriptionInfo(sub);
+  }
+
+  async scheduleTariffChange(
+    input: Parameters<NonNullable<PaymentProvider['scheduleTariffChange']>>[0],
+  ): Promise<{ scheduleId: string; effectiveAt: Date }> {
+    const price = stripeV4Price(input.tier, this.testMode, input.amountCents, 'eur');
+    const sub = await this.stripe.subscriptions.retrieve(input.subscriptionId);
+    if (sub.status !== 'active' || sub.cancel_at_period_end || sub.items.data.length !== 1)
+      throw new Error('Tarifwechsel erfordert ein aktives, ungekündigtes Einzelabo.');
+    const item = sub.items.data[0]!;
+    if (input.expectedPriceId && item.price.id !== input.expectedPriceId) throw new Error('Aktueller Abo-Preis weicht ab.');
+    const schedule = sub.schedule
+      ? await this.stripe.subscriptionSchedules.retrieve(idOf(sub.schedule)!)
+      : await this.stripe.subscriptionSchedules.create(
+          { from_subscription: sub.id },
+          { idempotencyKey: `${input.idempotencyKey}-create` },
+        );
+    if (schedule.metadata?.tariffChangeKey === input.idempotencyKey)
+      return { scheduleId: schedule.id, effectiveAt: new Date(schedule.phases[1]!.start_date * 1000) };
+    if (schedule.phases.length > 1) throw new Error('Ein vorhandener Tarifplan muss zuerst geprüft werden.');
+    const phase = schedule.phases[0]!;
+    const end = item.current_period_end;
+    await this.stripe.subscriptionSchedules.update(
+      schedule.id,
+      {
+        end_behavior: 'release',
+        proration_behavior: 'none',
+        metadata: { tariffChangeKey: input.idempotencyKey },
+        phases: [
+          {
+            start_date: phase.start_date,
+            end_date: end,
+            items: [{ price: item.price.id, quantity: 1 }],
+            proration_behavior: 'none',
+          },
+          {
+            start_date: end,
+            duration: { interval: 'month', interval_count: 1 },
+            items: [{ price, quantity: 1 }],
+            proration_behavior: 'none',
+            metadata: { ...sub.metadata, tier: input.tier },
+          },
+        ],
+      },
+      { idempotencyKey: `${input.idempotencyKey}-update` },
+    );
+    return { scheduleId: schedule.id, effectiveAt: new Date(end * 1000) };
+  }
+
+  async releaseTariffSchedule(id: string, idempotencyKey: string): Promise<void> {
+    if (!this.testMode) throw new Error('V4 bisher nur Sandbox.');
+    const schedule = await this.stripe.subscriptionSchedules.retrieve(id);
+    if (schedule.status === 'released') return;
+    await this.stripe.subscriptionSchedules.release(id, {}, { idempotencyKey });
+  }
+
+  async cancelAtPeriodEnd(id: string, idempotencyKey: string): Promise<void> {
+    if (!this.testMode) throw new Error('V4 bisher nur Sandbox.');
+    const sub = await this.stripe.subscriptions.retrieve(id);
+    if (sub.status === 'canceled') return;
+    if (sub.schedule) await this.releaseTariffSchedule(idOf(sub.schedule)!, `${idempotencyKey}-release`);
+    await this.stripe.subscriptions.update(id, { cancel_at_period_end: true, proration_behavior: 'none' }, { idempotencyKey });
+  }
+
   async expireSession(sessionId: string): Promise<void> {
     try {
       await this.stripe.checkout.sessions.expire(sessionId);
@@ -384,6 +521,8 @@ export class StripePayment implements PaymentProvider {
         ...base,
         subscriptionId: sub.id,
         subscriptionStatus: sub.status,
+        subscriptionPriceId: sub.items.data[0]?.price.id,
+        cancelAtPeriodEnd: sub.cancel_at_period_end,
         metadata: metadataOf(sub.metadata),
         mode: 'subscription',
       };
@@ -397,6 +536,7 @@ export class StripePayment implements PaymentProvider {
         ...base,
         mode: 'subscription',
         invoiceId: inv.id,
+        subscriptionPriceId: line?.pricing?.price_details ? idOf(line.pricing.price_details.price) : undefined,
         subscriptionId: details ? idOf(details.subscription) : undefined,
         metadata: metadataOf(details?.metadata ?? inv.metadata),
         billingReason: inv.billing_reason ?? undefined,

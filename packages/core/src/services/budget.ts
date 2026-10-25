@@ -42,6 +42,8 @@ export interface CostEntry {
   /** Alternativ: Betrag in Mikro-Cent (1e-6 Cent), z. B. für LLM */
   amountMicroCents?: number;
   leadId?: string | null;
+  customerId?: string | null;
+  incurredAt?: Date;
   ref?: string;
   idempotencyKey?: string;
   meta?: Record<string, unknown>;
@@ -60,6 +62,8 @@ export async function recordCost(db: DbOrTx, entry: CostEntry): Promise<void> {
       amountCents: cents,
       amountMicroCents: micro,
       leadId: entry.leadId ?? null,
+      customerId: entry.customerId ?? null,
+      incurredAt: entry.incurredAt,
       ref: entry.ref,
       idempotencyKey: entry.idempotencyKey,
       meta: entry.meta ?? {},
