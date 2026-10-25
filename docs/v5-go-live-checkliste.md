@@ -81,3 +81,7 @@ die additive Migrations-/Queue-Vorschau sind konkret prüfbar, dürfen aber ohne
 nicht produktiv eingerichtet werden. Danach genau einen fiktiven vollständigen Providerlauf mit
 Hosted-Checkout und signierten Webhooks abnehmen. Erst mit diesen Nachweisen eine konkrete
 Betriebs-/Kampagnenfreigabe einholen. Jetzt keine Live-Aktion.
+
+Aktuellster verbindlicher Restaufgabenstand: [Abschluss-Audit](status-audit-abschluss-2026-10-25.md).
+Die lokalen Prüfungen einschließlich aller Templates/Paare und synthetischer mobiler Ladeleistung
+sind abgeschlossen; externe Betreiber-/Provider-/Infrastruktursperren gelten unverändert.

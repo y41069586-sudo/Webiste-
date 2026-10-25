@@ -130,3 +130,16 @@ externes Sandbox-Abnahmepaket klären. Danach separat freigegebene additive Migr
 Worker auf genehmigtem VPS einrichten; genau einen fiktiven vollständigen Providerlauf dokumentieren.
 Erst dann tatsächliche Betriebs-/Kampagnenfreigabe prüfen. Keine Live-Stripe-Freischaltung durch diese
 Sitzung, keine produktiven DB-/DNS-/Deploy-Aktionen. Erste 30 echten Demos weiter manuell abnehmen.
+
+## Verbindlicher Restaufgaben-Audit abgeschlossen
+
+Fortsetzung nach 9a09ca8: aktueller Nachweis in `status-audit-abschluss-2026-10-25.md`.
+432/432 Coretests inklusive 127 Template-Browserfälle,22/22 Produktions-E2E,97 Template-Tests,
+6 Root-Testdateien, Types/Lint/Build und erneuter Worker-Smoke bestanden. Alle 20 Vorlagen als
+vollständige Brief-Demo-Paare gerendert und visuell betrachtet, fünf Prüfbögen und PDF-Raster.
+Mobile Labormessung mit CPU 4×/1,6Mbit/s: LCP-Mediane Marketing 2,184 s/Demo 0,792 s/
+tatsächliche Mock-Bezahlseite 1,920 s; maximaler CLS 0,0152. Marketing-Erstwert 3,016 s dokumentiert.
+Keine Feld-/CDN-Abnahme behaupten. Neue Skripte audit-final-pairs.mts und
+audit-mobile-performance.mts; App unverändert, keine externen Aktionen. Artefakte unter
+data/exports/final-audit mit SHA-256-Manifest. Frühere lokale Restpunkte durch diesen Audit ersetzt.
+Offen bleiben ausschließlich die im neuen Bericht kategorisierten externen Schritte/Freigaben.
