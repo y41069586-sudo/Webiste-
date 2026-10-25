@@ -168,6 +168,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <dt className="text-slate-500">Erstattet</dt>
             <dd>
               {order.refundedCents ? `${eur(order.refundedCents)} am ${dt(order.refundedAt)}` : '–'}
+              {order.refundDocuments.map((d) => (
+                <div key={d.number}>
+                  <a href={`/admin/files/${d.pdfKey}`} className="text-brand-700 underline">
+                    Korrektur {d.number}: {eur(d.deltaCents)}
+                  </a>{' '}
+                  · versendet {dt(d.sentAt ? new Date(d.sentAt) : null)}
+                </div>
+              ))}
               {order.cancellationPdfKey ? (
                 <>
                   {' · '}
@@ -212,6 +220,15 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                       p.invoiceNumber
                     )}{' '}
                     · versendet {dt(p.invoiceSentAt)}
+                    {p.refundedCents ? <p>Bestätigt erstattet: {eur(p.refundedCents)}</p> : null}
+                    {p.refundDocuments.map((d) => (
+                      <div key={d.number}>
+                        <a href={`/admin/files/${d.pdfKey}`} className="text-brand-700 underline">
+                          Korrektur {d.number}: {eur(d.deltaCents)}
+                        </a>{' '}
+                        · versendet {dt(d.sentAt ? new Date(d.sentAt) : null)}
+                      </div>
+                    ))}
                   </Td>
                 </tr>
               ))}

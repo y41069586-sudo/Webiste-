@@ -200,3 +200,19 @@ Stilen. V4-Garantie/AGB-Arbeitsfassung konsistent zum implementierten Ablauf, ke
 Öffentliche Edge-Konfigurations-Whitelist überträgt Angebotsversion ohne interne Billing-/Bankdaten.
 Elf Seiten statisch lokal exportiert, Homepage Desktop/Handy sowie Preise/Beispiele Handy ohne
 Layout-/Bild-/Konsolenfehler. Nicht produktiv veröffentlicht.
+
+## P0-Finanzergänzung tatsächlich abgeschlossen (lokal)
+
+**304/304 Core-Tests bestanden**, anschließend 8/8 gezielte Monats-/Einrichtungs-/Legacy-
+Korrekturtests bestanden. Unbekannte Rechnungen bleiben retriable; bei erfolgreicher späterer
+Zuordnung wird die Finanzsperre aufgehoben. Ursprüngliche Rechnung und frühere Differenz-PDFs
+bleiben unverändert. Vor Migration gespeicherte Stornos behalten PDF/Nummer/Zustell-Idempotenz.
+Neue Migration0017 ausschließlich lokal. Monats-Erstattung ist damit kein offener Implementierungspunkt
+mehr; echter Stripe-Webhook-/Refund-Gesamtlauf und steuerliche Belegfreigabe bleiben externe Abnahme.
+
+Der erneute dev-E2E-Lauf hatte eine nachweisbare HMR-Reload-Schleife (keine fachlich erfolgreiche
+Abnahme). Beendet, nur eigene verifizierte lokale Mock-Server bereinigt. Vollständiger Nachlauf am
+neu gebauten **Produktionsbuild** mit `E2E_PRODUCTION=true`, Mock-Testfreigabe nur lokal und SHOTS_DIR
+außerhalb des Sourceverzeichnisses. Log: `/tmp/seitenwerk-v5-e2e-production-2.log`; aktuell noch laufend.
+Zuletzt sichere Commits: **910f612** Design/Review, **3bea72e** Zahlungen, **81098d0** Betrieb,
+**312aba8** V4-Operations. Letzte Monats-Erstattung noch uncommitted bis finaler Type-/Lint-Prüfung.

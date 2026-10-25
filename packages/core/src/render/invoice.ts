@@ -6,7 +6,6 @@ import { getDb } from '../db/client';
 import { customers, orderPayments, orders } from '../db/schema';
 import { orderConfirmationEmail, recurringInvoiceEmail, refundEmail } from '../emails/templates';
 import { buildCancellationData, nextInvoiceNumber, orderAmounts } from '../invoices/build';
-import { logger } from '../logger';
 import { getProviders } from '../providers';
 import { audit } from '../services/audit';
 import { sendTransactionalEmail } from '../services/email';
@@ -82,57 +81,154 @@ export async function sendOrderInvoice(orderId: string): Promise<'sent' | 'alrea
   return 'sent';
 }
 
-/** Stornorechnung (eigene fortlaufende Nummer) erzeugen und senden – idempotent. */
-export async function sendCancellationInvoice(orderId: string): Promise<'sent' | 'already' | 'skipped'> {
-  const db = getDb();
-  const cfg = await getConfig();
-  const { storage } = getProviders();
-  let order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
-  if (!order?.invoiceJson || !order.invoiceNumber || order.refundedCents <= 0) return 'skipped';
-  if (order.cancellationSentAt) return 'already';
-  if (!order.cancellationNumber) {
-    await db.transaction(async (tx) => {
-      const locked = await tx.execute<{ cancellation_number: string | null }>(
-        sql`SELECT cancellation_number FROM orders WHERE id = ${orderId} FOR UPDATE`,
-      );
-      if (locked.rows[0]?.cancellation_number) return;
-      const now = new Date();
-      const number = await nextInvoiceNumber(tx, cfg, now);
-      const data = buildCancellationData(order!.invoiceJson as unknown as InvoiceData, {
+/** Immutable delta corrections for setup and recurring payments; retries never credit twice. */
+export async function sendCancellationInvoice(orderId: string, paymentId?: string): Promise<'sent' | 'already' | 'skipped'> {
+  const db = getDb(),
+    cfg = await getConfig(),
+    storage = getProviders().storage;
+  const order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+  if (!order) return 'skipped';
+  const sourceId = paymentId ?? orderId;
+  const prepared = await db.transaction(async (tx) => {
+    if (paymentId) await tx.execute(sql`SELECT id FROM order_payments WHERE id=${paymentId} FOR UPDATE`);
+    else await tx.execute(sql`SELECT id FROM orders WHERE id=${orderId} FOR UPDATE`);
+    const source = paymentId
+      ? await tx.query.orderPayments.findFirst({ where: eq(orderPayments.id, paymentId) })
+      : await tx.query.orders.findFirst({ where: eq(orders.id, orderId) });
+    if (!source || (paymentId && 'orderId' in source && source.orderId !== orderId))
+      throw new Error('Korrekturzahlung falsch zugeordnet.');
+    if (!source.invoiceNumber || !source.invoiceJson || source.refundedCents <= 0) return null;
+    const docs = [...source.refundDocuments];
+    // Historical cancellations predate the document list. Never invent a second credit.
+    if (!paymentId && 'cancellationNumber' in source && source.cancellationNumber && !docs.length) return { legacy: true, docs };
+    const credited = docs.at(-1)?.cumulativeCents ?? 0;
+    if (credited < source.refundedCents) {
+      const now = new Date(),
+        number = await nextInvoiceNumber(tx, cfg, now);
+      const delta = source.refundedCents - credited;
+      const data = buildCancellationData(source.invoiceJson as unknown as InvoiceData, {
         number,
         issuedAt: now,
-        refundedCents: order!.refundedCents,
-        amounts: orderAmounts(order!),
+        refundedCents: delta,
+        alreadyRefundedCents: credited,
+        amounts: orderAmounts(source),
       });
-      const pdf = await htmlToPdf(renderInvoiceHtml(data));
       const key = invoiceKey(number, now);
-      await storage.put(key, pdf, 'application/pdf');
-      await tx
-        .update(orders)
-        .set({ cancellationNumber: number, cancellationPdfKey: key, updatedAt: now })
-        .where(eq(orders.id, orderId));
+      await storage.put(key, await htmlToPdf(renderInvoiceHtml(data)), 'application/pdf');
+      docs.push({
+        number,
+        cumulativeCents: source.refundedCents,
+        deltaCents: delta,
+        issuedAt: now.toISOString(),
+        pdfKey: key,
+        sentAt: null,
+      });
+      if (paymentId) await tx.update(orderPayments).set({ refundDocuments: docs }).where(eq(orderPayments.id, paymentId));
+      else
+        await tx
+          .update(orders)
+          .set({
+            refundDocuments: docs,
+            cancellationNumber: docs[0]!.number,
+            cancellationPdfKey: docs[0]!.pdfKey,
+            updatedAt: now,
+          })
+          .where(eq(orders.id, orderId));
+      await audit(tx, {
+        entity: 'order',
+        entityId: orderId,
+        action: 'refund_document_prepared',
+        actor: 'job:send-invoice',
+        context: { paymentId: paymentId ?? null, number, deltaCents: delta, cumulativeCents: source.refundedCents },
+      });
+    }
+    return { legacy: false, docs };
+  });
+  if (!prepared) return 'skipped';
+  if (prepared.legacy) {
+    // Preserve retry delivery of immutable pre-migration PDFs, including their old
+    // idempotency key. Never generate a replacement with a guessed historic amount.
+    const legacy = (await db.query.orders.findFirst({ where: eq(orders.id, orderId) }))!;
+    if (legacy.cancellationSentAt) return 'already';
+    const pdf = legacy.cancellationPdfKey ? await storage.get(legacy.cancellationPdfKey) : null;
+    if (!pdf || !legacy.cancellationNumber) throw new Error('Historischer Korrekturbeleg fehlt; manuelle Prüfung erforderlich.');
+    const mail = refundEmail(cfg, {
+      name: legacy.customerName,
+      amount: formatEuro(legacy.refundedCents),
+      cancellationNumber: legacy.cancellationNumber,
     });
-    order = (await db.query.orders.findFirst({ where: eq(orders.id, orderId) }))!;
+    await sendTransactionalEmail({
+      ...mail,
+      kind: 'cancellation',
+      idempotencyKey: `cancellation:${orderId}:${legacy.cancellationNumber}`,
+      to: legacy.customerEmail,
+      orderId,
+      leadId: legacy.leadId,
+      attachments: [
+        { filename: `Stornorechnung-${legacy.cancellationNumber}.pdf`, content: pdf, contentType: 'application/pdf' },
+      ],
+    });
+    await db.update(orders).set({ cancellationSentAt: new Date(), updatedAt: new Date() }).where(eq(orders.id, orderId));
+    return 'sent';
   }
-  const pdf = await storage.get(order.cancellationPdfKey!);
-  if (!pdf) throw new Error('Stornorechnung-PDF fehlt im Speicher');
-  const mail = refundEmail(cfg, {
-    name: order.customerName,
-    amount: formatEuro(order.refundedCents),
-    cancellationNumber: order.cancellationNumber!,
-  });
-  await sendTransactionalEmail({
-    ...mail,
-    kind: 'cancellation',
-    idempotencyKey: `cancellation:${order.id}:${order.cancellationNumber}`,
-    to: order.customerEmail,
-    attachments: [{ filename: `Stornorechnung-${order.cancellationNumber}.pdf`, content: pdf, contentType: 'application/pdf' }],
-    orderId: order.id,
-    leadId: order.leadId,
-  });
-  await db.update(orders).set({ cancellationSentAt: new Date(), updatedAt: new Date() }).where(eq(orders.id, orderId));
-  logger.info({ orderId }, 'Stornorechnung versendet');
-  return 'sent';
+  const unsent = prepared.docs.filter((d) => !d.sentAt);
+  for (const doc of unsent) {
+    const pdf = await storage.get(doc.pdfKey);
+    if (!pdf) throw new Error('Korrekturbeleg fehlt im privaten Speicher.');
+    const mail = refundEmail(cfg, {
+      name: order.customerName,
+      amount: formatEuro(doc.deltaCents),
+      cancellationNumber: doc.number,
+    });
+    await sendTransactionalEmail({
+      ...mail,
+      kind: 'cancellation',
+      idempotencyKey: `cancellation:${sourceId}:${doc.number}`,
+      to: order.customerEmail,
+      attachments: [{ filename: `Stornorechnung-${doc.number}.pdf`, content: pdf, contentType: 'application/pdf' }],
+      orderId,
+      leadId: order.leadId,
+    });
+    await db.transaction(async (tx) => {
+      if (paymentId) await tx.execute(sql`SELECT id FROM order_payments WHERE id=${paymentId} FOR UPDATE`);
+      else await tx.execute(sql`SELECT id FROM orders WHERE id=${orderId} FOR UPDATE`);
+      const source = paymentId
+        ? await tx.query.orderPayments.findFirst({ where: eq(orderPayments.id, paymentId) })
+        : await tx.query.orders.findFirst({ where: eq(orders.id, orderId) });
+      const docs = source!.refundDocuments.map((d) =>
+        d.number === doc.number ? { ...d, sentAt: d.sentAt ?? new Date().toISOString() } : d,
+      );
+      if (paymentId) await tx.update(orderPayments).set({ refundDocuments: docs }).where(eq(orderPayments.id, paymentId));
+      else
+        await tx
+          .update(orders)
+          .set({ refundDocuments: docs, cancellationSentAt: new Date(), updatedAt: new Date() })
+          .where(eq(orders.id, orderId));
+    });
+  }
+  return unsent.length ? 'sent' : 'already';
+}
+
+/** Recover a lost queue insertion or interrupted correction delivery without requesting money. */
+export async function sweepRefundDocuments(): Promise<number> {
+  const db = getDb();
+  const pending = await db.execute<{ order_id: string; payment_id: string | null; amount: number }>(sql`
+    SELECT id AS order_id,NULL::uuid AS payment_id,refunded_cents AS amount FROM orders
+    WHERE refunded_cents>0 AND cancellation_number IS NULL
+      OR refunded_cents>0 AND jsonb_array_length(refund_documents)>0 AND
+        ((refund_documents->-1->>'cumulativeCents')::int<refunded_cents OR EXISTS(SELECT 1 FROM jsonb_array_elements(refund_documents) d WHERE d->>'sentAt' IS NULL))
+    UNION ALL
+    SELECT order_id,id AS payment_id,refunded_cents AS amount FROM order_payments WHERE refunded_cents>0 AND
+      (jsonb_array_length(refund_documents)=0 OR (refund_documents->-1->>'cumulativeCents')::int<refunded_cents
+        OR EXISTS(SELECT 1 FROM jsonb_array_elements(refund_documents) d WHERE d->>'sentAt' IS NULL))`);
+  const { enqueue, QUEUES } = await import('../queue');
+  for (const row of pending.rows)
+    await enqueue(
+      QUEUES.sendInvoice,
+      { orderId: row.order_id, kind: 'cancellation', paymentId: row.payment_id ?? undefined },
+      { singletonKey: `refund-document-${row.payment_id ?? row.order_id}-${row.amount}` },
+    );
+  return pending.rows.length;
 }
 
 /** Rechnung zu einer Monatsrate bzw. „Hosting & Pflege“ erzeugen und senden (idempotent). */

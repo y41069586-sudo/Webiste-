@@ -2,7 +2,7 @@ import { and, count, eq, sql } from 'drizzle-orm';
 import { appUrl } from '../config/env';
 import { getConfig } from '../config/service';
 import { getDb } from '../db/client';
-import { customers, orderPayments, orders, sites } from '../db/schema';
+import { alerts, customers, orderPayments, orders, sites } from '../db/schema';
 import { subscriptionPaymentFailedEmail } from '../emails/templates';
 import { amountsFor, buildInvoiceData, nextInvoiceNumber } from '../invoices/build';
 import { errInfo, logger } from '../logger';
@@ -94,6 +94,62 @@ export async function applyRecurringEvent(ev: PaymentEvent, actor: string): Prom
     default:
       return 'ignored';
   }
+}
+
+/** A monthly refund changes that payment, never the separate 597-Euro setup invoice. */
+export async function applyRecurringRefund(ev: PaymentEvent, actor: string): Promise<string | null> {
+  if (!ev.invoiceId || ev.amountRefunded === undefined) return null;
+  const db = getDb();
+  const pay = await db.query.orderPayments.findFirst({ where: eq(orderPayments.providerInvoiceId, ev.invoiceId) });
+  if (!pay) {
+    const original = await db.query.orders.findFirst({ where: eq(orders.stripeInvoiceId, ev.invoiceId) });
+    if (original) return null; // Legacy first rate lives on the order itself.
+    if (ev.amountRefunded > 0) {
+      await raiseAlert(db, {
+        level: 'error',
+        code: `refund_reconciliation_${ev.invoiceId}`,
+        message: 'Bestätigte Erstattung ohne zugeordnete Rechnung. Finanzdaten bis zur Klärung unvollständig.',
+        context: { providerInvoiceId: ev.invoiceId, eventId: ev.eventId },
+      });
+      throw new Error('Erstattete Monatsrechnung noch nicht zugeordnet; Webhook erneut zustellen.');
+    }
+    return 'refund_pending';
+  }
+  const provider = (await import('../providers')).getProviders().payment.name;
+  if (
+    pay.provider !== provider ||
+    ev.currency !== 'eur' ||
+    ev.amountTotal !== pay.amountCents ||
+    !Number.isInteger(ev.amountRefunded) ||
+    ev.amountRefunded < 0 ||
+    ev.amountRefunded > pay.amountCents
+  )
+    throw new Error('Monats-Erstattung passt nicht zum verbuchten Zahlungsbeleg.');
+  const changed = await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT id FROM order_payments WHERE id=${pay.id} FOR UPDATE`);
+    const current = (await tx.query.orderPayments.findFirst({ where: eq(orderPayments.id, pay.id) }))!;
+    if (ev.amountRefunded! <= current.refundedCents) return false;
+    await tx.update(orderPayments).set({ refundedCents: ev.amountRefunded }).where(eq(orderPayments.id, pay.id));
+    await audit(tx, {
+      entity: 'order',
+      entityId: pay.orderId,
+      action: 'monthly_payment_refunded',
+      actor,
+      context: { paymentId: pay.id, providerInvoiceId: ev.invoiceId, refundedCents: ev.amountRefunded },
+    });
+    return true;
+  });
+  await db
+    .update(alerts)
+    .set({ acknowledgedAt: new Date() })
+    .where(eq(alerts.code, `refund_reconciliation_${ev.invoiceId}`));
+  if (ev.amountRefunded > 0)
+    await enqueue(
+      QUEUES.sendInvoice,
+      { orderId: pay.orderId, kind: 'cancellation', paymentId: pay.id },
+      { singletonKey: `refund-document-${pay.id}-${ev.amountRefunded}` },
+    );
+  return changed ? 'monthly_refunded' : 'unchanged';
 }
 
 async function recordRecurringPayment(t: Target, ev: PaymentEvent, actor: string): Promise<string> {

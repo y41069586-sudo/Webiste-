@@ -35,9 +35,15 @@ export async function FinanceOperations({ from, to }: { from?: string; to?: stri
           MRR zeigt den aktuellen Vertragsstand und ist kein Geldeingang. Kosten zum tatsächlichen Leistungsdatum.
         </p>
       </Card>
+      {report.reconciliationPending ? (
+        <Notice kind="warn">
+          {report.reconciliationPending} Erstattungszuordnung(en) offen. Die Zahlen zeigen nur bekannte Buchungen; ein
+          vollständiger Saldo und Deckungsbeitrag sind bis zur Klärung gesperrt.
+        </Notice>
+      ) : null}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat
-          label="Vereinnahmt nach Erstattungen"
+          label={report.reconciliationPending ? 'Bekannte Buchungen – Zuordnung offen' : 'Vereinnahmt nach Erstattungen'}
           value={eur(report.receivedCents)}
           hint={`Einrichtung ${eur(report.setupReceivedCents)} · Monatszahlungen ${eur(report.monthlyReceivedCents)} · Erstattungen ${eur(report.refundsCents)}`}
         />

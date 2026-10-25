@@ -555,6 +555,7 @@ export class StripePayment implements PaymentProvider {
     }
     if (event.type === 'refund.updated' || event.type === 'refund.failed') {
       const r = event.data.object as Stripe.Refund;
+      const charge = r.status === 'succeeded' && idOf(r.charge) ? await this.stripe.charges.retrieve(idOf(r.charge)!) : null;
       return {
         ...base,
         refundId: r.id,
@@ -563,23 +564,41 @@ export class StripePayment implements PaymentProvider {
         amountTotal: r.amount,
         currency: r.currency,
         metadata: metadataOf(r.metadata),
+        ...(charge ? { ...(await this.refundEvidence(charge)), amountTotal: charge.amount } : {}),
       };
     }
     if (event.type === 'charge.refunded') {
       const c = event.data.object as Stripe.Charge;
-      let confirmed = 0;
-      for await (const refund of this.stripe.refunds.list({ charge: c.id, limit: 100 }))
-        if (refund.status === 'succeeded') confirmed += refund.amount;
       return {
         ...base,
         paymentIntentId: idOf(c.payment_intent),
         amountTotal: c.amount,
-        amountRefunded: confirmed,
+        ...(await this.refundEvidence(c)),
         currency: c.currency,
         metadata: metadataOf(c.metadata),
       };
     }
     return base;
+  }
+
+  private async refundEvidence(charge: Stripe.Charge): Promise<{ amountRefunded: number; invoiceId?: string }> {
+    let confirmed = 0;
+    for await (const refund of this.stripe.refunds.list({ charge: charge.id, limit: 100 }))
+      if (refund.status === 'succeeded') confirmed += refund.amount;
+    const intent = idOf(charge.payment_intent);
+    const invoices = new Set<string>();
+    if (intent) {
+      for await (const payment of this.stripe.invoicePayments.list({
+        payment: { type: 'payment_intent', payment_intent: intent },
+        status: 'paid',
+        limit: 100,
+      })) {
+        const id = idOf(payment.invoice);
+        if (id) invoices.add(id);
+      }
+    }
+    if (invoices.size > 1) throw new Error('Erstattung über mehrere Rechnungen benötigt eine manuelle Zuordnung.');
+    return { amountRefunded: confirmed, invoiceId: invoices.values().next().value };
   }
 
   async refund(

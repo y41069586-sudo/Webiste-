@@ -1,0 +1,2 @@
+ALTER TABLE "order_payments" ADD COLUMN "refund_documents" jsonb DEFAULT '[]'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "orders" ADD COLUMN "refund_documents" jsonb DEFAULT '[]'::jsonb NOT NULL;

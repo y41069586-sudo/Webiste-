@@ -73,7 +73,7 @@ interface Money {
 export async function financeReportV4(from?: string, to?: string) {
   const range = financeRange(from, to),
     db = getDb();
-  const [initial, recurring, costs, work, arms, deliveries, mrr] = await Promise.all([
+  const [initial, recurring, costs, work, arms, deliveries, mrr, reconciliation] = await Promise.all([
     db
       .select({
         id: orders.id,
@@ -113,6 +113,9 @@ export async function financeReportV4(from?: string, to?: string) {
     db.execute<{ amount: string }>(
       sql`SELECT coalesce(sum((coalesce(active_offer_snapshot,offer_snapshot)->>'monthlyCents')::int),0)::text AS amount FROM orders WHERE offer_snapshot IS NOT NULL AND subscription_status='active' AND ended_at IS NULL`,
     ),
+    db.execute<{ n: number }>(
+      sql`SELECT count(*)::int AS n FROM alerts WHERE acknowledged_at IS NULL AND code LIKE 'refund_reconciliation_%'`,
+    ),
   ]);
   const money: Money[] = [
     ...initial.map((x) => ({
@@ -144,7 +147,8 @@ export async function financeReportV4(from?: string, to?: string) {
     }),
   );
   const review = await getSetting<{ fingerprint: string; at: string; actor: string } | null>(range.key, null);
-  const reviewed = review?.fingerprint === fingerprint && unpriced === 0 && estimated === 0;
+  const reconciliationPending = Number(reconciliation.rows[0]?.n ?? 0);
+  const reviewed = review?.fingerprint === fingerprint && unpriced === 0 && estimated === 0 && reconciliationPending === 0;
   const costCents = (c: (typeof actualCosts)[number]) => Number(c.amount) + Number(c.micro) / 1e6;
   const refundNet = (m: Money) => Math.round(m.refund * (m.gross ? m.net / m.gross : 0));
   const totalCost = Math.round(actualCosts.reduce((s, x) => s + costCents(x), 0));
@@ -181,6 +185,7 @@ export async function financeReportV4(from?: string, to?: string) {
     fingerprint,
     review,
     reviewed,
+    reconciliationPending,
     unpricedWork: unpriced,
     estimatedCosts: estimated,
     setupReceivedCents: initial.reduce((s, x) => s + x.amount, 0),
@@ -216,6 +221,7 @@ export async function financeReportV4(from?: string, to?: string) {
 export async function confirmFinanceCoverage(from: string, to: string, confirmed: boolean, actor: string) {
   if (!confirmed) throw new Error('Vollständigkeit aller tatsächlichen Kosten ausdrücklich bestätigen.');
   const report = await financeReportV4(from, to);
+  if (report.reconciliationPending) throw new Error('Offene Erstattungszuordnungen zuerst klären.');
   if (report.unpricedWork || report.estimatedCosts) throw new Error('Unbewertete Arbeit oder geschätzte Kosten zuerst klären.');
   await setSetting(report.range.key, { fingerprint: report.fingerprint, at: new Date().toISOString(), actor }, actor);
 }

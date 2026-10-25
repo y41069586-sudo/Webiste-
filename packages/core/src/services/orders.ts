@@ -23,7 +23,7 @@ import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
 import { guaranteeEndFor } from './guarantee';
 import { goLiveBlockers } from './readiness';
-import { applyRecurringEvent } from './recurring';
+import { applyRecurringEvent, applyRecurringRefund } from './recurring';
 import { applySubscriptionEvent } from './renewals';
 import { findPublicDemo, recordEvent, type RequestMeta } from './tracking';
 
@@ -765,13 +765,21 @@ async function findOrderForEvent(ev: PaymentEvent): Promise<Order | undefined> {
     const o = await db.query.orders.findFirst({ where: eq(orders.id, ref) });
     if (o) return o;
   }
-  if (ev.paymentIntentId) return db.query.orders.findFirst({ where: eq(orders.stripePaymentIntent, ev.paymentIntentId) });
+  if (ev.paymentIntentId) {
+    const order = await db.query.orders.findFirst({ where: eq(orders.stripePaymentIntent, ev.paymentIntentId) });
+    if (order) return order;
+  }
+  if (ev.invoiceId) return db.query.orders.findFirst({ where: eq(orders.stripeInvoiceId, ev.invoiceId) });
   return undefined;
 }
 
 /** Normalisiertes Zahlungs-Event anwenden (ohne Replay-Schutz – siehe processPaymentWebhook). */
 export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promise<string> {
   if (ev.type === 'other') return 'ignored';
+  if (ev.type === 'charge.refunded' || (ev.type === 'refund.updated' && ev.refundStatus === 'succeeded')) {
+    const recurring = await applyRecurringRefund(ev, actor);
+    if (recurring !== null) return recurring;
+  }
   // Laufende Abos: Rechnungen und Statuswechsel – Plan „monthly“ oder „Hosting & Pflege“ (Option A)
   if (
     ev.type === 'invoice.paid' ||
@@ -837,7 +845,13 @@ export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promis
       return res.length ? 'expired' : 'unchanged';
     }
     case 'refund.updated': {
-      if (ev.refundId !== order.pendingRefundId) return 'ignored';
+      if (ev.refundId !== order.pendingRefundId) {
+        if (ev.refundStatus === 'succeeded' && ev.amountRefunded !== undefined) {
+          await applyRefund(order.id, ev.amountRefunded, actor);
+          return 'refunded';
+        }
+        return 'ignored';
+      }
       await db
         .update(orders)
         .set({ pendingRefundStatus: ev.refundStatus ?? 'pending' })
@@ -853,8 +867,7 @@ export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promis
       return 'refunded';
     }
     case 'charge.refunded':
-      await applyRefund(order.id, ev.amountRefunded ?? 0, actor);
-      return 'refunded';
+      return (await applyRefund(order.id, ev.amountRefunded ?? 0, actor)) ? 'refunded' : 'unchanged';
     default:
       return 'ignored';
   }

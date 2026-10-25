@@ -182,12 +182,19 @@ function addOneMonth(d: Date): Date {
 /** Stornorechnung zur ursprünglichen Rechnung (negative Beträge, eigene fortlaufende Nummer). */
 export function buildCancellationData(
   original: InvoiceData,
-  opts: { number: string; issuedAt: Date; refundedCents: number; amounts: Amounts },
+  opts: { number: string; issuedAt: Date; refundedCents: number; amounts: Amounts; alreadyRefundedCents?: number },
 ): InvoiceData {
-  const full = opts.refundedCents >= opts.amounts.grossCents;
-  const ratio = full ? 1 : opts.refundedCents / opts.amounts.grossCents;
-  const gross = full ? opts.amounts.grossCents : opts.refundedCents;
-  const vat = Math.round(opts.amounts.vatCents * ratio);
+  const prior = opts.alreadyRefundedCents ?? 0;
+  const total = prior + opts.refundedCents;
+  if (!Number.isInteger(total) || opts.refundedCents <= 0 || prior < 0 || total > opts.amounts.grossCents)
+    throw new Error('Ungültiger Korrekturbetrag.');
+  const full = prior === 0 && total === opts.amounts.grossCents;
+  const gross = opts.refundedCents;
+  // Round cumulative tax, then subtract already credited tax. Several partial refunds
+  // must never create a cent more/less than the original invoice.
+  const vat =
+    Math.round((opts.amounts.vatCents * total) / opts.amounts.grossCents) -
+    Math.round((opts.amounts.vatCents * prior) / opts.amounts.grossCents);
   const net = gross - vat;
   return {
     ...original,

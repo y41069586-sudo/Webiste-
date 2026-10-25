@@ -45,6 +45,15 @@ const ts = (name: string) => timestamp(name, { withTimezone: true, mode: 'date' 
 const createdAt = () => ts('created_at').defaultNow().notNull();
 const updatedAt = () => ts('updated_at').defaultNow().notNull();
 
+export interface RefundDocument {
+  number: string;
+  cumulativeCents: number;
+  deltaCents: number;
+  issuedAt: string;
+  pdfKey: string;
+  sentAt: string | null;
+}
+
 // ---------------------------------------------------------------------------
 // Leads
 // ---------------------------------------------------------------------------
@@ -300,6 +309,7 @@ export const orders = pgTable(
     pendingRefundId: text('pending_refund_id'),
     pendingRefundCents: integer('pending_refund_cents').default(0).notNull(),
     pendingRefundStatus: text('pending_refund_status'),
+    refundDocuments: jsonb('refund_documents').$type<RefundDocument[]>().default([]).notNull(),
     refundedAt: ts('refunded_at'),
     cancellationNumber: text('cancellation_number'),
     cancellationPdfKey: text('cancellation_pdf_key'),
@@ -411,6 +421,7 @@ export const orderPayments = pgTable(
     invoicePdfKey: text('invoice_pdf_key'),
     invoiceSentAt: ts('invoice_sent_at'),
     refundedCents: integer('refunded_cents').default(0).notNull(),
+    refundDocuments: jsonb('refund_documents').$type<RefundDocument[]>().default([]).notNull(),
     createdAt: createdAt(),
   },
   (t) => [
