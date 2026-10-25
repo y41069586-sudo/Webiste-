@@ -138,3 +138,20 @@ und zusammenhängende Änderungen committen. Produktions-/Rechts-/Provider-Sperr
 Temporärer Docker-Speicherfehler (ENOSPC) hat einen Zwischenlauf ungültig gemacht. Ausschließlich
 IDs des eigenen Buildcaches bereinigt, keine Datenbanken/Volumes gelöscht; danach 18 GB frei und
 Core-Nachlauf grün. Keine Produktionsabnahme aus lokalen Nachweisen ableiten.
+
+## Paket 3 – Zahlungs- und Freigabegrenzen
+
+- Echter Sandbox-Befund in bestehendem Stripe-Adapter korrigiert: automatischer Erstmonat
+  `allow_incomplete` + `off_session`, keine Doppelposition und keine vorzeitige Rechnung.
+- Bestätigter Mandats-Checkout und ältere manuelle V4-Snapshots bekommen jeweils passende
+  Zustimmungstexte; Providerwechsel passt nicht stillschweigend zu einer bestehenden Bestellung.
+- Erstattungsanforderung und tatsächlicher Geldabgang getrennt. Pending/Fails erzeugen keine
+  Erstattungsrechnung und keine Erfolgsmail. Wiederholung legt keinen zweiten Request an;
+  Status-Webhooks und lesender Sweep führen bestätigte Erstattungen monoton nach.
+- Neue Tabellen-RLS nur bestehende interne Backendrolle, Browserrechte entzogen; Migrationen
+  0015/0016 nur lokal getestet. Extern keine Schemaänderung.
+- Explizite Steuerbestätigung als zusätzlicher Go-Live-Blocker (Standard false). Keine unbekannte
+  Kleinunternehmer-/USt-Angabe durch KI bestätigt.
+- Noch offen: allgemeine Reconciliation extern im Stripe-Dashboard erstatteter Monatsrechnungen;
+  aktuelle bestätigte Erstattungsstrecke bezieht sich auf die Bestell-/Einrichtungszahlung.
+  Vor Liveverkauf als Blocker behandeln, keine vollständige Refund-Abnahme behaupten.

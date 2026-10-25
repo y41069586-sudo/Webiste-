@@ -271,7 +271,14 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
       customerEmail: input.email,
       successUrl: appUrl(`/checkout/${slug}/erfolg?session_id={CHECKOUT_SESSION_ID}`),
       cancelUrl: appUrl(`/checkout/${slug}?abgebrochen=1`),
-      metadata: { kind: 'order', orderId: order.id, leadId: lead.id, demoId: demo.id, plan },
+      metadata: {
+        kind: 'order',
+        orderId: order.id,
+        leadId: lead.id,
+        demoId: demo.id,
+        plan,
+        ...(isV4Tier(plan) ? { billingMode: cfg.offers.billingMode ?? 'saved_mandate' } : {}),
+      },
       idempotencyKey: `checkout-${order.id}`,
       expiresInMinutes: minutes,
       paymentMethods: cfg.checkout.paymentMethods,
@@ -394,7 +401,7 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
     const g = cfg.guarantee;
     const note = [
       isV4Tier(plan)
-        ? v4CheckoutTerms(plan)
+        ? v4CheckoutTerms(plan, cfg.offers.billingMode ?? 'saved_mandate')
         : plan === 'monthly'
           ? `${formatEuro(p.monthlyCents)} pro Monat, erste Rate sofort. Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
           : `Einmalig ${formatEuro(p.packageCents)} inklusive Domain und ${p.hostingMonthsIncluded} Monaten Hosting.`,
@@ -426,7 +433,15 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
       },
       successUrl: appUrl(`/checkout/${slug}/erfolg?session_id={CHECKOUT_SESSION_ID}`),
       cancelUrl: appUrl(`/d/${slug}#uebernehmen`),
-      metadata: { kind: 'order', orderId: order.id, leadId: lead.id, demoId: demo.id, plan, hosted: '1' },
+      metadata: {
+        kind: 'order',
+        orderId: order.id,
+        leadId: lead.id,
+        demoId: demo.id,
+        plan,
+        ...(isV4Tier(plan) ? { billingMode: cfg.offers.billingMode ?? 'saved_mandate' } : {}),
+        hosted: '1',
+      },
       idempotencyKey: `checkout-${order.id}`,
       expiresInMinutes: minutes,
       paymentMethods: cfg.checkout.paymentMethods,
@@ -821,8 +836,24 @@ export async function applyPaymentEvent(ev: PaymentEvent, actor: string): Promis
       }
       return res.length ? 'expired' : 'unchanged';
     }
+    case 'refund.updated': {
+      if (ev.refundId !== order.pendingRefundId) return 'ignored';
+      await db
+        .update(orders)
+        .set({ pendingRefundStatus: ev.refundStatus ?? 'pending' })
+        .where(eq(orders.id, order.id));
+      if (ev.refundStatus !== 'succeeded') return 'refund_pending';
+      const target = Number(ev.metadata?.cumulativeTarget);
+      if (!Number.isInteger(target) || target <= 0) throw new Error('Erstattungszuordnung unvollständig.');
+      await applyRefund(order.id, target, actor);
+      await db
+        .update(orders)
+        .set({ pendingRefundId: null, pendingRefundCents: 0, pendingRefundStatus: 'succeeded' })
+        .where(and(eq(orders.id, order.id), eq(orders.pendingRefundId, ev.refundId)));
+      return 'refunded';
+    }
     case 'charge.refunded':
-      await applyRefund(order.id, ev.amountRefunded ?? ev.amountTotal ?? order.amountCents, actor);
+      await applyRefund(order.id, ev.amountRefunded ?? 0, actor);
       return 'refunded';
     default:
       return 'ignored';
@@ -867,12 +898,16 @@ async function markPaymentFailed(order: Order, actor: string): Promise<void> {
 export async function applyRefund(orderId: string, refundedCents: number, actor: string): Promise<boolean> {
   const db = getDb();
   const order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
-  if (!order || refundedCents <= order.refundedCents) return false;
+  if (!order || !order.paidAt || refundedCents <= order.refundedCents) return false;
+  if (!Number.isInteger(refundedCents) || refundedCents > order.amountCents)
+    throw new Error('Ungültiger bestätigter Erstattungsbetrag.');
   const full = refundedCents >= order.amountCents;
-  await db
+  const changed = await db
     .update(orders)
     .set({ refundedCents, refundedAt: new Date(), ...(full ? { status: 'refunded' as const } : {}), updatedAt: new Date() })
-    .where(eq(orders.id, orderId));
+    .where(and(eq(orders.id, orderId), lt(orders.refundedCents, refundedCents)))
+    .returning({ id: orders.id });
+  if (!changed.length) return false;
   await audit(db, {
     entity: 'order',
     entityId: orderId,
@@ -901,29 +936,61 @@ export async function applyRefund(orderId: string, refundedCents: number, actor:
 }
 
 /** Admin: Zahlung erstatten (Betrag in Cent, Standard: voll). Löst eine echte Erstattung aus. */
-export async function refundOrder(orderId: string, actor: string, amountCents?: number): Promise<void> {
+export async function refundOrder(orderId: string, actor: string, amountCents?: number): Promise<boolean> {
   const db = getDb();
-  const order = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
-  if (!order || order.status !== 'paid') throw new Error('Nur bezahlte Bestellungen können erstattet werden.');
-  const amount = Math.min(order.amountCents, amountCents ?? order.amountCents);
-  if (amount <= 0) throw new Error('Ungültiger Betrag');
-  const p = getProviders().payment;
-  if (p.name !== order.provider) throw new Error(`Bestellung wurde über ${order.provider} bezahlt, aktiv ist ${p.name}.`);
-  if (order.plan === 'monthly' && !order.stripePaymentIntent) {
-    // Erste Monatsrate: Erstattung über die Abo-Rechnung
-    if (!p.refundInvoice) throw new Error('Der Zahlungsanbieter unterstützt keine Erstattung von Abo-Rechnungen.');
-    if (!order.stripeInvoiceId) throw new Error('Keine Rechnungs-ID gespeichert – Erstattung bitte im Stripe-Dashboard.');
-    await p.refundInvoice(order.stripeInvoiceId, { idempotencyKey: `refund-${order.id}-${amount}`, amountCents: amount });
-  } else {
-    if (!p.refund) throw new Error('Der Zahlungsanbieter unterstützt keine Erstattung über die API.');
-    if (!order.stripePaymentIntent && p.name !== 'mock')
-      throw new Error('Keine Zahlungs-ID gespeichert – Erstattung bitte im Stripe-Dashboard.');
-    await p.refund(order.stripePaymentIntent ?? `pi_mock_${order.id}`, {
-      idempotencyKey: `refund-${order.id}-${amount}`,
+  const result = await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT id FROM orders WHERE id=${orderId} FOR UPDATE`);
+    const order = await tx.query.orders.findFirst({ where: eq(orders.id, orderId) });
+    if (!order || order.status !== 'paid') throw new Error('Nur bezahlte Bestellungen können erstattet werden.');
+    if (order.pendingRefundId) return { confirmed: false, target: order.refundedCents, id: order.pendingRefundId };
+    const remaining = order.amountCents - order.refundedCents;
+    const amount = amountCents ?? remaining;
+    if (!Number.isInteger(amount) || amount <= 0 || amount > remaining)
+      throw new Error('Ungültiger oder bereits erstatteter Betrag.');
+    const p = getProviders().payment;
+    if (p.name !== order.provider) throw new Error('Aktiver Zahlungsanbieter passt nicht zur Bestellung.');
+    const target = order.refundedCents + amount;
+    const opts = {
+      idempotencyKey: `refund-${order.id}-${order.refundedCents}-${amount}`,
       amountCents: amount,
+      metadata: { orderId: order.id, cumulativeTarget: String(target) },
+    };
+    let receipt;
+    if (order.plan === 'monthly' && !order.stripePaymentIntent) {
+      if (!p.refundInvoice || !order.stripeInvoiceId) throw new Error('Abo-Rechnung für Erstattung fehlt.');
+      receipt = await p.refundInvoice(order.stripeInvoiceId, opts);
+    } else {
+      if (!p.refund || (!order.stripePaymentIntent && p.name !== 'mock')) throw new Error('Zahlungs-ID für Erstattung fehlt.');
+      receipt = await p.refund(order.stripePaymentIntent ?? `pi_mock_${order.id}`, opts);
+    }
+    const status = receipt.status ?? 'pending';
+    await tx
+      .update(orders)
+      .set({ pendingRefundId: receipt.refundId, pendingRefundCents: amount, pendingRefundStatus: status, updatedAt: new Date() })
+      .where(eq(orders.id, order.id));
+    await audit(tx, {
+      entity: 'order',
+      entityId: order.id,
+      action: 'refund_requested',
+      actor,
+      context: { refundId: receipt.refundId, status, amountCents: amount },
     });
-  }
-  await applyRefund(order.id, order.refundedCents + amount, actor);
+    if (status !== 'succeeded')
+      await raiseAlert(tx, {
+        level: 'warn',
+        code: `refund_pending_${order.id}`,
+        message: 'Erstattung noch nicht bestätigt. Keine Erstattungsrechnung oder Erfolgsmeldung erzeugt.',
+        context: { orderId, refundId: receipt.refundId, status },
+      });
+    return { confirmed: status === 'succeeded', target, id: receipt.refundId };
+  });
+  if (!result.confirmed) return false;
+  await applyRefund(orderId, result.target, actor);
+  await db
+    .update(orders)
+    .set({ pendingRefundId: null, pendingRefundCents: 0, pendingRefundStatus: 'succeeded' })
+    .where(and(eq(orders.id, orderId), eq(orders.pendingRefundId, result.id)));
+  return true;
 }
 
 export class InvalidWebhookError extends Error {
@@ -1178,4 +1245,43 @@ export async function simulateMockPayment(
 
 interface PaymentProviderWithSign {
   sign(raw: string): string;
+}
+
+/** Lost or delayed refund webhooks: read provider evidence; never issue another refund. */
+export async function sweepRefunds() {
+  const db = getDb(),
+    provider = getProviders().payment;
+  if (!provider.refundState) return 0;
+  const pending = await db
+    .select()
+    .from(orders)
+    .where(and(eq(orders.provider, provider.name), sql`${orders.pendingRefundId} IS NOT NULL`));
+  let n = 0;
+  for (const order of pending) {
+    try {
+      const r = await provider.refundState(order.pendingRefundId!);
+      await applyPaymentEvent(
+        {
+          eventId: `reconcile:${r.id}:${r.status}`,
+          rawType: 'refund.updated',
+          type: 'refund.updated',
+          refundId: r.id,
+          refundStatus: r.status,
+          paymentIntentId: r.paymentIntentId,
+          amountTotal: r.amountCents,
+          metadata: { ...r.metadata, orderId: order.id },
+        },
+        'job:refund-reconcile',
+      );
+      n++;
+    } catch {
+      await raiseAlert(db, {
+        level: 'error',
+        code: `refund_reconcile_${order.id}`,
+        message: 'Erstattungsstatus konnte nicht verifiziert werden. Keine weitere Erstattung angelegt.',
+        context: { orderId: order.id },
+      });
+    }
+  }
+  return n;
 }

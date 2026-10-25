@@ -139,6 +139,7 @@ export const appConfigSchema = z.object({
     weeklyLeadFinder: z.boolean(),
   }),
   tax: z.object({
+    operatorConfirmed: z.boolean().default(false),
     kleinunternehmer: z.boolean(),
     vatRatePercent: z.number().min(0).max(100),
     /**
@@ -497,6 +498,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     weeklyLeadFinder: true,
   },
   tax: {
+    operatorConfirmed: false,
     kleinunternehmer: true,
     vatRatePercent: 19,
     pricesAreGross: false,

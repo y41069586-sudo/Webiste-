@@ -178,7 +178,21 @@ describe('Stripe', () => {
   });
 
   it('Webhook: Erstattung', async () => {
-    const p = new StripePayment({ secretKey: 'sk_test_abc', webhookSecret: 'whsec_test_secret' });
+    const http = fakeFetch(() => ({
+      json: {
+        object: 'list',
+        data: [
+          { id: 're_confirmed', status: 'succeeded', amount: 59000 },
+          { id: 're_pending', status: 'pending', amount: 1000 },
+        ],
+        has_more: false,
+      },
+    }));
+    const p = new StripePayment({
+      secretKey: 'sk_test_abc',
+      webhookSecret: 'whsec_test_secret',
+      httpClient: Stripe.createFetchHttpClient(http.fn),
+    });
     const payload = JSON.stringify({
       id: 'evt_2',
       object: 'event',

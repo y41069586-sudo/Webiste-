@@ -125,6 +125,7 @@ export interface QaResult {
   passed: boolean;
   checkedAt: string;
   checks: { name: string; passed: boolean; details?: string; score?: number }[];
+  review?: { facts: boolean; desktop: boolean; mobile: boolean; images: boolean; text: boolean; actor: string; at: string };
 }
 
 export const demos = pgTable(
@@ -296,6 +297,9 @@ export const orders = pgTable(
     invoiceJson: jsonb('invoice_json').$type<Record<string, unknown> | null>(),
     invoiceSentAt: ts('invoice_sent_at'),
     refundedCents: integer('refunded_cents').default(0).notNull(),
+    pendingRefundId: text('pending_refund_id'),
+    pendingRefundCents: integer('pending_refund_cents').default(0).notNull(),
+    pendingRefundStatus: text('pending_refund_status'),
     refundedAt: ts('refunded_at'),
     cancellationNumber: text('cancellation_number'),
     cancellationPdfKey: text('cancellation_pdf_key'),
@@ -620,7 +624,7 @@ export const careWork = pgTable(
     createdAt: createdAt(),
   },
   (t) => [uniqueIndex('care_work_idem_uidx').on(t.idempotencyKey), index('care_work_period_idx').on(t.customerId, t.periodStart)],
-);
+).enableRLS();
 
 export const careChecks = pgTable(
   'care_checks',
@@ -640,7 +644,7 @@ export const careChecks = pgTable(
     createdAt: createdAt(),
   },
   (t) => [uniqueIndex('care_checks_month_uidx').on(t.customerId, t.month)],
-);
+).enableRLS();
 
 export const tariffChanges = pgTable(
   'tariff_changes',
@@ -665,7 +669,7 @@ export const tariffChanges = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index('tariff_changes_order_idx').on(t.orderId)],
-);
+).enableRLS();
 
 // ---------------------------------------------------------------------------
 // Einstellungen, Audit, Admin

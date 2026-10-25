@@ -39,7 +39,14 @@ export async function guaranteeStatus(order: typeof orders.$inferSelect, now = n
   const endsAt = order.guaranteeEndsAt;
   if (!cfg.guarantee.enabled) return { available: false, reason: 'Garantie ist in den Einstellungen ausgeschaltet.', endsAt };
   if (order.status !== 'paid') return { available: false, reason: 'Nur für bezahlte Bestellungen.', endsAt };
-  if (!endsAt) return { available: false, reason: 'Bestellung ohne Garantiefrist (vor Einführung bezahlt).', endsAt };
+  if (!endsAt)
+    return {
+      available: false,
+      reason: order.offerSnapshot
+        ? 'Garantiefrist beginnt mit bestätigtem Go-Live.'
+        : 'Bestellung ohne Garantiefrist (vor Einführung bezahlt).',
+      endsAt,
+    };
   if (endsAt < now) return { available: false, reason: 'Garantiefrist abgelaufen.', endsAt };
   return { available: true, endsAt };
 }
@@ -78,7 +85,7 @@ export async function guaranteeRefund(orderId: string, actor: string): Promise<{
 
   // 2) Erstattung (Option A: voller Betrag; Option B: erste Rate) – Stornorechnung folgt automatisch
   const refundable = order.amountCents - order.refundedCents;
-  if (refundable > 0) await refundOrder(order.id, actor, refundable);
+  const refundConfirmed = refundable <= 0 || (await refundOrder(order.id, actor, refundable));
 
   // 3) Seite offline (falls schon gebaut bzw. veröffentlicht)
   if (customer?.siteId) {
@@ -112,13 +119,20 @@ export async function guaranteeRefund(orderId: string, actor: string): Promise<{
   }
   // 5) Kunde informieren
   try {
-    const mail = guaranteeRefundEmail(cfg, {
+    const confirmedMail = guaranteeRefundEmail(cfg, {
       name: order.customerName,
       amount: formatEuro(refundable),
       monthly: order.plan === 'monthly',
       domainRegistered: registered,
       domainExpires: customer?.domainExpiresAt ? formatDateLongDe(customer.domainExpiresAt) : null,
     });
+    const mail = refundConfirmed
+      ? confirmedMail
+      : {
+          html: '<p>Ihre Garantie wurde erfasst. Die Erstattung ist angefragt und noch nicht bestätigt. Bei Rückfragen schreiben Sie uns.</p>',
+          subject: 'Ihre Garantie-Erstattung wird geprüft',
+          text: `Ihre Garantie wurde erfasst und das Abo beendet. Die Erstattung von ${formatEuro(refundable)} wurde angefragt und ist noch nicht bestätigt. Bei Rückfragen schreiben Sie uns.`,
+        };
     await sendTransactionalEmail({
       ...mail,
       kind: 'refund',
@@ -142,11 +156,11 @@ export async function guaranteeRefund(orderId: string, actor: string): Promise<{
     key: `guarantee:${order.id}`,
     title: `Garantie ausgeführt: ${order.customerCompany}`,
     lines: [
-      `Erstattet: ${formatEuro(refundable)}`,
+      `Erstattung ${refundConfirmed ? 'bestätigt' : 'ausstehend'}: ${formatEuro(refundable)}`,
       order.plan === 'monthly' ? 'Monatsvertrag beendet.' : 'Einmalzahlung erstattet.',
       registered ? `Offen: Domain ${registered} übertragen oder kündigen.` : 'Keine Domain registriert.',
     ],
     link: appUrl(`/admin/orders/${order.id}`),
   });
-  return { refundedCents: refundable };
+  return { refundedCents: refundConfirmed ? refundable : 0 };
 }

@@ -352,6 +352,7 @@ export type PaymentEventType =
   | 'charge.refunded'
   | 'invoice.paid'
   | 'invoice.payment_failed'
+  | 'refund.updated'
   | 'subscription.updated'
   | 'subscription.deleted'
   | 'other';
@@ -384,6 +385,8 @@ export interface PaymentEvent {
   amountTotal?: number;
   /** charge.refunded: bisher erstatteter Betrag */
   amountRefunded?: number;
+  refundId?: string;
+  refundStatus?: string;
   /** Checkout im Abo-Modus bzw. Abo-Events */
   mode?: 'payment' | 'subscription';
   subscriptionId?: string;
@@ -470,7 +473,13 @@ export interface PaymentProvider {
   expireSession?(sessionId: string): Promise<void>;
   /** Webhook verifizieren und normalisieren. Wirft bei ungültiger Signatur. */
   parseWebhook(rawBody: string, signatureHeader: string | null): Promise<PaymentEvent>;
-  refund?(paymentIntentId: string, opts: { idempotencyKey: string; amountCents?: number }): Promise<{ refundId: string }>;
+  refund?(
+    paymentIntentId: string,
+    opts: { idempotencyKey: string; amountCents?: number; metadata?: Record<string, string> },
+  ): Promise<{ refundId: string; status?: string }>;
+  refundState?(
+    id: string,
+  ): Promise<{ id: string; status: string; amountCents: number; paymentIntentId?: string; metadata: Record<string, string> }>;
   /**
    * Plan „monthly“: Zeitplan an das Abo hängen – bis `minTermEndsAt` der bisherige Preis, danach
    * `afterTermCents` pro Monat (monatlich kündbar). Idempotent: vorhandener Zeitplan wird wiederverwendet.
@@ -482,7 +491,10 @@ export interface PaymentProvider {
   /** Abo sofort beenden (Garantie, Zahlungsausfall) – ohne anteilige Gutschrift */
   cancelSubscription?(subscriptionId: string, opts: { idempotencyKey: string }): Promise<void>;
   /** Zahlung einer Abo-Rechnung erstatten (z. B. erste Rate bei Garantie) */
-  refundInvoice?(invoiceId: string, opts: { idempotencyKey: string; amountCents?: number }): Promise<{ refundId: string }>;
+  refundInvoice?(
+    invoiceId: string,
+    opts: { idempotencyKey: string; amountCents?: number; metadata?: Record<string, string> },
+  ): Promise<{ refundId: string; status?: string }>;
 }
 
 export interface SubscriptionState {

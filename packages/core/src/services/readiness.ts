@@ -14,6 +14,8 @@ export function goLiveBlockers(cfg: AppConfig): GoLiveBlocker[] {
   const s = cfg.sender;
   const d = DEFAULT_CONFIG.sender;
   const out: GoLiveBlocker[] = [];
+  if (!cfg.tax.operatorConfirmed)
+    out.push({ key: 'tax.operatorConfirmed', label: 'Steuerstatus und Preis-/Rechnungsangaben vom Betreiber bestätigt' });
   const placeholder = (v: string, def: string) =>
     !v.trim() || v.trim() === def || /platzhalter|example\.(com|de)|muster/i.test(v);
   if (placeholder(s.name, d.name)) out.push({ key: 'sender.name', label: 'Absender: Name' });

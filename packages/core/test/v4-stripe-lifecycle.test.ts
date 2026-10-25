@@ -70,7 +70,8 @@ describe('V4 Stripe SDK: gespeichertes Mandat und ein einziger Tarif', () => {
     expect(create.body.get('items[0][price]')).toBe(basis);
     expect(create.body.has('items[1][price]')).toBe(false);
     expect(create.body.get('default_payment_method')).toBe('pm_fixture');
-    expect(create.body.get('payment_behavior')).toBe('default_incomplete');
+    expect(create.body.get('payment_behavior')).toBe('allow_incomplete');
+    expect(create.body.get('off_session')).toBe('true');
     expect(create.body.has('backdate_start_date')).toBe(false);
     expect(create.body.has('trial_end')).toBe(false);
     expect(create.key).toBe(input.idempotencyKey);

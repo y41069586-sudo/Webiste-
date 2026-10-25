@@ -17,6 +17,7 @@ export async function resetDb(): Promise<void> {
 
 /** Vollständige Betreiberdaten (sonst sperrt die Livegang-Prüfung echte Briefe und den Live-Checkout). */
 export const OPERATOR_TEST_CONFIG = {
+  tax: { operatorConfirmed: true },
   sender: {
     name: 'Erika Betreiberin',
     company: 'Betreiberin Websites',

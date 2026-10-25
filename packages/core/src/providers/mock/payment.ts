@@ -137,13 +137,13 @@ export class MockPayment implements PaymentProvider {
     await this.saveMock(sub);
   }
 
-  async refundInvoice(invoiceId: string, opts: { idempotencyKey: string }): Promise<{ refundId: string }> {
+  async refundInvoice(invoiceId: string, opts: { idempotencyKey: string }): Promise<{ refundId: string; status: string }> {
     void invoiceId;
-    return { refundId: `re_mock_${opts.idempotencyKey}` };
+    return { refundId: `re_mock_${opts.idempotencyKey}`, status: 'succeeded' };
   }
 
-  async refund(paymentIntentId: string, opts: { idempotencyKey: string }): Promise<{ refundId: string }> {
+  async refund(paymentIntentId: string, opts: { idempotencyKey: string }): Promise<{ refundId: string; status: string }> {
     void paymentIntentId;
-    return { refundId: `re_mock_${opts.idempotencyKey}` };
+    return { refundId: `re_mock_${opts.idempotencyKey}`, status: 'succeeded' };
   }
 }

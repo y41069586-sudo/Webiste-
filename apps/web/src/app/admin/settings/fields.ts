@@ -78,6 +78,12 @@ export const SECTIONS: SectionDef[] = [
       { path: 'pricing.subscriptionStartMonth', label: '„Hosting & Pflege“: ab Monat', type: 'number' },
       { path: 'guarantee.enabled', label: 'Zufriedenheitsgarantie aktiv', type: 'bool' },
       { path: 'guarantee.days', label: 'Garantie (Tage)', type: 'number' },
+      {
+        path: 'tax.operatorConfirmed',
+        label: 'Steuerstatus, Umsatzsteuer und Rechnungsangaben tatsächlich geklärt',
+        type: 'bool',
+        hint: 'Nur nach tatsächlicher Klärung bestätigen. Kein rechtliches Prüfsiegel; bis dahin sind echte Zahlungen und Briefe gesperrt.',
+      },
       { path: 'tax.kleinunternehmer', label: 'Kleinunternehmer (§ 19 UStG)', type: 'bool' },
       { path: 'tax.vatRatePercent', label: 'USt-Satz (%) falls nicht Kleinunternehmer', type: 'number' },
       {

@@ -23,6 +23,8 @@ const EVENT_TYPES: Record<string, PaymentEventType> = {
   'checkout.session.async_payment_failed': 'checkout.async_failed',
   'checkout.session.expired': 'checkout.expired',
   'charge.refunded': 'charge.refunded',
+  'refund.updated': 'refund.updated',
+  'refund.failed': 'refund.updated',
   'invoice.paid': 'invoice.paid',
   'invoice.payment_failed': 'invoice.payment_failed',
   'customer.subscription.updated': 'subscription.updated',
@@ -183,6 +185,7 @@ export class StripePayment implements PaymentProvider {
 
   async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSession> {
     const v4 = isV4Tier(input.metadata.plan ?? '');
+    const savedMandate = v4 && input.metadata.billingMode !== 'manual_checkout';
     if (v4 && input.recurring) throw new Error('V4-Einrichtung darf noch kein Monatsabo starten.');
     const setupPrice = v4 ? stripeV4Price('setup', this.testMode, input.amountCents, input.currency) : null;
     const minutes = Math.min(24 * 60, Math.max(30, input.expiresInMinutes ?? 60));
@@ -251,7 +254,7 @@ export class StripePayment implements PaymentProvider {
       ],
       metadata: input.metadata,
       payment_intent_data: { description: input.productName, metadata: input.metadata },
-      ...(v4
+      ...(savedMandate
         ? {
             customer_creation: 'always',
             payment_intent_data: { description: input.productName, metadata: input.metadata, setup_future_usage: 'off_session' },
@@ -269,7 +272,7 @@ export class StripePayment implements PaymentProvider {
             custom_text: {
               submit: {
                 message:
-                  `${v4CheckoutTerms(input.metadata.plan as V4Tier)}${input.collect ? ` AGB: ${input.collect.termsUrl}` : ''}`.slice(
+                  `${v4CheckoutTerms(input.metadata.plan as V4Tier, input.metadata.billingMode === 'manual_checkout' ? 'manual_checkout' : 'saved_mandate')}${input.collect ? ` AGB: ${input.collect.termsUrl}` : ''}`.slice(
                     0,
                     1200,
                   ),
@@ -404,7 +407,8 @@ export class StripePayment implements PaymentProvider {
         customer,
         default_payment_method: method.id,
         items: [{ price }],
-        payment_behavior: 'default_incomplete',
+        payment_behavior: 'allow_incomplete',
+        off_session: true,
         payment_settings: { save_default_payment_method: 'on_subscription' },
         metadata: {
           kind: 'subscription',
@@ -521,7 +525,7 @@ export class StripePayment implements PaymentProvider {
         ...base,
         subscriptionId: sub.id,
         subscriptionStatus: sub.status,
-        subscriptionPriceId: sub.items.data[0]?.price.id,
+        subscriptionPriceId: sub.items?.data?.[0]?.price?.id,
         cancelAtPeriodEnd: sub.cancel_at_period_end,
         metadata: metadataOf(sub.metadata),
         mode: 'subscription',
@@ -549,13 +553,28 @@ export class StripePayment implements PaymentProvider {
         nextPaymentAttempt: inv.next_payment_attempt ? new Date(inv.next_payment_attempt * 1000) : null,
       };
     }
+    if (event.type === 'refund.updated' || event.type === 'refund.failed') {
+      const r = event.data.object as Stripe.Refund;
+      return {
+        ...base,
+        refundId: r.id,
+        refundStatus: r.status ?? 'pending',
+        paymentIntentId: idOf(r.payment_intent),
+        amountTotal: r.amount,
+        currency: r.currency,
+        metadata: metadataOf(r.metadata),
+      };
+    }
     if (event.type === 'charge.refunded') {
       const c = event.data.object as Stripe.Charge;
+      let confirmed = 0;
+      for await (const refund of this.stripe.refunds.list({ charge: c.id, limit: 100 }))
+        if (refund.status === 'succeeded') confirmed += refund.amount;
       return {
         ...base,
         paymentIntentId: idOf(c.payment_intent),
         amountTotal: c.amount,
-        amountRefunded: c.amount_refunded,
+        amountRefunded: confirmed,
         currency: c.currency,
         metadata: metadataOf(c.metadata),
       };
@@ -563,16 +582,31 @@ export class StripePayment implements PaymentProvider {
     return base;
   }
 
-  async refund(paymentIntentId: string, opts: { idempotencyKey: string; amountCents?: number }): Promise<{ refundId: string }> {
+  async refund(
+    paymentIntentId: string,
+    opts: { idempotencyKey: string; amountCents?: number; metadata?: Record<string, string> },
+  ): Promise<{ refundId: string; status?: string }> {
     const r = await this.stripe.refunds.create(
       {
         payment_intent: paymentIntentId,
         ...(opts.amountCents ? { amount: opts.amountCents } : {}),
         reason: 'requested_by_customer',
+        ...(opts.metadata ? { metadata: opts.metadata } : {}),
       },
       { idempotencyKey: opts.idempotencyKey },
     );
-    return { refundId: r.id };
+    return { refundId: r.id, status: r.status ?? 'pending' };
+  }
+
+  async refundState(id: string) {
+    const r = await this.stripe.refunds.retrieve(id);
+    return {
+      id: r.id,
+      status: r.status ?? 'pending',
+      amountCents: r.amount,
+      paymentIntentId: idOf(r.payment_intent),
+      metadata: metadataOf(r.metadata),
+    };
   }
 
   async scheduleStepDown(
@@ -653,7 +687,10 @@ export class StripePayment implements PaymentProvider {
     }
   }
 
-  async refundInvoice(invoiceId: string, opts: { idempotencyKey: string; amountCents?: number }): Promise<{ refundId: string }> {
+  async refundInvoice(
+    invoiceId: string,
+    opts: { idempotencyKey: string; amountCents?: number; metadata?: Record<string, string> },
+  ): Promise<{ refundId: string; status?: string }> {
     const inv = await this.stripe.invoices.retrieve(invoiceId, { expand: ['payments'] });
     const payment = inv.payments?.data.find((p) => p.status === 'paid') ?? inv.payments?.data[0];
     const pi = payment ? idOf(payment.payment.payment_intent) : undefined;
@@ -664,10 +701,11 @@ export class StripePayment implements PaymentProvider {
         ...(pi ? { payment_intent: pi } : { charge }),
         ...(opts.amountCents ? { amount: opts.amountCents } : {}),
         reason: 'requested_by_customer',
+        ...(opts.metadata ? { metadata: opts.metadata } : {}),
       },
       { idempotencyKey: opts.idempotencyKey },
     );
-    return { refundId: r.id };
+    return { refundId: r.id, status: r.status ?? 'pending' };
   }
 
   /** Nur für Tests: gültigen Signatur-Header erzeugen. */

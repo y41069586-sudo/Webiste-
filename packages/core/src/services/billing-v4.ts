@@ -28,6 +28,7 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
     });
     if (!customer || !order.stripeSessionId) throw new Error('Einrichtungszahlung/Kunde fehlt.');
     const provider = getProviders().payment;
+    if (provider.name !== order.provider) throw new Error('Zahlungsanbieter passt nicht zur bezahlten Bestellung.');
     if (!provider.startSavedSubscription) throw new Error('Anbieter unterstützt keinen Mandatsstart.');
     const sub = await provider.startSavedSubscription({
       orderId,

@@ -32,7 +32,7 @@ export function v4Offer(
     minTermMonths: 0,
     billingStart: 'confirmed_go_live',
     includedChangeMinutes: tier === 'care_plus' ? 60 : 0,
-    consentVersion: 'v4-2026-10-25',
+    consentVersion: billingMode === 'saved_mandate' ? 'v4-mandate-2026-10-25' : 'v4-2026-10-25',
     consentAt,
     billingMode,
   };
@@ -45,9 +45,9 @@ export function v4PriceText(): string {
   return '597 € einmalig + wahlweise 19 €/Monat (Basis) oder insgesamt 99 €/Monat (Care+) ab Go-Live. Monatlich kündbar.';
 }
 /** Exact selected contract, also visible when both tiers share the same one-time Stripe price. */
-export function v4CheckoutTerms(tier: V4Tier): string {
+export function v4CheckoutTerms(tier: V4Tier, billingMode: V4OfferSnapshot['billingMode'] = 'saved_mandate'): string {
   const offer = v4Offer(tier);
-  return `Sie wählen SeitenWerk ${tier === 'basis' ? 'Basis' : 'Care+'}: jetzt ${formatEuroShort(offer.setupCents)} einmalig für die Einrichtung. Danach insgesamt ${formatEuroShort(offer.monthlyCents)}/Monat, ab dem bestätigten Go-Live. Mit dem Kauf stimmen Sie dem wiederkehrenden Einzug über das bei Stripe gespeicherte Zahlungsmittel ausdrücklich zu. Monatlich kündbar, keine zwölfmonatige Mindestbindung und keine zusätzliche Basisgebühr.`;
+  return `Sie wählen SeitenWerk ${tier === 'basis' ? 'Basis' : 'Care+'}: jetzt ${formatEuroShort(offer.setupCents)} einmalig für die Einrichtung. Danach insgesamt ${formatEuroShort(offer.monthlyCents)}/Monat, ab dem bestätigten Go-Live. ${billingMode === 'saved_mandate' ? 'Mit dem Kauf stimmen Sie dem wiederkehrenden Einzug über das bei Stripe gespeicherte Zahlungsmittel ausdrücklich zu.' : 'Der Monatstarif wird nach Go-Live in einem gesonderten Abo-Checkout bestätigt.'} Monatlich kündbar, keine zwölfmonatige Mindestbindung und keine zusätzliche Basisgebühr.`;
 }
 /** No session/mandate/Go-Live inference: missing evidence always blocks monthly billing. */
 export function assertV4BillingReady(input: {
