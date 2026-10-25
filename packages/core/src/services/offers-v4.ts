@@ -1,3 +1,5 @@
+import { formatEuroShort } from '../util/time';
+
 /** Versioned new-customer offer. Legacy pricing remains in cfg.pricing unchanged. */
 export const V4_TIERS = ['basis', 'care_plus'] as const;
 export type V4Tier = (typeof V4_TIERS)[number];
@@ -35,6 +37,11 @@ export function v4FirstYearCents(tier: V4Tier): number {
 }
 export function v4PriceText(): string {
   return '597 € einmalig + wahlweise 19 €/Monat (Basis) oder insgesamt 99 €/Monat (Care+) ab Go-Live. Monatlich kündbar.';
+}
+/** Exact selected contract, also visible when both tiers share the same one-time Stripe price. */
+export function v4CheckoutTerms(tier: V4Tier): string {
+  const offer = v4Offer(tier);
+  return `Sie wählen SeitenWerk ${tier === 'basis' ? 'Basis' : 'Care+'}: jetzt ${formatEuroShort(offer.setupCents)} einmalig für die Einrichtung. Danach insgesamt ${formatEuroShort(offer.monthlyCents)}/Monat, erst nach bestätigtem Go-Live und gesondertem Aboabschluss. Monatlich kündbar, keine zwölfmonatige Mindestbindung und keine zusätzliche Basisgebühr.`;
 }
 /** No session/mandate/Go-Live inference: missing evidence always blocks monthly billing. */
 export function assertV4BillingReady(input: {

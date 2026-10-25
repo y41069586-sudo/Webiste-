@@ -1,4 +1,4 @@
-import { isV4Tier, v4Offer, v4PriceText } from './offers-v4';
+import { isV4Tier, v4Offer, v4PriceText, v4CheckoutTerms } from './offers-v4';
 import { and, desc, eq, gt, inArray, isNull, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { appUrl, getEnv } from '../config/env';
@@ -394,11 +394,7 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
     const g = cfg.guarantee;
     const note = [
       isV4Tier(plan)
-        ? v4PriceText() +
-          ' Sie stimmen dem gewählten monatlichen Betrieb ausdrücklich zu; der separate Aboabschluss erfolgt erst nach Go-Live.'
-        : '',
-      isV4Tier(plan)
-        ? v4PriceText()
+        ? v4CheckoutTerms(plan)
         : plan === 'monthly'
           ? `${formatEuro(p.monthlyCents)} pro Monat, erste Rate sofort. Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
           : `Einmalig ${formatEuro(p.packageCents)} inklusive Domain und ${p.hostingMonthsIncluded} Monaten Hosting.`,

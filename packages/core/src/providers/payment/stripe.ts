@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import { createHash } from 'node:crypto';
 import { stripeV4Price } from '../../config/stripe-v4-prices';
-import { isV4Tier } from '../../services/offers-v4';
+import { isV4Tier, v4Offer, v4CheckoutTerms, type V4Tier } from '../../services/offers-v4';
 import { CHECKOUT_FIELDS } from '../types';
 import type {
   CheckoutSession,
@@ -89,6 +89,7 @@ export interface StripePaymentConfig {
 function collectionParams(input: CheckoutSessionInput): Partial<Stripe.Checkout.SessionCreateParams> {
   const c = input.collect;
   if (!c) return {};
+  const tier = isV4Tier(input.metadata.plan ?? '') ? (input.metadata.plan as V4Tier) : null;
   return {
     billing_address_collection: 'required',
     name_collection: { business: { enabled: true, optional: false }, individual: { enabled: true, optional: false } },
@@ -111,7 +112,9 @@ function collectionParams(input: CheckoutSessionInput): Partial<Stripe.Checkout.
         label: {
           type: 'custom',
           custom: c.recurringTerms
-            ? 'AGB und gewählter Monatstarif ab Go-Live'
+            ? tier
+              ? `AGB und ${tier === 'basis' ? 'Basis' : 'Care+'}: ${v4Offer(tier).monthlyCents / 100} €/Monat ab Go-Live`
+              : 'AGB und gewählter Monatstarif ab Go-Live'
             : `AGB (Stand ${c.termsVersion}) gelesen und akzeptiert`.slice(0, 100),
         },
         type: 'dropdown',
@@ -254,6 +257,19 @@ export class StripePayment implements PaymentProvider {
         submit: { message: 'Die Rechnung kommt per E-Mail. Danach geht es direkt mit Ihren Angaben für die Website weiter.' },
       },
       ...collectionParams(input),
+      ...(v4
+        ? {
+            custom_text: {
+              submit: {
+                message:
+                  `${v4CheckoutTerms(input.metadata.plan as V4Tier)}${input.collect ? ` AGB: ${input.collect.termsUrl}` : ''}`.slice(
+                    0,
+                    1200,
+                  ),
+              },
+            },
+          }
+        : {}),
     };
     const session = await this.stripe.checkout.sessions.create(params, { idempotencyKey: input.idempotencyKey });
     if (!session.url) throw new Error('Stripe hat keine Checkout-URL geliefert');

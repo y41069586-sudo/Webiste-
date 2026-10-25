@@ -70,18 +70,16 @@ async function live(customerId: string) {
       .update(sites)
       .set({ status: 'live', liveAt: new Date(Date.now() - 1000) })
       .where(eq(sites.id, existing.id));
-  return db
-    .insert(sites)
-    .values({
-      customerId,
-      templateId: 'handwerk-solid',
-      palette: 'werkblau',
-      contentJson: {},
-      formKey: randomToken(24),
-      formTargetEmail: 'fixture@example.test',
-      status: 'live',
-      liveAt: new Date(Date.now() - 1000),
-    });
+  return db.insert(sites).values({
+    customerId,
+    templateId: 'handwerk-solid',
+    palette: 'werkblau',
+    contentJson: {},
+    formKey: randomToken(24),
+    formTargetEmail: 'fixture@example.test',
+    status: 'live',
+    liveAt: new Date(Date.now() - 1000),
+  });
 }
 async function webhook(event: Record<string, unknown>) {
   const raw = JSON.stringify(event);
@@ -195,12 +193,23 @@ describe('Stripe V4: echter SDK, ausschließlich aufgezeichnete Fake-HTTP-Aufruf
       cancelUrl: 'https://example.test/cancel',
       metadata: { plan: 'basis' },
       idempotencyKey: 'fixture-v4-setup',
+      collect: {
+        termsUrl: 'https://example.test/agb',
+        termsVersion: 'v4',
+        submitNote: 'Both tiers share an initial price',
+        recurringTerms: true,
+      },
     });
     const p = captured.at(-1)!;
     expect(p.get('mode')).toBe('payment');
     expect(p.get('line_items[0][price]')).toBe('price_1UULWxGn2A630LhHdvSaUslJ');
     expect(p.get('integration_identifier')).toMatch(/^seitenwerk_v4_[a-z]{8}$/);
     expect(p.has('subscription_data')).toBe(false);
+    expect(p.get('custom_text[submit][message]')).toContain('SeitenWerk Basis');
+    expect(p.get('custom_text[submit][message]')).toContain('19');
+    expect(p.get('custom_text[submit][message]')).not.toContain('99');
+    expect(p.get('custom_fields[2][label][custom]')).toMatch(/Basis.*19/);
+    expect(p.has('custom_fields[3][key]')).toBe(false);
   });
   it.each([
     ['basis', 1900, 'price_1UULX3Gn2A630LhHDA6Or60k'],
