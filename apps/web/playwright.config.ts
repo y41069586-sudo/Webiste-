@@ -64,7 +64,7 @@ export default defineConfig({
       url: `${BASE}/api/health`,
       reuseExistingServer: false,
       timeout: 180_000,
-      env: production ? { ...e2eEnv, NODE_ENV: 'production', ALLOW_MOCK_PAYMENT: 'true' } : e2eEnv,
+      env: production ? { ...e2eEnv, NODE_ENV: 'production', ALLOW_MOCK_PAYMENT: 'true', ALLOW_MOCK_HOSTING: 'true' } : e2eEnv,
       stdout: 'ignore',
       stderr: 'pipe',
     },

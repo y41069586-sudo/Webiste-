@@ -19,12 +19,12 @@ sind **nicht produktiv angewandt**. `DRY_RUN=true`; kein VPS bestellt, kein Depl
 
 ## Zielbetrieb und Konfiguration
 
-| Bestandteil | Aufgabe | Vorbereitung / Grenze |
-| --- | --- | --- |
-| Statisches Netlify-Projekt | Firmenwebsite | Export einfrieren; keine API/Webhooks dort; Codeänderung ist kein veröffentlichter Stand |
-| Dynamisches Netlify-Projekt | Admin, Demos, Checkout, Webhooks, Kundenformulare | bestehende Next.js-Anwendung, serverseitiger DB-/S3-Zugriff |
-| Supabase | dieselbe vorhandene PostgreSQL-DB und privater S3-Speicher | keine neue Produktionsdatenbank; additive Migrationen 0011–0016 erst separat freigeben |
-| Späterer kleiner VPS | bestehender Node-/pg-boss-/Chromium-Worker | `docker-compose.worker.yml`; kein Postgres/Caddy/Webservice darin |
+| Bestandteil                 | Aufgabe                                                    | Vorbereitung / Grenze                                                                    |
+| --------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Statisches Netlify-Projekt  | Firmenwebsite                                              | Export einfrieren; keine API/Webhooks dort; Codeänderung ist kein veröffentlichter Stand |
+| Dynamisches Netlify-Projekt | Admin, Demos, Checkout, Webhooks, Kundenformulare          | bestehende Next.js-Anwendung, serverseitiger DB-/S3-Zugriff                              |
+| Supabase                    | dieselbe vorhandene PostgreSQL-DB und privater S3-Speicher | keine neue Produktionsdatenbank; additive Migrationen 0011–0017 erst separat freigeben   |
+| Späterer kleiner VPS        | bestehender Node-/pg-boss-/Chromium-Worker                 | `docker-compose.worker.yml`; kein Postgres/Caddy/Webservice darin                        |
 
 `docker-compose.yml` bleibt für den lokalen Gesamtstack erhalten. Für den späteren VPS ausschließlich
 `docker compose -f docker-compose.worker.yml …` verwenden. `.env.worker.example` enthält keine Secrets.
@@ -75,29 +75,29 @@ Diese Werte in **Web und Worker** identisch setzen. Sie sind Vorschläge, hier n
 gespeichert. In Netlify müssen Laufzeitwerte Functions/Builds abdecken; Änderungen benötigen einen
 gesondert freigegebenen Build/Deploy. Keine lokale Secretdatei hochladen.
 
-| Route | Verantwortliches System |
-| --- | --- |
-| seitenwerk.world / Preise / Kontakt / Recht | statischer Firmenexport |
-| `/d/{slug}`, `/q/{token}`, `/t/{short}` | dynamische App; Demo noindex, Opt-out und Tracking-Gates |
-| `/d/{slug}/uebernehmen`, `/checkout/…`, `/onboarding/…`, `/preview/…`, `/verlaengern/…` | dynamische App |
-| `/api/webhooks/stripe`, `/api/webhooks/resend`, `/api/forms/…` | dynamische App, Signatur/Rate-Limits/Zuordnung |
-| Kunden-Domain | vorhandener Hosting-/Registrar-Provider, erst nach separater Freigabe |
+| Route                                                                                   | Verantwortliches System                                               |
+| --------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| seitenwerk.world / Preise / Kontakt / Recht                                             | statischer Firmenexport                                               |
+| `/d/{slug}`, `/q/{token}`, `/t/{short}`                                                 | dynamische App; Demo noindex, Opt-out und Tracking-Gates              |
+| `/d/{slug}/uebernehmen`, `/checkout/…`, `/onboarding/…`, `/preview/…`, `/verlaengern/…` | dynamische App                                                        |
+| `/api/webhooks/stripe`, `/api/webhooks/resend`, `/api/forms/…`                          | dynamische App, Signatur/Rate-Limits/Zuordnung                        |
+| Kunden-Domain                                                                           | vorhandener Hosting-/Registrar-Provider, erst nach separater Freigabe |
 
 Eigene Subdomains app/demo/track sind optional, kein Hindernis für die interne Abnahme. Keine
 Weiterleitung der gesamten statischen Website auf die App und kein SPA-Catch-all über Webhooks legen.
 
 ## Provider-Matrix
 
-| Anbieter | Tatsächlicher Stand | Offener externer Nachweis / Zugang |
-| --- | --- | --- |
-| Anthropic | vorhandener Adapter, strukturierte Inhalte, Budget-/Fehler-/Fallbacktests | Laufzeit-Key/Modellzugang; echter Aufruf kostet Geld und wurde nicht ausgelöst |
-| OpenStreetMap | vorhandener Overpass-Adapter, Qualifizierung, Quellen-/Website-/Dublettenfilter | aktuelle Abfrage/Ratenlimit und manuelle Betriebs-/Websiteprüfung; keine Ratings behaupten |
-| LetterXpress | vorhandener Adapter, Testmodus und Freigaben; echte lokale PDFs/QR | Konto/API/Guthaben, Provider-Testkorb und später separat freigegebener eigener Druckbrief |
-| Stripe | bestehender Checkout, versionierte V4-Preise, Mandat/Go-Live/Abos; reale API-Sandbox für beide Tarife | vollständiger Hosted-Checkout/SEPA/Webhook-/Periodenwechsel; keine Live-Freigabe |
-| Resend | vorhandener Ausgang, signierter Eingang, manuelle Support-Ingestion, Schutz vor fremden Mailanweisungen | sichere Runtime-Secretbindung und echter Nachrichtenfluss; keine Mail gesendet |
-| Supabase Storage | privater Bucket extern bestätigt, vorhandener S3-Adapter und lokale Sicherungs-/Restoretests | S3-Access-/Secret-Key in Web/Worker; privater Put/Get/Head/Delete und vollständige Upload-/PDF-Kette separat abnehmen |
-| INWX | vorhandene Sandbox-/Kosten-/Registrierungsfreigaben und Adaptertests | Zugang und Registrar-Sandbox-Abnahme; keine Bestellung/Domainregistrierung |
-| Netlify / Cloudflare | vorhandene alternative Kundenhosting-Adapter; Mock-Ausgabe lokal geprüft | gewählten Adapter mit Tokens, Domain/TLS/Deployment abnehmen; keine Kundenwebsite veröffentlicht |
+| Anbieter             | Tatsächlicher Stand                                                                                     | Offener externer Nachweis / Zugang                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Anthropic            | vorhandener Adapter, strukturierte Inhalte, Budget-/Fehler-/Fallbacktests                               | Laufzeit-Key/Modellzugang; echter Aufruf kostet Geld und wurde nicht ausgelöst                                        |
+| OpenStreetMap        | vorhandener Overpass-Adapter, Qualifizierung, Quellen-/Website-/Dublettenfilter                         | aktuelle Abfrage/Ratenlimit und manuelle Betriebs-/Websiteprüfung; keine Ratings behaupten                            |
+| LetterXpress         | vorhandener Adapter, Testmodus und Freigaben; echte lokale PDFs/QR                                      | Konto/API/Guthaben, Provider-Testkorb und später separat freigegebener eigener Druckbrief                             |
+| Stripe               | bestehender Checkout, versionierte V4-Preise, Mandat/Go-Live/Abos; reale API-Sandbox für beide Tarife   | vollständiger Hosted-Checkout/SEPA/Webhook-/Periodenwechsel; keine Live-Freigabe                                      |
+| Resend               | vorhandener Ausgang, signierter Eingang, manuelle Support-Ingestion, Schutz vor fremden Mailanweisungen | sichere Runtime-Secretbindung und echter Nachrichtenfluss; keine Mail gesendet                                        |
+| Supabase Storage     | privater Bucket extern bestätigt, vorhandener S3-Adapter und lokale Sicherungs-/Restoretests            | S3-Access-/Secret-Key in Web/Worker; privater Put/Get/Head/Delete und vollständige Upload-/PDF-Kette separat abnehmen |
+| INWX                 | vorhandene Sandbox-/Kosten-/Registrierungsfreigaben und Adaptertests                                    | Zugang und Registrar-Sandbox-Abnahme; keine Bestellung/Domainregistrierung                                            |
+| Netlify / Cloudflare | vorhandene alternative Kundenhosting-Adapter; Mock-Ausgabe lokal geprüft                                | gewählten Adapter mit Tokens, Domain/TLS/Deployment abnehmen; keine Kundenwebsite veröffentlicht                      |
 
 Plugin-Verbindung ist kein Laufzeit-Key und Mock-Erfolg keine echte Providerverbindung. Keine
 Anbieter wechseln, keine neuen Konten provisionieren. Schriftliche Kundenanfragen bleiben der
@@ -145,3 +145,18 @@ Entwürfe sind keine Rechtsfreigabe. Erst danach getrennte Freigaben für Migrat
 - Resend-Readback: Domain verifiziert, Senden/Empfangen aktiv, Support-Inbox vorhanden;
   Webhook `/api/webhooks/resend` aktiviert für `email.received` und `inbox.email.received`.
   Secretbindung, Signaturprüfung und Ende-zu-Ende-Zustellung bleiben extern ungeprüft.
+
+Die lokale Restore-Probe verwendet eine neue Datenbank im eigenen PostgreSQL-Testcontainer. Rollen
+existierten dort bereits; bei Wiederanlauf in einem frischen Cluster müssen die eingeschränkten
+Runtime-Rollen und erforderlichen Erweiterungen vor dem Restore separat rekonstruiert werden.
+Struktur-Restore und Identität des Sicherungsinhalts sind getrennt: restore-test.sh meldet
+content_identity_verified=false; die separate 49-Tabellen-Probe vergleicht vollständige Datenhashes.
+
+## Repository-Abgleich
+
+GitHub-Connector am 25.10.2026: Hauptarbeitsbranch
+`claude/website-brief-maschine-0d0s37` ist weiterhin identisch mit
+`fbff0cc69d0b8e7a786333730893f89123c91f32` (ahead 0/behind 0).
+Die gerettete V4-Fortsetzung liegt lokal auf `codex/conversion-v4`; nicht gepusht/gemergt.
+Der zuvor fehlgeschlagene Shell-Remotezugriff wurde damit durch einen lesenden Connector-Nachweis
+ersetzt, ohne Credential-Dateien auszulesen. Originalworktree bleibt unverändert.

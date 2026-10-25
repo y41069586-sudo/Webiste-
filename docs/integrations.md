@@ -317,7 +317,6 @@ EXIF-Daten (Copyright, Artist, ImageDescription). Neue Bilder: nur CC0, ohne erk
   Pluginzugriff ersetzt keinen STRIPE_SECRET_KEY in der App; kein Live-Key zugänglich/verwendet.
 - Details, Quellen und noch fehlende Secrets: `integrationen-abschluss.md`.
 
-
 ## 25.10.2026 – Stripe V4, Sandbox und Branding
 
 Über das vorhandene Stripe-Plugin drei Produkte mit Defaultpreisen in der Website-Sandbox angelegt und
@@ -335,3 +334,19 @@ Keine automatische Monatsbelastung und kein geschätztes trial_end. Signature-/W
 Legacy-Zeitplan bleiben erhalten. Stripe Tax blieb aus; Steuerstatus ist ungeklärt. Keine Zahlung,
 Subscription oder Erstattung über das Plugin ausgelöst. Stand und offene echte Sandbox-Abnahme:
 `conversion-optimization-v4.md`.
+
+## V5: Refund-Zuordnung und Korrekturbelege (25.10.2026)
+
+Bestehender Stripe-Adapter, SDK23.0.1; kein neuer Zahlungsanbieter. Bestätigte Refunds paginiert
+über GET `/v1/refunds?charge=…` summieren. Für erfolgreiche refund.updated-Events zusätzlich
+GET `/v1/charges/{id}` lesen. Invoice-Zuordnung über GET `/v1/invoice_payments` mit
+`payment[type]=payment_intent`, `payment[payment_intent]=…`, `status=paid`.
+Nicht das frühere invoice.payment_intent-Feld voraussetzen. Offizielle Änderungsdokumentation:
+https://docs.stripe.com/changelog/basil/2025-03-31/add-support-for-multiple-partial-payments-on-invoices
+
+Aktuelle SDK-Typen und paginierte Fake-HTTP-Vertragstests zusätzlich geprüft. Restricted Key braucht
+entsprechende Invoice-Payment-/Charge-/Refund-Leserechte; diese Laufzeitrechte nicht ungeprüft als
+vorhanden behaupten. Mehrrechnungs-/Teilzahlungszuordnung wird zur manuellen Klärung abgewiesen.
+Pending ist kein Refund-Geldabgang, invoice.paid allein ein Zahlungsbeleg. Ursprüngliche Rechnung
+und vorbereitete Differenzbelege unveränderlich halten. Bereitstellung, Rechts-/Steuerfreigabe und
+vollständige echte Webhookkette weiterhin gesondert; V4-Live-Key blockiert.

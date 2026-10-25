@@ -2,9 +2,9 @@
 
 Findet lokale Betriebe ohne eigene Website, baut für jeden einen Website-Entwurf, schickt einen
 personalisierten Brief mit QR-Code und verkauft die fertige Website ohne Verkaufsgespräch:
-**Neukundenangebot V4:** Basis **597 € Einrichtung + 19 €/Monat** oder Care+ **597 € Einrichtung + insgesamt 99 €/Monat**. Monatsabo erst nach bestätigtem Go-Live und gesondertem ausdrücklichem Abschluss; keine zwölfmonatige Mindestbindung. Ablauf: Demo → Einrichtung bezahlen → Angaben → Vorschau → bestätigter Go-Live → Monatsabo bestätigen.
+**Neukundenangebot V4:** Basis **597 € Einrichtung + 19 €/Monat** oder Care+ **597 € Einrichtung + insgesamt 99 €/Monat**. Neue Bestellungen speichern nach ausdrücklicher Zustimmung ein Zahlungsmittel/Mandat; genau ein Monatsabo startet erst nach bestätigtem Go-Live. Keine zwölfmonatige Mindestbindung. Ältere V4-Bestellungen mit separatem Abo-Checkout behalten ihr Verfahren.
 
-Die bisherigen 590-/49-/19-Euro-Verträge bleiben unverändert. V4 ist auf dem Entwicklungszweig vorbereitet, nicht produktiv freigegeben. Verbindlicher Umsetzungs- und Prüfstand: [Conversion V4](docs/conversion-optimization-v4.md).
+Die bisherigen 590-/49-/19-Euro-Verträge bleiben unverändert. V4/V5 ist auf dem Entwicklungszweig vorbereitet, nicht produktiv freigegeben. Verbindlich: [Qualitätsprüfung](docs/v5-quality-pruefung.md), [Go-Live-Restpunkte](docs/v5-go-live-checkliste.md) und [wiederaufnehmbarer Handoff](docs/v4-quality-handoff.md). Der ältere [V4-Bericht](docs/conversion-optimization-v4.md) bleibt als historischer Nachweis erhalten.
 Maßgebliche Projektbeschreibung: [CLAUDE.md](CLAUDE.md).
 
 **Codex-Übernahme:** Dauerhafte Arbeitsanweisungen und neueste Betreiberentscheidungen stehen in

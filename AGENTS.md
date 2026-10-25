@@ -151,7 +151,6 @@ Stripe-Connector hat nur Sandbox. Keine echten Zahlungen/Briefe. Demo-Test und W
 Automatische Sicherheitsprüfung lehnte ungeschützte Speicherung von Resend-API-Key in Netlify ab;
 nicht über Umwege umgehen. Details docs/integrationen-abschluss.md und docs/recht/pruefprotokoll.md.
 
-
 ## Verbindliche Aktualisierung V4 (25.10.2026)
 
 Aktuelle Betreiberanweisung und `docs/master-implementation-v4.md` ersetzen frühere Neukundenpreise.
@@ -184,3 +183,26 @@ Fortlaufender Umsetzungsstand: `docs/v4-quality-handoff.md`; früherer Prüfstan
   Lokaler Core-/E2E-Testpostgres darf nie durch einen Supabase-Verbindungsstring ersetzt werden.
 - Finanzansicht trennt vereinnahmte Erst-/Monatszahlungen, Erstattungen, bekannten V4-MRR und Legacy-Vertragswert.
   Ohne belegte Hosting-/Domain-/Zahlungskosten und tatsächlich erfasste Care+-Zeit keinen Deckungsbeitrag erfinden.
+
+## Verbindliche Fortsetzung V5 (25.10.2026)
+
+- Autoritativer aktueller Stand: `docs/v4-quality-handoff.md`, `docs/v5-quality-pruefung.md`,
+  `docs/v5-go-live-checkliste.md`, `docs/v5-betrieb-und-provider-audit.md`. Alte Phase-/V4-Berichte
+  sind zeitgebundene Nachweise, kein Auftrag zum Wiederaufbau oder zur Preisrücksetzung.
+- Zielarchitektur: bestehende zwei Netlify-Bereitstellungen, dieselbe Supabase-DB/privater Storage,
+  später genehmigter dauerhafter Node-/Chromium-Worker. `docker-compose.worker.yml` enthält
+  ausdrücklich KEINEN Produktionspostgres. VPS nicht bestellen; keine Produktionsmigration/deploy.
+- Produktions-Web/Worker migrieren und seeden nicht automatisch. Queue offline mit `queue:prepare`
+  vorbereiten, Anwendung nur nach gesonderter Freigabe. Worker/Queue über Direct/Session5432;
+  `QUEUE_DATABASE_URL` muss dieselbe DB ansprechen. Keine Transaction6543 für Scheduler/Migration.
+- Health/Mock-Checks sind keine tatsächliche Provider-, Datenschutz- oder Betriebsabnahme.
+  Container-Smoke, lokale Rollen-/Queue-/Restoretests ersetzen keine Supabase-/S3-Produktionssicherung.
+- Erste30-Demos benötigen konkrete Fakten-/Desktop-/Mobil-/Bild-/Textprüfung; Bulk/CLI darf das
+  nicht umgehen. Technisch bestanden und manuell freigegeben bleiben getrennte Zustände.
+- V4-A enthält inzwischen eine Entwurfskennzeichnung; alte Fertig-Versprechen werden vom Wahrheitsgate
+  blockiert. Bestehende aktive DB-Arme nicht überschreiben, keine Varianten unbemerkt aktivieren.
+- Erstattungen nur bei bestätigtem Erfolg. Monatszahlung und Einrichtung getrennt buchen;
+  Korrekturbelege unveränderlich als Differenz, keine doppelte Gutschrift bei Replay. Unklare
+  Zuordnungen bleiben offen und sperren einen vollständig bestätigten Finanzsaldo/Deckungsbeitrag.
+- Garantie-/Vertragstexte sind Arbeitsfassungen zum implementierten Ablauf, keine Betreiber- oder
+  Rechtsfreigabe. Steuerbestätigung bleibt standardmäßig false, V4-Live-Key bleibt blockiert.

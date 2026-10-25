@@ -1,218 +1,132 @@
-# V4 / V5 – fortlaufende Übergabe
+# SeitenWerk V4/V5 – verbindlicher Handoff
 
-Stand 25.10.2026. **Nicht veröffentlicht. DRY_RUN=true.** Keine produktiven Migrationen,
-DNS-Änderungen, Briefe, Zahlungen, Erstattungen oder Domainkäufe freigegeben.
+Stand 25.10.2026. **Bereit für interne Tests. Kein Versand-/Verkaufsstart. Nicht veröffentlicht.**
+`DRY_RUN=true`; keine echten Briefe, Zahlungen/Erstattungen, Domainkäufe, DNS-/Produktionsänderungen.
+Die ausdrücklich autorisierten Stripe-Sandbox-Tests bewegten nur Testgeld; Testabos beendet.
 
-## Sicherung und Arbeitsbasis
+## Arbeitsbasis, Rettung und sichere Commits
 
-- Repository `y41069586-sudo/Webiste-`, bestehendes Worktree `/workspace/seitenwerk-v4`,
-  Branch `codex/conversion-v4`; Ursprung `fbff0cc`, letzter sicherer Commit vor Fortsetzung
-  `24d23f7`. Hauptbranch nicht zurückgesetzt. Originalworktree `/workspace/Webiste-` nicht ändern.
-- Phase 0: Status, Branch, letzte Commits, staged/unstaged/neue Dateien geprüft. Kein staged Diff.
-- Unterbrochener Diff zusätzlich `/tmp/seitenwerk-v4-rescue.patch`, neue Dateien
-  `/tmp/seitenwerk-v4-untracked-rescue.tar.gz` gesichert. Diese temporären Sicherungen ersetzen
-  keine überprüften Git-Commits.
-- Grundlagen: AGENTS/CLAUDE/README, Spezifikation/Entscheidungen, Übernahme-/Projektstand,
-  V4-Bericht, Integrationen, Compliance und Go-Live-Unterlagen. Alte Preis-/Betriebsangaben sind
-  historische Momentaufnahmen; jüngster V4/V5-Auftrag hat Vorrang.
+Repository `y41069586-sudo/Webiste-`; Arbeitsverzeichnis `/workspace/seitenwerk-v4`,
+Branch `codex/conversion-v4`. Originalworktree `/workspace/Webiste-` mit fremden Änderungen erhalten.
+Phase 0: Status, Branch, letzte Commits, staged/unstaged/untracked geprüft; kein Reset/Force-Push.
+Unterbrochener Patch zusätzlich `/tmp/seitenwerk-v4-rescue.patch`, neue Dateien
+`/tmp/seitenwerk-v4-untracked-rescue.tar.gz` gesichert. Nicht auf dieses temporäre Backup verlassen.
 
-## Bestandsaufnahme vor Fortsetzung
+Einstiegsliteratur geprüft: AGENTS, CLAUDE, README, spec-update-2, Entscheidungen, Übernahme,
+Projektstand sowie V4-/Compliance-/Integrations-/Go-Live-/Stripe-Unterlagen. Aktuelle V5-Dokumente
+unten ersetzen alte offene Statusangaben. Hauptarbeitsbranch per GitHub-Connector gelesen:
+`claude/website-brief-maschine-0d0s37` weiterhin exakt `fbff0cc69d0b8e7a786333730893f89123c91f32`.
 
-| Bereich                                                 | Stand                                                          | Nächster Nachweis                                                    |
-| ------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- |
-| V4 597 + 19 / 99, Bestell-Snapshot, Legacy-Erhalt       | implementiert und zuvor lokal getestet                         | Regression nach Fortsetzung                                          |
-| Automatischer Monatsstart erst nach echtem Go-Live      | teilweise, uncommitted                                         | gespeichertes Mandat, Fehler-/Retry-/Webhooktests                    |
-| Tarifwechsel / Kündigung                                | Services teilweise, uncommitted                                | Oberfläche, Periodenwechsel, Idempotenz                              |
-| Care+-Zeit / monatlicher Technikcheck                   | Services und additive Migration vorbereitet                    | Oberfläche, Integrationstests                                        |
-| Echte Kosten / Deckungsbeitrag je Brief und Versuchsarm | Service vorbereitet                                            | Oberfläche, Datenvollständigkeit, Tests                              |
-| Stripe-Sandbox-Katalog / blaues Branding                | zuvor extern angelegt und zurückgelesen                        | keine Duplikate; Zahlungen getrennt abnehmen                         |
-| Demos / Briefe                                          | 20 Vorlagen vorhanden; zuvor fünf V4-Demos und 15 PDFs geprüft | mindestens zehn echte Desktop-/Mobilrender, sichtbare Verbesserungen |
-| Öffentliche Website                                     | V4-Preise im Code, getrennte statische Bereitstellung          | Qualität, Export-/Linkprüfung; keine Veröffentlichung                |
-| Worker / pg-boss                                        | vorhandener langlebiger Worker, lokale Testqueue möglich       | Supabase-tauglicher Betrieb ohne zweite Produktions-DB               |
-| Storage / Resend / weitere Provider                     | Adapter vorhanden, externe Abnahme teilweise offen             | Mock und echter Provider klar getrennt ausweisen                     |
-| Backup / Restore                                        | Skripte vorhanden, Betriebsnachweis offen                      | isolierter lokaler Restore, Supabase-/Storage-Konzept                |
-| Steuer / finale Rechtstexte / Bankdaten                 | externe Angaben bzw. Freigabe erforderlich                     | niemals erfinden oder selbst freigeben                               |
+Vorheriger sicherer V4-Stand: `24d23f7`. Letzter sicherer Implementierungscommit: **48b6a99**.
+Zum endgültigen QA-/Dokumentationsstand `git log -1 --oneline` lesen (Handoff gehört zu diesem Commit).
 
-## Angefangene Dateien
+| Commit  | Abgeschlossenes Paket                                                                                                                         |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 312aba8 | Unterbrochene V4-Operations fertig: Mandat/Go-Live-Abo, Wechsel/Kündigung, Care+, tatsächliche Kosten und vorhandene Admin-/Kundenansichten   |
+| 81098d0 | Worker-only Docker, Queue-Konfiguration/Rechte, Offline-Vorbereitung, Storage-/DB-Backup-/Restore-Härtung                                     |
+| 3bea72e | Echter Sandbox-Befund korrigiert: allow_incomplete/off_session, bestätigte Refund-Zustände, Backend-RLS, Steuer-Gate                          |
+| 910f612 | Drei Demo-Designs, Fallbacktexte, Review-Gates/CLI, 15 Briefe, Firmenwebsite und fünf statische Muster, Edge-Angebotsversion                  |
+| 48b6a99 | Monats-Erstattungen, unveränderliche Differenzbelege, kumulative Steuer-Rundung, Legacy-Retry, Finanzsperre/Recovery bei unbekannter Rechnung |
 
-`packages/core/src/services/{billing-v4,care-v4,economics-v4,tariffs-v4}.ts`,
-Migration `0013_v4_operations.sql` samt Meta, Schema, Config, Stripe-/Mock-Payment-Provider,
-Payment-Typen, Orders/Recurring/Renewals/Budget/Finance, Livecheck, E-Mails, Core-Exports und
-Worker-Pipeline. Sie waren bei Wiederaufnahme noch **nicht abgenommen**.
+Exakte geänderte Dateien seit 24d23f7: [Dateimanifest](v5-geaenderte-dateien.txt).
+Keine neuen Dashboards/Logins/Zahlungsanbieter/Produktionsdatenbank. Plakat und Legacy-Verträge erhalten.
 
-## Prüfstand
+## Umsetzungsstand
 
-- Vorherige belegte Prüfungen: `conversion-optimization-v4.md`, nicht als neuer Lauf ausgeben.
-- Unterbrochener Stand: Core-TypeScript zuletzt erfolgreich; Migration nur generiert/lokal vorgesehen.
-- Noch auszuführen: neue Operations-Integrationstests, komplette Regression, E2E, visuelle Matrix,
-  PDF/QR, sicherer Queue-/Restore-Nachweis, Build/Lint/Types.
-- Testziele ausschließlich lokale explizite `*_test` / `*_e2e`-Datenbanken.
-  Niemals Supabase für destruktives Testsetup verwenden.
+- V4-Neukunden Basis 597+19 / Care+ 597+insgesamt99, zentral; Monatsbeginn erst nach tatsächlich
+  bestätigtem Go-Live, bezahlter Einrichtung und ausdrücklicher Zustimmung/Mandat. Ältere manuelle
+  V4-Snapshots behalten den separaten Checkout; Legacy 590/49/19 nicht neu berechnen.
+- Genau eine Subscription, idempotente Rechnungen/Events/Retry. Async ist nicht vorzeitig paid.
+  Wechsel am Periodenende ohne Proration, Kündigung, Care+-Kontingent 60 Minuten und dokumentierte Checks.
+- Refund-Pending kein Geldabgang. Monats-/Einrichtungszahlungen getrennt; bestätigte kumulative
+  Refunds monoton; immutable Differenz-PDFs mit eigener Nummer/Zustellung. Ungeklärte Zuordnung
+  bleibt retriable und blockiert einen vollständig bestätigten Finanzsaldo/Deckungsbeitrag.
+- Rechnungs-/Care-/Kostenfunktionen in bestehenden Oberflächen; keine fiktiven Gewinne oder Gewinner.
+- Demos: drei Layouts verbessert, vorhandene CC0-Beispielfotos passend eingegrenzt; tatsächliche
+  Fakten stärker sichtbar, keine erfundenen Betriebsfotos/Personen/Leistungen als bestätigte Fakten.
+- Erste 30-Demo-Freigabe auch direkt im Service/CLI gesperrt ohne Fakten-/Desktop-/Mobil-/Bild-/Textcheck.
+  Technisch bestanden, visuell geprüft, manuell freigegeben und versandbereit getrennt.
+- V4-A korrigiert (Entwurf statt angeblich fertige Website). Alte gespeicherte Varianten nicht
+  überschrieben/aktiviert; falsche Zusagen werden unter V4 blockiert. Keine neue Statistikbehauptung.
+- Firmenwebsite mit großen tatsächlichen Vorschauen/fünf fiktiven Mustern. Garantie/AGB nur
+  Arbeitsfassung zum implementierten Ablauf, keine Rechtsfreigabe. Statische Edge-Whitelist transportiert
+  Angebotsversion ohne interne Billing-/Bank-/Steuerfelder.
+- Worker-only Compose für dieselbe Supabase-DB; keine zweite Produktions-DB. Produktionsstarts
+  migrieren/seeden nicht. Queue offline vorbereiten; Anwendung nur nach gesonderter Freigabe.
+- Additive Migrationen 0011–0017 vorhanden, ausschließlich lokal angewandt. Supabase unverändert.
 
-## Aktueller Arbeitsschritt
+## Bestandene Prüfungen und Artefakte
 
-Bestehende V4-Operationsservices fertigstellen und an bestehende Kunden-/Adminansichten anbinden;
-danach isoliert testen und zusammenhängend committen. Weitere Pakete: Worker/Queue/Betrieb,
-Demo-/Brief-/Firmenwebsitequalität, vollständige QA und Abschlussbewertung.
+| Prüfung                                                | Tatsächlicher Nachweis                                                                                                                                   |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core-Gesamtlauf ohne separat ausgeführte Browsermatrix | 304/304, `/tmp/seitenwerk-v5-core-complete-last.log`                                                                                                     |
+| Letzter Korrektur-/Legacy-Nachlauf                     | 8/8, `/tmp/seitenwerk-v5-refund-final.log`; zusätzlicher Legacy-Fall nach Gesamtlauf                                                                     |
+| Template-Browsermatrix / zehn Generator-Demos          | 128/128 Tests (127 Matrix + ein Test mit zehn Fällen), `/tmp/seitenwerk-v5-visual-final.log`                                                             |
+| Template-Paket                                         | 97/97                                                                                                                                                    |
+| Root-Tests                                             | 6/6 Testdateien, `/tmp/seitenwerk-v5-root-last.log`                                                                                                      |
+| TypeScript / ESLint                                    | alle vier Pakete / Root bestanden, letzte Logs `seitenwerk-v5-types-final.log`, `seitenwerk-v5-lint-final.log`                                           |
+| Produktionsbuild / kompletter Browser-E2E              | Build grün; **22/22**, keine übersprungenen Fälle, `/tmp/seitenwerk-v5-e2e-production-final.log`                                                         |
+| PDF/QR                                                 | 15/15 einseitig, alle QR aus tatsächlicher PDF-Rasterung decodiert; DOM-/Adressprüfung bestanden                                                         |
+| Stripe echt, nur Sandbox                               | Basis 1900/Care 9900 Cent bezahlt, vollständig erstattet, Abos canceled; GET-Readback, `stripe-v5-sandbox-abnahme.md`                                    |
+| Worker-Image                                           | Node 22/Chromium, nicht-root/read-only, internes Netz, DB/Queue ok, PNG/PDF, SIGTERM Exit 0; `/tmp/seitenwerk-v5-worker-release.log`                     |
+| Queue / Runtime-Rolle                                  | tatsächlicher Job/Retry/Dead-Letter/Cron; beschränkte Rolle ohne Superuser/CREATEDB/BYPASSRLS; nur lokal                                                 |
+| Restore / Storage                                      | nach Migration 0017: neue lokale DB:49 Tabellen mit gleichen vollständigen Datenhashes; binärer Storage-/Hash-Test; keine produktive Sicherung behaupten |
+| Statischer Firmenexport                                | elf Seiten aus Produktionsvorschau mit lokaler Edge-Fixture; V4-Handy/Desktop-Layout und Bilder ohne Fehler                                              |
 
-## Go-Live-Sperren
+Artefakte ignoriert unter `data/exports/v5-quality/` (Symlink nach `/tmp/seitenwerk-v5-quality-artifacts`),
+`data/exports/conversion-v4/` und `apps/web/out`. V5 enthält 20 Demo-PNGs, Matrix, Worker-/DB-Proof,
+vier Firmenwebsitebilder und 30 zusätzliche E2E-Screenshots. Tatsächlich betrachtet: zehn Demo-Fälle,
+repräsentative A/B/C-PDFs und korrigiertes A, Firmenwebsite Desktop/Handy/Preise. Keine pauschale
+Premium-Abnahme echter Unternehmen. Artefakte können bei Umgebungswechsel fehlen; reproduzieren.
 
-Keine Produktionsfreigabe. Kein dauerhaft abgenommener Worker, keine produktive Queue-/Storage-/
-Backup-Abnahme, kein vollständiger echter Provider-End-to-End-Nachweis. Finale Rechts-/Steuer-/
-Vertragsfreigaben fehlen. V4-Live-Stripe technisch gesperrt. Erste 30 Demos bleiben manuell zu prüfen.
-Aktueller Status: **bereit für interne Weiterentwicklung und isolierte Tests; kein Versandstart**.
+Fehler/Nachläufe offen dokumentiert: Stripe default_incomplete ungeeignet; Legacy items-Webhook
+abgesichert; erste Texte/Selektoren korrigiert; temporärer Docker-ENOSPC nach gezielter Bereinigung
+eigenen Buildcaches behoben; Standardschema beim lokalen Restore korrigiert. Dev-E2E hatte HMR-
+Reload-Schleife, verworfen. Produktions-E2E zeigte korrekt die Mock-Hosting-Sperre; nur lokale
+Testkonfiguration freigeschaltet, final 22/22. Keine App-Sicherheitsgrenze abgeschaltet.
 
-## Paket 1 – V4-Betriebsfunktionen abgeschlossen (lokal)
+## Reproduktion – nur dedizierte lokale Wegwerf-Datenbanken
 
-- Automatischer Mandatsstart nach Go-Live mit Zeilensperre, stabilem Idempotency-Key und
-  Wiederfinden bereits angelegter Stripe-Abos nach einem DB-Abbruch. Alte V4-Checkout-Snapshots
-  und Legacy bleiben kompatibel. Noch kein Nachweis eines externen Hosted-Checkout-Gesamtlaufs.
-- Kunden verwalten Tarifwechsel und Kündigung über ihren privaten Link. Admin prüft Wechsel;
-  Provider plant genau eine Subscription zum Periodenende, ohne Proration. Erst Preisnachweis
-  aktiviert den neuen Leistungsstand; ursprünglicher Kaufsnapshot bleibt unverändert.
-- Care+-Arbeitszeit, Kontingent, Zusatzfreigabe, interne Bewertung/Storno und monatliche technische /
-  manuelle Prüfzustände in bestehender Kundenansicht. Mock-Checks sind ausdrücklich simuliert.
-- Budgetansicht: tatsächliche Kosten, Zahlungszeitraum, Attribution zum ersten versandten Briefarm,
-  Deckungsbeitrag nur bei bestätigter vollständiger Datenlage; Änderungen entwerten Bestätigung.
-- Migrationen 0013/0014 additiv generiert und ausschließlich in Wegwerf-Testdatenbanken geprüft.
-- **Nachgewiesen:** 24/24 gezielte Core-/Stripe-Fake-HTTP-Tests; TypeScript Templates/Core/Web/Worker;
-  ESLint. Erste Testfehler (Regex-Großschreibung, Syntax im Test) korrigiert, vollständiger Nachlauf grün.
-- Weiter offen: komplette Regression/E2E, reale Sandbox-Abnahme, asynchrone Erstattungsbewertung,
-  Betriebs-/Queue-/Backup-Härtung, zehn echte Demo-Render und Design-/Brief-/Website-Prüfung.
+Core-/E2E-Setup löscht die Ziel-Test-DB. Niemals Supabase/Produktivdaten benutzen. Derzeit eigener
+Postgres-Testcontainer `seitenwerk-v4-test-db`, Port 15432, Datenbanken wbm_v4_test/focus_test/e2e.
+Andere vorhandene Container/Volumes bleiben unberührt. Alle Provider ausdrücklich Mock.
 
-## Zwischenstand Paket 2/3 – 25.10.2026
+- Paketmanager `corepack pnpm`10.28.0; keine Lockfile-Migration zu System-pnpm11.
+- Types/Lint: `corepack pnpm -r typecheck`, `corepack pnpm lint`.
+- Core: TEST_DATABASE_URL auf lokale benannte Test-DB; `CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium`;
+  `corepack pnpm --filter @wbm/core exec vitest run` (enthält auch die längere127er Browsermatrix).
+- Produktions-E2E: zuerst lokaler Webbuild, dann E2E_DATABASE_URL auf lokale E2E-DB,
+  E2E_PRODUCTION=true, SHOTS_DIR außerhalb Source, E2E_PORT=3214 und
+  `corepack pnpm --filter @wbm/web exec playwright test`. Mock-Zahlung/Hosting werden ausschließlich
+  in dieser Testkonfiguration freigegeben. Ports 3214/3215 dürfen nicht von alten Testprozessen belegt sein.
+- Fünf statische Muster: `node --import ./packages/core/node_modules/tsx/dist/loader.mjs scripts/build-public-examples.mts`.
+- Briefe: gleicher Loader für `scripts/preview-conversion-v4.mts` und `scripts/check-v4-pdfs.mts`.
+- Queue-SQL: `corepack pnpm --filter @wbm/core queue:prepare` (standardmäßig offline).
 
-Letzter gesicherter Featurecommit: **312aba8**. Danach weiterhin uncommitted:
-Worker-/Queue-/Backup-Härtung, neue Qualitätsgates und zehnfache Browsermatrix, Demo-/Home-Design,
-fünf statische Muster, RLS-Migration 0015 und bestätigte Erstattungszustände 0016.
+## Externer Befund / noch nicht ausgeführte Abnahmen
 
-Belegte neue Prüfungen:
+Supabase aktiv, 32 Public-Tabellen, kein pgboss/offer_snapshot, privater Bucket vorhanden; Security-
+Advisor ohne Befunde. Netlify: statischer Firmenauftritt und dynamische App getrennt, unverändert.
+Resend: Domain verifiziert, Senden/Empfangen an, Support-Inbox und aktiver Eingangshook bestätigt.
+Plugin ist kein Runtime-Key. Keine echte Mail/LLM-/Druck-/Registrar-/Hostingaktion ausgeführt.
 
-- 10 fiktive Demos durch buildDemo/qaDemo, 20 Desktop-/Mobilbilder unter
-  `data/exports/v5-quality/`, Kontaktbögen tatsächlich betrachtet; alle zehn technische QA grün.
-  Fallback nach zwei kaputten KI-Antworten explizit geprüft. Kein echter Anthropic-Aufruf.
-- Sichtbarer Mobilfehler bei langen Firmennamen (schmale umgebrochene Headerbuttons) korrigiert;
-  finale Matrix nach Korrektur noch ausführen. Café-Fotos künftig nur passende Treffer.
-- Storage-Dateien lokal binär gesichert/zurückgelesen, Hashfehler erkannt. Root-Listing-Bug
-  im vorhandenen LocalStorage behoben.
-- Echte lokale Queue: Job/Retry/Dead-Letter/Cron nach Testkorrektur grün. Vorheriger Test nutzte
-  verzögert aktualisierte Stats; direkter Dead-Letter-Fetch ist der belastbare Nachweis.
-- Echte Stripe-Sandbox: Basis 1900 und Care+ 9900 bezahlt, jeweils vollständig erstattet und Abos
-  beendet; Endzustände per GET bestätigt. IDs in stripe-v5-sandbox-abnahme.md.
-  **default_incomplete war ungeeignet** für automatischen Erstmonat; allow_incomplete+off_session
-  wurde real getestet und im Code korrigiert.
-- Neues Erstattungs-Pending-Verhalten: zwei Regressionen + sechs Provider-Tests + Queue-Test grün.
-  Pending ist kein Geldabgang; kein zweiter Request bei Wiederholung; bestätigte Events monoton.
+Offen: kompletter597-Hosted-Checkout mit tatsächlicher Webhookzustellung; SEPA/SCA/Folgemonat/
+Schedulewechsel; S3Put/Get/Delete und gesamte Uploadkette; Resend-Nachrichtenfluss; echte LLM-/
+Lead-/Druck-/Domain-/Hostingabnahme; tatsächliches Produktionsbackup+Storage-Restore; VPS-Betrieb.
+Mehrrechnungs-/Teilzahlungs-Erstattungen benötigen manuelle Zuordnung, keine erfundene Aufteilung.
+Historische Korrekturbelege ohne neue Liste nicht automatisch neu interpretieren.
 
-Noch laufend: vollständige Core-Suite `/tmp/seitenwerk-v5-core-full.log`, Docker-Build
-`/tmp/seitenwerk-v5-docker-build.log`. Erster V4-Browserlauf scheiterte am wegen laufender
-Codeänderungen zurückgesetzten Mock-Zahlformular (kein POST, Bestellung pending); stabilisierte
-Hydration im Helper und erneuter Lauf erforderlich. 60 Template-Assertions verwenden noch das alte
-Bannerwort; konkrete neue Kennzeichnung angepasst, Suite erneut ausführen. Keine Fehler verschweigen.
+Automatische Sicherheitsprüfung lehnte vollständiges Netlify-ENV-Auslesen wegen möglicher Secret-
+Offenlegung ab. Nicht umgangen. Aktuelle Runtime-Werte/Secret-Scopes bleiben ungeprüft.
 
-Nächste Schritte: laufende Tests auswerten, PDF/QR neu rendern, vollständige E2E ohne parallele
-Source-Änderungen, isolierter DB-Restore, Screenshots final ansehen, Prüfergebnisse dokumentieren
-und zusammenhängende Änderungen committen. Produktions-/Rechts-/Provider-Sperren bleiben bestehen.
+## Offene Arbeit, nächster konkreter Schritt und Sperren
 
-## Paket 2 – Betrieb lokal nachgewiesen
+Keine angefangene Implementierung absichtlich offen; übrige Aufgaben sind externe Einrichtung,
+Abnahme und Betreiberentscheidungen. Verbindliche Details: [Go-Live-Checkliste](v5-go-live-checkliste.md),
+[Qualitätsbericht A–G](v5-quality-pruefung.md), [Provider-Audit](v5-betrieb-und-provider-audit.md).
 
-- Worker-Image mit Node 22 und ausschließlich Chromium gebaut; keine WebKit/Firefox-Last.
-  Tatsächlicher Starttest entdeckte restriktive COPY-Dateirechte. COPY gehört nun dem
-  nicht privilegierten node-Benutzer; korrigiertes Testimage startet mit read-only Rootfs.
-- Echte lokale Healthantwort DB/Queue ok, PNG 9424 Bytes, PDF 8052 Bytes,
-  SIGTERM beendet mit Exit 0. Internes Testnetz, sämtliche Provider Mock; Container/Netz bereinigt.
-- Queue mit eigener beschränkter Rolle ohne Superuser/CREATEDB/BYPASSRLS tatsächlich geprüft:
-  Start ohne Migration, Job senden/holen/abschließen, Cron und drei neue RLS-Tabellen erreichbar.
-- Read-only Managed-Dump und Restore in NEUE lokale Test-DB: 49 Tabellen einschließlich
-  Datenprüfsummen gleich. Standardschema-Kollision beim ersten Versuch behoben; bestehende
-  Restore-Ziele werden nicht mehr automatisch gelöscht. Kein produktiver Backup-Status verändert.
-- Resend erneut gelesen: Domain verifiziert, Senden/Empfangen aktiviert, Support-Inbox und
-  aktivierter Eingangswebhook vorhanden. Keine Nachricht gesendet; echter Nachrichtenfluss offen.
-- Vollständige Core-Suite ohne separat geprüfte Browsermatrix: 292/292 grün. Zuvor 127/127
-  Template-Browserprüfungen grün. Template-Paket 97/97, Types aller vier Pakete und ESLint grün.
-- Vollständiger E2E-Lauf: 20 bestanden, 1 übersprungen, 1 veraltete Dashboard-Überschrift erwartet.
-  Erwartung aktualisiert; Nachlauf noch offen. V4-Kauf bis Mock-Go-Live/Abo/Kündigung bestanden.
-- Bei echter PDF-Sichtprüfung A noch mit Fertig-Versprechen entdeckt. V4-A wird ehrlich korrigiert,
-  bestehende gespeicherte Varianten werden nicht überschrieben; Wahrheitsgate sperrt alte Zusagen.
-  Korrigierte 15 PDFs und V4-Garantie-/Vertragstexte werden erneut geprüft.
-
-Temporärer Docker-Speicherfehler (ENOSPC) hat einen Zwischenlauf ungültig gemacht. Ausschließlich
-IDs des eigenen Buildcaches bereinigt, keine Datenbanken/Volumes gelöscht; danach 18 GB frei und
-Core-Nachlauf grün. Keine Produktionsabnahme aus lokalen Nachweisen ableiten.
-
-## Paket 3 – Zahlungs- und Freigabegrenzen
-
-- Echter Sandbox-Befund in bestehendem Stripe-Adapter korrigiert: automatischer Erstmonat
-  `allow_incomplete` + `off_session`, keine Doppelposition und keine vorzeitige Rechnung.
-- Bestätigter Mandats-Checkout und ältere manuelle V4-Snapshots bekommen jeweils passende
-  Zustimmungstexte; Providerwechsel passt nicht stillschweigend zu einer bestehenden Bestellung.
-- Erstattungsanforderung und tatsächlicher Geldabgang getrennt. Pending/Fails erzeugen keine
-  Erstattungsrechnung und keine Erfolgsmail. Wiederholung legt keinen zweiten Request an;
-  Status-Webhooks und lesender Sweep führen bestätigte Erstattungen monoton nach.
-- Neue Tabellen-RLS nur bestehende interne Backendrolle, Browserrechte entzogen; Migrationen
-  0015/0016 nur lokal getestet. Extern keine Schemaänderung.
-- Explizite Steuerbestätigung als zusätzlicher Go-Live-Blocker (Standard false). Keine unbekannte
-  Kleinunternehmer-/USt-Angabe durch KI bestätigt.
-- Noch offen: allgemeine Reconciliation extern im Stripe-Dashboard erstatteter Monatsrechnungen;
-  aktuelle bestätigte Erstattungsstrecke bezieht sich auf die Bestell-/Einrichtungszahlung.
-  Vor Liveverkauf als Blocker behandeln, keine vollständige Refund-Abnahme behaupten.
-
-## Laufende P0-Ergänzung – Monats-Erstattungen (nicht überspringen)
-
-Letzter sicherer Commit: **3bea72e** (davor 81098d0 und 312aba8).
-Monats-Erstattung ist inzwischen implementiert, aber der abschließende Gesamtlauf läuft noch:
-
-- Stripe-SDK liest paginierte bestätigte Refunds und ordnet über `invoice_payments` den PaymentIntent
-  einer Rechnung zu. Pending nicht gebucht; Mehrrechnungszahlungen werden sicher zur Klärung abgewiesen.
-- Bestehende Monatszahlung wird monoton korrigiert; 597-Euro-Einrichtung bleibt unverändert.
-  Unbekannte Rechnung: sichtbarer Fehler, Retry und vorübergehend unvollständige Finanzansicht.
-- Unveränderliche Differenzbelege für Teil- und spätere Vollerstattung in bestehendem Rechnungsrenderer,
-  separat für Einrichtung und Monatszahlung. Originalrechnung bleibt unverändert, VAT-Rundung kumulativ.
-- Neue **additive Migration0017_refund_documents.sql** für Beleglisten auf orders/order_payments,
-  keine neue Zahlungsarchitektur. Korrekturen im vorhandenen Bestelldetail, Workerjob und Recovery-Sweep.
-- 26/26 gezielte Tests bestanden. Danach zusätzliche Retry-/Finanzsperren-Assertion ergänzt;
-  vollständige Core-Regression `/tmp/seitenwerk-v5-core-complete-last.log` läuft.
-- Typfehler allein in neuem Testcast korrigiert (unknown-Brücke); finaler Type-/Lint-Lauf wiederholen.
-- Vollständige E2E erneut **mit SHOTS_DIR** gestartet: `/tmp/seitenwerk-v5-e2e-release.log`,
-  eigene lokale DB wbm_v4_e2e. Währenddessen keine App-/Core-/Public-Dateien ändern.
-
-Weitere gesicherte Ergebnisse: 128/128 finale Visualtests inkl. zehn Demos, 15/15 neue PDFs/QR,
-Produktionsbuild und lokaler statischer Export elf Seiten, vier V4-Firmenwebsite-Screenshots ohne
-Layout-/Bild-/Konsolenfehler. Finanz-/Go-Live-/Qualitätsdokumente haben noch vorläufige Restpunkttexte;
-nach grünen Nachläufen auf tatsächlichen Abschlussstand bringen, nicht alte Absätze als Status lesen.
-Nächster Schritt: laufende Tests auswerten; finale Types/Lint/Build; korrigiertes Worker-Testimage
-mit aktuellen Quellen/Template-dist ergänzen und Smoke wiederholen; Design- und Finanzpaket committen;
-Handoff/Checkliste abschließen. Keine externe Veröffentlichung.
-
-## Paket 4 – Design/Brief-/Freigabequalität abgenommen
-
-Zehn finale Generator-Demos/20 Bilder und 127 Template-Browserprüfungen grün. Drei Vorlagen gezielt
-verbessert; Plakat erhalten. Nach Blick auf Screenshots lange Headernamen/Links korrigiert,
-Café-Fotos passend eingegrenzt und fehlende Pfeilglyphe durch SVG ersetzt. Erste30-Freigabe am
-Service/CLI abgesichert; technische und manuelle Prüfung getrennt.
-
-15 V4-A/B/C-Briefe wirklich gerendert: einseitig, Adress-/Randprüfung grün, jeder QR aus tatsächlichem
-PDF-Raster mit richtigem Ziel decodiert. Korrigiertes A nach Sichtprüfung erneut angesehen. Bestehende
-aktive DB-Varianten nicht verändert. Alle15 neuen Texte bestehen den deterministischen Wahrheitscheck.
-
-Firmenwebsite mit großer Produktvorschau, fünf echten fiktiven statischen Mustern und gemeinsamen
-Stilen. V4-Garantie/AGB-Arbeitsfassung konsistent zum implementierten Ablauf, keine Rechtsfreigabe.
-Öffentliche Edge-Konfigurations-Whitelist überträgt Angebotsversion ohne interne Billing-/Bankdaten.
-Elf Seiten statisch lokal exportiert, Homepage Desktop/Handy sowie Preise/Beispiele Handy ohne
-Layout-/Bild-/Konsolenfehler. Nicht produktiv veröffentlicht.
-
-## P0-Finanzergänzung tatsächlich abgeschlossen (lokal)
-
-**304/304 Core-Tests bestanden**, anschließend 8/8 gezielte Monats-/Einrichtungs-/Legacy-
-Korrekturtests bestanden. Unbekannte Rechnungen bleiben retriable; bei erfolgreicher späterer
-Zuordnung wird die Finanzsperre aufgehoben. Ursprüngliche Rechnung und frühere Differenz-PDFs
-bleiben unverändert. Vor Migration gespeicherte Stornos behalten PDF/Nummer/Zustell-Idempotenz.
-Neue Migration0017 ausschließlich lokal. Monats-Erstattung ist damit kein offener Implementierungspunkt
-mehr; echter Stripe-Webhook-/Refund-Gesamtlauf und steuerliche Belegfreigabe bleiben externe Abnahme.
-
-Der erneute dev-E2E-Lauf hatte eine nachweisbare HMR-Reload-Schleife (keine fachlich erfolgreiche
-Abnahme). Beendet, nur eigene verifizierte lokale Mock-Server bereinigt. Vollständiger Nachlauf am
-neu gebauten **Produktionsbuild** mit `E2E_PRODUCTION=true`, Mock-Testfreigabe nur lokal und SHOTS_DIR
-außerhalb des Sourceverzeichnisses. Log: `/tmp/seitenwerk-v5-e2e-production-2.log`; aktuell noch laufend.
-Zuletzt sichere Commits: **910f612** Design/Review, **3bea72e** Zahlungen, **81098d0** Betrieb,
-**312aba8** V4-Operations. Letzte Monats-Erstattung noch uncommitted bis finaler Type-/Lint-Prüfung.
+Zuerst Steuer-/Leistungs-/Garantie-/Rechtsfragen und sichere Runtime-Secrets für ein begrenztes
+externes Sandbox-Abnahmepaket klären. Danach separat freigegebene additive Migration/pgboss und
+Worker auf genehmigtem VPS einrichten; genau einen fiktiven vollständigen Providerlauf dokumentieren.
+Erst dann tatsächliche Betriebs-/Kampagnenfreigabe prüfen. Keine Live-Stripe-Freischaltung durch diese
+Sitzung, keine produktiven DB-/DNS-/Deploy-Aktionen. Erste 30 echten Demos weiter manuell abnehmen.

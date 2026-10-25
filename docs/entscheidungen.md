@@ -197,7 +197,6 @@ Webhook angelegt, Anwendungsschlüssel fehlt. Beide neuen Webhooks bis sicherer 
 pausiert. Netlify-Secretspeicherung von automatischer Sicherheitsprüfung abgelehnt; nicht umgehen.
 Siehe integrations-abschluss.md und recht/pruefprotokoll.md.
 
-
 ## 25.10.2026 – Conversion V4 und beauftragte Stripe-Sandbox
 
 Quelle: neuer Master-Prompt V4 und anschließende Betreiberanweisung zur Stripe-Plugin-Anbindung und blauem Branding.
@@ -209,3 +208,21 @@ Stripe-Sandbox enthält genau drei neue V4-Produkte mit Preisen; Checkout-Blau #
 Subscription, Kundenzahlung oder Erstattung über den Connector angelegt. Keine Produktionsumgebung geändert.
 Implementierung auf `codex/conversion-v4`, keine eigenmächtige Veröffentlichung. Briefkandidaten bleiben pausiert,
 Engagement-Messung aus. Vollständiger Prüf- und Restaufgabenstand: `conversion-optimization-v4.md`.
+
+## V4/V5-Fortsetzung – 25.10.2026
+
+Diese Ergänzung ersetzt für Neukunden die historischen Einmal-/Monatsangebote oben.
+Basis597+19 und Care+597+insgesamt99 bleiben zentral; alte Vertragssnapshots unverändert.
+Neue Mandatsbestellungen starten genau ein Monatsabo nach echtem bestätigtem Go-Live; vorhandene
+manuelle V4-Snapshots bleiben kompatibel. Sandbox-Test hat `allow_incomplete`+`off_session`
+bestätigt. Status active ist kein Zahlungseingang.
+
+Care+-Zeit/Technikchecks, Tarifwechsel und Istkosten in vorhandene Kunden-/Budgetseiten integriert.
+Neue Demos verwenden geprüfte Fakten und deutlich markierte Beispiele; drei Designs verbessert,
+Plakat bleibt. Erste30-Demos service-seitig manuell freizugeben. V4-Brief A wegen Fertig-Versprechen
+korrigiert; alte gespeicherte Fassung blockieren statt Quoten oder Datenbanktexte zu überschreiben.
+
+Worker-only Compose für spätere VPS-Freigabe; kein zweiter Produktionspostgres. Produktion migriert
+weder App noch Queue beim Start. Backup/Restore nur lokal nachgewiesen, echte Produktionssicherung
+weiter erforderlich. Aktueller Nachweis und Grenzen: docs/v5-quality-pruefung.md und
+v5-go-live-checkliste.md. Kein Deployment/DNS/echte Zahlungen/Briefversand durch diese Entscheidungen.

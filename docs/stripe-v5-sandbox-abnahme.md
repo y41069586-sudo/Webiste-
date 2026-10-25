@@ -33,9 +33,9 @@ erfundene IDs oder Auslesen fremder Laufzeit-Secrets umgehen.
 
 ## Ergänzung – beide Tarife und Bereinigung bestätigt
 
-| Fall | Subscription / Rechnung | Testbetrag | Endzustand |
-| --- | --- | ---: | --- |
-| Basis / Karte | sub_1UUPpPGn2A630LhH0F8aTA9N / in_1UUPpPGn2A630LhH4V0BVmQA | 1900 Cent | Rechnung paid; Abo canceled |
+| Fall          | Subscription / Rechnung                                    |          Testbetrag | Endzustand                                       |
+| ------------- | ---------------------------------------------------------- | ------------------: | ------------------------------------------------ |
+| Basis / Karte | sub_1UUPpPGn2A630LhH0F8aTA9N / in_1UUPpPGn2A630LhH4V0BVmQA |           1900 Cent | Rechnung paid; Abo canceled                      |
 | Care+ / Karte | sub_1UUQ1sGn2A630LhHuM7BzBq1 / in_1UUQ1sGn2A630LhHEuHjCMo2 | 9900 Cent insgesamt | Rechnung paid; genau eine Position, Abo canceled |
 
 Care+-Kunde cus_VVQt7oheePw20y, ebenfalls ohne E-Mail/Telefon, mit veröffentlichter Stripe-Testkarte.
@@ -53,3 +53,13 @@ Die 597-Euro-Initialzahlung wird lokal mit Mock-Checkout und SDK-Vertragstests g
 kein Browser-Abschluss einer echten gehosteten Stripe-Session durchgeführt. Die obigen Testabos
 verwenden einen ausdrücklich fiktiven bestätigten Go-Live, keine tatsächlich veröffentlichte Website.
 Testclock-/Kundendatensätze bleiben als fiktive Auditobjekte bestehen; ihre IDs sind keine Secrets.
+
+## Zusätzlicher echter Readback – Invoice-Payment-Zuordnung
+
+Der neue Zuordnungsweg wurde zusätzlich lesend in derselben Sandbox überprüft:
+GET `/v1/invoice_payments`, payment.type=payment_intent,
+payment.payment_intent=pi_3UUQ1tGn2A630LhH0cOrMcWp, status=paid.
+Ergebnis genau ein Datensatz inpay_1UUQ1uGn2A630LhHiuPOLnaP,
+invoice=in_1UUQ1sGn2A630LhHEuHjCMo2, amount_paid=9900, livemode=false.
+Damit ist der tatsächliche API-Zuordnungsweg belegt; die vorher bestätigte Erstattung bleibt bestehen.
+Das ersetzt weiterhin keinen tatsächlichen Refund-Webhook-Durchlauf durch die bereitgestellte App.

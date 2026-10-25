@@ -1,5 +1,7 @@
 # SeitenWerk – Gesamtstand und historische Momentaufnahme
 
+**V4/V5-Fortsetzung 25.10.2026:** Aktueller geprüfter Code-/Betriebsstand in [Qualitätsprüfung](v5-quality-pruefung.md), [Provider-Audit](v5-betrieb-und-provider-audit.md), [Go-Live-Checkliste](v5-go-live-checkliste.md) und [Handoff](v4-quality-handoff.md). Status: interne Tests; keine Veröffentlichung. Die folgenden Abschnitte bleiben historische Momentaufnahme.
+
 **Aktualisierung 25.10.2026:** Der neue Entwicklungsstand steht in [Conversion V4](conversion-optimization-v4.md). Preise und Betriebsgrenzen dort haben Vorrang. Stripe-Sandbox-Katalog und blaues Checkout-Branding sind angelegt; V4-Code ist nicht live. Die folgenden externen Feststellungen sind eine historische Momentaufnahme und kein erneuter Verbindungscheck.
 
 Stand der folgenden Momentaufnahme: 24.10.2026. Dieser Bericht ergänzt den historischen Übernahmebericht und ersetzt dessen
@@ -15,17 +17,17 @@ Schnittstellen, Vorlagen, Node-/pg-boss-Worker. Kein Neuaufbau. Angebote 590 Eur
 
 ## Vorhanden und geprüft
 
-| Bereich | Tatsächlicher Stand |
-| --- | --- |
-| Übernahme | CLAUDE-/Spezifikationsbestand geprüft, AGENTS.md lokal angelegt; Entscheidungen festgehalten. Nicht alle Übernahmedateien bereits im GitHub-Branch gesichert. |
-| Supabase | Webiste-, EU Irland; 11 vorhandene Migrationen, 32 Tabellen; RLS und keine Browser-Tabellengrants bei Einrichtung geprüft. Dedizierte Backendrolle, keine zweite Datenarchitektur. |
-| Öffentliche Konfiguration | Lesende Edge Function für freigegebene Websitefelder vorhanden. Statischer Export übernimmt Werte beim Build, nicht bei jedem Seitenaufruf. |
-| Admin | Bestehender Passwort-/TOTP-Zugang eingerichtet, 20 Bereiche per Browser geprüft; modernisiertes Layout, gruppierte lokale Suche, responsive Navigation, Ladeanzeige und anfragebezogene Session-Deduplizierung veröffentlicht. |
-| Netlify/Datenbank | TLS-CA korrekt eingebunden; wegen EMAXCONNSESSION Umstellung von Session-Port 5432 auf Transaction-Port 6543. Letzter Deploy 6add2a0a839192b88a83feb0 ready. Health aktuell HTTP 200, db=true. Belastungs-/Dauertest nach Umstellung noch offen. |
-| Resend | Domain verifiziert, Inbox support@example.test vorhanden; Empfang früher durch eingegangene Anbieter-Mail belegt. App-Versand und Support-Ingestion sind davon getrennt und noch nicht produktiv angebunden. |
-| Vorlagen | Fünf Branchengruppen mit je drei Basislayouts plus Plakat: 20 Websitevorlagen; Brief-/Rechnungsvorlagen vorhanden. Kein Betreiberfoto erforderlich. |
-| Fachfunktionen | Lead-Filter, Demos/QA, Briefe/Freigaben, Budget/Not-Aus, Checkout/Webhooks, Onboarding, Rechnungen, Support, Funnel, Optimizer/Lern-Agent im Code vorhanden; kein Nachweis eines produktiven Gesamtdurchlaufs. |
-| Tests | Bisher TypeScript/Lint, 97 Template-Tests, zwei isolierte Site-Sicherheitstests und vier isolierte TLS-Tests bestanden. Kein destruktives Core-Testsetup gegen Supabase ausgeführt. |
+| Bereich                   | Tatsächlicher Stand                                                                                                                                                                                                                              |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Übernahme                 | CLAUDE-/Spezifikationsbestand geprüft, AGENTS.md lokal angelegt; Entscheidungen festgehalten. Nicht alle Übernahmedateien bereits im GitHub-Branch gesichert.                                                                                    |
+| Supabase                  | Webiste-, EU Irland; 11 vorhandene Migrationen, 32 Tabellen; RLS und keine Browser-Tabellengrants bei Einrichtung geprüft. Dedizierte Backendrolle, keine zweite Datenarchitektur.                                                               |
+| Öffentliche Konfiguration | Lesende Edge Function für freigegebene Websitefelder vorhanden. Statischer Export übernimmt Werte beim Build, nicht bei jedem Seitenaufruf.                                                                                                      |
+| Admin                     | Bestehender Passwort-/TOTP-Zugang eingerichtet, 20 Bereiche per Browser geprüft; modernisiertes Layout, gruppierte lokale Suche, responsive Navigation, Ladeanzeige und anfragebezogene Session-Deduplizierung veröffentlicht.                   |
+| Netlify/Datenbank         | TLS-CA korrekt eingebunden; wegen EMAXCONNSESSION Umstellung von Session-Port 5432 auf Transaction-Port 6543. Letzter Deploy 6add2a0a839192b88a83feb0 ready. Health aktuell HTTP 200, db=true. Belastungs-/Dauertest nach Umstellung noch offen. |
+| Resend                    | Domain verifiziert, Inbox support@example.test vorhanden; Empfang früher durch eingegangene Anbieter-Mail belegt. App-Versand und Support-Ingestion sind davon getrennt und noch nicht produktiv angebunden.                                     |
+| Vorlagen                  | Fünf Branchengruppen mit je drei Basislayouts plus Plakat: 20 Websitevorlagen; Brief-/Rechnungsvorlagen vorhanden. Kein Betreiberfoto erforderlich.                                                                                              |
+| Fachfunktionen            | Lead-Filter, Demos/QA, Briefe/Freigaben, Budget/Not-Aus, Checkout/Webhooks, Onboarding, Rechnungen, Support, Funnel, Optimizer/Lern-Agent im Code vorhanden; kein Nachweis eines produktiven Gesamtdurchlaufs.                                   |
+| Tests                     | Bisher TypeScript/Lint, 97 Template-Tests, zwei isolierte Site-Sicherheitstests und vier isolierte TLS-Tests bestanden. Kein destruktives Core-Testsetup gegen Supabase ausgeführt.                                                              |
 
 ## Aktuell extern festgestellt
 

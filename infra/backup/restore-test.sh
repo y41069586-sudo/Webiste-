@@ -46,8 +46,8 @@ for T in leads demos letters orders customers sites settings audit_log suppressi
   R=$(psql -tA -d "$TEST_DB" -c "SELECT count(*) FROM $T" 2>/dev/null || echo "x")
   L=$(psql -tA -d "$LIVE_DB" -c "SELECT count(*) FROM $T" 2>/dev/null || echo "x")
   if [ "$R" = "x" ]; then FAIL="$FAIL $T(fehlt)"; continue; fi
-  # Der Dump ist älter als die Live-Daten: weniger ist erlaubt, mehr nicht
-  if [ "$L" != "x" ] && [ "$R" -gt "$L" ]; then FAIL="$FAIL $T($R>$L)"; fi
+  # Counts from a current database are informational: legitimate retention/deletions
+  # can make a historical backup larger. Equality needs a captured snapshot manifest.
   echo "{\"level\":\"info\",\"msg\":\"restore-test\",\"table\":\"$T\",\"restored\":$R,\"live\":${L:-0}}"
 done
 MIG=$(psql -tA -d "$TEST_DB" -c "SELECT count(*) FROM drizzle.__drizzle_migrations" 2>/dev/null || echo 0)
@@ -58,5 +58,5 @@ if [ -n "$FAIL" ]; then
   echo "{\"level\":\"error\",\"msg\":\"restore-test fehlgeschlagen\",\"detail\":\"$FAIL\"}"
   exit 1
 fi
-note ok "Wiederherstellung geprüft"
-echo "{\"level\":\"info\",\"msg\":\"restore-test ok\",\"file\":\"$(basename "$DUMP")\"}"
+note ok "Wiederherstellung technisch geprüft; separate Inhaltsprüfung erforderlich"
+echo "{\"level\":\"info\",\"msg\":\"restore-test ok\",\"file\":\"$(basename "$DUMP")\",\"content_identity_verified\":false}"

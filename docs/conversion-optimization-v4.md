@@ -1,5 +1,7 @@
 # SeitenWerk – Conversion-Optimierung V4
 
+> Historischer Prüfstand vor der V4/V5-Fortsetzung. Aktuell gelten [V5-Qualitätsprüfung](v5-quality-pruefung.md), [Go-Live-Checkliste](v5-go-live-checkliste.md) und [Handoff](v4-quality-handoff.md). Insbesondere sind neuer Mandatsstart, Tarifwechsel/Care+/Kostenoberflächen, Korrekturbelege, Worker/Queue/Restore und zehn Demo-Render inzwischen ergänzt. A wurde wegen eines falschen Fertig-Versprechens korrigiert und ist kein unveränderter Kontrolltext. Alte offene Punkte und Testergebnisse unten nicht als heutigen Status lesen.
+
 Stand: 25.10.2026. Entwicklungszweig `codex/conversion-v4`, Basis `fbff0cc` aus dem bestehenden Projekt. Dieser Stand ist **nicht live**. Bestehende ungesicherte Änderungen im ursprünglichen Arbeitsverzeichnis wurden durch ein eigenes Worktree erhalten. Auftrag: `master-implementation-v4.md`, ergänzt um den ausdrücklich beauftragten Stripe-Sandbox-Katalog und blaues Branding.
 
 ## 1. Umgesetzte Änderungen
@@ -9,9 +11,9 @@ Bestehende Next.js-/Core-/Drizzle-/pg-boss-Architektur erweitert. Keine zweite A
 ## 2. Neues Preismodell
 
 | Tarif | Einrichtung beim Kauf | Monatlich nach Go-Live und Aboabschluss | Rechnerisch erstes volles Betriebsjahr |
-| --- | ---: | ---: | ---: |
-| Basis | 597 € | 19 € insgesamt | 825 € |
-| Care+ | 597 € | 99 € insgesamt | 1.785 € |
+| ----- | --------------------: | --------------------------------------: | -------------------------------------: |
+| Basis |                 597 € |                          19 € insgesamt |                                  825 € |
+| Care+ |                 597 € |                          99 € insgesamt |                                1.785 € |
 
 Die Jahreswerte setzen zwölf berechnete Monate voraus und sind keine Vorauszahlung oder Mindestlaufzeit. Care+ enthält die Basisgebühr; niemals 19 + 99 Euro. Steuerstatus ungeklärt; keine Umsatzsteuerbefreiung oder endgültige rechtliche Freigabe behaupten. Zentrale Preisquelle: `packages/core/src/services/offers-v4.ts`.
 
@@ -53,11 +55,11 @@ Vorhandene persönliche Entwurfskennzeichnung, Firmenname, noindex, Musterkennze
 
 Über das Stripe-Plugin tatsächlich angelegt und zurückgelesen, ausschließlich `Website sandbox`, `livemode=false`:
 
-| Komponente | Stripe-Preis | Betrag |
-| --- | --- | ---: |
+| Komponente  | Stripe-Preis                     |              Betrag |
+| ----------- | -------------------------------- | ------------------: |
 | Einrichtung | `price_1UULWxGn2A630LhHdvSaUslJ` | 59700 Cent einmalig |
-| Basis | `price_1UULX3Gn2A630LhHDA6Or60k` | 1900 Cent/Monat |
-| Care+ | `price_1UULX8Gn2A630LhH0F3MgcLP` | 9900 Cent/Monat |
+| Basis       | `price_1UULX3Gn2A630LhHDA6Or60k` |     1900 Cent/Monat |
+| Care+       | `price_1UULX8Gn2A630LhH0F3MgcLP` |     9900 Cent/Monat |
 
 Produkt-/Preisreferenzen liegen in `config/stripe-v4-sandbox.json`, ohne API-Schlüssel. Der vorhandene Stripe-Provider benutzt diese IDs, prüft Betrag und Währung und blockiert V4 mit Live-Key. Keine dynamischen Duplikatprodukte beim V4-Checkout. Der gewählte Tarif und sein genauer Monatsbetrag stehen zusätzlich ausdrücklich am Pflichtfeld und über dem Zahlbutton, weil beide Tarife denselben Einrichtungspreis benutzen. Legacy bleibt bei seinem bisherigen Ablauf.
 
@@ -123,26 +125,24 @@ Eigene V4-AGB-/Datenschutz-/Impressums-Arbeitsfassungen sind keine anwaltlich od
 - [ ] Erst nach eigenem Auftrag Produktion veröffentlichen; Entwicklungserfolg ist keine Veröffentlichung.
 - [ ] Versandfreigabe und rechtliche Prüfung separat; DRY_RUN nicht selbst abschalten.
 
-
 ### Abschlussprotokoll der lokalen Prüfungen
 
-| Prüfung | Nachgewiesenes Ergebnis |
-| --- | --- |
-| Core-Nachlauf ohne unveränderte Template-A11y-Matrix | 34 Dateien, 265/265 Tests bestanden |
-| Browser-Template-Matrix im vorherigen Gesamtlauf | 127/127 bestanden; unveränderte Vorlagen/Paletten |
-| Abschließende Config-/V4-Sicherheitsprüfungen | 17/17 bestanden, einschließlich Freigabeentzug bei warmem Tracking-Cache, exakter ausgewählter Tarifzustimmung und Legacy-Providerparametern |
-| Eigenes Template-Paket | 97/97 bestanden |
-| Neue V4-Demos | alle fünf Gruppen: HTML, Axe auf Desktop/Mobil und Layoutprüfungen bestanden |
-| Isolierte Preis-/Legal-/Resend-/TLS-/DRY_RUN-Tests | 16/16 bestanden |
-| TypeScript | Core, Templates, Web und Worker bestanden; abschließender Core-/Web-Check ebenfalls bestanden |
-| ESLint / Whitespace | bestanden |
-| Lokaler Next.js-Produktionsbuild | bestanden, kein Upload/Deployment |
-| PDF/DOM/QR | 15 fiktive PDFs, jeweils eine Seite, keine festgestellten Überlappungen/Fenster-/Randfehler, 15/15 QR-Decodes, zusätzlich direkt aus den gerasterten PDFs geprüft; fünf mobile Vorschauen ohne horizontalen Überlauf |
-| Startcharge | 40 fiktive Revieweinträge: A 20, B 10, C 10; alle send=false, alle manuell zu prüfen |
+| Prüfung                                              | Nachgewiesenes Ergebnis                                                                                                                                                                                              |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core-Nachlauf ohne unveränderte Template-A11y-Matrix | 34 Dateien, 265/265 Tests bestanden                                                                                                                                                                                  |
+| Browser-Template-Matrix im vorherigen Gesamtlauf     | 127/127 bestanden; unveränderte Vorlagen/Paletten                                                                                                                                                                    |
+| Abschließende Config-/V4-Sicherheitsprüfungen        | 17/17 bestanden, einschließlich Freigabeentzug bei warmem Tracking-Cache, exakter ausgewählter Tarifzustimmung und Legacy-Providerparametern                                                                         |
+| Eigenes Template-Paket                               | 97/97 bestanden                                                                                                                                                                                                      |
+| Neue V4-Demos                                        | alle fünf Gruppen: HTML, Axe auf Desktop/Mobil und Layoutprüfungen bestanden                                                                                                                                         |
+| Isolierte Preis-/Legal-/Resend-/TLS-/DRY_RUN-Tests   | 16/16 bestanden                                                                                                                                                                                                      |
+| TypeScript                                           | Core, Templates, Web und Worker bestanden; abschließender Core-/Web-Check ebenfalls bestanden                                                                                                                        |
+| ESLint / Whitespace                                  | bestanden                                                                                                                                                                                                            |
+| Lokaler Next.js-Produktionsbuild                     | bestanden, kein Upload/Deployment                                                                                                                                                                                    |
+| PDF/DOM/QR                                           | 15 fiktive PDFs, jeweils eine Seite, keine festgestellten Überlappungen/Fenster-/Randfehler, 15/15 QR-Decodes, zusätzlich direkt aus den gerasterten PDFs geprüft; fünf mobile Vorschauen ohne horizontalen Überlauf |
+| Startcharge                                          | 40 fiktive Revieweinträge: A 20, B 10, C 10; alle send=false, alle manuell zu prüfen                                                                                                                                 |
 
 Die 265 Core-Tests und 17 Nachtests überlappen teilweise; nicht addieren und nicht als einen einzigen vollständigen grünen Gesamtlauf ausgeben. Der erste vollständige Lauf wurde zur Fehlerdiagnose benutzt, danach wurden die betroffenen Bereiche und übrigen Core-Tests erneut geprüft. Bei PDF-Prüfung wurde ein ungeeigneter hochkantiger Screenshot im ersten Beispielskript erkannt und durch die bereits vorhandene Laptop-/Handy-Komposition ersetzt; endgültige Beispiele wurden danach neu erzeugt.
 
 Browsertests: zwei neue V4-Tests bestanden; 20 Admin-Bereiche im bestehenden Navigationstest bestanden, nachdem dessen alte Überschrifterwartung korrigiert wurde. Der gemeinsame Nachlauf mit getrennten Legacy-/V4-Fixtures bestand mit **4/4 Tests**: zwei V4-Tests, bestehender Legacy-Kauf bis Rechnung im Mock-Postausgang und Navigation durch alle 20 Admin-Bereiche. Vollständige echte Stripe-Zahlungsabnahme, Live-SEPA/Erstattung, Produktionsmigrationen, Veröffentlichung, Backup-Restore und echte Sendungen wurden nicht ausgeführt.
-
 
 Gesichert in lokalen Entwicklungscommits auf `codex/conversion-v4`. Kein Push, Merge oder Produktionsdeploy ausgeführt. Das ursprüngliche Arbeitsverzeichnis mit vorherigen ungesicherten Änderungen bleibt erhalten.
