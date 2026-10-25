@@ -634,7 +634,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     sessionMinutes: 60,
     allowedTlds: ['de'],
     maxDomainPriceCents: 1500,
-    paymentMethods: ['card', 'sepa_debit'],
+    paymentMethods: ['card'],
   },
   onboarding: {
     includedChangeRounds: 2,

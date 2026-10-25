@@ -1,9 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { setOfferVersion } from './seed';
 
 const PAGES: [string, RegExp][] = [
   ['/', /Erst sehen.*Dann entscheiden/s],
   ['/so-funktionierts', /drei Schritten/],
-  ['/preise', /Offene Preise/],
+  ['/preise', /Zwei Tarife/],
   ['/garantie', /Zufriedenheitsgarantie/],
   ['/beispiele', /So sieht ein Entwurf aus/],
   ['/ueber-mich', /Hallo, (ich bin|hier ist)/],
@@ -31,17 +32,20 @@ test.describe('Firmen-Website', () => {
     expect(errors).toEqual([]);
   });
 
-  test('Preise: Umschalter wechselt den Preis; Vergleich zeigt beide Wege mit Mindestlaufzeit', async ({ page }) => {
+  test('Preise: öffentliche V4-Tarife bleiben auch mit gespeicherter Legacy-Konfiguration aktuell', async ({ page }) => {
+    setOfferVersion('legacy');
     await page.goto('/preise');
     await page.waitForLoadState('networkidle');
-    const toggle = page.getByRole('radiogroup', { name: 'Zahlweise' });
-    await expect(page.getByText('590 €').first()).toBeVisible();
-    await toggle.getByRole('radio', { name: 'Monatlich' }).click();
-    await expect(toggle.getByRole('radio', { name: 'Monatlich' })).toHaveAttribute('aria-checked', 'true');
-    await expect(page.getByText('12 Monate Mindestlaufzeit, erste Rate beim Kauf.')).toBeVisible();
-    const table = page.getByRole('table');
-    await expect(table).toContainText('12 Monate Mindestlaufzeit');
-    await expect(table).toContainText('19 €/Monat');
+    const tariffs = page.getByRole('region', { name: 'Tarife' });
+    await expect(tariffs.getByRole('heading', { name: 'SeitenWerk Basis', exact: true })).toBeVisible();
+    await expect(tariffs.getByRole('heading', { name: 'SeitenWerk Care+', exact: true })).toBeVisible();
+    await expect(tariffs).toContainText('597 €');
+    await expect(tariffs).toContainText('19 €/Monat insgesamt ab Go-Live');
+    await expect(tariffs).toContainText('99 €/Monat insgesamt ab Go-Live');
+    for (const route of ['/', '/preise', '/agb', '/garantie']) {
+      await page.goto(route);
+      await expect(page.locator('main')).not.toContainText(/49\s*€|590\s*€/);
+    }
   });
 
   test('Startseite: ruhige Produktvorschau und tatsächlich ansehbare Muster', async ({ page }) => {

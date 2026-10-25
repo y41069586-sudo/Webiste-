@@ -226,3 +226,23 @@ Worker-only Compose für spätere VPS-Freigabe; kein zweiter Produktionspostgres
 weder App noch Queue beim Start. Backup/Restore nur lokal nachgewiesen, echte Produktionssicherung
 weiter erforderlich. Aktueller Nachweis und Grenzen: docs/v5-quality-pruefung.md und
 v5-go-live-checkliste.md. Kein Deployment/DNS/echte Zahlungen/Briefversand durch diese Entscheidungen.
+
+## 25.10.2026 – Betreiberantworten zur Betriebsabnahme
+
+- Gewerbe laut Antwort auf Frage1 noch nicht angemeldet; mehrere Steuerfragen waren gebündelt,
+  daher aus „Nein“ weder bestätigte Regelbesteuerung noch abschließend fehlende W-IdNr. ableiten.
+  Steuerstatus bleibt unbestätigt. Kein Live-Verkauf und keine Briefkampagne freigegeben.
+- V4 Basis597+19 und Care+597+insgesamt99 ausdrücklich bestätigt. Kein49-Euro-Neukundenangebot.
+  Historische Vertragssnapshots unverändert erhalten. Default bleibt V4.
+- Domain-/Supportumfang nach bestehender Konfiguration: verfügbare Standard-.de-Domain bis
+  15Euro/Jahr, Hosting/SSL/Basis-Störungssupport; Zusatzleistungen separat bestätigen.
+- Auswahlbudget VPS maximal15Euro/Monat; keine konkrete Bestellung oder Bereitstellung freigegeben.
+  Einmaliges Testbudget10Euro, noch nicht verbraucht; keine automatische Ausweitung.
+- Nur Stripe/Kartenzahlung gewünscht, keine zusätzliche Banküberweisung. Neue Default-Konfiguration
+  checkout.paymentMethods=['card']; gespeicherte Produktionswerte und Altverträge unverändert.
+- Eigene Support-Testmail grundsätzlich genehmigt; noch nicht gesendet. Resend-Inbox-Sendetool
+  verlangt zusätzlich eine konkrete Bestätigung von Empfänger, Betreff und Wortlaut unmittelbar vorher.
+- Lesende Anbieterprüfung und konkrete Backup-/Migrationsvorbereitung erlaubt; keine Migration,
+  Produktionskonfiguration, Veröffentlichung, Domainkäufe oder echte Zahlungen/Briefe freigegeben.
+- Firmenwebsite erneut ansehen/weitergestalten und tatsächliche Brief-/Demo-Beispiele zeigen.
+  Bisherige V4-Gestaltung nur lokal, nicht als bereits auf seitenwerk.world veröffentlicht darstellen.

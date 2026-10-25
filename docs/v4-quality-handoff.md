@@ -143,3 +143,31 @@ Keine Feld-/CDN-Abnahme behaupten. Neue Skripte audit-final-pairs.mts und
 audit-mobile-performance.mts; App unverändert, keine externen Aktionen. Artefakte unter
 data/exports/final-audit mit SHA-256-Manifest. Frühere lokale Restpunkte durch diesen Audit ersetzt.
 Offen bleiben ausschließlich die im neuen Bericht kategorisierten externen Schritte/Freigaben.
+
+# Neuester Nachtrag: konkrete Betreiberantworten und öffentliche Preise
+
+25.10.2026, nach214c255. Betreiber bestätigt V4 und keine49-Euro-Neukundenangebote; nur Karte
+überStripe, VPS-Auswahlbudget15Euro/Monat und Testbudget10Euro. Gewerbe noch nicht angemeldet,
+Steuerstatus unbestätigt. Keine Produktionsmutation oder Veröffentlichung freigegeben.
+Rechtliche Nachprüfung und lesender Providerstand: docs/recht/nachpruefung-2026-10-25.md.
+
+Gefundene Lücke: öffentliche Firmenwebsite konnte über gespeicherte Legacy-Einstellungen alte
+Preise zeigen. getSiteConfig erzwingt jetzt V4 nur für öffentlichen Auftritt, dynamisch UND im
+statischen Export. Interne Konfiguration und historische Vertrags-/Rechnungssnapshots unverändert.
+Regression mit absichtlich gespeicherter Legacy-Konfiguration über/,/preise,/agb,/garantie bestanden.
+6/6Firmenwebsite-Browsertests,41betroffene Core-Tests, TypeScript allerPakete, Lint und Next-Build
+bestanden. Logs:/tmp/operator-site-tests.log,/tmp/operator-decisions-tests.log,
+/tmp/operator-typecheck-final.log,/tmp/operator-lint.log,/tmp/operator-build.log.
+
+QA-Skript leitet Briefempfänger aus Demo-Fakten ab, statt abweichender synthetischer Namen/Adressen.
+20Paare erneut gerendert, QR dekodiert, PDF/DIN-Prüfungen bestanden; keine Netzaufrufe/Sendung.
+Artefakte:data/exports/operator-preview. Aktuelle Firmenwebsite dort als Desktop-/Mobil-PNG,
+V4-Preise automatisch geprüft; beide Seitenbilder tatsächlich angesehen. Absender in allgemeinen
+Testdaten weiterhin fiktiv. Persönliche Vorschauen unter ignoriertem data/exports/deine-vorschau,
+keine personenbezogenen Angaben im Git. Keine behauptete Versand- oder Rechtsfreigabe.
+
+Neu zu beachten: gespeicherte Produktions-checkout.paymentMethods bleiben ungeprüft/unverändert;
+Default jetzt['card']. Dies allein ändert keine Netlify-/Supabase-Laufzeitkonfiguration.
+Resend-Postfach vorhanden, noch kein Eingangsbeleg und noch keine Testmail gesendet. Inbox-Sendetool
+verlangt vor Versand konkrete Bestätigung des Empfängers/Betreffs/Wortlauts; allgemeinesJa reicht dort
+nicht. Kein weiterer App-Neubau nötig; technische Providerabnahme und die externen Freigaben folgen.

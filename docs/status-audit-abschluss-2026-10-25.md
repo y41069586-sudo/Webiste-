@@ -5,6 +5,12 @@ Basis 9a09ca8. Keine vorhandenen Änderungen beim Einstieg; keine aktiven Node-/
 Core wbm_v4_test, E2E wbm_v4_e2e, Worker/Leistungsmessung wbm_v4_focus_test. DRY_RUN=true,
 alle Provider Mock. Keine produktiven Aktionen, keine externen Anbietermutationen.
 
+Nachtrag der Betreiberabnahme: siehe recht/nachpruefung-2026-10-25.md. Bei erneuter Ansicht der
+synthetischen Paare fiel auf, dass Adress-/Namensdaten des Brief-Fixtures von der Demo abwichen.
+Der frühere Sichtnachweis bestätigt das Layout, aber keine vollständige Faktenkonsistenz der Paare.
+QA-Skript korrigiert: Empfänger wird jetzt aus denselben BusinessFacts wie die Demo abgeleitet.
+Neue Artefakte getrennt unter data/exports/operator-preview; alte Nachweise bleiben erhalten.
+
 ## Nachweise der zehn beauftragten Aufgaben
 
 Alle nachstehenden Ergebnisse wurden tatsächlich ausgeführt; historische Zwischenläufe sind keine endgültige Abnahme.

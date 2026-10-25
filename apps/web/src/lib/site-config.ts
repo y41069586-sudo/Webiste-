@@ -5,7 +5,9 @@ import project from '../../../../supabase/project.json';
 
 /** Der statische Firmenexport braucht keinen direkten Datenbankzugang und keine privaten Schlüssel. */
 export async function getSiteConfig() {
-  if (!getEnv().SITE_STATIC) return getConfig();
+  // Public acquisition always advertises today's offer. Legacy settings remain available
+  // to existing orders and their snapshots, but must not restore retired public prices.
+  if (!getEnv().SITE_STATIC) return deepMerge(await getConfig(), { offers: { activeVersion: 'v4' } });
   const fallback = deepMerge(DEFAULT_CONFIG, { sender: OPERATOR_PROFILE });
   const url = process.env.SUPABASE_URL || project.url;
   const response = await fetch(`${url}/functions/v1/seitenwerk-site-config`, {
@@ -14,7 +16,7 @@ export async function getSiteConfig() {
   });
   if (!response.ok) throw new Error('Die Website-Einstellungen konnten nicht geladen werden.');
   const data = await response.json();
-  return appConfigSchema.parse(deepMerge(fallback, data));
+  return appConfigSchema.parse(deepMerge(deepMerge(fallback, data), { offers: { activeVersion: 'v4' } }));
 }
 
 interface PublicSource {

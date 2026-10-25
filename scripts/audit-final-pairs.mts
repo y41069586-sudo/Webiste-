@@ -12,7 +12,7 @@ import { v4LetterVariant } from '../packages/core/src/letters/conversion-v4';
 import { validateLetterDom } from '../packages/core/src/render/pdf';
 import { closeBrowser } from '../packages/core/src/render/browser';
 import { takeScreenshots, renderComposite } from '../packages/core/src/render/screenshots';
-const out = 'data/exports/final-audit';
+const out = process.env.AUDIT_PAIRS_OUTPUT ?? 'data/exports/final-audit';
 mkdirSync(out, { recursive: true });
 const cfg = deepMerge(DEFAULT_CONFIG, {
   sender: {
@@ -68,11 +68,11 @@ try {
         cfg,
         variant,
         recipient: {
-          businessName: 'Beispielbetrieb ' + group,
-          street: 'Musterweg',
-          houseNumber: '2',
-          postalCode: '12345',
-          city: 'Beispielstadt',
+          businessName: input.facts.name,
+          street: input.facts.street,
+          houseNumber: input.facts.houseNumber,
+          postalCode: input.facts.postalCode,
+          city: input.facts.city,
         },
         domain: null,
         rating: null,
