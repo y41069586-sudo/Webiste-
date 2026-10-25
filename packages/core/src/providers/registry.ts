@@ -76,6 +76,8 @@ export const registry = {
     if (kind !== 'stripe') return undefined;
     if (!env.STRIPE_SECRET_KEY)
       throw new Error('PAYMENT_PROVIDER=stripe verlangt STRIPE_SECRET_KEY (sonst PAYMENT_PROVIDER=mock).');
+    if (env.DRY_RUN && !/^(sk|rk)_test_/.test(env.STRIPE_SECRET_KEY))
+      throw new Error('DRY_RUN erlaubt ausschließlich Stripe-Testschlüssel.');
     if (env.NODE_ENV === 'production' && !env.STRIPE_WEBHOOK_SECRET)
       throw new Error('STRIPE_WEBHOOK_SECRET fehlt (Webhook-Signaturen sind Pflicht).');
     return new StripePayment({ secretKey: env.STRIPE_SECRET_KEY, webhookSecret: env.STRIPE_WEBHOOK_SECRET });

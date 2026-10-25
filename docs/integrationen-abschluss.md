@@ -72,3 +72,23 @@ Abschlussprüfungen: ESLint gesamtes Repository, Core-/Web-TypeScript erfolgreic
 Resend-Signatur-/Empfängertests, zwei Rechtstext-/Konfigurationstests, zwei Site-Sicherheitstests
 und vier TLS-Konfigurationstests bestanden. Kein Versand, keine Zahlung, kein DB-Reset.
 Vollständiger lokaler Next-Build weiterhin nicht erneut als erfolgreich bestätigt.
+
+## 25.10.2026: Betreiber hat Schlüssel hinterlegt
+
+Netlify-Readback bestätigt S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, STRIPE_SECRET_KEY,
+STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, RESEND_WEBHOOK_SECRET und EMAIL_API_KEY vorhanden,
+alle is_secret=true, Functions-Scope enthalten, Production-Werte vorhanden. Werte werden vom
+Connector maskiert: keine Validität oder Stripe-Testmodus aus dem maskierten Wert ableiten.
+Die frühere Sperre ungeschützter Secretablage ist durch die sichere Einrichtung des Betreibers
+überholt; keine geschützten Werte durch den Agenten ersetzt oder ausgegeben.
+
+STORAGE_DRIVER=s3 gesetzt, erst nach neuem Deploy wirksam. PAYMENT_PROVIDER bleibt mock,
+EMAIL_PROVIDER bleibt mock. DRY_RUN true. Providerinitialisierung weist Stripe-Live-/unbekannte
+Schlüssel bei DRY_RUN explizit zurück; isolierter Regressionstest für sk_/rk_ test/live.
+
+Neue authentifizierte GET-Prüfung /api/admin/integrations: bestätigt ausschließlich sichere
+Statusfelder, liest Stripe-Produktliste mit Testschlüssel, privaten Speicher-Präfix health/ und
+Resend-Inbox-Metadaten. Keine Zahlungen, Nachrichten, Datei-/Konfigurationsänderungen. Kein
+Upstream-Payload oder Schlüssel in Antworten/Logs. Erst nach neuer Veröffentlichung abrufbar.
+Anschließend müssen gültige Testberechtigungen und Secretpaare geprüft werden, bevor Provider
+oder die derzeit pausierten Webhooks aktiviert werden. Ein Secret-Eintrag allein genügt nicht.
