@@ -1,4 +1,7 @@
 import Stripe from 'stripe';
+import { createHash } from 'node:crypto';
+import { stripeV4Price } from '../../config/stripe-v4-prices';
+import { isV4Tier } from '../../services/offers-v4';
 import { CHECKOUT_FIELDS } from '../types';
 import type {
   CheckoutSession,
@@ -31,6 +34,14 @@ const EVENT_TYPES: Record<string, PaymentEventType> = {
  * Dashboard aktiven Zahlungsarten – ist SEPA dort nicht aktiv, wird nur Karte angeboten (kein Fehler).
  */
 const DEFAULT_PAYMENT_METHODS: Stripe.Checkout.SessionCreateParams.AllowedPaymentMethodType[] = ['card', 'sepa_debit'];
+
+function v4IntegrationLabel(key: string): string {
+  // Stable across retries with the same Idempotency-Key, with the required eight-letter suffix.
+  const suffix = [...createHash('sha256').update(key).digest().subarray(0, 8)]
+    .map((n) => String.fromCharCode(97 + (n % 26)))
+    .join('');
+  return `seitenwerk_v4_${suffix}`;
+}
 
 function fromUnix(v: number | null | undefined): Date | undefined {
   return typeof v === 'number' ? new Date(v * 1000) : undefined;
@@ -97,9 +108,21 @@ function collectionParams(input: CheckoutSessionInput): Partial<Stripe.Checkout.
       },
       {
         key: CHECKOUT_FIELDS.terms,
-        label: { type: 'custom', custom: `AGB (Stand ${c.termsVersion}) gelesen und akzeptiert`.slice(0, 100) },
+        label: {
+          type: 'custom',
+          custom: c.recurringTerms
+            ? 'AGB und gewählter Monatstarif ab Go-Live'
+            : `AGB (Stand ${c.termsVersion}) gelesen und akzeptiert`.slice(0, 100),
+        },
         type: 'dropdown',
-        dropdown: { options: [{ label: 'Ja, ich akzeptiere die AGB', value: 'ja' }] },
+        dropdown: {
+          options: [
+            {
+              label: c.recurringTerms ? 'Ja, AGB und Monatstarif ausdrücklich akzeptiert' : 'Ja, ich akzeptiere die AGB',
+              value: 'ja',
+            },
+          ],
+        },
       },
     ],
     custom_text: {
@@ -155,6 +178,9 @@ export class StripePayment implements PaymentProvider {
   }
 
   async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSession> {
+    const v4 = isV4Tier(input.metadata.plan ?? '');
+    if (v4 && input.recurring) throw new Error('V4-Einrichtung darf noch kein Monatsabo starten.');
+    const setupPrice = v4 ? stripeV4Price('setup', this.testMode, input.amountCents, input.currency) : null;
     const minutes = Math.min(24 * 60, Math.max(30, input.expiresInMinutes ?? 60));
     if (input.recurring) {
       const session = await this.stripe.checkout.sessions.create(
@@ -203,15 +229,20 @@ export class StripePayment implements PaymentProvider {
       allowed_payment_method_types: input.paymentMethods ?? DEFAULT_PAYMENT_METHODS,
       submit_type: 'pay',
       client_reference_id: input.orderId,
+      ...(v4 ? { integration_identifier: v4IntegrationLabel(input.idempotencyKey) } : {}),
       ...(input.customerEmail ? { customer_email: input.customerEmail } : {}),
       line_items: [
         {
           quantity: 1,
-          price_data: {
-            currency: input.currency,
-            unit_amount: input.amountCents,
-            product_data: { name: input.productName, description: input.productDescription.slice(0, 500) },
-          },
+          ...(setupPrice
+            ? { price: setupPrice }
+            : {
+                price_data: {
+                  currency: input.currency,
+                  unit_amount: input.amountCents,
+                  product_data: { name: input.productName, description: input.productDescription.slice(0, 500) },
+                },
+              }),
         },
       ],
       metadata: input.metadata,
@@ -231,26 +262,40 @@ export class StripePayment implements PaymentProvider {
 
   /** Abo mit Testphase bis zum Ende des inklusiven Hostings (Stripe: trial_end ≥ 48 h in der Zukunft). */
   async createSubscriptionCheckout(input: SubscriptionCheckoutInput): Promise<CheckoutSession> {
+    const v4 = input.metadata.offerVersion === 'v4';
+    if (v4 && (!input.confirmedGoLive || !isV4Tier(input.metadata.tier ?? '')))
+      throw new Error('V4-Monatsabo benötigt bestätigten Go-Live und einen gültigen Tarif.');
+    const recurringPrice = v4
+      ? stripeV4Price(input.metadata.tier as 'basis' | 'care_plus', this.testMode, input.amountCents, 'eur')
+      : null;
+    if (input.confirmedGoLive && (!Number.isFinite(input.billingStartsAt.getTime()) || input.billingStartsAt > new Date()))
+      throw new Error('Go-Live ist noch nicht bestätigt.');
     const minTrial = Math.floor(Date.now() / 1000) + 49 * 3600;
     const trialEnd = Math.max(minTrial, Math.floor(input.billingStartsAt.getTime() / 1000));
     const session = await this.stripe.checkout.sessions.create(
       {
         mode: 'subscription',
         locale: 'de',
+        ...(v4 ? { integration_identifier: v4IntegrationLabel(input.idempotencyKey) } : {}),
+        allowed_payment_method_types: DEFAULT_PAYMENT_METHODS,
         client_reference_id: input.customerRef,
         customer_email: input.customerEmail,
         line_items: [
           {
             quantity: 1,
-            price_data: {
-              currency: 'eur',
-              unit_amount: input.amountCents,
-              recurring: { interval: 'month' },
-              product_data: { name: input.productName },
-            },
+            ...(recurringPrice
+              ? { price: recurringPrice }
+              : {
+                  price_data: {
+                    currency: 'eur',
+                    unit_amount: input.amountCents,
+                    recurring: { interval: 'month' },
+                    product_data: { name: input.productName },
+                  },
+                }),
           },
         ],
-        subscription_data: { trial_end: trialEnd, metadata: input.metadata },
+        subscription_data: { ...(input.confirmedGoLive ? {} : { trial_end: trialEnd }), metadata: input.metadata },
         metadata: input.metadata,
         success_url: input.successUrl,
         cancel_url: input.cancelUrl,

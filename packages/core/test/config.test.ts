@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { effectiveSwitches, getConfig, updateConfig } from '../src/config/service';
 import { deepMerge } from '../src/config/settings';
 import { resetEnvCache } from '../src/config/env';
@@ -6,6 +6,16 @@ import { resetDb } from './helpers';
 
 describe('Konfiguration', () => {
   beforeEach(resetDb);
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('Engagement bleibt ohne gesonderte Freigabe aus, auch bei gespeichertem true und warmem Cache', async () => {
+    vi.stubEnv('ENGAGEMENT_TRACKING_APPROVED', 'true');
+    await updateConfig({ metrics: { engagementBeacon: true } }, 'test');
+    expect((await getConfig({ fresh: true })).metrics.engagementBeacon).toBe(true);
+    vi.stubEnv('ENGAGEMENT_TRACKING_APPROVED', 'false');
+    expect((await getConfig()).metrics.engagementBeacon).toBe(false);
+    expect((await getConfig({ fresh: true })).metrics.engagementBeacon).toBe(false);
+  });
 
   it('liefert Standardwerte aus dem Auftrag', async () => {
     const cfg = await getConfig({ fresh: true });

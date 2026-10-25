@@ -1,3 +1,4 @@
+import { addDays as v4AddDays } from '../util/time';
 import { eq } from 'drizzle-orm';
 import { getTemplate, renderSite, renderSubpage, type BusinessFacts, type RenderInput, type SiteContent } from '@wbm/templates';
 import { appUrl } from '../config/env';
@@ -685,7 +686,10 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
 
   if (ctx.site.status === 'live') return result; // Re-Deploy einer bereits live geschalteten Seite
   const now = new Date();
-  const hostingUntil = ctx.customer.hostingUntil ?? addMonths(now, ctx.cfg.pricing.hostingMonthsIncluded);
+  const purchasedOrder = await getDb().query.orders.findFirst({ where: eq(orders.id, ctx.customer.orderId) });
+  const hostingUntil = purchasedOrder?.offerSnapshot
+    ? null
+    : (ctx.customer.hostingUntil ?? addMonths(now, ctx.cfg.pricing.hostingMonthsIncluded));
   let domainExpires: Date | undefined;
   if (useDomain)
     domainExpires = (
@@ -704,7 +708,13 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
       .where(eq(customers.id, ctx.customer.id));
     // Garantie läuft ab Go-Live (höchstens bis zum spätesten Beginn laut Zahlung)
     const order = await tx.query.orders.findFirst({ where: eq(orders.id, ctx.customer.orderId) });
-    if (order?.paidAt && order.guaranteeEndsAt) {
+    if (order?.offerSnapshot && order.paidAt && ctx.cfg.guarantee.enabled) {
+      await tx
+        .update(orders)
+        .set({ guaranteeEndsAt: v4AddDays(now, ctx.cfg.guarantee.days), updatedAt: now })
+        .where(eq(orders.id, order.id));
+    }
+    if (order?.paidAt && order.guaranteeEndsAt && !order.offerSnapshot) {
       const end = guaranteeEndFor(ctx.cfg, order.paidAt, now);
       if (end < order.guaranteeEndsAt)
         await tx.update(orders).set({ guaranteeEndsAt: end, updatedAt: now }).where(eq(orders.id, order.id));
@@ -725,8 +735,13 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
     name: ctx.customer.contactName,
     url,
     domain: useDomain ? domain : null,
-    hostingUntil: formatDateLongDe(hostingUntil),
+    hostingUntil: hostingUntil
+      ? formatDateLongDe(hostingUntil)
+      : 'monatlicher Tarif ab Go-Live – separater Aboabschluss erforderlich',
     formTarget: ctx.site.formTargetEmail ?? ctx.customer.email,
+    monthlyOffer: ctx.order.offerSnapshot
+      ? { amountCents: ctx.order.offerSnapshot.monthlyCents, url: appUrl(`/verlaengern/${ctx.customer.accessToken}`) }
+      : undefined,
   });
   await sendTransactionalEmail({
     ...mail,

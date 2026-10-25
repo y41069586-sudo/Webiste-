@@ -139,6 +139,7 @@ export interface TrustInfo {
 }
 
 export interface DemoOptions {
+  offerVersion?: 'v4' | 'legacy';
   slug: string;
   /** Einmalpreis (Kurzform) – für Altdaten/Fallback */
   priceLabel: string;

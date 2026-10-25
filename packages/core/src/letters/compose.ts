@@ -1,3 +1,4 @@
+import { v4PriceText } from '../services/offers-v4';
 import type { LetterData } from '@wbm/templates/letter-types';
 import type { AppConfig } from '../config/settings';
 import { priceTaxSuffix } from '../invoices/build';
@@ -74,6 +75,7 @@ export interface ComposeInput {
 
 /** Beide Preisoptionen in einem Satzteil – die Mindestlaufzeit steht immer direkt neben der Monatsrate. */
 export function pricesPhrase(cfg: AppConfig, oneTimeLabel: string): string {
+  if (cfg.offers.activeVersion === 'v4') return v4PriceText();
   const p = cfg.pricing;
   const tax = priceTaxSuffix(cfg);
   const t = tax ? ` ${tax}` : '';
@@ -89,6 +91,7 @@ export function guaranteeSentence(cfg: AppConfig): string {
 function composeVars(i: ComposeInput): Record<string, string> {
   return {
     firmenname: i.recipient.businessName,
+    ort: i.recipient.city,
     preis: i.priceLabel,
     preise: pricesPhrase(i.cfg, i.priceLabel),
     preis_monat: formatEuroShort(i.cfg.pricing.monthlyCents),

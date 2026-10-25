@@ -1,3 +1,4 @@
+import { priorityV4, type PriorityReason } from './priority-v4';
 import type { AppConfig, BranchConfig } from '../config/settings';
 import type { RawPlace } from '../providers/types';
 import type { LeadSegment } from '../types';
@@ -95,6 +96,7 @@ export interface QualifyInput {
 
 export interface QualifyResult {
   qualified: boolean;
+  scoreReasons: PriorityReason[];
   reasons: RejectionReason[];
   score: number;
   website: WebsiteClass;
@@ -154,11 +156,18 @@ export function qualify(input: QualifyInput): QualifyResult {
   if (input.chainByFrequency || matchesChainName(place.name, cfg.targeting.chainNames)) reasons.push('chain');
   if (input.isDuplicate) reasons.push('duplicate');
   if (input.excludedIndustry) reasons.push('excluded_industry');
+  const priority = priorityV4(place, {
+    completeAddress: hasCompleteAddress(place),
+    hasWebsite: website.hasWebsite,
+    socialOnly: website.socialOnly,
+    branchWeight: input.branch.weight,
+  });
   const base = computeScore({ branch: input.branch, place, rating: input.rating, website });
   return {
     qualified: reasons.length === 0,
+    scoreReasons: priority.reasons,
     reasons,
-    score: Math.round((base + cfg.segments.scoreBonus[segment]) * 100) / 100,
+    score: cfg.offers.activeVersion === 'v4' ? priority.score : Math.round((base + cfg.segments.scoreBonus[segment]) * 100) / 100,
     website,
     segment,
   };

@@ -5,6 +5,8 @@ export default async function setup(): Promise<void> {
   const url = process.env.TEST_DATABASE_URL ?? 'postgres://wbm:wbm@localhost:5432/wbm_test';
   const u = new URL(url);
   const dbName = u.pathname.slice(1);
+  if (!['localhost', '127.0.0.1', '::1'].includes(u.hostname) || !/^[a-zA-Z0-9_]*(test|e2e)[a-zA-Z0-9_]*$/.test(dbName))
+    throw new Error('Testdatenbank-Reset ist ausschließlich lokal für ausdrücklich benannte test/e2e-Datenbanken erlaubt.');
   const admin = new URL(url);
   admin.pathname = '/postgres';
   const client = new pg.Client({ connectionString: admin.toString() });

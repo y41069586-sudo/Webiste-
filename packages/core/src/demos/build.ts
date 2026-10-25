@@ -1,3 +1,4 @@
+import { v4Offer, V4_TIERS, v4FirstYearCents } from '../services/offers-v4';
 import { eq, sql } from 'drizzle-orm';
 import {
   renderSite,
@@ -138,9 +139,33 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
       ],
       href: take('monthly'),
     });
+  if (cfg.offers.activeVersion === 'v4') {
+    offers.splice(
+      0,
+      offers.length,
+      ...V4_TIERS.map((tier) => {
+        const o = v4Offer(tier);
+        return {
+          title: tier === 'basis' ? 'SeitenWerk Basis' : 'SeitenWerk Care+',
+          price: formatEuroShort(o.setupCents),
+          unit: 'einmalig',
+          points: [
+            `+ ${formatEuroShort(o.monthlyCents)}/Monat insgesamt ab Go-Live`,
+            'Monatlich kündbar, keine zwölfmonatige Mindestbindung',
+            tier === 'care_plus'
+              ? 'Hosting inklusive; bis zu 60 Minuten kleine Inhaltsänderungen/Monat'
+              : 'Hosting, SSL und Basis-Support bei Betriebsstörungen',
+            `Erstes volles Betriebsjahr: ${formatEuroShort(v4FirstYearCents(tier))} bei 12 Monatsgebühren`,
+          ],
+          href: demoUrl(`/d/${slug}/uebernehmen?plan=${tier}`),
+        };
+      }),
+    );
+  }
   return {
+    offerVersion: cfg.offers.activeVersion,
     slug,
-    priceLabel: formatEuroShort(p.packageCents),
+    priceLabel: formatEuroShort(cfg.offers.activeVersion === 'v4' ? v4Offer('basis').setupCents : p.packageCents),
     checkoutUrl: demoUrl(`/d/${slug}/uebernehmen`),
     questionUrl: demoUrl(`/d/${slug}/frage`),
     optOutUrl: demoUrl(`/d/${slug}/kein-interesse`),

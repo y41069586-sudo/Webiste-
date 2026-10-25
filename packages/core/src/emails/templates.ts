@@ -90,10 +90,15 @@ export function orderConfirmationEmail(
     monthlyMinTermEnds?: string | null;
     /** Zufriedenheitsgarantie bis (formatiert) */
     guaranteeUntil?: string | null;
+    v4?: { tier: 'basis' | 'care_plus'; monthlyCents: number };
   },
 ): EmailContent {
   const p = cfg.pricing;
   const terms: Block[] = [];
+  if (d.v4)
+    terms.push(
+      `Einmalige Einrichtung: ${d.amount}. Ihr gewählter Tarif ${d.v4.tier === 'basis' ? 'Basis' : 'Care+'} kostet insgesamt ${formatEuro(d.v4.monthlyCents)} pro Monat. Das Monatsabo schließen Sie erst nach bestätigtem Go-Live gesondert ab. Keine Monatsabbuchung vor Go-Live und keine zwölfmonatige Mindestbindung.`,
+    );
   if (d.monthlyMinTermEnds)
     terms.push(
       `Sie zahlen ${d.amount} pro Monat, die Mindestlaufzeit endet am ${d.monthlyMinTermEnds}. Danach kostet „${p.subscriptionName}“ automatisch nur noch ${formatEuro(p.subscriptionCents)} pro Monat und ist monatlich kündbar. Für jede Rate erhalten Sie eine eigene Rechnung.`,
@@ -103,7 +108,7 @@ export function orderConfirmationEmail(
       `Zufriedenheitsgarantie: Sind Sie nicht zufrieden, antworten Sie bis zum ${d.guaranteeUntil} auf diese E-Mail – Sie bekommen Ihr Geld zurück${d.monthlyMinTermEnds ? ' und der Vertrag endet' : ''}.`,
     );
   return renderEmail(cfg, {
-    subject: `Ihre Bestellung: ${d.monthlyMinTermEnds ? p.monthlyName : p.packageName} für ${d.company} (Rechnung ${d.invoiceNumber})`,
+    subject: `Ihre Bestellung: ${d.v4 ? `SeitenWerk ${d.v4.tier === 'basis' ? 'Basis' : 'Care+'} – Einrichtung` : d.monthlyMinTermEnds ? p.monthlyName : p.packageName} für ${d.company} (Rechnung ${d.invoiceNumber})`,
     name: d.name,
     blocks: [
       `vielen Dank für Ihre Bestellung – die Zahlung über ${d.amount} ist eingegangen. Die Rechnung ${d.invoiceNumber} finden Sie im Anhang.`,
@@ -301,7 +306,14 @@ export function previewReadyEmail(
 
 export function liveHandoverEmail(
   cfg: AppConfig,
-  d: { name: string; url: string; domain: string | null; hostingUntil: string; formTarget: string },
+  d: {
+    name: string;
+    url: string;
+    domain: string | null;
+    hostingUntil: string;
+    formTarget: string;
+    monthlyOffer?: { amountCents: number; url: string };
+  },
 ): EmailContent {
   return renderEmail(cfg, {
     subject: `Ihre Website ist online: ${d.domain ?? d.url}`,
@@ -314,10 +326,13 @@ export function liveHandoverEmail(
             ? `Die Domain ${d.domain} ist auf Sie registriert und gehört Ihnen.`
             : 'Ihre Website ist unter der oben genannten Adresse erreichbar.',
           `Nachrichten aus dem Kontaktformular gehen an ${d.formTarget}.`,
-          `Hosting und SSL-Verschlüsselung sind bis ${d.hostingUntil} enthalten. Wir erinnern Sie rechtzeitig vor Ablauf.`,
+          d.monthlyOffer
+            ? `Ihr Monatstarif kostet insgesamt ${formatEuro(d.monthlyOffer.amountCents)}. Bitte bestätigen Sie jetzt den separaten Aboabschluss; erst damit beginnt die monatliche Zahlung. Es gibt keine rückwirkende Abbuchung für die Vorschauzeit.`
+            : `Hosting und SSL-Verschlüsselung sind bis ${d.hostingUntil} enthalten. Wir erinnern Sie rechtzeitig vor Ablauf.`,
           'Impressum und Datenschutzerklärung stammen aus Ihren Angaben – bitte halten Sie sie aktuell und geben Sie uns Bescheid, wenn sich etwas ändert.',
         ],
       },
+      ...(d.monthlyOffer ? [{ button: { href: d.monthlyOffer.url, label: 'Monatstarif bestätigen' } }] : []),
       'Kleine Textänderungen oder neue Öffnungszeiten? Antworten Sie einfach auf diese E-Mail.',
       'Vielen Dank für Ihr Vertrauen!',
     ],

@@ -323,6 +323,7 @@ export interface CheckoutSessionInput {
     domainDefault?: string;
     termsUrl: string;
     termsVersion: string;
+    recurringTerms?: boolean;
     /** Hinweis neben dem Bezahlknopf (Mindestlaufzeit, Garantie …) */
     submitNote: string;
   };
@@ -429,6 +430,8 @@ export interface SubscriptionCheckoutInput {
   productName: string;
   /** Erste Abbuchung erst ab diesem Zeitpunkt (Ende des inklusiven Hostings) */
   billingStartsAt: Date;
+  /** New V4 flow: subscription checkout is offered only after confirmed Go-Live. */
+  confirmedGoLive?: boolean;
   successUrl: string;
   cancelUrl: string;
   metadata: Record<string, string>;

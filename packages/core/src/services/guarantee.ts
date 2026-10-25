@@ -59,10 +59,11 @@ export async function guaranteeRefund(orderId: string, actor: string): Promise<{
   const customer = await db.query.customers.findFirst({ where: eq(customers.orderId, order.id) });
 
   // 1) Option B: Vertrag sofort beenden (keine weiteren Raten), bevor erstattet wird
-  if (order.plan === 'monthly' && order.stripeSubscriptionId) {
+  const subscriptionToCancel = order.stripeSubscriptionId ?? (order.offerSnapshot ? customer?.subscriptionId : null);
+  if (subscriptionToCancel) {
     const p = getProviders().payment;
     if (!p.cancelSubscription) throw new Error('Der Zahlungsanbieter kann Abos nicht über die API beenden.');
-    await p.cancelSubscription(order.stripeSubscriptionId, { idempotencyKey: `guarantee-cancel-${order.id}` });
+    await p.cancelSubscription(subscriptionToCancel, { idempotencyKey: `guarantee-cancel-${order.id}` });
   }
   const now = new Date();
   await db

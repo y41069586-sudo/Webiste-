@@ -4,6 +4,7 @@ import { variants } from '../db/schema';
 import { maintainClaims } from '../claims/library';
 import { SLOT_VARIANTS } from '../letters/slots';
 import { DEFAULT_LETTER_VARIANTS } from '../letters/variants';
+import { v4LetterVariant, V4_LETTER_INDUSTRIES } from '../letters/conversion-v4';
 import { syncPlaybooks } from '../playbooks';
 
 /**
@@ -51,6 +52,25 @@ export async function seedDefaults(db: DbOrTx = getDb()): Promise<void> {
         target: [variants.kind, variants.name],
         set: { slotsJson: slots, content: slots, industry: v.industry, sequence: v.sequence, hypothesis: v.hypothesis },
       });
+  }
+  // New candidates are review-only, never automatically added to active allocations.
+  for (const industry of V4_LETTER_INDUSTRIES) {
+    for (const arm of ['A', 'B', 'C'] as const) {
+      await db
+        .insert(variants)
+        .values({
+          kind: 'letter',
+          name: `V4 ${industry} ${arm}`,
+          industry,
+          sequence: 1,
+          content: v4LetterVariant(industry, arm) as unknown as Record<string, unknown>,
+          status: 'paused',
+          active: false,
+          weight: 1,
+          hypothesis: arm === 'A' ? 'Bestehende Kontrolle' : arm === 'B' ? 'Vorschau zuerst' : 'Branchennutzen zuerst',
+        })
+        .onConflictDoNothing({ target: [variants.kind, variants.name] });
+    }
   }
   await db.execute(sql`INSERT INTO counters (name, value) VALUES ('demos_reviewed', 0) ON CONFLICT DO NOTHING`);
   // Claims-Bibliothek und Playbooks aus den YAML-Dateien (B2/B3)

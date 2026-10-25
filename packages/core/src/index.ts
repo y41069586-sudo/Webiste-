@@ -110,3 +110,10 @@ export {
 export * from './stats/bayes';
 export * from './stats/model';
 export * from './stats/simulate';
+
+export * from './services/offers-v4';
+
+export * from './services/contribution-v4';
+
+export * from './services/finance-v4';
+export * from './services/funnel-v4';

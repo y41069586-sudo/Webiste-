@@ -53,6 +53,7 @@ export async function sendOrderInvoice(orderId: string): Promise<'sent' | 'alrea
     domain: order.domainWish,
     monthlyMinTermEnds: order.plan === 'monthly' && order.minTermEndsAt ? formatDateLongDe(order.minTermEndsAt) : null,
     guaranteeUntil: order.guaranteeEndsAt ? formatDateLongDe(order.guaranteeEndsAt) : null,
+    v4: order.offerSnapshot ?? undefined,
   });
   await sendTransactionalEmail({
     ...mail,

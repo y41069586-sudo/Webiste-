@@ -1,5 +1,5 @@
 import { eq, sql } from 'drizzle-orm';
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { updateConfig } from '../src/config/service';
 import { getDb } from '../src/db/client';
 import { demos, events, leads, letters, orders } from '../src/db/schema';
@@ -91,8 +91,11 @@ describe('Messung und Funnel (L4)', () => {
     await updateConfig({ ...OPERATOR_TEST_CONFIG }, 'test');
   });
   afterAll(stopBoss);
+  afterEach(() => vi.unstubAllEnvs());
 
   it('Abnahme: simulierter Durchlauf Scan → Demo → Kauf erscheint vollständig im Funnel', async () => {
+    vi.stubEnv('ENGAGEMENT_TRACKING_APPROVED', 'true');
+    await updateConfig({ metrics: { engagementBeacon: true } }, 'test:explicit-approval');
     const db = getDb();
     const { lead, demo } = await seedSentLetter({ industry: 'gastronomie', segment: 'neu' });
     // Scan über die Kurz-URL (Kanal wird mitgespeichert)

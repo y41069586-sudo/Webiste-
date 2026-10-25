@@ -75,10 +75,13 @@ describe('Qualifizierung', () => {
     expect(q({}, { rating: null, cfg }).reasons).toContain('no_rating_data');
   });
 
-  it('höherer Score bei mehr Bewertungen', () => {
-    expect(q({}, { rating: { rating: 4.8, ratingCount: 300 } }).score).toBeGreaterThan(
-      q({}, { rating: { rating: 4.8, ratingCount: 40 } }).score,
-    );
+  it('V4 priorisiert keine Bewertungssummen als erfundenes Finanzsignal; Legacy bleibt unverändert', () => {
+    const high = { rating: { rating: 4.8, ratingCount: 300 } };
+    const low = { rating: { rating: 4.8, ratingCount: 40 } };
+    expect(q({}, high).score).toBe(q({}, low).score);
+    const cfg = { ...DEFAULT_CONFIG, offers: { activeVersion: 'legacy' as const } };
+    expect(q({}, { ...high, cfg }).score).toBeGreaterThan(q({}, { ...low, cfg }).score);
+    expect(q({}).scoreReasons.some((r) => r.criterion === 'website' && !r.verified)).toBe(true);
   });
 
   it('Kettenname matcht nur ganze Wörter', () => {

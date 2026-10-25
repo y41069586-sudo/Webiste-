@@ -10,6 +10,8 @@ export async function resetDb(): Promise<void> {
     rate_limits, webhook_events, reports, alerts, outbound_emails, order_payments, dunning_letters, arm_allocations, safety_actions,
     experiments, objections, weekly_reports RESTART IDENTITY CASCADE`);
   await db.execute(sql`UPDATE counters SET value = 0`);
+  // Existing contract regression fixtures explicitly keep the legacy offer; V4 tests opt in.
+  await db.execute(sql`INSERT INTO settings (key, value) VALUES ('app_config', '{"offers":{"activeVersion":"legacy"}}'::jsonb)`);
   invalidateConfigCache();
 }
 

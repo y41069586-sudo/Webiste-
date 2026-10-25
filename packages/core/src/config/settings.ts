@@ -74,6 +74,7 @@ export const appConfigSchema = z.object({
     /** Kurzvorstellung (zwei Sätze, keine erfundenen Referenzen) */
     intro: z.string().max(400).default(''),
   }),
+  offers: z.object({ activeVersion: z.enum(['v4', 'legacy']).default('v4') }).default({ activeVersion: 'v4' }),
   pricing: z.object({
     /** Option A „Einmalzahlung“ (Stripe mode=payment) */
     packageCents: z.number().int().positive(),
@@ -118,9 +119,9 @@ export const appConfigSchema = z.object({
       /** erwarteter Anteil, der nach der Mindestlaufzeit kündigt (0–1) */
       expectedChurnRate: z.number().min(0).max(1),
       /** Verweildauer/Scrolltiefe per Skript auf der Demo messen (abschaltbar, falls die Rechtsprüfung zu § 25 TDDDG es verlangt) */
-      engagementBeacon: z.boolean().default(true),
+      engagementBeacon: z.boolean().default(false),
     })
-    .default({ expectedFollowMonths: 12, expectedChurnRate: 0.5, engagementBeacon: true }),
+    .default({ expectedFollowMonths: 12, expectedChurnRate: 0.5, engagementBeacon: false }),
   segments: z.object({
     /** Segment „neu“: neu aufgetaucht mit so vielen Bewertungen (Mindestanzahl entfällt, Mindest-Rating bleibt) */
     newMinRatings: z.number().int().min(0),
@@ -437,6 +438,7 @@ export const DEFAULT_BRANCHES: BranchConfig[] = [
 ];
 
 export const DEFAULT_CONFIG: AppConfig = {
+  offers: { activeVersion: 'v4' },
   sender: {
     name: 'Vorname Nachname',
     company: 'Website-Brief (Platzhalter)',
@@ -481,7 +483,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     maintenanceAfterDays: 7,
     claimDueDays: 14,
   },
-  metrics: { expectedFollowMonths: 12, expectedChurnRate: 0.5, engagementBeacon: true },
+  metrics: { expectedFollowMonths: 12, expectedChurnRate: 0.5, engagementBeacon: false },
   segments: {
     newMinRatings: 3,
     newMaxRatings: 20,

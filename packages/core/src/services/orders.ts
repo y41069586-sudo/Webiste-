@@ -1,3 +1,4 @@
+import { isV4Tier, v4Offer, v4PriceText } from './offers-v4';
 import { and, desc, eq, gt, inArray, isNull, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { appUrl, getEnv } from '../config/env';
@@ -110,8 +111,8 @@ export async function getCheckoutContext(slug: string): Promise<CheckoutContext>
   // Echte Zahlungen erst, wenn Absenderdaten, Rechtstexte und AGB vollständig sind
   if (avail.mode === 'live' && goLiveBlockers(cfg).length)
     return { state: 'disabled', reason: 'Online-Bestellung ist noch nicht freigeschaltet.' };
-  const a = planAmounts(cfg, 'one_time');
-  const m = planAmounts(cfg, 'monthly');
+  const a = planAmounts(cfg, cfg.offers.activeVersion === 'v4' ? 'basis' : 'one_time');
+  const m = planAmounts(cfg, cfg.offers.activeVersion === 'v4' ? 'care_plus' : 'monthly');
   const l = found.lead;
   return {
     state: 'ok',
@@ -181,12 +182,15 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
   const domain = dom.domain;
   const avail = checkoutAvailability();
   const plan: OrderPlan = input.plan;
+  if (cfg.offers.activeVersion === 'v4' && !isV4Tier(plan)) return { ok: false, error: 'Bitte Basis oder Care+ wählen.' };
   if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
     return {
       ok: false,
       error: 'Die monatliche Zahlung ist derzeit nicht verfügbar.',
       fieldErrors: { plan: 'Bitte Einmalzahlung wählen.' },
     };
+  if (isV4Tier(plan) && !input.subscription)
+    return { ok: false, error: 'Bitte dem monatlichen Tarif ab Go-Live ausdrücklich zustimmen.' };
   const subscriptionOptIn = plan === 'one_time' && cfg.pricing.subscriptionEnabled && input.subscription;
   const amounts = planAmounts(cfg, plan);
 
@@ -214,6 +218,7 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
       demoId: demo.id,
       provider: getProviders().payment.name,
       plan,
+      offerSnapshot: isV4Tier(plan) ? v4Offer(plan, new Date().toISOString()) : null,
       amountCents: amounts.grossCents,
       netCents: amounts.netCents,
       vatCents: amounts.vatCents,
@@ -257,9 +262,10 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
       orderId: order.id,
       amountCents: amounts.grossCents,
       currency: 'eur',
-      productName: `${plan === 'monthly' ? p.monthlyName : p.packageName} – ${domain}`,
-      productDescription:
-        plan === 'monthly'
+      productName: `${isV4Tier(plan) ? `SeitenWerk ${plan === 'basis' ? 'Basis' : 'Care+'} – Einrichtung` : plan === 'monthly' ? p.monthlyName : p.packageName} – ${domain}`,
+      productDescription: isV4Tier(plan)
+        ? v4PriceText()
+        : plan === 'monthly'
           ? `${p.packageDescription} Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
           : p.packageDescription,
       customerEmail: input.email,
@@ -310,6 +316,7 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
   const plan = (ORDER_PLANS as readonly string[]).includes(planRaw) ? (planRaw as OrderPlan) : null;
   if (!plan) return { ok: false, error: 'Bitte wählen Sie eine der beiden Optionen.' };
   const { cfg, lead, demo } = ctx;
+  if (cfg.offers.activeVersion === 'v4' && !isV4Tier(plan)) return { ok: false, error: 'Bitte Basis oder Care+ wählen.' };
   if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
     return { ok: false, error: 'Die monatliche Zahlung ist derzeit nicht verfügbar.' };
   const db = getDb();
@@ -342,6 +349,7 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
       demoId: demo.id,
       provider: getProviders().payment.name,
       plan,
+      offerSnapshot: isV4Tier(plan) ? v4Offer(plan) : null,
       amountCents: amounts.grossCents,
       netCents: amounts.netCents,
       vatCents: amounts.vatCents,
@@ -385,9 +393,15 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
     const p = cfg.pricing;
     const g = cfg.guarantee;
     const note = [
-      plan === 'monthly'
-        ? `${formatEuro(p.monthlyCents)} pro Monat, erste Rate sofort. Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
-        : `Einmalig ${formatEuro(p.packageCents)} inklusive Domain und ${p.hostingMonthsIncluded} Monaten Hosting.`,
+      isV4Tier(plan)
+        ? v4PriceText() +
+          ' Sie stimmen dem gewählten monatlichen Betrieb ausdrücklich zu; der separate Aboabschluss erfolgt erst nach Go-Live.'
+        : '',
+      isV4Tier(plan)
+        ? v4PriceText()
+        : plan === 'monthly'
+          ? `${formatEuro(p.monthlyCents)} pro Monat, erste Rate sofort. Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
+          : `Einmalig ${formatEuro(p.packageCents)} inklusive Domain und ${p.hostingMonthsIncluded} Monaten Hosting.`,
       g.enabled ? `${g.days} Tage Zufriedenheitsgarantie.` : '',
       'Rechnung per E-Mail, danach tragen Sie Ihre Angaben für die Website ein.',
     ]
@@ -398,18 +412,20 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
       amountCents: amounts.grossCents,
       currency: 'eur',
       productName:
-        `${plan === 'monthly' ? p.monthlyName : p.packageName} – ${lead.anonymizedAt ? 'Website' : lead.businessName}`.slice(
+        `${isV4Tier(plan) ? `SeitenWerk ${plan === 'basis' ? 'Basis' : 'Care+'} – Einrichtung` : plan === 'monthly' ? p.monthlyName : p.packageName} – ${lead.anonymizedAt ? 'Website' : lead.businessName}`.slice(
           0,
           250,
         ),
-      productDescription:
-        plan === 'monthly'
+      productDescription: isV4Tier(plan)
+        ? v4PriceText()
+        : plan === 'monthly'
           ? `${p.packageDescription} Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
           : p.packageDescription,
       collect: {
         domainDefault: lead.domainSuggestion ?? undefined,
         termsUrl: appUrl('/agb'),
         termsVersion: cfg.legal.termsVersion,
+        recurringTerms: isV4Tier(plan),
         submitNote: note,
       },
       successUrl: appUrl(`/checkout/${slug}/erfolg?session_id={CHECKOUT_SESSION_ID}`),
@@ -491,6 +507,9 @@ export async function applyCollectedCustomer(orderId: string, c: CollectedCustom
       b2bConfirmed: b2b,
       termsAcceptedAt: terms ? (order.termsAcceptedAt ?? new Date()) : order.termsAcceptedAt,
       termsVersion: cfg.legal.termsVersion,
+      ...(order.offerSnapshot && terms
+        ? { offerSnapshot: { ...order.offerSnapshot, consentAt: (order.termsAcceptedAt ?? new Date()).toISOString() } }
+        : {}),
       updatedAt: new Date(),
     })
     .where(eq(orders.id, orderId));
@@ -597,7 +616,7 @@ export async function fulfillOrder(
         invoiceJson: invoice as unknown as Record<string, unknown>,
         // Garantie gilt für beide Optionen ab Zahlung; Mindestlaufzeit nur für Option B
         // Vorläufig: spätester Beginn (Zahlung + 14 Tage); beim Go-Live wird auf Go-Live + 14 Tage verkürzt
-        guaranteeEndsAt: cfg.guarantee.enabled ? guaranteeEndFor(cfg, paidAt, null) : null,
+        guaranteeEndsAt: cfg.guarantee.enabled && !order.offerSnapshot ? guaranteeEndFor(cfg, paidAt, null) : null,
         ...(monthly
           ? {
               stripeSubscriptionId: info.subscriptionId ?? order.stripeSubscriptionId,

@@ -26,7 +26,7 @@ import { approveLetter, eligibleLetterVariants } from '../src/services/letters';
 import { sendLetter } from '../src/services/sending';
 import { runTruthCheck } from '../src/services/truth-check';
 import { stopBoss } from '../src/queue';
-import { resetDb } from './helpers';
+import { resetDb, resetVariants } from './helpers';
 
 const FUTURE = new Date('2030-01-01T00:00:00Z');
 
@@ -228,6 +228,7 @@ describe('Slot-Briefe im echten Ablauf', () => {
   let leadId: string;
   beforeAll(async () => {
     await resetDb();
+    await resetVariants();
     await getDb().execute(sql`TRUNCATE claim_usages, claims CASCADE`);
     await syncClaims(getDb());
     await findLeads({ actor: 'job:test', branches: ['maler'] });

@@ -86,7 +86,7 @@ export type VariantStatus = (typeof VARIANT_STATUSES)[number];
 export type VariantCreator = 'human' | 'learning_agent';
 
 /** one_time = 590 € einmalig (mode=payment), monthly = 49 €/Monat mit Mindestlaufzeit (mode=subscription) */
-export const ORDER_PLANS = ['one_time', 'monthly'] as const;
+export const ORDER_PLANS = ['one_time', 'monthly', 'basis', 'care_plus'] as const;
 export type OrderPlan = (typeof ORDER_PLANS)[number];
 
 /** Priorität: neu > social_only > etabliert (Update 2, A2) */

@@ -32,12 +32,17 @@ export async function getStoredPatch(db: DbOrTx = getDb()): Promise<AppConfigPat
 }
 
 export async function getConfig(opts: { fresh?: boolean; db?: DbOrTx } = {}): Promise<AppConfig> {
-  if (!opts.fresh && cache && Date.now() - cache.at < CACHE_MS) return cache.value;
+  if (!opts.fresh && cache && Date.now() - cache.at < CACHE_MS) {
+    if (process.env.ENGAGEMENT_TRACKING_APPROVED !== 'true')
+      return { ...cache.value, metrics: { ...cache.value.metrics, engagementBeacon: false } };
+    return cache.value;
+  }
   const patch = await getStoredPatch(opts.db);
   const merged = deepMerge(baseConfig(), patch);
   const parsed = appConfigSchema.safeParse(merged);
   // Ungültige gespeicherte Werte dürfen das System nicht lahmlegen: Standardwerte verwenden
   const value = parsed.success ? parsed.data : baseConfig();
+  if (process.env.ENGAGEMENT_TRACKING_APPROVED !== 'true') value.metrics.engagementBeacon = false;
   cache = { at: Date.now(), value };
   return value;
 }

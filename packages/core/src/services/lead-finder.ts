@@ -374,6 +374,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       primaryType: place.primaryType ?? null,
       rejectionReasons: result.reasons,
       score: result.score,
+      scoreReasons: result.scoreReasons,
       leadSegment: result.segment,
       segmentKey: segKey,
       searchQuery: c.query,

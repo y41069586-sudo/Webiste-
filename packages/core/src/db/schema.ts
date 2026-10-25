@@ -1,3 +1,4 @@
+import type { V4OfferSnapshot } from '../services/offers-v4';
 import { sql } from 'drizzle-orm';
 import {
   bigserial,
@@ -76,6 +77,7 @@ export const leads = pgTable(
     /** Alle Gründe, aus denen die Qualifizierung fehlschlug */
     rejectionReasons: jsonb('rejection_reasons').$type<string[]>().default([]).notNull(),
     score: doublePrecision('score').default(0).notNull(),
+    scoreReasons: jsonb('score_reasons').$type<import('../leads/priority-v4').PriorityReason[] | null>(),
     segmentKey: text('segment_key').notNull(),
     /** Token für QR-Code (/q/{token}) – zufällig, nicht erratbar */
     trackToken: text('track_token').notNull(),
@@ -273,6 +275,9 @@ export const orders = pgTable(
     demoId: uuid('demo_id').references(() => demos.id, { onDelete: 'set null' }),
     provider: text('provider').default('stripe').notNull(),
     plan: text('plan').$type<OrderPlan>().default('one_time').notNull(),
+    offerSnapshot: jsonb('offer_snapshot').$type<V4OfferSnapshot | null>(),
+    recurringCheckoutUrl: text('recurring_checkout_url'),
+    recurringCheckoutSessionId: text('recurring_checkout_session_id'),
     stripeSessionId: text('stripe_session_id'),
     stripePaymentIntent: text('stripe_payment_intent'),
     amountCents: integer('amount_cents').notNull(),

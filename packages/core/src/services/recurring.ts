@@ -16,9 +16,10 @@ import { resetDunning, startDunning } from './dunning';
 import { maintenanceReasonOf, setSiteMaintenance } from './maintenance';
 import { fulfillOrder, type Order } from './orders';
 import { applySubscriptionEvent } from './renewals';
+import { assertV4BillingReady } from './offers-v4';
 
 /** monthly = Option B (49 €/Monat, Mindestlaufzeit), care = „Hosting & Pflege“ nach Option A */
-type RecurringKind = 'monthly' | 'care';
+type RecurringKind = 'monthly' | 'care' | 'v4';
 
 interface Target {
   kind: RecurringKind;
@@ -32,16 +33,30 @@ async function findTarget(ev: PaymentEvent): Promise<Target | null> {
     const order = await db.query.orders.findFirst({ where: eq(orders.stripeSubscriptionId, ev.subscriptionId) });
     if (order) {
       const customer = await db.query.customers.findFirst({ where: eq(customers.orderId, order.id) });
-      return { kind: 'monthly', order, customer };
+      return { kind: order.offerSnapshot ? 'v4' : 'monthly', order, customer };
     }
     const customer = await db.query.customers.findFirst({ where: eq(customers.subscriptionId, ev.subscriptionId) });
     if (customer) {
       const o = await db.query.orders.findFirst({ where: eq(orders.id, customer.orderId) });
-      if (o) return { kind: 'care', order: o, customer };
+      if (o) return { kind: o.offerSnapshot ? 'v4' : 'care', order: o, customer };
     }
   }
   // Erste Rechnung kann vor dem Checkout-Event eintreffen: Zuordnung über die Abo-Metadaten
   const ref = ev.metadata?.orderId;
+  if (ev.metadata?.kind === 'subscription' && ev.metadata?.offerVersion === 'v4' && ref && /^[0-9a-f-]{36}$/.test(ref)) {
+    const order = await db.query.orders.findFirst({ where: eq(orders.id, ref) });
+    const customer = order ? await db.query.customers.findFirst({ where: eq(customers.orderId, order.id) }) : undefined;
+    if (
+      order?.offerSnapshot &&
+      customer?.id === ev.metadata.customerId &&
+      ev.subscriptionId &&
+      order.recurringCheckoutSessionId &&
+      order.status === 'paid' &&
+      !order.endedAt &&
+      (!order.stripeSubscriptionId || order.stripeSubscriptionId === ev.subscriptionId)
+    )
+      return { kind: 'v4', order, customer };
+  }
   if (ev.metadata?.kind === 'order' && ref && /^[0-9a-f-]{36}$/.test(ref)) {
     const order = await db.query.orders.findFirst({ where: eq(orders.id, ref) });
     if (order?.plan === 'monthly') {
@@ -94,6 +109,19 @@ async function recordRecurringPayment(t: Target, ev: PaymentEvent, actor: string
   }
   // 0-€-Rechnungen (z. B. Testphase bis Hosting-Ende) brauchen keine eigene Rechnung
   if (amount <= 0) return 'zero_amount';
+  if (t.kind === 'v4' && (amount !== t.order.offerSnapshot!.monthlyCents || ev.currency !== 'eur' || t.order.endedAt))
+    throw new Error('V4-Monatsrechnung stimmt nicht mit dem Vertrag überein; manuelle Prüfung erforderlich.');
+  if (t.kind === 'v4') {
+    const site = t.customer
+      ? await db.query.sites.findFirst({ where: and(eq(sites.customerId, t.customer.id), eq(sites.status, 'live')) })
+      : undefined;
+    assertV4BillingReady({
+      offer: t.order.offerSnapshot!,
+      paid: t.order.status === 'paid',
+      liveAt: site?.liveAt ?? null,
+      cancelled: Boolean(t.order.endedAt),
+    });
+  }
   if (t.order.status !== 'paid') {
     await raiseAlert(db, {
       level: 'warn',
@@ -105,6 +133,16 @@ async function recordRecurringPayment(t: Target, ev: PaymentEvent, actor: string
 
   const paymentId = await db.transaction(async (tx) => {
     await tx.execute(sql`SELECT id FROM orders WHERE id = ${t.order.id} FOR UPDATE`);
+    if (t.kind === 'v4') {
+      const currentOrder = await tx.query.orders.findFirst({ where: eq(orders.id, t.order.id) });
+      const currentCustomer = await tx.query.customers.findFirst({ where: eq(customers.orderId, t.order.id) });
+      if (
+        currentOrder?.endedAt ||
+        (currentOrder?.stripeSubscriptionId && currentOrder.stripeSubscriptionId !== ev.subscriptionId) ||
+        (currentCustomer?.subscriptionId && currentCustomer.subscriptionId !== ev.subscriptionId)
+      )
+        throw new Error('Zweites oder beendetes V4-Abonnement erfordert manuelle Prüfung.');
+    }
     const existing = await tx.query.orderPayments.findFirst({
       where: and(eq(orderPayments.provider, t.order.provider), eq(orderPayments.providerInvoiceId, ev.invoiceId!)),
     });
@@ -148,8 +186,17 @@ async function recordRecurringPayment(t: Target, ev: PaymentEvent, actor: string
         invoiceJson: invoice as unknown as Record<string, unknown>,
       })
       .returning({ id: orderPayments.id });
-    if (t.kind === 'monthly')
+    if (t.kind === 'monthly' || t.kind === 'v4')
       await tx.update(orders).set({ subscriptionStatus: 'active', updatedAt: new Date() }).where(eq(orders.id, t.order.id));
+    if (t.kind === 'v4' && ev.subscriptionId && t.customer) {
+      if (
+        (t.order.stripeSubscriptionId && t.order.stripeSubscriptionId !== ev.subscriptionId) ||
+        (t.customer.subscriptionId && t.customer.subscriptionId !== ev.subscriptionId)
+      )
+        throw new Error('Zweites V4-Abonnement erfordert manuelle Prüfung.');
+      await tx.update(orders).set({ stripeSubscriptionId: ev.subscriptionId }).where(eq(orders.id, t.order.id));
+      await tx.update(customers).set({ subscriptionId: ev.subscriptionId }).where(eq(customers.id, t.customer.id));
+    }
     await audit(tx, {
       entity: 'order',
       entityId: t.order.id,
@@ -198,7 +245,7 @@ async function handleFailedPayment(t: Target, ev: PaymentEvent, actor: string): 
   const cfg = await getConfig();
   // Fehlgeschlagene erste Rate im Checkout: Stripe schließt den Checkout nicht ab → nichts zu tun
   if (t.order.status !== 'paid') return 'ignored';
-  if (t.kind === 'monthly')
+  if (t.kind === 'monthly' || t.kind === 'v4')
     await db.update(orders).set({ subscriptionStatus: 'past_due', updatedAt: new Date() }).where(eq(orders.id, t.order.id));
   const final = ev.nextPaymentAttempt === null;
   await audit(db, {
@@ -246,7 +293,7 @@ async function handleFailedPayment(t: Target, ev: PaymentEvent, actor: string): 
 async function handleStatusChange(t: Target, ev: PaymentEvent, actor: string): Promise<string> {
   const db = getDb();
   const status = ev.subscriptionStatus ?? 'unknown';
-  if (t.kind === 'monthly')
+  if (t.kind === 'monthly' || t.kind === 'v4')
     await db.update(orders).set({ subscriptionStatus: status, updatedAt: new Date() }).where(eq(orders.id, t.order.id));
   if (status === 'unpaid') {
     await startDunning(t.order.id, actor);

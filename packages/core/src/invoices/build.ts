@@ -1,3 +1,4 @@
+import { isV4Tier, V4_PRICES } from '../services/offers-v4';
 import { sql } from 'drizzle-orm';
 import type { InvoiceData } from '@wbm/templates/letter-types';
 import type { AppConfig } from '../config/settings';
@@ -26,7 +27,10 @@ export function packageAmounts(cfg: AppConfig): Amounts {
 
 /** Beträge des gewählten Plans (Option A: Einmalpreis; Option B: erste Monatsrate). */
 export function planAmounts(cfg: AppConfig, plan: OrderPlan): Amounts {
-  return amountsFor(cfg, plan === 'monthly' ? cfg.pricing.monthlyCents : cfg.pricing.packageCents);
+  return amountsFor(
+    cfg,
+    isV4Tier(plan) ? V4_PRICES.setupCents : plan === 'monthly' ? cfg.pricing.monthlyCents : cfg.pricing.packageCents,
+  );
 }
 
 export function amountsFor(cfg: AppConfig, base: number): Amounts {
@@ -107,13 +111,22 @@ export function buildInvoiceData(
           : `Hosting, SSL und Pflege Ihrer Website, monatlich kündbar.`,
       }
     : { title: `${p.packageName}${domain}`, description: p.packageDescription };
+  if (isV4Tier(order.plan ?? '')) {
+    const care = order.plan === 'care_plus';
+    line.title = `SeitenWerk ${care ? 'Care+' : 'Basis'}${domain}${rate ? ' – Monatstarif' : ' – Einrichtung'}`;
+    line.description = rate
+      ? `Domain, Hosting, SSL und technische Betreuung${care ? '; zusätzlich bis zu 60 Minuten kleine Inhaltsänderungen im Monat' : '; Inhaltsänderungen separat nach Freigabe'}. Monatlich kündbar. Keine weitere Basisgebühr.`
+      : 'Erstellung und Einrichtung der Website. Monatstarif wird erst nach bestätigtem Go-Live separat abgeschlossen; kein Hosting-Jahrespaket im Einrichtungspreis.';
+  }
   return {
     kind: 'invoice',
     number: opts.number,
     issueDate: formatDateDe(opts.issuedAt),
     serviceDate: rate
       ? `Leistungszeitraum ${formatDateDe(rate.periodStart)} bis ${formatDateDe(new Date(rate.periodEnd.getTime() - 86400_000))}; Entgelt vereinnahmt am ${paid}.`
-      : `Entgelt vereinnahmt am ${paid}; Leistungszeitraum: Erstellung ab ${paid}, Hosting ${p.hostingMonthsIncluded} Monate ab Veröffentlichung.`,
+      : isV4Tier(order.plan ?? '')
+        ? `Entgelt vereinnahmt am ${paid}; Leistungszeitraum: Erstellung und Einrichtung ab ${paid}.`
+        : `Entgelt vereinnahmt am ${paid}; Leistungszeitraum: Erstellung ab ${paid}, Hosting ${p.hostingMonthsIncluded} Monate ab Veröffentlichung.`,
     orderRef: order.id.slice(0, 8).toUpperCase(),
     seller: {
       name: s.name,

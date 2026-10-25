@@ -78,6 +78,20 @@
       "when": 1792826585613,
       "tag": "0010_learning_agent",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792910870756,
+      "tag": "0011_conversion_v4",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792911357140,
+      "tag": "0012_lead_priority_v4",
+      "breakpoints": true
     }
   ]
 }

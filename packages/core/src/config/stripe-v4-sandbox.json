@@ -1,0 +1,35 @@
+{
+  "account": "Website sandbox",
+  "livemode": false,
+  "prices": [
+    {
+      "component": "setup",
+      "productId": "prod_VVMFusQN3ISi90",
+      "priceId": "price_1UULWxGn2A630LhHdvSaUslJ",
+      "amountCents": 59700,
+      "currency": "eur",
+      "livemode": false
+    },
+    {
+      "component": "basis",
+      "productId": "prod_VVMFrkHU4USKzX",
+      "priceId": "price_1UULX3Gn2A630LhHDA6Or60k",
+      "amountCents": 1900,
+      "currency": "eur",
+      "livemode": false
+    },
+    {
+      "component": "care_plus",
+      "productId": "prod_VVMFC31RBYt8V1",
+      "priceId": "price_1UULX8Gn2A630LhH0F3MgcLP",
+      "amountCents": 9900,
+      "currency": "eur",
+      "livemode": false
+    }
+  ],
+  "branding": {
+    "primary": "#1F4FD8",
+    "background": "#FFFFFF",
+    "font": "Inter"
+  }
+}

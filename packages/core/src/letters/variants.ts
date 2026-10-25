@@ -94,9 +94,24 @@ export const LETTER_FOLLOWUP_IMPROVED: LetterVariantContent = {
   qrCaption: QR_CAPTION,
 };
 
+/** V4 copy tests keep identical financial conditions; no unsupported statistics. */
+export const LETTER_VARIANT_C: LetterVariantContent = {
+  ...LETTER_VARIANT_B,
+  subject: 'So könnte die Website von {firmenname} aussehen',
+  ratingSentence: '',
+  hook: 'für Ihren Betrieb in {ort} habe ich einen unverbindlichen Website-Entwurf vorbereitet.',
+  intro: [
+    'Zeigen Sie Leistungen und Kontaktmöglichkeiten an einem Ort. Die Vorschau können Sie kostenlos und ohne Registrierung ansehen.',
+  ],
+  qrCaption: 'Ihre Website-Vorschau kostenlos ansehen',
+};
+
 export const DEFAULT_LETTER_VARIANTS: { name: string; sequence: 1 | 2 | 3; content: LetterVariantContent }[] = [
   { name: 'A – Standard', sequence: 1, content: LETTER_VARIANT_A },
   { name: 'B – Ruf & Entwurf', sequence: 1, content: LETTER_VARIANT_B },
   { name: 'F1 – Follow-up kurz', sequence: 2, content: LETTER_FOLLOWUP_A },
   { name: 'F2 – Seite verbessert', sequence: 3, content: LETTER_FOLLOWUP_IMPROVED },
 ];
+
+/** Review candidates only: never add or activate extra experiment arms implicitly during seeding. */
+export const V4_LETTER_CANDIDATES = [LETTER_VARIANT_A, LETTER_VARIANT_B, LETTER_VARIANT_C] as const;
