@@ -32,7 +32,7 @@ Claims-, AGB- und Betriebsdokumente in `docs/` ergänzen. Unter `apps/web` gilt 
   PostgreSQL-/Drizzle-/pg-boss-Bestand weiterverwenden; kein paralleles Backend. Eine öffentliche, auf Website-Inhalte begrenzte Edge Function ist eingerichtet.
   Neue Logins hat der Betreiber ausdrücklich wieder verworfen; bestehenden internen Admin erhalten. Worker, Chromium/PDFs und Dateispeicher
   brauchen auch bei einer verwalteten Datenbank eine gesonderte Betriebsplanung.
-- **Resend verbunden**; Kontaktadresse `support@seitenwerk.world`. Domain einschließlich DKIM/SPF/MX verifiziert; Support-Inbox am 24.10.2026 angelegt und per Connector bestätigt. Bestehenden Resend-Provider verwenden; Verbindung im Chat
+- **Resend verbunden**; Kontaktadresse `support@example.test`. Domain einschließlich DKIM/SPF/MX verifiziert; Support-Inbox am 24.10.2026 angelegt und per Connector bestätigt. Bestehenden Resend-Provider verwenden; Verbindung im Chat
   bedeutet nicht automatisch, dass die App `EMAIL_API_KEY`, verifizierte Domain und Inbound hat.
   Keine erneute Anbieterwahl, keine Test-Mail ohne entsprechenden Auftrag.
 - **Stripe und DNS übernimmt der Betreiber.** Bestehenden Stripe-Code behalten; offene Einrichtung
@@ -124,8 +124,8 @@ Claims-, AGB- und Betriebsdokumente in `docs/` ergänzen. Unter `apps/web` gilt 
 Die in älteren Dateien erwähnte `DESIGN.md` fehlt im Git-Bestand der Übernahme. Nicht erfinden;
 vorhandene Komponenten, CSS, Bilder und die dokumentierten späteren Designentscheidungen verwenden.
 
-Aktuelle Firmenangaben: Doaa Attia, Seitenwerk, Wilhelm-Diess-Weg 3a, 94081 Fürstenzell,
-+4915219682134 (auch WhatsApp). Öffentliche Kurzvorstellung in `packages/core/src/config/operator.ts`.
+Aktuelle Firmenangaben: [Name aus privater Konfiguration], Seitenwerk, [Anschrift aus privater Konfiguration], [PLZ] [Ort],
+[Telefon aus privater Konfiguration] (auch WhatsApp). Öffentliche Kurzvorstellung in `packages/core/src/config/operator.ts`.
 Rechtstexte sind eigene gekennzeichnete Entwürfe, kein eRecht24-Export; nicht automatisch in die
 freigegebenen `legal.*`-Felder oder den Live-Checkout übernehmen. Supabase-Einrichtung und die
 Support-Adresse sind inzwischen ausdrücklich beauftragt; Brief-/Zahlungs-/Domain-Sperren gelten weiter.
@@ -150,3 +150,34 @@ Live-Verkauf bleibt gesperrt. Dateispeicher, Resend und Stripe-Anbindung nun aus
 Stripe-Connector hat nur Sandbox. Keine echten Zahlungen/Briefe. Demo-Test und Worker bleiben später.
 Automatische Sicherheitsprüfung lehnte ungeschützte Speicherung von Resend-API-Key in Netlify ab;
 nicht über Umwege umgehen. Details docs/integrationen-abschluss.md und docs/recht/pruefprotokoll.md.
+
+
+## Verbindliche Aktualisierung V4 (25.10.2026)
+
+Aktuelle Betreiberanweisung und `docs/master-implementation-v4.md` ersetzen frühere Neukundenpreise.
+Maßgeblicher Umsetzungsstand: `docs/conversion-optimization-v4.md`.
+
+- Für **neue** Bestellungen genau Basis 597 € + 19 €/Monat oder Care+ 597 € + insgesamt 99 €/Monat.
+  Care+ enthält die Basisgebühr vollständig, inklusive höchstens 60 Minuten kleiner Änderungen monatlich ohne Übertrag.
+- Preise ausschließlich aus `offers-v4.ts`. `cfg.pricing` mit 590/49/19 ist der erhaltene Legacy-Bestand, kein V4-Preisformular.
+  Angebotssnapshot an der Bestellung erhalten; historische Rechnungen, Abos und Verträge nicht neu berechnen.
+- Monatsabrechnung erst nach bezahlter Einrichtung, dokumentierter Tarifzustimmung und tatsächlich bestätigtem Go-Live.
+  Sicherer V4-Prozess: separater Abo-Checkout nach Go-Live, keine automatische Off-Session-Abbuchung und keine
+  Rückdatierung. Hosting bis zum Kundenabschluss muss betrieblich überwacht werden.
+- Keine zwölfmonatige Standardbindung für V4. Tarifwechsel nur als bestätigter Wechsel zum nächsten Periodenende
+  ohne Proration vorbereiten; keine zweite Subscription erzeugen. Rechts-/Kündigungsdetails bleiben freigabepflichtig.
+- Stripe-Plugin wurde für **Sandbox** ausdrücklich beauftragt. Drei Produkte/Preise und blaues Branding sind vorhanden:
+  `packages/core/src/config/stripe-v4-sandbox.json`. Wiederverwenden, keine Duplikate anlegen.
+  V4-Checkout mit Live-Key bleibt technisch gesperrt. DNS und Domains nicht ändern.
+- **Kein Live-Deployment, keine Produktionsmigration und keine Produktionskonfiguration für diesen V4-Auftrag.**
+  DRY_RUN=true und Mock-Provider beibehalten. Vorherige Deploy-Aufträge sind keine V4-Produktionsfreigabe.
+- V4-Briefkandidaten A/B/C je fünf Branchen nur pausiert anlegen; bestehende aktive Quoten und Freigaben erhalten.
+  Kein automatisches Aktivieren oder Versenden; erste 30 Demos weiterhin manuell prüfen.
+- Engagement-Messung standardmäßig aus; zusätzlich `ENGAGEMENT_TRACKING_APPROVED=true` nötig.
+  „Nicht gemessen“ nicht als 0 oder gemessene Conversion darstellen. Keine juristische Freigabe behaupten.
+- Keine persönlichen Betreiberangaben hart im öffentlichen Repository. Private DB-Konfiguration oder OPERATOR_*-ENV
+  verwenden; fiktive Kontaktdaten in Tests und PDFs. Kein Betreiberfoto. Historische Redaktionen als solche verstehen.
+- Test-Reset nur auf lokalen ausdrücklich benannten test/e2e-Datenbanken. Externe Dienste mocken.
+  Lokaler Core-/E2E-Testpostgres darf nie durch einen Supabase-Verbindungsstring ersetzt werden.
+- Finanzansicht trennt vereinnahmte Erst-/Monatszahlungen, Erstattungen, bekannten V4-MRR und Legacy-Vertragswert.
+  Ohne belegte Hosting-/Domain-/Zahlungskosten und tatsächlich erfasste Care+-Zeit keinen Deckungsbeitrag erfinden.

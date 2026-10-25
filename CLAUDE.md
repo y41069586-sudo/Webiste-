@@ -1,5 +1,7 @@
 # CLAUDE.md – „Website-Brief-Maschine“
 
+> **Aktualisierung 25.10.2026:** Für Neukunden gilt jetzt Master V4: Basis 597 € + 19 €/Monat oder Care+ 597 € + insgesamt 99 €/Monat, jeweils erst nach bestätigtem Go-Live und Aboabschluss. Legacy-Verträge bleiben unverändert. Neueste dauerhafte Anweisungen in [AGENTS.md](AGENTS.md), geprüfter Umsetzungsstand in [Conversion V4](docs/conversion-optimization-v4.md). Frühere Neukundenpreise unten sind historisch. Kein persönliches Foto, VPS später. Nur sichere Entwicklung und ausdrücklich beauftragte Stripe-Sandbox; DRY_RUN=true, kein Live-Deployment.
+
 > Maßgebliche Projektbeschreibung für Claude Code. Stand: Update 2 (`docs/spec-update-2.md`) ist
 > eingearbeitet. Bei Widersprüchen gilt `docs/spec-update-2.md` vor dieser Datei; offene Widersprüche
 > werden gesammelt beim Betreiber nachgefragt, nicht selbst entschieden. Entscheidungen und Abweichungen:

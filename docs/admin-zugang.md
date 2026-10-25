@@ -3,7 +3,7 @@
 Stand 24.10.2026. Arbeiten an Rechtstexten auf ausdrücklichen Wunsch gestoppt.
 
 - Bestehende App: https://seitenwerkworld.netlify.app/login (Netlify-Projekt `seitenwerkworld`, nicht die statische Firmenwebsite).
-- Admin-Konto `support@seitenwerk.world` in der bestehenden Tabelle `admin_users` angelegt, scrypt-Passworthash und verschlüsseltes TOTP-Secret, 2FA aktiv. Kein bestehendes Konto überschrieben.
+- Admin-Konto `support@example.test` in der bestehenden Tabelle `admin_users` angelegt, scrypt-Passworthash und verschlüsseltes TOTP-Secret, 2FA aktiv. Kein bestehendes Konto überschrieben.
 - Passwort und Einrichtungsschlüssel ausschließlich in der ignorierten privaten Datei `data/exports/admin-zugang.txt`; Authenticator-QR unter `data/exports/admin-2fa.png`. Nicht ins Repository oder in die öffentliche Website übernehmen.
 - Dedizierte PostgreSQL-Rolle `seitenwerk_admin_backend`, kein Superuser/CREATEDB/CREATEROLE/BYPASSRLS, keine Schema-Erstellrechte. DML-Rechte und explizite RLS-Policies nur für diese interne Backendrolle; Browserrollen bleiben ausgesperrt. Hauptpasswort von Supabase unverändert.
 - Netlify: DATABASE_URL, SESSION_SECRET und ENCRYPTION_KEY als Secrets, Builds/Functions. APP_URL, DRY_RUN=true, sämtliche externen Provider als Mock und automatische Schalter aus gesetzt. Kein Worker gestartet.

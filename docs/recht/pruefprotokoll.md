@@ -5,9 +5,9 @@ Eigene Texte, kein eRecht24-Export und keine anwaltliche Freigabe.
 
 ## Bestätigte Fakten
 
-Doaa Attia, Seitenwerk, Einzelunternehmen ohne Handelsregistereintrag und ohne angegebene USt-ID,
-Wilhelm-Diess-Weg 3a, 94081 Fürstenzell, Deutschland; support@seitenwerk.world;
-+4915219682134 auch WhatsApp. Kein Foto. Nur B2B-Angebot.
+[Name aus privater Konfiguration], Seitenwerk, Einzelunternehmen ohne Handelsregistereintrag und ohne angegebene USt-ID,
+[Anschrift aus privater Konfiguration], [PLZ] [Ort], Deutschland; support@example.test;
+[Telefon aus privater Konfiguration] auch WhatsApp. Kein Foto. Nur B2B-Angebot.
 
 ## Offene Punkte mit Wirkung
 

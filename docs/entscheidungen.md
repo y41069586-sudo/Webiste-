@@ -162,14 +162,14 @@ Segment „neu“ u. a.).
 
 - Projekt `Webiste-` in Supabase verwenden, EU Irland. Bestehende 11 Drizzle-Migrationen und deren Historie übernehmen, alle 32 Tabellen hinter RLS und ohne Browserrechte. Öffentliche Website-Inhalte über die schmale Edge Function `seitenwerk-site-config`.
 - Neue Website-Logins nach ausdrücklicher Korrektur des Betreibers nicht einbauen; vorhandener interner Admin bleibt. Keine neue Supabase-Auth-Oberfläche.
-- Doaa Attia, Seitenwerk, Wilhelm-Diess-Weg 3a, 94081 Fürstenzell, Telefon/WhatsApp +4915219682134. Kein persönliches Foto; Foto-Pflicht im Readiness-Check entfernt.
-- Gewünschte Geschäftsadresse: `support@seitenwerk.world`. Resend-Connector meldet weiterhin DKIM pending und lehnt Inbox-Erstellung ab; DNS bleibt beim Betreiber. Keine E-Mail versendet.
+- [Name aus privater Konfiguration], Seitenwerk, [Anschrift aus privater Konfiguration], [PLZ] [Ort], Telefon/WhatsApp [Telefon aus privater Konfiguration]. Kein persönliches Foto; Foto-Pflicht im Readiness-Check entfernt.
+- Gewünschte Geschäftsadresse: `support@example.test`. Resend-Connector meldet weiterhin DKIM pending und lehnt Inbox-Erstellung ab; DNS bleibt beim Betreiber. Keine E-Mail versendet.
 - Impressum-, Datenschutz- und AGB-Entwürfe aus tatsächlichen Projektfunktionen, ausdrücklich nicht von eRecht24 erzeugt oder juristisch freigegeben. Leere freigegebene `legal.*`-Felder bleiben leer; Entwürfe entsperren keinen Verkauf.
 - Statische Firmenwebsite liest Supabase beim Export. Einstellungen werden erst nach erneutem Export/Deployment öffentlich aktualisiert. VPS/Worker später, Stripe und DNS beim Betreiber, DRY_RUN=true.
 
 ### Resend-Nachprüfung 24.10.2026, 17:53 UTC
 
-Domain nun vollständig verifiziert (DKIM/SPF/MX). Gewünschte Inbox `support@seitenwerk.world` erfolgreich angelegt und über `get_inbox` bestätigt. Keine Test-Mail und keine DNS-Änderung. Frühere Meldung „pending/422“ ist überholt.
+Domain nun vollständig verifiziert (DKIM/SPF/MX). Gewünschte Inbox `support@example.test` erfolgreich angelegt und über `get_inbox` bestätigt. Keine Test-Mail und keine DNS-Änderung. Frühere Meldung „pending/422“ ist überholt.
 
 ### Rechtsform bestätigt
 
@@ -196,3 +196,16 @@ Supabase-Bucket angelegt; S3-Zugangsdaten fehlen. Stripe-Connector nur Sandbox; 
 Webhook angelegt, Anwendungsschlüssel fehlt. Beide neuen Webhooks bis sicherer Konfiguration
 pausiert. Netlify-Secretspeicherung von automatischer Sicherheitsprüfung abgelehnt; nicht umgehen.
 Siehe integrations-abschluss.md und recht/pruefprotokoll.md.
+
+
+## 25.10.2026 – Conversion V4 und beauftragte Stripe-Sandbox
+
+Quelle: neuer Master-Prompt V4 und anschließende Betreiberanweisung zur Stripe-Plugin-Anbindung und blauem Branding.
+Neukundenpreise: 597 € + 19 €/Monat Basis oder 597 € + insgesamt 99 €/Monat Care+, ohne zwölfmonatige Mindestbindung.
+Bestehende Verträge bleiben unverändert. Separate Einrichtung und anschließend ausdrücklicher Monatsabo-Abschluss
+nach bestätigtem Go-Live verhindern vorzeitige Abbuchung. Kein automatischer geschätzter Go-Live-Termin.
+
+Stripe-Sandbox enthält genau drei neue V4-Produkte mit Preisen; Checkout-Blau #1F4FD8, Weiß, Inter. Keine
+Subscription, Kundenzahlung oder Erstattung über den Connector angelegt. Keine Produktionsumgebung geändert.
+Implementierung auf `codex/conversion-v4`, keine eigenmächtige Veröffentlichung. Briefkandidaten bleiben pausiert,
+Engagement-Messung aus. Vollständiger Prüf- und Restaufgabenstand: `conversion-optimization-v4.md`.

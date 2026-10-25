@@ -316,3 +316,22 @@ EXIF-Daten (Copyright, Artist, ImageDescription). Neue Bilder: nur CC0, ohne erk
 - Stripe: vorhandene Sandbox beibehalten, neuer Webhook auf dynamische Netlify-App.
   Pluginzugriff ersetzt keinen STRIPE_SECRET_KEY in der App; kein Live-Key zugänglich/verwendet.
 - Details, Quellen und noch fehlende Secrets: `integrationen-abschluss.md`.
+
+
+## 25.10.2026 – Stripe V4, Sandbox und Branding
+
+Über das vorhandene Stripe-Plugin drei Produkte mit Defaultpreisen in der Website-Sandbox angelegt und
+per GET zurückgelesen: 59700 Cent Einrichtung, 1900 Cent Basis monatlich, 9900 Cent Care+ monatlich.
+IDs stehen ausschließlich als nicht geheime Referenzen in `packages/core/src/config/stripe-v4-sandbox.json`.
+Keine V4-Duplikatprodukte bei Checkout-Erstellung; der Provider verwendet diese Preise und blockiert Live-Keys.
+Branding per UpdateBrandSettings gespeichert und zurückgelesen: Blau #1F4FD8, Weiß, Inter. API-Update
+erwartet RGB-Strings; Readback liefert Hexwerte. Kein fremdes oder erfundenes Logo hochgeladen.
+
+PostCheckoutSessions-Dokumentation bestätigt: höchstens drei custom_fields; Business-/Individual-Name-
+Collection, dynamisch gefilterte erlaubte Zahlungsmethoden und integration_identifier verfügbar.
+V4 verwendet exakt drei Pflichtfelder und eine wiederholungsstabile Integrationskennung. Monatsabo
+wird in einem separaten Checkout erst nach bestätigtem Go-Live und Vertragszustimmung abgeschlossen.
+Keine automatische Monatsbelastung und kein geschätztes trial_end. Signature-/Webhook-/SEPA-Pfade und
+Legacy-Zeitplan bleiben erhalten. Stripe Tax blieb aus; Steuerstatus ist ungeklärt. Keine Zahlung,
+Subscription oder Erstattung über das Plugin ausgelöst. Stand und offene echte Sandbox-Abnahme:
+`conversion-optimization-v4.md`.

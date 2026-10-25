@@ -2,9 +2,9 @@
 
 Findet lokale Betriebe ohne eigene Website, baut für jeden einen Website-Entwurf, schickt einen
 personalisierten Brief mit QR-Code und verkauft die fertige Website ohne Verkaufsgespräch:
-**590 € einmalig** (inkl. Domain und 12 Monaten Hosting, danach optional 19 €/Monat) **oder 49 €/Monat**
-(12 Monate Mindestlaufzeit, ab Monat 13 automatisch 19 €/Monat, monatlich kündbar), jeweils mit
-14-Tage-Zufriedenheitsgarantie. Ablauf: Demo → Checkout → Angaben → Vorschau → Go-Live.
+**Neukundenangebot V4:** Basis **597 € Einrichtung + 19 €/Monat** oder Care+ **597 € Einrichtung + insgesamt 99 €/Monat**. Monatsabo erst nach bestätigtem Go-Live und gesondertem ausdrücklichem Abschluss; keine zwölfmonatige Mindestbindung. Ablauf: Demo → Einrichtung bezahlen → Angaben → Vorschau → bestätigter Go-Live → Monatsabo bestätigen.
+
+Die bisherigen 590-/49-/19-Euro-Verträge bleiben unverändert. V4 ist auf dem Entwicklungszweig vorbereitet, nicht produktiv freigegeben. Verbindlicher Umsetzungs- und Prüfstand: [Conversion V4](docs/conversion-optimization-v4.md).
 Maßgebliche Projektbeschreibung: [CLAUDE.md](CLAUDE.md).
 
 **Codex-Übernahme:** Dauerhafte Arbeitsanweisungen und neueste Betreiberentscheidungen stehen in
@@ -160,7 +160,7 @@ Wichtige Schalter:
 
 ## Firmen-Website
 
-Aktuelle [Supabase-Anbindung und Betriebsgrenzen](docs/supabase-anbindung.md): öffentliche Inhalte per Edge Function, keine neuen Logins, `support@seitenwerk.world` als bestätigte Resend-Support-Inbox.
+Aktuelle [Supabase-Anbindung und Betriebsgrenzen](docs/supabase-anbindung.md): öffentliche Inhalte per Edge Function, keine neuen Logins, eine privat konfigurierte geschäftliche Resend-Support-Inbox.
 
 Startseite, „So funktioniert’s“, Preise, Garantie, Beispiele, Über mich, Kontakt sowie Impressum, Datenschutz, AGB und
 Quellen liegen unter `apps/web/src/app/(site)` (Design nach DESIGN.md). Inhalte kommen aus den Einstellungen: Absender

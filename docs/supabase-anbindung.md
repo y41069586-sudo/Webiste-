@@ -7,7 +7,7 @@ Stand 24.10.2026. Ausdrücklich beauftragt nach der zunächst rein dokumentarisc
 - Supabase-Projekt **Webiste-**, Ref `nfecpmamgrcgnnyulioy`, EU Irland (`eu-west-1`). Projektzuordnung in `supabase/project.json`, keine Secrets darin.
 - Die elf vorhandenen Drizzle-Migrationen sind übernommen. 32 Tabellen, keine Paralleltabellen. Originale Drizzle-Hashes und Zeitstempel in `drizzle.__drizzle_migrations`, damit spätere Drizzle-Läufe die alten Migrationen nicht erneut anwenden.
 - Alle 32 Tabellen mit RLS, keine direkten Rechte für `anon`, `authenticated` oder `PUBLIC`, auch nicht auf materialisierte Sichten. Service-Zugriff bleibt serverseitig. Keine Anmeldung oder Kundendatenbank-API im Browser.
-- Betreiberkonfiguration in `settings.app_config`: Doaa Attia, Seitenwerk, Wilhelm-Diess-Weg 3a, 94081 Fürstenzell, Telefon/WhatsApp +4915219682134, Kontakt `support@seitenwerk.world`, kein Foto, formulierte Kurzvorstellung.
+- Betreiberkonfiguration in `settings.app_config`: [Name aus privater Konfiguration], Seitenwerk, [Anschrift aus privater Konfiguration], [PLZ] [Ort], Telefon/WhatsApp [Telefon aus privater Konfiguration], Kontakt `support@example.test`, kein Foto, formulierte Kurzvorstellung.
 - `dryRun=true`, automatische Briefe, Antworten, Domainregistrierung und Optimierung aus. Keine Zahlungs-, Brief- oder Domainaktionen gestartet.
 - Edge Function `seitenwerk-site-config` aktiv. GET liefert nur freigegebene öffentliche Felder (Name/Kontakt/Preise/Garantie/Rechtstextfelder); Bankdaten, Steuer-ID und interne Schalter ausgeschlossen. `?view=sources` liefert öffentliche Quellen nach denselben Kriterien wie der bestehende Core-Service. POST wird mit 405 abgelehnt.
 - Die Edge Function ist bewusst öffentlich ohne Login, aber nur lesend. Privater Supabase-Key ausschließlich aus der Funktionsumgebung, nie im Website-Bundle. Keine Auth- oder E-Mail-Automatik eingerichtet.
@@ -31,7 +31,7 @@ Das Skript erzeugt ausschließlich SQL aus den vorhandenen Migrationen und Betre
 
 Impressum, Datenschutz und AGB verwenden ausdrücklich markierte eigene Entwürfe, falls keine freigegebenen Texte hinterlegt sind. Das sind keine eRecht24-Generatorausgaben. Es gibt keinen angebundenen eRecht24-Generatorzugang in dieser Sitzung. Rechtlich zu prüfende Vertragsbestandteile sind offengelegt; die freigegebenen `legal.*`-Felder bleiben leer und der Live-Verkauf gesperrt.
 
-**Aktualisiert 24.10.2026, 17:53 UTC:** Resend bestätigt die Domain vollständig einschließlich DKIM, SPF und Empfangs-MX. Die Inbox `support@seitenwerk.world` wurde erfolgreich angelegt und anschließend über den Connector bestätigt (Anzeigename Seitenwerk, Postfach Seitenwerk Support). Keine Test-Mail verschickt; tatsächliche Zustellung noch nicht getestet. Die frühere 422-Sperre ist behoben.
+**Aktualisiert 24.10.2026, 17:53 UTC:** Resend bestätigt die Domain vollständig einschließlich DKIM, SPF und Empfangs-MX. Die Inbox `support@example.test` wurde erfolgreich angelegt und anschließend über den Connector bestätigt (Anzeigename Seitenwerk, Postfach Seitenwerk Support). Keine Test-Mail verschickt; tatsächliche Zustellung noch nicht getestet. Die frühere 422-Sperre ist behoben.
 
 ## Prüfungen
 
