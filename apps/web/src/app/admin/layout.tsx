@@ -30,10 +30,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <AdminNav />
         <div className="admin-account">
           <span className="admin-avatar" aria-hidden="true">
-            DA
+            SW
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold">Doaa Attia</p>
+            <p className="text-sm font-semibold">Betreiberzugang</p>
             <p className="truncate text-xs text-slate-500" title={session.email}>
               {session.email}
             </p>

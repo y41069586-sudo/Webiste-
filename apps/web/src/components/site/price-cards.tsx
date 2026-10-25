@@ -1,9 +1,11 @@
+import { V4PriceCards } from './v4-price-cards';
 import Link from 'next/link';
 import type { SitePricing } from '@/lib/site';
 import { Check, delay } from './section';
 
 /** Zwei gleichwertige Preiskarten – keine Vorauswahl, keine versteckten Kosten. */
 export function PriceCards({ p }: { p: SitePricing }) {
+  if (p.version === 'v4') return <V4PriceCards />;
   return (
     <div>
       <div className="grid gap-4 md:grid-cols-2">

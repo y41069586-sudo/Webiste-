@@ -1,3 +1,4 @@
+import { realizedFinanceV4, operationalFunnelV4 } from '@wbm/core';
 import Link from 'next/link';
 import { sql } from 'drizzle-orm';
 import { FUNNEL_WINDOW_DAYS, funnelRows, funnelStages, getDb, INDUSTRIES, type FunnelDimension, type FunnelRow } from '@wbm/core';
@@ -73,6 +74,8 @@ export default async function FunnelPage({
   searchParams: Promise<{ gruppe?: string; branche?: string; von?: string; bis?: string }>;
 }) {
   await requireAdmin();
+  const finance = await realizedFinanceV4();
+  const operational = await operationalFunnelV4();
   const sp = await searchParams;
   const group = GROUPS.find((g) => g.key === sp.gruppe) ?? GROUPS[0]!;
   const industry = INDUSTRIES.find((i) => i === sp.branche);
@@ -89,6 +92,40 @@ export default async function FunnelPage({
   const stages = total ? funnelStages(total) : [];
   return (
     <>
+      <Card title="Tatsächliche Einnahmen · gesamter Datenbestand" className="mb-6">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Stat label="Bezahlte Erstzahlungen" value={eur(finance.setupReceivedCents)} />
+          <Stat label="Vereinnahmte Monatszahlungen" value={eur(finance.monthlyReceivedCents)} />
+          <Stat label="Erstattungen" value={eur(finance.refundsCents)} />
+          <Stat label="Bekannter V4-MRR (kein Geldeingang)" value={eur(finance.knownV4MrrCents)} />
+          <Stat
+            label="Care+-Anteil an bezahlten Käufen"
+            value={finance.carePlusShare === null ? '–' : `${Math.round(finance.carePlusShare * 100)} %`}
+          />
+        </div>
+        <p className="mt-4 text-sm text-slate-600">
+          Deckungsbeitrag noch nicht vollständig messbar: Hosting, Domain, Zahlungsgebühren und tatsächlich geleistete Care+-Zeit
+          müssen vollständig erfasst werden. Zukunftszahlungen sind keine Einnahmen. Kleine Fallzahlen begründen keinen
+          Testsieger.
+        </p>
+      </Card>
+      <Card title="Gesamter Ablauf · Betriebszahlen" className="mb-6">
+        <p className="mb-4 text-sm text-slate-600">
+          Gesamter Datenbestand, unterschiedliche Zähleinheiten; keine Kohorten-Kaufrate. Fehlende historische Nachweise werden
+          nicht nachträglich erfunden. „Nicht gemessen“ bedeutet keinen Wert von null. Tarifwechsel werden bislang nur
+          vorbereitet.
+        </p>
+        <ol className="grid gap-x-8 gap-y-2 text-sm md:grid-cols-2">
+          {operational.map((stage, i) => (
+            <li key={stage.label} className="flex justify-between gap-4 border-b border-slate-100 py-2">
+              <span>
+                {i + 1}. {stage.label}
+              </span>
+              <strong className="tabular-nums">{stage.count === null ? 'Nicht gemessen' : num(stage.count)}</strong>
+            </li>
+          ))}
+        </ol>
+      </Card>
       <PageHeader
         title="Funnel"
         subtitle={`Erstbriefe ab Versand; ein Brief gilt ${FUNNEL_WINDOW_DAYS} Tage nach (geschätzter) Zustellung als ausgewertet. Kaufrate nur aus ausgewerteten Briefen.`}
@@ -162,7 +199,7 @@ export default async function FunnelPage({
               hint={`${num(total.evaluated)} ausgewertete Briefe`}
             />
             <Stat
-              label="Umsatz pro Brief"
+              label="Geschätzter Legacy-Vertragswert/Brief"
               value={total.letters ? eur(Math.round(total.revenueCents / total.letters)) : '–'}
               hint="Monatsplan bewertet nach Einstellungen → Messung"
             />
@@ -202,7 +239,7 @@ export default async function FunnelPage({
                   'Kaufrate',
                   'Opt-outs',
                   'Kosten',
-                  'Umsatz/Brief',
+                  'Legacy-Vertragswert/Brief',
                 ]}
                 empty="Keine Daten"
               >

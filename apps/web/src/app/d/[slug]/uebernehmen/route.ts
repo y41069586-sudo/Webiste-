@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const found = await findPublicDemo(slug);
   if (found.state !== 'ok') return Response.redirect(appUrl(`/d/${slug}`), 302);
   const raw = new URL(req.url).searchParams.get('plan');
-  const plan = raw === 'one_time' || raw === 'monthly' ? raw : null;
+  const plan = raw === 'one_time' || raw === 'monthly' || raw === 'basis' || raw === 'care_plus' ? raw : null;
   const meta = requestMetaFrom(req.headers);
   await recordEvent(getDb(), { leadId: found.lead.id, type: 'cta_click', meta: plan ? { plan } : undefined, req: meta });
   if (!plan || meta.isBot) {

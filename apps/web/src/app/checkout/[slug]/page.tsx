@@ -22,7 +22,7 @@ export default async function CheckoutPage({
   const ctx = await getCheckoutContext(slug);
   if (ctx.state === 'ok') {
     redirect(
-      plan === 'one_time' || plan === 'monthly'
+      plan === 'one_time' || plan === 'monthly' || plan === 'basis' || plan === 'care_plus'
         ? appUrl(`/d/${slug}/uebernehmen?plan=${plan}`)
         : appUrl(`/d/${slug}#uebernehmen`),
     );

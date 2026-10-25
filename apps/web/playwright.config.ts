@@ -45,6 +45,7 @@ export default defineConfig({
     baseURL: BASE,
     trace: 'retain-on-failure',
     ...devices['Desktop Chrome'],
+    ...(process.env.CHROMIUM_EXECUTABLE_PATH ? { launchOptions: { executablePath: process.env.CHROMIUM_EXECUTABLE_PATH } } : {}),
   },
   // Reihenfolge: zuerst DB-Setup + Worker, dann Next.js
   webServer: [

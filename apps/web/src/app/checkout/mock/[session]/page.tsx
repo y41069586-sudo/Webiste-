@@ -29,9 +29,20 @@ export default async function MockCheckoutPage({ params }: { params: Promise<{ s
         </p>
         <h1 className="mb-1 text-2xl font-semibold">Testzahlung</h1>
         <p className="mb-6 text-slate-600">
-          {o.plan === 'monthly' ? cfg.pricing.monthlyName : cfg.pricing.packageName} · {formatEuro(o.amountCents)}
+          {o.offerSnapshot
+            ? `SeitenWerk ${o.offerSnapshot.tier === 'basis' ? 'Basis' : 'Care+'} – Einrichtung`
+            : o.plan === 'monthly'
+              ? cfg.pricing.monthlyName
+              : cfg.pricing.packageName}{' '}
+          · {formatEuro(o.amountCents)}
           {o.plan === 'monthly' ? ` pro Monat · ${cfg.pricing.minTermMonths} Monate Mindestlaufzeit` : ''}
         </p>
+        {o.offerSnapshot ? (
+          <p className="mb-5 text-sm">
+            Zusätzlich insgesamt {formatEuro(o.offerSnapshot.monthlyCents)} pro Monat nach bestätigtem Go-Live und gesondertem
+            Aboabschluss. Monatlich kündbar. Keine zusätzliche Basisgebühr.
+          </p>
+        ) : null}
         <form action={mockPayAction.bind(null, session)} className="space-y-3">
           {info.hosted ? (
             <fieldset className="mb-6 grid gap-3 sm:grid-cols-2">
@@ -74,6 +85,9 @@ export default async function MockCheckoutPage({ params }: { params: Promise<{ s
               <label className="flex gap-2 text-sm sm:col-span-2">
                 <input name="terms" type="checkbox" required className="mt-0.5" /> AGB (Stand {cfg.legal.termsVersion}) gelesen
                 und akzeptiert
+                {o.offerSnapshot
+                  ? `; ich stimme dem gewählten Monatstarif von insgesamt ${formatEuro(o.offerSnapshot.monthlyCents)} ab bestätigtem Go-Live ausdrücklich zu`
+                  : ''}
               </label>
             </fieldset>
           ) : null}

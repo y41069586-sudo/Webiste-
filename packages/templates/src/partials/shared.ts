@@ -122,7 +122,7 @@ function offerSection(demo: NonNullable<RenderInput['demo']>): string {
       <h3 class="text-base font-semibold">${esc(c.title)}</h3>
       <p class="mt-2"><span class="text-3xl font-bold tracking-tight">${esc(c.price)}</span> <span class="text-[#4b5563]">${esc(c.unit)}</span></p>
       <ul class="mt-3 flex-1 space-y-1.5 text-sm text-[#374151]">${c.points.map((p) => `<li class="flex gap-2"><span aria-hidden="true" class="text-[#047857]">✓</span><span>${esc(p)}</span></li>`).join('')}</ul>
-      <a href="${esc(c.href)}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-4 py-2 font-semibold text-white hover:bg-[#1f2937] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827]">${esc(c.title)} wählen</a>
+      <a href="${esc(c.href)}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-4 py-2 font-semibold text-white hover:bg-[#1f2937] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827]">${demo.offerVersion === 'v4' ? `Mit ${esc(c.title.replace('SeitenWerk ', ''))} übernehmen` : `${esc(c.title)} wählen`}</a>
     </li>`;
   const t = demo.trust;
   const trust = t
@@ -139,9 +139,64 @@ function offerSection(demo: NonNullable<RenderInput['demo']>): string {
   return `<section id="uebernehmen" aria-labelledby="uebernehmen-titel" class="border-t-4 border-[#fbbf24] bg-[#f3f4f6] py-12 text-[#111827]">
   <div class="mx-auto max-w-4xl px-4">
     <p class="text-sm font-medium text-[#4b5563]">Angebot von ${esc(demo.sender.company)} – nicht Teil der Website</p>
-    <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">Diese Seite übernehmen</h2>
+    <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${demo.offerVersion === 'v4' ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${demo.offerVersion === 'v4' ? '<p class="mt-3 text-sm">Übernehmen Sie diesen Entwurf und lassen Sie ihn für Ihren Betrieb fertigstellen und veröffentlichen.</p>' : ''}
     ${cards.length ? `<ul class="mt-6 grid gap-4 ${cards.length > 1 ? 'sm:grid-cols-2' : ''}">${cards.map(card).join('')}</ul>` : ''}
     ${demo.guaranteeNote ? `<p class="mt-4 text-sm text-[#374151]">${esc(demo.guaranteeNote)}</p>` : ''}
+    ${
+      demo.offerVersion === 'v4'
+        ? `<div class="mt-8"><h3 class="text-xl font-semibold">Ihre Fragen zur Übernahme</h3>${[
+            [
+              'Was passiert nach dem Kauf?',
+              'Nach der Einmalzahlung ergänzen Sie Ihre Angaben. Wir stimmen die Anpassungen mit Ihnen ab; die Veröffentlichung erfolgt erst nach Ihrer Freigabe.',
+            ],
+            [
+              'Wann geht die Website online?',
+              'Den tatsächlichen Go-Live vereinbaren wir, sobald Inhalte, Domain, rechtliche Angaben und Ihre Freigabe vorliegen. Es gibt keine erfundene feste Sofortfrist.',
+            ],
+            [
+              'Was ist im Einmalpreis enthalten?',
+              'Erstellung, vereinbarte Anpassung, technische Einrichtung, Standard-Domain im Kostenrahmen und bis zu zwei Änderungsrunden.',
+            ],
+            [
+              'Warum gibt es eine Monatsgebühr?',
+              'Für laufendes Hosting, SSL, technische Bereitstellung und den gewählten Betreuungsumfang. Sie beginnt nicht durch den QR-Scan.',
+            ],
+            [
+              'Was unterscheidet Basis und Care+?',
+              'Care+ enthält das Basis-Hosting vollständig sowie erweiterten Support und bis zu 60 Minuten kleine Inhaltsänderungen pro Monat. Keine doppelte Monatsgebühr.',
+            ],
+            [
+              'Kann ich den Tarif wechseln?',
+              'Sie können einen Wechsel anfragen. Er benötigt Ihre Bestätigung und wird zum vereinbarten Periodenende vorbereitet. Es wird kein zweites Abo stillschweigend angelegt.',
+            ],
+            [
+              'Kann ich kündigen oder wechseln?',
+              'Neue Monatstarife haben keine zwölfmonatige Mindestbindung. Kündigungsfrist und Übergabe stehen vor Abschluss transparent in den Vertragsbedingungen.',
+            ],
+            [
+              'Was passiert mit meiner Domain?',
+              'Sie wird auf Ihren Betrieb registriert. Für einen Anbieterwechsel erhalten Sie einen verfügbaren Auth-Code; Kosten des neuen Anbieters sind gesondert.',
+            ],
+            [
+              'Kann ich Bilder und Texte ändern?',
+              'Vor der Veröffentlichung sind zwei vereinbarte Änderungsrunden vorgesehen. Danach richtet sich die Betreuung nach Ihrem Tarif.',
+            ],
+            [
+              'Welche Änderungen umfasst Care+?',
+              'Bis zu 60 Minuten kleine vereinbarte Inhaltsänderungen im Monat. Größere Umbauten erfordern ein gesondertes Angebot; ungenutzte Minuten werden nicht übertragen.',
+            ],
+            [
+              'Was passiert, wenn ich nicht zufrieden bin?',
+              'Bitte melden Sie sich bei uns. Gesetzliche Rechte bleiben erhalten; eine zusätzliche Garantie gilt nur im konkret vereinbarten und technisch abgesicherten Umfang.',
+            ],
+          ]
+            .map(
+              ([question, answer]) =>
+                `<details class="mt-3 rounded-lg border border-[#d1d5db] bg-white p-4"><summary class="cursor-pointer font-semibold">${esc(question)}</summary><p class="mt-3 text-sm">${esc(answer)}</p></details>`,
+            )
+            .join('')}</div>`
+        : ''
+    }
     ${trust}
   </div>
 </section>`;

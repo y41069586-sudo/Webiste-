@@ -1,14 +1,29 @@
+import { V4PriceCards } from '@/components/site/v4-price-cards';
 import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
 import { PriceToggle, type PlanView } from '@/components/site/price-toggle';
 import { DarkBand, PageIntro } from '@/components/site/section';
 import { sitePricing } from '@/lib/site';
 
-export const metadata = { title: 'Preise', description: 'Einmalig oder monatlich – offene Endpreise ohne Einrichtungsgebühr.' };
+export const metadata = { title: 'Preise', description: '597 € einmalig plus 19 € Basis oder 99 € Care+ monatlich ab Go-Live.' };
 
 export default async function PricesPage() {
   const cfg = await getSiteConfig();
   const p = sitePricing(cfg);
+  if (cfg.offers.activeVersion === 'v4')
+    return (
+      <>
+        <PageIntro
+          eyebrow="Tarife"
+          title="Zwei Tarife. Klare Leistungen."
+        >
+          Einmalige Einrichtung plus gewählter Monatstarif ab bestätigtem Go-Live. Alle Beträge und Leistungen stehen im Vergleich.
+        </PageIntro>
+        <div className="mx-auto max-w-6xl px-5 py-12">
+          <V4PriceCards />
+        </div>
+      </>
+    );
   const plans: PlanView[] = [
     {
       key: 'one_time',

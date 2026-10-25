@@ -42,6 +42,24 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
 
   return (
     <>
+      {lead.scoreReasons?.length ? (
+        <Card title="Priorisierung: belegte und unsichere Signale" className="mb-6">
+          <ul className="space-y-2">
+            {lead.scoreReasons.map((reason) => (
+              <li key={reason.criterion} className="text-sm">
+                <strong>
+                  {reason.points > 0 ? '+' : ''}
+                  {reason.points}
+                </strong>{' '}
+                · {reason.detail} · {reason.verified ? 'in Quelle belegt' : 'manuelle Prüfung erforderlich'}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-slate-500">
+            Keine Aussage über Umsatz, Zahlungsbereitschaft oder garantierte Kaufchance.
+          </p>
+        </Card>
+      ) : null}
       <PageHeader
         title={lead.businessName}
         subtitle={

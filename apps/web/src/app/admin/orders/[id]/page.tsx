@@ -83,7 +83,30 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               {order.termsVersion ?? '–'} · {dt(order.termsAcceptedAt)}
             </dd>
             <dt className="text-slate-500">Plan</dt>
-            <dd>{monthly ? 'Monatlich (Option B)' : 'Einmalzahlung (Option A)'}</dd>
+            <dd>
+              {order.offerSnapshot
+                ? `V4 ${order.offerSnapshot.tier === 'basis' ? 'Basis' : 'Care+'}`
+                : monthly
+                  ? 'Monatlich (Option B)'
+                  : 'Einmalzahlung (Option A)'}
+            </dd>
+            {order.offerSnapshot ? (
+              <>
+                <dt className="text-slate-500">Monatstarif gesamt</dt>
+                <dd>{eur(order.offerSnapshot.monthlyCents)} ab bestätigtem Go-Live und Aboabschluss</dd>
+                <dt className="text-slate-500">Tarif-Zustimmung</dt>
+                <dd>
+                  {dt(order.offerSnapshot.consentAt ? new Date(order.offerSnapshot.consentAt) : null)} ·{' '}
+                  {order.offerSnapshot.consentVersion}
+                </dd>
+                <dt className="text-slate-500">Abo</dt>
+                <dd className="break-all">
+                  {order.stripeSubscriptionId ?? 'Noch nicht abgeschlossen'} · {order.subscriptionStatus ?? 'wartet auf Go-Live'}
+                </dd>
+                <dt className="text-slate-500">Inklusive Änderungen</dt>
+                <dd>{order.offerSnapshot.includedChangeMinutes} Minuten pro Monat; kein Übertrag</dd>
+              </>
+            ) : null}
             {monthly ? (
               <>
                 <dt className="text-slate-500">Abo</dt>

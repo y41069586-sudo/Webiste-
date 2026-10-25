@@ -120,8 +120,8 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .info .k{color:#6b7280}
 .info .date{margin-top:3mm;color:#1d232b}
 .body{position:absolute;left:25mm;right:20mm;top:96mm}
-.subject{font-size:11.5pt;font-weight:700;margin:0 0 4mm;line-height:1.3}
-.body p{margin:0 0 2.4mm}
+.subject{font-size:11.5pt;font-weight:700;margin:0 0 3mm;line-height:1.3}
+.body p{margin:0 0 2mm}
 .visual{display:flex;gap:6mm;align-items:center;margin:2mm 0 2mm}
 .composite{width:88mm;height:auto;display:block;border-radius:1.5mm}
 .qrbox{flex:1;text-align:center;font-size:9pt}

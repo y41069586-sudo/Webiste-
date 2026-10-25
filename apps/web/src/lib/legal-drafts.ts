@@ -90,7 +90,39 @@ Sie können sich bei einer Datenschutzaufsichtsbehörde beschweren. Für private
 
 Dies ist eine Arbeitsfassung für den beschriebenen Aufbau. Noch offen sind insbesondere die Bestätigung der Dienstleisterverträge, der accountabhängigen Log-/Postfachfristen und der Steuer-/Verkaufsaktivierung. Die endgültige Fassung muss der dann tatsächlich verwendeten Konfiguration entsprechen.
 `,
-    termsMarkdown: `# Allgemeine Geschäftsbedingungen
+    termsMarkdown:
+      cfg.offers.activeVersion === 'v4'
+        ? `# Vertragsbedingungen – SeitenWerk V4
+
+${draft}
+
+Anbieterin: ${contact}. Das Angebot richtet sich ausschließlich an Unternehmer (§ 14 BGB).
+
+## Leistungen und Preise
+
+SeitenWerk Basis: 597 € einmalig für Erstellung, Anpassung, Standard-Domain im vereinbarten Kostenrahmen, Einrichtung und zwei Änderungsrunden; dazu 19 €/Monat für Hosting, SSL und Basis-Support bei Betriebsstörungen.
+
+SeitenWerk Care+: ebenfalls 597 € einmalig, dazu insgesamt 99 €/Monat einschließlich sämtlicher Basisleistungen, Monitoring, monatlichem Technik-Check, persönlichem Support und bis zu 60 Minuten kleinen, vereinbarten Text-/Bildänderungen pro Monat. Keine zusätzliche 19-€-Gebühr. Größere Umbauten, neue Funktionen und Programmierarbeiten erfordern ein gesondert bestätigtes Angebot. Ungenutzte Minuten werden nicht übertragen.
+
+Rechnerische Übersicht bei zwölf vollständig berechneten Monaten: Basis 825 €, Care+ 1.785 €. Dies ist keine Vorauszahlungs- oder Mindestlaufzeitverpflichtung. Der Steuerstatus ist ungeklärt und muss vor verbindlichen Bestellungen geklärt werden; keine Umsatzsteuerbefreiung wird zugesichert.
+
+## Beginn und Zustimmung
+
+Die Einmalzahlung wird beim Kauf fällig. Monatsgebühren dürfen erst nach tatsächlichem, vereinbartem Go-Live beginnen. Im sicheren Entwicklungsablauf ist nach Go-Live ein gesonderter, ausdrücklich bestätigter Abo-Checkout erforderlich; ohne diesen wird keine automatische Abbuchung vorgenommen. Der Kunde stimmt dem gewählten monatlichen Tarif bereits beim Kauf ausdrücklich zu. Dieser erste Vertragsschritt ersetzt kein erforderliches Zahlungsmittelmandat. Es gibt keine zwölfmonatige kostenlose Hostingphase und keine automatische vorzeitige Monatsabbuchung.
+
+## Kündigung, Wechsel und Domain
+
+Monatlich kündbar, vorgesehen mit einem Monat Frist zum Ende der Abrechnungsperiode in Textform an ${email}; Frist und technischer Abrechnungsablauf sind vor Livebetrieb rechtlich abzugleichen. Tarifwechsel benötigen eine ausdrückliche Bestätigung, werden grundsätzlich zum nächsten Periodenende vorbereitet und lösen kein zweites Abo aus. Keine automatische anteilige Nachbelastung. Die Domain wird auf den Kunden registriert und kann nach Vertragsende mittels verfügbarem Auth-Code ohne zusätzliche Bearbeitungsgebühr übertragen werden; externe Anbietergebühren bleiben gesondert. Hosting endet nach Vertragsende, nach rechtzeitiger Übergabemöglichkeit für Kundendaten.
+
+## Inhalte, Mängel und Haftung
+
+Kunden liefern rechtmäßige Inhalte, Bildrechte und erforderliche Rechtsangaben und geben die Vorschau frei. Veröffentlichung ohne nachgewiesene Freigabe findet nicht statt. Für Mängel und Haftung gelten die gesetzlichen Vorschriften; kein pauschaler Ausschluss für Vorsatz, grobe Fahrlässigkeit oder Gesundheitsschäden. Nutzungsrechte an den vereinbarten Arbeitsergebnissen werden im erforderlichen Umfang eingeräumt; allgemeine Werkzeuge und Vorlagen werden nicht exklusiv übertragen. Es gibt keine Erfolgs-, Umsatz- oder Rankinggarantie.
+
+## Datenschutz, Garantie und Freigabe
+
+Kunden-Kontaktformulare erfordern vor Aktivierung eine gesonderte Vereinbarung nach Art. 28 DSGVO. Eine freiwillige Garantie darf nur mit zum tatsächlichen Ablauf passenden Fristen angeboten werden; der Abgleich der Garantie bei Verzögerungen ist noch offen. Bestehende Legacy-Verträge bleiben unverändert. Diese Arbeitsfassung ist keine anwaltlich geprüfte oder für echten Verkauf freigegebene Vertragsfassung.
+`
+        : `# Allgemeine Geschäftsbedingungen
 
 ${draft}
 

@@ -53,7 +53,12 @@ export default async function Home() {
                 </Link>
               </div>
               <p className="font-tight text-nav mt-5 text-[#5b6475]">
-                {p.oneTime} einmalig{p.monthlyEnabled ? ` oder ${p.monthly}/Monat (${p.minTerm} Monate Mindestlaufzeit)` : ''}
+                {p.oneTime} einmalig
+                {p.version === 'v4'
+                  ? ` + ${p.basis} Basis oder insgesamt ${p.carePlus} Care+ monatlich ab Go-Live`
+                  : p.monthlyEnabled
+                    ? ` oder ${p.monthly}/Monat (${p.minTerm} Monate Mindestlaufzeit)`
+                    : ''}
                 {p.guarantee ? ` · ${p.guarantee.days} Tage Garantie` : ''}
               </p>
             </div>

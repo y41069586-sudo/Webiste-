@@ -1,3 +1,4 @@
+import { v4Offer, v4FirstYearCents, formatEuroShort } from '@wbm/core';
 import { effectiveSwitches, getConfig } from '@wbm/core';
 import { Card, Notice, PageHeader, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
@@ -31,6 +32,25 @@ export default async function SettingsPage() {
         </div>
       </Card>
 
+      {cfg.offers.activeVersion === 'v4' ? (
+        <Card title="Neukundentarife V4" className="mb-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {(['basis', 'care_plus'] as const).map((tier) => (
+              <div key={tier}>
+                <h2 className="font-semibold">{tier === 'basis' ? 'Basis' : 'Care+'}</h2>
+                <p>
+                  {formatEuroShort(v4Offer(tier).setupCents)} einmalig + {formatEuroShort(v4Offer(tier).monthlyCents)}/Monat
+                  insgesamt ab Go-Live
+                </p>
+                <p className="text-sm text-slate-500">
+                  Erstes volles Betriebsjahr: {formatEuroShort(v4FirstYearCents(tier))}. Monatlich kündbar; Bestandsverträge
+                  bleiben unverändert.
+                </p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      ) : null}
       <Card title="Schalter" className="mb-6">
         {sw.dryRunLockedByEnv ? (
           <div className="mb-4">
@@ -67,7 +87,7 @@ export default async function SettingsPage() {
       </Card>
 
       <div className="space-y-6">
-        {SECTIONS.map((section) => (
+        {SECTIONS.filter((section) => cfg.offers.activeVersion !== 'v4' || section.id !== 'pricing').map((section) => (
           <Card key={section.id} title={section.title}>
             {section.description ? <p className="mb-4 text-sm text-slate-600">{section.description}</p> : null}
             <SectionForm

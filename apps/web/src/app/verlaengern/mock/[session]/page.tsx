@@ -1,5 +1,15 @@
 import { notFound, redirect } from 'next/navigation';
-import { checkoutAvailability, getConfig, getProviders, MockPayment, processPaymentWebhook, randomToken } from '@wbm/core';
+import { eq } from 'drizzle-orm';
+import {
+  checkoutAvailability,
+  getConfig,
+  getProviders,
+  getDb,
+  schema,
+  MockPayment,
+  processPaymentWebhook,
+  randomToken,
+} from '@wbm/core';
 import { PublicCard, PublicShell } from '@/components/public/shell';
 
 export const dynamic = 'force-dynamic';
@@ -22,16 +32,40 @@ export default async function MockSubscriptionPage({
     'use server';
     const p = getProviders().payment;
     if (!(p instanceof MockPayment)) throw new Error('nur im Testmodus');
+    const customer = await getDb().query.customers.findFirst({ where: eq(schema.customers.id, ref) });
+    if (!customer) throw new Error('Kunde nicht gefunden');
+    const order = await getDb().query.orders.findFirst({ where: eq(schema.orders.id, customer.orderId) });
+    const metadata = {
+      kind: 'subscription',
+      customerId: ref,
+      ...(order?.offerSnapshot ? { orderId: order.id, offerVersion: 'v4', tier: order.offerSnapshot.tier } : {}),
+    };
+    const subscriptionId = `sub_mock_${session.replace(/[^a-zA-Z0-9]/g, '')}`;
     const raw = JSON.stringify({
       eventId: `evt_mock_${randomToken(16)}`,
       type: 'checkout.completed',
       rawType: 'checkout.session.completed',
       sessionId: session,
       mode: 'subscription',
-      subscriptionId: `sub_mock_${randomToken(12)}`,
-      metadata: { kind: 'subscription', customerId: ref },
+      subscriptionId,
+      metadata,
     });
     await processPaymentWebhook(raw, p.sign(raw));
+    if (order?.offerSnapshot) {
+      const invoice = JSON.stringify({
+        eventId: `evt_mock_invoice_${session}`,
+        type: 'invoice.paid',
+        rawType: 'invoice.paid',
+        subscriptionId,
+        invoiceId: `in_mock_${session}`,
+        amountTotal: order.offerSnapshot.monthlyCents,
+        currency: 'eur',
+        billingReason: 'subscription_create',
+        metadata,
+      });
+      await processPaymentWebhook(invoice, p.sign(invoice));
+      redirect(`/verlaengern/${customer.accessToken}`);
+    }
     redirect('/');
   }
   return (
