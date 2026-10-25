@@ -11,12 +11,14 @@ export function localProfile(
   const studio = style === 'studio';
   return `<div class="sw-local-profile ${studio ? 'sw-local-profile-studio' : ''}">
     <p class="sw-profile-eyebrow">${esc(f.branchLabel)} · ${esc(f.city)}</p>
-    <div class="sw-profile-wordmark" aria-hidden="true">${esc(f.name.trim().slice(0, 1).toLocaleUpperCase('de'))}<span>·</span></div>
     <p class="sw-profile-name">${esc(f.name)}</p>
     <p class="sw-profile-address">${p.addressLines}</p>
     <div class="sw-profile-offer">${p.servicesNote('sw-profile-note')}<ul>${c.services
       .slice(0, 3)
-      .map((s) => `<li>${esc(s.title)}</li>`)
+      .map(
+        (s, index) =>
+          `<li><span class="sw-profile-index" aria-hidden="true">0${index + 1}</span><div><strong>${esc(s.title)}</strong><p>${esc(s.text)}</p></div></li>`,
+      )
       .join('')}</ul></div>
     <a href="#frage" class="sw-profile-contact">${studio ? 'Eine Anfrage stellen' : 'Ihr Vorhaben anfragen'} <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
   </div>`;

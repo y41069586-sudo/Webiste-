@@ -38,8 +38,8 @@ export const INDUSTRY_EXAMPLES = [
   {
     id: 'beauty',
     label: 'Beauty',
-    name: 'Kosmetik Muster',
-    hook: 'Behandlungen, Terminanfrage, Öffnungszeiten',
+    name: 'Salon Muster',
+    hook: 'Leistungen, Terminanfrage, Öffnungszeiten',
     color: '#a2566b',
   },
   {

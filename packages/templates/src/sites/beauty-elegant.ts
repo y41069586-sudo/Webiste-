@@ -12,12 +12,13 @@ export const beautyElegant: TemplateDef = {
   description: 'Serifenschrift, zentriert, feine Linien, ruhige Flächen',
   palettes: ['rose', 'noir', 'salbei'],
   render({ parts: p, content: c, facts: f }) {
+    const serviceLabel = /fris[öe]|friseur|haarsalon/i.test(f.branchLabel) ? 'Leistungen' : 'Behandlungen';
     const body = `
 <header class="border-b border-line bg-surface">
   <div class="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-5 md:flex-row md:justify-between">
     <a href="#inhalt" class="font-heading text-2xl italic tracking-wide">${p.brand()}</a>
     <nav aria-label="Hauptnavigation"><ul class="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm uppercase tracking-widest text-muted">
-      <li><a class="hover:text-ink" href="#leistungen">Behandlungen</a></li>
+      <li><a class="hover:text-ink" href="#leistungen">${serviceLabel}</a></li>
       <li><a class="hover:text-ink" href="#ueber-uns">Über uns</a></li>
       <li><a class="hover:text-ink" href="#oeffnungszeiten">Zeiten</a></li>
       <li><a class="hover:text-ink" href="#frage">Kontakt</a></li>
@@ -41,7 +42,7 @@ export const beautyElegant: TemplateDef = {
   <section id="leistungen" aria-labelledby="leistungen-titel" class="py-16 md:py-20">
     <div class="mx-auto max-w-4xl px-4">
       <div class="text-center">
-        <h2 id="leistungen-titel" class="font-heading text-4xl">Behandlungen</h2>
+        <h2 id="leistungen-titel" class="font-heading text-4xl">${serviceLabel}</h2>
         ${p.servicesNote('mt-3 text-sm text-muted')}
       </div>
       <ul class="mt-10 divide-y divide-line border-y border-line">

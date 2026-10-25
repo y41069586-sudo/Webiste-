@@ -202,5 +202,53 @@
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 15215,
     "keywords": ["yoga", "pilates"]
+  },
+  {
+    "file": "generated/maler.webp",
+    "group": "handwerk",
+    "alt": "KI-generiertes Beispielbild: Heller Wohnraum mit warmen Wandfarben",
+    "title": "Heller Wohnraum mit warmen Wandfarben",
+    "creator": "Mit OpenAI für SeitenWerk generiert",
+    "license": "Generated – OpenAI terms",
+    "licenseUrl": "https://openai.com/policies/terms-of-use/",
+    "source": "OpenAI image generation",
+    "sourceUrl": "https://openai.com/policies/terms-of-use/",
+    "openverseId": "",
+    "checkedAt": "2026-10-25",
+    "keywords": ["maler", "anstrich"],
+    "kind": "generated",
+    "bytes": 124428
+  },
+  {
+    "file": "generated/friseur.webp",
+    "group": "beauty",
+    "alt": "KI-generiertes Beispielbild: Illustrierter Salon mit Stylingplätzen",
+    "title": "Illustrierter Salon mit Stylingplätzen",
+    "creator": "Mit OpenAI für SeitenWerk generiert",
+    "license": "Generated – OpenAI terms",
+    "licenseUrl": "https://openai.com/policies/terms-of-use/",
+    "source": "OpenAI image generation",
+    "sourceUrl": "https://openai.com/policies/terms-of-use/",
+    "openverseId": "",
+    "checkedAt": "2026-10-25",
+    "keywords": ["friseur", "haarsalon", "frisör"],
+    "kind": "generated",
+    "bytes": 102408
+  },
+  {
+    "file": "generated/gartenbau.webp",
+    "group": "handwerk",
+    "alt": "KI-generiertes Beispielbild: Garten mit Stauden und Natursteinweg",
+    "title": "Garten mit Stauden und Natursteinweg",
+    "creator": "Mit OpenAI für SeitenWerk generiert",
+    "license": "Generated – OpenAI terms",
+    "licenseUrl": "https://openai.com/policies/terms-of-use/",
+    "source": "OpenAI image generation",
+    "sourceUrl": "https://openai.com/policies/terms-of-use/",
+    "openverseId": "",
+    "checkedAt": "2026-10-25",
+    "keywords": ["garten", "landschaft", "gärtner"],
+    "kind": "generated",
+    "bytes": 140466
   }
 ]

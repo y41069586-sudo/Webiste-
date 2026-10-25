@@ -5,32 +5,33 @@ import { sitePricing } from './site';
 export function legalDrafts(cfg: AppConfig) {
   const s = cfg.sender;
   const p = sitePricing(cfg);
-  const contact = `${s.name}, handelnd unter „${s.company}“, ${s.street}, ${s.postalCode} ${s.city}, Deutschland`;
-  const email = s.email;
+  const required = (value: string, label: string) => value.trim() || `TODO: ${label} ergänzen`;
+  const contact = `${required(s.name, 'vollständiger Vor- und Nachname')}, handelnd unter „${required(s.company, 'Geschäftsbezeichnung')}“, ${required(s.street, 'Straße und Hausnummer')}, ${required(s.postalCode, 'Postleitzahl')} ${required(s.city, 'Ort')}, Deutschland`;
+  const email = required(s.email, 'Kontakt-E-Mail');
   const draft =
-    '**Arbeitsfassung vom 24.10.2026. Der Verkauf ist noch nicht freigeschaltet. Steuerstatus, Vertragsabwicklung und Dienstleisterkonfiguration werden vor dem Verkaufsstart abschließend geprüft.**';
+    '**Entwurf, Stand 25.10.2026. Der Verkauf ist noch nicht freigeschaltet. Steuerstatus, Vertragsabwicklung und Dienstleisterkonfiguration werden vor dem Verkaufsstart abschließend geprüft.**';
   return {
     impressumMarkdown: `# Impressum
 
 ## Anbieterin gemäß § 5 DDG
 
-${s.company}
+${required(s.company, 'Geschäftsbezeichnung')}
 
-Inhaberin: ${s.name} (Einzelunternehmen)
+Inhaberin: ${required(s.name, 'vollständiger Vor- und Nachname')} (Einzelunternehmen)
 
-${s.street}
+${required(s.street, 'ladungsfähige Straße und Hausnummer')}
 
-${s.postalCode} ${s.city}
+${required(s.postalCode, 'Postleitzahl')} ${required(s.city, 'Ort')}
 
 Deutschland
 
 ## Kontakt
 
-Telefon: ${s.phone}
+Telefon: ${required(s.phone, 'Telefonnummer')}
 
 E-Mail: ${email}
 
-Kein Handelsregistereintrag. Eine Umsatzsteuer-Identifikationsnummer wurde nicht angegeben. Ob eine Wirtschafts-Identifikationsnummer zugeteilt wurde, wird derzeit geklärt. Eine bereits zugeteilte Nummer ist hier nachzutragen. Die persönliche Steuernummer wird hier nicht veröffentlicht.
+Kein Handelsregistereintrag. ${s.vatId ? `Umsatzsteuer-Identifikationsnummer: ${s.vatId}.` : 'TODO: Prüfen, ob eine Umsatzsteuer-Identifikationsnummer zugeteilt wurde; nur eine tatsächlich vorhandene Nummer ergänzen.'} TODO: Wirtschafts-Identifikationsnummer prüfen und bei erfolgter Zuteilung ergänzen. Die persönliche Steuernummer wird hier nicht veröffentlicht.
 
 ## Angebot
 
@@ -38,11 +39,11 @@ Erstellung und Betreuung von Websites für Unternehmer. Die Website enthält kei
 `,
     privacyMarkdown: `# Datenschutzerklärung
 
-Stand: 24. Oktober 2026
+Stand: 25. Oktober 2026
 
 ## 1. Verantwortliche und Kontakt
 
-${contact}. E-Mail: ${email}; Telefon: ${s.phone}. An diese Kontaktdaten können Sie auch Datenschutzanfragen richten.
+${contact}. E-Mail: ${email}; Telefon: ${required(s.phone, 'Telefonnummer')}. An diese Kontaktdaten können Sie auch Datenschutzanfragen richten.
 
 ## 2. Website und Hosting
 
@@ -86,7 +87,37 @@ Bei Vorliegen der gesetzlichen Voraussetzungen haben Sie Rechte auf Auskunft, Be
 
 Sie können sich bei einer Datenschutzaufsichtsbehörde beschweren. Für private Unternehmen in Bayern ist insbesondere das Bayerische Landesamt für Datenschutzaufsicht zuständig: https://www.lda.bayern.de . Die Bereitstellung von Kontaktdaten erfolgt grundsätzlich freiwillig; ohne erforderliche Angaben können wir eine Anfrage oder einen Vertrag gegebenenfalls nicht bearbeiten. Wir treffen keine ausschließlich automatisierten Entscheidungen mit rechtlicher oder ähnlich erheblicher Wirkung nach Art. 22 DSGVO.
 
-## 10. Prüfstand
+## 10. Unternehmensrecherche, Entwürfe und Postwerbung
+
+Für den noch nicht freigegebenen Akquiseprozess sind Firmenname, Branche, öffentlich bekannte Leistungen, Geschäftsanschrift, geschäftliche Kontaktdaten und der überprüfte Website-Status vorgesehen. Quellen sind insbesondere OpenStreetMap und manuell geprüfte öffentliche Unternehmensangaben; die konkrete Quelle wird pro Datensatz dokumentiert. Nicht jede Unternehmensangabe ist personenbezogen. Bei Einzelunternehmen und Ansprechpersonen kann Personenbezug bestehen. Keine privaten oder sensiblen Informationen für Akquise verwenden.
+
+Soweit nach dokumentierter Interessenabwägung zulässig, ist Grundlage Art. 6 Abs. 1 lit. f DSGVO mit dem Interesse, passenden Betrieben einen unverbindlichen Website-Entwurf postalisch anzubieten. Vor dem ersten Kontakt müssen die Informationen nach Art. 14 DSGVO einschließlich konkreter Datenquelle, Kategorien, Empfängern und Speicherdauer bereitgestellt werden, grundsätzlich spätestens binnen eines Monats nach Erhebung. Diese allgemeine Erklärung ersetzt den konkreten Hinweis beim Brief nicht. Der Prozess und die Versandfreigabe sind noch offen.
+
+**Sie können der Verarbeitung Ihrer personenbezogenen Daten zu Direktwerbezwecken jederzeit ohne Begründung widersprechen. Kontakt: ${email}. Nach einem Werbewiderspruch werden die Daten nicht mehr für Direktwerbung verarbeitet.** Zur Verhinderung weiterer Kontaktaufnahme kann ein minimaler gesperrter Abgleichwert aufbewahrt werden. Es werden keine unaufgeforderten Werbe-E-Mails, Anrufe oder WhatsApp-Nachrichten versendet.
+
+## 11. LetterXpress und postalische Dienstleister
+
+LetterXpress ist als Druck- und Versanddienst vorbereitet, wird jedoch durch diesen Testbetrieb nicht mit echten Briefen beauftragt. Anbieter ist A&O Fischer GmbH & Co. KG, Maybachstraße 9, 21423 Winsen (Luhe), Deutschland. Erst nach gesonderter Freigabe würden Empfängername und Postanschrift, Absenderangaben, Brief-PDF einschließlich Website-Screenshot und personalisierter Zieladresse sowie Auftrags-/Versanddaten für Druck, Kuvertierung und Postzustellung übermittelt. Zustelldienste erhalten die zur Beförderung erforderlichen Daten. Grundlage ist je nach Briefzweck Art. 6 Abs. 1 lit. b, c oder f DSGVO; die Interessen bei Werbung entsprechen Ziffer 10. Informationen: https://www.letterxpress.de/datenschutzerklaerung . TODO vor Beauftragung: konkrete AV-Vereinbarung, Unterauftragnehmer, Lösch-/Archivfristen und Rollenverteilung mit den Postdiensten dokumentieren. Ein bloßes Dienstleisterkonto ist keine Versandfreigabe.
+
+## 12. KI-Unterstützung und Bildmaterial
+
+Die Demo-Erstellung verfügt über eine vorbereitete Anthropic-API-Anbindung; die lokale Abnahme nutzt Mock- und Fallback-Inhalte. Bei gesonderter Aktivierung würden erforderliche verifizierte Geschäftsinformationen und Textanweisungen an den jeweiligen Anthropic-Vertragspartner übermittelt, um einen Entwurf zu erstellen. Keine Zahlungsdaten, Zugangsdaten oder ungeprüften privaten Informationen gehören in diese Anfragen. Rechtsgrundlage ist je nach Auftrag Art. 6 Abs. 1 lit. b oder nach dokumentierter Abwägung lit. f DSGVO. Inhalte werden vor Freigabe geprüft; es gibt keine ausschließlich automatisierten Entscheidungen mit rechtlicher oder ähnlich erheblicher Wirkung.
+
+TODO vor Aktivierung: Vertragspartner, AV-Vertrag, internationale Übermittlungsgrundlage und modell-/accountabhängige Aufbewahrung festlegen; keine pauschale Zero-Retention-Zusage. Informationen: https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data . Beispielbilder werden lokal ausgeliefert und gekennzeichnet; der Besuch muss nicht automatisch einen externen Bildanbieter kontaktieren. Fremde Betriebsbilder werden nicht als Kundenprojekte ausgegeben.
+
+## 13. Personalisierte Links, Messung und Kundenprojekte
+
+Personalisierte Demo- und Kurzlinks können einem konkreten Entwurf zugeordnet werden. Aufrufe solcher Links können technisch Zeitpunkt, Ziel und Sicherheits-/Gerätedaten zur Auslieferung und Missbrauchsabwehr erzeugen. Ein Linkaufruf belegt weder einen QR-Scan noch eine Kaufabsicht oder eine bestimmte natürliche Person. Das optionale Engagement-Tracking ist standardmäßig deaktiviert und benötigt eine gesonderte technische und rechtliche Freigabe. Kein Fingerprinting und keine Marketing-Cookies werden durch diese Erklärung erlaubt.
+
+Kundenseiten erhalten eigene Pflichtinformationen des jeweiligen Kunden. Eine spätere Registrierung über INWX oder zusätzliches Kundenhosting über Cloudflare ist vorbereitet, aber nicht durch diesen Testbetrieb aktiviert. TODO vor Aktivierung: tatsächliche Empfänger, erforderliche Domaininhaberdaten, Vertragsrollen und Übermittlungen ergänzen. Diese Erklärung behauptet keine Nutzung sämtlicher im Quellcode vorhandener Provider.
+
+## 14. Übermittlungen, Pflichtangaben und Rückfragen
+
+Einige Anbieter verarbeiten Daten außerhalb des EWR. Eine solche Übermittlung setzt eine tatsächlich anwendbare Grundlage nach Art. 44 ff. DSGVO voraus, beispielsweise einen einschlägigen Angemessenheitsbeschluss oder vereinbarte Standardvertragsklauseln mit erforderlichen ergänzenden Maßnahmen. TODO: die auf unseren konkreten Account anwendbare Grundlage je Anbieter dokumentieren. Informationen über die maßgeblichen Garantien oder verfügbare Kopien können über ${email} angefragt werden. Wir behaupten keine pauschale Zertifizierung oder ausschließlich europäische Verarbeitung.
+
+Kontaktdaten für allgemeine Fragen werden freiwillig angegeben; ohne notwendige Angaben kann eine Anfrage nicht beantwortet werden. Bei verbindlicher Beauftragung sind die zur Vertragserfüllung und Rechnung erforderlichen Daten bereitzustellen; sonst ist eine Durchführung nicht möglich. Weitere freiwillige Angaben sind als solche zu behandeln. Für eine Zweckänderung werden erforderliche Informationen vorab bereitgestellt.
+
+## 15. Prüfstand
 
 Dies ist eine Arbeitsfassung für den beschriebenen Aufbau. Noch offen sind insbesondere die Bestätigung der Dienstleisterverträge, der accountabhängigen Log-/Postfachfristen und der Steuer-/Verkaufsaktivierung. Die endgültige Fassung muss der dann tatsächlich verwendeten Konfiguration entsprechen.
 `,
@@ -98,29 +129,82 @@ ${draft}
 
 Anbieterin: ${contact}. Das Angebot richtet sich ausschließlich an Unternehmer (§ 14 BGB).
 
-## Leistungen und Preise
+## 1. Geltungsbereich und Testbetrieb
 
-SeitenWerk Basis: ${p.oneTime} einmalig für Erstellung, Anpassung, Standard-Domain im vereinbarten Kostenrahmen, Einrichtung und ${cfg.onboarding.includedChangeRounds} Änderungsrunden; dazu ${p.basis}/Monat für Hosting, SSL und Basis-Support bei Betriebsstörungen.
+Diese Bedingungen gelten für die Erstellung und den anschließenden technischen Betrieb der vereinbarten Website. Bestellungen sind ausschließlich für Unternehmer im Sinne von § 14 BGB für deren berufliche oder gewerbliche Tätigkeit vorgesehen. Individuelle Vereinbarungen haben Vorrang. Testentwürfe und Sandbox-Zahlungen begründen keine kostenpflichtige Bestellung. Derzeit sind echte Bestellungen gesperrt.
 
-SeitenWerk Care+: ebenfalls ${p.oneTime} einmalig, dazu insgesamt ${p.carePlus}/Monat einschließlich sämtlicher Basisleistungen, Monitoring, monatlichem Technik-Check, persönlichem Support und bis zu 60 Minuten kleinen, vereinbarten Text-/Bildänderungen pro Monat. Keine zusätzliche Basisgebühr. Größere Umbauten, neue Funktionen und Programmierarbeiten erfordern ein gesondert bestätigtes Angebot. Ungenutzte Minuten werden nicht übertragen.
+## 2. Entwurf, Bestellung und Vertragsschluss
 
-Rechnerische Übersicht bei zwölf vollständig berechneten Monaten: Basis ${formatEuroShort(v4FirstYearCents('basis'))}, Care+ ${formatEuroShort(v4FirstYearCents('care_plus'))}. Dies ist keine Vorauszahlungs- oder Mindestlaufzeitverpflichtung. Der Steuerstatus ist ungeklärt und muss vor verbindlichen Bestellungen geklärt werden; keine Umsatzsteuerbefreiung wird zugesichert.
+Die Demo dient der unverbindlichen Ansicht; ihr Aufruf erzeugt keine Zahlungspflicht. Vor Bestellung werden Tarif, Einmalpreis, Folgekosten, Leistungsumfang und diese Bedingungen angezeigt. Der Kunde kann Angaben vor Abgabe der Bestellung prüfen und korrigieren. Die Bestellung erfolgt über den gehosteten Stripe-Checkout unter ausdrücklicher Bestätigung der Unternehmereigenschaft und AGB. Maßgeblich bleibt der bei Bestellung gespeicherte Angebots- und Bedingungsstand.
 
-## Beginn und Zustimmung
+TODO vor Verkaufsfreigabe: Den rechtlichen Annahmezeitpunkt mit der tatsächlich automatisch versandten Bestellbestätigung verbindlich festlegen und den Checkout entsprechend abgleichen. Die technische Verbuchung nach bestätigter Zahlung allein ersetzt diese Festlegung nicht. Die Vertragssprache ist Deutsch. Eine Bestellbestätigung und die maßgeblichen Vertragsinformationen werden in Textform bereitgestellt; eine dauerhaft unbegrenzte Abrufbarkeit wird nicht zugesagt. Ein Telefonat oder persönlicher Termin ist keine Bestellvoraussetzung.
 
-Die Einmalzahlung wird beim Kauf fällig. Monatsgebühren dürfen erst nach tatsächlichem, vereinbartem Go-Live beginnen. Die Monatsabrechnung beginnt erst nach dem tatsächlich bestätigten Go-Live, ohne Rückdatierung. Der Kunde stimmt dem gewählten monatlichen Tarif beim Kauf ausdrücklich zu. Mit gesonderter Mandatszustimmung wird das bei Stripe gespeicherte Zahlungsmittel wiederkehrend belastet. Ältere Bestellungen mit separatem Abo-Checkout behalten ihr vereinbartes Verfahren. Bei SEPA müssen ein wirksames Mandat und eine passende Vorabankündigung vorliegen. Es gibt keine zwölfmonatige kostenlose Hostingphase und keine automatische vorzeitige Monatsabbuchung.
+## 3. Leistungsumfang und Mitwirkung
 
-## Kündigung, Wechsel und Domain
+Geliefert wird eine Website auf Grundlage des ausgewählten Entwurfs mit den vereinbarten Seiten und Funktionen. Enthalten sind Einrichtung, Anpassung anhand der Kundendaten und ${cfg.onboarding.includedChangeRounds} abgestimmte Änderungsrunden vor Veröffentlichung. Neue Funktionen, zusätzliche Seiten, größere Umbauten und Leistungen außerhalb des vereinbarten Umfangs bedürfen eines gesondert bestätigten Angebots.
 
-Basis und Care+ sind monatlich zum Ende des laufenden Abrechnungszeitraums kündbar, über den privaten Kundenlink oder in Textform an ${email}. Es gibt keine zwölfmonatige Mindestlaufzeit. Kündigungsbedingungen sind vor Livebetrieb rechtlich freizugeben. Tarifwechsel benötigen eine ausdrückliche Bestätigung, werden grundsätzlich zum nächsten Periodenende vorbereitet und lösen kein zweites Abo aus. Keine automatische anteilige Nachbelastung. Die Domain wird auf den Kunden registriert und kann nach Vertragsende mittels verfügbarem Auth-Code ohne zusätzliche Bearbeitungsgebühr übertragen werden; externe Anbietergebühren bleiben gesondert. Hosting endet nach Vertragsende, nach rechtzeitiger Übergabemöglichkeit für Kundendaten.
+Der Kunde liefert zutreffende Unternehmens-, Kontakt- und Rechtsangaben sowie rechtmäßig nutzbare Inhalte und Fotos. Er prüft Texte, Leistungsbeschreibungen und Bilder vor Veröffentlichung. Gekennzeichnete Beispielinhalte und Beispielfotos sind keine Behauptung über den Betrieb. KI-Unterstützung ersetzt weder die Faktenprüfung noch eine erforderliche rechtliche Prüfung. Personenbilder, Zertifizierungen, Bewertungen und Referenzen werden nicht erfunden.
 
-## Inhalte, Mängel und Haftung
+## 4. Preise und steuerliche Angaben
 
-Kunden liefern rechtmäßige Inhalte, Bildrechte und erforderliche Rechtsangaben und geben die Vorschau frei. Veröffentlichung ohne nachgewiesene Freigabe findet nicht statt. Für Mängel und Haftung gelten die gesetzlichen Vorschriften; kein pauschaler Ausschluss für Vorsatz, grobe Fahrlässigkeit oder Gesundheitsschäden. Nutzungsrechte an den vereinbarten Arbeitsergebnissen werden im erforderlichen Umfang eingeräumt; allgemeine Werkzeuge und Vorlagen werden nicht exklusiv übertragen. Es gibt keine Erfolgs-, Umsatz- oder Rankinggarantie.
+Basis: ${p.oneTime} einmalige Einrichtung zuzüglich ${p.basis} monatlich für Hosting, SSL und technischen Basis-Support bei Betriebsstörungen.
 
-## Datenschutz, Garantie und Freigabe
+Care+: ${p.oneTime} einmalige Einrichtung dazu insgesamt ${p.carePlus}/Monat. Die Basisleistung ist vollständig enthalten; es werden keine weiteren ${p.basis} zusätzlich berechnet.
 
-Kunden-Kontaktformulare erfordern vor Aktivierung eine gesonderte Vereinbarung nach Art. 28 DSGVO. Vorgesehen sind ${cfg.guarantee.days} Tage freiwillige Einrichtungsgarantie ab bestätigtem Go-Live. Vorher läuft keine Garantiefrist ab. Innerhalb der Frist genügt eine formlose Nachricht an ${email}: Die Einrichtungsgebühr wird erstattet, das Abo beendet und die Website offline genommen. Bereits erbrachte Monatsleistungen sind nicht Teil dieser freiwilligen Einrichtungsgarantie; gesetzliche Ansprüche bleiben unberührt. Dieser Umfang bedarf noch der ausdrücklichen Betreiber- und rechtlichen Freigabe. Bestehende Legacy-Verträge bleiben unverändert. Diese Arbeitsfassung ist keine anwaltlich geprüfte oder für echten Verkauf freigegebene Vertragsfassung.
+Rechnerische Übersicht bei zwölf vollständig berechneten Monaten: Basis ${formatEuroShort(v4FirstYearCents('basis'))}, Care+ ${formatEuroShort(v4FirstYearCents('care_plus'))}. Dies begründet keine Mindestlaufzeit oder Vorauszahlungspflicht.
+
+**TODO: Der Steuerstatus ist ungeklärt. Vor verbindlichen Bestellungen sind Steuerbehandlung, Umsatzsteuerausweis und tatsächlich geschuldeter Gesamtpreis festzulegen. Es wird keine Steuerbefreiung nach § 19 UStG zugesichert.** Änderungen des Steuerstatus ändern bestehende vereinbarte Gesamtpreise nicht automatisch.
+
+## 5. Zahlung und Beginn der Monatsabrechnung
+
+Die Einrichtungsgebühr ist nach dem verbindlich festgelegten Vertragsschluss über Stripe per angebotener Kartenzahlung zu zahlen. Banküberweisung wird derzeit nicht angeboten. Für bestätigte Zahlungen werden Rechnungen bereitgestellt. Fehlgeschlagene oder noch ausstehende Zahlungen gelten nicht als Zahlungseingang.
+
+Die Monatsabrechnung beginnt erst nach dem tatsächlich bestätigten Go-Live, nach bestätigter Einrichtungszahlung und ausdrücklicher Tarifzustimmung, ohne Rückdatierung. Der Kunde stimmt der Speicherung und wiederkehrenden Belastung des Zahlungsmittels im dafür vorgesehenen Checkout ausdrücklich zu. Ältere Bestellungen mit gesondertem Abo-Abschluss behalten das vereinbarte Verfahren. Eine offene Zahlungsbestätigung löst kein zusätzliches Abonnement aus.
+
+## 6. Domain und Hosting
+
+Enthalten ist eine verfügbare Standard-.de-Domain im vereinbarten Kostenrahmen von ${formatEuroShort(cfg.checkout.maxDomainPriceCents)} pro Jahr. Premiumdomains, zusätzliche Domains und kostenpflichtige Sonderleistungen werden nur nach gesonderter Zustimmung bestellt. Die Domain wird auf den Kunden als Inhaber registriert. Verfügbarkeit und Rechte Dritter müssen vor Registrierung geprüft werden; ein bloßer Domainwunsch ist keine Registrierungszusage.
+
+Hosting umfasst die Bereitstellung der vereinbarten Website mit TLS-Verschlüsselung. Eine hundertprozentige oder unterbrechungsfreie Verfügbarkeit wird nicht zugesichert. Erforderliche Wartung und externe Störungen sind möglich; gesetzliche Rechte bei Leistungsmängeln bleiben bestehen. TODO vor Livebetrieb: tatsächlich eingesetzte Hostinganbieter, Wartungs-/Sicherungsumfang und Reaktionswege verbindlich dokumentieren.
+
+## 7. Betreuung und Care+
+
+Basis-Support betrifft technische Störungen im vereinbarten Leistungsbereich. Laufende Text- und Bildänderungen sind im Basistarif nicht pauschal enthalten. Care+ umfasst zusätzlich Monitoring, monatlichen Technik-Check, persönlichen schriftlichen Support und bis zu 60 Minuten kleinere, abgestimmte Inhaltsänderungen pro Monat. Nicht verbrauchte Zeit wird nicht übertragen oder ausgezahlt. Größere Umgestaltungen und neue Funktionen sind ausgenommen. Zusatzkosten entstehen erst nach gesonderter Zustimmung. TODO: konkrete Supportzeiten und Reaktionsziele vor Vertragsstart festlegen; keine sofortige oder durchgehende Erreichbarkeit zugesichert.
+
+## 8. Fertigstellung, Prüfung und Veröffentlichung
+
+Termine werden nach Vorliegen der benötigten Inhalte und Freigaben vereinbart. Fehlende Mitwirkung kann den Zeitplan entsprechend verschieben, ohne eine fingierte Abnahme oder vorzeitige monatliche Abrechnung zu bewirken. Gesetzliche Regeln zu Verzug und Mitwirkung bleiben unberührt.
+
+Der Kunde erhält eine Vorschau zur Prüfung und meldet Abweichungen nachvollziehbar. Veröffentlicht wird erst nach seiner ausdrücklichen Freigabe und Erfüllung der technischen, rechtlichen und betrieblichen Voraussetzungen. Bloßes Schweigen gilt nicht pauschal als Freigabe. Gesetzliche Abnahmeregelungen und Rechte bei Mängeln bleiben unberührt.
+
+## 9. Laufzeit, Kündigung und Tarifwechsel
+
+Basis und Care+ sind ohne zwölfmonatige Mindestbindung monatlich zum Ende des laufenden Abrechnungszeitraums kündbar, über den privaten Kundenlink oder in Textform an ${email}. Die bestätigte Kündigung beendet künftige Monatsabrechnungen zum vereinbarten Ende. Das Recht zur außerordentlichen Kündigung aus wichtigem Grund bleibt bestehen.
+
+Tarifwechsel werden ausdrücklich vereinbart und grundsätzlich zum nächsten Periodenende ohne automatische anteilige Nachbelastung umgesetzt. Es entsteht kein zweites Abonnement. Eine Änderung von Preisen oder Leistungen laufender Verträge erfolgt nicht allein durch Änderung dieser Website.
+
+## 10. Übergabe bei Vertragsende und Nutzungsrechte
+
+Nach vollständiger Zahlung erhält der Kunde die zur vereinbarten Nutzung erforderlichen Rechte an den individuell erstellten Arbeitsergebnissen. Allgemeine Vorlagen, Werkzeuge, Generatorsoftware und Rechte Dritter werden nicht exklusiv übertragen. Lizenzen von Schriftarten, Software und Bildern sind einzuhalten.
+
+Vor Abschaltung wird Gelegenheit zur Sicherung der kundeneigenen Inhalte und zur Domainübertragung gegeben. Ein verfügbarer Auth-Code wird ohne zusätzliche eigene Bearbeitungsgebühr bereitgestellt; externe Gebühren bleiben gesondert. Ein neuer Anbieter benötigt eine technisch kompatible Hostingumgebung; deren Einrichtung ist nicht automatisch enthalten. TODO: Umfang und Format des Website-Exports vor Vertragsabschluss ausdrücklich festlegen. Ohne Verlängerungsauftrag erfolgt keine weitere Domainverlängerung durch uns. Eine Kündigung löscht nicht gesetzlich aufzubewahrende Vertragsdaten.
+
+## 11. Freiwillige Einrichtungsgarantie
+
+Vorgesehen sind ${cfg.guarantee.days} Tage Einrichtungsgarantie ab tatsächlichem bestätigtem Go-Live. Vorher läuft keine Garantiefrist ab. Eine formlose Nachricht an ${email} innerhalb dieser Frist genügt. Die Einrichtungsgebühr wird erstattet, das Monatsabo beendet und die Website offline genommen. Bereits erbrachte Monatsleistungen sind nicht Teil dieser freiwilligen Einrichtungsgarantie. Gesetzliche Mängel- und Erstattungsansprüche bleiben uneingeschränkt bestehen. TODO: diesen genauen Garantieumfang vor Livebetrieb ausdrücklich freigeben. Alte Verträge behalten ihre gespeicherten Bedingungen.
+
+## 12. Zahlungsverzug, Mängel und Haftung
+
+Zahlungsverzug und Verzugsfolgen richten sich nach den gesetzlichen Voraussetzungen. Eine notwendige Sperrung setzt eine berechtigte Forderung, vorherige Ankündigung und angemessene Möglichkeit zur Abhilfe voraus. Es gibt keine pauschale sofortige Fälligstellung nicht vereinbarter künftiger Raten und kein automatisches Inkasso durch diese Bedingungen.
+
+Für Mängel gelten die gesetzlichen Vorschriften. Die Haftung richtet sich nach den gesetzlichen Regelungen; insbesondere wird sie für Vorsatz, grobe Fahrlässigkeit sowie Schäden an Leben, Körper oder Gesundheit nicht ausgeschlossen. Eine bestimmte Anzahl von Anfragen, Umsätze, Suchmaschinenpositionen oder geschäftlicher Erfolg werden nicht garantiert.
+
+## 13. Datenschutz und Schlussbestimmungen
+
+Unsere Verarbeitung von Kontakt- und Vertragsdaten wird in der Datenschutzerklärung beschrieben. Verarbeiten wir Daten im Auftrag des Kunden, etwa über ein Kontaktformular seiner Website, ist vor Aktivierung eine Vereinbarung nach Art. 28 DSGVO erforderlich. Ein Verweis in diesen AGB ersetzt sie nicht.
+
+Es gilt deutsches Recht unter Beachtung zwingender Vorschriften; die gesetzlichen Gerichtsstände bleiben bestehen. Unwirksame Klauseln werden durch die gesetzlichen Regelungen ersetzt. Diese Fassung wird nicht automatisch als freigegebener Checkout-Vertrag gespeichert. TODOs, gegebenenfalls erforderliche gesetzliche Vertretung oder Ermächtigung der Anbieterin sowie die tatsächliche Vertragsabwicklung sind vor produktiven Bestellungen zu klären. Diese Fassung bedarf noch der Betreiber- und rechtlichen Freigabe. Dies ist ein fachlich noch zu prüfender Entwurf.
+
 `
         : `# Allgemeine Geschäftsbedingungen
 

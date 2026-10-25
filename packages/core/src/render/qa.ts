@@ -134,6 +134,16 @@ export async function browserChecks(opts: BrowserQaOptions): Promise<Check[]> {
         });
         page.on('pageerror', (e) => consoleErrors.push(e.message.slice(0, 200)));
         await page.setContent(opts.html, { waitUntil: 'load' });
+        const brokenImages = await page.evaluate(() =>
+          Array.from(document.images)
+            .filter((image) => !image.complete || image.naturalWidth === 0)
+            .map((image) => image.alt || 'Bild ohne Alternativtext'),
+        );
+        checks.push({
+          name: `bilder-${vp.label}`,
+          passed: brokenImages.length === 0,
+          ...(brokenImages.length ? { details: brokenImages.slice(0, 8).join(' | ') } : {}),
+        });
         if (vp.label === 'desktop') {
           checks.push({
             name: 'konsole',

@@ -8,7 +8,7 @@ const require = createRequire(new URL('../apps/web/node_modules/next/package.jso
 const sharp = require('sharp');
 const fixtures = [
   { id: 'handwerk', name: 'Malerei Muster', branch: 'maler', label: 'Malerbetrieb', template: 'handwerk-klar' },
-  { id: 'beauty', name: 'Kosmetik Muster', branch: 'kosmetikstudio', label: 'Kosmetikstudio', template: 'beauty-elegant' },
+  { id: 'beauty', name: 'Salon Muster', branch: 'friseur', label: 'Friseursalon', template: 'beauty-elegant' },
   { id: 'gastronomie', name: 'Trattoria Muster', branch: 'restaurant', label: 'Restaurant', template: 'gastronomie-split' },
   { id: 'einzelhandel', name: 'Blumen Muster', branch: 'blumenladen', label: 'Blumenladen', template: 'einzelhandel-magazin' },
   { id: 'kurse', name: 'Tanzschule Muster', branch: 'tanzschule', label: 'Tanzschule', template: 'kurse-split' },

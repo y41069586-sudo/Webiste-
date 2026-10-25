@@ -120,19 +120,23 @@ describe('Beispielfotos (lizenzfrei, nur im Entwurf)', () => {
     for (const g of ['gastronomie', 'einzelhandel', 'kurse'] as const)
       expect(list.filter((p) => p.group === g).length, g).toBeGreaterThanOrEqual(3);
     for (const p of list) {
-      expect(p.license, p.file).toMatch(/^CC0/);
+      expect(p.license, p.file).toMatch(p.kind === 'generated' ? /^Generated/ : /^CC0/);
       expect(p.sourceUrl).toMatch(/^https:\/\//);
       expect(p.alt.length).toBeGreaterThan(5);
       const bytes = readFileSync(path.join(imagesDir(), p.file));
       expect(bytes.length, p.file).toBeLessThan(150_000);
-      expect(bytes.toString('latin1'), `${p.file}: EXIF`).toContain('CC0');
-      expect(bytes.toString('latin1')).toContain(p.sourceUrl);
+      if (p.kind !== 'generated') {
+        expect(bytes.toString('latin1'), `${p.file}: EXIF`).toContain('CC0');
+        expect(bytes.toString('latin1')).toContain(p.sourceUrl);
+      } else expect(p.alt).toContain('KI-generiertes Beispielbild');
     }
   });
 
   it('Entwurf zeigt gekennzeichnete Beispielfotos; Vorschau und Live nie', () => {
     const t = TEMPLATES.find((x) => x.id === 'gastronomie-foto')!;
-    const demo = renderSite(demoInput(t.id, t.palettes[0]!, 'gastronomie'));
+    const input = demoInput(t.id, t.palettes[0]!, 'gastronomie');
+    input.facts.branchLabel = 'Restaurant';
+    const demo = renderSite(input);
     expect(demo).toContain('data:image/jpeg;base64,');
     expect(demo).toContain('Beispielfoto');
     for (const mode of ['preview', 'live'] as const) {
@@ -151,5 +155,8 @@ describe('Beispielfotos (lizenzfrei, nur im Entwurf)', () => {
     const { stockPhotos } = await import('../src');
     expect(stockPhotos('kurse', 0, 'Tanzschule')[0]!.file).toBe('kurse/ballettschuhe.jpg');
     expect(stockPhotos('kurse', 0, 'Yogastudio')[0]!.file).toBe('kurse/yogamatte.jpg');
+    expect(stockPhotos('kurse', 0, 'Musikunterricht')).toEqual([]);
+    expect(stockPhotos('einzelhandel', 0, 'Fahrradgeschäft')).toEqual([]);
+    expect(stockPhotos('kurse', -7, 'Tanzschule')[0]!.file).toBe('kurse/ballettschuhe.jpg');
   });
 });

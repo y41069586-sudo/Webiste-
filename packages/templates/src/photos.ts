@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import type { BranchGroup } from './types';
 
 /**
- * Lizenzfreie Beispielfotos (CC0) für Entwürfe. Lizenz, Urheber und Quelle stehen in den EXIF-Daten
- * jedes Bildes und in assets/images/manifest.json. Sie erscheinen nur im Entwurf und sind dort als
+ * CC0-Fotos und getrennt dokumentierte KI-Beispielbilder für Entwürfe. Herkunft und
+ * Nutzungsgrundlage stehen in assets/images/manifest.json; nur CC0-JPEGs tragen EXIF-Lizenzdaten. Sie erscheinen nur im Entwurf und sind dort als
  * „Beispielfoto“ gekennzeichnet – auf Live-Seiten stehen nur Fotos des Kunden.
  */
 export interface StockPhoto {
@@ -22,6 +22,7 @@ export interface StockPhoto {
   checkedAt: string;
   /** Stichwörter für die Auswahl passend zur Branche (z. B. „tanz“ für eine Tanzschule) */
   keywords?: string[];
+  kind?: 'generated';
 }
 
 export function imagesDir(): string {
@@ -44,21 +45,34 @@ export function stockPhotoManifest(): StockPhoto[] {
 
 /** Fotos einer Gruppe in fester, vom Seed abhängiger Reihenfolge (Abwechslung zwischen Demos). */
 export function stockPhotos(group: BranchGroup, seed = 0, branchLabel = ''): StockPhoto[] {
-  const list = stockPhotoManifest().filter((p) => p.group === group);
+  const root = path.resolve(imagesDir());
+  const list = stockPhotoManifest().filter((p) => {
+    const file = path.resolve(root, p.file);
+    return (
+      p.group === group &&
+      (p.license === 'CC0 1.0' ||
+        (p.kind === 'generated' && p.source === 'OpenAI image generation' && p.license === 'Generated – OpenAI terms')) &&
+      Boolean(p.sourceUrl && p.checkedAt) &&
+      file.startsWith(root + path.sep) &&
+      existsSync(file)
+    );
+  });
   if (!list.length) return [];
-  const start = seed % list.length;
+  const start = ((seed % list.length) + list.length) % list.length;
   const rotated = [...list.slice(start), ...list.slice(0, start)];
   // Passende Fotos zuerst (Tanzschule → Ballettschuhe statt Hanteln), Reihenfolge sonst stabil
   const label = branchLabel.toLowerCase();
   const fits = (p: StockPhoto) => (p.keywords ?? []).some((k) => label.includes(k));
   const matching = rotated.filter(fits);
-  return matching.length ? matching : rotated;
+  // Unknown specialties must not silently receive an unrelated service photograph.
+  return matching.length ? matching : label.trim() ? rotated.filter((p) => !p.keywords?.length) : rotated;
 }
 
 export function stockPhotoDataUri(photo: StockPhoto): string {
   let uri = dataCache.get(photo.file);
   if (!uri) {
-    uri = `data:image/jpeg;base64,${readFileSync(path.join(imagesDir(), photo.file)).toString('base64')}`;
+    const mime = photo.file.endsWith('.webp') ? 'image/webp' : 'image/jpeg';
+    uri = `data:${mime};base64,${readFileSync(path.join(imagesDir(), photo.file)).toString('base64')}`;
     dataCache.set(photo.file, uri);
   }
   return uri;

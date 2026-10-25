@@ -62,7 +62,10 @@ export default async function Home() {
           persönlicher Entwurf verwendet die bekannten Angaben Ihres Betriebs.
         </SectionHead>
         <div className="mt-12">
-          <ExamplesGrid />
+          <ExamplesGrid limit={2} />
+          <Link href="/beispiele" className="btn-site btn-secondary mt-8">
+            Alle fünf Branchen ansehen <Arrow />
+          </Link>
         </div>
       </section>
 

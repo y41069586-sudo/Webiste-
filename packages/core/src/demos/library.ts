@@ -300,6 +300,70 @@ export const CONTENT_LIBRARY: Record<string, LibraryEntry> = {
   },
 };
 
+/** Additional specialties share the existing truthful fallback contract; services remain labelled examples. */
+const SPECIALTIES: { match: RegExp; headline: string; services: { title: string; text: string; icon: IconKey }[] }[] = [
+  {
+    match: /fris[öe]|friseur|haarsalon/i,
+    headline: 'Ihr Friseursalon in {stadt}',
+    services: [
+      {
+        title: 'Schnitt & Styling',
+        text: 'Platz für die tatsächlich angebotenen Schnitte und Styling-Leistungen.',
+        icon: 'sparkle',
+      },
+      {
+        title: 'Farbe & Pflege',
+        text: 'Mögliche Übersicht zu Farb- und Pflegeangeboten; Umfang mit dem Salon abstimmen.',
+        icon: 'drop',
+      },
+      { title: 'Terminwünsche', text: 'Eine Anfrage senden; der Salon bestätigt den gewünschten Termin.', icon: 'calendar' },
+    ],
+  },
+  {
+    match: /garten|landschaft|gaertner|gärtner/i,
+    headline: 'Gartenideen für Ihr Zuhause',
+    services: [
+      { title: 'Gartengestaltung', text: 'Eine mögliche Übersicht für Gestaltung und Bepflanzung.', icon: 'leaf' },
+      { title: 'Pflegearbeiten', text: 'Hier lassen sich die bestätigten Pflegeleistungen darstellen.', icon: 'flower' },
+      { title: 'Ihr Vorhaben', text: 'Wünsche und Standort beschreiben und den möglichen Umfang anfragen.', icon: 'chat' },
+    ],
+  },
+  {
+    match: /reinig|gebäudeservice|gebaeudeservice/i,
+    headline: 'Reinigung anfragen. Umfang klar abstimmen.',
+    services: [
+      { title: 'Räume & Gebäude', text: 'Platz für die vom Betrieb bestätigten Reinigungsbereiche.', icon: 'house' },
+      {
+        title: 'Regelmäßige Reinigung',
+        text: 'Mögliche Einsatzzeiten und Umfang werden persönlich bestätigt.',
+        icon: 'calendar',
+      },
+      {
+        title: 'Individuelle Anfrage',
+        text: 'Objekt und Reinigungsbedarf für eine konkrete Rückmeldung beschreiben.',
+        icon: 'chat',
+      },
+    ],
+  },
+  {
+    match: /sanitär|sanitaer|heizung|installat/i,
+    headline: 'Ihr Anliegen rund um Haus und Technik',
+    services: [
+      {
+        title: 'Technische Leistungen',
+        text: 'Hier stehen nach Abstimmung die tatsächlich angebotenen Arbeiten.',
+        icon: 'wrench',
+      },
+      { title: 'Wartung & Reparatur', text: 'Mögliche Aufgaben darstellen; keine ungeprüfte Notdienstzusage.', icon: 'house' },
+      {
+        title: 'Projekt anfragen',
+        text: 'Das Vorhaben und vorhandene Unterlagen für eine Rückmeldung übermitteln.',
+        icon: 'chat',
+      },
+    ],
+  },
+];
+
 const GENERIC: Record<BranchGroup, LibraryEntry> = {
   handwerk: CONTENT_LIBRARY.maler!,
   beauty: CONTENT_LIBRARY.kosmetikstudio!,
@@ -323,7 +387,10 @@ export function libraryContent(
   vars: { name: string; stadt: string; branche: string },
   seed: number,
 ): SiteContent {
-  const lib = CONTENT_LIBRARY[branch] ?? GENERIC[group];
+  const specialty = SPECIALTIES.find((entry) => entry.match.test(`${branch} ${vars.branche}`));
+  const lib = specialty
+    ? { ...GENERIC[group], headlines: [specialty.headline], services: specialty.services }
+    : (CONTENT_LIBRARY[branch] ?? GENERIC[group]);
   const v = { name: vars.name, stadt: vars.stadt, branche: vars.branche };
   const services = lib.services.slice(0, 4 + (seed % 3)).map((s) => ({ ...s, title: fill(s.title, v), text: fill(s.text, v) }));
   const focus: Record<BranchGroup, string> = {
@@ -358,7 +425,9 @@ export function libraryContent(
   ];
   return {
     hero_headline: fill(pick(lib.headlines, seed), v),
-    hero_subline: focus[group],
+    hero_subline: specialty
+      ? `${vars.branche} in ${vars.stadt}: Leistungen kennenlernen und Ihren Wunsch direkt anfragen.`
+      : focus[group],
     services,
     about: `${vars.name} ist als ${vars.branche} in ${vars.stadt} erfasst. Anschrift und Kontakt finden Sie auf dieser Seite.\n\nDie dargestellten Angebotsbereiche zeigen, wie sich die Website aufbauen lässt. Vor der Veröffentlichung werden Leistungen, Texte und Bilder mit dem Betrieb abgestimmt.`,
     cta_text: group === 'beauty' ? 'Termin anfragen' : group === 'kurse' ? 'Kurs anfragen' : 'Anfrage stellen',

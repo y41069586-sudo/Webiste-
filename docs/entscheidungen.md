@@ -246,3 +246,13 @@ v5-go-live-checkliste.md. Kein Deployment/DNS/echte Zahlungen/Briefversand durch
   Produktionskonfiguration, Veröffentlichung, Domainkäufe oder echte Zahlungen/Briefe freigegeben.
 - Firmenwebsite erneut ansehen/weitergestalten und tatsächliche Brief-/Demo-Beispiele zeigen.
   Bisherige V4-Gestaltung nur lokal, nicht als bereits auf seitenwerk.world veröffentlicht darstellen.
+
+## 25.10.2026 – Testphase, Rechtstexte, Push und Ultimate-Qualitätsauftrag
+
+Betreiber berichtet telefonische Rathausbestätigung einer Testphase vor Gewerbeanmeldung.
+Als Betreiberangabe dokumentieren, keine eigene rechtliche Freigabe daraus behaupten. Rechtstexte
+vollständig auf tatsächliche/verplante Dienste abstimmen, fehlende AngabenTODO, Live-Sperren erhalten.
+Commit und Push auf aktuellen Arbeitsbranch ausdrücklich beauftragt, kein Live-Deploy. Neuester
+Ultimate-Auftrag erweitert die Qualitätsanforderungen; frühere lokale Abnahmen sind keine Abnahme
+neuer branchenspezifischer Designs oder9–10/10-Gesamtqualität. Kennzeichnung KI-Beispielbilder,
+kein Fake-Portfolio und kein Betreiberfoto. Fortschritt: ultimate-quality-handoff.md.

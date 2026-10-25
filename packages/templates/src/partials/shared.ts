@@ -520,9 +520,9 @@ ${jsonLd}
       .map((ph) => ({ src: stockPhotoDataUri(ph), alt: ph.alt, example: true }));
   };
   const figure = (ph: { src: string; alt: string; example: boolean }, imgClass: string, figClass = '') =>
-    `<figure class="${/\babsolute\b/.test(figClass) ? figClass : `relative ${figClass}`}"><img src="${ph.src}" alt="${esc(ph.alt)}" class="${imgClass}" width="1000" height="750">${
+    `<figure class="${/\babsolute\b/.test(figClass) ? figClass : `relative ${figClass}`}"><img src="${esc(ph.src)}" alt="${esc(ph.alt)}" class="${imgClass}" width="1000" height="750" decoding="async">${
       ph.example
-        ? '<figcaption class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs font-medium text-white">Beispielfoto</figcaption>'
+        ? `<figcaption class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs font-medium text-white">${/^KI-generiertes/.test(ph.alt) ? 'KI-generiertes Beispielbild' : 'Beispielfoto'}</figcaption>`
         : ''
     }</figure>`;
 

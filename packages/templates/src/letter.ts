@@ -119,11 +119,11 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .info{position:absolute;left:${infoX}mm;top:50mm;width:65mm;font-size:8.5pt;line-height:1.45;color:#3b4350}
 .info .k{color:#6b7280}
 .info .date{margin-top:3mm;color:#1d232b}
-.body{position:absolute;left:25mm;right:20mm;top:96mm}
+.body{position:absolute;left:25mm;right:20mm;top:94mm}
 .subject{font-size:11.5pt;font-weight:700;margin:0 0 3mm;line-height:1.3}
-.body p{margin:0 0 2mm}
+.body p{margin:0 0 1.5mm}
 .visual{display:flex;gap:6mm;align-items:center;margin:2mm 0 2mm}
-.composite{width:88mm;height:auto;display:block;border-radius:1.5mm}
+.composite{width:96mm;max-height:51mm;object-fit:contain;object-position:left center;height:auto;display:block;border-radius:1.5mm}
 .qrbox{flex:1;text-align:center;font-size:9pt}
 /* QR-Code mindestens 4 × 4 cm (gut scanbar, auch bei schwachem Licht) */
 .qr{width:41mm;height:41mm;display:block;margin:0 auto 1.5mm}

@@ -25,6 +25,13 @@ test.describe('Firmen-Website', () => {
       expect(res?.status(), path).toBe(200);
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(h1);
       await expect(page.locator('h1')).toHaveCount(1);
+      const legal = page.getByRole('navigation', { name: 'Rechtliches' });
+      for (const [label, href] of [
+        ['Impressum', '/impressum'],
+        ['Datenschutz', '/datenschutz'],
+        ['AGB', '/agb'],
+      ])
+        await expect(legal.getByRole('link', { name: label, exact: true })).toHaveAttribute('href', href!);
     }
     await page.goto('/');
     await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Preise', exact: true }).click();

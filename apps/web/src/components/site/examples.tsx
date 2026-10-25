@@ -59,10 +59,10 @@ export function ExamplesCascade({ head, children }: { head: ReactNode; children?
 }
 
 /** Statische Übersicht der Beispiele (Seite „Beispiele“): große Vorschau, Farbfeld-Kante, Name, Branche, Aufhänger. */
-export function ExamplesGrid() {
+export function ExamplesGrid({ limit }: { limit?: number } = {}) {
   return (
     <ul aria-label="Beispiel-Websites je Branche" className="grid gap-x-6 gap-y-12 md:grid-cols-2">
-      {INDUSTRY_EXAMPLES.map((ex, i) => (
+      {INDUSTRY_EXAMPLES.slice(0, limit).map((ex, i) => (
         <li key={ex.id} data-reveal style={{ '--d': `${(i % 2) * 90}ms` } as CSSProperties}>
           <a
             href={`/beispiele/${ex.id}.html`}

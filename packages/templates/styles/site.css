@@ -74,19 +74,6 @@
   text-transform: uppercase;
   color: var(--c-muted);
 }
-.sw-profile-wordmark {
-  font-family: var(--f-heading);
-  font-size: clamp(5rem, 10vw, 8rem);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.08em;
-  margin: 1rem 0;
-  color: var(--c-primary);
-}
-.sw-profile-wordmark span {
-  color: var(--c-muted);
-  font-weight: 400;
-}
 .sw-profile-name {
   font-size: 1.25rem;
   font-weight: 600;
@@ -108,15 +95,32 @@
   margin-bottom: 0.6rem;
 }
 .sw-profile-offer ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  display: grid;
+  gap: 1rem;
 }
 .sw-profile-offer li {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  border-top: 1px solid var(--c-line);
+  padding-top: 1rem;
+}
+.sw-profile-offer li strong {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.sw-profile-offer li p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--c-muted);
+  margin-top: 0.35rem;
+}
+.sw-profile-index {
+  flex: 0 0 1.4rem;
+  white-space: nowrap;
   font-size: 0.75rem;
-  border: 1px solid var(--c-line);
-  border-radius: 2rem;
-  padding: 0.35rem 0.65rem;
+  color: var(--c-primary);
+  font-variant-numeric: tabular-nums;
 }
 .sw-profile-contact {
   display: flex;
@@ -130,19 +134,16 @@
   color: var(--c-primary);
 }
 .sw-local-profile-studio {
-  border-radius: 12rem 12rem 1rem 1rem;
-  text-align: center;
-  padding-top: 3.5rem;
+  border-radius: 0.25rem;
+  text-align: left;
   background: var(--c-surface);
+  border-top: 4px solid var(--c-primary);
 }
-.sw-local-profile-studio .sw-profile-wordmark {
-  font-style: italic;
+.sw-local-profile-studio .sw-profile-name {
+  font-family: var(--f-heading);
+  font-size: 1.6rem;
   font-weight: 400;
 }
-.sw-local-profile-studio .sw-profile-offer ul {
-  justify-content: center;
-}
-
 /* Single mobile purchase bar with safe-area space; the actual draft keeps its own visual identity. */
 .sw-demo-context {
   background: #f4f6fa;

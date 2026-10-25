@@ -43,3 +43,20 @@ test('contract prices come from existing configuration', () => {
   assert.ok(text.includes('55'));
   assert.ok(!text.includes('590 Euro'));
 });
+
+test('V4 legal drafts explain providers, truthful test status and unresolved mandatory details', () => {
+  const cfg = deepMerge(DEFAULT_CONFIG, { sender: OPERATOR_PROFILE });
+  const text = legalDrafts(cfg);
+  for (const provider of ['Netlify', 'Supabase', 'Stripe', 'Resend', 'LetterXpress', 'Anthropic'])
+    assert.ok(text.privacyMarkdown.includes(provider), provider);
+  assert.ok(text.privacyMarkdown.includes('Art. 14'));
+  assert.ok(text.privacyMarkdown.includes('jederzeit ohne Begründung'));
+  assert.ok(text.termsMarkdown.includes('60 Minuten'));
+  assert.ok(text.termsMarkdown.includes('Monatsabrechnung beginnt erst'));
+  assert.ok(text.termsMarkdown.includes('TODO'));
+  assert.ok(!/49\s*€|590\s*€/.test(text.termsMarkdown));
+  const incomplete = legalDrafts(deepMerge(cfg, { sender: { name: '', street: '' } }));
+  assert.ok(incomplete.impressumMarkdown.includes('TODO: vollständiger Vor- und Nachname'));
+  assert.ok(incomplete.privacyMarkdown.includes('TODO: Straße und Hausnummer'));
+  assert.equal(cfg.legal.termsMarkdown, '');
+});
