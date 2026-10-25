@@ -1,6 +1,12 @@
 import { renderLetterHtml, type LetterData } from '@wbm/templates';
 import type { AppConfig } from '../config/settings';
-import { composeLetter, placeholderValues, type ComposeInput, type RecipientInput } from '../letters/compose';
+import {
+  composeLetter,
+  letterTruthBlocklist,
+  placeholderValues,
+  type ComposeInput,
+  type RecipientInput,
+} from '../letters/compose';
 import { objectionNoticeText, privacyNoticeText } from '../letters/notices';
 import { renderSlots, type LetterSlots } from '../letters/slots';
 import { checkLetterTruth, type ClaimForCheck, type TruthCheckInput, type TruthCheckResult } from '../letters/truth-check';
@@ -75,7 +81,7 @@ export async function renderLetterPreview(i: LetterPreviewInput): Promise<Letter
     industry: i.industry,
     placeholderValues: placeholderValues(composeInput),
     sourcesLabel: i.sourcesLabel,
-    extraBlocklist: i.cfg.letter.truthCheckBlocklist,
+    extraBlocklist: letterTruthBlocklist(i.cfg),
     maxStatistics: i.cfg.letter.maxStatistics,
   };
   return { data, html: renderLetterHtml(data), truthInput, truth: checkLetterTruth(truthInput) };

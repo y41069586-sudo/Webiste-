@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 const PAGES: [string, RegExp][] = [
-  ['/', /Ihre Website ist schon fertig/],
+  ['/', /Erst sehen.*Dann entscheiden/s],
   ['/so-funktionierts', /drei Schritten/],
   ['/preise', /Offene Preise/],
   ['/garantie', /Zufriedenheitsgarantie/],
@@ -44,15 +44,13 @@ test.describe('Firmen-Website', () => {
     await expect(table).toContainText('19 €/Monat');
   });
 
-  test('Startseite: Beispiel-Treppe im Kopfbereich läuft und lässt sich anhalten', async ({ page }) => {
+  test('Startseite: ruhige Produktvorschau und tatsächlich ansehbare Muster', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ihre Website ist schon fertig.');
-    const track = page.locator('.cascade-track');
-    await expect(track.getByText('Beispiel', { exact: true })).toHaveCount(15);
-    await expect(track).toHaveCSS('animation-play-state', 'running');
-    await page.getByLabel('Bewegung anhalten').check();
-    await expect(track).toHaveCSS('animation-play-state', 'paused');
-    await expect(page.getByText('Beispiele je Branche.')).toHaveCount(0);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Erst sehen.*Dann entscheiden/s);
+    await expect(page.locator('.site-example-stage img')).toBeVisible();
+    await page.getByRole('link', { name: 'Musterwebsite für Handwerk ansehen' }).click();
+    await expect(page.getByText('Fiktive Musterwebsite von SeitenWerk.', { exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Zurück zu SeitenWerk' })).toBeVisible();
   });
 
   test('Beispiele: fünf erfundene Musterbetriebe, klar gekennzeichnet', async ({ page }) => {

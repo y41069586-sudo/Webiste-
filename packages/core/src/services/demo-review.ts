@@ -29,16 +29,30 @@ export async function requiresManualReview(db: DbOrTx, random = Math.random()): 
 export async function approveDemo(
   demoId: string,
   actor: string,
-  opts: { manual: boolean; note?: string } = { manual: true },
+  opts: {
+    manual: boolean;
+    note?: string;
+    review?: { facts: boolean; desktop: boolean; mobile: boolean; images: boolean; text: boolean };
+  } = { manual: true },
 ): Promise<void> {
   const db = getDb();
   await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT id FROM demos WHERE id=${demoId} FOR UPDATE`);
     const demo = await tx.query.demos.findFirst({ where: eq(demos.id, demoId) });
     if (!demo) throw new Error('Demo nicht gefunden');
     if (!['pending_review', 'qa_failed'].includes(demo.status)) {
       throw new Error(`Demo im Status ${demo.status} kann nicht freigegeben werden`);
     }
-    if (demo.status === 'qa_failed' && !opts.manual) throw new Error('QA nicht bestanden');
+    if (!demo.qaResultJson?.passed || demo.qaResultJson.checks.some((c) => !c.passed))
+      throw new Error('Technische QA nicht bestanden; Befunde beheben und erneut prüfen.');
+    if (!opts.manual && (await requiresManualReview(tx)))
+      throw new Error('Manuelle Demo-Prüfung erforderlich; erste 30 und Stichproben bleiben geschützt.');
+    if (
+      opts.manual &&
+      (!opts.review ||
+        !['facts', 'desktop', 'mobile', 'images', 'text'].every((k) => opts.review![k as keyof typeof opts.review] === true))
+    )
+      throw new Error('Fakten, Desktop, Mobil, Bilder und Text müssen tatsächlich manuell geprüft werden.');
     await tx
       .update(demos)
       .set({
@@ -46,6 +60,10 @@ export async function approveDemo(
         approvedBy: actor,
         approvedAt: new Date(),
         reviewNote: opts.note ?? null,
+        qaResultJson: {
+          ...demo.qaResultJson,
+          ...(opts.manual ? { review: { ...opts.review!, actor, at: new Date().toISOString() } } : {}),
+        },
         updatedAt: new Date(),
       })
       .where(eq(demos.id, demoId));

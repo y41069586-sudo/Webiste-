@@ -52,12 +52,15 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
     }
     const html = (await storage.get(demo!.htmlStorageKey!))!.toString();
     expect(html).toContain('noindex');
-    expect(html).toContain('Unverbindlicher Entwurf');
+    expect(html).toContain('Unverbindlicher Website-Entwurf');
   }, 120_000);
 
   it('Freigabe → Veröffentlichung setzt Ablaufdatum und Lead-Status', async () => {
     const demo = (await getDb().select().from(demos).where(eq(demos.leadId, leadId)))[0]!;
-    await approveDemo(demo.id, 'admin:test');
+    await approveDemo(demo.id, 'admin:test', {
+      manual: true,
+      review: { facts: true, desktop: true, mobile: true, images: true, text: true },
+    });
     await publishDemo(demo.id, 'admin:test');
     const after = await getDb().query.demos.findFirst({ where: eq(demos.id, demo.id) });
     expect(after?.status).toBe('published');

@@ -40,8 +40,8 @@ describe('Templates', () => {
         expect(html.startsWith('<!DOCTYPE html>')).toBe(true);
         expect(html).toContain('<html lang="de">');
         expect(html).toContain('<meta name="robots" content="noindex, nofollow, noarchive">');
-        expect(html).toContain('Unverbindlicher Entwurf');
-        expect(html).toContain('Seite übernehmen');
+        expect(html).toContain('Unverbindlicher Website-Entwurf');
+        expect(html).toContain('Diese Website übernehmen');
         expect(html).toContain('href="#uebernehmen"');
         expect(html).toContain('Frage per WhatsApp');
         expect(html).toContain('https://wa.me/491701234567?text=');
@@ -83,7 +83,7 @@ describe('Templates', () => {
         canonicalUrl: 'https://malerbetrieb-beispiel.de/',
       },
     });
-    expect(html).not.toContain('Unverbindlicher Entwurf');
+    expect(html).not.toContain('Unverbindlicher Website-Entwurf');
     expect(html).not.toContain('noindex');
     expect(html).not.toContain('Beispiel-Leistungen');
     expect(html).toContain('action="https://app.example.de/api/forms/abc"');
@@ -93,7 +93,7 @@ describe('Templates', () => {
 
   it('Screenshot-Modus: ohne Banner, aber noindex', () => {
     const html = renderSite({ ...demoInput('beauty-soft', 'salbei', 'beauty'), mode: 'screenshot' });
-    expect(html).not.toContain('Unverbindlicher Entwurf');
+    expect(html).not.toContain('Unverbindlicher Website-Entwurf');
     expect(html).not.toContain('id="uebernehmen"');
     expect(html).not.toContain('wa.me');
     expect(html).toContain('noindex');

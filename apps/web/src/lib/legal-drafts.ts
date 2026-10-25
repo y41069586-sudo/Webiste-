@@ -1,4 +1,4 @@
-import type { AppConfig } from '@wbm/core';
+import { formatEuroShort, v4FirstYearCents, type AppConfig } from '@wbm/core';
 import { sitePricing } from './site';
 
 /** Own working texts based on confirmed facts. Never silently approve these for live checkout. */
@@ -100,19 +100,19 @@ Anbieterin: ${contact}. Das Angebot richtet sich ausschließlich an Unternehmer 
 
 ## Leistungen und Preise
 
-SeitenWerk Basis: 597 € einmalig für Erstellung, Anpassung, Standard-Domain im vereinbarten Kostenrahmen, Einrichtung und zwei Änderungsrunden; dazu 19 €/Monat für Hosting, SSL und Basis-Support bei Betriebsstörungen.
+SeitenWerk Basis: ${p.oneTime} einmalig für Erstellung, Anpassung, Standard-Domain im vereinbarten Kostenrahmen, Einrichtung und ${cfg.onboarding.includedChangeRounds} Änderungsrunden; dazu ${p.basis}/Monat für Hosting, SSL und Basis-Support bei Betriebsstörungen.
 
-SeitenWerk Care+: ebenfalls 597 € einmalig, dazu insgesamt 99 €/Monat einschließlich sämtlicher Basisleistungen, Monitoring, monatlichem Technik-Check, persönlichem Support und bis zu 60 Minuten kleinen, vereinbarten Text-/Bildänderungen pro Monat. Keine zusätzliche 19-€-Gebühr. Größere Umbauten, neue Funktionen und Programmierarbeiten erfordern ein gesondert bestätigtes Angebot. Ungenutzte Minuten werden nicht übertragen.
+SeitenWerk Care+: ebenfalls ${p.oneTime} einmalig, dazu insgesamt ${p.carePlus}/Monat einschließlich sämtlicher Basisleistungen, Monitoring, monatlichem Technik-Check, persönlichem Support und bis zu 60 Minuten kleinen, vereinbarten Text-/Bildänderungen pro Monat. Keine zusätzliche Basisgebühr. Größere Umbauten, neue Funktionen und Programmierarbeiten erfordern ein gesondert bestätigtes Angebot. Ungenutzte Minuten werden nicht übertragen.
 
-Rechnerische Übersicht bei zwölf vollständig berechneten Monaten: Basis 825 €, Care+ 1.785 €. Dies ist keine Vorauszahlungs- oder Mindestlaufzeitverpflichtung. Der Steuerstatus ist ungeklärt und muss vor verbindlichen Bestellungen geklärt werden; keine Umsatzsteuerbefreiung wird zugesichert.
+Rechnerische Übersicht bei zwölf vollständig berechneten Monaten: Basis ${formatEuroShort(v4FirstYearCents('basis'))}, Care+ ${formatEuroShort(v4FirstYearCents('care_plus'))}. Dies ist keine Vorauszahlungs- oder Mindestlaufzeitverpflichtung. Der Steuerstatus ist ungeklärt und muss vor verbindlichen Bestellungen geklärt werden; keine Umsatzsteuerbefreiung wird zugesichert.
 
 ## Beginn und Zustimmung
 
-Die Einmalzahlung wird beim Kauf fällig. Monatsgebühren dürfen erst nach tatsächlichem, vereinbartem Go-Live beginnen. Im sicheren Entwicklungsablauf ist nach Go-Live ein gesonderter, ausdrücklich bestätigter Abo-Checkout erforderlich; ohne diesen wird keine automatische Abbuchung vorgenommen. Der Kunde stimmt dem gewählten monatlichen Tarif bereits beim Kauf ausdrücklich zu. Dieser erste Vertragsschritt ersetzt kein erforderliches Zahlungsmittelmandat. Es gibt keine zwölfmonatige kostenlose Hostingphase und keine automatische vorzeitige Monatsabbuchung.
+Die Einmalzahlung wird beim Kauf fällig. Monatsgebühren dürfen erst nach tatsächlichem, vereinbartem Go-Live beginnen. Die Monatsabrechnung beginnt erst nach dem tatsächlich bestätigten Go-Live, ohne Rückdatierung. Der Kunde stimmt dem gewählten monatlichen Tarif beim Kauf ausdrücklich zu. Mit gesonderter Mandatszustimmung wird das bei Stripe gespeicherte Zahlungsmittel wiederkehrend belastet. Ältere Bestellungen mit separatem Abo-Checkout behalten ihr vereinbartes Verfahren. Bei SEPA müssen ein wirksames Mandat und eine passende Vorabankündigung vorliegen. Es gibt keine zwölfmonatige kostenlose Hostingphase und keine automatische vorzeitige Monatsabbuchung.
 
 ## Kündigung, Wechsel und Domain
 
-Monatlich kündbar, vorgesehen mit einem Monat Frist zum Ende der Abrechnungsperiode in Textform an ${email}; Frist und technischer Abrechnungsablauf sind vor Livebetrieb rechtlich abzugleichen. Tarifwechsel benötigen eine ausdrückliche Bestätigung, werden grundsätzlich zum nächsten Periodenende vorbereitet und lösen kein zweites Abo aus. Keine automatische anteilige Nachbelastung. Die Domain wird auf den Kunden registriert und kann nach Vertragsende mittels verfügbarem Auth-Code ohne zusätzliche Bearbeitungsgebühr übertragen werden; externe Anbietergebühren bleiben gesondert. Hosting endet nach Vertragsende, nach rechtzeitiger Übergabemöglichkeit für Kundendaten.
+Basis und Care+ sind monatlich zum Ende des laufenden Abrechnungszeitraums kündbar, über den privaten Kundenlink oder in Textform an ${email}. Es gibt keine zwölfmonatige Mindestlaufzeit. Kündigungsbedingungen sind vor Livebetrieb rechtlich freizugeben. Tarifwechsel benötigen eine ausdrückliche Bestätigung, werden grundsätzlich zum nächsten Periodenende vorbereitet und lösen kein zweites Abo aus. Keine automatische anteilige Nachbelastung. Die Domain wird auf den Kunden registriert und kann nach Vertragsende mittels verfügbarem Auth-Code ohne zusätzliche Bearbeitungsgebühr übertragen werden; externe Anbietergebühren bleiben gesondert. Hosting endet nach Vertragsende, nach rechtzeitiger Übergabemöglichkeit für Kundendaten.
 
 ## Inhalte, Mängel und Haftung
 
@@ -120,7 +120,7 @@ Kunden liefern rechtmäßige Inhalte, Bildrechte und erforderliche Rechtsangaben
 
 ## Datenschutz, Garantie und Freigabe
 
-Kunden-Kontaktformulare erfordern vor Aktivierung eine gesonderte Vereinbarung nach Art. 28 DSGVO. Eine freiwillige Garantie darf nur mit zum tatsächlichen Ablauf passenden Fristen angeboten werden; der Abgleich der Garantie bei Verzögerungen ist noch offen. Bestehende Legacy-Verträge bleiben unverändert. Diese Arbeitsfassung ist keine anwaltlich geprüfte oder für echten Verkauf freigegebene Vertragsfassung.
+Kunden-Kontaktformulare erfordern vor Aktivierung eine gesonderte Vereinbarung nach Art. 28 DSGVO. Vorgesehen sind ${cfg.guarantee.days} Tage freiwillige Einrichtungsgarantie ab bestätigtem Go-Live. Vorher läuft keine Garantiefrist ab. Innerhalb der Frist genügt eine formlose Nachricht an ${email}: Die Einrichtungsgebühr wird erstattet, das Abo beendet und die Website offline genommen. Bereits erbrachte Monatsleistungen sind nicht Teil dieser freiwilligen Einrichtungsgarantie; gesetzliche Ansprüche bleiben unberührt. Dieser Umfang bedarf noch der ausdrücklichen Betreiber- und rechtlichen Freigabe. Bestehende Legacy-Verträge bleiben unverändert. Diese Arbeitsfassung ist keine anwaltlich geprüfte oder für echten Verkauf freigegebene Vertragsfassung.
 `
         : `# Allgemeine Geschäftsbedingungen
 

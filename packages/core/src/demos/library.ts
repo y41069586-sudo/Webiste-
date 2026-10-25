@@ -239,7 +239,7 @@ export const CONTENT_LIBRARY: Record<string, LibraryEntry> = {
       { title: 'Damenmode', text: 'Kleidung für Alltag und besondere Anlässe.', icon: 'tag' },
       { title: 'Herrenmode', text: 'Von lässig bis elegant.', icon: 'bag' },
       { title: 'Accessoires', text: 'Taschen, Schals und kleine Begleiter.', icon: 'sparkle' },
-      { title: 'Persönliche Beratung', text: 'Wir nehmen uns Zeit für Ihre Fragen.', icon: 'chat' },
+      { title: 'Persönliche Beratung', text: 'Fragen zu Auswahl und Möglichkeiten vorab klären.', icon: 'chat' },
       { title: 'Vorab reservieren', text: 'Fragen Sie an, ob Ihr Wunschteil vorrätig ist.', icon: 'calendar' },
     ],
     about: [
@@ -326,14 +326,44 @@ export function libraryContent(
   const lib = CONTENT_LIBRARY[branch] ?? GENERIC[group];
   const v = { name: vars.name, stadt: vars.stadt, branche: vars.branche };
   const services = lib.services.slice(0, 4 + (seed % 3)).map((s) => ({ ...s, title: fill(s.title, v), text: fill(s.text, v) }));
+  const focus: Record<BranchGroup, string> = {
+    handwerk: 'Arbeiten am Haus beginnen mit einer konkreten Frage. Hier finden Sie den Kontakt für Ihr Vorhaben.',
+    beauty: 'Behandlungen kennenlernen und einen Termin anfragen. Die Übersicht führt Sie zum passenden Kontakt.',
+    gastronomie: 'Ein Blick auf Angebot, Öffnungszeiten und Anfahrt hilft bei der Planung Ihres Besuchs.',
+    einzelhandel: 'Sortiment entdecken, einen Artikel anfragen und den Weg ins Geschäft finden.',
+    kurse: 'Kursarten überblicken und eine passende Stunde anfragen. Termine werden vor einer Buchung bestätigt.',
+  };
+  const faq: SiteContent['faq'] = [
+    {
+      q:
+        group === 'handwerk'
+          ? 'Wie beschreibe ich mein Vorhaben?'
+          : group === 'beauty'
+            ? 'Wie frage ich einen Termin an?'
+            : group === 'gastronomie'
+              ? 'Wie frage ich einen Besuch an?'
+              : group === 'einzelhandel'
+                ? 'Wie frage ich einen Artikel an?'
+                : 'Wie frage ich eine Probestunde an?',
+      a: 'Beschreiben Sie Ihren Wunsch und nennen Sie mögliche Zeiten. Eine Anfrage ist noch keine verbindliche Zusage oder Buchung.',
+    },
+    {
+      q: 'Welche Angaben sind bereits bestätigt?',
+      a: 'Name, Anschrift und vorhandene Kontaktdaten stammen aus den erfassten Betriebsangaben. Die Angebotsbereiche zeigen eine mögliche Gestaltung und werden vor Veröffentlichung mit dem Betrieb abgestimmt.',
+    },
+    {
+      q: 'Wo finde ich den Standort?',
+      a: 'Die Anschrift und der Link zur Anfahrt stehen im Kontaktbereich. Aktuelle Öffnungszeiten werden angezeigt, soweit sie in den erfassten Angaben vorhanden sind.',
+    },
+  ];
   return {
     hero_headline: fill(pick(lib.headlines, seed), v),
-    hero_subline: fill(pick(lib.sublines, seed, 1), v),
+    hero_subline: focus[group],
     services,
-    about: fill(pick(lib.about, seed), v),
-    cta_text: pick(lib.cta, seed),
+    about: `${vars.name} ist als ${vars.branche} in ${vars.stadt} erfasst. Anschrift und Kontakt finden Sie auf dieser Seite.\n\nDie dargestellten Angebotsbereiche zeigen, wie sich die Website aufbauen lässt. Vor der Veröffentlichung werden Leistungen, Texte und Bilder mit dem Betrieb abgestimmt.`,
+    cta_text: group === 'beauty' ? 'Termin anfragen' : group === 'kurse' ? 'Kurs anfragen' : 'Anfrage stellen',
     seo_title: `${vars.name} – ${vars.branche} in ${vars.stadt}`.slice(0, 65),
-    seo_description: fill(pick(lib.sublines, seed), v).slice(0, 158),
-    faq: lib.faq.slice(0, 3 + (seed % 2)).map((f) => ({ q: fill(f.q, v), a: fill(f.a, v) })),
+    seo_description: `${vars.branche} in ${vars.stadt}. ${focus[group]}`.slice(0, 158),
+    faq,
   };
 }

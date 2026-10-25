@@ -6,17 +6,24 @@ import { actorOf, requireAdmin } from '@/lib/auth';
 
 export async function approveDemoAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
-  await approveDemo(String(form.get('id')), actorOf(s), { manual: true, note: String(form.get('note') ?? '') || undefined });
+  await approveDemo(String(form.get('id')), actorOf(s), {
+    manual: true,
+    note: String(form.get('note') ?? '') || undefined,
+    review: {
+      facts: form.get('facts') === 'on',
+      desktop: form.get('desktop') === 'on',
+      mobile: form.get('mobile') === 'on',
+      images: form.get('images') === 'on',
+      text: form.get('text') === 'on',
+    },
+  });
   revalidatePath('/admin/demos');
 }
 
 export async function bulkApproveDemos(form: FormData): Promise<void> {
-  const s = await requireAdmin();
-  const ids = form.getAll('ids').map(String);
-  for (const id of ids) {
-    await approveDemo(id, actorOf(s), { manual: true }).catch(() => undefined);
-  }
-  revalidatePath('/admin/demos');
+  await requireAdmin();
+  void form;
+  throw new Error('Demos bitte einzeln mit Fakten-, Desktop-, Mobil-, Bild- und Textprüfung freigeben.');
 }
 
 export async function rejectDemoAction(form: FormData): Promise<void> {

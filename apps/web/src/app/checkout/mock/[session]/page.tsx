@@ -39,8 +39,11 @@ export default async function MockCheckoutPage({ params }: { params: Promise<{ s
         </p>
         {o.offerSnapshot ? (
           <p className="mb-5 text-sm">
-            Zusätzlich insgesamt {formatEuro(o.offerSnapshot.monthlyCents)} pro Monat nach bestätigtem Go-Live und gesondertem
-            Aboabschluss. Monatlich kündbar. Keine zusätzliche Basisgebühr.
+            Zusätzlich insgesamt {formatEuro(o.offerSnapshot.monthlyCents)} pro Monat ab bestätigtem Go-Live.{' '}
+            {o.offerSnapshot.billingMode === 'saved_mandate'
+              ? 'Der wiederkehrende Einzug wird mit diesem Kauf ausdrücklich vereinbart.'
+              : 'Der Aboabschluss erfolgt gesondert.'}{' '}
+            Monatlich kündbar. Keine zusätzliche Basisgebühr.
           </p>
         ) : null}
         <form action={mockPayAction.bind(null, session)} className="space-y-3">

@@ -4,6 +4,8 @@ import { getDb, closeDb } from '../src/db/client';
 import { demos, leads } from '../src/db/schema';
 import { findLeads } from '../src/services/lead-finder';
 import { approveDemo, publishDemo } from '../src/services/demo-review';
+import { qaDemo } from '../src/render/demo-qa';
+import { closeBrowser } from '../src/render/browser';
 import { buildDemo } from '../src/demos/build';
 import { stopBoss } from '../src/queue';
 import { randomToken } from '../src/util/crypto';
@@ -47,11 +49,15 @@ async function main(): Promise<void> {
   }
   if (!lead) throw new Error('Kein Lead für die Demo');
   const demoId = await buildDemo(lead.id, { actor: 'e2e' });
-  await db.update(demos).set({ status: 'pending_review' }).where(eq(demos.id, demoId));
-  await approveDemo(demoId, 'e2e', { manual: true });
+  await qaDemo(demoId, 'e2e', { lighthouse: false });
+  await approveDemo(demoId, 'e2e', {
+    manual: true,
+    review: { facts: true, desktop: true, mobile: true, images: true, text: true },
+  });
   await publishDemo(demoId, 'e2e');
   const demo = await db.query.demos.findFirst({ where: eq(demos.id, demoId) });
   process.stdout.write(JSON.stringify({ slug: demo!.slug, trackToken: lead.trackToken, leadId: lead.id, demoId }));
+  await closeBrowser();
   await stopBoss();
   await closeDb();
 }

@@ -6,7 +6,14 @@ import { effectiveSwitches, getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
 import { getDb } from '../db/client';
 import { claimUsages, leads, letters } from '../db/schema';
-import { composeLetter, placeholderValues, recipientLines, type ComposeInput, type RecipientInput } from '../letters/compose';
+import {
+  composeLetter,
+  letterTruthBlocklist,
+  placeholderValues,
+  recipientLines,
+  type ComposeInput,
+  type RecipientInput,
+} from '../letters/compose';
 import { renderSlots } from '../letters/slots';
 import type { TruthCheckResult } from '../letters/truth-check';
 import { getPlaybook } from '../playbooks';
@@ -221,7 +228,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       industry: lead.industry ?? null,
       placeholderValues: placeholderValues(composeInput),
       sourcesLabel,
-      extraBlocklist: cfg.letter.truthCheckBlocklist,
+      extraBlocklist: letterTruthBlocklist(cfg),
       maxStatistics: cfg.letter.maxStatistics,
     },
     { leadId, checkSourcesPage: !sw.dryRun, idempotencyKey: `truth:${leadId}:${seqDb}:${Date.now()}` },

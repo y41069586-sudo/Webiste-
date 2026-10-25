@@ -2,7 +2,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { publicConfig } from '../supabase/functions/_shared/policy';
 import { DEFAULT_CONFIG, deepMerge } from '../packages/core/src/config/settings';
-const OPERATOR_PROFILE = { name:'Erika Beispiel',company:'Beispielwerk',street:'Beispielweg 1',postalCode:'12345',city:'Beispielstadt',email:'support@example.test',phone:'+493000000000',whatsappNumber:'493000000000',website:'example.test',intro:'Fiktiver Betrieb. Nur für Tests.',photoUrl:'' };
+const OPERATOR_PROFILE = {
+  name: 'Erika Beispiel',
+  company: 'Beispielwerk',
+  street: 'Beispielweg 1',
+  postalCode: '12345',
+  city: 'Beispielstadt',
+  email: 'support@example.test',
+  phone: '+493000000000',
+  whatsappNumber: '493000000000',
+  website: 'example.test',
+  intro: 'Fiktiver Betrieb. Nur für Tests.',
+  photoUrl: '',
+};
 import { goLiveBlockers } from '../packages/core/src/services/readiness';
 
 test('public config never discloses banking, tax IDs, internal switches or unknown settings', () => {
@@ -11,12 +23,14 @@ test('public config never discloses banking, tax IDs, internal switches or unkno
     switches: { dryRun: true },
     privateKey: 'private',
     pricing: { packageCents: 59000 },
+    offers: { activeVersion: 'legacy', internalSecret: 'private' },
   });
   const text = JSON.stringify(result);
   assert.ok(!text.includes('private'));
   assert.ok(!text.includes('photoUrl'));
   assert.ok(!('switches' in result));
   assert.equal(result.sender.email, 'support@example.test');
+  assert.deepEqual(result.offers, { activeVersion: 'legacy' });
 });
 
 test('no personal photo is required while missing legal and fiscal information still blocks live operations', () => {

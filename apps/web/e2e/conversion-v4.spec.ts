@@ -12,11 +12,11 @@ test.afterAll(async () => {
 });
 
 test('V4: mobile Tarifkarten, echte Formularzustimmung und gesperrter Aboabschluss vor Go-Live', async ({ page }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(300_000);
   const demo = seedPublishedDemo();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/d/${demo.slug}`);
-  await expect(page.getByText('Unverbindlicher Entwurf', { exact: true })).toBeVisible();
+  await expect(page.getByText('Unverbindlicher Website-Entwurf', { exact: true })).toBeVisible();
   const offers = page.locator('#uebernehmen');
   await expect(offers.getByRole('heading', { name: 'Gefällt Ihnen Ihre neue Website?' })).toBeVisible();
   await expect(offers.getByRole('link', { name: 'Mit Basis übernehmen' })).toBeVisible();
@@ -33,8 +33,38 @@ test('V4: mobile Tarifkarten, echte Formularzustimmung und gesperrter Aboabschlu
   const token = onboarding!.split('/').at(-1)!;
   await page.goto(`/verlaengern/${token}`);
   await expect(page.getByRole('heading', { name: 'SeitenWerk Care+' })).toBeVisible();
-  await page.getByRole('button', { name: 'Monatstarif ausdrücklich bestätigen' }).click();
-  await expect(page.getByText(/erst nach bestätigtem Go-Live und Zustimmung/)).toBeVisible();
+  await expect(page.getByText(/Sie müssen kein zweites Abo abschließen/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Monatstarif ausdrücklich bestätigen' })).toHaveCount(0);
+  await page.goto(`/onboarding/${token}`);
+  await page.getByLabel('Rechtsform').selectOption('Einzelunternehmen');
+  await page.getByLabel('Telefon', { exact: true }).fill('030 00000000');
+  await page
+    .getByLabel('Ihre Datenschutzerklärung (Text einfügen)')
+    .fill('Fiktive Datenschutzerklärung für den isolierten Test. '.repeat(15));
+  await page.getByLabel(/Ich bestätige, dass die Angaben/).check();
+  await page.getByRole('button', { name: /Angaben absenden/ }).click();
+  await expect(async () => {
+    await page.goto(`/preview/${token}`);
+    await expect(page.getByRole('heading', { name: 'Vorschau Ihrer Website' })).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 90000 });
+  await page.getByLabel(/Ich habe die Vorschau geprüft/).check();
+  await page.getByRole('button', { name: 'Freigeben und veröffentlichen' }).click();
+  await expect(async () => {
+    await page.goto(`/preview/${token}`);
+    await expect(page.getByRole('heading', { name: 'Ihre Website ist online' })).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 120000 });
+  await expect(async () => {
+    await page.goto(`/verlaengern/${token}`);
+    await expect(page.getByText('Ihr Monatstarif ist aktiv.', { exact: false })).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 30000 });
+  await page.getByLabel(/Ich wünsche diesen Wechsel/).check();
+  await page.getByRole('button', { name: 'Tarifwechsel anfragen' }).click();
+  await expect(page.getByText(/wird geprüft/)).toBeVisible();
+  await page.getByRole('button', { name: 'Wechsel zurücknehmen' }).click();
+  await expect(page.getByRole('button', { name: 'Tarifwechsel anfragen' })).toBeVisible();
+  await page.getByLabel(/Ich bestätige die Kündigung/).check();
+  await page.getByRole('button', { name: 'Zum Periodenende kündigen' }).click();
+  await expect(page.getByText(/Ihre Kündigung zum Ende/)).toBeVisible();
 });
 
 test('V4: Firmen-Preise zeigen zwei Tarife ohne alte Jahresbindung', async ({ page }) => {

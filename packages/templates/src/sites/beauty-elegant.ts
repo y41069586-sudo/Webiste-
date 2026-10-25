@@ -1,6 +1,6 @@
 import { esc } from '../html';
 import { icon } from '../icons';
-import { archArt } from '../partials/art';
+import { localProfile } from '../partials/local-profile';
 import { documentShell } from '../partials/shared';
 import type { TemplateDef } from '../types';
 
@@ -34,7 +34,7 @@ export const beautyElegant: TemplateDef = {
         <p class="mt-6 text-lg text-muted">${esc(c.hero_subline)}</p>
         <a href="${esc(p.ctaHref)}" class="mt-8 inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold uppercase tracking-widest text-on-primary">${icon('calendar', 'h-4 w-4')}${esc(c.cta_text)}</a>
       </div>
-      <div>${archArt(c.services[0]?.icon ?? 'sparkle')}</div>
+      <div>${localProfile({ facts: f, parts: p, content: c }, 'studio')}</div>
     </div>
   </section>
 

@@ -4,6 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 const PORT = Number(process.env.E2E_PORT ?? 3100);
 const BASE = `http://localhost:${PORT}`;
+const production = process.env.E2E_PRODUCTION === 'true';
 const STATE = path.join(os.tmpdir(), 'wbm-e2e-state.json');
 const STORAGE = path.join(os.tmpdir(), 'wbm-e2e-storage');
 
@@ -59,11 +60,11 @@ export default defineConfig({
       stderr: 'pipe',
     },
     {
-      command: 'pnpm exec next dev -p ' + PORT,
+      command: `pnpm exec next ${production ? 'start' : 'dev'} -p ${PORT}`,
       url: `${BASE}/api/health`,
       reuseExistingServer: false,
       timeout: 180_000,
-      env: e2eEnv,
+      env: production ? { ...e2eEnv, NODE_ENV: 'production', ALLOW_MOCK_PAYMENT: 'true' } : e2eEnv,
       stdout: 'ignore',
       stderr: 'pipe',
     },

@@ -73,6 +73,23 @@ export default async function DemoDetail({ params }: { params: Promise<{ id: str
           {canDecide ? (
             <Card title="Entscheidung">
               <form action={approveDemoAction} className="space-y-3">
+                <p className="text-sm text-slate-600">
+                  Technische QA ist keine visuelle Abnahme. Jede Freigabe bestätigt die tatsächliche Einzelprüfung.
+                </p>
+                {(['facts', 'desktop', 'mobile', 'images', 'text'] as const).map((key, index) => (
+                  <label key={key} className="flex gap-2 text-sm">
+                    <input type="checkbox" name={key} required />
+                    {
+                      [
+                        'Name, Anschrift, Betrieb und Branche verifiziert',
+                        'Desktop tatsächlich angesehen, keine sichtbaren Layoutfehler',
+                        'Handy tatsächlich angesehen und bedienbar',
+                        'Bilder passend, rechtmäßig und korrekt gekennzeichnet',
+                        'Texte glaubwürdig; Beispiele und offene Inhalte erkennbar',
+                      ][index]
+                    }
+                  </label>
+                ))}
                 <input type="hidden" name="id" value={demo.id} />
                 <textarea name="note" placeholder="Notiz (optional)" className={input} rows={2} />
                 <button className={btn.primary} type="submit">

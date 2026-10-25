@@ -173,7 +173,9 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
     expiresLabel: EXPIRES_PLACEHOLDER,
     offers,
     guaranteeNote: cfg.guarantee.enabled
-      ? `${cfg.guarantee.days} Tage Zufriedenheitsgarantie: Gefällt Ihnen die fertige Website nicht, bekommen Sie Ihr Geld zurück.`
+      ? cfg.offers.activeVersion === 'v4'
+        ? `${cfg.guarantee.days} Tage Geld zurück für die Einrichtung ab bestätigtem Go-Live. Bereits erbrachte Monatsleistungen gehören nicht zur freiwilligen Einrichtungsgarantie. Die Bedingungen finden Sie bei SeitenWerk unter „Garantie“.`
+        : `${cfg.guarantee.days} Tage Zufriedenheitsgarantie: Gefällt Ihnen die fertige Website nicht, bekommen Sie Ihr Geld zurück.`
       : null,
     // Über unsere Weiterleitung, damit der Klick gezählt wird (B6.1); Ziel bleibt der wa.me-Link
     whatsappUrl: whatsappUrl(cfg, slug) ? demoUrl(`/d/${slug}/whatsapp`) : null,
@@ -280,7 +282,20 @@ export async function generateDemoContent(lead: Lead, cfg: AppConfig): Promise<G
         purpose: 'demo_content',
         leadId: lead.id,
       });
-      const content = normalizeContent(raw);
+      let content: SiteContent;
+      try {
+        content = normalizeContent(raw);
+      } catch {
+        lastViolations = [
+          {
+            field: 'response',
+            rule: 'Ungültige Inhaltsstruktur',
+            detail: 'Pflichtfelder fehlen oder haben einen falschen Datentyp.',
+          },
+        ];
+        feedback = ['Alle Pflichtfelder gemäß Tool-Schema mit vollständigen Texten und Listen liefern.'];
+        continue;
+      }
       const violations = validateDemoContent(content, facts);
       if (violations.length === 0) return { content, source: 'llm', attempts: attempt, violations: [] };
       lastViolations = violations;

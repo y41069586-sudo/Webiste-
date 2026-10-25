@@ -7,8 +7,8 @@ test.describe('Checkout über die Bezahlseite (Stripe, im Test simuliert)', () =
     const demo = seedPublishedDemo();
     await page.goto(`/d/${demo.slug}`);
     await page
-      .getByRole('complementary', { name: 'Hinweis zum Entwurf' })
-      .getByRole('link', { name: 'Seite übernehmen' })
+      .getByRole('complementary', { name: 'Website übernehmen' })
+      .getByRole('link', { name: 'Diese Website übernehmen' })
       .click();
     // Zwei gleichwertige Preiskarten auf der Demo, Mindestlaufzeit neben den 49 €
     const offer = page.locator('#uebernehmen');

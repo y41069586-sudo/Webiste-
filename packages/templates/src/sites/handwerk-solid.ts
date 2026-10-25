@@ -1,6 +1,6 @@
 import { esc } from '../html';
 import { icon } from '../icons';
-import { blobArt } from '../partials/art';
+import { localProfile } from '../partials/local-profile';
 import { documentShell } from '../partials/shared';
 import type { TemplateDef } from '../types';
 
@@ -12,7 +12,6 @@ export const handwerkSolid: TemplateDef = {
   description: 'Kräftige Farbfläche, klare Karten, großer Anruf-Button',
   palettes: ['werkblau', 'anthrazit', 'waldgruen'],
   render({ parts: p, content: c, facts: f }) {
-    const firstIcon = c.services[0]?.icon ?? 'house';
     const body = `
 <header class="bg-primary text-on-primary">
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
@@ -38,7 +37,7 @@ export const handwerkSolid: TemplateDef = {
           <a href="#frage" class="inline-flex min-h-12 items-center rounded-lg border-2 border-on-primary/70 px-6 py-3 font-semibold">Anfrage senden</a>
         </div>
       </div>
-      <div class="hidden md:block">${blobArt(firstIcon)}</div>
+      <div>${localProfile({ facts: f, parts: p, content: c }, 'workshop')}</div>
     </div>
   </section>
 

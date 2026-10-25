@@ -74,7 +74,10 @@ describe('Brief-PDF (echter Browser)', () => {
     leadId = lead.id;
     const demoId = await buildDemo(leadId, { actor: 'job:test' });
     await qaDemo(demoId, 'job:test', { lighthouse: false });
-    await approveDemo(demoId, 'admin:test');
+    await approveDemo(demoId, 'admin:test', {
+      manual: true,
+      review: { facts: true, desktop: true, mobile: true, images: true, text: true },
+    });
     await publishDemo(demoId, 'admin:test');
   }, 120_000);
   afterAll(async () => {

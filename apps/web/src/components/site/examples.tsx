@@ -1,5 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
+import Link from 'next/link';
 import { INDUSTRY_EXAMPLES } from '@/lib/site';
+import { Arrow } from './section';
 
 const n = INDUSTRY_EXAMPLES.length;
 // Drei Durchläufe, damit die Treppe auch am Ende einer Schleife bis unten reicht
@@ -62,7 +64,12 @@ export function ExamplesGrid() {
     <ul aria-label="Beispiel-Websites je Branche" className="grid gap-x-6 gap-y-12 md:grid-cols-2">
       {INDUSTRY_EXAMPLES.map((ex, i) => (
         <li key={ex.id} data-reveal style={{ '--d': `${(i % 2) * 90}ms` } as CSSProperties}>
-          <div className="tile relative aspect-[16/10]" style={{ borderBottom: `6px solid ${ex.color}` }}>
+          <a
+            href={`/beispiele/${ex.id}.html`}
+            className="tile relative block aspect-[16/10]"
+            style={{ borderBottom: `6px solid ${ex.color}` }}
+            aria-label={`${ex.label}: fiktive Musterwebsite ansehen`}
+          >
             <img
               src={`/beispiele/${ex.id}-karte.webp`}
               alt={`Beispiel-Website für einen erfundenen Betrieb „${ex.name}“ (${ex.label})`}
@@ -75,14 +82,52 @@ export function ExamplesGrid() {
             <span className="font-tight absolute top-3 left-3 rounded-[4px] bg-white px-2 py-1 text-xs font-medium text-[#0f172a]">
               Beispiel
             </span>
-          </div>
+          </a>
           <p className="mt-4 flex items-baseline justify-between gap-4">
             <span className="text-strong text-[#0f172a]">{ex.name}</span>
             <span className="font-tight text-nav text-[#5b6475]">{ex.label} · erfunden</span>
           </p>
           <p className="mt-1 text-sm text-[#5b6475]">{ex.hook}</p>
+          <a
+            href={`/beispiele/${ex.id}.html`}
+            className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[#1f4fd8] underline underline-offset-4"
+          >
+            Musterwebsite ansehen <Arrow />
+          </a>
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Calm product presentation: actual rendered sample pages, no invented customer portfolio. */
+export function ExampleStage() {
+  return (
+    <div className="site-example-stage">
+      <div className="site-example-stage-head">
+        <span className="flex gap-1" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
+        <span>Ein Entwurf. Viele Möglichkeiten.</span>
+      </div>
+      <a href="/beispiele/handwerk.html" className="block" aria-label="Musterwebsite für Handwerk ansehen">
+        <img
+          src="/beispiele/handwerk-karte.webp"
+          alt="Fiktiver Handwerksbetrieb – tatsächlich gerenderte Website-Vorschau"
+          width="960"
+          height="600"
+          fetchPriority="high"
+          className="block w-full"
+        />
+      </a>
+      <div className="site-example-stage-foot">
+        <span>Handwerk · fiktives Beispiel</span>
+        <Link href="/beispiele">
+          Alle fünf Branchen <Arrow />
+        </Link>
+      </div>
+    </div>
   );
 }

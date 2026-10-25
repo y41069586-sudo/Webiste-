@@ -14,20 +14,30 @@ const BENEFIT: Partial<Record<Industry, string>> = {
     'Kursangebot, Zeiten und die Anfrage nach einer Probestunde verständlich zeigen: So fällt die erste Kontaktaufnahme leichter.',
 };
 
-/** Claim-free B/C candidates. A deliberately remains the existing control; all need manual truth review. */
+/** Review candidates. A's old finished-site promise is corrected; no active DB arm is overwritten. */
 export function v4LetterVariant(industry: Industry, arm: 'A' | 'B' | 'C'): LetterVariantContent {
-  if (arm === 'A') return { ...LETTER_VARIANT_A };
   const benefit = BENEFIT[industry] ?? 'Leistungen, Standort und Kontakt übersichtlich an einem Ort zeigen.';
   return {
-    ...LETTER_VARIANT_B,
-    subject: arm === 'B' ? 'Ein Website-Entwurf für {firmenname} in {ort}' : 'Ihr Betrieb auf einen Blick – ein Website-Entwurf',
+    ...(arm === 'A' ? LETTER_VARIANT_A : LETTER_VARIANT_B),
+    subject:
+      arm === 'A'
+        ? 'Ihr persönlicher Website-Entwurf'
+        : arm === 'B'
+          ? 'Ein Website-Entwurf für {firmenname} in {ort}'
+          : 'Ihr Betrieb auf einen Blick – ein Website-Entwurf',
     ratingSentence: '',
-    hook: arm === 'B' ? 'für {firmenname} in {ort} habe ich einen unverbindlichen Website-Entwurf vorbereitet.' : benefit,
+    hook: arm !== 'C' ? 'für {firmenname} in {ort} habe ich einen unverbindlichen Website-Entwurf vorbereitet.' : benefit,
     intro:
-      arm === 'B'
-        ? ['Der QR-Code zeigt Ihnen die persönliche Vorschau kostenlos und ohne Anmeldung.', benefit]
+      arm !== 'C'
+        ? [
+            'Unter dem QR-Code können Sie die persönliche Vorschau kostenlos ansehen – ohne Anmeldung.',
+            benefit,
+            ...(arm === 'A'
+              ? ['Ihre tatsächlichen Inhalte ergänzen wir vor der Veröffentlichung. Fragen können Sie schriftlich stellen.']
+              : []),
+          ]
         : [
-            'Für {firmenname} in {ort} habe ich dazu eine persönliche Vorschau vorbereitet. Sie können sie kostenlos und ohne Anmeldung ansehen.',
+            'Für {firmenname} in {ort} habe ich dazu eine persönliche Vorschau vorbereitet. Sie können sie kostenlos ansehen – ohne Anmeldung.',
           ],
     offerWithDomain:
       'Wenn der Entwurf zu Ihnen passt: {preise} Standard-Domain (z. B. **{domain_vorschlag}**) und Hosting sind im gewählten Tarif enthalten. Vor Veröffentlichung bestätigen Sie alle Inhalte. {garantie_satz}',

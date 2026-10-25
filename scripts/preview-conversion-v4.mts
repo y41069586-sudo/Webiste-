@@ -4,6 +4,7 @@ import QRCode from '../packages/core/node_modules/qrcode/lib/index.js';
 import jsQR from '../packages/templates/node_modules/jsqr/dist/jsQR.js';
 import { renderSite, TEMPLATES, renderLetterHtml } from '../packages/templates/src/index';
 import { demoInput } from '../packages/templates/test/fixtures';
+import { libraryContent } from '../packages/core/src/demos/library';
 import { DEFAULT_CONFIG, deepMerge } from '../packages/core/src/config/settings';
 import { demoOptions } from '../packages/core/src/demos/build';
 import { composeLetter } from '../packages/core/src/letters/compose';
@@ -35,7 +36,18 @@ try {
   for (const group of ['handwerk', 'beauty', 'gastronomie', 'einzelhandel', 'kurse'] as const) {
     const t = TEMPLATES.find((t) => t.group === group)!;
     const input = demoInput(t.id, t.palettes[0]!, group);
-    input.facts.name = 'Beispielbetrieb ' + group;
+    const branches = {
+      handwerk: ['maler', 'Malerbetrieb'],
+      beauty: ['kosmetikstudio', 'Kosmetikstudio'],
+      gastronomie: ['restaurant', 'Restaurant'],
+      einzelhandel: ['blumenladen', 'Blumenladen'],
+      kurse: ['tanzschule', 'Tanzschule'],
+    } as const;
+    const [branch, label] = branches[group];
+    input.facts.name = 'Fiktiver Beispielbetrieb ' + group;
+    input.facts.branchLabel = label;
+    input.facts.city = 'Musterstadt';
+    input.content = libraryContent(branch, group, { name: input.facts.name, stadt: input.facts.city, branche: label }, 1);
     input.demo = { ...demoOptions('fictional-test-demo', cfg), expiresLabel: '25. November 2026' };
     const html = renderSite(input);
     writeFileSync(`${out}/demo-${group}.html`, html);

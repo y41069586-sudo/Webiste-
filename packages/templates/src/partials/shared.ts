@@ -136,7 +136,7 @@ function offerSection(demo: NonNullable<RenderInput['demo']>): string {
       </div>
     </div>`
     : '';
-  return `<section id="uebernehmen" aria-labelledby="uebernehmen-titel" class="border-t-4 border-[#fbbf24] bg-[#f3f4f6] py-12 text-[#111827]">
+  return `<section id="uebernehmen" aria-labelledby="uebernehmen-titel" class="border-t border-[#dce2ed] bg-[#f3f4f6] py-12 text-[#111827]">
   <div class="mx-auto max-w-4xl px-4">
     <p class="text-sm font-medium text-[#4b5563]">Angebot von ${esc(demo.sender.company)} – nicht Teil der Website</p>
     <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${demo.offerVersion === 'v4' ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${demo.offerVersion === 'v4' ? '<p class="mt-3 text-sm">Übernehmen Sie diesen Entwurf und lassen Sie ihn für Ihren Betrieb fertigstellen und veröffentlichen.</p>' : ''}
@@ -198,6 +198,8 @@ function offerSection(demo: NonNullable<RenderInput['demo']>): string {
         : ''
     }
     ${trust}
+    <div class="mt-6 flex flex-wrap gap-4 text-sm">${demo.whatsappUrl ? `<a href="${esc(demo.whatsappUrl)}" target="_blank" rel="noopener noreferrer" class="underline">Frage per WhatsApp</a>` : ''}<a href="mailto:${esc(demo.sender.email)}" class="underline">Frage per E-Mail</a><a href="#frage" class="underline">Frageformular zu diesem Entwurf</a></div>
+    <form method="post" action="${esc(demo.optOutUrl)}" class="sw-demo-optout"><button type="submit" class="min-h-11 underline">Kein Interesse – Entwurf und Werbung abbestellen</button></form>
   </div>
 </section>`;
 }
@@ -266,22 +268,12 @@ ${jsonLd}
 
   let banner = '';
   if (isDemo && demo) {
-    banner = `<aside class="sticky top-0 z-50 border-b border-black/10 bg-[#111827] text-white shadow-md" aria-label="Hinweis zum Entwurf">
-  <div class="mx-auto flex max-w-6xl flex-col gap-1.5 px-3 py-2 text-xs sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm md:flex-row md:items-center md:justify-between">
-    <p class="leading-snug"><strong class="font-semibold">Unverbindlicher Entwurf</strong> von ${esc(demo.sender.company)} für ${esc(facts.name)}. Nicht öffentlich.</p>
-    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-      <a href="${demo.offers?.length ? '#uebernehmen' : esc(demo.checkoutUrl)}" class="inline-flex min-h-10 items-center rounded-md bg-[#fbbf24] px-2.5 py-1.5 sm:px-3 font-semibold text-[#111827] hover:bg-[#f59e0b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Seite übernehmen</a>
-      ${
-        demo.whatsappUrl
-          ? `<a href="${esc(demo.whatsappUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-10 items-center rounded-md border border-white/40 px-2.5 py-1.5 sm:px-3 font-medium text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Frage per WhatsApp</a>`
-          : `<a href="#frage" class="inline-flex min-h-10 items-center rounded-md border border-white/40 px-2.5 py-1.5 sm:px-3 font-medium text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Frage stellen</a>`
-      }
-      <form method="post" action="${esc(demo.optOutUrl)}" class="inline">
-        <button type="submit" class="inline-flex min-h-10 items-center rounded-md px-2 py-1.5 sm:px-3 font-medium text-white underline underline-offset-2 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Kein Interesse</button>
-      </form>
-    </div>
-  </div>
-</aside>`;
+    banner =
+      `<aside class="sw-demo-context" aria-label="Hinweis zum Entwurf"><strong>Unverbindlicher Website-Entwurf</strong> von ${esc(demo.sender.company)} für ${esc(facts.name)}. Dies ist nicht die offizielle Website des Betriebs.</aside>
++<aside class="sw-demo-toolbar" aria-label="Website übernehmen"><div class="sw-demo-toolbar-inner">
++  <p class="sw-demo-toolbar-title text-sm"><strong>Ihr Entwurf.</strong> In Ruhe ansehen, direkt übernehmen.</p>
++  <div class="sw-demo-actions"><a href="${demo.offers?.length ? '#uebernehmen' : esc(demo.checkoutUrl)}" class="sw-demo-buy">Diese Website übernehmen</a><a href="#frage" class="sw-demo-ask">Fragen</a></div>
++</div></aside>`.replace(/^\+/gm, '');
   } else if (mode === 'preview') {
     banner = `<aside class="sticky top-0 z-50 bg-[#1e3a8a] px-4 py-2 text-center text-sm text-white" aria-label="Vorschau">Vorschau – diese Seite ist noch nicht veröffentlicht.</aside>`;
   }

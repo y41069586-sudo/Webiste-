@@ -1,8 +1,8 @@
 import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
-import { ExamplesCascade } from '@/components/site/examples';
+import { ExampleStage, ExamplesGrid } from '@/components/site/examples';
 import { PriceCards } from '@/components/site/price-cards';
-import { Arrow, Check, DarkBand, delay, ICONS, SectionHead, t } from '@/components/site/section';
+import { Arrow, Check, DarkBand, delay, ICONS, SectionHead } from '@/components/site/section';
 import { sitePricing } from '@/lib/site';
 
 export const metadata = {
@@ -26,43 +26,43 @@ export default async function Home() {
   const p = sitePricing(cfg);
   return (
     <>
-      {/* Hero: Titel oben links, Beispiel-Treppe diagonal, kurzer Text mit Buttons unten rechts */}
-      <section className="hero-field">
-        <div className="mx-auto max-w-[90rem]">
-          <ExamplesCascade
-            head={
-              <>
-                <p className="build font-tight text-nav text-[#5b6475]">Für Betriebe in {cfg.sender.city} ohne eigene Website</p>
-                <h1 style={t(60)} className="build text-hero mt-4 max-w-[11ch] text-[#0f172a]">
-                  Ihre Website ist schon fertig.
-                </h1>
-              </>
-            }
-          >
-            <div style={t(500)} className="build">
-              <p className="text-[1.0625rem] leading-relaxed text-[#3c4454]">
-                Wir bauen Ihrem Betrieb einen fertigen Website-Entwurf und schicken ihn per Brief. Gefällt er Ihnen, geht er auf
-                Ihrer eigenen Domain online – ohne Termin und ohne Verkaufsgespräch.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/so-funktionierts" className="btn-site btn-primary btn-compact">
-                  So funktioniert’s <Arrow />
-                </Link>
-                <Link href="/preise" className="btn-site btn-secondary">
-                  Preise
-                </Link>
-              </div>
-              <p className="font-tight text-nav mt-5 text-[#5b6475]">
-                {p.oneTime} einmalig
-                {p.version === 'v4'
-                  ? ` + ${p.basis} Basis oder insgesamt ${p.carePlus} Care+ monatlich ab Go-Live`
-                  : p.monthlyEnabled
-                    ? ` oder ${p.monthly}/Monat (${p.minTerm} Monate Mindestlaufzeit)`
-                    : ''}
-                {p.guarantee ? ` · ${p.guarantee.days} Tage Garantie` : ''}
-              </p>
+      <section className="site-premium-hero mx-auto max-w-[90rem] px-5 py-14 sm:px-8 sm:py-24">
+        <div className="grid items-center gap-12 lg:grid-cols-[.9fr_1.2fr]">
+          <div>
+            <p className="text-sm font-medium tracking-wide text-[#5b6475]">Websites für lokale Betriebe</p>
+            <h1 className="mt-5 max-w-[12ch] text-[clamp(3.1rem,6vw,6rem)] font-semibold leading-[1.02] tracking-[-.065em] text-[#0f172a]">
+              Erst sehen.
+              <br />
+              <span className="text-[#1f4fd8]">Dann entscheiden.</span>
+            </h1>
+            <p className="mt-7 max-w-[38ch] text-lg leading-relaxed text-[#3c4454]">
+              Ihr eigener Website-Entwurf, bevor Sie etwas kaufen. Für Ihren Betrieb gestaltet, kostenlos anzusehen und ohne
+              Anmeldung.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/beispiele" className="btn-site btn-primary">
+                Website-Beispiele ansehen <Arrow />
+              </Link>
+              <Link href="/preise" className="btn-site btn-secondary">
+                Preise & Leistungen
+              </Link>
             </div>
-          </ExamplesCascade>
+            <p className="mt-6 max-w-[44ch] text-sm leading-relaxed text-[#5b6475]">
+              {p.oneTime} einmalig
+              {p.version === 'v4' ? ` + ${p.basis} Basis oder insgesamt ${p.carePlus} Care+ pro Monat ab Go-Live` : ''}.
+              Schriftlich bestellen und abstimmen – ohne Verkaufsgespräch.
+            </p>
+          </div>
+          <ExampleStage />
+        </div>
+      </section>
+      <section className="mx-auto max-w-[90rem] px-5 pb-20 sm:px-8 sm:pb-28">
+        <SectionHead title="Ein guter Entwurf zeigt, was möglich ist.">
+          Handwerk, Studio, Restaurant oder Geschäft: Gestaltung und Aufbau passen zur Branche. Diese Muster sind fiktiv; Ihr
+          persönlicher Entwurf verwendet die bekannten Angaben Ihres Betriebs.
+        </SectionHead>
+        <div className="mt-12">
+          <ExamplesGrid />
         </div>
       </section>
 
@@ -74,7 +74,8 @@ export default async function Home() {
               Drei Schritte. Kein Termin.
             </h2>
             <p data-reveal style={delay(100)} className="max-w-[44ch] leading-relaxed text-[#3c4454]">
-              Sie müssen nichts vorbereiten. Den Entwurf gibt es schon, bevor wir uns kennen.
+              Zum Ansehen brauchen Sie keine Anmeldung. Für die Veröffentlichung ergänzen Sie anschließend Ihre tatsächlichen
+              Inhalte.
             </p>
           </div>
           <ol className="mt-14 grid gap-4 md:grid-cols-3">

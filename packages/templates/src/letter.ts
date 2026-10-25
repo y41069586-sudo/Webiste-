@@ -90,7 +90,7 @@ export function renderLetterHtml(d: LetterData): string {
     ? `<section class="page" aria-label="Seite 2">
   <div class="p2">
     <h2>So sieht Ihre neue Website aus</h2>
-    <p class="muted">Am Computer und auf dem Handy – fertig, sobald Sie zustimmen.</p>
+    <p class="muted">Ihr Entwurf am Computer und auf dem Handy. Eigene Inhalte und Freigabe folgen vor der Veröffentlichung.</p>
     <div class="shots">
       <img class="desk" src="${d.screenshotPage.desktopDataUri}" alt="Ansicht am Computer">
       <img class="mob" src="${d.screenshotPage.mobileDataUri}" alt="Ansicht auf dem Handy">

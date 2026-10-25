@@ -1,6 +1,6 @@
 import { esc } from '../html';
 import { icon } from '../icons';
-import { gridArt } from '../partials/art';
+import { localProfile } from '../partials/local-profile';
 import { documentShell } from '../partials/shared';
 import type { TemplateDef } from '../types';
 
@@ -40,10 +40,7 @@ export const handwerkKlar: TemplateDef = {
           <li class="flex items-center gap-2"><span class="text-primary">${icon('wrench', 'h-4 w-4')}</span>${esc(f.branchLabel)}</li>
         </ul>
       </div>
-      <div class="md:col-span-2">${gridArt(
-        c.services.map((s) => s.icon),
-        'mx-auto max-w-xs',
-      )}</div>
+      <div class="md:col-span-2">${localProfile({ facts: f, parts: p, content: c }, 'workshop')}</div>
     </div>
   </section>
 

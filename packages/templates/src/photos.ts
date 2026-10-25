@@ -51,7 +51,8 @@ export function stockPhotos(group: BranchGroup, seed = 0, branchLabel = ''): Sto
   // Passende Fotos zuerst (Tanzschule → Ballettschuhe statt Hanteln), Reihenfolge sonst stabil
   const label = branchLabel.toLowerCase();
   const fits = (p: StockPhoto) => (p.keywords ?? []).some((k) => label.includes(k));
-  return [...rotated.filter(fits), ...rotated.filter((p) => !fits(p))];
+  const matching = rotated.filter(fits);
+  return matching.length ? matching : rotated;
 }
 
 export function stockPhotoDataUri(photo: StockPhoto): string {

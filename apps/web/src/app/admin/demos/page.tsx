@@ -4,7 +4,6 @@ import { getDb, schema, type DemoStatus } from '@wbm/core';
 import { Badge, Card, Notice, PageHeader, StatusBadge, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
-import { bulkApproveDemos } from './actions';
 
 export const metadata = { title: 'Demos' };
 
@@ -52,15 +51,11 @@ export default async function DemosPage({ searchParams }: { searchParams: Promis
       {rows.length === 0 ? (
         <Notice>Keine Demos in dieser Ansicht.</Notice>
       ) : (
-        <form action={bulkApproveDemos}>
-          {tab.key === 'review' ? (
-            <div className="mb-4 flex items-center gap-3">
-              <button type="submit" className={btn.primary}>
-                Markierte freigeben
-              </button>
-              <span className="text-sm text-slate-600">Bitte jede Demo vorher in der Vorschau ansehen.</span>
-            </div>
-          ) : null}
+        <div>
+          <p className="mb-4 text-sm text-slate-600">
+            Jede Demo einzeln auf Fakten, Darstellung, mobile Bedienbarkeit und Text prüfen. Technische QA allein ist keine
+            Versandfreigabe.
+          </p>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {rows.map(({ demo, lead }) => (
               <Card key={demo.id} className="overflow-hidden">
@@ -102,11 +97,6 @@ export default async function DemosPage({ searchParams }: { searchParams: Promis
                 </div>
                 {tab.key === 'review' || tab.key === 'failed' ? (
                   <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {tab.key === 'review' ? (
-                      <label className="flex items-center gap-1 text-sm">
-                        <input type="checkbox" name="ids" value={demo.id} /> markieren
-                      </label>
-                    ) : null}
                     <Link href={`/admin/demos/${demo.id}`} className={btn.secondary}>
                       Prüfen
                     </Link>
@@ -115,7 +105,7 @@ export default async function DemosPage({ searchParams }: { searchParams: Promis
               </Card>
             ))}
           </div>
-        </form>
+        </div>
       )}
     </>
   );

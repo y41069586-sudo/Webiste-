@@ -18,20 +18,20 @@ DNS-Änderungen, Briefe, Zahlungen, Erstattungen oder Domainkäufe freigegeben.
 
 ## Bestandsaufnahme vor Fortsetzung
 
-| Bereich | Stand | Nächster Nachweis |
-| --- | --- | --- |
-| V4 597 + 19 / 99, Bestell-Snapshot, Legacy-Erhalt | implementiert und zuvor lokal getestet | Regression nach Fortsetzung |
-| Automatischer Monatsstart erst nach echtem Go-Live | teilweise, uncommitted | gespeichertes Mandat, Fehler-/Retry-/Webhooktests |
-| Tarifwechsel / Kündigung | Services teilweise, uncommitted | Oberfläche, Periodenwechsel, Idempotenz |
-| Care+-Zeit / monatlicher Technikcheck | Services und additive Migration vorbereitet | Oberfläche, Integrationstests |
-| Echte Kosten / Deckungsbeitrag je Brief und Versuchsarm | Service vorbereitet | Oberfläche, Datenvollständigkeit, Tests |
-| Stripe-Sandbox-Katalog / blaues Branding | zuvor extern angelegt und zurückgelesen | keine Duplikate; Zahlungen getrennt abnehmen |
-| Demos / Briefe | 20 Vorlagen vorhanden; zuvor fünf V4-Demos und 15 PDFs geprüft | mindestens zehn echte Desktop-/Mobilrender, sichtbare Verbesserungen |
-| Öffentliche Website | V4-Preise im Code, getrennte statische Bereitstellung | Qualität, Export-/Linkprüfung; keine Veröffentlichung |
-| Worker / pg-boss | vorhandener langlebiger Worker, lokale Testqueue möglich | Supabase-tauglicher Betrieb ohne zweite Produktions-DB |
-| Storage / Resend / weitere Provider | Adapter vorhanden, externe Abnahme teilweise offen | Mock und echter Provider klar getrennt ausweisen |
-| Backup / Restore | Skripte vorhanden, Betriebsnachweis offen | isolierter lokaler Restore, Supabase-/Storage-Konzept |
-| Steuer / finale Rechtstexte / Bankdaten | externe Angaben bzw. Freigabe erforderlich | niemals erfinden oder selbst freigeben |
+| Bereich                                                 | Stand                                                          | Nächster Nachweis                                                    |
+| ------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| V4 597 + 19 / 99, Bestell-Snapshot, Legacy-Erhalt       | implementiert und zuvor lokal getestet                         | Regression nach Fortsetzung                                          |
+| Automatischer Monatsstart erst nach echtem Go-Live      | teilweise, uncommitted                                         | gespeichertes Mandat, Fehler-/Retry-/Webhooktests                    |
+| Tarifwechsel / Kündigung                                | Services teilweise, uncommitted                                | Oberfläche, Periodenwechsel, Idempotenz                              |
+| Care+-Zeit / monatlicher Technikcheck                   | Services und additive Migration vorbereitet                    | Oberfläche, Integrationstests                                        |
+| Echte Kosten / Deckungsbeitrag je Brief und Versuchsarm | Service vorbereitet                                            | Oberfläche, Datenvollständigkeit, Tests                              |
+| Stripe-Sandbox-Katalog / blaues Branding                | zuvor extern angelegt und zurückgelesen                        | keine Duplikate; Zahlungen getrennt abnehmen                         |
+| Demos / Briefe                                          | 20 Vorlagen vorhanden; zuvor fünf V4-Demos und 15 PDFs geprüft | mindestens zehn echte Desktop-/Mobilrender, sichtbare Verbesserungen |
+| Öffentliche Website                                     | V4-Preise im Code, getrennte statische Bereitstellung          | Qualität, Export-/Linkprüfung; keine Veröffentlichung                |
+| Worker / pg-boss                                        | vorhandener langlebiger Worker, lokale Testqueue möglich       | Supabase-tauglicher Betrieb ohne zweite Produktions-DB               |
+| Storage / Resend / weitere Provider                     | Adapter vorhanden, externe Abnahme teilweise offen             | Mock und echter Provider klar getrennt ausweisen                     |
+| Backup / Restore                                        | Skripte vorhanden, Betriebsnachweis offen                      | isolierter lokaler Restore, Supabase-/Storage-Konzept                |
+| Steuer / finale Rechtstexte / Bankdaten                 | externe Angaben bzw. Freigabe erforderlich                     | niemals erfinden oder selbst freigeben                               |
 
 ## Angefangene Dateien
 
@@ -87,6 +87,7 @@ Worker-/Queue-/Backup-Härtung, neue Qualitätsgates und zehnfache Browsermatrix
 fünf statische Muster, RLS-Migration 0015 und bestätigte Erstattungszustände 0016.
 
 Belegte neue Prüfungen:
+
 - 10 fiktive Demos durch buildDemo/qaDemo, 20 Desktop-/Mobilbilder unter
   `data/exports/v5-quality/`, Kontaktbögen tatsächlich betrachtet; alle zehn technische QA grün.
   Fallback nach zwei kaputten KI-Antworten explizit geprüft. Kein echter Anthropic-Aufruf.
@@ -155,3 +156,47 @@ Core-Nachlauf grün. Keine Produktionsabnahme aus lokalen Nachweisen ableiten.
 - Noch offen: allgemeine Reconciliation extern im Stripe-Dashboard erstatteter Monatsrechnungen;
   aktuelle bestätigte Erstattungsstrecke bezieht sich auf die Bestell-/Einrichtungszahlung.
   Vor Liveverkauf als Blocker behandeln, keine vollständige Refund-Abnahme behaupten.
+
+## Laufende P0-Ergänzung – Monats-Erstattungen (nicht überspringen)
+
+Letzter sicherer Commit: **3bea72e** (davor 81098d0 und 312aba8).
+Monats-Erstattung ist inzwischen implementiert, aber der abschließende Gesamtlauf läuft noch:
+
+- Stripe-SDK liest paginierte bestätigte Refunds und ordnet über `invoice_payments` den PaymentIntent
+  einer Rechnung zu. Pending nicht gebucht; Mehrrechnungszahlungen werden sicher zur Klärung abgewiesen.
+- Bestehende Monatszahlung wird monoton korrigiert; 597-Euro-Einrichtung bleibt unverändert.
+  Unbekannte Rechnung: sichtbarer Fehler, Retry und vorübergehend unvollständige Finanzansicht.
+- Unveränderliche Differenzbelege für Teil- und spätere Vollerstattung in bestehendem Rechnungsrenderer,
+  separat für Einrichtung und Monatszahlung. Originalrechnung bleibt unverändert, VAT-Rundung kumulativ.
+- Neue **additive Migration0017_refund_documents.sql** für Beleglisten auf orders/order_payments,
+  keine neue Zahlungsarchitektur. Korrekturen im vorhandenen Bestelldetail, Workerjob und Recovery-Sweep.
+- 26/26 gezielte Tests bestanden. Danach zusätzliche Retry-/Finanzsperren-Assertion ergänzt;
+  vollständige Core-Regression `/tmp/seitenwerk-v5-core-complete-last.log` läuft.
+- Typfehler allein in neuem Testcast korrigiert (unknown-Brücke); finaler Type-/Lint-Lauf wiederholen.
+- Vollständige E2E erneut **mit SHOTS_DIR** gestartet: `/tmp/seitenwerk-v5-e2e-release.log`,
+  eigene lokale DB wbm_v4_e2e. Währenddessen keine App-/Core-/Public-Dateien ändern.
+
+Weitere gesicherte Ergebnisse: 128/128 finale Visualtests inkl. zehn Demos, 15/15 neue PDFs/QR,
+Produktionsbuild und lokaler statischer Export elf Seiten, vier V4-Firmenwebsite-Screenshots ohne
+Layout-/Bild-/Konsolenfehler. Finanz-/Go-Live-/Qualitätsdokumente haben noch vorläufige Restpunkttexte;
+nach grünen Nachläufen auf tatsächlichen Abschlussstand bringen, nicht alte Absätze als Status lesen.
+Nächster Schritt: laufende Tests auswerten; finale Types/Lint/Build; korrigiertes Worker-Testimage
+mit aktuellen Quellen/Template-dist ergänzen und Smoke wiederholen; Design- und Finanzpaket committen;
+Handoff/Checkliste abschließen. Keine externe Veröffentlichung.
+
+## Paket 4 – Design/Brief-/Freigabequalität abgenommen
+
+Zehn finale Generator-Demos/20 Bilder und 127 Template-Browserprüfungen grün. Drei Vorlagen gezielt
+verbessert; Plakat erhalten. Nach Blick auf Screenshots lange Headernamen/Links korrigiert,
+Café-Fotos passend eingegrenzt und fehlende Pfeilglyphe durch SVG ersetzt. Erste30-Freigabe am
+Service/CLI abgesichert; technische und manuelle Prüfung getrennt.
+
+15 V4-A/B/C-Briefe wirklich gerendert: einseitig, Adress-/Randprüfung grün, jeder QR aus tatsächlichem
+PDF-Raster mit richtigem Ziel decodiert. Korrigiertes A nach Sichtprüfung erneut angesehen. Bestehende
+aktive DB-Varianten nicht verändert. Alle15 neuen Texte bestehen den deterministischen Wahrheitscheck.
+
+Firmenwebsite mit großer Produktvorschau, fünf echten fiktiven statischen Mustern und gemeinsamen
+Stilen. V4-Garantie/AGB-Arbeitsfassung konsistent zum implementierten Ablauf, keine Rechtsfreigabe.
+Öffentliche Edge-Konfigurations-Whitelist überträgt Angebotsversion ohne interne Billing-/Bankdaten.
+Elf Seiten statisch lokal exportiert, Homepage Desktop/Handy sowie Preise/Beispiele Handy ohne
+Layout-/Bild-/Konsolenfehler. Nicht produktiv veröffentlicht.

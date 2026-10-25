@@ -89,6 +89,7 @@ export async function payOnMockCheckout(
 ): Promise<void> {
   const { expect } = await import('@playwright/test');
   await expect(page.getByRole('heading', { name: 'Testzahlung' })).toBeVisible();
+  await page.waitForLoadState('networkidle');
   await page.getByLabel('Ihr Name').fill(o.name ?? 'Erika Beispiel');
   await page.getByLabel('E-Mail').fill(o.email ?? 'erika@example.org');
   await page.getByLabel('Wunschdomain').fill(o.domain ?? `e2e-${Date.now()}.de`);

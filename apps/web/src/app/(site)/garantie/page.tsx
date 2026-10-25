@@ -22,17 +22,26 @@ export default async function GuaranteePage() {
   return (
     <>
       <PageIntro eyebrow="Garantie" title={`${g.days} Tage Zufriedenheitsgarantie.`}>
-        Sind Sie mit Ihrer Website nicht zufrieden, bekommen Sie Ihr Geld zurück – vollständig und ohne Begründung.
+        {p.version === 'v4'
+          ? 'Sind Sie mit Ihrer Website nicht zufrieden, erstatten wir die Einrichtungsgebühr innerhalb der Garantiefrist. Der Monatstarif wird beendet.'
+          : 'Sind Sie mit Ihrer Website nicht zufrieden, bekommen Sie Ihr Geld zurück – vollständig und ohne Begründung.'}
       </PageIntro>
       <section className="mx-auto max-w-[90rem] px-5 sm:px-8 pb-10">
         <div className="grid gap-5 md:grid-cols-3">
           {[
             [
               'Wann sie beginnt',
-              `Mit dem Tag, an dem Ihre Website online geht – spätestens ${g.latestStartDays} Tage nach Ihrer Zahlung.`,
+              p.version === 'v4'
+                ? 'Mit dem bestätigten Go-Live Ihrer Website. Vorher läuft keine Garantiefrist ab.'
+                : `Mit dem Tag, an dem Ihre Website online geht – spätestens ${g.latestStartDays} Tage nach Ihrer Zahlung.`,
             ],
             ['Was Sie tun müssen', 'Eine kurze Nachricht per E-Mail oder Kontaktformular innerhalb der Frist genügt.'],
-            ['Was dann passiert', 'Wir erstatten den vollen Betrag. Die Seite geht offline, die Domain können Sie behalten.'],
+            [
+              'Was dann passiert',
+              p.version === 'v4'
+                ? 'Wir erstatten die Einrichtung, beenden das Abo und nehmen die Website offline. Eine Domainübertragung stimmen wir schriftlich ab.'
+                : 'Wir erstatten den vollen Betrag. Die Seite geht offline, die Domain können Sie behalten.',
+            ],
           ].map(([t, d], i) => (
             <div
               key={t}
@@ -52,7 +61,12 @@ export default async function GuaranteePage() {
         </h2>
         <ul data-reveal className="mt-6 space-y-3 leading-relaxed text-slate-700">
           <Check>Einmalzahlung ({p.oneTime}): volle Erstattung des Betrags.</Check>
-          {p.monthlyEnabled ? (
+          {p.version === 'v4' ? (
+            <Check>
+              Basis und Care+: monatlich kündbar. Bereits erbrachte Monatsleistungen sind nicht Teil der freiwilligen
+              Einrichtungsgarantie. Gesetzliche Ansprüche bleiben bestehen.
+            </Check>
+          ) : p.monthlyEnabled ? (
             <Check>
               Monatlich ({p.monthly}): Erstattung der ersten Rate, der Vertrag endet sofort – auch innerhalb der Mindestlaufzeit.
             </Check>

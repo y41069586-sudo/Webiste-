@@ -22,6 +22,17 @@
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
   }
+  body {
+    overflow-wrap: anywhere;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  main [id] {
+    scroll-margin-top: 6rem;
+  }
   :focus-visible {
     outline: 3px solid var(--c-primary);
     outline-offset: 3px;
@@ -48,6 +59,178 @@
   }
 }
 
+/* Photoless editorial composition: actual local facts, no simulated workshop/studio photographs. */
+.sw-local-profile {
+  background: var(--c-surface);
+  color: var(--c-ink);
+  border: 1px solid var(--c-line);
+  border-radius: 1rem;
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  box-shadow: 0 24px 64px #00000012;
+}
+.sw-profile-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+.sw-profile-wordmark {
+  font-family: var(--f-heading);
+  font-size: clamp(5rem, 10vw, 8rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.08em;
+  margin: 1rem 0;
+  color: var(--c-primary);
+}
+.sw-profile-wordmark span {
+  color: var(--c-muted);
+  font-weight: 400;
+}
+.sw-profile-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.sw-profile-address {
+  font-size: 0.875rem;
+  color: var(--c-muted);
+  margin-top: 0.5rem;
+}
+.sw-profile-offer {
+  border-top: 1px solid var(--c-line);
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+.sw-profile-note {
+  font-size: 0.75rem;
+  color: var(--c-muted);
+  margin-bottom: 0.6rem;
+}
+.sw-profile-offer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.sw-profile-offer li {
+  font-size: 0.75rem;
+  border: 1px solid var(--c-line);
+  border-radius: 2rem;
+  padding: 0.35rem 0.65rem;
+}
+.sw-profile-contact {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--c-primary);
+}
+.sw-local-profile-studio {
+  border-radius: 12rem 12rem 1rem 1rem;
+  text-align: center;
+  padding-top: 3.5rem;
+  background: var(--c-surface);
+}
+.sw-local-profile-studio .sw-profile-wordmark {
+  font-style: italic;
+  font-weight: 400;
+}
+.sw-local-profile-studio .sw-profile-offer ul {
+  justify-content: center;
+}
+
+/* Single mobile purchase bar with safe-area space; the actual draft keeps its own visual identity. */
+.sw-demo-context {
+  background: #f4f6fa;
+  border-bottom: 1px solid #dce2ed;
+  padding: 0.65rem 1rem;
+  color: #334155;
+  font:
+    400 0.75rem/1.5 Inter,
+    sans-serif;
+}
+.sw-demo-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #fff;
+  color: #0f172a;
+  border-bottom: 1px solid #dce2ed;
+}
+.sw-demo-toolbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 72rem;
+  margin: auto;
+  padding: 0.6rem 1rem;
+}
+.sw-demo-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.sw-demo-buy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 0.5rem;
+  background: #1f4fd8;
+  color: white;
+  padding: 0.65rem 1rem;
+  font:
+    600 0.875rem/1.3 Inter,
+    sans-serif;
+}
+.sw-demo-ask {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.6rem;
+  font:
+    500 0.875rem/1.3 Inter,
+    sans-serif;
+  text-decoration: underline;
+}
+.sw-demo-optout {
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+}
+@media (max-width: 639px) {
+  body:has(.sw-demo-toolbar) {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+  .sw-demo-toolbar {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid #dce2ed;
+    border-bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -8px 24px #0f172a0d;
+  }
+  .sw-demo-toolbar-title {
+    display: none;
+  }
+  .sw-demo-toolbar-inner {
+    padding: 0.6rem 0.75rem;
+  }
+  .sw-demo-actions {
+    width: 100%;
+  }
+  .sw-demo-buy {
+    flex: 1;
+  }
+}
+
 /* Rechtstexte auf Unterseiten (Impressum, Datenschutz) */
 @layer components {
   .legal h2 {
@@ -67,4 +250,24 @@
     list-style: disc;
     padding-left: 1.5rem;
   }
+}
+
+/* Long business names may wrap; short header actions must keep a usable hit area. */
+header a:first-child {
+  min-width: 0;
+}
+header a:last-child:not(:first-child) {
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+header a svg {
+  flex-shrink: 0;
+}
+header nav {
+  flex-shrink: 0;
+}
+header nav a {
+  white-space: nowrap;
+  overflow-wrap: normal;
 }

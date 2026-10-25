@@ -16,8 +16,8 @@ test.describe('Demo: Ansicht, Frage, Opt-out', () => {
     expect(res?.headers()['x-robots-tag']).toContain('noindex');
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
     const banner = page.getByRole('complementary', { name: 'Hinweis zum Entwurf' });
-    await expect(banner).toContainText('Unverbindlicher Entwurf');
-    await expect(banner.getByRole('link', { name: 'Seite übernehmen' })).toBeVisible();
+    await expect(banner).toContainText('Unverbindlicher Website-Entwurf');
+    await expect(page.getByRole('link', { name: 'Diese Website übernehmen' })).toBeVisible();
     await expect(page.locator('#uebernehmen')).toContainText('590');
     await expect(page.locator('#uebernehmen')).toContainText('49');
     await expect(page.getByRole('heading', { name: 'Wer hat diesen Entwurf gebaut?' })).toBeVisible();
@@ -25,7 +25,7 @@ test.describe('Demo: Ansicht, Frage, Opt-out', () => {
     await expect(page.getByText('Beispiel-Leistungen')).toBeVisible();
 
     // Frage stellen → Formular an uns
-    await banner.getByRole('link', { name: 'Frage stellen' }).click();
+    await page.getByRole('link', { name: 'Fragen', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Frage zu diesem Entwurf' })).toBeVisible();
     await page.waitForTimeout(3200); // Zeitfalle des Spamschutzes
     await page.getByLabel('Name').fill('E2E Tester');
@@ -37,10 +37,7 @@ test.describe('Demo: Ansicht, Frage, Opt-out', () => {
 
     // Kein Interesse → sofortiger Widerspruch
     await page.goto(`/d/${demo.slug}`);
-    await page
-      .getByRole('complementary', { name: 'Hinweis zum Entwurf' })
-      .getByRole('button', { name: 'Kein Interesse' })
-      .click();
+    await page.getByRole('button', { name: /Kein Interesse/ }).click();
     await expect(page.getByRole('heading', { name: /wir schreiben Ihnen nicht mehr/ })).toBeVisible();
 
     // Danach: Demo und QR liefern 410

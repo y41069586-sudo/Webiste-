@@ -70,10 +70,12 @@ HARTE REGELN (jeder Verstoß macht den Text unbrauchbar):
 2. Keine Zahlen und Ziffern im gesamten Text.
 3. Keine Bewertungen, Sterne, Kundenstimmen, Zitate oder Testimonials – auch keine allgemeinen wie „zufriedene Kunden“.
 4. Leistungen: nur allgemein übliche Leistungen dieser Branche, neutral beschrieben. Sie werden auf der Seite als Beispiele gekennzeichnet.
-5. „Über uns“: neutral und allgemein (Haltung, Arbeitsweise im Allgemeinen, Einladung zur Kontaktaufnahme). Nichts, was eine Tatsache über den Betrieb behauptet.
+5. „Über uns“: nur bekannte Orts-/Branchenangaben und Orientierung für den Besucher. Keine erfundene Haltung, Arbeitsweise, Beratung, Atmosphäre oder Qualitätsbehauptung über den Betrieb.
 6. Keine Links, keine E-Mail-Adressen, keine Telefonnummern, keine Platzhalter, kein Lorem ipsum, keine eckigen oder geschweiften Klammern.
 7. Sprache: Deutsch, Sie-Form, freundlich-professionell, kurze und klare Sätze, keine Übertreibungen, keine Superlative („der beste“, „Nummer eins“).
 8. Der Firmenname und die Stadt dürfen vorkommen. Andere Fakten nur, wenn sie unten ausdrücklich genannt sind.
+9. Keine austauschbaren Werbesätze wie „Qualität und Kundenzufriedenheit stehen an erster Stelle“, „Ihr zuverlässiger Partner“ oder „wir nehmen uns Zeit“. Keine erfundenen Termine, Kurse, Behandlungen, Warenbestände oder verbindlichen Zusagen in FAQ. Eine Anfrage ist keine Buchung.
+10. Kurze, branchengerechte Überschriften. Namen, Stadt und Leistungen nicht in jedem Absatz wiederholen. Der Entwurf hat einen zentralen Hinweis auf Beispielinhalte; keine Serie auffälliger Platzhalterwarnungen im Fließtext.
 
 FORMAT: Liefere die Inhalte ausschließlich über das Tool „${DEMO_TOOL_NAME}“. Icons wählst du passend zur Leistung aus der vorgegebenen Liste.`;
 
@@ -102,7 +104,7 @@ export function buildDemoPrompt(f: ContentFacts, seed: number, feedback?: string
     `Design-Gruppe: ${f.group}`,
     `Passende Icons (bevorzugt): ${icons}`,
     ...(GROUP_HINTS[f.group] ? [`Hinweis zu den Leistungen: ${GROUP_HINTS[f.group]}`] : []),
-    `Button-Text: ${f.phone ? 'Aufforderung zum Anrufen oder zur Terminanfrage' : 'Aufforderung zur Anfrage über das Kontaktformular'}`,
+    'Button-Text: schriftliche Anfrage oder unverbindliche Terminanfrage; kein verpflichtendes Gespräch, keine bestätigte Buchung.',
   ];
   let prompt = `Erstelle die Texte für den Website-Entwurf dieses Betriebs:\n\n${lines.join('\n')}\n\nAnforderungen: 4–6 Leistungen, 3–4 FAQ, „Über uns“ in zwei kurzen Absätzen.`;
   if (feedback?.length) {
@@ -121,6 +123,10 @@ export interface RuleViolation {
 }
 
 const FORBIDDEN: { rule: string; re: RegExp }[] = [
+  {
+    rule: 'Unbelegte Werbephrase',
+    re: /qualität und kundenzufriedenheit|zuverlässige[rn]? partner|wir nehmen uns zeit|steht.{0,35}im mittelpunkt/i,
+  },
   {
     rule: 'erfundene Historie',
     re: /\bseit\b|gegründet|gründung|jahre(n)?\s+(lang|erfahrung)|jahrzehnt|tradition|familienbetrieb|generation/i,
@@ -299,7 +305,7 @@ export const QA_SCHEMA = {
 } as const;
 
 export const QA_SYSTEM_PROMPT = `Du prüfst Texte eines Website-Entwurfs für einen lokalen Betrieb, der den Entwurf NICHT beauftragt hat. Melde jeden Verstoß gegen diese Regeln:
-- Erfundene Fakten über den Betrieb (Jahreszahlen, Erfahrung, Auszeichnungen, Zertifikate, Meistertitel, Teamgröße, Personennamen, Marken, Preise, Garantien, Notdienst, Reaktionszeiten, Einzugsgebiet, Familienbetrieb). Allgemeine Aussagen zu Arbeitsweise oder Haltung sind erlaubt.
+- Erfundene Fakten über den Betrieb (Jahreszahlen, Erfahrung, Auszeichnungen, Zertifikate, Meistertitel, Teamgröße, Personennamen, Marken, Preise, Garantien, Notdienst, Reaktionszeiten, Einzugsgebiet, Familienbetrieb). Auch Haltung, Atmosphäre, Arbeitsweise oder Kundenorientierung nicht ohne Quelle behaupten.
 - Bewertungen, Kundenstimmen, Zitate, Testimonials.
 - Zahlen oder Ziffern.
 - Leistungen, die nicht zur Branche passen oder ungewöhnlich spezifisch sind.

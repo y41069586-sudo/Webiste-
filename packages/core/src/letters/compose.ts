@@ -85,7 +85,19 @@ export function pricesPhrase(cfg: AppConfig, oneTimeLabel: string): string {
 
 export function guaranteeSentence(cfg: AppConfig): string {
   if (!cfg.guarantee.enabled) return '';
+  if (cfg.offers.activeVersion === 'v4')
+    return `${cfg.guarantee.days} Tage Geld zurück für die Einrichtung ab bestätigtem Go-Live. Bedingungen: ${cfg.sender.website.replace(/\/$/, '')}/garantie.`;
   return `Gefällt sie Ihnen nach dem Kauf nicht, gibt es ${cfg.guarantee.days} Tage lang das Geld zurück.`;
+}
+
+/** Reject old promises in stored variants, without silently replacing or activating an experiment. */
+export function letterTruthBlocklist(cfg: AppConfig): string[] {
+  return [
+    ...cfg.letter.truthCheckBlocklist,
+    ...(cfg.offers.activeVersion === 'v4'
+      ? ['fertige Website', 'Website ist schon fertig', 'Sie ist fertig', '12 Monate Mindestlaufzeit']
+      : []),
+  ];
 }
 
 function composeVars(i: ComposeInput): Record<string, string> {
