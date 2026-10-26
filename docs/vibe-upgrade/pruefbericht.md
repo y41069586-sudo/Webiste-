@@ -101,3 +101,8 @@ ist eine begründete Sichtprüfung, keine unabhängige Unternehmerbefragung.
 Lokal ist das technische Gestaltungspaket geprüft. Ein tatsächlich betriebsspezifischer Vibe bleibt
 von den Quellen abhängig. Neue Gestaltungskontexte benötigen individuelle visuelle Freigabe;
 kein Test oder Modellprofil schaltet echten Versand/Verkauf frei.
+
+## Git-Stand
+
+Implementierung lokal committet: `941f7fe0ba9de01cb8d58a429d2db0f91bead675` auf `codex/conversion-v4`.
+Anschließender Dokumentationscommit vermerkt diesen geprüften Stand. Kein Push oder Deployment.

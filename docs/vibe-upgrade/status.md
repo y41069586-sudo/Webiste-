@@ -1,6 +1,7 @@
 # Handoff – Betriebscharakter und Demoqualität
 
 Stand: 26.10.2026. Repository `/workspace/seitenwerk-v4`, Branch `codex/conversion-v4`.
+Letzter geprüfter Implementierungscommit: `941f7fe0ba9de01cb8d58a429d2db0f91bead675`.
 Ausgangscommit: `0c788f5`; Arbeitsbaum war beim Einstieg sauber. Der neueste Betreiberauftrag erweitert
 Aufgabe 3 ausdrücklich um Demoqualität und Automatisierung. Keine parallele Anwendung oder neue
 Produktivdatenbank. Alle bisherigen V4/V5-/Task-1/2/3-Arbeiten und Exporte erhalten.
@@ -43,7 +44,8 @@ Produktivdatenbank. Alle bisherigen V4/V5-/Task-1/2/3-Arbeiten und Exporte erhal
 
 Reproduktionsbefehle in `README.md`, exakte Matrix/Abgrenzung in `pruefbericht.md` und `verification.json`.
 Exporte: `data/exports/vibe-upgrade/`, Galerie `galerie.html`, kompakte Übersichten unter `evidence/`.
-Die Git-Version mit diesen Dateien enthält den geprüften Quellstand; kein Push.
+Der Implementierungscommit `941f7fe0ba9de01cb8d58a429d2db0f91bead675` enthält den geprüften Quellstand.
+Der folgende Dokumentationscommit hält diesen Hash fest; kein Push.
 
 ## Aufgetreten und korrigiert
 

@@ -277,3 +277,13 @@ seitenwerk-aufgabe2-betreiberfassung.zip unter data/exports/task2-letters/. Alte
 Keine externen Aktionen oder Freigaben. Nächster Schritt: Betreiberfeedback/nächsten Einzelprompt abwarten.
 
 Letzter sicherer Implementierungscommit der optimierten Betreiberfassung: `031ffe96678add462751ff08592b23625b3b20f4`.
+
+
+### 26.10.2026 – Anschluss: Betriebscharakter und Demoqualität
+
+Geprüfter lokaler Implementierungscommit `941f7fe0ba9de01cb8d58a429d2db0f91bead675` auf `codex/conversion-v4`.
+Aktuelle Wiederaufnahme und vollständige Nachweise unter `docs/vibe-upgrade/status.md` und
+`pruefbericht.md`: 20 Vorlagen, 101 Core-/108 Template-Tests, 14 Browserfälle und drei
+Produktionsbuild-Wiederholungen. Alle Anbieteraufrufe im Test Mock. Kein Push/Deployment,
+keine reale Bildanalyse-Abnahme oder automatische Google-Maps-Fotorecherche behauptet.
+V4/V5-Architektur und reale Betriebsfreigaben bleiben erhalten.
