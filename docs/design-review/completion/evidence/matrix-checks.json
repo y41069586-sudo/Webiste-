@@ -1,0 +1,1546 @@
+{
+  "matrix": [
+    {
+      "template": "handwerk-solid",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "handwerk-klar",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "handwerk-werkstatt",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "beauty-elegant",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "beauty-soft",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "beauty-modern",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "gastronomie-foto",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "gastronomie-split",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "gastronomie-magazin",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "einzelhandel-foto",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "einzelhandel-split",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "einzelhandel-magazin",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "kurse-foto",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "kurse-split",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "kurse-magazin",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "handwerk-plakat",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "beauty-plakat",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "gastronomie-plakat",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "einzelhandel-plakat",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    },
+    {
+      "template": "kurse-plakat",
+      "states": [
+        {
+          "state": "normal",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "normal",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "long",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 1440,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 360,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 390,
+          "overflow": false,
+          "brokenImages": 0
+        },
+        {
+          "state": "no-images",
+          "width": 430,
+          "overflow": false,
+          "brokenImages": 0
+        }
+      ]
+    }
+  ],
+  "visualApproved": false,
+  "scope": "Geometry and actual renders; manual visual approval remains separate."
+}

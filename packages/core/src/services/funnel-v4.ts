@@ -5,26 +5,29 @@ import { getDb, type DbOrTx } from '../db/client';
 /** Operational totals, not a cohort or a claim that every stage was tracked historically. */
 export async function operationalFunnelV4(db: DbOrTx = getDb()) {
   const cfg = await getConfig({ db });
-  const result = await db.execute<Record<string, string>>(sql`SELECT
+  const result = await db.execute<
+    Record<string, string>
+  >(sql`WITH real_letters AS (SELECT * FROM letters WHERE NOT is_test AND NOT dry_run AND provider <> 'mock'), real_orders AS (SELECT * FROM orders WHERE payment_mode='live' AND provider='stripe'), real_events AS (SELECT e.* FROM events e WHERE coalesce(e.meta_json->>'audience','') NOT IN ('test','control') AND EXISTS (SELECT 1 FROM real_letters l WHERE l.lead_id=e.lead_id AND l.sent_at <= e.created_at)) SELECT
     (SELECT count(*) FROM leads) AS identified,
     (SELECT count(DISTINCT entity_id) FROM audit_log WHERE entity='lead' AND action LIKE 'status:%->qualified') AS qualified,
     (SELECT count(*) FROM demos WHERE content_json IS NOT NULL) AS demos,
     (SELECT count(*) FROM demos WHERE approved_at IS NOT NULL) AS demos_approved,
-    (SELECT count(*) FROM letters WHERE pdf_storage_key IS NOT NULL AND NOT is_test) AS letters,
-    (SELECT count(*) FROM letters WHERE approved_at IS NOT NULL AND NOT is_test) AS letters_approved,
-    (SELECT count(*) FROM letters WHERE sent_at IS NOT NULL AND NOT is_test) AS sent,
-    (SELECT count(*) FROM letters WHERE NOT is_test AND NOT undeliverable AND coalesce(delivered_at,estimated_delivered_at) <= now()) AS delivered,
-    (SELECT count(DISTINCT lead_id) FROM events WHERE type='scan') AS scans,
-    (SELECT count(DISTINCT lead_id) FROM events WHERE type='demo_view') AS views,
-    (SELECT count(DISTINCT lead_id) FROM events WHERE type='demo_engagement' AND meta_json->'sections' ? 'uebernehmen') AS pricing,
-    (SELECT count(*) FROM orders WHERE offer_snapshot->>'tier'='basis') AS basis,
-    (SELECT count(*) FROM orders WHERE offer_snapshot->>'tier'='care_plus') AS care,
-    (SELECT count(*) FROM orders) AS checkout,
-    (SELECT count(*) FROM orders WHERE paid_at IS NOT NULL) AS paid,
+    (SELECT count(*) FROM real_letters WHERE pdf_storage_key IS NOT NULL AND NOT is_test) AS letters,
+    (SELECT count(*) FROM real_letters WHERE approved_at IS NOT NULL AND NOT is_test) AS letters_approved,
+    (SELECT count(*) FROM real_letters WHERE sent_at IS NOT NULL AND NOT is_test) AS sent,
+    (SELECT count(*) FROM real_letters WHERE sent_at IS NOT NULL AND delivered_at IS NULL AND NOT undeliverable) AS unknown_delivery,
+    (SELECT count(*) FROM real_letters WHERE NOT is_test AND NOT undeliverable AND delivered_at <= now() AND NOT EXISTS (SELECT 1 FROM audit_log a WHERE a.entity='letter' AND a.entity_id=real_letters.id::text AND a.action='status:delivered' AND (a.actor='public:scan' OR a.actor LIKE '%:angenommen'))) AS delivered,
+    (SELECT count(DISTINCT lead_id) FROM real_events WHERE type='scan') AS scans,
+    (SELECT count(DISTINCT lead_id) FROM real_events WHERE type='demo_view') AS views,
+    (SELECT count(DISTINCT lead_id) FROM real_events WHERE type='demo_engagement' AND meta_json->'sections' ? 'uebernehmen') AS pricing,
+    (SELECT count(*) FROM real_orders WHERE offer_snapshot->>'tier'='basis') AS basis,
+    (SELECT count(*) FROM real_orders WHERE offer_snapshot->>'tier'='care_plus') AS care,
+    (SELECT count(*) FROM real_orders) AS checkout,
+    (SELECT count(*) FROM real_orders WHERE paid_at IS NOT NULL) AS paid,
     (SELECT count(*) FROM sites WHERE live_at IS NOT NULL) AS live,
-    (SELECT count(*) FROM order_payments WHERE paid_at IS NOT NULL) AS recurring,
-    (SELECT count(*) FROM orders WHERE ended_at IS NOT NULL) AS cancelled,
-    (SELECT count(*) FROM orders WHERE refunded_cents>0) AS refunded,
+    (SELECT count(*) FROM order_payments p JOIN real_orders o ON o.id=p.order_id WHERE p.paid_at IS NOT NULL) AS recurring,
+    (SELECT count(*) FROM real_orders WHERE ended_at IS NOT NULL) AS cancelled,
+    (SELECT count(*) FROM real_orders WHERE refunded_cents>0) AS refunded,
     (SELECT count(*) FROM audit_log WHERE action='v4_tier_changed') AS switched`);
   const r = result.rows[0]!;
   return [
@@ -35,7 +38,8 @@ export async function operationalFunnelV4(db: DbOrTx = getDb()) {
     ['Brief erstellt', Number(r.letters)],
     ['Brief freigegeben', Number(r.letters_approved)],
     ['Brief versendet', Number(r.sent)],
-    ['Brief zugestellt (teils geschätzt)', Number(r.delivered)],
+    ['Brief zugestellt (bestätigt)', Number(r.delivered)],
+    ['Zustellung unbekannt (versendete Briefe)', Number(r.unknown_delivery)],
     ['QR/Kurz-URL genutzt (eindeutige Leads)', Number(r.scans)],
     ['Demo geöffnet (eindeutige Leads)', Number(r.views)],
     ['Tarifbereich angesehen', cfg.metrics.engagementBeacon ? Number(r.pricing) : null],

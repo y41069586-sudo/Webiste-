@@ -113,11 +113,13 @@ async function lead(o: { industry?: 'handwerk' | 'beauty' } = {}) {
 async function sent(variantId: string, o: { scan?: boolean; cta?: boolean; sentDaysAgo?: number } = {}) {
   const db = getDb();
   const l = await lead();
-  const sentAt = addDays(new Date(), -(o.sentDaysAgo ?? 9));
+  const sentAt = addDays(new Date(), -(o.sentDaysAgo ?? ((new Date().getUTCDay() + 6) % 7) + 6));
   await db.insert(letters).values({
     leadId: l.id,
     sequence: 1,
     status: 'delivered',
+    provider: 'letterxpress', // Synthetic provider-confirmed cohort, no API call.
+    deliveredAt: addDays(sentAt, 3),
     variantId,
     industry: 'handwerk',
     sentAt,

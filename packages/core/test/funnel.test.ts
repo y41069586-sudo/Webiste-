@@ -4,11 +4,10 @@ import { updateConfig } from '../src/config/service';
 import { getDb } from '../src/db/client';
 import { demos, events, leads, letters, orders } from '../src/db/schema';
 import { stopBoss } from '../src/queue';
-import { funnelRows, funnelStages, purchaseValueCents, refreshFunnel } from '../src/services/funnel';
+import { funnelRows, funnelStages, refreshFunnel } from '../src/services/funnel';
 import { markLetterUndeliverable, recordDemoEngagement, sanitizeEngagement, whatsappRedirect } from '../src/services/measurement';
 import { simulateMockPayment, startCheckout, type CheckoutInput } from '../src/services/orders';
 import { handleScan, recordEvent, type RequestMeta } from '../src/services/tracking';
-import { DEFAULT_CONFIG } from '../src/config/settings';
 import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
 import { OPERATOR_TEST_CONFIG, resetDb } from './helpers';
@@ -60,7 +59,7 @@ async function seedSentLetter(
       demoId: demo!.id,
       sequence: 1,
       status: 'sent',
-      provider: 'mock',
+      provider: 'letterxpress',
       providerLetterId: `mock_${randomToken(8)}`,
       sentAt,
       estimatedDeliveredAt: addDays(sentAt, 3),
@@ -117,7 +116,7 @@ describe('Messung und Funnel (L4)', () => {
       industry: 'gastronomie',
       segment: 'neu',
       letters: 1,
-      delivered: 1,
+      delivered: 0,
       scans: 1,
       demo_views: 1,
       engaged: 1,
@@ -125,12 +124,12 @@ describe('Messung und Funnel (L4)', () => {
       whatsapp: 1,
       checkouts: 1,
       abandoned: 0,
-      purchases: 1,
-      purchases_monthly: 1,
+      purchases: 0,
+      purchases_monthly: 0,
       purchases_one_time: 0,
       cost_cents: 81,
     });
-    expect(row!.revenueCents).toBe(purchaseValueCents(DEFAULT_CONFIG, 'monthly'));
+    expect(row!.revenueCents).toBe(0);
     expect(row!.week).toMatch(/^\d{4}-KW\d{2}$/);
     // Kanal, Gerät und grobe Engagement-Werte stehen am Ereignis – ohne IP, ohne Cookies
     const ev = await db.select().from(events).where(eq(events.leadId, lead.id));
@@ -142,7 +141,7 @@ describe('Messung und Funnel (L4)', () => {
     });
     expect(JSON.stringify(ev)).not.toMatch(/\d+\.\d+\.\d+\.\d+/);
     const stages = funnelStages(row!);
-    expect(stages.map((s) => s.count)).toEqual([1, 1, 1, 1, 1, 1]);
+    expect(stages.map((s) => s.count)).toEqual([0, 1, 1, 1, 1, 0]);
   });
 
   it('Auswertungsfenster: Kauf zählt erst 45 Tage nach Zustellung in die Kaufrate; abgebrochener Checkout', async () => {
@@ -159,7 +158,7 @@ describe('Messung und Funnel (L4)', () => {
     ]);
     await refreshFunnel(db);
     const [t] = await funnelRows();
-    expect(t).toMatchObject({ letters: 2, delivered: 2, evaluated: 1, purchases: 1, purchases_evaluated: 0, checkouts: 1 });
+    expect(t).toMatchObject({ letters: 2, delivered: 0, evaluated: 1, purchases: 0, purchases_evaluated: 0, checkouts: 1 });
     // der späte Kauf liegt außerhalb des Fensters – der Abbruch im Fenster bleibt sichtbar
     expect(t!.abandoned).toBe(1);
   });

@@ -1,6 +1,5 @@
 import { sql } from 'drizzle-orm';
 import { getEnv } from '../config/env';
-import { getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
 import { getDb, type DbOrTx } from '../db/client';
 import { logger } from '../logger';
@@ -8,7 +7,7 @@ import { logger } from '../logger';
 /**
  * Funnel-Sicht (Update 2, B6.1/B6.2/B7). Grundlage sind die materialisierten Sichten `letter_outcomes`
  * (je Erstbrief) und `funnel_by_arm` (Branche × Variante × Segment × Woche). Das Auswertungsfenster der
- * Sicht beträgt 45 Tage nach (geschätzter) Zustellung – der Standard aus B6.2.
+ * Sicht beträgt 45 Tage ab Versand – der Standard aus B6.2.
  */
 export const FUNNEL_WINDOW_DAYS = 45;
 
@@ -32,6 +31,7 @@ export const FUNNEL_METRICS = [
   'opt_outs',
   'complaints',
   'cost_cents',
+  'revenue_cents',
 ] as const;
 export type FunnelMetric = (typeof FUNNEL_METRICS)[number];
 
@@ -85,7 +85,6 @@ const DIM_SQL: Record<FunnelDimension, string> = {
 };
 
 export async function funnelRows(filter: FunnelFilter = {}, db: DbOrTx = getDb()): Promise<FunnelRow[]> {
-  const cfg = await getConfig();
   const dims = filter.groupBy ?? [];
   // Spaltenausdrücke nur aus der festen Liste; alle Filterwerte als Parameter
   const dimCols = dims.map((d) => sql.raw(`${DIM_SQL[d]} AS ${d}`));
@@ -113,8 +112,7 @@ export async function funnelRows(filter: FunnelFilter = {}, db: DbOrTx = getDb()
       variantName: variant ? (names.get(variant) ?? (variant === 'ohne' ? 'ohne Variante' : variant)) : undefined,
       segment: r.segment !== undefined ? String(r.segment) : undefined,
       week: r.week !== undefined ? String(r.week) : undefined,
-      revenueCents:
-        row.purchases_one_time * purchaseValueCents(cfg, 'one_time') + row.purchases_monthly * purchaseValueCents(cfg, 'monthly'),
+      revenueCents: row.revenue_cents,
     };
   });
 }

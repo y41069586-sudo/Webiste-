@@ -122,7 +122,7 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   // 6) Screenshots + Komposit (ohne Banner)
   // Use exactly the stored page served by the demo route; newer template code must not change its screenshot.
   const shots = await takeScreenshots(html, { hideDemoChrome: true });
-  const composite = await renderComposite(shots.desktop, shots.mobile);
+  const composite = await renderComposite(shots.desktop, shots.mobile, { businessName: bizFacts.name });
   const base = `demos/${demoId}`;
   await storage.put(`${base}/desktop.jpg`, shots.desktop, 'image/jpeg');
   await storage.put(`${base}/mobile.jpg`, shots.mobile, 'image/jpeg');

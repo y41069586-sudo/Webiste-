@@ -111,9 +111,9 @@ export default async function FunnelPage({
       </Card>
       <Card title="Gesamter Ablauf · Betriebszahlen" className="mb-6">
         <p className="mb-4 text-sm text-slate-600">
-          Gesamter Datenbestand, unterschiedliche Zähleinheiten; keine Kohorten-Kaufrate. Fehlende historische Nachweise werden
-          nicht nachträglich erfunden. „Nicht gemessen“ bedeutet keinen Wert von null. Tarifwechsel werden bislang nur
-          vorbereitet.
+          Nachweisliche Live-Zahlungen und echte Briefe; unbekannter historischer Zahlungsmodus ist ausgeschlossen.
+          Unterschiedliche Zähleinheiten; keine Kohorten-Kaufrate. Fehlende historische Nachweise werden nicht nachträglich
+          erfunden. „Nicht gemessen“ bedeutet keinen Wert von null. Tarifwechsel werden bislang nur vorbereitet.
         </p>
         <ol className="grid gap-x-8 gap-y-2 text-sm md:grid-cols-2">
           {operational.map((stage, i) => (
@@ -128,7 +128,7 @@ export default async function FunnelPage({
       </Card>
       <PageHeader
         title="Funnel"
-        subtitle={`Erstbriefe ab Versand; ein Brief gilt ${FUNNEL_WINDOW_DAYS} Tage nach (geschätzter) Zustellung als ausgewertet. Kaufrate nur aus ausgewerteten Briefen.`}
+        subtitle={`Erstbriefe ab Versand; ein Brief gilt ${FUNNEL_WINDOW_DAYS} Tage nach Versand als ausgewertet. Kaufrate nur aus ausgewerteten Briefen.`}
         actions={
           <form action={refreshFunnelAction}>
             <button type="submit" className={btn.secondary}>

@@ -190,7 +190,7 @@ describe('Versand', () => {
     expect((await getDb().query.leads.findFirst({ where: eq(leads.id, lead.id) }))?.status).toBe('failed');
   });
 
-  it('Abgleich nimmt Zustellung nach X Tagen an', async () => {
+  it('Abgleich erfindet keine Zustellung nach Ablauf einer Schätzung', async () => {
     const { letter, lead } = await seed();
     const sent = await sendLetter(letter.id, 'test');
     if (sent.state !== 'sent') throw new Error('nicht gesendet');
@@ -204,8 +204,9 @@ describe('Versand', () => {
       })
       .where(eq(letters.id, letter.id));
     const r = await syncLetterStatuses();
-    expect(r.changed).toBeGreaterThanOrEqual(1);
-    expect((await getDb().query.leads.findFirst({ where: eq(leads.id, lead.id) }))?.status).toBe('letter_delivered');
+    expect(r.changed).toBe(0);
+    expect((await getDb().query.leads.findFirst({ where: eq(leads.id, lead.id) }))?.status).toBe('letter_sent');
+    expect((await getDb().query.letters.findFirst({ where: eq(letters.id, letter.id) }))?.deliveredAt).toBeNull();
   });
 
   it('Follow-up nur mit Schalter und nach 12 Tagen ohne Scan', async () => {

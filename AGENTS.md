@@ -244,3 +244,9 @@ Fortlaufender Umsetzungsstand: `docs/v4-quality-handoff.md`; früherer Prüfstan
   Branchen und kein allgemeines Firmenwebsite-Redesign. Nächste Sitzung dort fortsetzen, nicht neu bauen.
 - Screenshots/PDFs sind echte lokale Renderartefakte; QR-Testserver ist nur lokal, kein öffentliches
   Briefziel. Lokale Mock-/Browserprüfungen nicht als echte Stripe-Sandbox-/Providerabnahme darstellen.
+
+## Neuester Completion-Auftrag
+
+Kein Push ohne neue ausdrückliche Freigabe. Lokale allgemeine Funktionskorrekturen, Geräte-Mockups,
+Personalisierung und Abnahmegalerie sind beauftragt. Drei neue Maler-Stile weiterhin nicht auf andere
+Branchen übertragen. Vorhandene andere Templates dürfen mit fiktiven Profilen geprüft werden.

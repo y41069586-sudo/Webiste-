@@ -15,6 +15,8 @@ export function priorityV4(
     excluded?: boolean;
     websiteAbsentVerified?: boolean;
     demoSuitable?: boolean;
+    addressVerified?: boolean;
+    independentVerified?: boolean;
   },
   thresholds = { goodMin: 75, reviewMin: 40 },
 ) {
@@ -28,7 +30,7 @@ export function priorityV4(
     reason('identity', Boolean(place.name?.trim()), 15, 'Firmenname in der Quelle vorhanden', 'Firmenname fehlt'),
     reason(
       'postal_address',
-      flags.completeAddress,
+      flags.completeAddress && Boolean(flags.addressVerified),
       25,
       'Anschriftfelder vollständig; Zustellbarkeit und Ortszuordnung prüfen',
       'Anschrift unvollständig',
@@ -82,7 +84,12 @@ export function priorityV4(
             reasons.reduce((sum, r) => sum + r.points, 0),
           ),
         );
-  const category = score >= thresholds.goodMin ? 'good_fit' : score >= thresholds.reviewMin ? 'manual_review' : 'unsuitable';
+  const category =
+    score >= thresholds.goodMin && flags.independentVerified
+      ? 'good_fit'
+      : score >= thresholds.reviewMin
+        ? 'manual_review'
+        : 'unsuitable';
   reasons.push({
     criterion: 'suitability',
     points: 0,

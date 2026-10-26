@@ -28,3 +28,31 @@ export function letterBranchBenefit(branchLabel: string): string {
     'So könnten Interessierte Ihre bestätigten Leistungen, den Standort und die Kontaktmöglichkeiten übersichtlich finden.'
   );
 }
+
+export interface VerifiedLetterContext {
+  businessName: string;
+  city: string;
+  branchLabel: string;
+  /** Confirmed business facts only, with an auditable source reference. */
+  details: { text: string; source: string; verified: boolean }[];
+}
+/** Deterministic copy from reviewed facts; never turn typical branch services into facts. */
+export function personalizedLetterCopy(context: VerifiedLetterContext, variant = 0) {
+  const facts = context.details.filter((d) => d.verified && d.source.trim() && d.text.trim()).slice(0, 2);
+  if (!facts.length) throw new Error('Für einen persönlichen Brief fehlt ein belegter Betriebsbezug.');
+  const detail = facts.map((d) => d.text.replace(/[.!]$/, '')).join('; ');
+  const openings = [
+    `Für ${context.businessName} in ${context.city} steht in diesem Entwurf Folgendes im Mittelpunkt: ${detail}.`,
+    `Bei der Vorschau für ${context.businessName} haben wir diese Angaben berücksichtigt: ${detail}.`,
+    `Der Entwurf für Ihren Betrieb in ${context.city} greift konkret auf: ${detail}.`,
+  ];
+  return {
+    subject: `${context.businessName}: ${facts[0]!.text.replace(/[.!]$/, '')}`,
+    intro: [
+      openings[variant % openings.length]!,
+      'Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab.',
+    ],
+    sources: facts.map((d) => d.source),
+    automatic: true,
+  };
+}

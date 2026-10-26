@@ -214,3 +214,13 @@ Funnel-Zustellschätzung/Testabgrenzung bleiben offene Kampagnenblocker. Keine P
 
 Letzter sicherer Redesign-Implementierungscommit: `b618a7a2a9a0322f813906af4aa7320ee72189ab` auf `codex/conversion-v4`.
 Stand zur visuellen Zwischenabnahme, ausdrücklich keine gestalterische oder produktive Freigabe.
+
+
+## Laufende Premium-Completion nach Gerätefeedback (26.10.2026)
+
+[Verbindlicher Zwischenstand](design-review/completion/status.md),
+[Bericht mit offenen Punkten](design-review/completion/bericht.md). Neue kompakte Gerätebilder,
+15 fiktive Brief-Demo-Paare und isolierte20-Template-Matrix vorhanden. Personalisierung nicht fertig;
+keine abschließende Design-/Produktionsfreigabe. Neuer Auftrag verbietet Push ohne Freigabe.
+Migration0018 ausschließlich gegen lokalen Testpostgres geprüft. Standardrenderer nicht auf neue
+Maler-Stile umgestellt. Bei Wiederaufnahme keine belegten Ergebnisse erneut bauen.

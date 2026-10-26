@@ -93,6 +93,11 @@ export function checkoutAvailability(): { ok: true; mode: 'live' | 'test' | 'moc
   return { ok: true, mode: key.startsWith('sk_live_') || key.startsWith('rk_live_') ? 'live' : 'test' };
 }
 
+function paymentModeAtCheckout(): 'unknown' | 'live' | 'test' | 'mock' {
+  const availability = checkoutAvailability();
+  return availability.ok ? availability.mode : 'unknown';
+}
+
 export async function getCheckoutContext(slug: string): Promise<CheckoutContext> {
   const avail = checkoutAvailability();
   const found = await findPublicDemo(slug);
@@ -217,6 +222,7 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
       leadId: lead.id,
       demoId: demo.id,
       provider: getProviders().payment.name,
+      paymentMode: paymentModeAtCheckout(),
       plan,
       offerSnapshot: isV4Tier(plan) ? v4Offer(plan, new Date().toISOString(), cfg.offers.billingMode ?? 'saved_mandate') : null,
       amountCents: amounts.grossCents,
@@ -355,6 +361,7 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
       leadId: lead.id,
       demoId: demo.id,
       provider: getProviders().payment.name,
+      paymentMode: paymentModeAtCheckout(),
       plan,
       offerSnapshot: isV4Tier(plan) ? v4Offer(plan, null, cfg.offers.billingMode ?? 'saved_mandate') : null,
       amountCents: amounts.grossCents,

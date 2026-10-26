@@ -13,7 +13,7 @@ const place: RawPlace = {
   businessStatus: 'OPERATIONAL',
   phone: '030000000',
 };
-const flags = { completeAddress: true, hasWebsite: false, socialOnly: true, branchWeight: 1 };
+const flags = { completeAddress: true, hasWebsite: false, socialOnly: true, branchWeight: 1, addressVerified: true, independentVerified: true };
 it('unknown website absence and unreviewed demos cannot earn their verification points', () => {
   const result = priorityV4(place, flags);
   expect(result.score).toBe(70);

@@ -146,7 +146,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .premium .offer-copy{flex:1;min-width:0}
 .premium .qrbox{flex:0 0 45mm}
 .premium .subject{font-size:12pt}
-.review-letter .intro{font-size:10.5pt;margin:2mm 0 3mm}.review-letter .visual{align-items:flex-start;margin:3mm 0}.review-letter .hero-complete{display:block;width:118mm;height:auto;max-height:55mm;object-fit:contain;object-position:top left;border:0.2mm solid #d9e0e8}.review-letter .qrbox{width:41mm;flex:0 0 41mm}.review-letter .qrbox strong{font-size:9pt}.review-prices{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:0.3mm solid #1d4e89;border-bottom:0.3mm solid #d9e0e8;padding:3mm 0;gap:4mm;margin:2mm 0}.review-prices strong{font-size:15pt;display:block;line-height:1.25}.review-prices span{font-size:8.5pt;display:block}.review-conditions{font-size:9pt;line-height:1.45;margin:1.5mm 0!important}.sign{margin-top:3mm}
+.review-letter .intro{font-size:10.5pt;margin:2mm 0 3mm}.review-letter .visual{align-items:flex-start;margin:3mm 0}.review-letter .hero-complete{display:block;width:118mm;height:auto;max-height:67mm;object-fit:contain;object-position:top left;border:0.2mm solid #d9e0e8}.review-letter .qrbox{width:41mm;flex:0 0 41mm}.review-letter .qrbox strong{font-size:9pt}.review-prices{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:0.3mm solid #1d4e89;border-bottom:0.3mm solid #d9e0e8;padding:3mm 0;gap:4mm;margin:2mm 0}.review-prices strong{font-size:10pt;display:block;line-height:1.25}.review-prices span{font-size:8.5pt;display:block}.review-conditions{font-size:9pt;line-height:1.45;margin:1.5mm 0!important}.sign{margin-top:3mm}
 .sign .name{font-weight:600}
 .small{position:absolute;left:25mm;right:20mm;bottom:16mm;font-size:7pt;line-height:1.38;color:#4a5565;border-top:0.25mm solid #d9e0e8;padding-top:2mm}
 .small p{margin:0 0 1.2mm}
@@ -182,7 +182,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
     ${
       d.reviewOffer
         ? `<p class="intro">${d.intro.map((p) => boldMd(p)).join(' ')}</p>
-    <div class="visual"><img class="hero-complete" src="${esc(d.desktopScreenshotDataUri ?? d.compositeDataUri ?? '')}" alt="Vollständiger Hero des persönlichen Website-Entwurfs"><div class="qrbox"><img class="qr" src="${d.qrDataUri}" alt="QR-Code zum Entwurf"><strong>Entwurf kostenlos ansehen</strong><span class="short">${esc(d.shortUrl)}</span></div></div>
+    <div class="visual"><img class="hero-complete" src="${esc(d.compositeDataUri ?? d.desktopScreenshotDataUri ?? '')}" alt="Vollständiger Hero des persönlichen Website-Entwurfs"><div class="qrbox"><img class="qr" src="${d.qrDataUri}" alt="QR-Code zum Entwurf"><strong>Entwurf kostenlos ansehen</strong><span class="short">${esc(d.shortUrl)}</span></div></div>
     <div class="review-prices"><div><span>Einrichtung · einmalig</span><strong>${esc(d.reviewOffer.setup)}</strong></div><div><span>Basis · monatlich</span><strong>${esc(d.reviewOffer.basis)}</strong></div><div><span>Care+ · monatlich insgesamt</span><strong>${esc(d.reviewOffer.care)}</strong></div></div>
     <p class="review-conditions">${esc(d.reviewOffer.conditions)}</p><p>${esc(d.reviewOffer.scope)}</p>
     <p class="review-conditions">Rückfragen gern per E-Mail oder WhatsApp. Der Entwurf ist unverbindlich.</p><div class="sign">${esc(d.closing)}<br><strong>${esc(d.signatureName)}</strong></div>`

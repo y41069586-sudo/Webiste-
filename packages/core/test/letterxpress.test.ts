@@ -361,11 +361,12 @@ describe('LetterXpress im Versandablauf', () => {
     expect(Math.abs(l.estimatedDeliveredAt!.getTime() - expected.getTime())).toBeLessThan(1000);
     // Scan einen Werktag nach dem Versand → Brief ist angekommen
     const scanAt = addBusinessDays(l.sentAt!, 1);
-    expect(await correctDeliveryEstimate(getDb(), lead.id, scanAt)).toBe(true);
+    expect(await correctDeliveryEstimate(getDb(), lead.id, scanAt)).toBe(false);
     l = (await getDb().query.letters.findFirst({ where: eq(letters.id, letter.id) }))!;
-    expect(l.status).toBe('delivered');
-    expect(l.deliveryCorrectedAt).toEqual(scanAt);
-    expect(l.estimatedDeliveredAt).toEqual(scanAt);
-    expect((await observedTransit()).samples).toBe(1);
+    expect(l.status).toBe('sent');
+    expect(l.deliveredAt).toBeNull();
+    expect(l.deliveryCorrectedAt).toBeNull();
+    expect(l.estimatedDeliveredAt).not.toEqual(scanAt);
+    expect((await observedTransit()).samples).toBe(0);
   });
 });

@@ -1,0 +1,1020 @@
+{
+  "rows": [
+    {
+      "id": "handwerk-klar",
+      "name": "handwerk-klar",
+      "files": [
+        "handwerk-klar-minimal.jpg",
+        "handwerk-klar-editorial.jpg",
+        "handwerk-klar-studio.jpg",
+        "handwerk-klar-leistungen.png",
+        "handwerk-klar-kontakt.png",
+        "handwerk-klar-angebot.png"
+      ]
+    },
+    {
+      "id": "handwerk-solid",
+      "name": "handwerk-solid",
+      "files": [
+        "handwerk-solid-minimal.jpg",
+        "handwerk-solid-editorial.jpg",
+        "handwerk-solid-studio.jpg",
+        "handwerk-solid-leistungen.png",
+        "handwerk-solid-kontakt.png",
+        "handwerk-solid-angebot.png"
+      ]
+    },
+    {
+      "id": "handwerk-werkstatt",
+      "name": "handwerk-werkstatt",
+      "files": [
+        "handwerk-werkstatt-minimal.jpg",
+        "handwerk-werkstatt-editorial.jpg",
+        "handwerk-werkstatt-studio.jpg",
+        "handwerk-werkstatt-leistungen.png",
+        "handwerk-werkstatt-kontakt.png",
+        "handwerk-werkstatt-angebot.png"
+      ]
+    },
+    {
+      "id": "test-01",
+      "name": "Farbwerk Nord",
+      "template": "handwerk-klar",
+      "copy": {
+        "subject": "Farbwerk Nord: Innenanstriche",
+        "intro": [
+          "Für Farbwerk Nord in Testort 1 steht in diesem Entwurf Folgendes im Mittelpunkt: Innenanstriche; Treppenhäuser.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-01:services",
+          "fixture:test-01:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-01:services",
+        "fixture:test-01:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-01-mockup.jpg",
+        "test-01-druck.webp",
+        "test-01-brief.pdf",
+        "test-01.html"
+      ]
+    },
+    {
+      "id": "test-02",
+      "name": "Fassade & Farbton",
+      "template": "handwerk-solid",
+      "copy": {
+        "subject": "Fassade & Farbton: Fassadenanstriche",
+        "intro": [
+          "Bei der Vorschau für Fassade & Farbton haben wir diese Angaben berücksichtigt: Fassadenanstriche; Holzfenster lackieren.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-02:services",
+          "fixture:test-02:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-02:services",
+        "fixture:test-02:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-02-mockup.jpg",
+        "test-02-druck.webp",
+        "test-02-brief.pdf",
+        "test-02.html"
+      ]
+    },
+    {
+      "id": "test-03",
+      "name": "Raumfarbe Süd",
+      "template": "handwerk-werkstatt",
+      "copy": {
+        "subject": "Raumfarbe Süd: Kalkfarben",
+        "intro": [
+          "Der Entwurf für Ihren Betrieb in Testort 3 greift konkret auf: Kalkfarben; Altbauräume.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-03:services",
+          "fixture:test-03:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-03:services",
+        "fixture:test-03:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-03-mockup.jpg",
+        "test-03-druck.webp",
+        "test-03-brief.pdf",
+        "test-03.html"
+      ]
+    },
+    {
+      "id": "test-04",
+      "name": "Salon Scherenschnitt",
+      "template": "beauty-elegant",
+      "copy": {
+        "subject": "Salon Scherenschnitt: Haarschnitte",
+        "intro": [
+          "Für Salon Scherenschnitt in Testort 4 steht in diesem Entwurf Folgendes im Mittelpunkt: Haarschnitte; Termine per Nachricht.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-04:services",
+          "fixture:test-04:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-04:services",
+        "fixture:test-04:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-04-mockup.jpg",
+        "test-04-druck.webp",
+        "test-04-brief.pdf",
+        "test-04.html"
+      ]
+    },
+    {
+      "id": "test-05",
+      "name": "Lockenstudio Nord",
+      "template": "beauty-modern",
+      "copy": {
+        "subject": "Lockenstudio Nord: Lockenhaarschnitte",
+        "intro": [
+          "Bei der Vorschau für Lockenstudio Nord haben wir diese Angaben berücksichtigt: Lockenhaarschnitte; Beratung zur Haarpflege.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-05:services",
+          "fixture:test-05:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-05:services",
+        "fixture:test-05:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-05-mockup.jpg",
+        "test-05-druck.webp",
+        "test-05-brief.pdf",
+        "test-05.html"
+      ]
+    },
+    {
+      "id": "test-06",
+      "name": "Studio Hautzeit",
+      "template": "beauty-modern",
+      "copy": {
+        "subject": "Studio Hautzeit: Gesichtsbehandlungen",
+        "intro": [
+          "Der Entwurf für Ihren Betrieb in Testort 6 greift konkret auf: Gesichtsbehandlungen; Terminanfragen per E-Mail.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-06:services",
+          "fixture:test-06:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-06:services",
+        "fixture:test-06:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-06-mockup.jpg",
+        "test-06-druck.webp",
+        "test-06-brief.pdf",
+        "test-06.html"
+      ]
+    },
+    {
+      "id": "test-07",
+      "name": "Tisch am Park",
+      "template": "gastronomie-foto",
+      "copy": {
+        "subject": "Tisch am Park: Mittagskarte",
+        "intro": [
+          "Für Tisch am Park in Testort 7 steht in diesem Entwurf Folgendes im Mittelpunkt: Mittagskarte; Öffnungszeiten Dienstag bis Sonntag.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-07:services",
+          "fixture:test-07:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-07:services",
+        "fixture:test-07:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-07-mockup.jpg",
+        "test-07-druck.webp",
+        "test-07-brief.pdf",
+        "test-07.html"
+      ]
+    },
+    {
+      "id": "test-08",
+      "name": "Kaffeefenster",
+      "template": "gastronomie-split",
+      "copy": {
+        "subject": "Kaffeefenster: Kaffee und Kuchen",
+        "intro": [
+          "Bei der Vorschau für Kaffeefenster haben wir diese Angaben berücksichtigt: Kaffee und Kuchen; Abholung im Laden.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-08:services",
+          "fixture:test-08:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-08:services",
+        "fixture:test-08:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-08-mockup.jpg",
+        "test-08-druck.webp",
+        "test-08-brief.pdf",
+        "test-08.html"
+      ]
+    },
+    {
+      "id": "test-09",
+      "name": "Kleine Tafel",
+      "template": "gastronomie-magazin",
+      "copy": {
+        "subject": "Kleine Tafel: Abendkarte",
+        "intro": [
+          "Der Entwurf für Ihren Betrieb in Testort 9 greift konkret auf: Abendkarte; Reservierungsanfragen.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-09:services",
+          "fixture:test-09:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-09:services",
+        "fixture:test-09:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-09-mockup.jpg",
+        "test-09-druck.webp",
+        "test-09-brief.pdf",
+        "test-09.html"
+      ]
+    },
+    {
+      "id": "test-10",
+      "name": "Blütenraum",
+      "template": "einzelhandel-foto",
+      "copy": {
+        "subject": "Blütenraum: Schnittblumen",
+        "intro": [
+          "Für Blütenraum in Testort 10 steht in diesem Entwurf Folgendes im Mittelpunkt: Schnittblumen; Abholung vor Ort.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-10:services",
+          "fixture:test-10:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-10:services",
+        "fixture:test-10:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-10-mockup.jpg",
+        "test-10-druck.webp",
+        "test-10-brief.pdf",
+        "test-10.html"
+      ]
+    },
+    {
+      "id": "test-11",
+      "name": "Buchwinkel",
+      "template": "einzelhandel-split",
+      "copy": {
+        "subject": "Buchwinkel: Bücher bestellen",
+        "intro": [
+          "Bei der Vorschau für Buchwinkel haben wir diese Angaben berücksichtigt: Bücher bestellen; Abholung im Geschäft.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-11:services",
+          "fixture:test-11:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-11:services",
+        "fixture:test-11:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-11-mockup.jpg",
+        "test-11-druck.webp",
+        "test-11-brief.pdf",
+        "test-11.html"
+      ]
+    },
+    {
+      "id": "test-12",
+      "name": "Radladen West",
+      "template": "einzelhandel-magazin",
+      "copy": {
+        "subject": "Radladen West: Fahrradzubehör",
+        "intro": [
+          "Der Entwurf für Ihren Betrieb in Testort 12 greift konkret auf: Fahrradzubehör; Besuchsinformationen.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-12:services",
+          "fixture:test-12:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-12:services",
+        "fixture:test-12:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-12-mockup.jpg",
+        "test-12-druck.webp",
+        "test-12-brief.pdf",
+        "test-12.html"
+      ]
+    },
+    {
+      "id": "test-13",
+      "name": "Tanzraum",
+      "template": "kurse-foto",
+      "copy": {
+        "subject": "Tanzraum: Paartanz",
+        "intro": [
+          "Für Tanzraum in Testort 13 steht in diesem Entwurf Folgendes im Mittelpunkt: Paartanz; Probestundenanfragen.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-13:services",
+          "fixture:test-13:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-13:services",
+        "fixture:test-13:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-13-mockup.jpg",
+        "test-13-druck.webp",
+        "test-13-brief.pdf",
+        "test-13.html"
+      ]
+    },
+    {
+      "id": "test-14",
+      "name": "Atemraum",
+      "template": "kurse-split",
+      "copy": {
+        "subject": "Atemraum: Yoga für Einsteiger",
+        "intro": [
+          "Bei der Vorschau für Atemraum haben wir diese Angaben berücksichtigt: Yoga für Einsteiger; Kursanfragen.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-14:services",
+          "fixture:test-14:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-14:services",
+        "fixture:test-14:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-14-mockup.jpg",
+        "test-14-druck.webp",
+        "test-14-brief.pdf",
+        "test-14.html"
+      ]
+    },
+    {
+      "id": "test-15",
+      "name": "Klangatelier",
+      "template": "kurse-magazin",
+      "copy": {
+        "subject": "Klangatelier: Klavierunterricht",
+        "intro": [
+          "Der Entwurf für Ihren Betrieb in Testort 15 greift konkret auf: Klavierunterricht; Anfragen zum Einzelunterricht.",
+          "Der QR-Code öffnet Ihren unabhängigen, nicht beauftragten Website-Entwurf kostenlos und ohne Anmeldung. Ihre Inhalte stimmen wir vor einer Veröffentlichung mit Ihnen ab."
+        ],
+        "sources": [
+          "fixture:test-15:services",
+          "fixture:test-15:detail"
+        ],
+        "automatic": true
+      },
+      "sources": [
+        "fixture:test-15:services",
+        "fixture:test-15:detail"
+      ],
+      "checks": [],
+      "pdfQr": true,
+      "pages": 1,
+      "files": [
+        "test-15-mockup.jpg",
+        "test-15-druck.webp",
+        "test-15-brief.pdf",
+        "test-15.html"
+      ]
+    }
+  ],
+  "similarities": [
+    {
+      "a": 1,
+      "b": 2,
+      "jaccard": 0.4444444444444444
+    },
+    {
+      "a": 1,
+      "b": 3,
+      "jaccard": 0.5806451612903226
+    },
+    {
+      "a": 1,
+      "b": 4,
+      "jaccard": 0.7096774193548387
+    },
+    {
+      "a": 1,
+      "b": 5,
+      "jaccard": 0.4857142857142857
+    },
+    {
+      "a": 1,
+      "b": 6,
+      "jaccard": 0.5625
+    },
+    {
+      "a": 1,
+      "b": 7,
+      "jaccard": 0.6875
+    },
+    {
+      "a": 1,
+      "b": 8,
+      "jaccard": 0.4444444444444444
+    },
+    {
+      "a": 1,
+      "b": 9,
+      "jaccard": 0.5806451612903226
+    },
+    {
+      "a": 1,
+      "b": 10,
+      "jaccard": 0.7586206896551724
+    },
+    {
+      "a": 1,
+      "b": 11,
+      "jaccard": 0.4444444444444444
+    },
+    {
+      "a": 1,
+      "b": 12,
+      "jaccard": 0.5806451612903226
+    },
+    {
+      "a": 1,
+      "b": 13,
+      "jaccard": 0.7586206896551724
+    },
+    {
+      "a": 1,
+      "b": 14,
+      "jaccard": 0.45714285714285713
+    },
+    {
+      "a": 1,
+      "b": 15,
+      "jaccard": 0.5625
+    },
+    {
+      "a": 2,
+      "b": 3,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 2,
+      "b": 4,
+      "jaccard": 0.43243243243243246
+    },
+    {
+      "a": 2,
+      "b": 5,
+      "jaccard": 0.6774193548387096
+    },
+    {
+      "a": 2,
+      "b": 6,
+      "jaccard": 0.47058823529411764
+    },
+    {
+      "a": 2,
+      "b": 7,
+      "jaccard": 0.42105263157894735
+    },
+    {
+      "a": 2,
+      "b": 8,
+      "jaccard": 0.6774193548387096
+    },
+    {
+      "a": 2,
+      "b": 9,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 2,
+      "b": 10,
+      "jaccard": 0.45714285714285713
+    },
+    {
+      "a": 2,
+      "b": 11,
+      "jaccard": 0.6774193548387096
+    },
+    {
+      "a": 2,
+      "b": 12,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 2,
+      "b": 13,
+      "jaccard": 0.45714285714285713
+    },
+    {
+      "a": 2,
+      "b": 14,
+      "jaccard": 0.7
+    },
+    {
+      "a": 2,
+      "b": 15,
+      "jaccard": 0.47058823529411764
+    },
+    {
+      "a": 3,
+      "b": 4,
+      "jaccard": 0.5625
+    },
+    {
+      "a": 3,
+      "b": 5,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 3,
+      "b": 6,
+      "jaccard": 0.8076923076923077
+    },
+    {
+      "a": 3,
+      "b": 7,
+      "jaccard": 0.5454545454545454
+    },
+    {
+      "a": 3,
+      "b": 8,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 3,
+      "b": 9,
+      "jaccard": 0.84
+    },
+    {
+      "a": 3,
+      "b": 10,
+      "jaccard": 0.6
+    },
+    {
+      "a": 3,
+      "b": 11,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 3,
+      "b": 12,
+      "jaccard": 0.84
+    },
+    {
+      "a": 3,
+      "b": 13,
+      "jaccard": 0.6
+    },
+    {
+      "a": 3,
+      "b": 14,
+      "jaccard": 0.5
+    },
+    {
+      "a": 3,
+      "b": 15,
+      "jaccard": 0.8076923076923077
+    },
+    {
+      "a": 4,
+      "b": 5,
+      "jaccard": 0.43243243243243246
+    },
+    {
+      "a": 4,
+      "b": 6,
+      "jaccard": 0.5454545454545454
+    },
+    {
+      "a": 4,
+      "b": 7,
+      "jaccard": 0.6666666666666666
+    },
+    {
+      "a": 4,
+      "b": 8,
+      "jaccard": 0.43243243243243246
+    },
+    {
+      "a": 4,
+      "b": 9,
+      "jaccard": 0.5625
+    },
+    {
+      "a": 4,
+      "b": 10,
+      "jaccard": 0.7333333333333333
+    },
+    {
+      "a": 4,
+      "b": 11,
+      "jaccard": 0.43243243243243246
+    },
+    {
+      "a": 4,
+      "b": 12,
+      "jaccard": 0.5625
+    },
+    {
+      "a": 4,
+      "b": 13,
+      "jaccard": 0.7333333333333333
+    },
+    {
+      "a": 4,
+      "b": 14,
+      "jaccard": 0.4444444444444444
+    },
+    {
+      "a": 4,
+      "b": 15,
+      "jaccard": 0.5454545454545454
+    },
+    {
+      "a": 5,
+      "b": 6,
+      "jaccard": 0.47058823529411764
+    },
+    {
+      "a": 5,
+      "b": 7,
+      "jaccard": 0.42105263157894735
+    },
+    {
+      "a": 5,
+      "b": 8,
+      "jaccard": 0.6774193548387096
+    },
+    {
+      "a": 5,
+      "b": 9,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 5,
+      "b": 10,
+      "jaccard": 0.45714285714285713
+    },
+    {
+      "a": 5,
+      "b": 11,
+      "jaccard": 0.6774193548387096
+    },
+    {
+      "a": 5,
+      "b": 12,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 5,
+      "b": 13,
+      "jaccard": 0.45714285714285713
+    },
+    {
+      "a": 5,
+      "b": 14,
+      "jaccard": 0.7
+    },
+    {
+      "a": 5,
+      "b": 15,
+      "jaccard": 0.47058823529411764
+    },
+    {
+      "a": 6,
+      "b": 7,
+      "jaccard": 0.5294117647058824
+    },
+    {
+      "a": 6,
+      "b": 8,
+      "jaccard": 0.47058823529411764
+    },
+    {
+      "a": 6,
+      "b": 9,
+      "jaccard": 0.8076923076923077
+    },
+    {
+      "a": 6,
+      "b": 10,
+      "jaccard": 0.5806451612903226
+    },
+    {
+      "a": 6,
+      "b": 11,
+      "jaccard": 0.47058823529411764
+    },
+    {
+      "a": 6,
+      "b": 12,
+      "jaccard": 0.8076923076923077
+    },
+    {
+      "a": 6,
+      "b": 13,
+      "jaccard": 0.5806451612903226
+    },
+    {
+      "a": 6,
+      "b": 14,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 6,
+      "b": 15,
+      "jaccard": 0.7777777777777778
+    },
+    {
+      "a": 7,
+      "b": 8,
+      "jaccard": 0.42105263157894735
+    },
+    {
+      "a": 7,
+      "b": 9,
+      "jaccard": 0.5454545454545454
+    },
+    {
+      "a": 7,
+      "b": 10,
+      "jaccard": 0.7096774193548387
+    },
+    {
+      "a": 7,
+      "b": 11,
+      "jaccard": 0.42105263157894735
+    },
+    {
+      "a": 7,
+      "b": 12,
+      "jaccard": 0.5454545454545454
+    },
+    {
+      "a": 7,
+      "b": 13,
+      "jaccard": 0.7096774193548387
+    },
+    {
+      "a": 7,
+      "b": 14,
+      "jaccard": 0.43243243243243246
+    },
+    {
+      "a": 7,
+      "b": 15,
+      "jaccard": 0.5294117647058824
+    },
+    {
+      "a": 8,
+      "b": 9,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 8,
+      "b": 10,
+      "jaccard": 0.5
+    },
+    {
+      "a": 8,
+      "b": 11,
+      "jaccard": 0.7333333333333333
+    },
+    {
+      "a": 8,
+      "b": 12,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 8,
+      "b": 13,
+      "jaccard": 0.45714285714285713
+    },
+    {
+      "a": 8,
+      "b": 14,
+      "jaccard": 0.7
+    },
+    {
+      "a": 8,
+      "b": 15,
+      "jaccard": 0.47058823529411764
+    },
+    {
+      "a": 9,
+      "b": 10,
+      "jaccard": 0.6
+    },
+    {
+      "a": 9,
+      "b": 11,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 9,
+      "b": 12,
+      "jaccard": 0.84
+    },
+    {
+      "a": 9,
+      "b": 13,
+      "jaccard": 0.6
+    },
+    {
+      "a": 9,
+      "b": 14,
+      "jaccard": 0.5
+    },
+    {
+      "a": 9,
+      "b": 15,
+      "jaccard": 0.8076923076923077
+    },
+    {
+      "a": 10,
+      "b": 11,
+      "jaccard": 0.5
+    },
+    {
+      "a": 10,
+      "b": 12,
+      "jaccard": 0.6
+    },
+    {
+      "a": 10,
+      "b": 13,
+      "jaccard": 0.7857142857142857
+    },
+    {
+      "a": 10,
+      "b": 14,
+      "jaccard": 0.47058823529411764
+    },
+    {
+      "a": 10,
+      "b": 15,
+      "jaccard": 0.5806451612903226
+    },
+    {
+      "a": 11,
+      "b": 12,
+      "jaccard": 0.48484848484848486
+    },
+    {
+      "a": 11,
+      "b": 13,
+      "jaccard": 0.45714285714285713
+    },
+    {
+      "a": 11,
+      "b": 14,
+      "jaccard": 0.7
+    },
+    {
+      "a": 11,
+      "b": 15,
+      "jaccard": 0.47058823529411764
+    },
+    {
+      "a": 12,
+      "b": 13,
+      "jaccard": 0.6
+    },
+    {
+      "a": 12,
+      "b": 14,
+      "jaccard": 0.5
+    },
+    {
+      "a": 12,
+      "b": 15,
+      "jaccard": 0.8076923076923077
+    },
+    {
+      "a": 13,
+      "b": 14,
+      "jaccard": 0.47058823529411764
+    },
+    {
+      "a": 13,
+      "b": 15,
+      "jaccard": 0.5806451612903226
+    },
+    {
+      "a": 14,
+      "b": 15,
+      "jaccard": 0.48484848484848486
+    }
+  ],
+  "visualApproved": false,
+  "publicQr": false,
+  "realCustomerValidation": false
+}

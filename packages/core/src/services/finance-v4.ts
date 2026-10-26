@@ -11,14 +11,16 @@ export async function realizedFinanceV4(db: DbOrTx = getDb()) {
     care: string;
     v4buyers: string;
   }>(sql`
+    WITH live_orders AS (SELECT * FROM orders WHERE provider='stripe' AND payment_mode='live'),
+    live_payments AS (SELECT p.* FROM order_payments p JOIN live_orders o ON o.id=p.order_id)
     SELECT
-      (SELECT coalesce(sum(amount_cents),0) FROM orders WHERE paid_at IS NOT NULL) AS setup,
-      (SELECT coalesce(sum(amount_cents),0) FROM order_payments) AS monthly,
-      ((SELECT coalesce(sum(refunded_cents),0) FROM orders)+(SELECT coalesce(sum(refunded_cents),0) FROM order_payments)) AS refunds,
-      (SELECT coalesce(sum((coalesce(active_offer_snapshot,offer_snapshot)->>'monthlyCents')::int),0) FROM orders WHERE offer_snapshot IS NOT NULL AND subscription_status='active' AND ended_at IS NULL) AS mrr,
-      (SELECT count(*) FROM orders WHERE paid_at IS NOT NULL) AS buyers,
-      (SELECT count(*) FROM orders WHERE paid_at IS NOT NULL AND offer_snapshot->>'tier'='care_plus') AS care,
-      (SELECT count(*) FROM orders WHERE paid_at IS NOT NULL AND offer_snapshot IS NOT NULL) AS v4buyers`);
+      (SELECT coalesce(sum(amount_cents),0) FROM live_orders WHERE paid_at IS NOT NULL) AS setup,
+      (SELECT coalesce(sum(amount_cents),0) FROM live_payments) AS monthly,
+      ((SELECT coalesce(sum(refunded_cents),0) FROM live_orders)+(SELECT coalesce(sum(refunded_cents),0) FROM live_payments)) AS refunds,
+      (SELECT coalesce(sum((coalesce(active_offer_snapshot,offer_snapshot)->>'monthlyCents')::int),0) FROM live_orders WHERE offer_snapshot IS NOT NULL AND subscription_status='active' AND ended_at IS NULL) AS mrr,
+      (SELECT count(*) FROM live_orders WHERE paid_at IS NOT NULL) AS buyers,
+      (SELECT count(*) FROM live_orders WHERE paid_at IS NOT NULL AND offer_snapshot->>'tier'='care_plus') AS care,
+      (SELECT count(*) FROM live_orders WHERE paid_at IS NOT NULL AND offer_snapshot IS NOT NULL) AS v4buyers`);
   const r = result.rows[0]!;
   return {
     setupReceivedCents: Number(r.setup),
@@ -29,6 +31,6 @@ export async function realizedFinanceV4(db: DbOrTx = getDb()) {
     carePlusShare: Number(r.v4buyers) ? Number(r.care) / Number(r.v4buyers) : null,
     contributionCents: null,
     missingCostData: ['vollständige Hostingkosten', 'Domainkosten', 'Zahlungsgebühren', 'erfüllte Care+-Arbeitszeit'],
-    scope: 'Gesamter Datenbestand, unabhängig vom Funnel-Zeitraumfilter',
+    scope: 'Nur nachweislicher Live-Zahlungsmodus, unabhängig vom Funnel-Zeitraumfilter',
   };
 }

@@ -56,6 +56,8 @@ async function sentLetter(
     leadId: lead!.id,
     sequence: 1,
     status: 'delivered',
+    provider: 'letterxpress', // Synthetic provider-confirmed cohort, no API call.
+    deliveredAt: addDays(sentAt, 3),
     variantId,
     industry: 'handwerk',
     sentAt,

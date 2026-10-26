@@ -1,14 +1,13 @@
-import { and, desc, eq, gt, gte, inArray, isNotNull, sql } from 'drizzle-orm';
+import { and, eq, gte, sql } from 'drizzle-orm';
 import { demoUrl } from '../config/env';
 import { getDb, type DbOrTx } from '../db/client';
-import { demos, events, leads, letters, supportMessages } from '../db/schema';
+import { demos, events, leads, supportMessages } from '../db/schema';
 import { enqueue, QUEUES } from '../queue';
 import type { EventType, LeadStatus } from '../types';
 import { audit } from './audit';
 import { currentDemoForLead } from './demo-review';
 import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
-import { applyLetterStatus } from './sending';
 import { optOutLead } from './suppression';
 import { SHORT_CODE_RE } from '../util/crypto';
 
@@ -18,6 +17,8 @@ export interface RequestMeta {
   /** IP-Hash mit täglich rotierendem Salt – nie die IP selbst */
   ipHash: string;
   isBot: boolean;
+  /** Explicit operator/test probes, never inferred from an IP address. */
+  audience?: 'test' | 'control';
 }
 
 const EVENT_STATUS: Partial<Record<EventType, LeadStatus>> = {
@@ -35,6 +36,8 @@ export async function recordEvent(
   input: { leadId: string; type: EventType; meta?: Record<string, unknown>; req?: RequestMeta; dedupeDaily?: boolean },
 ): Promise<boolean> {
   if (input.req?.isBot) return false;
+  // Serialize daily duplicate detection as well as status transitions.
+  if (input.dedupeDaily && input.req) await db.execute(sql`SELECT id FROM leads WHERE id = ${input.leadId} FOR UPDATE`);
   if (input.dedupeDaily && input.req) {
     const since = new Date();
     since.setUTCHours(0, 0, 0, 0);
@@ -59,9 +62,13 @@ export async function recordEvent(
   await db.insert(events).values({
     leadId: input.leadId,
     type: input.type,
-    metaJson: { ...(input.meta ?? {}), ...(input.req ? { ua: input.req.ua, ipHash: input.req.ipHash } : {}) },
+    metaJson: {
+      ...(input.meta ?? {}),
+      ...(input.req?.audience ? { audience: input.req.audience } : {}),
+      ...(input.req ? { ua: input.req.ua, ipHash: input.req.ipHash } : {}),
+    },
   });
-  if (target) {
+  if (target && !input.req?.audience) {
     await transitionLead(db, input.leadId, target, { actor: `public:${input.type}`, onlyForward: true });
   }
   return true;
@@ -82,34 +89,10 @@ export async function findPublicDemo(slug: string, now = new Date()): Promise<De
   return { state: 'ok', demo, lead };
 }
 
-/**
- * Ein Scan beweist, dass der Brief angekommen ist: liegt die geschätzte Zustellung noch in der Zukunft,
- * wird sie auf den Scan-Zeitpunkt korrigiert und der Brief als zugestellt markiert (B5.2). Die
- * korrigierten Briefe liefern die beobachtete Laufzeit (observedTransit).
- */
-export async function correctDeliveryEstimate(db: DbOrTx, leadId: string, at: Date): Promise<boolean> {
-  const rows = await db
-    .select()
-    .from(letters)
-    .where(
-      and(
-        eq(letters.leadId, leadId),
-        eq(letters.isTest, false),
-        inArray(letters.status, ['queued', 'sent']),
-        isNotNull(letters.providerLetterId),
-        gt(letters.estimatedDeliveredAt, at),
-      ),
-    )
-    .orderBy(desc(letters.sequence))
-    .limit(1);
-  const l = rows[0];
-  if (!l) return false;
-  await db
-    .update(letters)
-    .set({ estimatedDeliveredAt: at, deliveryCorrectedAt: at, sentAt: l.sentAt ?? at })
-    .where(eq(letters.id, l.id));
-  await applyLetterStatus(db, l.providerLetterId!, 'delivered', at, 'public:scan');
-  return true;
+/** A scan is evidence of an opened URL, never proof of postal delivery.
+ * Kept as a compatible entry point; it must not alter letter delivery facts. */
+export async function correctDeliveryEstimate(_db: DbOrTx, _leadId: string, _at: Date): Promise<boolean> {
+  return false;
 }
 
 /** Beobachtete Laufzeit aus korrigierten Briefen (Werktage zwischen Versand und erstem Scan). */

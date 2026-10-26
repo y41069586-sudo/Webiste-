@@ -443,11 +443,10 @@ export async function processLetterWebhookEvents(events: LetterWebhookEvent[], p
 
 /**
  * Abgleich ohne Webhook: Status beim Anbieter abfragen; ohne Zustellmeldung gilt ein Brief
- * nach `assumeDeliveredAfterDays` als zugestellt (Standardbriefe haben keine Sendungsverfolgung).
+ * bleibt die Zustellung unbekannt (Standardbriefe haben keine Sendungsverfolgung).
  */
 export async function syncLetterStatuses(actor = 'job:sync-letter-status'): Promise<{ checked: number; changed: number }> {
   const db = getDb();
-  const cfg = await getConfig();
   const provider = getProviders().mail;
   const open = await db
     .select()
@@ -465,24 +464,9 @@ export async function syncLetterStatuses(actor = 'job:sync-letter-status'): Prom
       logger.warn({ letterId: l.id, err: err instanceof Error ? err.message : String(err) }, 'Statusabgleich fehlgeschlagen');
     }
   }
-  // Ohne Zustellmeldung: zugestellt ab geschätzter Zustellung (Versand + DELIVERY_BUSINESS_DAYS), sonst nach X Tagen
-  const now = new Date();
-  const cutoff = addDays(now, -cfg.timing.assumeDeliveredAfterDays);
-  const assume = await db
-    .select()
-    .from(letters)
-    .where(
-      and(
-        eq(letters.status, 'sent'),
-        isNotNull(letters.providerLetterId),
-        sql`(${letters.estimatedDeliveredAt} <= ${now} OR (${letters.estimatedDeliveredAt} IS NULL AND ${letters.sentAt} < ${cutoff}))`,
-      ),
-    );
-  for (const l of assume) {
-    const at = l.estimatedDeliveredAt ?? addDays(l.sentAt!, cfg.timing.assumeDeliveredAfterDays);
-    if (await applyLetterStatus(db, l.providerLetterId!, 'delivered', at, `${actor}:angenommen`)) changed++;
-  }
-  return { checked: open.length + assume.length, changed };
+  // An elapsed delivery estimate is not a provider confirmation. Keep status sent
+  // and estimatedDeliveredAt separately; no fabricated delivery or follow-up trigger.
+  return { checked: open.length, changed };
 }
 
 export { scheduleFollowups } from './followups';

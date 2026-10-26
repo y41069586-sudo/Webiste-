@@ -285,6 +285,8 @@ export const orders = pgTable(
     leadId: uuid('lead_id').references(() => leads.id, { onDelete: 'set null' }),
     demoId: uuid('demo_id').references(() => demos.id, { onDelete: 'set null' }),
     provider: text('provider').default('stripe').notNull(),
+    /** Persisted at checkout; historical Stripe mode stays unknown rather than guessed. */
+    paymentMode: text('payment_mode').$type<'unknown' | 'live' | 'test' | 'mock'>().default('unknown').notNull(),
     plan: text('plan').$type<OrderPlan>().default('one_time').notNull(),
     offerSnapshot: jsonb('offer_snapshot').$type<V4OfferSnapshot | null>(),
     recurringCheckoutUrl: text('recurring_checkout_url'),

@@ -1,0 +1,54 @@
+completion-types-final.log
+packages/templates typecheck$ tsc --noEmit
+packages/templates typecheck: Done
+packages/core typecheck$ tsc -p tsconfig.json
+packages/core typecheck: Done
+apps/web typecheck$ tsc --noEmit
+apps/worker typecheck$ tsc --noEmit
+apps/worker typecheck: Done
+apps/web typecheck: Done
+
+completion-final-lint.log
+
+> website-brief-maschine@0.1.0 lint /workspace/seitenwerk-v4
+> eslint .
+
+
+completion-build-clean.log
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> @wbm/worker@0.1.0 build /workspace/seitenwerk-v4/apps/worker
+> tsc --noEmit
+
+
+completion-template-tests.log
+ ✓ test/templates.test.ts (97 tests) 165ms
+ ✓ test/design-review.test.ts (3 tests) 35ms
+
+ Test Files  2 passed (2)
+      Tests  100 passed (100)
+   Start at  06:45:36
+   Duration  1.70s (transform 593ms, setup 0ms, collect 873ms, tests 200ms, environment 0ms, prepare 218ms)
+
+
+completion-repairs.log
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 54 passed (55)
+   Start at  06:49:43
+   Duration  17.59s (transform 1.16s, setup 19ms, collect 6.88s, tests 7.93s, environment 1ms, prepare 338ms)
+
+undefined
+/workspace/seitenwerk-v4/packages/core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/sending.test.ts test/learning.test.ts test/optimizer-l5.test.ts test/completion-quality.test.ts test/funnel.test.ts test/letterxpress.test.ts test/lead-score-quality.test.ts
+
+completion-learning-final.log
+   ✓ Lern-Agent: Probelauf auf simulierten Daten (Abnahme L6) > Freigabe und Ablehnung in der Review-Queue  364ms
+   ✓ Lern-Agent: Probelauf auf simulierten Daten (Abnahme L6) > Aufräumen: Variante mit P ≥ 95 % schlechter als die Kontrolle (genug Briefe) wird pausiert  1185ms
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  06:51:38
+   Duration  6.58s (transform 868ms, setup 8ms, collect 2.18s, tests 2.66s, environment 0ms, prepare 62ms)

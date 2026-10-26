@@ -14,6 +14,7 @@ import { v4Offer } from '../packages/core/src/services/offers-v4';
 import { formatEuroShort } from '../packages/core/src/util/time';
 import { validateLetterDom, validateLetterPdf, htmlToPdf } from '../packages/core/src/render/pdf';
 import { browserChecks, lighthouseCheck, validateHtml } from '../packages/core/src/render/qa';
+import { takeScreenshots, renderComposite } from '../packages/core/src/render/screenshots';
 import { closeBrowser } from '../packages/core/src/render/browser';
 process.env.APP_URL = 'http://127.0.0.1:3214';
 process.env.DEMO_DOMAIN = '127.0.0.1:3214';
@@ -177,6 +178,7 @@ try {
     data.intro = [
       'für Malerbetrieb Muster & Partner habe ich einen Website-Entwurf vorbereitet. So könnten Interessierte Ihre Malerleistungen kennenlernen und eine Anfrage stellen. Sehen Sie ihn kostenlos an – ohne Anmeldung.',
     ];
+    data.privacyNotice = 'Fiktiver Testbrief. Alle Angaben sind Testdaten. Kein Versand. Vor echtem Einsatz müssen Verantwortliche, Datenquelle, Rechtsgrundlage, Empfänger und Betroffenenrechte fachlich geprüft und vollständig angegeben werden.';
     data.reviewOffer = {
       setup: formatEuroShort(v4Offer('basis').setupCents),
       basis: formatEuroShort(v4Offer('basis').monthlyCents),
@@ -185,6 +187,8 @@ try {
         'Basis oder Care+ wählen. Monatsgebühr erst ab bestätigtem Go-Live. Monatlich kündbar. Care+ enthält Basis bereits.',
       scope: `Fertigstellung, ${cfg.onboarding.includedChangeRounds} Änderungsrunden, Standard-Domain im vereinbarten Umfang, Hosting und SSL. Care+: bis zu ${v4Offer('care_plus').includedChangeMinutes} Minuten kleine Änderungen/Monat.`,
     };
+    const deviceShots = await takeScreenshots(html, { hideDemoChrome: true });
+    data.compositeDataUri = 'data:image/jpeg;base64,' + (await renderComposite(deviceShots.desktop, deviceShots.mobile, { businessName: input.facts.name, printWidthMm:165 })).toString('base64');
     const letter = renderLetterHtml(data);
     writeFileSync(`${out}/${id}-brief.html`, letter);
     const dom = await validateLetterDom(letter, 'left');
