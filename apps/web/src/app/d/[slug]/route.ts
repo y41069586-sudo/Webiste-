@@ -34,7 +34,7 @@ const DEMO_HEADERS = {
   'cache-control': 'private, no-store',
   'x-robots-tag': 'noindex, nofollow, noarchive',
   'referrer-policy': 'no-referrer',
-  'content-security-policy': `default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src 'sha256-${BEACON_HASH}'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`,
+  'content-security-policy': `default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; script-src 'sha256-${BEACON_HASH}'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`,
 };
 
 /** Demo-Auslieferung: nur veröffentlichte, nicht abgelaufene Entwürfe; sonst 410. */

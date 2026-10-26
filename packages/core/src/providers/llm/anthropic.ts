@@ -76,7 +76,22 @@ export class AnthropicLlm implements LlmProvider {
         ],
         tool_choice: { type: 'auto' },
         output_config: { effort: req.effort ?? 'medium' },
-        messages: [{ role: 'user', content: req.prompt + instruction }],
+        messages: [
+          {
+            role: 'user',
+            content: req.images?.length
+              ? [
+                  ...req.images
+                    .slice(0, 3)
+                    .map((image) => ({
+                      type: 'image' as const,
+                      source: { type: 'base64' as const, media_type: image.mediaType, data: image.data },
+                    })),
+                  { type: 'text' as const, text: req.prompt + instruction },
+                ]
+              : req.prompt + instruction,
+          },
+        ],
         ...(this.useServerFallback ? { betas: [FALLBACK_BETA], fallbacks: 'default' as const } : {}),
       });
 

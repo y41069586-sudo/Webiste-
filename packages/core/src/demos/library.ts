@@ -496,7 +496,7 @@ export function libraryContent(
     .slice(0, 4 + (seed % 3))
     .map((s) => ({ ...s, title: fill(s.title, vars), text: fill(s.text, vars) }));
   const focus: Record<BranchGroup, string> = {
-    handwerk: 'Arbeiten am Haus beginnen mit einer konkreten Frage. Hier finden Sie den Kontakt für Ihr Vorhaben.',
+    handwerk: 'Leistungen im Überblick. Beschreiben Sie Ihr Vorhaben für eine erste Anfrage.',
     beauty: 'Behandlungen kennenlernen und einen Termin anfragen. Die Übersicht führt Sie zum passenden Kontakt.',
     gastronomie: 'Ein Blick auf Angebot, Öffnungszeiten und Anfahrt hilft bei der Planung Ihres Besuchs.',
     einzelhandel: 'Sortiment entdecken, einen Artikel anfragen und den Weg ins Geschäft finden.',
@@ -529,9 +529,15 @@ export function libraryContent(
     hero_headline: `${vars.branche} in ${vars.stadt}`,
     hero_subline: /barber|barbier|fris[öe]|friseur|haarsalon/i.test(`${branch} ${vars.branche}`)
       ? 'Schnitt und Styling kennenlernen. Beschreiben Sie Ihren Wunsch und fragen Sie einen Termin an.'
-      : /nagel|nail/i.test(`${branch} ${vars.branche}`)
-        ? 'Ideen zur Nagelgestaltung im Überblick. Für Ihren Terminwunsch finden Sie hier den Kontakt.'
-        : focus[group],
+      : /maler|anstrich/i.test(`${branch} ${vars.branche}`)
+        ? 'Ein neuer Anstrich beginnt mit Ihrer Idee. Hier finden Sie die Leistungsübersicht und den Kontakt für Ihr Vorhaben.'
+        : /elektro/i.test(`${branch} ${vars.branche}`)
+          ? 'Elektroarbeiten anfragen: Beschreiben Sie Ihr Vorhaben und finden Sie hier die Kontaktdaten des Betriebs.'
+          : /café|cafe/i.test(`${branch} ${vars.branche}`)
+            ? 'Planen Sie Ihren Besuch: Angebot, bekannte Öffnungszeiten und der Weg zu uns auf einen Blick.'
+            : /nagel|nail/i.test(`${branch} ${vars.branche}`)
+              ? 'Ideen zur Nagelgestaltung im Überblick. Für Ihren Terminwunsch finden Sie hier den Kontakt.'
+              : focus[group],
     services,
     about: `${vars.name} ist als ${vars.branche} in ${vars.stadt} zu finden. Anschrift und Kontakt finden Sie auf dieser Seite.\n\nDie dargestellten Angebotsbereiche zeigen, wie sich die Website aufbauen lässt. Vor der Veröffentlichung werden Leistungen, Texte und Bilder mit dem Betrieb abgestimmt.`,
     cta_text: group === 'beauty' ? 'Termin anfragen' : group === 'kurse' ? 'Kurs anfragen' : 'Anfrage stellen',

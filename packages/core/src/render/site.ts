@@ -213,6 +213,7 @@ function factsFor(ctx: Ctx, assets: PreparedAssets, mode: 'preview' | 'live'): B
 function renderInput(ctx: Ctx, content: SiteContent, facts: BusinessFacts, mode: 'preview' | 'live'): RenderInput {
   const domain = ctx.customer.domain;
   return {
+    artDirection: (ctx.site.contentJson?._meta as { artDirection?: RenderInput['artDirection'] } | undefined)?.artDirection,
     templateId: ctx.site.templateId,
     palette: ctx.site.palette,
     mode,
@@ -387,7 +388,13 @@ export async function buildSite(
     .set({
       contentJson: {
         ...revised.content,
-        _meta: { source: revised.source, summary: revised.summary, version, qa },
+        _meta: {
+          source: revised.source,
+          summary: revised.summary,
+          version,
+          qa,
+          artDirection: (ctx.site.contentJson?._meta as { artDirection?: unknown } | undefined)?.artDirection,
+        },
       } as unknown as Record<string, unknown>,
       impressumJson: impressum,
       privacyText: ctx.data.privacyText,

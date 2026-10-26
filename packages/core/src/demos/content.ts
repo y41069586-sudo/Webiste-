@@ -15,6 +15,8 @@ export interface ContentFacts {
   phone: string | null;
   hasOpeningHours: boolean;
   socialOnly: boolean;
+  /** Wording tone only; never infer facts or atmosphere from a design choice. */
+  designCharacter?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -100,7 +102,7 @@ export function buildDemoPrompt(f: ContentFacts, seed: number, feedback?: string
     `Telefonnummer bekannt: ${f.phone ? 'ja (wird automatisch eingefügt, nicht im Text nennen)' : 'nein'}`,
     `Öffnungszeiten bekannt: ${f.hasOpeningHours ? 'ja (werden automatisch eingefügt)' : 'nein'}`,
     `Bekannter Social-/Portal-Link: ${f.socialOnly ? 'ja' : 'nein'}. Daraus keine Aussage über das Fehlen einer eigenen Website ableiten.`,
-    `Gewünschte Tonalität: ${TONES[seed % TONES.length]}`,
+    `Gewünschte Tonalität: ${f.designCharacter ? (({ warm: 'ruhig und nahbar', refined: 'knapp und elegant', precise: 'klar und sachlich', natural: 'unaufgeregt und zugänglich', urban: 'direkt und präzise', classic: 'freundlich und respektvoll' } as Record<string, string>)[f.designCharacter] ?? 'sachlich') : TONES[seed % TONES.length]}. Nur Sprachstil; keine Betriebsatmosphäre oder Eigenschaften behaupten.`,
     `Design-Gruppe: ${f.group}`,
     `Passende Icons (bevorzugt): ${icons}`,
     ...(GROUP_HINTS[f.group] ? [`Hinweis zu den Leistungen: ${GROUP_HINTS[f.group]}`] : []),

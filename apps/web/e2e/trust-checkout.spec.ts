@@ -6,7 +6,7 @@ import { seedPublishedDemo, setOfferVersion } from './seed';
 import { payOnMockCheckout } from './helpers';
 import { measureTrustPages } from './trust-performance';
 
-const out = path.resolve('../../data/exports/task3-checkout/after');
+const out = path.resolve(process.env.QUALITY_EXPORT_DIR ?? '../../data/exports/task3-checkout/after');
 const profiles = [
   ['Maleratelier Nordlicht – fiktiver Testbetrieb', 'maler', 'Teststadt'],
   ['Elektro Nordlicht – fiktiver Testbetrieb', 'elektriker', 'Beispielort'],

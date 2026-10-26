@@ -278,3 +278,17 @@ nur pausiert vorbereiten; vorhandene aktive Varianten/Quoten nicht still veränd
 Freigabe und Versand Sperrlisten, Dubletten, Quellenzulässigkeit und unveränderte Brief-/Demo-/Bildzuordnung
 lokal erneut prüfen. DRY_RUN=true, nur fiktive Testpaare, kein Push/Deployment oder echter Versand.
 Nachweise/Wiederaufnahme: `docs/task2-letters/`.
+
+### 26.10.2026 – Betriebscharakter und Bildstrategie
+
+Neuester Betreiberauftrag: bestehende Demos und automatische Auswahl stärker auf den tatsächlichen
+Betrieb abstimmen, keine V6. Stil ist eine eigenständige Gestaltungsvorgabe, kein Nachweis für
+Leistungen/Qualität/Preislage. Quellengebundene Profile beeinflussen Schriftcharakter, Farben,
+Komposition und passende bestehende Template-ID. Ohne Belege Branchenvorschlag statt Recherchebehauptung.
+KI-Motive aus normaler Auswahl entfernt; historische Reviewassets erhalten und ehrlich gekennzeichnet.
+Analyseberechtigung und Darstellungsrecht für Fotos getrennt. Kein Google-Fotoscraping; bestehende
+Google-/Datenschutzfreigaben bleiben. Ein dezenter lesbarer Hinweis auf lizenzierte Beispielbildwelt
+ersetzt wiederholte Bildbadges für nichtgenerierte Fotos. Tatsächliche Betriebsaufnahmen nur mit
+explizitem Darstellungsrecht. Keine Firmenfakten aus Bildinhalt ableiten.
+Vorhandener Admin/Settings/Storage/Anthropic-Provider erweitert, keine neue DB oder Bildanbieter-API.
+Lokale Mock-/SDK-/Browserprüfungen sind keine echte Anbieter-Bildanalyse oder Betreiberabnahme.

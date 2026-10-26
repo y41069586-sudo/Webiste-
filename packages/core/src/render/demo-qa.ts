@@ -158,11 +158,14 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   const current = await db.query.demos.findFirst({ where: eq(demos.id, demoId), columns: { status: true, reviewNote: true } });
   const decide = ['building', 'pending_review', 'qa_failed'].includes(current?.status ?? '');
   // Mit Prüfhinweis (z. B. Überarbeitung für Brief 3) immer manuell prüfen
-  const manual = !quality.complete
-    ? true
-    : passed && decide
-      ? Boolean(current?.reviewNote) || (await requiresManualReview(db))
-      : true;
+  const styleNeedsManual =
+    (demo.contentJson?._meta as { designRequiresReview?: boolean } | undefined)?.designRequiresReview === true;
+  const manual =
+    !quality.complete || styleNeedsManual
+      ? true
+      : passed && decide
+        ? Boolean(current?.reviewNote) || (await requiresManualReview(db))
+        : true;
   await db
     .update(demos)
     .set({

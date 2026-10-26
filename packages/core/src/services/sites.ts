@@ -110,7 +110,12 @@ export async function ensureSiteForCustomer(customerId: string, db: DbOrTx = get
       customerId,
       templateId: demo?.templateId ?? 'handwerk-klar',
       palette: demo?.palette ?? 'werkblau',
-      contentJson: (content ?? {}) as unknown as Record<string, unknown>,
+      contentJson: {
+        ...(content ?? {}),
+        ...((demo?.contentJson?._meta as { artDirection?: unknown } | undefined)?.artDirection
+          ? { _meta: { artDirection: (demo!.contentJson!._meta as { artDirection: unknown }).artDirection } }
+          : {}),
+      } as unknown as Record<string, unknown>,
       formKey: randomToken(24),
       formTargetEmail: customer.email,
       onboardingJson: onboardingDefaults({ customer, order, lead, content }) as unknown as Record<string, unknown>,

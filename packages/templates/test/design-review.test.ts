@@ -3,7 +3,9 @@ import { renderSite, stockPhotos } from '../src';
 import { demoInput } from './fixtures';
 it('does not expose review assets or prototype markup in normal rendering', () => {
   expect(stockPhotos('handwerk', 0, 'Malerbetrieb').every((p) => !p.reviewOnly)).toBe(true);
-  expect(stockPhotos('handwerk', 0, 'Malerbetrieb', { includeReview: true }).some((p) => p.reviewOnly)).toBe(true);
+  expect(
+    stockPhotos('handwerk', 0, 'Malerbetrieb', { includeReview: true, allowGenerated: true }).some((p) => p.reviewOnly),
+  ).toBe(true);
   const input = demoInput('handwerk-klar', 'werkblau', 'handwerk');
   expect(renderSite(input)).not.toContain('data-review-hero');
   expect(renderSite({ ...input, designReview: true })).toContain('data-review-hero');

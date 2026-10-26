@@ -67,7 +67,7 @@ export async function measureTrustPages(browser: Browser, base: string, routes: 
     path.join(out, 'mobile-performance.json'),
     JSON.stringify(
       {
-        scope: 'local production build, synthetic single cold run; not field CWV or Stripe-hosted performance',
+        scope: `local ${process.env.E2E_PRODUCTION === 'true' ? 'production build' : 'development server'}, synthetic single cold run; not field CWV or Stripe-hosted performance`,
         profile: { width: 390, rttMs: 150, downloadBytesPerSecond: 200000, cpuSlowdown: 4 },
         results,
       },

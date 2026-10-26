@@ -1,9 +1,11 @@
+import { hintKey } from '../demos/business-design';
+import { setSetting } from '../config/service';
 import { and, eq, gt, ne, or, sql } from 'drizzle-orm';
 import { getEnv } from '../config/env';
 import { getConfig } from '../config/service';
 import type { AppConfig, BranchConfig } from '../config/settings';
 import { getDb, type DbOrTx } from '../db/client';
-import { leads } from '../db/schema';
+import { leads, settings } from '../db/schema';
 import { businessHash, normalizeAddress, normalizeBusinessName, segmentKey } from '../leads/normalize';
 import { classifyWebsite, qualify, type RatingSignal, type RejectionReason } from '../leads/qualify';
 import { logger } from '../logger';
@@ -407,6 +409,9 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
           context: { source: place.source, segment: values.segmentKey },
         });
       }
+      if (place.source !== 'google_places' && place.designHint && /^#[0-9a-f]{6}$/i.test(place.designHint.primaryColor))
+        await setSetting(hintKey(id), { ...place.designHint, checkedAt: new Date().toISOString() }, 'source:design-hint', tx);
+      else if (place.source !== 'google_places') await tx.delete(settings).where(eq(settings.key, hintKey(id)));
       const current = existing?.status ?? 'discovered';
       if (current !== target) {
         await transitionLead(tx, id, target, {

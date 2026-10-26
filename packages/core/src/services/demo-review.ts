@@ -54,6 +54,8 @@ export async function approveDemo(
     }
     if (!demo.qaResultJson?.passed || demo.qaResultJson.checks.some((c) => !c.passed))
       throw new Error('Technische QA nicht bestanden; Befunde beheben und erneut prüfen.');
+    if (!opts.manual && (demo.contentJson?._meta as { designRequiresReview?: boolean } | undefined)?.designRequiresReview)
+      throw new Error('Neuer Gestaltungskontext benötigt eine individuelle visuelle Freigabe.');
     if (!opts.manual && (await requiresManualReview(tx)))
       throw new Error('Manuelle Demo-Prüfung erforderlich; erste 30 und Stichproben bleiben geschützt.');
     if (

@@ -93,7 +93,7 @@ function header(ctx: RenderContext, group: PhotoGroup, variant: 'light' | 'cente
   }
   return `<header class="border-b border-line bg-surface">
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-    <a href="#inhalt" class="flex items-center gap-2 text-lg font-bold"><span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-on-primary">${icon(c.icon, 'h-5 w-5')}</span>${p.brand()}</a>
+    <a href="#inhalt" class="flex items-center gap-2 text-lg font-bold">${p.brand()}</a>
     ${nav}
     <a href="${p.draft ? '#oeffnungszeiten' : '#frage'}" class="inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary">Kontakt</a>
   </div>
@@ -151,7 +151,7 @@ function heroCta(ctx: RenderContext, light = false): string {
         </div>`;
 }
 
-/** Foto: großes Bild als Hero mit dunkler Fläche für den Text, Fotoleiste, Karten. */
+/** Branchenbezogene Foto-Komposition mit lesbarer Typografie außerhalb des Motivs. */
 function fotoLayout(group: PhotoGroup): TemplateDef {
   return {
     id: `${group}-foto`,
@@ -162,7 +162,6 @@ function fotoLayout(group: PhotoGroup): TemplateDef {
     render(ctx) {
       const { parts: p, content: c, facts: f } = ctx;
       const [hero, ...more] = p.photos(4);
-      const heroMedia = hero ? p.figure(hero, 'h-full w-full object-cover', 'absolute inset-0 h-full w-full') : '';
       const strip = more.length
         ? `<section aria-label="Eindrücke" class="py-12"><ul class="mx-auto grid max-w-6xl gap-4 px-4 sm:grid-cols-3">${more
             .map((ph) => `<li>${p.figure(ph, 'aspect-[4/3] w-full rounded-2xl object-cover')}</li>`)
@@ -173,16 +172,10 @@ function fotoLayout(group: PhotoGroup): TemplateDef {
           ? `<section class="sw-retail-hero"><div class="sw-retail-image">${hero ? p.figure(hero, 'w-full h-full object-cover') : fallbackArt(ctx, '')}</div><div class="sw-retail-intro"><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><p class="sw-hero-copy">${esc(c.hero_subline)}</p>${heroCta(ctx)}<a class="sw-text-link" href="#oeffnungszeiten">Besuch &amp; Öffnungszeiten</a></div></section>`
           : group === 'kurse'
             ? `<section class="sw-course-hero"><div class="sw-course-heading"><div><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1></div><div><p class="sw-hero-copy">${esc(c.hero_subline)}</p>${heroCta(ctx)}</div></div><div class="sw-course-image">${hero ? p.figure(hero, 'w-full h-full object-cover') : fallbackArt(ctx, '')}</div></section>`
-            : `  <section class="relative isolate overflow-hidden">
-    ${heroMedia}
-    <div class="relative z-10 bg-black/65 md:bg-transparent md:bg-gradient-to-r md:from-black/80 md:via-black/60 md:to-black/20">
-      <div class="mx-auto max-w-6xl px-4 py-24 md:py-32">
-        <p class="text-sm font-semibold uppercase tracking-widest text-white">${esc(COPY[group].tag)} in ${esc(f.city)}</p>
-        <h1 class="mt-3 max-w-2xl font-heading text-4xl font-bold leading-tight text-white md:text-5xl">${esc(c.hero_headline)}</h1>
-        <p class="mt-5 max-w-xl text-lg text-white">${esc(c.hero_subline)}</p>
-        ${heroCta(ctx, true)}
-      </div>
-    </div>
+            : `<section class="sw-dining-hero">
+    <div class="sw-dining-heading"><div><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1></div><div class="sw-dining-description"><p>${esc(c.hero_subline)}</p>${heroCta(ctx)}</div></div>
+    <div class="sw-dining-image">${hero ? p.figure(hero, 'w-full h-full object-cover') : fallbackArt(ctx, '')}</div>
+    <div class="sw-dining-foot"><a href="${p.draft ? '#speisekarte' : '#angebot'}">Angebot entdecken <span aria-hidden="true">↗</span></a><a href="#oeffnungszeiten">Öffnungszeiten &amp; Anfahrt</a></div>
   </section>`;
       const body = `${header(ctx, group, 'light')}
 <main id="inhalt">
@@ -211,7 +204,7 @@ function splitLayout(group: PhotoGroup): TemplateDef {
         ph ? p.figure(ph, `${cls} w-full object-cover`) : fallbackArt(ctx, `${cls} w-full`);
       const body = `${header(ctx, group, 'light')}
 <main id="inhalt">
-  <section class="py-14 md:py-20">
+  <section class="sw-split-hero py-14 md:py-20">
     <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 md:grid-cols-2">
       <div>
         <p class="text-sm font-semibold uppercase tracking-widest text-primary">${esc(COPY[group].tag)} · ${esc(f.city)}</p>

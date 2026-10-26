@@ -1,7 +1,15 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { and, asc, desc, eq } from 'drizzle-orm';
-import { formatOpeningHours, getConfig, getDb, REJECTION_LABELS, schema, type RejectionReason } from '@wbm/core';
+import {
+  businessDesignEvidence,
+  formatOpeningHours,
+  getConfig,
+  getDb,
+  REJECTION_LABELS,
+  schema,
+  type RejectionReason,
+} from '@wbm/core';
 import { Badge, Card, PageHeader, StatusBadge, Table, Td, btn, input } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
@@ -38,6 +46,7 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
     })),
   ].sort((a, b) => b.at.getTime() - a.at.getTime());
   const totalCostCents = costs.reduce((s, c) => s + c.amountCents + c.amountMicroCents / 1e6, 0);
+  const designEvidence = await businessDesignEvidence(id);
   const branch = cfg.targeting.branches.find((b) => b.key === lead.branch);
 
   return (
@@ -96,6 +105,101 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
           </>
         }
       />
+      <Card title="Charakter des Betriebs" className="mb-6">
+        <p className="mb-4 text-sm text-slate-600">
+          Farben, Typografie und Aufbau sollen zum tatsächlichen Betrieb passen. Hinterlege berechtigte Referenzen oder geprüfte
+          Beobachtungen. Die nächste Demo-Erstellung wertet sie aus; bestehende Demos und Briefe werden nicht still verändert.
+        </p>
+        {designEvidence ? (
+          <p className="mb-4 text-sm">
+            Gespeichert: {designEvidence.images.length} Bildreferenzen ·{' '}
+            {designEvidence.sourceKind === 'owner_provided' ? 'vom Betrieb bereitgestellt' : 'lizenzierte Referenz'} ·{' '}
+            {designEvidence.displayPermission ? 'Bildnutzung bestätigt' : 'nur Gestaltungsauswertung, keine Bildübernahme'}. Eine
+            fertige gestalterische Freigabe ist das noch nicht.
+          </p>
+        ) : (
+          <p className="mb-4 text-sm">Noch keine Betriebsreferenz: Entwürfe verwenden einen Branchenvorschlag.</p>
+        )}
+        {designEvidence && (
+          <details className="mb-4">
+            <summary className="cursor-pointer text-sm">Gespeicherte Referenz prüfen</summary>
+            <p className="mt-3 whitespace-pre-wrap text-sm">{designEvidence.notes}</p>
+            <a className="text-sm underline" href={designEvidence.sourceRef} target="_blank" rel="noopener noreferrer">
+              Quellen-/Berechtigungsnachweis öffnen
+            </a>
+            <div className="mt-3 flex flex-wrap gap-3">
+              {designEvidence.images.map((image) => (
+                <a
+                  key={image.key}
+                  href={`/admin/files/${image.key.split('/').map(encodeURIComponent).join('/')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src={`/admin/files/${image.key.split('/').map(encodeURIComponent).join('/')}`}
+                    alt={image.alt || 'Private Bildreferenz'}
+                    width={160}
+                    height={110}
+                    className="h-28 w-40 rounded object-cover"
+                  />
+                </a>
+              ))}
+            </div>
+          </details>
+        )}
+        <details>
+          <summary className="cursor-pointer font-medium">Referenz hinzufügen oder ersetzen</summary>
+          <form
+            method="post"
+            action={`/admin/leads/${id}/design`}
+            encType="multipart/form-data"
+            className="mt-4 grid gap-4 sm:grid-cols-2"
+          >
+            <label className="text-sm">
+              Art der Quelle
+              <select name="sourceKind" required className={input}>
+                <option value="owner_provided">Vom Betrieb bereitgestellt</option>
+                <option value="licensed_reference">Lizenzierte Bildreferenz</option>
+              </select>
+            </label>
+            <label className="text-sm">
+              Quellen- oder Berechtigungsnachweis (HTTPS)
+              <input name="sourceRef" type="url" required className={input} placeholder="https://…" />
+            </label>
+            <label className="text-sm sm:col-span-2">
+              Geprüfte Stilbeobachtungen
+              <textarea
+                name="notes"
+                maxLength={1000}
+                rows={3}
+                className={input}
+                placeholder="Beispiel: dunkles Holz, warmes Licht, handwerkliche Beschilderung. Keine vermuteten Leistungen oder Bewertungen."
+              />
+            </label>
+            <label className="text-sm">
+              Bis zu 3 Bildreferenzen (je 1 MB)
+              <input name="photos" type="file" multiple accept="image/jpeg,image/png,image/webp" className={input} />
+            </label>
+            <label className="text-sm">
+              Kurze Bildbeschreibung
+              <input name="description" maxLength={140} className={input} />
+            </label>
+            <label className="flex gap-2 text-sm sm:col-span-2">
+              <input type="checkbox" name="analysisPermission" required />
+              Ich bestätige die Zuordnung zum richtigen Betrieb und die Berechtigung zur Speicherung und KI-Auswertung. Öffentlich
+              sichtbar allein genügt dafür nicht.
+            </label>
+            <label className="flex gap-2 text-sm sm:col-span-2">
+              <input type="checkbox" name="displayPermission" />
+              Zusätzlich ist die Darstellung dieser Bilder im Entwurf ohne weitere Namens- oder Lizenzhinweise erlaubt. Ohne diese
+              Bestätigung werden sie ausschließlich zur Gestaltungsauswertung genutzt.
+            </label>
+            <button type="submit" className={btn.primary}>
+              Gestaltungskontext speichern
+            </button>
+          </form>
+        </details>
+      </Card>
       <div className="grid gap-6 lg:grid-cols-3">
         <Card title="Stammdaten" className="lg:col-span-1">
           <dl className="space-y-2 text-sm">

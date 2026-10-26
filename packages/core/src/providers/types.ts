@@ -28,6 +28,8 @@ export interface RawPlace {
   /** Relevante OSM-Tags (amenity, shop, craft, leisure, healthcare, office, beauty, sport) für die Branchen-Zuordnung */
   osmTags?: Record<string, string>;
   openingHours?: OpeningHours | null;
+  /** Minimal styling hint from the permitted source, not a verified brand identity. */
+  designHint?: { primaryColor: string; sourceRef: string };
 }
 
 export interface LeadSearchQuery {
@@ -253,7 +255,13 @@ export interface LlmUsage {
   cacheWriteTokens: number;
 }
 
+export interface LlmImage {
+  mediaType: 'image/jpeg' | 'image/png' | 'image/webp';
+  data: string;
+}
 export interface LlmStructuredRequest {
+  /** Bounded, source-authorized image blocks; never remote URLs or executable instructions. */
+  images?: LlmImage[];
   model: string;
   /** Statischer System-Prompt (wird gecacht) */
   system: string;

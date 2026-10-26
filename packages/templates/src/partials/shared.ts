@@ -1,3 +1,5 @@
+import { artPalette } from '../art-direction';
+import { designFontCss } from '../design-fonts';
 import { brandMarkHtml } from '../brand';
 import { readSiteCss } from '../css';
 import { esc, mapsLink, paragraphs } from '../html';
@@ -232,7 +234,7 @@ export function buildParts(input: RenderInput): SharedParts {
   const { mode, content, facts, demo, live } = input;
   const industry: IndustryKey = facts.industry ?? GROUP_INDUSTRY[facts.group];
   const request = REQUEST_FORMS[industry];
-  const palette = getPalette(input.palette);
+  const palette = input.artDirection ? artPalette(input.palette, input.artDirection) : getPalette(input.palette);
   const isDemo = mode === 'demo';
   const isLive = mode === 'live';
   const noindex = mode !== 'live';
@@ -267,7 +269,7 @@ ${isLive && live?.canonicalUrl ? `<link rel="canonical" href="${esc(live.canonic
 <meta name="format-detection" content="telephone=no">
 <link rel="icon" href="${faviconDataUri(letter, palette.primary)}">
 ${isLive ? `<meta property="og:title" content="${esc(content.seo_title)}"><meta property="og:description" content="${esc(content.seo_description)}"><meta property="og:type" content="website">` : ''}
-<style>${css}</style>
+<style>${input.artDirection ? designFontCss(input.artDirection.typography) : ''}${css}</style>
 <style>:root{${paletteCssVars(palette)}}</style>
 ${jsonLd}
 </head>`;
@@ -410,7 +412,7 @@ ${jsonLd}
       return `${o.omitOffer ? '' : offerSection(demo)}<footer class="${o.className}">
   <div class="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:grid-cols-3">
     <div><p class="font-semibold">${esc(facts.name)}</p><p class="mt-2 text-sm opacity-90">${addressLines}</p>${facts.googleReviewsUrl ? `<p class="mt-2 text-sm"><a class="${o.linkClass}" href="${esc(facts.googleReviewsUrl)}" rel="noopener noreferrer">Bewertungen auf Google</a></p>` : ''}</div>
-    <div class="text-sm opacity-90"><p>Dies ist ein unverbindlicher Entwurf. ${esc(facts.name)} hat diese Seite nicht beauftragt.</p><p class="mt-2">Der Entwurf ist bis ${esc(demo.expiresLabel.replace(/^am\s+/, ''))} online und anschließend nicht mehr öffentlich erreichbar.</p></div>
+    <div class="text-sm opacity-90">${photos(1).some((ph) => ph.example) ? '<p class="mb-3">Bildwelt zur Gestaltung: lizenzierte Beispielfotos, keine Aufnahmen des Betriebs.</p>' : ''}<p>Dies ist ein unverbindlicher Entwurf. ${esc(facts.name)} hat diese Seite nicht beauftragt.</p><p class="mt-2">Der Entwurf ist bis ${esc(demo.expiresLabel.replace(/^am\s+/, ''))} online und anschließend nicht mehr öffentlich erreichbar.</p></div>
     <div class="text-sm"><p class="opacity-90">Entwurf erstellt von ${esc(demo.sender.company)}</p>
       <ul class="mt-2 space-y-1"><li><a class="${o.linkClass}" href="${esc(demo.sender.imprintUrl)}">Impressum (Ersteller)</a></li><li><a class="${o.linkClass}" href="${esc(demo.sender.privacyUrl)}">Datenschutz (Ersteller)</a></li></ul>
     </div>
@@ -516,9 +518,11 @@ ${jsonLd}
 
   const seed = [...(demo?.slug ?? facts.name)].reduce((a, ch) => a + ch.charCodeAt(0), 0);
   const photos = (n: number) => {
-    const own = (facts.photos ?? []).filter(() => !isDemo).map((ph) => ({ src: ph.src, alt: ph.alt, example: false }));
+    const own = (facts.photos ?? [])
+      .filter((ph) => !draft || ph.rightsConfirmed)
+      .map((ph) => ({ src: ph.src, alt: ph.alt, example: ph.origin === 'example', focalPoint: ph.focalPoint }));
     if (own.length || !draft) return own.slice(0, n);
-    return stockPhotos(facts.group, seed, facts.branchLabel)
+    return stockPhotos(facts.group, seed, facts.branchLabel, { mood: input.artDirection?.imageMood })
       .slice(0, n)
       .map((ph) => ({
         src: stockPhotoDataUri(ph),
@@ -543,7 +547,7 @@ ${jsonLd}
         ? ` style="object-position:${Math.min(100, Math.max(0, point.x))}% ${Math.min(100, Math.max(0, point.y))}%"`
         : '';
     const size = ph.width && ph.height ? ` width="${ph.width}" height="${ph.height}"` : '';
-    return `<figure class="${/\babsolute\b/.test(figClass) ? figClass : `relative ${figClass}`}"><img src="${esc(ph.src)}" alt="${esc(ph.alt)}" class="${imgClass}"${size}${position} loading="${priority ? 'eager' : 'lazy'}"${priority ? ' fetchpriority="high"' : ''} decoding="async">${ph.example ? `<figcaption class="absolute bottom-2 left-2 z-20 max-w-[calc(100%-1rem)] rounded bg-black/70 px-2 py-0.5 text-xs font-medium text-white">${/^KI-generiertes/.test(ph.alt) ? 'KI-generiertes Beispielbild' : 'Beispielfoto'}</figcaption>` : ''}</figure>`;
+    return `<figure class="${/\babsolute\b/.test(figClass) ? figClass : `relative ${figClass}`}"><img src="${esc(ph.src)}" alt="${esc(ph.alt)}" class="${imgClass}"${size}${position} loading="${priority ? 'eager' : 'lazy'}"${priority ? ' fetchpriority="high"' : ''} decoding="async">${ph.example ? (/^KI-generiertes/.test(ph.alt) ? '<figcaption class="absolute bottom-2 left-2 z-20 rounded bg-black/70 px-2 py-1 text-xs text-white">KI-generiertes Beispielbild</figcaption>' : '<figcaption class="sr-only">Lizenziertes Beispielfoto zur Gestaltung, keine Aufnahme des Betriebs.</figcaption>') : ''}</figure>`;
   };
 
   return {
@@ -571,7 +575,7 @@ ${jsonLd}
     brand: () => {
       // Kundenlogo/-fotos gibt es nur nach dem Onboarding – Demos zeigen nie Material des Betriebs
       const logo =
-        !isDemo && facts.logoSrc
+        (!draft || facts.logoRightsConfirmed) && facts.logoSrc
           ? `<img src="${esc(facts.logoSrc)}" alt="" class="h-8 w-auto max-w-28 object-contain sm:h-10 sm:max-w-40" height="40">`
           : '';
       // Auf schmalen Bildschirmen nur das Logo (Name bleibt für Screenreader erhalten)
@@ -580,7 +584,7 @@ ${jsonLd}
         : esc(facts.name);
     },
     gallery: (o = {}) => {
-      const photos = isDemo ? [] : (facts.photos ?? []);
+      const photos = (facts.photos ?? []).filter((ph) => !draft || (ph.rightsConfirmed && ph.origin === 'business'));
       if (!photos.length) return '';
       return `<section id="einblicke" aria-labelledby="einblicke-titel" class="${o.sectionClass ?? 'py-16 md:py-20'}">
   <div class="mx-auto max-w-6xl px-4">

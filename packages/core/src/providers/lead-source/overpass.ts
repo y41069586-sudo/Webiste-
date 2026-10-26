@@ -140,6 +140,9 @@ export function osmElementToPlace(el: OsmElement, fallbackCity: string): RawPlac
     types: [t.craft, t.shop, t.beauty].filter((x): x is string => Boolean(x)),
     osmTags: Object.fromEntries(CLASSIFY_KEYS.filter((k) => t[k]).map((k) => [k, t[k]!])),
     openingHours: parseOsmOpeningHours(t.opening_hours),
+    ...(/^#[0-9a-f]{6}$/i.test(t['brand:colour'] ?? '')
+      ? { designHint: { primaryColor: t['brand:colour']!, sourceRef: `https://www.openstreetmap.org/${el.type}/${el.id}` } }
+      : {}),
   };
 }
 

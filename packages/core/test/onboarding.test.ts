@@ -1,3 +1,4 @@
+import { industryDirection } from '@wbm/templates';
 import { deflateSync } from 'node:zlib';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -63,7 +64,7 @@ function png(w = 8, h = 8): Buffer {
   ]);
 }
 
-async function paidCustomer() {
+async function paidCustomer(withDesign = false) {
   const db = getDb();
   const [lead] = await db
     .insert(leads)
@@ -95,6 +96,7 @@ async function paidCustomer() {
       publishedAt: new Date(),
       expiresAt: addDays(new Date(), 30),
       contentJson: {
+        ...(withDesign ? { _meta: { artDirection: industryDirection('handwerk', 'maler') } } : {}),
         hero_headline: 'Malerarbeiten in Dortmund',
         hero_subline: 'Sauber geplant und ordentlich ausgeführt – für Wohnung, Haus und Gewerbe.',
         services: [
@@ -253,6 +255,24 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     vi.unstubAllGlobals();
     await closeBrowser();
     await stopBoss();
+  });
+
+  it('behält die gekaufte Gestaltung über Onboarding und Textüberarbeitung', async () => {
+    const { customer } = await paidCustomer(true);
+    const ctx = await getOnboardingContext(customer.accessToken);
+    expect(ctx.state).toBe('form');
+    if (ctx.state !== 'form') return;
+    await saveOnboarding(customer.accessToken, complete(ctx.data), { submit: true });
+    const site = (await getDb().query.sites.findFirst({ where: eq(sites.customerId, customer.id) }))!;
+    expect((site.contentJson?._meta as { artDirection: unknown }).artDirection).toEqual(industryDirection('handwerk', 'maler'));
+    await buildSite(site.id);
+    const revised = (await getDb().query.sites.findFirst({ where: eq(sites.id, site.id) }))!;
+    expect((revised.contentJson?._meta as { artDirection: unknown }).artDirection).toEqual(
+      industryDirection('handwerk', 'maler'),
+    );
+    const html = (await getProviders().storage.get(revised.previewHtmlKey!))!.toString();
+    expect(html).toContain('data-character="warm"');
+    expect(html).not.toContain('KI-generiertes Beispielbild');
   });
 
   it('kompletter Ablauf mit Mock-Registrar und Mock-Hosting', async () => {

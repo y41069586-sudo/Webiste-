@@ -88,7 +88,7 @@ export const handwerkWerkstatt: TemplateDef = {
     </div>
   </section>
 </main>
-${p.callHref ? `<a href="${esc(p.callHref)}" class="fixed inset-x-4 bottom-4 z-40 flex min-h-12 items-center justify-center gap-2 bg-accent font-bold uppercase tracking-wide text-on-accent shadow-lg md:hidden">${icon('phone', 'h-5 w-5')}Jetzt anrufen</a>` : ''}
+${p.callHref && !p.draft ? `<a href="${esc(p.callHref)}" class="fixed inset-x-4 bottom-4 z-40 flex min-h-12 items-center justify-center gap-2 bg-accent font-bold uppercase tracking-wide text-on-accent shadow-lg md:hidden">${icon('phone', 'h-5 w-5')}Jetzt anrufen</a>` : ''}
 ${p.footer({ className: `bg-primary-dark text-on-primary ${p.callHref ? 'pb-20 md:pb-0' : ''}`, linkClass: 'underline underline-offset-4' })}`;
     return documentShell(p, 'bg-surface font-body text-ink antialiased', body);
   },

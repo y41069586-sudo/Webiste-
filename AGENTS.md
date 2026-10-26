@@ -285,3 +285,17 @@ V4-Preise und Go-Live-Monatsstart bleiben. Bezahlte und noch verarbeitete Bestel
 keinen Onboarding-Link über halböffentlichen Demo-Kontext ausgeben. Gleichzeitige Hosted-Klicks mit
 bestehender Lead-Zeile serialisieren; innerhalb der Sperre dieselbe DbOrTx-Verbindung durchreichen.
 Mock-Browserprüfungen sind keine Stripe-Sandbox-Zahlungen. Keine neue Aufgabe4/5, kein Push/Deploy.
+
+## Aktueller Auftrag – Betriebscharakter und Demoqualität (26.10.2026)
+
+Der neueste Betreiberauftrag erweitert Aufgabe3 ausdrücklich um bestehende Demo-/Automatisierungsqualität.
+Stand/Nachweise: `docs/vibe-upgrade/`. Alle20 IDs/Plakat und V4/V5 erhalten, keine Produktionsaktionen.
+KI-Bilder gehören nicht mehr zur normalen Demoauswahl; archivierte Prüfassets nicht löschen oder
+umetikettieren. Lizenzierte nichtgenerierte Motive dezent, aber lesbar als Beispielbildwelt kennzeichnen.
+Betriebsbilder im Entwurf ausschließlich mit explizit bestätigtem Darstellungsrecht. Analyseberechtigung
+ist ein eigenes Feld und erlaubt noch keine Fotoveröffentlichung. Öffentlich sichtbar bedeutet nicht frei
+verwendbar. Keine Google-Compliance-Schalter oder Quellenbedingungen umgehen.
+Stilprofil bestimmt Farbe, Typografie, Komposition und passende bestehende Vorlage; daraus keine
+Leistungen, Qualitätsaussagen oder Firmenfakten ableiten. Ohne Belege bleibt es ein Branchenvorschlag.
+Private Belege über bestehende Leadverwaltung/Settings/Storage, kein zweites Datenmodell. Bestehender
+Anthropic-Provider unterstützt Bildblöcke; Mock-Stilantworten sind keine echte Bildanalyse-Abnahme.

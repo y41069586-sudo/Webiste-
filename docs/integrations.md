@@ -361,3 +361,19 @@ https://wiki.openstreetmap.org/wiki/Tag:shop=hairdresser
 https://wiki.openstreetmap.org/wiki/Tag:craft=gardener
 https://wiki.openstreetmap.org/wiki/Tag:craft=cleaning
 https://wiki.openstreetmap.org/wiki/Tag:craft=plumber
+
+## Bildgestützter Gestaltungskontext (lokal, 26.10.2026)
+
+Vorhandener Anthropic-Provider: strukturierter Tool-Aufruf kann bis zu drei JPEG/PNG/WebP-Bildblöcke
+mit `source.type=base64`, `media_type`, `data` erhalten. Geprüfte offizielle Referenz:
+https://platform.claude.com/docs/en/build-with-claude/vision . Keine neue API/SDK-Version eingeführt.
+Worker re-encodiert freigegebene Referenzen auf höchstens1200px, entfernt dadurch Metadaten und nutzt
+nur begrenzte Stilklassen/Hexfarben. Private Belege und erlaubte Verwendung müssen vorher durch den
+Admin bestätigt sein; Bildtext/Notizen sind untrusted Daten und dürfen keine Aktionen anweisen.
+Kein URL-Fetch aus Referenzen, keine Kundennachricht, keine Faktenextraktion über den Geschäftsbetrieb.
+Analyse läuft über bestehenden Bulk-Modelltarif und Budgetledger, Cache je Beleg/Modell/Version;
+jeder tatsächlich erfolgte Provideraufruf wird separat verbucht. Uploadroute startet kein Chromium/LLM.
+Quellen und Ergebnis in bestehenden Settings, Bilder im privaten Storage unter `lead-design/`.
+Opt-out bereinigt Dateien/Settings einschließlich Schutz vor verspäteten Cache-Antworten.
+Abnahme: lokaler Mock und SDK-Request-Shape-Test, **keine echte Vision-Anbieterprüfung**. OSM liefert
+allenfalls einen Farbhinweis aus `brand:colour`; kein behaupteter Google-Maps-Fotodatenstrom.

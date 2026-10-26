@@ -19,7 +19,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
       'x-robots-tag': 'noindex, nofollow',
       'referrer-policy': 'no-referrer',
       'content-security-policy':
-        "default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'; frame-ancestors 'self'",
+        "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; form-action 'none'; base-uri 'none'; frame-ancestors 'self'",
     },
   });
 }

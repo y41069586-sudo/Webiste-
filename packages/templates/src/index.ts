@@ -1,5 +1,7 @@
 export { brandMarkHtml, brandMarkDataUri } from './brand';
 import { renderMalerDesignReview } from './sites/maler-design-review';
+import { industryDirection, normalizeDirection } from './art-direction';
+export * from './art-direction';
 import { buildParts } from './partials/shared';
 import { beautyElegant } from './sites/beauty-elegant';
 import { beautyModern } from './sites/beauty-modern';
@@ -47,6 +49,17 @@ export function renderSite(input: RenderInput): string {
   if (input.mode === 'live' && !input.live) throw new Error('Live-Modus braucht live-Optionen');
   if (input.mode === 'demo' || input.mode === 'screenshot')
     input = { ...input, content: { ...input.content, cta_text: 'Kontakt ansehen' } };
+  if (input.artDirection || input.mode === 'demo' || input.mode === 'screenshot')
+    input = {
+      ...input,
+      artDirection: normalizeDirection(input.artDirection, industryDirection(input.facts.group, input.facts.branchLabel)),
+    };
+  if (
+    input.artDirection &&
+    input.content.hero_headline.toLocaleLowerCase('de').trim() ===
+      `${input.facts.branchLabel} in ${input.facts.city}`.toLocaleLowerCase('de')
+  )
+    input = { ...input, content: { ...input.content, hero_headline: input.facts.name } };
   const parts = buildParts(input);
   const html = input.designReview ? renderMalerDesignReview({ ...input, parts }) : tpl.render({ ...input, parts });
   const sector = /barber|barbier/i.test(input.facts.branchLabel)
@@ -56,7 +69,10 @@ export function renderSite(input: RenderInput): string {
       : /elektro|elektriker/i.test(input.facts.branchLabel)
         ? 'electrical'
         : 'general';
-  return html.replace('<body ', `<body data-template="${tpl.id}" data-sector="${sector}" `);
+  return html.replace(
+    '<body ',
+    `<body data-template="${tpl.id}" data-sector="${sector}" data-character="${input.artDirection?.character ?? 'legacy'}" data-type="${input.artDirection?.typography ?? 'legacy'}" data-composition="${input.artDirection?.composition ?? 'legacy'}" data-design-source="${input.artDirection?.source ?? 'legacy'}" `,
+  );
 }
 export { renderLetterHtml, embeddedFontCss, LETTER_GEOMETRY, type LetterData, type LetterSender } from './letter';
 export { renderInvoiceHtml, type InvoiceData, type InvoiceLine, type InvoiceBuyer, type InvoiceSeller } from './invoice';

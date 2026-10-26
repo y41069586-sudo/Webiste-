@@ -98,7 +98,15 @@ export interface BusinessFacts {
   /** Logo des Kunden (nur Live/Vorschau; nie in Demos) */
   logoSrc?: string | null;
   /** Fotos des Kunden (nur Live/Vorschau; nie in Demos) */
-  photos?: { src: string; alt: string }[];
+  photos?: {
+    src: string;
+    alt: string;
+    rightsConfirmed?: boolean;
+    origin?: 'business' | 'example';
+    focalPoint?: { x: number; y: number };
+  }[];
+  /** Explicitly checked permission, required to display a logo in an unsolicited draft. */
+  logoRightsConfirmed?: boolean;
   /** Nur Link „Bewertungen auf Google“ aus der place_id – nie Inhalte von Google */
   googleReviewsUrl?: string | null;
 }
@@ -166,6 +174,8 @@ export interface LiveOptions {
 }
 
 export interface RenderInput {
+  /** Source-bound design interpretation; an industry proposal is not a verified business identity. */
+  artDirection?: import('./art-direction').ArtDirection;
   /** Internal opt-in for the pending painter design review; not a public URL parameter. */
   designReview?: boolean;
   templateId: string;

@@ -7,11 +7,12 @@ const TYPES: Record<string, string> = {
   jpg: 'image/jpeg',
   jpeg: 'image/jpeg',
   png: 'image/png',
+  webp: 'image/webp',
   pdf: 'application/pdf',
   html: 'text/html; charset=utf-8',
   json: 'application/json',
 };
-const ALLOWED = /^(demos|letters|invoices|sites|outbox|uploads)\//;
+const ALLOWED = /^(demos|letters|invoices|sites|outbox|uploads|lead-design)\//;
 
 /** Dateien aus dem Speicher – nur für angemeldete Admins. */
 export async function GET(_req: Request, { params }: { params: Promise<{ key: string[] }> }) {
@@ -28,7 +29,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ key: st
       'cache-control': 'private, no-store',
       'x-content-type-options': 'nosniff',
       ...(ext === 'html'
-        ? { 'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox" }
+        ? { 'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; sandbox" }
         : {}),
     },
   });

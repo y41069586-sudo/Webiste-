@@ -43,6 +43,7 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
         'lighthouse',
       ]),
     );
+    await expect(approveDemo(demoId, 'test:automatic', { manual: false })).rejects.toThrow(/Gestaltungskontext/);
     const demo = await getDb().query.demos.findFirst({ where: eq(demos.id, demoId) });
     expect(demo?.status).toBe('pending_review');
     expect(demo?.slug.length).toBeGreaterThanOrEqual(20);

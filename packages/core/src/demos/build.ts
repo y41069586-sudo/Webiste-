@@ -1,3 +1,5 @@
+import { resolveBusinessDesign } from './business-design';
+import { designTemplateRank, industryDirection, type ArtDirection } from '@wbm/templates';
 import { v4Offer, V4_TIERS } from '../services/offers-v4';
 import { eq, sql } from 'drizzle-orm';
 import {
@@ -231,7 +233,10 @@ export function chooseTemplate(
   lead: Pick<Lead, 'id' | 'branchGroup'> & Partial<Pick<Lead, 'branch'>>,
   previous: string[] = [],
   usage: Record<string, number> = {},
+  direction?: ArtDirection,
 ): { templateId: string; palette: string } {
+  const resolvedDirection = direction ?? (lead.branch ? industryDirection(lead.branchGroup, lead.branch) : null);
+  const rank = (id: string) => (resolvedDirection ? designTemplateRank(id, resolvedDirection) : 0);
   const options = templatesForGroup(lead.branchGroup);
   const fresh = options.filter((t) => !previous.includes(t.id));
   const pool = fresh.length ? fresh : options;
@@ -240,7 +245,10 @@ export function chooseTemplate(
       .filter(([k]) => k.startsWith(`${id}/`))
       .reduce((s, [, n]) => s + n, 0);
   const tpl = [...pool].sort(
-    (a, b) => tplUse(a.id) - tplUse(b.id) || seedFromId(`${lead.id}:${a.id}`) - seedFromId(`${lead.id}:${b.id}`),
+    (a, b) =>
+      rank(a.id) - rank(b.id) ||
+      tplUse(a.id) - tplUse(b.id) ||
+      seedFromId(`${lead.id}:${a.id}`) - seedFromId(`${lead.id}:${b.id}`),
   )[0]!;
   const natural = /garten|landschaft|gärtner|gaertner/i.test(lead.branch ?? '');
   const preference = (palette: string) => (natural && palette === 'waldgruen' ? -1 : 0);
@@ -271,8 +279,8 @@ export interface GeneratedContent {
  * Inhalte per Claude (MODEL_CREATIVE) mit Regelprüfung. Bis zu zwei Versuche
  * (der zweite mit konkretem Feedback), danach geprüfte Fallback-Texte.
  */
-export async function generateDemoContent(lead: Lead, cfg: AppConfig): Promise<GeneratedContent> {
-  const facts = leadContentFacts(lead, cfg);
+export async function generateDemoContent(lead: Lead, cfg: AppConfig, direction?: ArtDirection): Promise<GeneratedContent> {
+  const facts = { ...leadContentFacts(lead, cfg), designCharacter: direction?.character };
   const seed = seedFromId(lead.id);
   let feedback: string[] | undefined;
   let lastViolations: RuleViolation[] = [];
@@ -336,9 +344,11 @@ export function renderDemoHtml(input: {
   cfg: AppConfig;
   mode?: 'demo' | 'screenshot';
   photoDataUri?: string | null;
+  artDirection?: ArtDirection;
 }): string {
   return renderSite({
     templateId: input.templateId,
+    artDirection: input.artDirection,
     palette: input.palette,
     mode: input.mode ?? 'demo',
     content: input.content,
@@ -381,20 +391,23 @@ export async function buildDemo(
     throw new Error(`Lead im Status ${lead.status} – Demo nicht vorgesehen`);
   }
 
+  const design = await resolveBusinessDesign(lead);
   const rotated = chooseTemplate(
     lead,
     existing.map((d) => d.templateId),
     await templateUsage(),
+    design.direction,
   );
   const fixed = opts.templateId ? templatesForGroup(lead.branchGroup).find((t) => t.id === opts.templateId) : undefined;
   const templateId = fixed?.id ?? rotated.templateId;
   const palette = fixed ? (fixed.palettes.includes(rotated.palette) ? rotated.palette : fixed.palettes[0]!) : rotated.palette;
-  const generated = await generateDemoContent(lead, cfg);
-  const facts = leadToFacts(lead, cfg);
+  const generated = await generateDemoContent(lead, cfg, design.direction);
+  const facts = { ...leadToFacts(lead, cfg), photos: design.photos };
   const slug = randomToken(24);
   const html = renderDemoHtml({
     templateId,
     palette,
+    artDirection: design.direction,
     content: generated.content,
     facts,
     slug,
@@ -402,37 +415,59 @@ export async function buildDemo(
     photoDataUri: await senderPhotoDataUri(cfg),
   });
 
-  const [demo] = await db
-    .insert(demos)
-    .values({
-      leadId,
-      slug,
-      templateId,
-      palette,
-      status: 'building',
-      reviewNote: opts.reviewNote ?? null,
-      contentJson: {
-        ...generated.content,
-        _meta: { source: generated.source, attempts: generated.attempts, violations: generated.violations },
-      } as unknown as Record<string, unknown>,
-    })
-    .returning({ id: demos.id });
-  const demoId = demo!.id;
-  await getProviders().storage.put(demoHtmlKey(demoId), html, 'text/html; charset=utf-8');
-  await db
-    .update(demos)
-    .set({ htmlStorageKey: demoHtmlKey(demoId) })
-    .where(eq(demos.id, demoId));
-  await db.transaction(async (tx) => {
-    await transitionLead(tx, leadId, 'demo_built', { actor: opts.actor, soft: true });
-    await audit(tx, {
-      entity: 'demo',
-      entityId: demoId,
-      action: 'build',
-      actor: opts.actor,
-      context: { templateId, palette, source: generated.source, attempts: generated.attempts },
+  let createdId: string | undefined;
+  let demoId: string;
+  try {
+    demoId = await db.transaction(async (tx) => {
+      // Do not hold a DB connection during LLM work. Lock only the final persistence stage.
+      // Opt-out/anonymization take the same lock and cannot be followed by newly restored demo files.
+      await tx.execute(sql`SELECT id FROM leads WHERE id=${leadId} FOR UPDATE`);
+      const current = await tx.query.leads.findFirst({ where: eq(leads.id, leadId) });
+      if (!current || current.anonymizedAt || ['suppressed', 'rejected', 'expired'].includes(current.status))
+        throw Error('Betrieb inzwischen gesperrt; keine Demo gespeichert.');
+      const [demo] = await tx
+        .insert(demos)
+        .values({
+          leadId,
+          slug,
+          templateId,
+          palette,
+          status: 'building',
+          reviewNote: opts.reviewNote ?? null,
+          contentJson: {
+            ...generated.content,
+            _meta: {
+              source: generated.source,
+              attempts: generated.attempts,
+              violations: generated.violations,
+              artDirection: design.direction,
+              designSourceRef: design.sourceRef,
+              designRequiresReview: design.requiresReview,
+            },
+          } as unknown as Record<string, unknown>,
+        })
+        .returning({ id: demos.id });
+      const demoId = demo!.id;
+      createdId = demoId;
+      await getProviders().storage.put(demoHtmlKey(demoId), html, 'text/html; charset=utf-8');
+      await tx
+        .update(demos)
+        .set({ htmlStorageKey: demoHtmlKey(demoId) })
+        .where(eq(demos.id, demoId));
+      await transitionLead(tx, leadId, 'demo_built', { actor: opts.actor, soft: true });
+      await audit(tx, {
+        entity: 'demo',
+        entityId: demoId,
+        action: 'build',
+        actor: opts.actor,
+        context: { templateId, palette, source: generated.source, attempts: generated.attempts },
+      });
+      return demoId;
     });
-  });
+  } catch (err) {
+    if (createdId) await getProviders().storage.delete(demoHtmlKey(createdId));
+    throw err;
+  }
   await enqueue(QUEUES.qaDemo, { demoId }, { singletonKey: `qa:${demoId}` });
   return demoId;
 }

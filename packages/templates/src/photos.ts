@@ -27,6 +27,7 @@ export interface StockPhoto {
   width?: number;
   height?: number;
   focalPoint?: { x: number; y: number };
+  moods?: ('warm' | 'neutral' | 'dark' | 'natural')[];
   role?: 'work' | 'detail' | 'interior' | 'product';
 }
 
@@ -53,7 +54,7 @@ export function stockPhotos(
   group: BranchGroup,
   seed = 0,
   branchLabel = '',
-  opts: { includeReview?: boolean } = {},
+  opts: { includeReview?: boolean; allowGenerated?: boolean; mood?: 'warm' | 'neutral' | 'dark' | 'natural' } = {},
 ): StockPhoto[] {
   const root = path.resolve(imagesDir());
   const list = stockPhotoManifest().filter((p) => {
@@ -62,7 +63,10 @@ export function stockPhotos(
       p.group === group &&
       (!p.reviewOnly || opts.includeReview) &&
       (p.license === 'CC0 1.0' ||
-        (p.kind === 'generated' && p.source === 'OpenAI image generation' && p.license === 'Generated – OpenAI terms')) &&
+        (opts.allowGenerated === true &&
+          p.kind === 'generated' &&
+          p.source === 'OpenAI image generation' &&
+          p.license === 'Generated – OpenAI terms')) &&
       Boolean(p.sourceUrl && p.checkedAt) &&
       file.startsWith(root + path.sep) &&
       existsSync(file)
@@ -77,7 +81,11 @@ export function stockPhotos(
   const matching = rotated.filter(fits);
   // Prefer a relevant activity/detail over another generic interior. Ties keep stable variety.
   const roleOrder = { work: 0, detail: 1, product: 1, interior: 2 };
-  matching.sort((a, b) => roleOrder[a.role ?? 'interior'] - roleOrder[b.role ?? 'interior']);
+  matching.sort(
+    (a, b) =>
+      Number(Boolean(b.moods?.includes(opts.mood!))) - Number(Boolean(a.moods?.includes(opts.mood!))) ||
+      roleOrder[a.role ?? 'interior'] - roleOrder[b.role ?? 'interior'],
+  );
   // Unknown specialties must not silently receive an unrelated service photograph.
   return matching.length ? matching : label.trim() ? rotated.filter((p) => !p.keywords?.length) : rotated;
 }

@@ -35,7 +35,7 @@ it('keeps unknown activities neutral and never fills them with painter services'
 it('instructs the model to describe confirmed activity and location without inferring a specialty from a name', () => {
   expect(buildDemoPrompt(facts, 0)).toContain('Firmenname: Fiktiver Testbetrieb');
 });
-it('uses stable per-template hashes rather than template-name length ties', async () => {
+it('selects a stable fitting composition before usage rotation', async () => {
   const { chooseTemplate } = await import('../src/demos/build');
   const ids = new Set<string>();
   for (let i = 0; i < 100; i++) {
@@ -44,7 +44,14 @@ it('uses stable per-template hashes rather than template-name length ties', asyn
     expect(chooseTemplate(lead)).toEqual(first);
     ids.add(first.templateId);
   }
-  expect(ids.size).toBe(4);
+  expect([...ids]).toEqual(['handwerk-klar']);
+  const { industryDirection } = await import('@wbm/templates');
+  const lead = { id: 'same-business', branchGroup: 'handwerk' as const, branch: 'maler' };
+  expect(chooseTemplate(lead, [], {}, { ...industryDirection('handwerk', 'maler'), composition: 'business' }).templateId).toBe(
+    'handwerk-solid',
+  );
+  expect(chooseTemplate(lead, ['handwerk-klar']).templateId).not.toBe('handwerk-klar');
+  expect(chooseTemplate(lead, ['handwerk-klar', 'handwerk-solid', 'handwerk-werkstatt']).templateId).toBe('handwerk-plakat');
 });
 it('captures lazy images below the fold without waiting for a visitor to scroll', async () => {
   const { takeScreenshots } = await import('../src/render/screenshots');

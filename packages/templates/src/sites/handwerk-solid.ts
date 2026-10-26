@@ -32,9 +32,9 @@ export const handwerkSolid: TemplateDef = {
     <div class="sw-business-facts"><span>${esc(f.branchLabel)}</span><span>${esc(f.city)}</span><a href="#oeffnungszeiten">Standort &amp; Kontakt</a></div>
   </section>
 
-  <section id="leistungen" aria-labelledby="leistungen-titel" class="-mt-10 pb-16 md:-mt-14">
+  <section id="leistungen" aria-labelledby="leistungen-titel" class="border-y border-line py-14">
     <div class="mx-auto max-w-6xl px-4">
-      <div class="rounded-2xl bg-surface p-6 shadow-xl ring-1 ring-line md:p-10">
+      <div class="sw-service-index">
         <div class="flex flex-wrap items-end justify-between gap-2">
           <h2 id="leistungen-titel" class="font-heading text-3xl font-bold">Unsere Leistungen</h2>
           ${p.servicesNote()}
@@ -42,8 +42,8 @@ export const handwerkSolid: TemplateDef = {
         <ul class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           ${c.services
             .map(
-              (s) => `<li class="rounded-xl border border-line p-5">
-            <span class="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-on-primary">${icon(s.icon)}</span>
+              (s) => `<li class="sw-service-index-item">
+            <span class="inline-flex text-primary">${icon(s.icon)}</span>
             <h3 class="mt-4 text-lg font-semibold">${esc(s.title)}</h3>
             <p class="mt-2 text-muted">${esc(s.text)}</p>
           </li>`,

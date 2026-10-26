@@ -1,6 +1,6 @@
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client';
-import { demos, leads, suppressionList } from '../db/schema';
+import { demos, leads, suppressionList, settings } from '../db/schema';
 import { addressHash, businessHash, emailHash, sourceHash } from '../leads/normalize';
 import { getProviders } from '../providers';
 import type { Actor } from '../types';
@@ -50,6 +50,12 @@ export async function addSuppression(db: DbOrTx, s: SuppressionSubject, reason: 
  * personenbezogene Felder anonymisieren. Danach existiert nur noch der Hash.
  */
 export async function optOutLead(db: DbOrTx, leadId: string, actor: Actor | string, reason: string): Promise<boolean> {
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT id FROM leads WHERE id=${leadId} FOR UPDATE`);
+    return optOutLeadLocked(tx, leadId, actor, reason);
+  });
+}
+async function optOutLeadLocked(db: DbOrTx, leadId: string, actor: Actor | string, reason: string): Promise<boolean> {
   const lead = await db.query.leads.findFirst({ where: eq(leads.id, leadId) });
   if (!lead) return false;
   if (lead.status === 'suppressed' && lead.anonymizedAt) return true;
@@ -96,25 +102,34 @@ export async function optOutLead(db: DbOrTx, leadId: string, actor: Actor | stri
 
 /** Personenbezogene Felder eines Leads entfernen (Zeile bleibt für Statistik). */
 export async function anonymizeLead(db: DbOrTx, leadId: string): Promise<void> {
-  await db
-    .update(leads)
-    .set({
-      businessName: '[gelöscht]',
-      street: null,
-      houseNumber: null,
-      postalCode: null,
-      phone: null,
-      openingHours: null,
-      websiteUri: null,
-      rating: null,
-      ratingCount: null,
-      domainSuggestion: null,
-      sourceId: `deleted:${leadId}`,
-      googlePlaceId: null,
-      anonymizedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(leads.id, leadId));
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT id FROM leads WHERE id=${leadId} FOR UPDATE`);
+    await getProviders().storage.deletePrefix(`lead-design/${leadId}/`);
+    await tx
+      .delete(settings)
+      .where(
+        inArray(settings.key, [`lead-design-evidence:${leadId}`, `lead-design-result:${leadId}`, `lead-design-hint:${leadId}`]),
+      );
+    await tx
+      .update(leads)
+      .set({
+        businessName: '[gelöscht]',
+        street: null,
+        houseNumber: null,
+        postalCode: null,
+        phone: null,
+        openingHours: null,
+        websiteUri: null,
+        rating: null,
+        ratingCount: null,
+        domainSuggestion: null,
+        sourceId: `deleted:${leadId}`,
+        googlePlaceId: null,
+        anonymizedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(leads.id, leadId));
+  });
 }
 
 /** Nur eine E-Mail-Adresse sperren (z. B. Abmeldelink in der Erinnerungs-Mail). */

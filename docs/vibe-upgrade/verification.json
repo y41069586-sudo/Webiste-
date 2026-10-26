@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-26",
+  "branch": "codex/conversion-v4",
+  "baseCommit": "0c788f5",
+  "dryRun": true,
+  "externalProviders": "mock for all tests",
+  "liveActions": false,
+  "templates": 20,
+  "geometryStates": 120,
+  "browserChecks": 540,
+  "failedBrowserChecks": 0,
+  "core": {
+    "files": 13,
+    "passed": 101
+  },
+  "templatesTests": 108,
+  "e2e": {
+    "distinctCasesPassed": 14,
+    "additionalProductionRerunsPassed": 3,
+    "note": "13 dev regression cases plus corrected admin upload case rerun passed; 3 of these cases repeated against the local production build. All payments mocked."
+  },
+  "typecheck": "passed",
+  "lint": "passed",
+  "build": "passed; 7 pre-existing dynamic filesystem tracing warnings",
+  "realVisionProvider": "not tested",
+  "realBusinessPhotoIngestion": "requires permitted sources; not a Maps crawler",
+  "performance": [
+    {
+      "id": "handwerk-klar",
+      "before": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 99, accessibility: 100, best-practices: 100, seo: 66"
+      },
+      "after": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 100, accessibility: 100, best-practices: 100, seo: 66"
+      }
+    },
+    {
+      "id": "beauty-modern",
+      "before": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 98, accessibility: 100, best-practices: 100, seo: 66"
+      },
+      "after": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 96, accessibility: 100, best-practices: 100, seo: 66"
+      }
+    },
+    {
+      "id": "gastronomie-foto",
+      "before": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 97, accessibility: 100, best-practices: 100, seo: 66"
+      },
+      "after": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 95, accessibility: 100, best-practices: 100, seo: 66"
+      }
+    }
+  ]
+}

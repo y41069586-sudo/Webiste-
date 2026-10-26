@@ -25,7 +25,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "product"
+    "role": "product",
+    "moods": [
+      "warm"
+    ]
   },
   {
     "file": "gastronomie/pasta.jpg",
@@ -54,7 +57,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "product"
+    "role": "product",
+    "moods": [
+      "warm"
+    ]
   },
   {
     "file": "gastronomie/gastraum.jpg",
@@ -82,7 +88,11 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "dark",
+      "warm"
+    ]
   },
   {
     "file": "gastronomie/backwaren.jpg",
@@ -111,7 +121,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "product"
+    "role": "product",
+    "moods": [
+      "warm"
+    ]
   },
   {
     "file": "gastronomie/cafetisch.jpg",
@@ -139,7 +152,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "warm"
+    ]
   },
   {
     "file": "einzelhandel/blumen.jpg",
@@ -166,7 +182,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "product"
+    "role": "product",
+    "moods": [
+      "natural"
+    ]
   },
   {
     "file": "einzelhandel/kleiderstange.jpg",
@@ -194,7 +213,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "einzelhandel/buecherregal.jpg",
@@ -221,7 +243,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "kurse/trainingsraum.jpg",
@@ -249,7 +274,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "kurse/kettlebells.jpg",
@@ -277,7 +305,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "detail"
+    "role": "detail",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "kurse/ballettschuhe.jpg",
@@ -303,7 +334,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "kurse/yogamatte.jpg",
@@ -330,7 +364,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "natural"
+    ]
   },
   {
     "file": "generated/maler.webp",
@@ -356,7 +393,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "generated/friseur.webp",
@@ -385,7 +425,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "generated/gartenbau.webp",
@@ -412,7 +455,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "generated/reinigung.webp",
@@ -439,7 +485,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "generated/sanitaer.webp",
@@ -466,7 +515,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "generated/maler-werkzeuge.webp",
@@ -491,7 +543,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "detail"
+    "role": "detail",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "generated/maler-arbeit.webp",
@@ -516,7 +571,10 @@
       "x": 50,
       "y": 45
     },
-    "role": "work"
+    "role": "work",
+    "moods": [
+      "neutral"
+    ]
   },
   {
     "file": "generated/maler-raum.webp",
@@ -543,6 +601,38 @@
       "x": 50,
       "y": 45
     },
-    "role": "interior"
+    "role": "interior",
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "beauty/barber-werkzeug.jpg",
+    "group": "beauty",
+    "alt": "Bartpflege und Haarschneidewerkzeug auf einem Arbeitsplatz",
+    "title": "Beard Oil And Balm",
+    "creator": "Kyle Topping",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://www.shopify.com/stock-photos/licenses/creative-commons",
+    "source": "Burst",
+    "sourceUrl": "https://www.shopify.com/stock-photos/photos/beard-oil-and-balm",
+    "openverseId": "",
+    "checkedAt": "2026-10-26",
+    "checkedVia": "Original-Bildseite und CC0-Lizenz geprüft; Foto visuell geprüft. Kein Team-/Betriebsnachweis.",
+    "width": 1200,
+    "height": 801,
+    "focalPoint": {
+      "x": 38,
+      "y": 48
+    },
+    "role": "detail",
+    "keywords": [
+      "barber",
+      "barbier"
+    ],
+    "moods": [
+      "warm",
+      "dark"
+    ]
   }
 ]

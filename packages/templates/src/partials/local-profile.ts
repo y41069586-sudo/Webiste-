@@ -8,7 +8,13 @@ export function localProfile(
 ) {
   const photos = p.photos(style === 'workshop' ? 2 : 1);
   if (photos.length)
-    return `<div class="sw-photo-composition">${photos.map((photo) => p.figure(photo, 'w-full object-cover')).join('')}</div>${photos.some((photo) => photo.example) ? '<p class="sw-image-context">Illustrative Bildauswahl für diesen Entwurf · keine Aufnahmen des Betriebs.</p>' : ''}`;
+    return `<div class="sw-photo-composition">${photos.map((photo) => p.figure(photo, 'w-full object-cover')).join('')}</div>`;
+  if (/maler|anstrich/i.test(f.branchLabel))
+    return `<div class="sw-material-study" role="img" aria-label="Illustrative Farb- und Oberflächenstudie, kein ausgeführtes Kundenprojekt">
+    <div class="sw-material-label"><span>Farbe &amp; Oberfläche</span><span>Gestaltungsstudie</span></div>
+    <div class="sw-material-canvas"><div class="sw-material-paper"></div><div class="sw-material-block"></div><div class="sw-material-line"></div><div class="sw-material-swatch"></div></div>
+    <div class="sw-material-caption"><p>Raum für neue Farbe.</p><span>Illustrative Gestaltung · kein Kundenprojekt</span></div>
+  </div>`;
   const studio = style === 'studio';
   return `<div class="sw-local-profile ${studio ? 'sw-local-profile-studio' : ''}">
     <p class="sw-profile-eyebrow">${esc(f.branchLabel)} · ${esc(f.city)}</p>
