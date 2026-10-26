@@ -239,7 +239,14 @@ describe('Slot-Briefe im echten Ablauf', () => {
     await qaDemo(demoId, 'job:test', { lighthouse: false });
     await approveDemo(demoId, 'admin:test', {
       manual: true,
-      review: { facts: true, desktop: true, mobile: true, images: true, text: true },
+      review: {
+        facts: true,
+        desktop: true,
+        mobile: true,
+        images: true,
+        text: true,
+        qualityScores: { design: 90, industry: 90, personalization: 90, images: 90, mobile: 90 },
+      },
     });
     await publishDemo(demoId, 'admin:test');
   }, 120_000);
@@ -278,7 +285,10 @@ describe('Slot-Briefe im echten Ablauf', () => {
     expect(usage.map((u) => u.claimId)).toEqual(['HANDWERK_OHNE_WEBSITE_AUSSORTIERT']);
     expect((await sourcesPageClaims(db)).map((c) => c.id)).toContain('HANDWERK_OHNE_WEBSITE_AUSSORTIERT');
     // Freigabe möglich; wird der Claim danach gesperrt, geht der Brief nicht raus
-    expect(await approveLetter(letter.id, 'admin:test')).toBe(true);
+    expect(await approveLetter(letter.id, 'admin:test')).toBe(false);
+    expect(
+      await approveLetter(letter.id, 'admin:test', { personalization: 90, industry: 90, text: 90, visual: 90, screenshot: 90 }),
+    ).toBe(true);
     await blockClaim(db, 'HANDWERK_OHNE_WEBSITE_AUSSORTIERT', 'admin:test');
     const sent = await sendLetter(letter.id, 'admin:test');
     expect(sent.state).toBe('skipped');

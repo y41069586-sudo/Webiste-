@@ -1,3 +1,4 @@
+import { assessLetterQuality, type LetterQualityScores, type LetterQualityAssessment } from '../quality/letter';
 import { and, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm';
 import { usableClaims, type ClaimRow } from '../claims/library';
 import { getConfig } from '../config/service';
@@ -149,16 +150,33 @@ async function assignedThisWeek(db: DbOrTx, industry: Industry, now = new Date()
 }
 
 /** Brief freigeben (einzeln oder per Bulk). */
-export async function approveLetter(letterId: string, actor: string): Promise<boolean> {
+export async function approveLetter(letterId: string, actor: string, scores?: Partial<LetterQualityScores>): Promise<boolean> {
   const db = getDb();
   return db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT id FROM letters WHERE id=${letterId} FOR UPDATE`);
     const letter = await tx.query.letters.findFirst({ where: eq(letters.id, letterId) });
     if (!letter || letter.status !== 'generated') return false;
     // Kein Versand ohne bestandenen Wahrheits-Check (B5.4)
     if ((letter.truthCheckJson as { passed?: boolean } | null)?.passed !== true) return false;
+    const previous = letter.truthCheckJson?._quality as LetterQualityAssessment | undefined;
+    if (previous && (previous.version !== 1 || !Array.isArray(previous.dimensions))) return false;
+    const quality = previous
+      ? assessLetterQuality(
+          [{ passed: previous.dimensions.some((d) => d.key === 'technical' && d.score === 100) }],
+          scores,
+          (await getConfig({ db: tx })).review.letterQualityMinimum,
+        )
+      : undefined;
+    if (quality && !quality.passed) return false;
     await tx
       .update(letters)
-      .set({ status: 'approved', approvedBy: actor, approvedAt: new Date(), updatedAt: new Date() })
+      .set({
+        ...(quality ? { truthCheckJson: { ...letter.truthCheckJson, _quality: quality } } : {}),
+        status: 'approved',
+        approvedBy: actor,
+        approvedAt: new Date(),
+        updatedAt: new Date(),
+      })
       .where(eq(letters.id, letterId));
     if (letter.sequence === 1 && !letter.isTest)
       await transitionLead(tx, letter.leadId, 'letter_approved', { actor, soft: true });

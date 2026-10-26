@@ -76,7 +76,14 @@ describe('Brief-PDF (echter Browser)', () => {
     await qaDemo(demoId, 'job:test', { lighthouse: false });
     await approveDemo(demoId, 'admin:test', {
       manual: true,
-      review: { facts: true, desktop: true, mobile: true, images: true, text: true },
+      review: {
+        facts: true,
+        desktop: true,
+        mobile: true,
+        images: true,
+        text: true,
+        qualityScores: { design: 90, industry: 90, personalization: 90, images: 90, mobile: 90 },
+      },
     });
     await publishDemo(demoId, 'admin:test');
   }, 120_000);
@@ -144,7 +151,16 @@ describe('Brief-PDF (echter Browser)', () => {
 
   it('Freigabe setzt Lead auf letter_approved; Ablehnen mit Neu-Erzeugen setzt zurück', async () => {
     const res = await generateLetter(leadId, 1, { actor: 'job:test', regenerate: true });
-    expect(await approveLetter(res.letterId, 'admin:test')).toBe(true);
+    expect(await approveLetter(res.letterId, 'admin:test')).toBe(false);
+    expect(
+      await approveLetter(res.letterId, 'admin:test', {
+        personalization: 90,
+        industry: 90,
+        text: 90,
+        visual: 90,
+        screenshot: 90,
+      }),
+    ).toBe(true);
     expect((await getDb().query.leads.findFirst({ where: eq(leads.id, leadId) }))?.status).toBe('letter_approved');
     await rejectLetter(res.letterId, 'admin:test', 'Tippfehler', false);
     expect((await getDb().query.leads.findFirst({ where: eq(leads.id, leadId) }))?.status).toBe('demo_published');

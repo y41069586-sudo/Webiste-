@@ -1,3 +1,4 @@
+import { assessLetterQuality } from '../quality/letter';
 import { and, eq, isNull } from 'drizzle-orm';
 import QRCode from 'qrcode';
 import { renderLetterHtml } from '@wbm/templates';
@@ -27,8 +28,7 @@ import { raiseAlert } from '../services/budget';
 import { currentDemoForLead } from '../services/demo-review';
 import { transitionLead } from '../services/lead-state';
 import { extendDemoUntil } from '../services/demo-review';
-import { reviewedImprovements } from '../services/followups';
-import { approveLetter, chooseLetterVariant } from '../services/letters';
+import { chooseLetterVariant } from '../services/letters';
 import { randomShortCode } from '../util/crypto';
 import { addBusinessDays, addDays, endOfDayBerlin, formatDateLongDe, formatEuroShort } from '../util/time';
 import { htmlToPdf, validateLetterDom, validateLetterPdf, type LayoutIssue } from './pdf';
@@ -36,7 +36,7 @@ import { htmlToPdf, validateLetterDom, validateLetterPdf, type LayoutIssue } fro
 export async function qrDataUri(url: string): Promise<string> {
   return QRCode.toDataURL(url, {
     errorCorrectionLevel: 'M',
-    margin: 1,
+    margin: 4,
     width: 600,
     color: { dark: '#111111', light: '#ffffff' },
   });
@@ -147,8 +147,18 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
 
   const demo = await currentDemoForLead(db, leadId);
   if (!demo) throw new Error('Keine veröffentlichte Demo für den Lead');
+  if (
+    !demo.qaResultJson?.passed ||
+    demo.qaResultJson.checks.some((c) => !c.passed) ||
+    (demo.qaResultJson.quality && !demo.qaResultJson.quality.passed)
+  )
+    throw new Error('Demo ist nicht technisch und gestalterisch freigegeben.');
   const storage = getProviders().storage;
   const composite = demo.compositeKey ? await storage.get(demo.compositeKey) : null;
+  if (!composite?.length) throw new Error('Demo-Screenshot fehlt; erst QA und Screenshot erneut erstellen.');
+  const desktop =
+    cfg.offers.activeVersion === 'v4' && demo.screenshotDesktopKey ? await storage.get(demo.screenshotDesktopKey) : null;
+  if (cfg.offers.activeVersion === 'v4' && !desktop?.length) throw new Error('Desktop-Vorschau fehlt; Brief bleibt gesperrt.');
   const variant = await chooseLetterVariant(db, sequence, { industry: lead.industry });
   const sourcesLabel = shortUrl(trackUrl('/quellen'));
   const slotRender = variant.slots
@@ -175,6 +185,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
         postalCode: lead.postalCode ?? '',
         city: lead.city,
       };
+  if (!recipient.businessName.trim()) throw new Error('Firmenname fehlt; Brief bleibt ungeprüft.');
   if (!recipient.street || !recipient.houseNumber || !/^\d{5}$/.test(recipient.postalCode) || !recipient.city) {
     throw new Error(opts.test ? 'Testempfänger in den Einstellungen unvollständig' : 'Anschrift unvollständig');
   }
@@ -193,8 +204,10 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     variant: slotRender?.content ?? variant.content,
     cfg,
     recipient,
+    branchLabel: cfg.targeting.branches.find((b) => b.key === lead.branch)?.label ?? lead.branch,
     domain,
     rating: useRating ? { rating: lead.rating!, count: lead.ratingCount! } : null,
+    desktopScreenshotDataUri: desktop ? `data:image/jpeg;base64,${desktop.toString('base64')}` : null,
     compositeDataUri: composite ? `data:image/jpeg;base64,${composite.toString('base64')}` : null,
     qrDataUri: await qrDataUri(url),
     shortUrl: shortUrl(trackUrl(`/${code}`)),
@@ -212,6 +225,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const expectedPages = screenshotPage ? 2 : 1;
   const domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
   const pdfCheck = await validateLetterPdf(pdf, {
+    qrExpectedUrl: url,
     recipientLines: recipientLines(recipient),
     position: cfg.letter.addressPosition,
     expectedPages,
@@ -267,7 +281,14 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
           ? [...issues.map((i) => `${i.check}: ${i.detail}`), ...truthIssues].join(' | ').slice(0, 1000)
           : null,
       industry: lead.industry ?? null,
-      truthCheckJson: truth as unknown as Record<string, unknown>,
+      truthCheckJson: {
+        ...truth,
+        _quality: assessLetterQuality(
+          [{ passed: truth.passed }, { passed: issues.length === 0 }],
+          undefined,
+          cfg.review.letterQualityMinimum,
+        ),
+      } as unknown as Record<string, unknown>,
       isTest: Boolean(opts.test),
       dryRun: sw.dryRun,
     })
@@ -322,14 +343,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   if (!opts.test && sequence === 1) {
     await db.transaction((tx) => transitionLead(tx, leadId, 'letter_generated', { actor: opts.actor, soft: true }));
   }
-  // Brief 3: nach den ersten N vom Betreiber geprüften Briefen automatisch freigeben (Wahrheits-Check grün)
-  if (sequence === 3 && !opts.test && (await reviewedImprovements()) >= cfg.review.letter3ManualFirstN) {
-    await approveLetter(letterId, 'job:auto-letter3');
-    return { letterId, status: 'approved', issues, pages: pdfCheck.pages, truthCheck: truth };
-  }
-  if (sw.autoSend && !opts.test) {
-    await approveLetter(letterId, 'job:auto-send');
-    return { letterId, status: 'approved', issues, pages: pdfCheck.pages, truthCheck: truth };
-  }
+  // New quality-scored letters remain in review until individual ratings exist.
+  // The prior third-letter automation cannot manufacture those ratings.
+
   return { letterId, status, issues, pages: pdfCheck.pages, truthCheck: truth };
 }

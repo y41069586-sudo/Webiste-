@@ -7,44 +7,92 @@ export interface PriorityReason {
 }
 export function priorityV4(
   place: RawPlace,
-  flags: { completeAddress: boolean; hasWebsite: boolean; socialOnly: boolean; branchWeight: number },
+  flags: {
+    completeAddress: boolean;
+    hasWebsite: boolean;
+    socialOnly: boolean;
+    branchWeight: number;
+    excluded?: boolean;
+    websiteAbsentVerified?: boolean;
+    demoSuitable?: boolean;
+  },
+  thresholds = { goodMin: 75, reviewMin: 40 },
 ) {
-  const reasons: PriorityReason[] = [
-    {
-      criterion: 'postal_address',
-      points: flags.completeAddress ? 4 : 0,
-      verified: flags.completeAddress,
-      detail: flags.completeAddress
-        ? 'Vollständige Anschrift in der Quelle; Zustellbarkeit noch zu prüfen'
-        : 'Postanschrift unvollständig',
-    },
-    {
-      criterion: 'website',
-      points: flags.hasWebsite ? -100 : 0,
-      verified: flags.hasWebsite,
-      detail: flags.hasWebsite ? 'Eigene Website in der Quelle' : 'Keine eigene Website in der Quelle; manuell zu bestätigen',
-    },
-    {
-      criterion: 'operational',
-      points: place.businessStatus === 'OPERATIONAL' ? 3 : 0,
-      verified: place.businessStatus === 'OPERATIONAL',
-      detail:
-        place.businessStatus === 'OPERATIONAL'
-          ? 'Quelle meldet geöffneten Betrieb'
-          : 'Betriebsstatus unbekannt oder nicht geöffnet',
-    },
-    {
-      criterion: 'social_only',
-      points: flags.socialOnly ? 2 : 0,
-      verified: flags.socialOnly,
-      detail: flags.socialOnly ? 'Social-/Portaladresse statt eigener Website vorhanden' : 'Kein bestätigtes Social-Signal',
-    },
-    {
-      criterion: 'phone',
-      points: place.phone ? 1 : 0,
-      verified: Boolean(place.phone),
-      detail: 'Telefonangabe als Vollständigkeitssignal, keine Kaltanrufe',
-    },
+  const reason = (criterion: string, verified: boolean, points: number, yes: string, no: string): PriorityReason => ({
+    criterion,
+    verified,
+    points: verified ? points : 0,
+    detail: verified ? yes : no,
+  });
+  const reasons = [
+    reason('identity', Boolean(place.name?.trim()), 15, 'Firmenname in der Quelle vorhanden', 'Firmenname fehlt'),
+    reason(
+      'postal_address',
+      flags.completeAddress,
+      25,
+      'Anschriftfelder vollständig; Zustellbarkeit und Ortszuordnung prüfen',
+      'Anschrift unvollständig',
+    ),
+    reason(
+      'operational',
+      place.source !== 'osm' && place.businessStatus === 'OPERATIONAL',
+      10,
+      'Quelle meldet aktiven Betrieb',
+      'Betriebsstatus nicht bestätigt',
+    ),
+    reason(
+      'branch',
+      flags.branchWeight > 0,
+      10,
+      'Branche in der Auswahl berücksichtigt; Leistungen noch bestätigen',
+      'Branchenpassung nicht bestätigt',
+    ),
+    reason(
+      'phone',
+      Boolean(place.phone),
+      5,
+      'Geschäftliche Kontaktnummer vorhanden, keine Kaltanrufe',
+      'Keine Telefonnummer in der Quelle',
+    ),
+    reason('social_only', flags.socialOnly, 5, 'Social-/Portalpräsenz vorhanden', 'Keine bestätigte Social-Präsenz'),
+    reason(
+      'website',
+      Boolean(flags.websiteAbsentVerified) && !flags.hasWebsite,
+      20,
+      'Fehlen einer eigenen Website gesondert bestätigt',
+      flags.hasWebsite
+        ? 'Eigene Website vorhanden; ausgeschlossen'
+        : 'Keine Website in der Quelle ist kein Nachweis; manuell prüfen',
+    ),
+    reason(
+      'demo_suitability',
+      Boolean(flags.demoSuitable),
+      10,
+      'Eignung für eine geprüfte Demo bestätigt',
+      'Demo-Eignung noch nicht gesondert bestätigt',
+    ),
   ];
-  return { score: Math.round(reasons.reduce((sum, r) => sum + r.points, 0) * flags.branchWeight * 100) / 100, reasons };
+  const score =
+    flags.excluded || flags.hasWebsite
+      ? 0
+      : Math.max(
+          0,
+          Math.min(
+            100,
+            reasons.reduce((sum, r) => sum + r.points, 0),
+          ),
+        );
+  const category = score >= thresholds.goodMin ? 'good_fit' : score >= thresholds.reviewMin ? 'manual_review' : 'unsuitable';
+  reasons.push({
+    criterion: 'suitability',
+    points: 0,
+    verified: false,
+    detail:
+      category === 'good_fit'
+        ? 'Gute Eignung nach belegten Signalen; keine Versandfreigabe'
+        : category === 'manual_review'
+          ? 'Manuelle Prüfung notwendig; keine Versandfreigabe'
+          : 'Nicht geeignet nach aktuellem Prüfstand',
+  });
+  return { score, category, reasons };
 }

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { seedPendingDemo } from './seed';
 import { loginAsAdmin } from './helpers';
 
 test('alle Admin-Seiten laden ohne Fehler', async ({ page }) => {
@@ -57,4 +58,30 @@ test('Claims: Freigabe nur mit Bestätigung, gesperrte Quellen ohne Button', asy
   await card.getByRole('button', { name: 'Sperren' }).click();
   await card.getByRole('button', { name: 'Sperre aufheben' }).click();
   await expect(card.getByText('wartet auf Freigabe')).toBeVisible();
+});
+
+test('Qualitätsfreigabe: keine voreingestellten Noten, schwaches Design blockiert, Einzelprüfung gibt frei', async ({ page }) => {
+  test.setTimeout(180_000);
+  const demo = seedPendingDemo();
+  await loginAsAdmin(page);
+  await page.goto(`/admin/demos/${demo.demoId}`);
+  const form = page
+    .locator('form')
+    .filter({ has: page.getByRole('button', { name: 'Freigeben & veröffentlichen', exact: true }) });
+  const fillReview = async (design: string) => {
+    for (const key of ['facts', 'desktop', 'mobile', 'images', 'text']) await form.locator(`input[name="${key}"]`).check();
+    // Explicitly simulated human ratings for an isolated fictional fixture, never actual business metrics.
+    for (const key of ['design', 'industry', 'personalization', 'images', 'mobile'])
+      await form.locator(`input[name="quality_${key}"]`).fill(key === 'design' ? design : '90');
+  };
+  await expect(form.locator('input[name="quality_design"]')).toHaveValue('');
+  await fillReview('0');
+  await form.getByRole('button', { name: 'Freigeben & veröffentlichen', exact: true }).click();
+  await expect(page.getByText('Qualitätsbewertung unvollständig oder unter Mindestniveau.', { exact: false })).toBeVisible();
+  await expect(form).toBeVisible();
+  await fillReview('90');
+  await form.getByRole('button', { name: 'Freigeben & veröffentlichen', exact: true }).click();
+  await expect(page.getByText(/^(approved|published)$/).first()).toBeVisible();
+  await expect(form).toHaveCount(0);
+  await expect(page.getByText('Qualitätsbewertung unvollständig oder unter Mindestniveau.', { exact: false })).toHaveCount(0);
 });

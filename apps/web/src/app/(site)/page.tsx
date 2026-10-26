@@ -12,12 +12,14 @@ export const metadata = {
 };
 
 const STEPS = [
-  { icon: ICONS.letter, title: 'Brief', text: 'Sie bekommen Post mit einem QR-Code zu Ihrem fertigen Website-Entwurf.' },
-  { icon: ICONS.demo, title: 'Entwurf', text: 'Sie sehen sich den Entwurf auf dem Handy an – in Ruhe, ohne Anmeldung.' },
+  { icon: ICONS.demo, title: 'Entwurf ansehen', text: 'Ihre Vorschau kostenlos und ohne Anmeldung öffnen.' },
+  { icon: ICONS.demo, title: 'Tarif prüfen', text: 'Einrichtung, Monatskosten und Leistungen vergleichen.' },
+  { icon: ICONS.online, title: 'Online bestellen', text: 'Den persönlichen Entwurf über die sichere Bezahlseite beauftragen.' },
+  { icon: ICONS.letter, title: 'Inhalte ergänzen', text: 'Unternehmensangaben, eigene Fotos und Änderungswünsche übermitteln.' },
   {
     icon: ICONS.online,
-    title: 'Online',
-    text: 'Gefällt er Ihnen, ergänzen Sie Ihre Angaben, und er geht auf Ihrer Domain live.',
+    title: 'Prüfen & freigeben',
+    text: 'Die finale Vorschau prüfen. Erst nach Freigabe wird veröffentlicht.',
   },
 ];
 
@@ -56,6 +58,21 @@ export default async function Home() {
           <ExampleStage />
         </div>
       </section>
+      <div
+        className="mx-auto grid max-w-[90rem] grid-cols-2 gap-4 px-5 pb-10 text-sm text-[#3c4454] sm:px-8 md:grid-cols-4"
+        aria-label="Leistungen auf einen Blick"
+      >
+        {[
+          'Individueller Website-Entwurf',
+          'Für Smartphone und Computer',
+          'Einrichtung plus klarer Monatstarif',
+          'Schriftlich abstimmen, ohne Verkaufsgespräch',
+        ].map((item) => (
+          <p key={item} className="border-t border-[#e3e7ee] pt-3">
+            {item}
+          </p>
+        ))}
+      </div>
       <section className="mx-auto max-w-[90rem] px-5 pb-20 sm:px-8 sm:pb-28">
         <SectionHead title="Ein guter Entwurf zeigt, was möglich ist.">
           Handwerk, Studio, Restaurant oder Geschäft: Gestaltung und Aufbau passen zur Branche. Diese Muster sind fiktiv; Ihr
@@ -74,19 +91,18 @@ export default async function Home() {
         <div className="mx-auto max-w-[90rem] px-5 py-20 sm:px-8 sm:py-28">
           <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-end">
             <h2 data-reveal className="text-section max-w-[16ch] text-[#0f172a]">
-              Drei Schritte. Kein Termin.
+              Klarer Ablauf. Kein Termin.
             </h2>
             <p data-reveal style={delay(100)} className="max-w-[44ch] leading-relaxed text-[#3c4454]">
               Zum Ansehen brauchen Sie keine Anmeldung. Für die Veröffentlichung ergänzen Sie anschließend Ihre tatsächlichen
               Inhalte.
             </p>
           </div>
-          <ol className="mt-14 grid gap-4 md:grid-cols-3">
+          <ol className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {STEPS.map((s, i) => (
-              <li key={s.title} data-reveal style={delay(i * 120)} className="card-site card-hover p-7 sm:p-9">
-                <span className="grid h-11 w-11 place-items-center rounded-[8px] bg-[#eef3ff] text-[#1f4fd8]">{s.icon}</span>
-                <p className="font-tight text-nav mt-8 text-[#5b6475]">Schritt {i + 1}</p>
-                <h3 className="mt-1 text-[1.75rem] font-semibold tracking-[-0.04em] text-[#0f172a]">{s.title}</h3>
+              <li key={s.title} data-reveal style={delay(i * 120)} className="card-site p-5">
+                <p className="font-tight text-nav text-[#5b6475]">Schritt {i + 1}</p>
+                <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#0f172a]">{s.title}</h3>
                 <p className="mt-3 leading-relaxed text-[#3c4454]">{s.text}</p>
               </li>
             ))}
@@ -128,6 +144,45 @@ export default async function Home() {
         </SectionHead>
         <div className="mt-12">
           <PriceCards p={p} />
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-4xl px-5 py-16 sm:px-8" aria-labelledby="faq-title">
+        <h2 id="faq-title" className="text-section text-[#0f172a]">
+          Vor der Entscheidung.
+        </h2>
+        <div className="mt-8 divide-y divide-[#e3e7ee] border-y border-[#e3e7ee]">
+          {[
+            [
+              'Kostet mich das Ansehen etwas?',
+              'Nein. Der Entwurf ist unverbindlich und ohne Anmeldung anzusehen. Erst eine ausdrückliche Bestellung begründet eine Zahlungspflicht.',
+            ],
+            [
+              'Welche Kosten entstehen anschließend?',
+              `${p.oneTime} einmalige Einrichtung plus ${p.basis} monatlich für Basis oder insgesamt ${p.carePlus} für Care+. Die Monatsabrechnung beginnt erst ab bestätigtem Go-Live. Beide Monatstarife sind monatlich kündbar.`,
+            ],
+            [
+              'Muss ich dafür telefonieren?',
+              'Nein. Bestellung, Inhalte und Freigabe lassen sich vollständig schriftlich erledigen. Fragen können Sie per Kontaktformular, E-Mail oder selbst geöffnetem WhatsApp-Chat stellen.',
+            ],
+            [
+              'Sind die Beispielbilder echte Kundenprojekte?',
+              'Nein. Unsere Muster sind fiktiv. Stock- und KI-Beispielbilder sind gekennzeichnet. Vor Veröffentlichung Ihrer Website stimmen wir die tatsächlichen Inhalte und Ihre eigenen Fotos mit Ihnen ab.',
+            ],
+            [
+              'Was passiert nach der Bestellung?',
+              'Sie ergänzen Ihre Unternehmensdaten, Inhalte, Bilder und Domainwünsche. Sie erhalten eine finale Vorschau. Erst nach Ihrer Freigabe und den erforderlichen Prüfungen wird veröffentlicht.',
+            ],
+            [
+              'Wem gehören Domain und Inhalte?',
+              'Die vereinbarte Domain wird auf Sie registriert. Sie erhalten die vereinbarten Nutzungsrechte und eine Übergabemöglichkeit bei Vertragsende. Einzelheiten zu Umfang, Export und Drittanbieterrechten stehen in den Vertragsbedingungen.',
+            ],
+          ].map(([question, answer]) => (
+            <details key={question} className="py-5">
+              <summary className="min-h-11 cursor-pointer text-lg font-medium text-[#0f172a]">{question}</summary>
+              <p className="mt-3 leading-relaxed text-[#3c4454]">{answer}</p>
+            </details>
+          ))}
         </div>
       </section>
 

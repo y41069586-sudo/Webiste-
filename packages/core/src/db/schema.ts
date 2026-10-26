@@ -131,6 +131,7 @@ export const leads = pgTable(
 // Demos
 // ---------------------------------------------------------------------------
 export interface QaResult {
+  quality?: import('../quality/demo').DemoQualityAssessment;
   passed: boolean;
   checkedAt: string;
   checks: { name: string; passed: boolean; details?: string; score?: number }[];

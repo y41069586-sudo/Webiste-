@@ -7,10 +7,11 @@ import { LETTER_VARIANT_A } from '../src/letters/variants';
 import { legalDrafts } from '../../../apps/web/src/lib/legal-drafts';
 
 const cfg = { ...DEFAULT_CONFIG, offers: { ...DEFAULT_CONFIG.offers, activeVersion: 'v4' as const } };
-function truth(variant: ComposeInput['variant']) {
+function truth(variant: ComposeInput['variant'], branchLabel?: string) {
   const input: ComposeInput = {
     cfg,
     variant,
+    branchLabel,
     recipient: {
       businessName: 'Fiktiver Betrieb',
       street: 'Musterweg',
@@ -55,6 +56,15 @@ describe('V5: tatsächliche V4-Brief- und Vertragsbedingungen', () => {
         expect(letter.offer).toContain('insgesamt 99');
         expect(letter.offer).toContain('bestätigtem Go-Live');
         expect(JSON.stringify(letter)).not.toMatch(/fertige Website|Sie ist fertig|12 Monate Mindestlaufzeit/);
+      }
+    },
+  );
+  it.each(['Malerbetrieb', 'Friseursalon', 'Garten- und Landschaftsbau', 'Reinigungsunternehmen', 'Sanitärbetrieb'])(
+    '%s: personalisierte A/B/C bleiben wahrheitsgemäße Vorschauangebote',
+    (label) => {
+      for (const arm of ['A', 'B', 'C'] as const) {
+        const { check } = truth(v4LetterVariant(label === 'Friseursalon' ? 'beauty' : 'handwerk', arm), label);
+        expect(check.violations).toEqual([]);
       }
     },
   );

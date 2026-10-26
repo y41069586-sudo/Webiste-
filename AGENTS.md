@@ -206,3 +206,30 @@ Fortlaufender Umsetzungsstand: `docs/v4-quality-handoff.md`; früherer Prüfstan
   Zuordnungen bleiben offen und sperren einen vollständig bestätigten Finanzsaldo/Deckungsbeitrag.
 - Garantie-/Vertragstexte sind Arbeitsfassungen zum implementierten Ablauf, keine Betreiber- oder
   Rechtsfreigabe. Steuerbestätigung bleibt standardmäßig false, V4-Live-Key bleibt blockiert.
+
+## Ultimate-Qualitätsfortsetzung (25.10.2026)
+
+- Aktuellste Entwicklungsprüfung: `docs/ultimate-quality-handoff.md`. Fünf kuratierte KI-Motive
+  sind ausdrücklich **Beispielbilder**, keine echten Betriebsfotos und kein CC0. Im Manifest getrennt
+  dokumentieren, nur Entwürfe; Live nur berechtigte Kundenbilder. Unpassende/fehlende Bilder blockieren
+  bzw. bildfreien Fallback verwenden; kein zufälliges anderes Gewerbe illustrieren.
+- Neue Demo-/Brief-Qualitätsberichte enthalten gewichtete manuelle Kriterien. Unbekannt bleibt `null`,
+  nicht künstlich90/100. Technisch bestanden ist keine gestalterische Freigabe. Erste30-Demos und
+  neue Briefe einschließlich Folgebrief3 benötigen tatsächlich dokumentierte individuelle Prüfung.
+- Screenshot aus exakt gespeichertem/ausgeliefertem Demo-HTML; spätere Templateänderungen dürfen das
+  Briefbild nicht still verändern. QR-Ziel aus dem **fertigen PDF** dekodieren und vergleichen.
+  Empfängeranschrift niemals zur optischen Reparatur abschneiden; unpassende Anschrift zur Prüfung.
+- 0–100-Leadscore nur für neue begründete Bewertungsdatensätze. Fehlendes OSM-Website-Tag und der
+  technische OSM-Default `OPERATIONAL` sind kein Verifikationsnachweis. Aktivität/fehlende eigene
+  Website und Eignung der Demo durch tatsächlichen Faktenreview bestätigen. Score ist keine Versandfreigabe.
+- Primärbranchenprofile Friseur/Garten/Reinigung/Sanitär sind nur inaktiv vorbereitet. Keine bestehende
+  Such-/Variantenquote oder Produktivkonfiguration durch neue Defaults ungefragt überschreiben.
+- Bei großen lokalen Render-/Browser-/Dockerläufen Speicher- und RAM-Grenzen beachten. Schwere
+  Browserpakete nacheinander, Paare in kleinen Gruppen. Speicherabbruch/OOM/Registry503 ist kein
+  bestandenes Ergebnis. Nur eigene entbehrliche Build-Artefakte bereinigen, keine fremde Arbeit/DBs.
+- Push auf den Arbeitsbranch ausdrücklich beauftragt, mit `[skip ci] [skip netlify]`. Keine Freigabe
+  für automatisches Produktionsdeployment, Migrationen, Zahlungen, Werbeversand oder DNS ableiten.
+
+- Vor Versand muss die Brief-Demo weiterhin die aktuell über QR erreichbare Demo sein. Ersetzte
+  Demos und nachträglich fehlgeschlagene/offene Qualitätsprüfungen blockieren Versand erneut.
+  Ein früheres approved darf diesen späteren Befund nicht umgehen.

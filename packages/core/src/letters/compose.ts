@@ -1,3 +1,4 @@
+import { letterBranchBenefit } from './personalization';
 import { v4PriceText } from '../services/offers-v4';
 import type { LetterData } from '@wbm/templates/letter-types';
 import type { AppConfig } from '../config/settings';
@@ -28,7 +29,9 @@ function wrap(text: string, max: number): string[] {
     }
   }
   if (cur) lines.push(cur);
-  return lines.map((l) => (l.length > max ? `${l.slice(0, max - 1)}.` : l));
+  if (lines.some((l) => l.length > max))
+    throw new Error('Anschrift enthält ein zu langes Wort; manuelle Formatierung erforderlich.');
+  return lines;
 }
 
 /**
@@ -36,16 +39,23 @@ function wrap(text: string, max: number): string[] {
  * Straße Hausnummer und „PLZ Ort“ (letzte Zeile, ohne Land), keine Leerzeilen, max. 5 Zeilen.
  */
 export function recipientLines(r: RecipientInput): string[] {
-  const head = `An das Team von ${r.businessName.trim()}`;
-  const nameLines = head.length <= MAX_LINE ? [head] : ['An das Team von', ...wrap(r.businessName.trim(), MAX_LINE).slice(0, 2)];
-  return [...nameLines, `${r.street.trim()} ${r.houseNumber.trim()}`, `${r.postalCode.trim()} ${r.city.trim()}`];
+  const name = r.businessName.trim();
+  if (!name) throw new Error('Firmenname fehlt; Anschrift prüfen.');
+  const head = `An das Team von ${name}`;
+  const wrapped = wrap(name, MAX_LINE);
+  const nameLines = head.length <= MAX_LINE ? [head] : wrapped.length <= 2 ? ['An das Team von', ...wrapped] : wrapped;
+  const street = `${r.street.trim()} ${r.houseNumber.trim()}`;
+  const city = `${r.postalCode.trim()} ${r.city.trim()}`;
+  if (nameLines.length > 3 || street.length > MAX_LINE || city.length > MAX_LINE)
+    throw new Error('Anschrift passt nicht vollständig ins Adressfenster; manuelle Prüfung erforderlich.');
+  return [...nameLines, street, city];
 }
 
 export function fillPlaceholders(text: string, vars: Record<string, string>): string {
   return text.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? vars[k]! : m));
 }
 
-const LOWER_START = /^(Wer|Wir|Ich|Vor|Deshalb|Mit|Seit|Gern|Gerne|Heute|Kürzlich|Als|Da|Damit|Weil)\b/;
+const LOWER_START = /^(Wer|Wir|Ich|Vor|Deshalb|Mit|Seit|So|Gern|Gerne|Heute|Kürzlich|Als|Da|Damit|Weil)\b/;
 
 /** Nach der Anrede mit Komma beginnt der Text klein (außer Höflichkeitsform/Substantiv). */
 export function lowerFirstWord(text: string): string {
@@ -56,9 +66,12 @@ export interface ComposeInput {
   variant: LetterVariantContent;
   cfg: AppConfig;
   recipient: RecipientInput;
+  /** Verified branch label only; never infer private facts or actual service promises. */
+  branchLabel?: string;
   domain: string | null;
   rating: { rating: number; count: number } | null;
   compositeDataUri: string | null;
+  desktopScreenshotDataUri?: string | null;
   qrDataUri: string;
   shortUrl: string;
   dateLine: string;
@@ -103,6 +116,7 @@ export function letterTruthBlocklist(cfg: AppConfig): string[] {
 function composeVars(i: ComposeInput): Record<string, string> {
   return {
     firmenname: i.recipient.businessName,
+    branch_benefit: letterBranchBenefit(i.branchLabel ?? ''),
     ort: i.recipient.city,
     preis: i.priceLabel,
     preise: pricesPhrase(i.cfg, i.priceLabel),
@@ -156,6 +170,7 @@ export function composeLetter(i: ComposeInput): LetterData {
     greeting: fillPlaceholders(v.greeting, vars),
     intro,
     compositeDataUri: i.compositeDataUri,
+    desktopScreenshotDataUri: i.desktopScreenshotDataUri,
     qrDataUri: i.qrDataUri,
     qrCaption: fillPlaceholders(v.qrCaption, vars),
     shortUrl: i.shortUrl,

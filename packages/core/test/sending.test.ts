@@ -83,6 +83,31 @@ describe('Versand', () => {
     await stopBoss();
   });
 
+  it('blockiert einen alten Brief, wenn sein QR inzwischen eine neuere Demo öffnen würde', async () => {
+    const { lead, letter } = await seed();
+    await getDb()
+      .insert(demos)
+      .values({
+        leadId: lead.id,
+        slug: randomToken(24),
+        templateId: 'handwerk-klar',
+        palette: 'werkblau',
+        status: 'published',
+        publishedAt: new Date(Date.now() + 1000),
+        expiresAt: addDays(new Date(), 30),
+      });
+    expect((await sendLetter(letter.id, 'test')).state).toBe('skipped');
+    expect(await getDb().select().from(budgetLedger)).toHaveLength(0);
+  });
+  it('erneut fehlgeschlagene Demo-QA blockiert auch einen zuvor freigegebenen Brief', async () => {
+    const { demo, letter } = await seed();
+    await getDb()
+      .update(demos)
+      .set({ qaResultJson: { passed: false, checkedAt: new Date().toISOString(), checks: [{ name: 'test', passed: false }] } })
+      .where(eq(demos.id, demo.id));
+    expect((await sendLetter(letter.id, 'test')).state).toBe('skipped');
+    expect(await getDb().select().from(budgetLedger)).toHaveLength(0);
+  });
   it('DRY_RUN: kein API-Aufruf, keine Kosten, Status bleibt freigegeben', async () => {
     await updateConfig({ switches: { dryRun: true } }, 'test');
     const { letter } = await seed();

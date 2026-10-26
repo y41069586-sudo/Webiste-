@@ -70,6 +70,10 @@ try {
       }));
       if (name === 'checkout' && !page.url().includes('/checkout/mock/'))
         throw Error('Keine tatsächliche Mock-Bezahlseite: ' + page.url());
+      if (process.env.AUDIT_SCREENSHOTS_DIR && run === 1) {
+        await mkdir(process.env.AUDIT_SCREENSHOTS_DIR, { recursive: true });
+        await page.screenshot({ path: `${process.env.AUDIT_SCREENSHOTS_DIR}/v4-${name}-mobile.png`, fullPage: true });
+      }
       results.push({ name, run, finalPath: new URL(page.url()).pathname, status: response?.status(), ...metrics });
       await ctx.close();
     }

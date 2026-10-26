@@ -12,3 +12,18 @@ export const OPERATOR_PROFILE = {
   website: process.env.OPERATOR_WEBSITE ?? '',
   intro: process.env.OPERATOR_INTRO ?? '',
 };
+
+/** Public pages never present the internal starter identity as a real provider. */
+export function publicOperatorSettings<T extends { sender: Record<string, unknown> }>(
+  cfg: T,
+  defaults: T['sender'],
+  profile: Record<string, unknown> = OPERATOR_PROFILE,
+): T {
+  const sender = { ...cfg.sender };
+  const unconfigured = !sender.name || sender.name === defaults.name;
+  for (const key of ['name', 'company', 'street', 'email', 'phone', 'website', 'whatsappNumber', 'intro']) {
+    if (!sender[key] || sender[key] === defaults[key]) sender[key] = profile[key] ?? '';
+  }
+  if (unconfigured) for (const key of ['postalCode', 'city']) sender[key] = profile[key] ?? '';
+  return { ...cfg, sender };
+}

@@ -1,10 +1,12 @@
+import { sha256 } from '../util/crypto';
+import { assessDemoQuality, type ManualQualityScores } from '../quality/demo';
 import { eq } from 'drizzle-orm';
 import { renderSite } from '@wbm/templates';
 import { getConfig } from '../config/service';
 import { getDb } from '../db/client';
 import { demos, leads, type QaResult } from '../db/schema';
 import { buildQaPrompt, QA_SCHEMA, QA_SYSTEM_PROMPT, QA_TOOL_NAME, validateDemoContent, type QaIssue } from '../demos/content';
-import { leadContentFacts, leadToFacts, renderDemoHtml, storedContent } from '../demos/build';
+import { leadContentFacts, leadToFacts, storedContent } from '../demos/build';
 import { logger } from '../logger';
 import { getProviders } from '../providers';
 import { audit } from '../services/audit';
@@ -118,16 +120,8 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   }
 
   // 6) Screenshots + Komposit (ohne Banner)
-  const shotHtml = renderDemoHtml({
-    templateId: demo.templateId,
-    palette: demo.palette,
-    content,
-    facts: bizFacts,
-    slug: demo.slug,
-    cfg,
-    mode: 'screenshot',
-  });
-  const shots = await takeScreenshots(shotHtml);
+  // Use exactly the stored page served by the demo route; newer template code must not change its screenshot.
+  const shots = await takeScreenshots(html, { hideDemoChrome: true });
   const composite = await renderComposite(shots.desktop, shots.mobile);
   const base = `demos/${demoId}`;
   await storage.put(`${base}/desktop.jpg`, shots.desktop, 'image/jpeg');
@@ -135,12 +129,27 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   await storage.put(`${base}/composite.jpg`, composite, 'image/jpeg');
 
   const passed = checks.every((c) => c.passed);
-  const result: QaResult = { passed, checkedAt: new Date().toISOString(), checks };
+  const htmlHash = sha256(html);
+  const previousQuality = demo.qaResultJson?.quality;
+  const previousScores =
+    previousQuality?.passed && previousQuality.htmlHash === htmlHash
+      ? (Object.fromEntries(
+          previousQuality.dimensions
+            .filter((d) => d.key !== 'technical' && typeof d.score === 'number')
+            .map((d) => [d.key, d.score]),
+        ) as Partial<ManualQualityScores>)
+      : undefined;
+  const quality = { ...assessDemoQuality(checks, previousScores, cfg.review.qualityMinimum), htmlHash };
+  const result: QaResult = { passed, checkedAt: new Date().toISOString(), checks, quality };
   // Bereits freigegebene/veröffentlichte Demos behalten ihren Status (QA-Wiederholung)
   const current = await db.query.demos.findFirst({ where: eq(demos.id, demoId), columns: { status: true, reviewNote: true } });
   const decide = ['building', 'pending_review', 'qa_failed'].includes(current?.status ?? '');
   // Mit Prüfhinweis (z. B. Überarbeitung für Brief 3) immer manuell prüfen
-  const manual = passed && decide ? Boolean(current?.reviewNote) || (await requiresManualReview(db)) : true;
+  const manual = !quality.complete
+    ? true
+    : passed && decide
+      ? Boolean(current?.reviewNote) || (await requiresManualReview(db))
+      : true;
   await db
     .update(demos)
     .set({

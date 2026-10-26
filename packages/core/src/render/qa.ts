@@ -81,7 +81,9 @@ const LAYOUT_SCRIPT = `(() => {
     const s = getComputedStyle(el);
     const r = el.getBoundingClientRect();
     if (r.width <= 2 || r.height <= 2) return false;
-    if (el.closest('details:not([open])') && !el.closest('summary')) return false;
+    for (let parent = el.parentElement; parent; parent = parent.parentElement) {
+      if (parent.tagName === 'DETAILS' && !parent.open && !parent.querySelector(':scope > summary')?.contains(el)) return false;
+    }
     return s.display !== 'none' && s.visibility !== 'hidden';
   }
   function label(el, n) { return (el.textContent || '').trim().slice(0, n); }

@@ -59,7 +59,14 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
     const demo = (await getDb().select().from(demos).where(eq(demos.leadId, leadId)))[0]!;
     await approveDemo(demo.id, 'admin:test', {
       manual: true,
-      review: { facts: true, desktop: true, mobile: true, images: true, text: true },
+      review: {
+        facts: true,
+        desktop: true,
+        mobile: true,
+        images: true,
+        text: true,
+        qualityScores: { design: 90, industry: 90, personalization: 90, images: 90, mobile: 90 },
+      },
     });
     await publishDemo(demo.id, 'admin:test');
     const after = await getDb().query.demos.findFirst({ where: eq(demos.id, demo.id) });

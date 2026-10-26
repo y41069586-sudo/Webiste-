@@ -8,7 +8,7 @@
     "node": ">=22.12"
   },
   "scripts": {
-    "build": "pnpm -r --filter ./packages/* build && pnpm --filter @wbm/web build && pnpm --filter @wbm/worker build",
+    "build": "pnpm -r --filter './packages/*' build && pnpm --filter @wbm/web build && pnpm --filter @wbm/worker build",
     "dev": "pnpm -r --parallel --filter @wbm/web --filter @wbm/worker dev",
     "dev:web": "pnpm --filter @wbm/web dev",
     "dev:worker": "pnpm --filter @wbm/worker dev",

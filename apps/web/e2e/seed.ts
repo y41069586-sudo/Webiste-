@@ -21,10 +21,19 @@ export function setOfferVersion(version: 'v4' | 'legacy'): void {
 
 /** Legt über die Core-Services eine veröffentlichte Demo an (Mock-KI). */
 export function seedPublishedDemo(): SeededDemo {
+  return seedDemo(false);
+}
+
+/** Fiktive Demo mit bestandener Technik, jedoch ohne erfundene manuelle Freigabe. */
+export function seedPendingDemo(): SeededDemo {
+  return seedDemo(true);
+}
+
+function seedDemo(pendingReview: boolean): SeededDemo {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
   const out = execFileSync('pnpm', ['--silent', '--filter', '@wbm/core', 'exec', 'tsx', 'scripts/e2e-seed-demo.ts'], {
     cwd: root,
-    env: { ...process.env, ...e2eEnv, LOG_LEVEL: 'silent' },
+    env: { ...process.env, ...e2eEnv, LOG_LEVEL: 'silent', E2E_DEMO_PENDING: pendingReview ? '1' : '0' },
     encoding: 'utf8',
   });
   const json = out.slice(out.indexOf('{'));

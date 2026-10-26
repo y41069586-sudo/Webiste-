@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { desc, eq } from 'drizzle-orm';
 import {
+  LETTER_QUALITY_DIMENSIONS,
+  type LetterQualityScores,
   approveLetter,
   audit,
   bulkApproveLetters,
@@ -19,13 +21,31 @@ import { actorOf, requireAdmin } from '@/lib/auth';
 
 export async function approveLetterAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
-  await approveLetter(String(form.get('id')), actorOf(s));
+  const ok = await approveLetter(
+    String(form.get('id')),
+    actorOf(s),
+    Object.fromEntries(
+      Object.keys(LETTER_QUALITY_DIMENSIONS).map((key) => [
+        key,
+        form.has(`quality_${key}`) ? Number(form.get(`quality_${key}`)) : NaN,
+      ]),
+    ) as LetterQualityScores,
+  );
+  if (!ok)
+    redirect(
+      `/admin/letters/${encodeURIComponent(String(form.get('id')))}?hinweis=${encodeURIComponent('Freigabe nicht möglich. Wahrheitsprüfung und vollständige Qualitätsbewertung müssen bestanden sein.')}`,
+    );
   revalidatePath('/admin/letters');
 }
 
 export async function bulkApproveLettersAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
-  await bulkApproveLetters(form.getAll('ids').map(String), actorOf(s));
+  const ids = form.getAll('ids').map(String);
+  const count = await bulkApproveLetters(ids, actorOf(s));
+  if (count < ids.length)
+    redirect(
+      `/admin/letters/${encodeURIComponent(ids[0]!)}?hinweis=${encodeURIComponent('Neue Briefe benötigen eine tatsächliche Einzelbewertung. Nicht alle ausgewählten Briefe wurden freigegeben.')}`,
+    );
   revalidatePath('/admin/letters');
 }
 

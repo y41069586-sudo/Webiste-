@@ -51,7 +51,7 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
                   {reason.points > 0 ? '+' : ''}
                   {reason.points}
                 </strong>{' '}
-                · {reason.detail} · {reason.verified ? 'in Quelle belegt' : 'manuelle Prüfung erforderlich'}
+                · {reason.detail} · {reason.verified ? 'belegt (siehe Prüfhinweis)' : 'manuelle Prüfung erforderlich'}
               </li>
             ))}
           </ul>

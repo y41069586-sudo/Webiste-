@@ -350,3 +350,14 @@ vorhanden behaupten. Mehrrechnungs-/Teilzahlungszuordnung wird zur manuellen Kl�
 Pending ist kein Refund-Geldabgang, invoice.paid allein ein Zahlungsbeleg. Ursprüngliche Rechnung
 und vorbereitete Differenzbelege unveränderlich halten. Bereitstellung, Rechts-/Steuerfreigabe und
 vollständige echte Webhookkette weiterhin gesondert; V4-Live-Key blockiert.
+
+## 25.10.2026 – zusätzliche Spezialbranchen, nur vorbereitet
+
+BestehendenOSM-Adapter erhalten. Pausierte Defaultprofile Friseur(shop=hairdresser),
+Gartenbau(craft=gardener), Reinigung(craft=cleaning), Sanitär(craft=plumber) ergänzt.
+Keine gespeicherten aktiven Branchen überschrieben oder echten Suchläufe gestartet.
+Tagbedeutungen anhand offiziellerOSM-Wiki-Seiten geprüft:
+https://wiki.openstreetmap.org/wiki/Tag:shop=hairdresser
+https://wiki.openstreetmap.org/wiki/Tag:craft=gardener
+https://wiki.openstreetmap.org/wiki/Tag:craft=cleaning
+https://wiki.openstreetmap.org/wiki/Tag:craft=plumber

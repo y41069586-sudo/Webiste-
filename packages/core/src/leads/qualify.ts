@@ -156,12 +156,17 @@ export function qualify(input: QualifyInput): QualifyResult {
   if (input.chainByFrequency || matchesChainName(place.name, cfg.targeting.chainNames)) reasons.push('chain');
   if (input.isDuplicate) reasons.push('duplicate');
   if (input.excludedIndustry) reasons.push('excluded_industry');
-  const priority = priorityV4(place, {
-    completeAddress: hasCompleteAddress(place),
-    hasWebsite: website.hasWebsite,
-    socialOnly: website.socialOnly,
-    branchWeight: input.branch.weight,
-  });
+  const priority = priorityV4(
+    place,
+    {
+      completeAddress: hasCompleteAddress(place),
+      hasWebsite: website.hasWebsite,
+      socialOnly: website.socialOnly,
+      branchWeight: input.branch.weight,
+      excluded: reasons.length > 0,
+    },
+    cfg.leadScoring,
+  );
   const base = computeScore({ branch: input.branch, place, rating: input.rating, website });
   return {
     qualified: reasons.length === 0,

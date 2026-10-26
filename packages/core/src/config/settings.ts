@@ -127,6 +127,10 @@ export const appConfigSchema = z.object({
       engagementBeacon: z.boolean().default(false),
     })
     .default({ expectedFollowMonths: 12, expectedChurnRate: 0.5, engagementBeacon: false }),
+  leadScoring: z
+    .object({ goodMin: z.number().int().min(1).max(100), reviewMin: z.number().int().min(0).max(99) })
+    .refine((v) => v.reviewMin < v.goodMin, 'Prüfschwelle muss unter Eignungsschwelle liegen')
+    .default({ goodMin: 75, reviewMin: 40 }),
   segments: z.object({
     /** Segment „neu“: neu aufgetaucht mit so vielen Bewertungen (Mindestanzahl entfällt, Mindest-Rating bleibt) */
     newMinRatings: z.number().int().min(0),
@@ -243,6 +247,8 @@ export const appConfigSchema = z.object({
     placesCacheDays: z.number().int().min(1).max(30),
   }),
   review: z.object({
+    letterQualityMinimum: z.number().int().min(60).max(100).default(80),
+    qualityMinimum: z.number().int().min(60).max(100).default(80),
     manualReviewFirstN: z.number().int().min(0),
     sampleRatePercent: z.number().min(0).max(100),
     /** Lighthouse in der Demo-QA (≈ 8 s je Demo) */
@@ -441,6 +447,46 @@ export const DEFAULT_BRANCHES: BranchConfig[] = [
     weight: 1,
     active: false,
   },
+  {
+    key: 'friseur',
+    group: 'beauty',
+    label: 'Friseursalon',
+    queries: ['Friseursalon'],
+    osmTags: [{ key: 'shop', value: 'hairdresser' }],
+    googleTypes: [],
+    weight: 1,
+    active: false,
+  },
+  {
+    key: 'gartenbau',
+    group: 'handwerk',
+    label: 'Garten- und Landschaftsbau',
+    queries: ['Gartenbau'],
+    osmTags: [{ key: 'craft', value: 'gardener' }],
+    googleTypes: [],
+    weight: 1,
+    active: false,
+  },
+  {
+    key: 'reinigung',
+    group: 'handwerk',
+    label: 'Reinigungsunternehmen',
+    queries: ['Gebäudereinigung'],
+    osmTags: [{ key: 'craft', value: 'cleaning' }],
+    googleTypes: [],
+    weight: 1,
+    active: false,
+  },
+  {
+    key: 'sanitaer',
+    group: 'handwerk',
+    label: 'Sanitärbetrieb',
+    queries: ['Sanitärbetrieb'],
+    osmTags: [{ key: 'craft', value: 'plumber' }],
+    googleTypes: [],
+    weight: 1,
+    active: false,
+  },
 ];
 
 export const DEFAULT_CONFIG: AppConfig = {
@@ -490,6 +536,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     claimDueDays: 14,
   },
   metrics: { expectedFollowMonths: 12, expectedChurnRate: 0.5, engagementBeacon: false },
+  leadScoring: { goodMin: 75, reviewMin: 40 },
   segments: {
     newMinRatings: 3,
     newMaxRatings: 20,
@@ -624,6 +671,8 @@ export const DEFAULT_CONFIG: AppConfig = {
     placesCacheDays: 30,
   },
   review: {
+    letterQualityMinimum: 80,
+    qualityMinimum: 80,
     manualReviewFirstN: 30,
     sampleRatePercent: 10,
     qaLighthouse: true,

@@ -1,7 +1,14 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { and, desc, eq } from 'drizzle-orm';
-import { getDb, getProviders, schema, type TruthCheckResult } from '@wbm/core';
+import {
+  getDb,
+  getProviders,
+  schema,
+  LETTER_QUALITY_DIMENSIONS,
+  type LetterQualityAssessment,
+  type TruthCheckResult,
+} from '@wbm/core';
 import { Badge, Card, PageHeader, StatusBadge, btn, input } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
@@ -24,6 +31,7 @@ export default async function LetterDetail({
   const db = getDb();
   const letter = await db.query.letters.findFirst({ where: eq(schema.letters.id, id) });
   if (!letter) notFound();
+  const quality = letter.truthCheckJson?._quality as LetterQualityAssessment | undefined;
   const lead = await db.query.leads.findFirst({ where: eq(schema.leads.id, letter.leadId) });
   const log = await db
     .select()
@@ -63,9 +71,40 @@ export default async function LetterDetail({
           )}
         </Card>
         <div className="space-y-6">
+          {quality ? (
+            <Card title="Briefqualität">
+              <p className="text-sm">
+                {quality.total === null ? 'Einzelbewertungen ausstehend' : `${quality.total}/100`} ·{' '}
+                {quality.passed ? 'Mindestkriterien bestanden' : 'noch nicht freigegeben'}
+              </p>
+            </Card>
+          ) : null}
           {letter.status === 'generated' && truth?.passed ? (
             <Card title="Entscheidung">
-              <form action={approveLetterAction}>
+              <form action={approveLetterAction} className="space-y-3">
+                {quality ? (
+                  <fieldset className="space-y-3">
+                    <legend className="text-sm font-semibold">Brief tatsächlich prüfen (0–100)</legend>
+                    {Object.entries(LETTER_QUALITY_DIMENSIONS).map(([key, definition]) => (
+                      <label key={key} className="block text-sm">
+                        {definition.label} ({definition.weight} %)
+                        <input
+                          type="number"
+                          name={`quality_${key}`}
+                          min={0}
+                          max={100}
+                          required
+                          className={input}
+                          placeholder="Nach PDF-Sichtprüfung bewerten"
+                        />
+                      </label>
+                    ))}
+                    <p className="text-xs text-slate-600">
+                      Mindestgesamtwert {quality.minimum}; kein Bereich unter 60. Der QR-Code wurde bereits aus dem fertigen PDF
+                      geprüft. Technische Tests ersetzen keine Sichtprüfung.
+                    </p>
+                  </fieldset>
+                ) : null}
                 <input type="hidden" name="id" value={letter.id} />
                 <button className={btn.primary} type="submit">
                   Freigeben

@@ -1,3 +1,4 @@
+import { assessDemoQuality, type ManualQualityScores } from '../quality/demo';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { effectiveSwitches, getConfig } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
@@ -32,7 +33,14 @@ export async function approveDemo(
   opts: {
     manual: boolean;
     note?: string;
-    review?: { facts: boolean; desktop: boolean; mobile: boolean; images: boolean; text: boolean };
+    review?: {
+      facts: boolean;
+      desktop: boolean;
+      mobile: boolean;
+      images: boolean;
+      text: boolean;
+      qualityScores?: ManualQualityScores;
+    };
   } = { manual: true },
 ): Promise<void> {
   const db = getDb();
@@ -53,6 +61,56 @@ export async function approveDemo(
         !['facts', 'desktop', 'mobile', 'images', 'text'].every((k) => opts.review![k as keyof typeof opts.review] === true))
     )
       throw new Error('Fakten, Desktop, Mobil, Bilder und Text müssen tatsächlich manuell geprüft werden.');
+    const quality = demo.qaResultJson.quality
+      ? assessDemoQuality(
+          demo.qaResultJson.checks,
+          opts.review?.qualityScores ??
+            (!opts.manual && demo.qaResultJson.quality?.passed
+              ? Object.fromEntries(
+                  demo.qaResultJson.quality.dimensions.filter((d) => d.key !== 'technical').map((d) => [d.key, d.score]),
+                )
+              : undefined),
+          (await getConfig({ db: tx })).review.qualityMinimum,
+        )
+      : undefined;
+    if (quality && !quality.passed)
+      throw new Error('Qualitätsbewertung unvollständig oder unter Mindestniveau; manuelle Überarbeitung erforderlich.');
+    if (opts.manual && opts.review?.facts) {
+      const lead = await tx.query.leads.findFirst({ where: eq(leads.id, demo.leadId) });
+      if (lead?.scoreReasons?.some((r) => r.criterion === 'suitability')) {
+        const cfg = await getConfig({ db: tx });
+        const reasons = lead.scoreReasons
+          .filter((r) => r.criterion !== 'suitability')
+          .map((r) =>
+            r.criterion === 'operational'
+              ? { ...r, points: 10, verified: true, detail: 'Aktiver Betrieb im manuellen Faktenreview bestätigt' }
+              : r.criterion === 'website'
+                ? { ...r, points: 20, verified: true, detail: 'Fehlen einer eigenen Website im manuellen Faktenreview bestätigt' }
+                : r.criterion === 'demo_suitability'
+                  ? { ...r, points: 10, verified: true, detail: 'Demo technisch und gestalterisch einzeln geprüft' }
+                  : r,
+          );
+        const score = Math.max(
+          0,
+          Math.min(
+            100,
+            reasons.reduce((sum, r) => sum + r.points, 0),
+          ),
+        );
+        reasons.push({
+          criterion: 'suitability',
+          points: 0,
+          verified: true,
+          detail:
+            score >= cfg.leadScoring.goodMin
+              ? 'Gute Eignung; weiterhin keine Versandfreigabe'
+              : score >= cfg.leadScoring.reviewMin
+                ? 'Manuelle Prüfung notwendig'
+                : 'Nicht geeignet nach aktuellem Prüfstand',
+        });
+        await tx.update(leads).set({ score, scoreReasons: reasons, updatedAt: new Date() }).where(eq(leads.id, lead.id));
+      }
+    }
     await tx
       .update(demos)
       .set({
@@ -62,6 +120,7 @@ export async function approveDemo(
         reviewNote: opts.note ?? null,
         qaResultJson: {
           ...demo.qaResultJson,
+          ...(quality ? { quality: { ...quality, htmlHash: demo.qaResultJson.quality?.htmlHash } } : {}),
           ...(opts.manual ? { review: { ...opts.review!, actor, at: new Date().toISOString() } } : {}),
         },
         updatedAt: new Date(),

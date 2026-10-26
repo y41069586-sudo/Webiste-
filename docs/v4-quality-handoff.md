@@ -171,3 +171,27 @@ Default jetzt['card']. Dies allein ändert keine Netlify-/Supabase-Laufzeitkonfi
 Resend-Postfach vorhanden, noch kein Eingangsbeleg und noch keine Testmail gesendet. Inbox-Sendetool
 verlangt vor Versand konkrete Bestätigung des Empfängers/Betreffs/Wortlauts; allgemeinesJa reicht dort
 nicht. Kein weiterer App-Neubau nötig; technische Providerabnahme und die externen Freigaben folgen.
+
+## Ultimate-Fortsetzung in Arbeit (25.10.2026)
+
+Gesicherter Push `e2f6da448a49bd56265743c3459b0c557f94af4e`, Branch `codex/conversion-v4`.
+Zweites Paket mit Branchenbildern, echter PDF-QR-Prüfung, gewichteten manuellen Qualitätsfreigaben,
+0–100-Leadscore, kompakter Firmenwebsite und Briefverbesserung lokal umgesetzt. Vollständiger
+aktueller Arbeits-/Fehler-/Prüfstand: [Ultimate-Handoff](ultimate-quality-handoff.md).
+Ältere Aussagen „lokal abgeschlossen“ gelten für den damaligen V4/V5-Stand, nicht automatisch für
+alle neuen Ultimate-Anforderungen. Neue Endabnahme noch in Arbeit. Keine Live-Aktion.
+
+## Abgeschlossene lokale Fortsetzung (26.10.2026)
+
+Autoritativer neuer Nachweis: [Ultimate-Abschluss](ultimate-quality-abschluss.md).
+461Core,97Template,19Root und23Browserfälle bestanden; danach33Versand-/Followup-Fälle und
+6Werkstatt-Palettenfälle bestanden.15Primärbranchen-Demos/45PDFs sowie20weitere Vorlagenpaare
+inklusivePlakat gerendert und visuell geprüft. Neue Versandprüfung verhindert alte Screenshot-/QR-
+Zuordnung bei ersetzter Demo und blockiert nachträglich fehlgeschlagene QA. Lange Werkstatt-Headline
+korrigiert und betroffene Paare erneut erstellt. Finale Typen/Lint/Build bestanden.
+Worker-Offline-Image6fca5413a7df mit unveränderten installierten Abhängigkeiten und endgültigen Quellen
+besteht Smoke; kalter Registry-Neubau bleibt durchHTTP503 blockiert. Mobile Labormessung abgeschlossen.
+Vorherige Abschnitte mit „in Arbeit“ sind zeitgebundene Zwischenstände und durch diesen Abschluss ersetzt.
+Keine Produktionsmigration/Veröffentlichung/Zahlung/Briefe/Domainkäufe. DRY_RUN=true.
+Nächster Schritt: fachliche Anbieter-/Steuer-/Vertragsfreigaben und geschützte Runtimezugänge,
+anschließend genehmigte externe Sandbox-/Infrastrukturabnahme gemäß Abschlussbericht.

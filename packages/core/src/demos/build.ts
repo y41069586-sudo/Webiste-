@@ -223,7 +223,7 @@ export async function senderPhotoDataUri(cfg: AppConfig): Promise<string | null>
  * bei Gleichstand deterministisch je Lead). Bei Neugenerierung ein anderes Template.
  */
 export function chooseTemplate(
-  lead: Pick<Lead, 'id' | 'branchGroup'>,
+  lead: Pick<Lead, 'id' | 'branchGroup'> & Partial<Pick<Lead, 'branch'>>,
   previous: string[] = [],
   usage: Record<string, number> = {},
 ): { templateId: string; palette: string } {
@@ -238,9 +238,13 @@ export function chooseTemplate(
   const tpl = [...pool].sort(
     (a, b) => tplUse(a.id) - tplUse(b.id) || ((seed + a.id.length) % 7) - ((seed + b.id.length) % 7),
   )[0]!;
+  const natural = /garten|landschaft|gärtner|gaertner/i.test(lead.branch ?? '');
+  const preference = (palette: string) => (natural && palette === 'waldgruen' ? -1 : 0);
   const palette = [...tpl.palettes].sort(
     (a, b) =>
-      (usage[`${tpl.id}/${a}`] ?? 0) - (usage[`${tpl.id}/${b}`] ?? 0) || tpl.palettes.indexOf(a) - tpl.palettes.indexOf(b),
+      (usage[`${tpl.id}/${a}`] ?? 0) - (usage[`${tpl.id}/${b}`] ?? 0) ||
+      preference(a) - preference(b) ||
+      tpl.palettes.indexOf(a) - tpl.palettes.indexOf(b),
   )[0]!;
   return { templateId: tpl.id, palette };
 }

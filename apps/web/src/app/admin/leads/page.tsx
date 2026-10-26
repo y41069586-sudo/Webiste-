@@ -164,7 +164,10 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
               <Td className="text-xs text-slate-600">
                 {l.rejectionReasons.map((r) => REJECTION_LABELS[r as RejectionReason] ?? r).join(', ') || '–'}
               </Td>
-              <Td className="tabular-nums">{l.score}</Td>
+              <Td className="tabular-nums">
+                {l.score}
+                {l.scoreReasons?.some((r) => r.criterion === 'suitability') ? ' / 100' : ''}
+              </Td>
               <Td className="text-xs">{l.source}</Td>
               <Td className="text-xs whitespace-nowrap">{dt(l.createdAt)}</Td>
             </tr>

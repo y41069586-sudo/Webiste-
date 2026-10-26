@@ -39,7 +39,8 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
             <div>
               <p className="text-section text-[#0f172a]">{brand}</p>
               <p className="mt-4 max-w-[34ch] text-[0.95rem] leading-relaxed text-[#3c4454]">
-                Fertige Websites für lokale Betriebe ohne eigene Website – mit eigener Domain und Hosting. Aus {s.city}.
+                Fertige Websites für lokale Betriebe ohne eigene Website – mit eigener Domain und Hosting.{' '}
+                {s.city ? `Aus ${s.city}.` : ''}
               </p>
             </div>
             <nav aria-label="Seiten">
@@ -74,15 +75,19 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
             <div>
               <p className="text-strong text-[#0f172a]">Kontakt</p>
               <ul className="font-tight text-nav mt-3 space-y-2 text-[#0f172a]">
-                <li>
-                  <a href={`mailto:${s.email}`} className="transition-opacity duration-300 hover:opacity-60">
-                    {s.email}
-                  </a>
-                </li>
+                {s.email ? (
+                  <li>
+                    <a href={`mailto:${s.email}`} className="transition-opacity duration-300 hover:opacity-60">
+                      {s.email}
+                    </a>
+                  </li>
+                ) : null}
                 {s.phone ? <li>{s.phone}</li> : null}
-                <li className="text-[#5b6475]">
-                  {s.street}, {s.postalCode} {s.city}
-                </li>
+                {s.street && s.city ? (
+                  <li className="text-[#5b6475]">
+                    {s.street}, {s.postalCode} {s.city}
+                  </li>
+                ) : null}
               </ul>
             </div>
           </div>

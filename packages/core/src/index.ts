@@ -124,3 +124,6 @@ export * from './services/care-v4';
 export * from './services/economics-v4';
 
 export { closeBrowser } from './render/browser';
+
+export * from './quality/demo';
+export * from './quality/letter';

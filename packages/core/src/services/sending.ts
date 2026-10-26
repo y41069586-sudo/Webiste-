@@ -9,7 +9,7 @@ import type { LetterWebhookEvent, ProviderLetterStatus } from '../providers/type
 import { addBusinessDays, addDays } from '../util/time';
 import { audit } from './audit';
 import { BudgetExceededError, KillSwitchError, raiseAlert, releaseReservation, reserveBudget, settleCost } from './budget';
-import { extendDemoExpiry, extendDemoUntil } from './demo-review';
+import { currentDemoForLead, extendDemoExpiry, extendDemoUntil } from './demo-review';
 import { GoLiveBlockedError, goLiveBlockers } from './readiness';
 import { transitionLead } from './lead-state';
 
@@ -100,11 +100,22 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     return { state: 'skipped', reason: 'Claim gesperrt' };
   }
   if (!letter.isTest) {
+    const currentDemo = await currentDemoForLead(db, letter.leadId);
     const demo = letter.demoId ? await db.query.demos.findFirst({ where: eq(demos.id, letter.demoId) }) : null;
-    if (!demo || demo.status !== 'published' || (demo.expiresAt && demo.expiresAt < addDays(new Date(), 7))) {
+    if (
+      !demo ||
+      currentDemo?.id !== demo.id ||
+      demo.qaResultJson?.passed === false ||
+      demo.qaResultJson?.quality?.passed === false ||
+      demo.status !== 'published' ||
+      (demo.expiresAt && demo.expiresAt < addDays(new Date(), 7))
+    ) {
       await db
         .update(letters)
-        .set({ status: 'cancelled', statusReason: 'Demo nicht (mehr lange genug) online' })
+        .set({
+          status: 'cancelled',
+          statusReason: 'Demo ersetzt, Qualitätsprüfung offen/fehlgeschlagen oder nicht mehr lange genug online',
+        })
         .where(eq(letters.id, letterId));
       return { state: 'skipped', reason: 'Demo nicht verfügbar' };
     }

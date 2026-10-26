@@ -19,6 +19,16 @@ export interface SectionDef {
 
 export const SECTIONS: SectionDef[] = [
   {
+    id: 'leadScoring',
+    title: 'Lead-Eignung (0–100)',
+    description:
+      'Belegte Signale, keine Umsatzprognose. Fehlender Website-Nachweis oder fehlende Demo-Prüfung gibt keine Punkte. Ein Score ersetzt keine Versandfreigabe.',
+    fields: [
+      { path: 'leadScoring.goodMin', label: 'Gute Eignung ab', type: 'number' },
+      { path: 'leadScoring.reviewMin', label: 'Manuelle Prüfung ab', type: 'number' },
+    ],
+  },
+  {
     id: 'sender',
     title: 'Absender & Impressumsdaten',
     description: 'Erscheint im Brief, auf Demo-Seiten (Footer), in E-Mails und Rechnungen.',
@@ -200,6 +210,8 @@ export const SECTIONS: SectionDef[] = [
       { path: 'timing.renewalReminderDays', label: 'Erinnerung vor Hosting-Ablauf (Tage)', type: 'number' },
       { path: 'timing.assumeDeliveredAfterDays', label: 'Zustellung annehmen nach (Tage)', type: 'number' },
       { path: 'timing.placesCacheDays', label: 'Places-Daten-Cache (Tage, max. 30)', type: 'number' },
+      { path: 'review.letterQualityMinimum', label: 'Mindestwert Briefqualität (60–100)', type: 'number' },
+      { path: 'review.qualityMinimum', label: 'Mindestwert Demo-Qualität (60–100)', type: 'number' },
       { path: 'review.manualReviewFirstN', label: 'Manuelle Prüfung der ersten N Demos', type: 'number' },
       { path: 'review.sampleRatePercent', label: 'Danach Stichprobe (%)', type: 'number' },
       { path: 'review.qaLighthouse', label: 'Lighthouse in der Demo-QA', type: 'bool' },

@@ -12,14 +12,22 @@ export async function imagesPainted(page: Page): Promise<void> {
 }
 
 /** Screenshots ohne Banner (Screenshot-Modus): Desktop 1440×900, Mobil 390×844 (2×). */
-export async function takeScreenshots(html: string): Promise<Screenshots> {
-  const desktop = await withPage({ width: 1440, height: 900 }, async (page) => {
+export async function takeScreenshots(html: string, opts: { hideDemoChrome?: boolean } = {}): Promise<Screenshots> {
+  const desktop = await withPage({ width: 1440, height: 900, deviceScaleFactor: 2 }, async (page) => {
     await page.setContent(html, { waitUntil: 'load' });
+    if (opts.hideDemoChrome)
+      await page.addStyleTag({
+        content: '.sw-demo-context,.sw-demo-toolbar,#uebernehmen{display:none!important}body{padding-bottom:0!important}',
+      });
     await imagesPainted(page);
     return page.screenshot({ type: 'jpeg', quality: 88, fullPage: false });
   });
   const mobile = await withPage({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true }, async (page) => {
     await page.setContent(html, { waitUntil: 'load' });
+    if (opts.hideDemoChrome)
+      await page.addStyleTag({
+        content: '.sw-demo-context,.sw-demo-toolbar,#uebernehmen{display:none!important}body{padding-bottom:0!important}',
+      });
     await imagesPainted(page);
     return page.screenshot({ type: 'jpeg', quality: 88, fullPage: false });
   });

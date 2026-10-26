@@ -1,15 +1,22 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { eq } from 'drizzle-orm';
-import { getDb, schema } from '@wbm/core';
-import { Badge, Card, PageHeader, StatusBadge, Table, Td, btn, input } from '@/components/ui';
+import { getDb, schema, DEMO_QUALITY_DIMENSIONS } from '@wbm/core';
+import { Badge, Card, PageHeader, StatusBadge, Table, Td, btn, input, Notice } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
 import { approveDemoAction, rejectDemoAction } from '../actions';
 
 export const metadata = { title: 'Demo prüfen' };
 
-export default async function DemoDetail({ params }: { params: Promise<{ id: string }> }) {
+export default async function DemoDetail({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ quality?: string }>;
+}) {
+  const qualityMessage = (await searchParams).quality;
   await requireAdmin();
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
@@ -21,6 +28,12 @@ export default async function DemoDetail({ params }: { params: Promise<{ id: str
   const canDecide = ['pending_review', 'qa_failed'].includes(demo.status);
   return (
     <>
+      {qualityMessage === 'required' && canDecide ? (
+        <Notice kind="warn">
+          Qualitätsbewertung unvollständig oder unter Mindestniveau. Bitte Entwurf überarbeiten, erneut prüfen und alle Bereiche
+          tatsächlich bewerten.
+        </Notice>
+      ) : null}
       <PageHeader
         title={`Demo: ${lead?.businessName ?? '–'}`}
         subtitle={
@@ -81,7 +94,7 @@ export default async function DemoDetail({ params }: { params: Promise<{ id: str
                     <input type="checkbox" name={key} required />
                     {
                       [
-                        'Name, Anschrift, Betrieb und Branche verifiziert',
+                        'Name, Anschrift, aktiver Betrieb, Branche und fehlende eigene Website verifiziert',
                         'Desktop tatsächlich angesehen, keine sichtbaren Layoutfehler',
                         'Handy tatsächlich angesehen und bedienbar',
                         'Bilder passend, rechtmäßig und korrekt gekennzeichnet',
@@ -90,6 +103,29 @@ export default async function DemoDetail({ params }: { params: Promise<{ id: str
                     }
                   </label>
                 ))}
+                {demo.qaResultJson?.quality ? (
+                  <fieldset className="grid gap-3 sm:grid-cols-2">
+                    <legend className="text-sm font-semibold">Tatsächliche Qualitätsbewertung (0–100)</legend>
+                    {Object.entries(DEMO_QUALITY_DIMENSIONS).map(([key, definition]) => (
+                      <label key={key} className="text-sm">
+                        {definition.label} ({definition.weight} %)
+                        <input
+                          type="number"
+                          name={`quality_${key}`}
+                          min={0}
+                          max={100}
+                          required
+                          className={input}
+                          placeholder="Nach Sichtprüfung bewerten"
+                        />
+                      </label>
+                    ))}
+                    <p className="text-xs text-slate-600 sm:col-span-2">
+                      Keine automatische Designnote. Mindestgesamtwert {demo.qaResultJson.quality.minimum}; kein Bereich unter 60.
+                      Niedrige Werte erfordern Überarbeitung.
+                    </p>
+                  </fieldset>
+                ) : null}
                 <input type="hidden" name="id" value={demo.id} />
                 <textarea name="note" placeholder="Notiz (optional)" className={input} rows={2} />
                 <button className={btn.primary} type="submit">
@@ -97,7 +133,7 @@ export default async function DemoDetail({ params }: { params: Promise<{ id: str
                 </button>
                 {demo.status === 'qa_failed' ? (
                   <p className="text-xs text-amber-700">
-                    Achtung: QA nicht bestanden – nur freigeben, wenn die Befunde unkritisch sind.
+                    QA nicht bestanden: Befunde beheben und erneut prüfen. Eine manuelle Freigabe umgeht diese Sperre nicht.
                   </p>
                 ) : null}
               </form>
@@ -117,6 +153,15 @@ export default async function DemoDetail({ params }: { params: Promise<{ id: str
             </Card>
           ) : null}
           <Card title={`QA ${demo.qaResultJson ? (demo.qaResultJson.passed ? '– bestanden' : '– nicht bestanden') : ''}`}>
+            {demo.qaResultJson?.quality ? (
+              <p className="mb-3 text-sm">
+                Gewichtete Bewertung:{' '}
+                {demo.qaResultJson.quality.total === null
+                  ? 'Sichtprüfung und Einzelbewertungen stehen aus'
+                  : `${demo.qaResultJson.quality.total}/100`}
+                . Technische Tests allein liefern keine Designnote.
+              </p>
+            ) : null}
             <Table head={['Prüfung', 'Ergebnis', 'Details']} empty="Noch nicht geprüft">
               {(demo.qaResultJson?.checks ?? []).map((c) => (
                 <tr key={c.name}>

@@ -18,10 +18,10 @@ export function privacyNoticeText(cfg: AppConfig, source: LeadSourceKind, privac
   const s = cfg.sender;
   return (
     `**Datenschutzhinweis (Art. 14 DSGVO):** Verantwortlich: ${s.company}, ${s.name}, ${s.street}, ${s.postalCode} ${s.city}, ${s.email}. ` +
-    `Ihre Firmenanschrift stammt aus ${dataSourceText(source)}. Wir verwenden sie, um Ihnen einmalig dieses Angebot zu senden ` +
-    `(Rechtsgrundlage: berechtigtes Interesse an Direktwerbung, Art. 6 Abs. 1 lit. f DSGVO). Empfänger sind unser Druck- und ` +
+    `Ihre Firmenanschrift stammt aus ${dataSourceText(source)}. Wir verwenden sie für dieses postalische Angebot ` +
+    `(höchstens ${cfg.letter.maxLettersPerLead} Briefe insgesamt, jederzeit widersprechbar; Rechtsgrundlage: berechtigtes Interesse an Direktwerbung, Art. 6 Abs. 1 lit. f DSGVO). Empfänger sind unser Druck- und ` +
     `Versanddienstleister sowie unser Hosting-Anbieter. Reagieren Sie nicht, löschen wir Ihre Daten spätestens ` +
-    `${cfg.timing.leadRetentionMonths} Monate nach diesem Brief. Sie haben das Recht auf Auskunft, Berichtigung, Löschung, ` +
+    `${cfg.timing.leadRetentionMonths} Monate nach dem letzten Brief. Sie haben das Recht auf Auskunft, Berichtigung, Löschung, ` +
     `Einschränkung und Beschwerde bei einer Datenschutz-Aufsichtsbehörde. Vollständige Informationen: ${privacyUrl}`
   );
 }
@@ -30,6 +30,6 @@ export function privacyNoticeText(cfg: AppConfig, source: LeadSourceKind, privac
 export function objectionNoticeText(optOutEmail: string): string {
   return (
     `**Widerspruch (Art. 21 DSGVO):** Kein Interesse? Scannen Sie den Code und tippen Sie auf „Kein Interesse“ oder schreiben Sie an ` +
-    `${optOutEmail}. Wir löschen Ihre Daten dann sofort und schreiben Ihnen nie wieder.`
+    `${optOutEmail}. Weitere Werbung wird gesperrt, Akquisedaten werden gelöscht. Ein Sperrhash und gesetzlich aufzubewahrende Unterlagen bleiben erhalten.`
   );
 }

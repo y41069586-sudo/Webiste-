@@ -43,6 +43,10 @@ describe('Konfiguration', () => {
       'einzelhandel',
       'kurse',
       'kurse',
+      'beauty',
+      'handwerk',
+      'handwerk',
+      'handwerk',
     ]);
   });
 

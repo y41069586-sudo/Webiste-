@@ -308,12 +308,12 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
     services: [
       {
         title: 'Schnitt & Styling',
-        text: 'Platz für die tatsächlich angebotenen Schnitte und Styling-Leistungen.',
+        text: 'Ideen für Schnitt und Styling, abgestimmt auf persönliche Wünsche.',
         icon: 'sparkle',
       },
       {
         title: 'Farbe & Pflege',
-        text: 'Mögliche Übersicht zu Farb- und Pflegeangeboten; Umfang mit dem Salon abstimmen.',
+        text: 'Farbideen und Pflege rund ums Haar. Den tatsächlichen Umfang bestätigt der Salon.',
         icon: 'drop',
       },
       { title: 'Terminwünsche', text: 'Eine Anfrage senden; der Salon bestätigt den gewünschten Termin.', icon: 'calendar' },
@@ -323,8 +323,12 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
     match: /garten|landschaft|gaertner|gärtner/i,
     headline: 'Gartenideen für Ihr Zuhause',
     services: [
-      { title: 'Gartengestaltung', text: 'Eine mögliche Übersicht für Gestaltung und Bepflanzung.', icon: 'leaf' },
-      { title: 'Pflegearbeiten', text: 'Hier lassen sich die bestätigten Pflegeleistungen darstellen.', icon: 'flower' },
+      {
+        title: 'Gartengestaltung',
+        text: 'Eine mögliche Übersicht zu Bepflanzung, Wegen und der Aufteilung von Gartenflächen.',
+        icon: 'leaf',
+      },
+      { title: 'Pflegearbeiten', text: 'Mögliche Pflegearbeiten für Beete, Gehölze und Grünflächen.', icon: 'flower' },
       { title: 'Ihr Vorhaben', text: 'Wünsche und Standort beschreiben und den möglichen Umfang anfragen.', icon: 'chat' },
     ],
   },
@@ -332,7 +336,11 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
     match: /reinig|gebäudeservice|gebaeudeservice/i,
     headline: 'Reinigung anfragen. Umfang klar abstimmen.',
     services: [
-      { title: 'Räume & Gebäude', text: 'Platz für die vom Betrieb bestätigten Reinigungsbereiche.', icon: 'house' },
+      {
+        title: 'Räume & Gebäude',
+        text: 'Mögliche Reinigungsbereiche in Wohn-, Büro- oder Gewerberäumen im Überblick.',
+        icon: 'house',
+      },
       {
         title: 'Regelmäßige Reinigung',
         text: 'Mögliche Einsatzzeiten und Umfang werden persönlich bestätigt.',
@@ -351,10 +359,14 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
     services: [
       {
         title: 'Technische Leistungen',
-        text: 'Hier stehen nach Abstimmung die tatsächlich angebotenen Arbeiten.',
+        text: 'Eine Übersicht zu möglichen Arbeiten an vorhandenen Installationen.',
         icon: 'wrench',
       },
-      { title: 'Wartung & Reparatur', text: 'Mögliche Aufgaben darstellen; keine ungeprüfte Notdienstzusage.', icon: 'house' },
+      {
+        title: 'Wartung & Reparatur',
+        text: 'Das Anliegen und die vorhandene Anlage beschreiben, um den möglichen Umfang zu klären.',
+        icon: 'house',
+      },
       {
         title: 'Projekt anfragen',
         text: 'Das Vorhaben und vorhandene Unterlagen für eine Rückmeldung übermitteln.',
@@ -429,7 +441,7 @@ export function libraryContent(
       ? `${vars.branche} in ${vars.stadt}: Leistungen kennenlernen und Ihren Wunsch direkt anfragen.`
       : focus[group],
     services,
-    about: `${vars.name} ist als ${vars.branche} in ${vars.stadt} erfasst. Anschrift und Kontakt finden Sie auf dieser Seite.\n\nDie dargestellten Angebotsbereiche zeigen, wie sich die Website aufbauen lässt. Vor der Veröffentlichung werden Leistungen, Texte und Bilder mit dem Betrieb abgestimmt.`,
+    about: `${vars.name} ist als ${vars.branche} in ${vars.stadt} zu finden. Anschrift und Kontakt finden Sie auf dieser Seite.\n\nDie dargestellten Angebotsbereiche zeigen, wie sich die Website aufbauen lässt. Vor der Veröffentlichung werden Leistungen, Texte und Bilder mit dem Betrieb abgestimmt.`,
     cta_text: group === 'beauty' ? 'Termin anfragen' : group === 'kurse' ? 'Kurs anfragen' : 'Anfrage stellen',
     seo_title: `${vars.name} – ${vars.branche} in ${vars.stadt}`.slice(0, 65),
     seo_description: `${vars.branche} in ${vars.stadt}. ${focus[group]}`.slice(0, 158),

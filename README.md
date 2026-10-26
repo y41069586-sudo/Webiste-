@@ -5,6 +5,8 @@ personalisierten Brief mit QR-Code und verkauft die fertige Website ohne Verkauf
 **Neukundenangebot V4:** Basis **597 € Einrichtung + 19 €/Monat** oder Care+ **597 € Einrichtung + insgesamt 99 €/Monat**. Neue Bestellungen speichern nach ausdrücklicher Zustimmung ein Zahlungsmittel/Mandat; genau ein Monatsabo startet erst nach bestätigtem Go-Live. Keine zwölfmonatige Mindestbindung. Ältere V4-Bestellungen mit separatem Abo-Checkout behalten ihr Verfahren.
 
 Die bisherigen 590-/49-/19-Euro-Verträge bleiben unverändert. V4/V5 ist auf dem Entwicklungszweig vorbereitet, nicht produktiv freigegeben. Verbindlich: [Qualitätsprüfung](docs/v5-quality-pruefung.md), [Go-Live-Restpunkte](docs/v5-go-live-checkliste.md) und [wiederaufnehmbarer Handoff](docs/v4-quality-handoff.md). Der ältere [V4-Bericht](docs/conversion-optimization-v4.md) bleibt als historischer Nachweis erhalten.
+Aktueller Nachweisbericht: [Ultimate-Abschluss](docs/ultimate-quality-abschluss.md).
+Aktuelle Premium-/Qualitätsfortsetzung: [Ultimate-Handoff](docs/ultimate-quality-handoff.md).
 Maßgebliche Projektbeschreibung: [CLAUDE.md](CLAUDE.md).
 
 **Codex-Übernahme:** Dauerhafte Arbeitsanweisungen und neueste Betreiberentscheidungen stehen in
@@ -43,7 +45,7 @@ apps/web        Next.js 16 (App Router): Admin-Dashboard, Demo-Seiten /d, QR /q,
 apps/worker     pg-boss-Worker: Lead-Suche, Demos, Briefe, Versand, Rechnungen, Deploys,
                 Support, Optimizer, Lösch-Job, Cron-Takte
 packages/core   Datenbank (Drizzle), Services, Provider-Interfaces, Prompts, Rendering (Playwright)
-packages/templates  6 Website-Templates × 3 Paletten (Tailwind, kompiliert), Brief- und Rechnungslayout
+packages/templates  20 Website-Templates (fünf Gruppen, je drei Layouts + Plakat) (Tailwind, kompiliert), Brief- und Rechnungslayout
 infra/          Caddy (TLS), Backup-Container mit Wiederherstellungstest
 docs/           Compliance, Integrationen, Verarbeitungsverzeichnis, Checkliste
 ```

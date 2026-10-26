@@ -11,6 +11,21 @@ import { stopBoss } from '../src/queue';
 import { randomToken } from '../src/util/crypto';
 
 async function main(): Promise<void> {
+  const target = new URL(process.env.DATABASE_URL ?? 'postgres://invalid/invalid');
+  if (
+    !['localhost', '127.0.0.1', '::1'].includes(target.hostname) ||
+    !/(test|e2e)/.test(target.pathname) ||
+    [
+      'LLM_PROVIDER',
+      'LEAD_SOURCE',
+      'PAYMENT_PROVIDER',
+      'EMAIL_PROVIDER',
+      'MAIL_PROVIDER',
+      'REGISTRAR_PROVIDER',
+      'HOSTING_PROVIDER',
+    ].some((key) => process.env[key] !== 'mock')
+  )
+    throw new Error('E2E-Demodaten ausschließlich lokal mit Testdatenbank und Mock-Providern.');
   const db = getDb();
   let lead = (await db.select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0];
   if (!lead) {
@@ -50,11 +65,20 @@ async function main(): Promise<void> {
   if (!lead) throw new Error('Kein Lead für die Demo');
   const demoId = await buildDemo(lead.id, { actor: 'e2e' });
   await qaDemo(demoId, 'e2e', { lighthouse: false });
-  await approveDemo(demoId, 'e2e', {
-    manual: true,
-    review: { facts: true, desktop: true, mobile: true, images: true, text: true },
-  });
-  await publishDemo(demoId, 'e2e');
+  if (process.env.E2E_DEMO_PENDING !== '1') {
+    await approveDemo(demoId, 'e2e', {
+      manual: true,
+      review: {
+        facts: true,
+        desktop: true,
+        mobile: true,
+        images: true,
+        text: true,
+        qualityScores: { design: 90, industry: 90, personalization: 90, images: 90, mobile: 90 },
+      },
+    });
+    await publishDemo(demoId, 'e2e');
+  }
   const demo = await db.query.demos.findFirst({ where: eq(demos.id, demoId) });
   process.stdout.write(JSON.stringify({ slug: demo!.slug, trackToken: lead.trackToken, leadId: lead.id, demoId }));
   await closeBrowser();

@@ -2,43 +2,30 @@ import type { Industry } from '../types';
 import { LETTER_VARIANT_A, LETTER_VARIANT_B, type LetterVariantContent } from './variants';
 
 export const V4_LETTER_INDUSTRIES = ['handwerk', 'beauty', 'gastronomie', 'einzelhandel', 'kurse_training'] as const;
-const BENEFIT: Partial<Record<Industry, string>> = {
-  handwerk:
-    'Leistungen, Einzugsgebiet und eine direkte Anfrage: So können Interessierte leichter einschätzen, ob Ihr Betrieb zu ihrem Vorhaben passt.',
-  beauty:
-    'Behandlungen, Einblicke und eine Terminanfrage an einem Ort: So können sich Interessierte vor ihrem ersten Besuch orientieren.',
-  gastronomie: 'Speisekarte, Öffnungszeiten und Anfahrt auf einen Blick: So können Gäste ihren Besuch leichter planen.',
-  einzelhandel:
-    'Sortiment, Öffnungszeiten und Standort übersichtlich zeigen: So finden Interessierte die Informationen für ihren nächsten Besuch.',
-  kurse_training:
-    'Kursangebot, Zeiten und die Anfrage nach einer Probestunde verständlich zeigen: So fällt die erste Kontaktaufnahme leichter.',
-};
-
 /** Review candidates. A's old finished-site promise is corrected; no active DB arm is overwritten. */
 export function v4LetterVariant(industry: Industry, arm: 'A' | 'B' | 'C'): LetterVariantContent {
-  const benefit = BENEFIT[industry] ?? 'Leistungen, Standort und Kontakt übersichtlich an einem Ort zeigen.';
+  const benefit = '{branch_benefit}';
   return {
     ...(arm === 'A' ? LETTER_VARIANT_A : LETTER_VARIANT_B),
     subject:
       arm === 'A'
-        ? 'Ihr persönlicher Website-Entwurf'
+        ? 'Ihr Website-Entwurf für {firmenname}'
         : arm === 'B'
           ? 'Ein Website-Entwurf für {firmenname} in {ort}'
-          : 'Ihr Betrieb auf einen Blick – ein Website-Entwurf',
+          : 'Eine Website-Idee für {firmenname}',
+    greeting: 'Guten Tag an das Team von {firmenname},',
     ratingSentence: '',
-    hook: arm !== 'C' ? 'für {firmenname} in {ort} habe ich einen unverbindlichen Website-Entwurf vorbereitet.' : benefit,
+    hook: arm === 'B' ? benefit : 'für {firmenname} in {ort} habe ich einen unverbindlichen Website-Entwurf vorbereitet.',
     intro:
-      arm !== 'C'
+      arm === 'B'
         ? [
-            'Unter dem QR-Code können Sie die persönliche Vorschau kostenlos ansehen – ohne Anmeldung.',
-            benefit,
-            ...(arm === 'A'
-              ? ['Ihre tatsächlichen Inhalte ergänzen wir vor der Veröffentlichung. Fragen können Sie schriftlich stellen.']
-              : []),
+            'Ich habe dazu einen persönlichen Website-Entwurf für Ihren Betrieb vorbereitet. Unter dem QR-Code können Sie ihn kostenlos ansehen, ohne Anmeldung.',
           ]
-        : [
-            'Für {firmenname} in {ort} habe ich dazu eine persönliche Vorschau vorbereitet. Sie können sie kostenlos ansehen – ohne Anmeldung.',
-          ],
+        : arm === 'A'
+          ? ['Unter dem QR-Code können Sie die Vorschau kostenlos ansehen. Eine Anmeldung ist nicht erforderlich.', benefit]
+          : [
+              'Sie können sich den Entwurf kostenlos ansehen, ohne Anmeldung. Ihre tatsächlichen Inhalte stimmen wir vor der Veröffentlichung ab. Fragen können Sie schriftlich stellen.',
+            ],
     offerWithDomain:
       'Wenn der Entwurf zu Ihnen passt: {preise} Standard-Domain (z. B. **{domain_vorschlag}**) und Hosting sind im gewählten Tarif enthalten. Vor Veröffentlichung bestätigen Sie alle Inhalte. {garantie_satz}',
     offerWithoutDomain:

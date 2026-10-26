@@ -45,6 +45,8 @@ export interface LetterData {
   /** Absätze vor dem Bild (Rating-Satz + Aufhänger, Einleitung) */
   intro: string[];
   compositeDataUri: string | null;
+  /** Exact stored demo hero for the large preview layout; absent keeps the legacy layout. */
+  desktopScreenshotDataUri?: string | null;
   qrDataUri: string;
   qrCaption: string;
   /** Kurz-URL zum Abtippen, ohne Protokoll */
@@ -80,6 +82,13 @@ export function embeddedFontCss(): string {
 }
 
 export function renderLetterHtml(d: LetterData): string {
+  const estimatedHeight =
+    Math.ceil(d.subject.length / 72) * 5.4 +
+    Math.ceil(d.intro.join(' ').length / 105) * 4.7 +
+    11 +
+    53 +
+    Math.max(53, Math.ceil((d.offer.length + d.noAction.length) / 68) * 4.7 + 12);
+  const premium = Boolean(d.desktopScreenshotDataUri && estimatedHeight <= 150);
   const right = d.addressPosition === 'right';
   const g = right ? LETTER_GEOMETRY.right : LETTER_GEOMETRY.left;
   // Anschrift 3 mm eingerückt im Feld, oben 1 mm Luft
@@ -119,9 +128,9 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .info{position:absolute;left:${infoX}mm;top:50mm;width:65mm;font-size:8.5pt;line-height:1.45;color:#3b4350}
 .info .k{color:#6b7280}
 .info .date{margin-top:3mm;color:#1d232b}
-.body{position:absolute;left:25mm;right:20mm;top:94mm}
+.body{position:absolute;left:25mm;right:20mm;top:91mm}
 .subject{font-size:11.5pt;font-weight:700;margin:0 0 3mm;line-height:1.3}
-.body p{margin:0 0 1.5mm}
+.body p{margin:0 0 1mm}
 .visual{display:flex;gap:6mm;align-items:center;margin:2mm 0 2mm}
 .composite{width:96mm;max-height:51mm;object-fit:contain;object-position:left center;height:auto;display:block;border-radius:1.5mm}
 .qrbox{flex:1;text-align:center;font-size:9pt}
@@ -129,6 +138,12 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .qr{width:41mm;height:41mm;display:block;margin:0 auto 1.5mm}
 .qrbox strong{display:block;font-size:9.5pt;line-height:1.3}
 .short{font-size:7.5pt;color:#4a5565;word-break:break-all}
+.premium .intro{margin-bottom:3mm}
+.premium .hero-shot{display:block;width:165mm;height:50mm;object-fit:cover;object-position:top;border:0.25mm solid #d9e0e8;border-radius:1mm;margin:0 0 3mm}
+.premium .offer-row{display:flex;align-items:flex-start;gap:6mm}
+.premium .offer-copy{flex:1;min-width:0}
+.premium .qrbox{flex:0 0 45mm}
+.premium .subject{font-size:12pt}
 .sign{margin-top:3mm}
 .sign .name{font-weight:600}
 .small{position:absolute;left:25mm;right:20mm;bottom:16mm;font-size:7pt;line-height:1.38;color:#4a5565;border-top:0.25mm solid #d9e0e8;padding-top:2mm}
@@ -159,9 +174,20 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
     <div><span class="k">E-Mail</span> ${esc(d.sender.email)}</div>
     <div class="date">${esc(d.dateLine)}</div>
   </div>
-  <main class="body" id="brieftext">
+  <main class="body ${premium ? 'premium' : ''}" id="brieftext">
     <h1 class="subject">${esc(d.subject)}</h1>
     <p>${esc(d.greeting)}</p>
+    ${
+      premium
+        ? `
+    <p class="intro">${d.intro.map((p) => boldMd(p)).join(' ')}</p>
+    <img class="hero-shot" src="${esc(d.desktopScreenshotDataUri!)}" alt="Persönlicher Website-Entwurf: tatsächlich gerenderter Hero-Bereich für ${esc(d.recipientLines.join(' '))}">
+    <div class="offer-row"><div class="offer-copy">
+      <p>${boldMd(d.offer)}</p><p>${boldMd(d.noAction)}</p>
+      <div class="sign"><div>${esc(d.closing)}</div><div class="name">${esc(d.signatureName)}</div></div>
+    </div><div class="qrbox"><img class="qr" src="${d.qrDataUri}" alt="QR-Code zum persönlichen Entwurf"><strong>${esc(d.qrCaption)}</strong><span class="short">${esc(d.shortUrl)}</span></div></div>
+    `
+        : `
     ${d.intro.map((p) => `<p>${boldMd(p)}</p>`).join('\n    ')}
     <div class="visual">
       ${d.compositeDataUri ? `<img class="composite" src="${d.compositeDataUri}" alt="Ihre neue Website am Computer und auf dem Handy">` : ''}
@@ -170,6 +196,8 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
     <p>${boldMd(d.offer)}</p>
     <p>${boldMd(d.noAction)}</p>
     <div class="sign"><div>${esc(d.closing)}</div><div class="name">${esc(d.signatureName)}</div></div>
+    `
+    }
   </main>
   <footer class="small" id="kleingedrucktes">
     ${d.footnotes?.length ? `<p class="fn" id="fussnoten">${d.footnotes.map((f) => esc(f)).join(' ')}</p>` : ''}

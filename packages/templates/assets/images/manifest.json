@@ -250,5 +250,37 @@
     "keywords": ["garten", "landschaft", "gärtner"],
     "kind": "generated",
     "bytes": 140466
+  },
+  {
+    "file": "generated/reinigung.webp",
+    "group": "handwerk",
+    "alt": "KI-generiertes Beispielbild: Heller Empfangsbereich mit Reinigungswagen",
+    "title": "Heller Empfangsbereich mit Reinigungswagen",
+    "creator": "Mit OpenAI für SeitenWerk generiert",
+    "license": "Generated – OpenAI terms",
+    "licenseUrl": "https://openai.com/policies/terms-of-use/",
+    "source": "OpenAI image generation",
+    "sourceUrl": "https://openai.com/policies/terms-of-use/",
+    "openverseId": "",
+    "checkedAt": "2026-10-25",
+    "keywords": ["reinig", "gebäudeservice", "gebaeudeservice"],
+    "kind": "generated",
+    "bytes": 79958
+  },
+  {
+    "file": "generated/sanitaer.webp",
+    "group": "handwerk",
+    "alt": "KI-generiertes Beispielbild: Modernes Badezimmer mit Waschplatz und Dusche",
+    "title": "Modernes Badezimmer mit Waschplatz und Dusche",
+    "creator": "Mit OpenAI für SeitenWerk generiert",
+    "license": "Generated – OpenAI terms",
+    "licenseUrl": "https://openai.com/policies/terms-of-use/",
+    "source": "OpenAI image generation",
+    "sourceUrl": "https://openai.com/policies/terms-of-use/",
+    "openverseId": "",
+    "checkedAt": "2026-10-25",
+    "keywords": ["sanitär", "sanitaer", "installat"],
+    "kind": "generated",
+    "bytes": 94416
   }
 ]

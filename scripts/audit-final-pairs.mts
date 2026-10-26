@@ -8,8 +8,9 @@ import { libraryContent } from '../packages/core/src/demos/library';
 import { DEFAULT_CONFIG, deepMerge } from '../packages/core/src/config/settings';
 import { demoOptions } from '../packages/core/src/demos/build';
 import { composeLetter } from '../packages/core/src/letters/compose';
+import { privacyNoticeText, objectionNoticeText } from '../packages/core/src/letters/notices';
 import { v4LetterVariant } from '../packages/core/src/letters/conversion-v4';
-import { validateLetterDom } from '../packages/core/src/render/pdf';
+import { validateLetterDom, validateLetterPdf } from '../packages/core/src/render/pdf';
 import { closeBrowser } from '../packages/core/src/render/browser';
 import { takeScreenshots, renderComposite } from '../packages/core/src/render/screenshots';
 const out = process.env.AUDIT_PAIRS_OUTPUT ?? 'data/exports/final-audit';
@@ -33,7 +34,29 @@ const page = await browser.newPage();
 await page.route('**/*', (route) => route.abort());
 const results = [];
 try {
-  for (const t of TEMPLATES) {
+  const specialtyLabels: Record<string, string> = {
+    maler: 'Malerbetrieb',
+    friseur: 'Friseursalon',
+    gartenbau: 'Garten- und Landschaftsbau',
+    reinigung: 'Reinigungsunternehmen',
+    sanitaer: 'Sanitärbetrieb',
+  };
+  const templates =
+    process.env.AUDIT_PRIMARY_SPECIALTIES === 'true'
+      ? Object.keys(specialtyLabels).flatMap((branch) =>
+          TEMPLATES.filter((t) =>
+            (branch === 'friseur'
+              ? ['beauty-elegant', 'beauty-soft', 'beauty-modern']
+              : ['handwerk-klar', 'handwerk-solid', 'handwerk-werkstatt']
+            ).includes(t.id),
+          ).map((t) => ({ ...t, auditBranch: branch })),
+        )
+      : TEMPLATES.map((t) => ({ ...t, auditBranch: '' }));
+  for (const t of templates.filter(
+    (t) =>
+      (!process.env.AUDIT_BRANCH || t.auditBranch === process.env.AUDIT_BRANCH) &&
+      (!process.env.AUDIT_TEMPLATE_GROUP || t.group === process.env.AUDIT_TEMPLATE_GROUP),
+  )) {
     const group = t.group;
     const input = demoInput(t.id, t.palettes[0]!, group);
     const branches = {
@@ -43,29 +66,37 @@ try {
       einzelhandel: ['blumenladen', 'Blumenladen'],
       kurse: ['tanzschule', 'Tanzschule'],
     } as const;
-    const [branch, label] = branches[group];
-    input.facts.name = 'Fiktiver Beispielbetrieb ' + group;
+    const [branch, label] = t.auditBranch ? [t.auditBranch, specialtyLabels[t.auditBranch]!] : branches[group];
+    const artifact = t.id + (t.auditBranch ? '-' + t.auditBranch : '');
+    input.facts.name = label + ' Muster & Partner';
+    if (branch === 'gartenbau') input.palette = 'waldgruen';
     input.facts.branchLabel = label;
     input.facts.city = 'Musterstadt';
     input.content = libraryContent(branch, group, { name: input.facts.name, stadt: input.facts.city, branche: label }, 1);
     input.demo = { ...demoOptions('fictional-test-demo', cfg), expiresLabel: '25. November 2026' };
     const html = renderSite(input);
-    writeFileSync(`${out}/demo-${t.id}.html`, html);
+    writeFileSync(`${out}/demo-${artifact}.html`, html);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.setContent(html);
-    await page.screenshot({ path: `${out}/demo-${t.id}-mobile.png`, fullPage: true });
+    await page.screenshot({ path: `${out}/demo-${artifact}-mobile.png`, fullPage: true });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
     if (overflow) throw Error('Mobile overflow ' + group);
-    const shots = await takeScreenshots(renderSite({ ...input, mode: 'screenshot', demo: input.demo }));
-    writeFileSync(`${out}/demo-${t.id}-desktop.png`, shots.desktop);
-    writeFileSync(`${out}/demo-${t.id}-clean-mobile.png`, shots.mobile);
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.screenshot({ path: `${out}/demo-${artifact}-tablet.png`, fullPage: true });
+    const shots = await takeScreenshots(html, { hideDemoChrome: true });
+    writeFileSync(`${out}/demo-${artifact}-desktop.png`, shots.desktop);
+    writeFileSync(`${out}/demo-${artifact}-clean-mobile.png`, shots.mobile);
     const composite = 'data:image/jpeg;base64,' + (await renderComposite(shots.desktop, shots.mobile)).toString('base64');
-    for (const [index, arm] of (['B'] as const).entries()) {
+    const arms = (['A', 'B', 'C'] as const).filter(
+      (arm) => !process.env.AUDIT_LETTER_ARMS || process.env.AUDIT_LETTER_ARMS.split(',').includes(arm),
+    );
+    for (const [index, arm] of arms.entries()) {
       const variant = v4LetterVariant(group === 'kurse' ? 'kurse_training' : group, arm);
-      const url = 'https://example.test/t/fictional-' + group;
+      const url = 'https://example.test/t/fictional-' + branch;
       const qr = await QRCode.toDataURL(url, { margin: 4, width: 600, errorCorrectionLevel: 'M' });
       const data = composeLetter({
         cfg,
+        branchLabel: input.facts.branchLabel,
         variant,
         recipient: {
           businessName: input.facts.name,
@@ -77,11 +108,12 @@ try {
         domain: null,
         rating: null,
         compositeDataUri: composite,
+        desktopScreenshotDataUri: 'data:image/jpeg;base64,' + shots.desktop.toString('base64'),
         qrDataUri: qr,
         shortUrl: url.replace('https://', ''),
         dateLine: '25. Oktober 2026',
-        privacyNotice: 'Fiktive Testdaten. Datenquelle und Art.-14-Hinweis vor echtem Versand prüfen.',
-        objectionNotice: 'Werbewiderspruch nach Art. 21 DSGVO jederzeit an support@example.test.',
+        privacyNotice: privacyNoticeText(cfg, 'osm', 'https://example.test/datenschutz'),
+        objectionNotice: objectionNoticeText('support@example.test'),
         priceLabel: '597 €',
         expiresLabel: '25. November 2026',
         addressPosition: 'left',
@@ -93,7 +125,15 @@ try {
       await page.setContent(letter);
       await page.evaluate(() => document.fonts.ready);
       const pdf = await page.pdf({ format: 'A4', printBackground: true });
-      writeFileSync(`${out}/brief-${t.id}-${index + 1}.pdf`, pdf);
+      const pdfIssues = await validateLetterPdf(pdf, {
+        qrExpectedUrl: url,
+        recipientLines: data.recipientLines,
+        position: data.addressPosition,
+        expectedPages: 1,
+      });
+      if (pdfIssues.issues.length) throw new Error(`${artifact}/${arm}: ${JSON.stringify(pdfIssues.issues)}`);
+      writeFileSync(`${out}/brief-${artifact}-${index + 1}.pdf`, pdf);
+      await page.screenshot({ path: `${out}/brief-${artifact}-${index + 1}.png`, fullPage: true });
       const pixels = await page.evaluate(async (uri) => {
         const image = new Image();
         image.src = uri;
@@ -106,7 +146,9 @@ try {
         return { data: Array.from(ctx.getImageData(0, 0, c.width, c.height).data), width: c.width, height: c.height };
       }, qr);
       if (jsQR(new Uint8ClampedArray(pixels.data), pixels.width, pixels.height)?.data !== url) throw Error('QR decode failed');
-      results.push({ templateId: t.id, group, variant: index + 1, qr: true, pdfBytes: pdf.length });
+      results.push({ templateId: t.id, branch, group, variant: arm, qrSource: true, qrFinalPdf: true, pdfBytes: pdf.length });
+      writeFileSync(`${out}/checks.json`, JSON.stringify(results, null, 2));
+      console.log(`${t.id}/${branch}/${arm}: PDF geometry and QR passed`);
     }
   }
   writeFileSync(`${out}/checks.json`, JSON.stringify(results, null, 2));

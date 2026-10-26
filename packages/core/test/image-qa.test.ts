@@ -21,3 +21,21 @@ it('accepts a decoded local image without mistaking it for a design approval', a
   });
   expect(checks.filter((c) => c.name.startsWith('bilder-')).every((c) => c.passed)).toBe(true);
 });
+it('ignores summaries hidden by an outer disclosure but still catches genuine visible overlaps', async () => {
+  const document = (body: string) =>
+    `<!doctype html><html lang="de"><head><title>Test</title></head><body><main><h1>Layoutprüfung</h1>${body}</main></body></html>`;
+  const closed = await browserChecks({
+    html: document(
+      '<details><summary>Weitere Informationen</summary><details><summary>Verdeckte Unterfrage</summary><p>Verdeckte Antwort</p></details></details><p>Sichtbarer Inhalt nach dem geschlossenen Bereich</p>',
+    ),
+  });
+  expect(closed.filter((c) => c.name.startsWith('layout-')).every((c) => c.passed)).toBe(true);
+  const overlap = await browserChecks({
+    html: document(
+      '<div style="position:relative;height:100px"><p style="position:absolute;top:0;left:0">Erster sichtbarer Text</p><p style="position:absolute;top:0;left:0">Zweiter sichtbarer Text</p></div>',
+    ),
+  });
+  expect(overlap.filter((c) => c.name.startsWith('layout-')).every((c) => !c.passed && c.details?.includes('overlap'))).toBe(
+    true,
+  );
+});

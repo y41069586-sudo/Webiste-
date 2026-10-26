@@ -1,3 +1,7 @@
+> Historischer Betriebsstand der Übernahme. Der neuere Entwicklungs-/Prüfstand und die V4-Preise
+> stehen im [Ultimate-Handoff](ultimate-quality-handoff.md) und [V4/V5-Handoff](v4-quality-handoff.md).
+> Codeänderungen auf dem Entwicklungsbranch sind kein Nachweis einer aktualisierten Live-Website.
+
 # SeitenWerk – Gesamtstand und historische Momentaufnahme
 
 **V4/V5-Fortsetzung 25.10.2026:** Aktueller geprüfter Code-/Betriebsstand in [Qualitätsprüfung](v5-quality-pruefung.md), [Provider-Audit](v5-betrieb-und-provider-audit.md), [Go-Live-Checkliste](v5-go-live-checkliste.md) und [Handoff](v4-quality-handoff.md). Status: interne Tests; keine Veröffentlichung. Die folgenden Abschnitte bleiben historische Momentaufnahme.

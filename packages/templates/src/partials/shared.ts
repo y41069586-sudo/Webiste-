@@ -144,14 +144,14 @@ function offerSection(demo: NonNullable<RenderInput['demo']>): string {
     ${demo.guaranteeNote ? `<p class="mt-4 text-sm text-[#374151]">${esc(demo.guaranteeNote)}</p>` : ''}
     ${
       demo.offerVersion === 'v4'
-        ? `<div class="mt-8"><h3 class="text-xl font-semibold">Ihre Fragen zur Übernahme</h3>${[
+        ? `<details class="mt-6 rounded-xl border border-[#d1d5db] bg-white p-5"><summary class="cursor-pointer text-lg font-semibold">Ihre Fragen zur Übernahme</summary>${[
             [
               'Was passiert nach dem Kauf?',
               'Nach der Einmalzahlung ergänzen Sie Ihre Angaben. Wir stimmen die Anpassungen mit Ihnen ab; die Veröffentlichung erfolgt erst nach Ihrer Freigabe.',
             ],
             [
               'Wann geht die Website online?',
-              'Den tatsächlichen Go-Live vereinbaren wir, sobald Inhalte, Domain, rechtliche Angaben und Ihre Freigabe vorliegen. Es gibt keine erfundene feste Sofortfrist.',
+              'Den Termin vereinbaren wir mit Ihnen, sobald Inhalte, Domain, rechtliche Angaben und Ihre Freigabe vorliegen.',
             ],
             [
               'Was ist im Einmalpreis enthalten?',
@@ -194,7 +194,7 @@ function offerSection(demo: NonNullable<RenderInput['demo']>): string {
               ([question, answer]) =>
                 `<details class="mt-3 rounded-lg border border-[#d1d5db] bg-white p-4"><summary class="cursor-pointer font-semibold">${esc(question)}</summary><p class="mt-3 text-sm">${esc(answer)}</p></details>`,
             )
-            .join('')}</div>`
+            .join('')}</details>`
         : ''
     }
     ${trust}
@@ -436,15 +436,15 @@ ${jsonLd}
       <p class="mt-3 text-muted">${esc(request.intro)}</p>
       ${example(`Vorschau: Formular mit Name, E-Mail, „${esc(request.wish)}“ und Nachricht. Im Entwurf noch nicht aktiv – nach dem Start kommen Anfragen direkt per E-Mail zu Ihnen.`)}
     </div>
-    <div class="${o.cardClass} md:col-span-3" aria-hidden="true">
-      <div class="grid gap-4 sm:grid-cols-2">
+    <details class="${o.cardClass} md:col-span-3"><summary class="cursor-pointer font-semibold">Formular-Vorschau ansehen</summary>
+      <div class="mt-4 grid gap-4 sm:grid-cols-2" aria-hidden="true">
         ${field('Name')}
         ${field('E-Mail')}
         <div class="sm:col-span-2">${field(request.wish)}</div>
         <div class="sm:col-span-2">${field('Nachricht', true)}</div>
         <div class="sm:col-span-2"><span class="${o.buttonClass}">${esc(request.button)}</span></div>
       </div>
-    </div>
+    </details>
   </div>
 </section>`;
   };
@@ -482,11 +482,11 @@ ${jsonLd}
       <p class="mt-3 text-lg">${esc(facts.city)} und Umgebung</p>
       ${example('Beispiel – Ihr tatsächliches Einzugsgebiet tragen wir gemeinsam ein.')}
     </div>
-    <div class="${o.cardClass}">
-      <h2 id="jobs-titel" class="${o.titleClass}">Wir stellen ein</h2>
+    <details class="${o.cardClass}"><summary class="cursor-pointer font-semibold">Optional: Stellenbereich als Vorschau</summary>
+      <h2 id="jobs-titel" class="mt-4 text-lg font-semibold">Wir stellen ein</h2>
       <p class="mt-3">Hier stellen Sie offene Stellen und Ausbildungsplätze vor, zum Beispiel für Gesellinnen und Gesellen oder Auszubildende (m/w/d). Bewerbungen kommen direkt per Formular zu Ihnen.</p>
-      ${example('Optionaler Bereich – nur wenn Sie möchten.')}
-    </div>
+      ${example('Gestaltungsbeispiel, keine tatsächliche Stellenausschreibung des Betriebs.')}
+    </details>
   </div>
 </section>`);
     }

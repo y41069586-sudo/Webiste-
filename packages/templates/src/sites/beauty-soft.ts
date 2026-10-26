@@ -1,6 +1,6 @@
 import { esc } from '../html';
 import { icon } from '../icons';
-import { blobArt } from '../partials/art';
+import { localProfile } from '../partials/local-profile';
 import { documentShell } from '../partials/shared';
 import type { TemplateDef } from '../types';
 
@@ -31,7 +31,7 @@ export const beautySoft: TemplateDef = {
           <a href="#leistungen" class="inline-flex min-h-12 items-center rounded-full bg-surface px-6 py-3 font-semibold text-ink ring-1 ring-line">Angebot ansehen</a>
         </div>
       </div>
-      <div class="hidden md:block">${blobArt(c.services[0]?.icon ?? 'flower')}</div>
+      <div>${localProfile({ facts: f, parts: p, content: c }, 'studio')}</div>
     </div>
   </section>
 

@@ -12,6 +12,7 @@ export const handwerkWerkstatt: TemplateDef = {
   description: 'Dunkles Kopfband, Akzentkanten, fester Anruf-Button auf dem Handy',
   palettes: ['anthrazit', 'werkblau', 'waldgruen'],
   render({ parts: p, content: c, facts: f }) {
+    const photo = p.photos(1)[0];
     const body = `
 <header class="bg-primary-dark text-on-primary">
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
@@ -21,14 +22,17 @@ export const handwerkWerkstatt: TemplateDef = {
 </header>
 <main id="inhalt">
   <section class="relative bg-primary text-on-primary">
-    <div class="mx-auto max-w-6xl px-4 pb-20 pt-14 md:pt-20">
+    <div class="mx-auto grid max-w-6xl gap-10 px-4 pb-20 pt-14 md:pt-20 ${photo ? 'md:grid-cols-2' : ''}">
+      <div>
       <p class="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-on-accent">${icon('wrench', 'h-4 w-4')}${esc(f.branchLabel)} · ${esc(f.city)}</p>
-      <h1 class="mt-5 max-w-3xl font-heading text-4xl font-black leading-tight md:text-6xl">${esc(c.hero_headline)}</h1>
+      <h1 class="mt-5 max-w-3xl font-heading text-4xl font-black leading-tight ${c.hero_headline.length > 40 ? 'md:text-5xl' : 'md:text-6xl'}">${esc(c.hero_headline)}</h1>
       <p class="mt-5 max-w-2xl text-lg opacity-95">${esc(c.hero_subline)}</p>
       <div class="mt-8 flex flex-wrap gap-3">
         <a href="${esc(p.ctaHref)}" class="inline-flex min-h-12 items-center gap-2 bg-accent px-6 py-3 font-bold uppercase tracking-wide text-on-accent">${esc(c.cta_text)}</a>
         <a href="#leistungen" class="inline-flex min-h-12 items-center border-2 border-on-primary px-6 py-3 font-bold uppercase tracking-wide">Leistungen</a>
       </div>
+      </div>
+      ${photo ? p.figure(photo, 'w-full min-h-72 object-cover', 'overflow-hidden rounded-xl self-center') : ''}
     </div>
     <div class="absolute inset-x-0 bottom-0 text-surface">${stripeArt()}</div>
   </section>

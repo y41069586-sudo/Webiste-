@@ -256,3 +256,14 @@ Commit und Push auf aktuellen Arbeitsbranch ausdrücklich beauftragt, kein Live-
 Ultimate-Auftrag erweitert die Qualitätsanforderungen; frühere lokale Abnahmen sind keine Abnahme
 neuer branchenspezifischer Designs oder9–10/10-Gesamtqualität. Kennzeichnung KI-Beispielbilder,
 kein Fake-Portfolio und kein Betreiberfoto. Fortschritt: ultimate-quality-handoff.md.
+
+## 25.10.2026 – Ultimate-Qualität, zweite Fortsetzung
+
+Bestehende Demo-/Brief-/Providerarchitektur erhalten. Gewichtete manuelle Qualitätsfreigaben,
+0–100-Eignungsscore ohne erfundene OSM-Nachweise, große tatsächliche Screenshot-Vorschau und
+QR-Decodierung aus dem finalen PDF ergänzt. Neue Qualitätsbriefe bleiben einschließlich Folgebrief3
+in Einzelprüfung; unbekannte visuelle Qualität wird nicht automatisch benotet. Öffentliche
+Firmenwebsite kompakter, Starteridentität nicht als echte Betreiberangaben veröffentlichen.
+Fünf ausdrücklich fiktive KI-Branchenbilder, keine realen Referenzen oder CC0-Behauptung.
+Vollständige Nachweise/Grenzen im Ultimate-Handoff. Betreiberauftrag erlaubt Commit und Push,
+weiterhin keine Produktion; DRY_RUN=true und bisherige Go-Live-Sperren bleiben erhalten.

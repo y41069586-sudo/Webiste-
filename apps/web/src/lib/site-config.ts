@@ -1,13 +1,14 @@
 import 'server-only';
 import { appConfigSchema, DEFAULT_CONFIG, deepMerge, getConfig, getEnv, sourcesPageClaims } from '@wbm/core';
-import { OPERATOR_PROFILE } from '../../../../packages/core/src/config/operator';
+import { OPERATOR_PROFILE, publicOperatorSettings } from '../../../../packages/core/src/config/operator';
 import project from '../../../../supabase/project.json';
 
 /** Der statische Firmenexport braucht keinen direkten Datenbankzugang und keine privaten Schlüssel. */
 export async function getSiteConfig() {
   // Public acquisition always advertises today's offer. Legacy settings remain available
   // to existing orders and their snapshots, but must not restore retired public prices.
-  if (!getEnv().SITE_STATIC) return deepMerge(await getConfig(), { offers: { activeVersion: 'v4' } });
+  if (!getEnv().SITE_STATIC)
+    return publicOperatorSettings(deepMerge(await getConfig(), { offers: { activeVersion: 'v4' } }), DEFAULT_CONFIG.sender);
   const fallback = deepMerge(DEFAULT_CONFIG, { sender: OPERATOR_PROFILE });
   const url = process.env.SUPABASE_URL || project.url;
   const response = await fetch(`${url}/functions/v1/seitenwerk-site-config`, {
@@ -16,7 +17,10 @@ export async function getSiteConfig() {
   });
   if (!response.ok) throw new Error('Die Website-Einstellungen konnten nicht geladen werden.');
   const data = await response.json();
-  return appConfigSchema.parse(deepMerge(deepMerge(fallback, data), { offers: { activeVersion: 'v4' } }));
+  return publicOperatorSettings(
+    appConfigSchema.parse(deepMerge(deepMerge(fallback, data), { offers: { activeVersion: 'v4' } })),
+    DEFAULT_CONFIG.sender,
+  );
 }
 
 interface PublicSource {

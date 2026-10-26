@@ -1,3 +1,4 @@
+import { pdfQrTargets } from './pdf-qr';
 import { LETTER_GEOMETRY } from '@wbm/templates';
 import { withPage } from './browser';
 
@@ -80,11 +81,23 @@ function intersects(
  */
 export async function validateLetterPdf(
   pdf: Buffer,
-  opts: { recipientLines: string[]; position: 'left' | 'right'; expectedPages: number },
+  opts: { qrExpectedUrl?: string; recipientLines: string[]; position: 'left' | 'right'; expectedPages: number },
 ): Promise<{ issues: LayoutIssue[]; pages: number; addressBox: { x1: number; y1: number; x2: number; y2: number } | null }> {
   const g = LETTER_GEOMETRY[opts.position];
   const { pages, items } = await pdfTextItems(pdf);
   const issues: LayoutIssue[] = [];
+  if (opts.qrExpectedUrl) {
+    try {
+      const targets = await pdfQrTargets(pdf);
+      if (targets.length !== 1 || targets[0] !== opts.qrExpectedUrl)
+        issues.push({
+          check: 'qr-ziel',
+          detail: 'QR-Code im fertigen PDF fehlt, ist nicht dekodierbar oder verweist auf ein anderes Ziel.',
+        });
+    } catch {
+      issues.push({ check: 'qr-ziel', detail: 'QR-Code im fertigen PDF konnte nicht sicher geprüft werden.' });
+    }
+  }
   if (pages !== opts.expectedPages) issues.push({ check: 'seitenzahl', detail: `${pages} Seiten statt ${opts.expectedPages}` });
   const p1 = items.filter((i) => i.page === 1);
   // Anschriftzeilen finden (in Reihenfolge, auf Seite 1)
