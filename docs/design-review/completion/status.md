@@ -40,3 +40,6 @@ verifizieren; danach Kontrollmarkierung, vollständige Anbieter-/Preiskonsistenz
 Für die Stilübertragung zunächst ausdrückliche gestalterische Entscheidung abwarten. 20 neue vollständige
 Brief-Demo-Paare erst anschließend. Migration0018 ist nur lokal vorbereitet/getestet; Anwendung außerhalb
 Tests benötigt später getrennte Freigabe. Kein Push/Deployment/Provideraufruf.
+
+Letzter sicherer Implementierungscommit: `9e20fe2e3467a5f14d06f1b9522a944775a72e5f`. Nur lokal, nicht gepusht.
+Alle oben gestarteten Test-/Renderläufe sind beendet. Keine laufende DB-Mutation.
