@@ -1,0 +1,7 @@
+✓ test/task2-letter.test.ts (8 tests) 11677ms
+ ✓ test/v5-letter-contract.test.ts (13 tests) 30ms
+ ✓ test/letter-personalization.test.ts (7 tests) 16ms
+ ✓ test/letter-research.test.ts (7 tests) 4ms
+ Test Files  4 passed (4)
+      Tests  35 passed (35)
+   Duration  16.55s (transform 863ms, setup 15ms, collect 3.16s, tests 11.73s, environment 0ms, prepare 184ms)

@@ -263,3 +263,5 @@ Volle Galerie und ZIP: data/exports/task2-letters/. Keine echten Geschäftsdaten
 DRY_RUN=true. Kein Push/Deployment/Providerauftrag. Aufgabe3 nicht anfangen, bis deren Einzelprompt vorliegt.
 
 Letzter sicherer Aufgabe2-Implementierungscommit: `c621f9ef401588bdadcbfbd150babc0db11284a9` auf `codex/conversion-v4`.
+
+Zusatzfeedback zu Aufgabe2: recherchegebundene Einstiege mit frischem manuellem Prüfnachweis implementiert. Zwei ausdrücklich fiktive Muster und35 aktuelle Tests/Typen/Lint/Build bestanden; Bericht task2-letters/README.md. Keine echte Recherche oder Kunden-/Leadgarantie behaupten.

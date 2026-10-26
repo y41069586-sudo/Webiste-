@@ -1,0 +1,12 @@
+> website-brief-maschine@0.1.0 typecheck /workspace/seitenwerk-v4
+> pnpm -r typecheck
+
+Scope: 4 of 5 workspace projects
+packages/templates typecheck$ tsc --noEmit
+packages/templates typecheck: Done
+packages/core typecheck$ tsc -p tsconfig.json
+packages/core typecheck: Done
+apps/web typecheck$ tsc --noEmit
+apps/worker typecheck$ tsc --noEmit
+apps/worker typecheck: Done
+apps/web typecheck: Done

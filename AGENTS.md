@@ -271,3 +271,8 @@ und generierter Demo-Text sind keine verifizierten Firmenfakten. Ohne Details ne
 Neue Briefdateien an QA-/PDF-/Empfänger-/Angebotshashes binden, vor Freigabe/Versand erneut prüfen.
 Fehlgeschlagene Regenerierung darf den bisherigen Brief nicht löschen. Neue Varianten bleiben pausiert;
 keine aktiven DB-Arme oder Quoten still überschreiben. Kein Push/Deployment oder echter Anbieterauftrag.
+
+Rechercheformulierungen in Briefen nur mit explizitem manuell geprüftem `letterFacts.kind` (`public_observation`
+oder `website_search`), Quelle und aktuellem `checkedAt`. Website-Suchbefund verlangt dokumentierte Namen-/Ort-
+Suche, Verzeichnis- und Social-Link-Prüfung; kein Nachweis aus fehlendem OSM-Tag. Fiktive Recherche-Muster niemals
+als tatsächlich recherchierte Betriebe präsentieren. Keine garantierten Kunden, Leads oder Umsätze.

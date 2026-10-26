@@ -1,0 +1,2 @@
+> website-brief-maschine@0.1.0 lint /workspace/seitenwerk-v4
+> eslint .

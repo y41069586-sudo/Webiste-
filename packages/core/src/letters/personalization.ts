@@ -45,19 +45,53 @@ export interface VerifiedLetterContext {
   city: string;
   branchLabel: string;
   /** Confirmed business facts only, with an auditable source reference. */
-  details: { text: string; source: string; verified: boolean }[];
+  details: {
+    text: string;
+    source: string;
+    verified: boolean;
+    /** Explicit human-reviewed public observation; never inferred from a missing OSM website tag. */
+    kind?: 'public_observation' | 'website_search';
+    checkedAt?: string;
+    checks?: ('name_city_search' | 'directory_links' | 'social_links')[];
+  }[];
 }
 /** Reviewed facts only. Typical sector services never become business facts automatically. */
 export function reviewedLetterDetails(context: VerifiedLetterContext) {
   const facts = context.details.filter((d) => d.verified && d.source.trim() && d.text.trim());
-  if (facts.some((d) => d.text.length > 140 || /[\r\n{}*]|garantiert|verdoppel|verlieren|mehr Umsatz/i.test(d.text)))
+  if (
+    facts.some(
+      (d) =>
+        d.text.length > 140 || /[\r\n{}*]|garantiert|versichern|verdoppel|verlieren|mehr (?:Umsatz|Kunden|Leads)/i.test(d.text),
+    )
+  )
     throw new Error('Betriebsangabe nicht als kurzer, sachlicher Briefbezug geeignet; prüfen.');
-  return facts.slice(0, 2).map((d) => ({ ...d, text: d.text.trim().replace(/[.!]$/, ''), source: d.source.trim() }));
+  for (const fact of facts.filter((d) => d.kind)) {
+    const checked = new Date(fact.checkedAt ?? '').getTime();
+    if (!Number.isFinite(checked) || checked > Date.now() || Date.now() - checked > 30 * 86400000)
+      throw new Error('Recherchebefund benötigt einen aktuellen dokumentierten Prüftermin.');
+    if (
+      fact.kind === 'website_search' &&
+      (fact.text !== 'not_found' ||
+        !['name_city_search', 'directory_links', 'social_links'].every((method) =>
+          fact.checks?.includes(method as 'name_city_search'),
+        ))
+    )
+      throw new Error('Website-Recherche unvollständig oder eigene Website gefunden; Eignung manuell prüfen.');
+  }
+  return facts.slice(0, 3).map((d) => ({ ...d, text: d.text.trim().replace(/[.!]$/, ''), source: d.source.trim() }));
 }
 export function personalizedLetterCopy(context: VerifiedLetterContext, variant = 0) {
   const facts = reviewedLetterDetails(context);
   if (!facts.length) throw new Error('Für einen persönlichen Brief fehlt ein belegter Betriebsbezug.');
-  const detail = facts.map((d) => d.text).join(' und ');
+  const website = facts.find((d) => d.kind === 'website_search');
+  const observation = facts.find((d) => d.kind === 'public_observation');
+  const services = facts.filter((d) => !d.kind).slice(0, 2);
+  const researchOpening = website
+    ? 'Bei unserer Recherche haben wir keinen eigenen Webauftritt gefunden.'
+    : observation
+      ? `Bei unserer Recherche ist uns aufgefallen: ${observation.text}.`
+      : undefined;
+  const detail = services.map((d) => d.text).join(' und ');
   const openings = [
     `Im Mittelpunkt: ${detail} – für Ihren Betrieb in ${context.city}.`,
     `Für ${context.businessName} haben wir ${detail} in der Vorschau aufgegriffen.`,
@@ -65,8 +99,15 @@ export function personalizedLetterCopy(context: VerifiedLetterContext, variant =
   ];
   return {
     subject: `Ein Website-Entwurf für ${context.businessName}`,
+    researchOpening,
     intro: [
-      openings[variant % openings.length]!,
+      researchOpening
+        ? observation
+          ? letterBranchBenefit(context.branchLabel)
+          : detail
+            ? `Ihr Entwurf zeigt ${detail} – mit einem klaren Kontaktweg.`
+            : letterBranchBenefit(context.branchLabel)
+        : openings[variant % openings.length]!,
       'Der unabhängige, nicht beauftragte Entwurf lässt sich kostenlos ansehen. Vor Veröffentlichung bestätigen Sie Inhalte und Funktionen.',
     ],
     sources: facts.map((d) => d.source),

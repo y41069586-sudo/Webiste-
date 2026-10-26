@@ -167,3 +167,25 @@ Pflichttexte/Absender/Anschriften können weiterhin zur manuellen Layoutprüfung
 - Öffentliche Domains/TLS/QR-/Kurz-URL-Routen, echte Datei-/Worker-Infrastruktur und Ablaufverfügbarkeit
   über die Anbieter prüfen. Lokale Loopback-Ziele in dieser Galerie sind keine versandfähigen URLs.
 - Reale Scan-/Kaufwirkung ist unbekannt. Kein statistischer Gewinner aus20 fiktiven Briefen.
+
+## Nachbesserung: echter Recherche-Aufhänger statt bloßer Leistungsnamen
+
+Nach Betreiberfeedback ergänzt: explizit als öffentlich recherchiert geprüfte Beobachtungen und ein
+qualifizierter Website-Suchbefund. `review.letterFacts` nutzt dafür optional `kind: public_observation`
+oder `website_search` mit `checkedAt`; Website-Suche zusätzlich dokumentierte Prüfung von Firmenname/Ort,
+Verzeichnislinks und Social-Profil-Links. Das fehlende OSM-Tag wird niemals automatisch so umgedeutet.
+Prüftermin maximal30Tage alt, kein Zukunftsdatum, Quelle und tatsächliche manuelle Bestätigung erforderlich.
+`website_search` mit einem gefundenen/unklaren Ergebnis oder unvollständigen Prüfwegen blockiert die Aussage.
+
+Bei gedecktem Befund lautet der Einstieg „Bei unserer Recherche haben wir keinen eigenen Webauftritt
+gefunden.“ Das ist eine Aussage über die dokumentierte Suche, keine Behauptung der sicheren Nichtexistenz.
+Ein öffentlicher Betriebsbefund wird mit konkretem Inhalt genannt; der folgende Satz erklärt dessen Bezug
+zum Entwurf bzw. den Kontaktweg. Ohne Beleg bleibt die neutrale Fassung erhalten. Keine Umsatz-/Kunden-
+oder Leadgarantie; tatsächliche Ergebnisse wurden nicht gemessen.
+
+Die2 zusätzlichen Muster unter `data/exports/task2-letters/research/` sind ausdrücklich fiktive
+Rechercheszenarien, keine tatsächlich im Internet recherchierten Unternehmen. Die vorhandenen20 Original-
+Prüfpaare werden damit nicht nachträglich als recherchiert umetikettiert. Keine Anbieter-/Kampagnenaktivierung.
+
+[Recherche-Muster1: Website-Suchbefund](evidence/recherche-01.pdf), [Muster2: konkreter öffentlicher Betriebsbefund](evidence/recherche-02.pdf).
+35 relevante Tests einschließlich7 neuer Recherchefälle, TypeScript/Lint/Build und beide PDF-/Druck-/QR-Prüfungen bestanden. Sieben bekannte Build-Tracingwarnungen bleiben.

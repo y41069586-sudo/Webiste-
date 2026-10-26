@@ -33,3 +33,13 @@ Keine echten Kauf-/Scanwirkungen bekannt. Keine Aufgabe3 vorwegnehmen. Nächster
 gestalterisches Betreiberfeedback und nächsten Einzelprompt abwarten.
 
 Letzter sicherer Aufgabe2-Implementierungscommit: `c621f9ef401588bdadcbfbd150babc0db11284a9` auf `codex/conversion-v4`.
+
+### Zusätzlicher Recherche-Einstieg nach Betreiberfeedback
+
+Leistungsnamen allein wurden als zu wenig persönlich kritisiert. Neu: ausdrückliche öffentliche Beobachtungen
+und aktueller, methodisch dokumentierter Website-Suchbefund im selben geprüften `letterFacts`-Metadatenpfad.
+Keine eigene Website aus fehlendem OSM-Tag ableiten; keine garantierten Kunden/Leads behaupten.
+Zwei getrennte fiktive Recherche-Muster unter data/exports/task2-letters/research/, keine echte Recherche.
+Aktueller Nachlauf wird separat nachgewiesen;20 vorherige Paare bleiben unverändert archiviert.
+
+Recherche-Nachlauf abgeschlossen:35 Tests in4 Dateien, darunter7 neue Fälle zu unbestätigter/veralteter/unvollständiger/positiver Recherche und falschen Kundengarantien. Beide Muster-PDFs/QR-Raster bestanden; Typen/Lint/Build bestanden. Belege research-* unter evidence/.

@@ -26,7 +26,7 @@ export function v4LetterVariant(industry: Industry, arm: 'A' | 'B' | 'C', sequen
           ? 'hier ist der überarbeitete, unverbindliche Entwurf für Ihren Betrieb.'
           : arm === 'B'
             ? benefit
-            : 'für Ihren Betrieb habe ich diese unverbindliche Website-Vorschau vorbereitet.',
+            : '{research_opening}',
     intro: [
       '{personal_context}',
       'Unabhängig und nicht beauftragt: kostenlos ansehen, ohne Anmeldung. Sie prüfen die Inhalte vor Veröffentlichung.',

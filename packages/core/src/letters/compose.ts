@@ -60,7 +60,7 @@ export function fillPlaceholders(text: string, vars: Record<string, string>): st
   return text.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? vars[k]! : m));
 }
 
-const LOWER_START = /^(Wer|Wir|Ich|Vor|Deshalb|Mit|Seit|So|Gern|Gerne|Heute|Kürzlich|Als|Da|Damit|Weil)\b/;
+const LOWER_START = /^(Bei|Wer|Wir|Ich|Vor|Deshalb|Mit|Seit|So|Gern|Gerne|Heute|Kürzlich|Als|Da|Damit|Weil)\b/;
 
 /** Nach der Anrede mit Komma beginnt der Text klein (außer Höflichkeitsform/Substantiv). */
 export function lowerFirstWord(text: string): string {
@@ -132,16 +132,19 @@ export function letterTruthBlocklist(cfg: AppConfig): string[] {
 
 function composeVars(i: ComposeInput): Record<string, string> {
   const hasFacts = i.personalization && reviewedLetterDetails(i.personalization).length > 0;
-  const personal = hasFacts
-    ? personalizedLetterCopy(i.personalization!, /kennenlernen|überblicken/.test(i.variant.hook) ? 2 : 0).intro[0]!
-    : i.variant.hook === '{branch_benefit}'
+  const personalized = hasFacts ? personalizedLetterCopy(i.personalization!) : undefined;
+  const personal =
+    personalized?.intro[0] ??
+    (i.variant.hook === '{branch_benefit}'
       ? 'Leistungen, Texte und Bilder sind Beispiele, bis Sie Ihre tatsächlichen Inhalte bestätigen.'
-      : letterBranchBenefit(i.branchLabel ?? '');
+      : letterBranchBenefit(i.branchLabel ?? ''));
   return {
     personal_context: personal,
+    research_opening:
+      personalized?.researchOpening ?? 'für Ihren Betrieb habe ich diese unverbindliche Website-Vorschau vorbereitet.',
     absender_email: i.cfg.sender.email,
     firmenname: i.recipient.businessName,
-    branch_benefit: letterBranchBenefit(i.branchLabel ?? ''),
+    branch_benefit: personalized?.researchOpening ?? letterBranchBenefit(i.branchLabel ?? ''),
     ort: i.recipient.city,
     preis: i.priceLabel,
     preise: pricesPhrase(i.cfg, i.priceLabel),
@@ -165,7 +168,16 @@ function composeVars(i: ComposeInput): Record<string, string> {
  */
 export function placeholderValues(i: ComposeInput): string[] {
   const vars = composeVars(i);
-  const keys = ['firmenname', 'domain_vorschlag', 'ablaufdatum', 'preise', 'garantie_satz', 'absender_name', 'personal_context'];
+  const keys = [
+    'firmenname',
+    'domain_vorschlag',
+    'ablaufdatum',
+    'preise',
+    'garantie_satz',
+    'absender_name',
+    'personal_context',
+    'research_opening',
+  ];
   const out = keys.map((k) => vars[k]!).filter(Boolean);
   if (i.rating && i.variant.ratingSentence) out.push(fillPlaceholders(i.variant.ratingSentence, vars));
   return out;
@@ -174,9 +186,19 @@ export function placeholderValues(i: ComposeInput): string[] {
 export function composeLetter(i: ComposeInput): LetterData {
   const vars = composeVars(i);
   const v = i.variant;
-  const first = [i.rating && v.ratingSentence ? fillPlaceholders(v.ratingSentence, vars) : '', fillPlaceholders(v.hook, vars)]
+  let first = [i.rating && v.ratingSentence ? fillPlaceholders(v.ratingSentence, vars) : '', fillPlaceholders(v.hook, vars)]
     .filter(Boolean)
     .join(' ');
+  // Retain stored variants; personalize only the exact previous V4 default opening when evidence exists.
+  if (
+    i.cfg.offers.activeVersion === 'v4' &&
+    v.hook === 'für Ihren Betrieb habe ich diese unverbindliche Website-Vorschau vorbereitet.' &&
+    i.personalization &&
+    reviewedLetterDetails(i.personalization).length > 0
+  ) {
+    const research = personalizedLetterCopy(i.personalization).researchOpening;
+    if (research) first = research;
+  }
   const intro = [lowerFirstWord(first), ...v.intro.map((p) => fillPlaceholders(p, vars))].filter(Boolean);
   return {
     ...(i.cfg.offers.activeVersion === 'v4'

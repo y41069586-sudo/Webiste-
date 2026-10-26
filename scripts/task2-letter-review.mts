@@ -18,7 +18,7 @@ import { DEFAULT_CONFIG, deepMerge } from '../packages/core/src/config/settings'
 import { sha256 } from '../packages/core/src/util/crypto';
 const sharp = createRequire(new URL('../apps/web/node_modules/next/package.json', import.meta.url))('sharp');
 process.env.DRY_RUN = 'true';
-const phase = process.argv.includes('--before') ? 'before' : 'after';
+const phase = process.argv.includes('--before') ? 'before' : process.argv.includes('--research') ? 'research' : 'after';
 const root = 'data/exports/task2-letters',
   out = `${root}/${phase}`,
   fixtureDir = `${root}/fixtures`;
@@ -89,7 +89,7 @@ try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.route(/^https?:\/(?!\/127\.0\.0\.1:3216)/, (route) => route.abort());
   const page = await ctx.newPage();
-  for (const [n, t] of TEMPLATES.entries()) {
+  for (const [n, t] of (phase === 'research' ? TEMPLATES.slice(0, 2) : TEMPLATES).entries()) {
     const id = String(n + 1).padStart(2, '0'),
       file = `${fixtureDir}/${id}`;
     if (phase === 'before' && !process.argv.includes('--recheck')) {
@@ -140,6 +140,28 @@ try {
       objectionNotice: objectionNoticeText('support@example.test'),
       priceLabel: '597 €',
     };
+    if (phase === 'research') {
+      const context =
+        composeInput.personalization as import('../packages/core/src/letters/personalization').VerifiedLetterContext;
+      context.details.unshift(
+        n === 0
+          ? {
+              kind: 'website_search',
+              text: 'not_found',
+              verified: true,
+              source: `fixture:${id}:fictional-public-search`,
+              checkedAt: new Date().toISOString(),
+              checks: ['name_city_search', 'directory_links', 'social_links'],
+            }
+          : {
+              kind: 'public_observation',
+              text: 'Ihr öffentlicher Eintrag nennt Innenanstriche und Arbeiten in Treppenhäusern',
+              source: `fixture:${id}:fictional-public-listing`,
+              verified: true,
+              checkedAt: new Date().toISOString(),
+            },
+      );
+    }
     const recheck = phase === 'before' && process.argv.includes('--recheck');
     const data = {
       ...composeLetter(composeInput),

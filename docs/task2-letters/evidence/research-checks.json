@@ -1,0 +1,56 @@
+[
+  {
+    "id": "01",
+    "template": "handwerk-solid",
+    "business": "Elektro Nordlicht",
+    "branch": "Elektrobetrieb",
+    "sequence": 1,
+    "arm": "A",
+    "details": [
+      "Elektroinstallation",
+      "Anfragen zu geplanten Umbauten"
+    ],
+    "issues": [],
+    "pages": 1,
+    "truth": true,
+    "truthViolations": [],
+    "qrRaster": true,
+    "targets": true,
+    "mobile": true,
+    "price": true,
+    "date": true,
+    "privacy": true,
+    "demoHash": "38cd9245e6ac2754101edf24ff061e34e34d8010fe335e5aaad046363dde3280",
+    "desktopHash": "6ac184459a6210c19fbb5125be7db4fe533fe0be80c986cdbba31c4110cb67b4",
+    "mobileHash": "48644a7a19da8318248cb1a3892ae83e383c84e35cbc1a3e79d9e6cb521cf31f",
+    "pdfHash": "786dfe125346fde3c36f76adefef6a78021521146d343b8ae3bb071be0800cc4",
+    "visualApproved": false
+  },
+  {
+    "id": "02",
+    "template": "handwerk-klar",
+    "business": "Farbwerk Linde",
+    "branch": "Malerbetrieb",
+    "sequence": 1,
+    "arm": "B",
+    "details": [
+      "Innenanstriche",
+      "Arbeiten in Treppenhäusern"
+    ],
+    "issues": [],
+    "pages": 1,
+    "truth": true,
+    "truthViolations": [],
+    "qrRaster": true,
+    "targets": true,
+    "mobile": true,
+    "price": true,
+    "date": true,
+    "privacy": true,
+    "demoHash": "91f0bf8cf413bae0d8184111307611a9cc2f97f47a87e865cad6f427c0895d75",
+    "desktopHash": "2663ee41907dd45a5a8eee895ff0c2d87ddc2cf4b164093309436e9e944635b2",
+    "mobileHash": "46a654c4e907905605227859ece9858867e48ddbd841e2dba912be5f909dac42",
+    "pdfHash": "9e9674ce6cd6588d8c22aed41f69d7993ba0a841c47faf72873f396372b09554",
+    "visualApproved": false
+  }
+]
