@@ -1,3 +1,4 @@
+import { Brand } from '@/components/brand';
 import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
@@ -37,7 +38,9 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <div className="mx-auto max-w-[90rem] px-5 pt-16 pb-10 sm:px-8">
           <div className="grid gap-10 border-t border-[#e3e7ee] pt-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
-              <p className="text-section text-[#0f172a]">{brand}</p>
+              <p className="text-section text-[#0f172a]">
+                <Brand />
+              </p>
               <p className="mt-4 max-w-[34ch] text-[0.95rem] leading-relaxed text-[#3c4454]">
                 Fertige Websites für lokale Betriebe ohne eigene Website – mit eigener Domain und Hosting.{' '}
                 {s.city ? `Aus ${s.city}.` : ''}

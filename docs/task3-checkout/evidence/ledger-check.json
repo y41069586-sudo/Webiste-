@@ -1,0 +1,85 @@
+{
+  "scope": "local fictional e2e database; no real revenue",
+  "rows": [
+    {
+      "branch": "blumenladen",
+      "plan": "basis",
+      "orders": 1,
+      "unique_orders": 1,
+      "unique_invoices": 1,
+      "all_mock": true
+    },
+    {
+      "branch": "cafe",
+      "plan": "care_plus",
+      "orders": 1,
+      "unique_orders": 1,
+      "unique_invoices": 1,
+      "all_mock": true
+    },
+    {
+      "branch": "elektriker",
+      "plan": "care_plus",
+      "orders": 1,
+      "unique_orders": 1,
+      "unique_invoices": 1,
+      "all_mock": true
+    },
+    {
+      "branch": "kosmetikstudio",
+      "plan": "care_plus",
+      "orders": 1,
+      "unique_orders": 1,
+      "unique_invoices": 1,
+      "all_mock": true
+    },
+    {
+      "branch": "maler",
+      "plan": "basis",
+      "orders": 1,
+      "unique_orders": 1,
+      "unique_invoices": 1,
+      "all_mock": true
+    },
+    {
+      "branch": "modegeschaeft",
+      "plan": "care_plus",
+      "orders": 1,
+      "unique_orders": 1,
+      "unique_invoices": 1,
+      "all_mock": true
+    },
+    {
+      "branch": "nagelstudio",
+      "plan": "basis",
+      "orders": 1,
+      "unique_orders": 1,
+      "unique_invoices": 1,
+      "all_mock": true
+    },
+    {
+      "branch": "restaurant",
+      "plan": "basis",
+      "orders": 1,
+      "unique_orders": 1,
+      "unique_invoices": 1,
+      "all_mock": true
+    },
+    {
+      "branch": "tanzschule",
+      "plan": "care_plus",
+      "orders": 1,
+      "unique_orders": 1,
+      "unique_invoices": 1,
+      "all_mock": true
+    },
+    {
+      "branch": "yogastudio",
+      "plan": "basis",
+      "orders": 1,
+      "unique_orders": 1,
+      "unique_invoices": 1,
+      "all_mock": true
+    }
+  ]
+}

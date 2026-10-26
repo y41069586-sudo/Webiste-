@@ -1,0 +1,53 @@
+{
+  "scope": "local production build, synthetic single cold run; not field CWV or Stripe-hosted performance",
+  "profile": {
+    "width": 390,
+    "rttMs": 150,
+    "downloadBytesPerSecond": 200000,
+    "cpuSlowdown": 4
+  },
+  "results": [
+    {
+      "label": "demo",
+      "status": 200,
+      "lcp": 888,
+      "cls": 0,
+      "ttfb": 31.80000001192093,
+      "domContentLoaded": 1142.300000011921,
+      "load": 1186.9000000059605,
+      "bytes": 138411,
+      "horizontalOverflow": false,
+      "brokenImages": 0,
+      "pendingLazyImages": 0,
+      "errors": []
+    },
+    {
+      "label": "preise",
+      "status": 200,
+      "lcp": 1792,
+      "cls": 0.02456797073291256,
+      "ttfb": 72.69999998807907,
+      "domContentLoaded": 699.2999999970198,
+      "load": 2245.7999999970198,
+      "bytes": 7775,
+      "horizontalOverflow": false,
+      "brokenImages": 0,
+      "pendingLazyImages": 0,
+      "errors": []
+    },
+    {
+      "label": "checkout-mock",
+      "status": 200,
+      "lcp": 1948,
+      "cls": 0.0000673137395835673,
+      "ttfb": 42.29999999701977,
+      "domContentLoaded": 706.5,
+      "load": 1902.9000000059605,
+      "bytes": 6090,
+      "horizontalOverflow": false,
+      "brokenImages": 0,
+      "pendingLazyImages": 0,
+      "errors": []
+    }
+  ]
+}

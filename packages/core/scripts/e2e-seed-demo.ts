@@ -8,6 +8,8 @@ import { qaDemo } from '../src/render/demo-qa';
 import { closeBrowser } from '../src/render/browser';
 import { buildDemo } from '../src/demos/build';
 import { stopBoss } from '../src/queue';
+import { getConfig } from '../src/config/service';
+import { z } from 'zod';
 import { randomToken } from '../src/util/crypto';
 
 async function main(): Promise<void> {
@@ -27,7 +29,38 @@ async function main(): Promise<void> {
   )
     throw new Error('E2E-Demodaten ausschließlich lokal mit Testdatenbank und Mock-Providern.');
   const db = getDb();
-  let lead = (await db.select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0];
+  const profile = process.env.E2E_DEMO_PROFILE
+    ? z
+        .object({ name: z.string().min(3).max(120), branch: z.string(), city: z.string().min(2) })
+        .parse(JSON.parse(process.env.E2E_DEMO_PROFILE))
+    : null;
+  const cfg = await getConfig();
+  const branch = profile ? cfg.targeting.branches.find((b) => b.key === profile.branch) : null;
+  if (profile && !branch) throw new Error('Unbekannte E2E-Branche');
+  let lead =
+    profile && branch
+      ? (
+          await db
+            .insert(leads)
+            .values({
+              source: 'mock',
+              sourceId: `e2e-trust-${randomToken(8)}`,
+              businessName: profile.name,
+              branch: branch.key,
+              branchGroup: branch.group,
+              city: profile.city,
+              street: 'Fiktiver Testweg',
+              houseNumber: '7',
+              postalCode: '12345',
+              phone: '030 0000000',
+              segmentKey: `test:${branch.group}:${branch.key}`,
+              trackToken: randomToken(24),
+              identityHash: randomToken(16),
+              status: 'qualified',
+            })
+            .returning()
+        )[0]
+      : (await db.select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0];
   if (!lead) {
     await findLeads({ actor: 'e2e' });
     lead = (

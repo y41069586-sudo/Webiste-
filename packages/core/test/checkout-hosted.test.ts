@@ -1,11 +1,12 @@
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { updateConfig } from '../src/config/service';
 import { getDb } from '../src/db/client';
 import { alerts, customers, demos, events, leads, orders } from '../src/db/schema';
 import type { CollectedCustomer } from '../src/providers/types';
 import { stopBoss } from '../src/queue';
 import { clearDomainCache } from '../src/services/domains';
-import { simulateMockPayment, startHostedCheckout } from '../src/services/orders';
+import { getCheckoutContext, simulateMockPayment, startHostedCheckout } from '../src/services/orders';
 import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
 import { resetDb } from './helpers';
@@ -72,6 +73,49 @@ describe('Checkout über die Bezahlseite des Anbieters (Stripe)', () => {
     const { demo } = await seedDemo();
     const r = await startHostedCheckout(demo.slug, '', meta);
     expect(r.ok).toBe(false);
+  });
+
+  it('gleichzeitige Tarifklicks erzeugen nur eine offene Checkout-Sitzung', async () => {
+    const { demo, lead } = await seedDemo();
+    const results = await Promise.all(
+      [1, 2, 3].map(() => startHostedCheckout(demo.slug, 'one_time', { ...meta, ipHash: 'concurrent-hosted' })),
+    );
+    expect(results.every((r) => r.ok)).toBe(true);
+    expect(new Set(results.flatMap((r) => (r.ok ? [r.orderId] : []))).size).toBe(1);
+    const rows = await getDb().select().from(orders).where(eq(orders.leadId, lead.id));
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.status).toBe('pending');
+  });
+
+  it.each(['basis', 'care_plus'] as const)(
+    '%s: parallele Klicks, richtiger Snapshot und tarifbezogener Abbruch',
+    async (plan) => {
+      await updateConfig({ offers: { activeVersion: 'v4' } }, 'test:task3');
+      const { demo, lead } = await seedDemo();
+      const results = await Promise.all([1, 2, 3].map(() => startHostedCheckout(demo.slug, plan, meta)));
+      const ids = results.flatMap((r) => (r.ok ? [r.orderId] : []));
+      expect(results.every((r) => r.ok)).toBe(true);
+      expect(new Set(ids).size).toBe(1);
+      const rows = await getDb().select().from(orders).where(eq(orders.leadId, lead.id));
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({
+        amountCents: 59700,
+        offerSnapshot: { tier: plan, monthlyCents: plan === 'basis' ? 1900 : 9900, billingStart: 'confirmed_go_live' },
+      });
+      const r = results[0]!;
+      if (!r.ok) throw new Error(r.error);
+      expect(await simulateMockPayment(sessionOf(r.url), 'cancel')).toContain(`?abgebrochen=1&plan=${plan}#uebernehmen`);
+    },
+  );
+
+  it('ausstehende Bestätigung wird nicht als bezahlt ausgegeben und sperrt erneuten Checkout', async () => {
+    await updateConfig({ offers: { activeVersion: 'v4' } }, 'test:task3');
+    const { demo } = await seedDemo();
+    const r = await startHostedCheckout(demo.slug, 'basis', meta);
+    if (!r.ok) throw new Error(r.error);
+    await simulateMockPayment(sessionOf(r.url), 'sepa_processing', collected());
+    expect(await getCheckoutContext(demo.slug)).toEqual({ state: 'ordered', paymentState: 'processing' });
+    expect((await startHostedCheckout(demo.slug, 'care_plus', meta)).ok).toBe(false);
   });
 
   it('Option wählen → Bezahlseite; Angaben aus dem Checkout landen in Bestellung, Kunde und Rechnung', async () => {

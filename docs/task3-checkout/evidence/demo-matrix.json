@@ -1,0 +1,95 @@
+{
+  "scope": "fictional local acceptance fixtures, synthetic manual scores are not real design approval",
+  "rows": [
+    {
+      "branch": "blumenladen",
+      "template_id": "einzelhandel-split",
+      "palette": "flieder",
+      "plan": "basis",
+      "technical_passed": true,
+      "technical_checks": 12,
+      "payment_mode": "mock"
+    },
+    {
+      "branch": "cafe",
+      "template_id": "gastronomie-split",
+      "palette": "tomate",
+      "plan": "care_plus",
+      "technical_passed": true,
+      "technical_checks": 12,
+      "payment_mode": "mock"
+    },
+    {
+      "branch": "elektriker",
+      "template_id": "handwerk-solid",
+      "palette": "anthrazit",
+      "plan": "care_plus",
+      "technical_passed": true,
+      "technical_checks": 12,
+      "payment_mode": "mock"
+    },
+    {
+      "branch": "kosmetikstudio",
+      "template_id": "beauty-soft",
+      "palette": "rose",
+      "plan": "care_plus",
+      "technical_passed": true,
+      "technical_checks": 12,
+      "payment_mode": "mock"
+    },
+    {
+      "branch": "maler",
+      "template_id": "handwerk-plakat",
+      "palette": "signalgelb",
+      "plan": "basis",
+      "technical_passed": true,
+      "technical_checks": 13,
+      "payment_mode": "mock"
+    },
+    {
+      "branch": "modegeschaeft",
+      "template_id": "einzelhandel-plakat",
+      "palette": "limette",
+      "plan": "care_plus",
+      "technical_passed": true,
+      "technical_checks": 12,
+      "payment_mode": "mock"
+    },
+    {
+      "branch": "nagelstudio",
+      "template_id": "beauty-soft",
+      "palette": "salbei",
+      "plan": "basis",
+      "technical_passed": true,
+      "technical_checks": 12,
+      "payment_mode": "mock"
+    },
+    {
+      "branch": "restaurant",
+      "template_id": "gastronomie-foto",
+      "palette": "olive",
+      "plan": "basis",
+      "technical_passed": true,
+      "technical_checks": 12,
+      "payment_mode": "mock"
+    },
+    {
+      "branch": "tanzschule",
+      "template_id": "kurse-foto",
+      "palette": "energie",
+      "plan": "care_plus",
+      "technical_passed": true,
+      "technical_checks": 12,
+      "payment_mode": "mock"
+    },
+    {
+      "branch": "yogastudio",
+      "template_id": "kurse-plakat",
+      "palette": "tuerkis",
+      "plan": "basis",
+      "technical_passed": true,
+      "technical_checks": 12,
+      "payment_mode": "mock"
+    }
+  ]
+}

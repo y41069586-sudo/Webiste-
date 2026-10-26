@@ -1,4 +1,5 @@
 import { AdminArrow } from '@/components/admin-arrow';
+import { Brand } from '@/components/brand';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { effectiveSwitches, getConfig } from '@wbm/core';
@@ -17,11 +18,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       </a>
       <aside className="admin-sidebar">
         <Link href="/admin" className="admin-brand">
-          <span className="admin-brand-mark">
-            S
-            <span>
-              <AdminArrow />
-            </span>
+          <span className="admin-brand-mark !bg-white">
+            <Brand compact />
           </span>
           <span>
             SeitenWerk<small>DEIN ARBEITSPLATZ</small>

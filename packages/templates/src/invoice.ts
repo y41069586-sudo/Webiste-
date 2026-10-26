@@ -1,3 +1,4 @@
+import { brandMarkHtml } from './brand';
 import { esc } from './html';
 import { embeddedFontCss, LETTER_GEOMETRY } from './letter';
 
@@ -107,7 +108,7 @@ td{vertical-align:top;padding:2mm 1mm;border-bottom:0.2mm solid #d9e0e8}
 </style></head>
 <body>
 <section class="page">
-  <header class="head"><div class="brand">${esc(d.seller.company)}</div><div class="web">${esc(d.seller.website)}</div></header>
+  <header class="head"><div class="brand" style="display:flex;align-items:center;gap:8px">${brandMarkHtml(26, true)}<span>${esc(d.seller.company)}</span></div><div class="web">${esc(d.seller.website)}</div></header>
   <div class="sender">${esc(sellerLine)}</div>
   <div class="address" id="anschrift">${buyerLines.map((l) => `<div>${esc(l)}</div>`).join('')}</div>
   <div class="meta">

@@ -242,7 +242,7 @@ describe('Checkout und Zahlung', () => {
     ).toHaveLength(1);
 
     // Bereits gekauft: Checkout zeigt „bestellt“, ohne Onboarding-Token
-    expect(await getCheckoutContext(demo.slug)).toEqual({ state: 'ordered' });
+    expect(await getCheckoutContext(demo.slug)).toEqual({ state: 'ordered', paymentState: 'paid' });
 
     // Erfolgsseite
     const ret = await confirmCheckoutReturn(demo.slug, order.stripeSessionId!);

@@ -1,3 +1,4 @@
+import { brandMarkHtml } from '../brand';
 import { readSiteCss } from '../css';
 import { esc, mapsLink, paragraphs } from '../html';
 import { icon } from '../icons';
@@ -126,7 +127,7 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
     c: (typeof cards)[number],
   ) => `<li class="flex flex-col rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] shadow-sm">
       <h3 class="text-base font-semibold">${esc(c.title)}</h3>
-      <p class="mt-2"><span class="text-3xl font-bold tracking-tight">${esc(c.price)}</span> <span class="text-[#4b5563]">${esc(c.unit)}</span></p>
+      <p class="mt-2 text-3xl font-bold tracking-tight">${esc(c.price)}</p><p class="mt-1 text-sm text-[#4b5563]">${esc(c.unit)}</p>
       <ul class="mt-3 flex-1 space-y-1.5 text-sm text-[#374151]">${c.points.map((p) => `<li class="flex gap-2"><span aria-hidden="true" class="text-[#047857]">✓</span><span>${esc(p)}</span></li>`).join('')}</ul>
       <a href="${esc(c.href)}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-4 py-2 font-semibold text-white hover:bg-[#1f2937] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827]">${demo.offerVersion === 'v4' ? `Mit ${esc(c.title.replace('SeitenWerk ', ''))} übernehmen` : `${esc(c.title)} wählen`}</a>
     </li>`;
@@ -136,18 +137,18 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
       ${t.photoDataUri ? `<img src="${t.photoDataUri}" alt="${esc(t.name)}" width="96" height="96" class="h-24 w-24 shrink-0 rounded-full object-cover">` : ''}
       <div>
         <h3 class="text-base font-semibold">Wer hat diesen Entwurf gebaut?</h3>
-        <p class="mt-1 font-medium">${esc(t.name)}</p>
+        <p class="mt-1 font-medium">${esc(t.name) || 'Anbieterangaben noch nicht vollständig – Veröffentlichung gesperrt'}</p>
         ${t.intro ? `<p class="mt-2 text-sm text-[#374151]">${esc(t.intro)}</p>` : ''}
-        <p class="mt-3 text-sm text-[#374151]">${esc(t.email)}${t.phone ? ` · ${esc(t.phone)}` : ''} · <a class="underline" href="${esc(t.imprintUrl)}">Impressum</a></p>
+        <p class="mt-3 text-sm text-[#374151]">${t.email ? `<a class="underline" href="mailto:${esc(t.email)}">${esc(t.email)}</a>` : ''}${t.phone ? ` · ${esc(t.phone)}` : ''} · <a class="underline" href="${esc(t.imprintUrl)}">Impressum</a></p>
       </div>
     </div>`
     : '';
   return `<section id="uebernehmen" aria-labelledby="uebernehmen-titel" class="border-t border-[#dce2ed] bg-[#f3f4f6] py-12 text-[#111827]">
   <div class="mx-auto max-w-4xl px-4">
-    <p class="text-sm font-medium text-[#4b5563]">Angebot von ${esc(demo.sender.company)} – nicht Teil der Website</p>
-    <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${demo.offerVersion === 'v4' ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${demo.offerVersion === 'v4' ? '<p class="mt-3 text-sm">Übernehmen Sie diesen Entwurf und lassen Sie ihn für Ihren Betrieb fertigstellen und veröffentlichen.</p>' : ''}
-    ${opts.review ? `<div class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><h3 class="text-base font-semibold">Was Sie beauftragen</h3><p class="mt-2">Die Fertigstellung Ihres Entwurfs und einen der beiden Monatstarife. Sie übermitteln Ihre echten Inhalte. Veröffentlicht wird nach Ihrer Freigabe; die Monatsgebühr beginnt mit dem bestätigten Go-Live.</p><ol class="mt-4 grid gap-3 sm:grid-cols-3"><li><strong>1. Online bestellen</strong><br>Tarif und Bedingungen prüfen.</li><li><strong>2. Inhalte ergänzen</strong><br>Angaben, Fotos und Wünsche übermitteln.</li><li><strong>3. Prüfen &amp; freigeben</strong><br>Finale Website gemeinsam abstimmen.</li></ol><p class="mt-4">Zusätzlich beauftragte Seiten und größere Umbauten sind nicht pauschal enthalten. Zusatzarbeiten benötigen ein gesondertes Angebot. Domainumfang, Übergabe und Kündigung stehen in den Bedingungen vor dem Checkout.</p></div>` : ''}
+    <p class="text-sm font-medium text-[#4b5563]">${brandMarkHtml(24)} Angebot von ${esc(demo.sender.company)} – nicht Teil der Website</p>
+    <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${demo.offerVersion === 'v4' ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${demo.offerVersion === 'v4' ? '<p class="mt-3 text-sm">Einrichtung, Ihre Inhalte und Fertigstellung dieses Entwurfs. Veröffentlichung erst nach Ihrer Freigabe. Wählen Sie dazu Ihren laufenden Tarif:</p>' : ''}
     ${cards.length ? `<ul class="mt-6 grid gap-4 ${cards.length > 1 ? 'sm:grid-cols-2' : ''}">${cards.map(card).join('')}</ul>` : ''}
+    ${opts.review || demo.offerVersion === 'v4' ? `<details class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><summary class="cursor-pointer font-semibold">Was Sie beauftragen – Ablauf und Leistungsgrenzen</summary><p class="mt-3">Sie übermitteln Ihre tatsächlichen Inhalte und Änderungswünsche. Wir stellen den Entwurf fertig, richten die vereinbarten technischen Leistungen ein und veröffentlichen erst nach Ihrer Freigabe.</p><ol class="mt-4 space-y-3"><li><strong>1. Online bestellen</strong><br>Tarif und Bedingungen prüfen.</li><li><strong>2. Inhalte ergänzen</strong><br>Firmenangaben, rechtliche Texte, eigene Bilder und Wünsche übermitteln.</li><li><strong>3. Prüfen und freigeben</strong><br>Website abstimmen. Erst nach bestätigtem Go-Live beginnt die Monatsgebühr.</li></ol><p class="mt-4">Zusatzseiten, größere Umbauten und Leistungen außerhalb des Tarifs benötigen ein gesondertes Angebot. Domainumfang, Kündigungsfrist und Übergabe sind in den verlinkten Vertragsbedingungen beschrieben.</p></details>` : ''}
     ${demo.guaranteeNote ? `<p class="mt-4 text-sm text-[#374151]">${esc(demo.guaranteeNote)}</p>` : ''}
     ${
       demo.offerVersion === 'v4'
@@ -205,7 +206,7 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
         : ''
     }
     ${trust}
-    <div class="mt-6 flex flex-wrap gap-4 text-sm">${demo.whatsappUrl ? `<a href="${esc(demo.whatsappUrl)}" target="_blank" rel="noopener noreferrer" class="underline">Frage per WhatsApp</a>` : ''}<a href="mailto:${esc(demo.sender.email)}" class="underline">Frage per E-Mail</a><a href="#frage" class="underline">Frageformular zu diesem Entwurf</a></div>
+    <div class="mt-6 flex flex-wrap gap-4 text-sm">${demo.whatsappUrl ? `<a href="${esc(demo.whatsappUrl)}" target="_blank" rel="noopener noreferrer" class="underline">Frage per WhatsApp</a>` : ''}${demo.sender.email ? `<a href="mailto:${esc(demo.sender.email)}" class="underline">Frage per E-Mail</a>` : ''}<a href="#frage" class="underline">Frageformular zu diesem Entwurf</a></div>
     <form method="post" action="${esc(demo.optOutUrl)}" class="sw-demo-optout"><button type="submit" class="min-h-11 underline">Kein Interesse – Entwurf und Werbung abbestellen</button></form>
   </div>
 </section>`;
@@ -278,7 +279,7 @@ ${jsonLd}
     banner =
       `<aside class="sw-demo-context" aria-label="Hinweis zum Entwurf"><strong>Unverbindlicher Website-Entwurf</strong> von ${esc(demo.sender.company)} für ${esc(facts.name)}. Dies ist nicht die offizielle Website des Betriebs.</aside>
 +<aside class="sw-demo-toolbar" aria-label="Website übernehmen"><div class="sw-demo-toolbar-inner">
-+  <p class="sw-demo-toolbar-title text-sm"><strong>Ihr Entwurf.</strong> In Ruhe ansehen, direkt übernehmen.</p>
++  <span class="sw-provider-mark">${brandMarkHtml(24)}</span><p class="sw-demo-toolbar-title text-sm"><strong>Ihr Entwurf.</strong> In Ruhe ansehen, direkt übernehmen.</p>
 +  <div class="sw-demo-actions"><a href="${demo.offers?.length ? '#uebernehmen' : esc(demo.checkoutUrl)}" class="sw-demo-buy">Diese Website übernehmen</a><a href="#frage" class="sw-demo-ask">Fragen</a></div>
 +</div></aside>`.replace(/^\+/gm, '');
   } else if (mode === 'preview') {
@@ -409,7 +410,7 @@ ${jsonLd}
       return `${o.omitOffer ? '' : offerSection(demo)}<footer class="${o.className}">
   <div class="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:grid-cols-3">
     <div><p class="font-semibold">${esc(facts.name)}</p><p class="mt-2 text-sm opacity-90">${addressLines}</p>${facts.googleReviewsUrl ? `<p class="mt-2 text-sm"><a class="${o.linkClass}" href="${esc(facts.googleReviewsUrl)}" rel="noopener noreferrer">Bewertungen auf Google</a></p>` : ''}</div>
-    <div class="text-sm opacity-90"><p>Dies ist ein unverbindlicher Entwurf. ${esc(facts.name)} hat diese Seite nicht beauftragt.</p><p class="mt-2">Der Entwurf ist bis ${esc(demo.expiresLabel.replace(/^am\s+/, ''))} online und wird danach automatisch gelöscht.</p></div>
+    <div class="text-sm opacity-90"><p>Dies ist ein unverbindlicher Entwurf. ${esc(facts.name)} hat diese Seite nicht beauftragt.</p><p class="mt-2">Der Entwurf ist bis ${esc(demo.expiresLabel.replace(/^am\s+/, ''))} online und anschließend nicht mehr öffentlich erreichbar.</p></div>
     <div class="text-sm"><p class="opacity-90">Entwurf erstellt von ${esc(demo.sender.company)}</p>
       <ul class="mt-2 space-y-1"><li><a class="${o.linkClass}" href="${esc(demo.sender.imprintUrl)}">Impressum (Ersteller)</a></li><li><a class="${o.linkClass}" href="${esc(demo.sender.privacyUrl)}">Datenschutz (Ersteller)</a></li></ul>
     </div>

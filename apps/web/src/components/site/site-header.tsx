@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { Brand } from '@/components/brand';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { SITE_NAV } from '@/lib/site-nav';
 
 /** Schlanker Kopf; mobil öffnet ein weißes Navigationspanel mit großen Links. */
-export function SiteHeader({ brand }: { brand: string }) {
+export function SiteHeader({ brand: _brand }: { brand: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [pathname]);
@@ -20,7 +21,7 @@ export function SiteHeader({ brand }: { brand: string }) {
     <header className="sticky top-0 z-40 bg-[#f8f8fb]/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-6 px-5 sm:px-8">
         <Link href="/" className="text-strong font-tight text-[1.05rem] text-[#0f172a]">
-          {brand}
+          <Brand />
         </Link>
         <nav aria-label="Hauptnavigation" className="hidden items-center gap-6 lg:flex">
           {SITE_NAV.map((n) => {

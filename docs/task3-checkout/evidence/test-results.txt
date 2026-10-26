@@ -1,0 +1,26 @@
+26.10.2026 – nur isolierte lokale Testdaten/Mock-Provider, DRY_RUN=true
+Keine tatsächliche Stripe-Testzahlung oder produktive Providerabnahme.
+
+Core
+Test Files  9 passed (9)
+Tests  70 passed (70)
+Duration  21.36s (transform 690ms, setup 22ms, collect 6.85s, tests 11.99s, environment 1ms, prepare 397ms)
+Templates
+Test Files  2 passed (2)
+Tests  102 passed (102)
+Duration  1.58s (transform 513ms, setup 0ms, collect 691ms, tests 226ms, environment 0ms, prepare 214ms)
+Browser-Hauptlauf
+12 passed (3.6m)
+Browser-Fehlerfälle
+2 passed (35.1s)
+
+TypeScript: pnpm typecheck – bestanden
+Lint: pnpm lint – bestanden
+Regulärer Build: pnpm build inkl. Worker – bestanden, 7 bekannte Dateitracing-Warnungen
+Brief: 1 A4-Seite; PDF-QR, Adressfeld und Druckränder ohne Befund
+Git diff --check: bestanden
+
+Wichtige Entwicklungskorrekturen:
+Vorher-Race: 3 simultane Klicks → 3 Bestellungen, Fehler reproduziert; nachher Legacy/Basis/Care+ je genau1.
+Intermediäre Browserläufe wegen HMR, legitimen Lazy-Loading-Zuständen und gemeinsamem Besucherlimit nicht als bestanden bewertet.
+Final: eigener Produktionsbuild, unterschiedliche fiktive Besucher; Rate-Limit blieb aktiviert.

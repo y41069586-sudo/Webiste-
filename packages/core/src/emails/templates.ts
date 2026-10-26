@@ -1,3 +1,4 @@
+import { appUrl } from '../config/env';
 import type { AppConfig } from '../config/settings';
 import { esc } from '../util/html';
 import { formatEuro } from '../util/time';
@@ -68,7 +69,7 @@ export function renderEmail(
 <body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;color:#1d232b;line-height:1.55">
 <div style="max-width:600px;margin:0 auto;padding:24px 16px">
 <div style="background:#ffffff;border-radius:12px;padding:28px 24px;font-size:15px">
-<div style="font-weight:700;color:#1d4e89;font-size:17px;margin-bottom:18px">${esc(s.company)}</div>
+<div style="font-weight:700;color:#1d4e89;font-size:17px;margin-bottom:18px"><img src="${esc(appUrl('/brand/seitenwerk-mark-96.png'))}" width="32" height="32" alt="SeitenWerk" style="vertical-align:middle;margin-right:10px;object-fit:contain">${esc(s.company)}</div>
 ${htmlParts.join('\n')}
 <p>Viele Grüße<br>${esc(s.name)}</p>
 </div>

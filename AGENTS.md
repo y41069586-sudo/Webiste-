@@ -276,3 +276,12 @@ Rechercheformulierungen in Briefen nur mit explizitem manuell geprüftem `letter
 oder `website_search`), Quelle und aktuellem `checkedAt`. Website-Suchbefund verlangt dokumentierte Namen-/Ort-
 Suche, Verzeichnis- und Social-Link-Prüfung; kein Nachweis aus fehlendem OSM-Tag. Fiktive Recherche-Muster niemals
 als tatsächlich recherchierte Betriebe präsentieren. Keine garantierten Kunden, Leads oder Umsätze.
+
+## Aktueller Einzelauftrag 3 – Vertrauen und bestehender Checkout
+
+Aufgabe2 bleibt erhalten. Aktueller Stand unter `docs/task3-checkout/`. Geliefertes SeitenWerk-Monogramm
+nur auf Anbieteroberflächen/Print verwenden, keine Kundenmarke ersetzen. Bestehender Hosted Checkout,
+V4-Preise und Go-Live-Monatsstart bleiben. Bezahlte und noch verarbeitete Bestellungen getrennt anzeigen;
+keinen Onboarding-Link über halböffentlichen Demo-Kontext ausgeben. Gleichzeitige Hosted-Klicks mit
+bestehender Lead-Zeile serialisieren; innerhalb der Sperre dieselbe DbOrTx-Verbindung durchreichen.
+Mock-Browserprüfungen sind keine Stripe-Sandbox-Zahlungen. Keine neue Aufgabe4/5, kein Push/Deploy.

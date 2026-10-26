@@ -1,5 +1,15 @@
 import { createHash } from 'node:crypto';
-import { findPublicDemo, formatDateDe, getConfig, getProviders, recordEvent, getDb, esc } from '@wbm/core';
+import {
+  findPublicDemo,
+  formatDateDe,
+  getConfig,
+  DEFAULT_CONFIG,
+  publicOperatorSettings,
+  getProviders,
+  recordEvent,
+  getDb,
+  esc,
+} from '@wbm/core';
 import { requestMetaFrom } from '@/lib/request';
 import { simplePage } from '@/lib/public-page';
 
@@ -33,7 +43,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const found = await findPublicDemo(slug);
   if (found.state === 'not_found') return simplePage('Seite nicht gefunden', '<p>Dieser Link ist ungültig.</p>', 404);
   if (found.state === 'gone') {
-    const cfg = await getConfig();
+    const cfg = publicOperatorSettings(await getConfig(), DEFAULT_CONFIG.sender);
     return simplePage(
       'Dieser Entwurf ist nicht mehr verfügbar',
       `<p>Der Website-Entwurf ist abgelaufen oder wurde gelöscht.</p><p class="muted">Fragen? <a href="mailto:${esc(cfg.sender.email)}">${esc(cfg.sender.email)}</a></p>`,
@@ -42,12 +52,19 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   }
   const html = await getProviders().storage.get(found.demo.htmlStorageKey ?? '');
   if (!html) return simplePage('Nicht verfügbar', '<p>Der Entwurf ist vorübergehend nicht verfügbar.</p>', 503);
-  const cfg = await getConfig();
+  const cfg = publicOperatorSettings(await getConfig(), DEFAULT_CONFIG.sender);
   const label = found.demo.expiresAt ? `am ${formatDateDe(found.demo.expiresAt)}` : 'nach Ablauf der Frist';
   await recordEvent(getDb(), { leadId: found.lead.id, type: 'demo_view', req: requestMetaFrom(req.headers), dedupeDaily: true });
+  const query = new URL(req.url).searchParams;
+  const selected = query.get('plan');
+  const cancelled = query.get('abgebrochen') === '1' && (selected === 'basis' || selected === 'care_plus');
+  const notice = cancelled
+    ? `<p role="status" style="margin:1rem 0;padding:1rem;border:1px solid #94a3b8;border-radius:.75rem;background:white;color:#0f172a">Bezahlvorgang verlassen. Zuletzt gewählter Tarif: <strong>${selected === 'basis' ? 'Basis' : 'Care+'}</strong>. Sie können das Angebot hier noch einmal prüfen. Falls Sie bereits bezahlt haben, warten Sie bitte auf die Bestätigung.</p>`
+    : '';
   const page = html
     .toString('utf8')
     .replaceAll(EXPIRES_PLACEHOLDER, label)
+    .replace('<h2 id="uebernehmen-titel"', `${notice}<h2 id="uebernehmen-titel"`)
     .replace('</body>', cfg.metrics.engagementBeacon ? `<script>${BEACON_SCRIPT}</script></body>` : '</body>');
   return new Response(page, { status: 200, headers: DEMO_HEADERS });
 }

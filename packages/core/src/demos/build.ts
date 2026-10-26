@@ -1,4 +1,4 @@
-import { v4Offer, V4_TIERS, v4FirstYearCents } from '../services/offers-v4';
+import { v4Offer, V4_TIERS } from '../services/offers-v4';
 import { eq, sql } from 'drizzle-orm';
 import {
   renderSite,
@@ -10,7 +10,8 @@ import {
 } from '@wbm/templates';
 import { appUrl, demoUrl } from '../config/env';
 import { getConfig } from '../config/service';
-import type { AppConfig } from '../config/settings';
+import { DEFAULT_CONFIG, type AppConfig } from '../config/settings';
+import { publicOperatorSettings } from '../config/operator';
 import { getDb } from '../db/client';
 import { demos, leads } from '../db/schema';
 import { formatPhoneDe, phoneHref } from '../leads/normalize';
@@ -111,6 +112,7 @@ export function whatsappUrl(cfg: AppConfig, slug: string): string | null {
 }
 
 export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string | null = null): DemoOptions {
+  cfg = publicOperatorSettings(cfg, DEFAULT_CONFIG.sender);
   const p = cfg.pricing;
   const tax = priceTaxSuffix(cfg);
   const care = `${formatEuroShort(p.subscriptionCents)}/Monat`;
@@ -148,14 +150,14 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
         return {
           title: tier === 'basis' ? 'SeitenWerk Basis' : 'SeitenWerk Care+',
           price: formatEuroShort(o.setupCents),
-          unit: 'einmalig',
+          unit: tax ? `einmalig ${tax}` : 'einmalig – Steuerstatus noch offen',
           points: [
             `+ ${formatEuroShort(o.monthlyCents)}/Monat insgesamt ab Go-Live`,
             'Monatlich kündbar, keine zwölfmonatige Mindestbindung',
             tier === 'care_plus'
               ? 'Hosting inklusive; bis zu 60 Minuten kleine Inhaltsänderungen/Monat'
               : 'Hosting, SSL und Basis-Support bei Betriebsstörungen',
-            `Erstes volles Betriebsjahr: ${formatEuroShort(v4FirstYearCents(tier))} bei 12 Monatsgebühren`,
+            'Standard-Domain im vereinbarten Kostenrahmen enthalten',
           ],
           href: demoUrl(`/d/${slug}/uebernehmen?plan=${tier}`),
         };
@@ -172,11 +174,14 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
     sender: senderInfo(cfg),
     expiresLabel: EXPIRES_PLACEHOLDER,
     offers,
-    guaranteeNote: cfg.guarantee.enabled
-      ? cfg.offers.activeVersion === 'v4'
-        ? `${cfg.guarantee.days} Tage Geld zurück für die Einrichtung ab bestätigtem Go-Live. Bereits erbrachte Monatsleistungen gehören nicht zur freiwilligen Einrichtungsgarantie. Die Bedingungen finden Sie bei SeitenWerk unter „Garantie“.`
-        : `${cfg.guarantee.days} Tage Zufriedenheitsgarantie: Gefällt Ihnen die fertige Website nicht, bekommen Sie Ihr Geld zurück.`
-      : null,
+    guaranteeNote:
+      !cfg.tax.operatorConfirmed || !cfg.legal.termsMarkdown.trim()
+        ? 'Testangebot: Rechtstexte und Steuerangaben sind noch nicht freigegeben. Kein Live-Verkauf.'
+        : cfg.guarantee.enabled
+          ? cfg.offers.activeVersion === 'v4'
+            ? 'Eine zusätzliche Einrichtungsgarantie gilt nur gemäß den ausdrücklich vereinbarten Garantiebedingungen. Gesetzliche Rechte bleiben unberührt.'
+            : `${cfg.guarantee.days} Tage Zufriedenheitsgarantie: Gefällt Ihnen die fertige Website nicht, bekommen Sie Ihr Geld zurück.`
+          : null,
     // Über unsere Weiterleitung, damit der Klick gezählt wird (B6.1); Ziel bleibt der wa.me-Link
     whatsappUrl: whatsappUrl(cfg, slug) ? demoUrl(`/d/${slug}/whatsapp`) : null,
     trust: {

@@ -1,5 +1,8 @@
 # Ultimate Conversion & Quality – laufender Umsetzungsstand
 
+Aktuelle lokale Fortsetzung vom 26.10.2026: Aufgabe3 (Anbieterlogo und Kaufstrecke), siehe `docs/task3-checkout/status.md` und Prüfbericht. Vorherige Abnahmen bleiben zeitgebundene Nachweise; keine Live-Freigabe.
+
+
 25.10.2026. Einstieg2b9313d, Branchcodex/conversion-v4, keine lokalen Änderungen verworfen.
 Dieser Auftrag erweitert den vorherigen Audit; dessen „lokal fertig“ bezieht sich nicht auf die neuen
 Ultimate-Anforderungen. DRY_RUN=true, keine Produktionsmigration, Veröffentlichung oder realen Briefe,

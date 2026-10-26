@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getConfig, getOnboardingContext, MAX_PHOTOS } from '@wbm/core';
+import { getConfig, DEFAULT_CONFIG, publicOperatorSettings, getOnboardingContext, MAX_PHOTOS } from '@wbm/core';
 import { PublicCard, PublicShell } from '@/components/public/shell';
 import { OnboardingForm } from './onboarding-form';
 
@@ -16,7 +16,7 @@ export default async function OnboardingPage({
 }) {
   const { token } = await params;
   const sp = await searchParams;
-  const cfg = await getConfig();
+  const cfg = publicOperatorSettings(await getConfig(), DEFAULT_CONFIG.sender);
   const ctx = await getOnboardingContext(token);
   if (ctx.state === 'not_found') {
     return (

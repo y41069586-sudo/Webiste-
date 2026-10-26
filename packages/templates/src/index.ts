@@ -1,3 +1,4 @@
+export { brandMarkHtml, brandMarkDataUri } from './brand';
 import { renderMalerDesignReview } from './sites/maler-design-review';
 import { buildParts } from './partials/shared';
 import { beautyElegant } from './sites/beauty-elegant';

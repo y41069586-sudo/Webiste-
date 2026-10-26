@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getConfig, getPreviewContext } from '@wbm/core';
+import { getConfig, DEFAULT_CONFIG, publicOperatorSettings, getPreviewContext } from '@wbm/core';
 import { PublicCard, PublicShell } from '@/components/public/shell';
 import { PreviewActions } from './preview-actions';
 
@@ -16,7 +16,7 @@ export default async function PreviewPage({
 }) {
   const { token } = await params;
   const sp = await searchParams;
-  const cfg = await getConfig();
+  const cfg = publicOperatorSettings(await getConfig(), DEFAULT_CONFIG.sender);
   const ctx = await getPreviewContext(token);
   const shell = (title: string, body: React.ReactNode) => (
     <PublicShell company={cfg.sender.company}>

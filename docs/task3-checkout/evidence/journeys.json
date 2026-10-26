@@ -1,0 +1,195 @@
+{
+  "scope": "local mock providers; no Stripe test payment",
+  "results": [
+    {
+      "id": "01",
+      "branch": "maler",
+      "name": "Maleratelier Nordlicht – fiktiver Testbetrieb",
+      "plan": "Basis",
+      "slug": "tdY29uLXA3ckwFVHtjkyJGJf",
+      "successReturn": true,
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        1440
+      ],
+      "paidReturn": true,
+      "invoiceAssigned": true,
+      "onboarding": true,
+      "simulation": true
+    },
+    {
+      "id": "02",
+      "branch": "elektriker",
+      "name": "Elektro Nordlicht – fiktiver Testbetrieb",
+      "plan": "Care+",
+      "slug": "LzySFi4VKYqKHum8k4YhD9s2",
+      "successReturn": true,
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        1440
+      ],
+      "paidReturn": true,
+      "invoiceAssigned": true,
+      "onboarding": true,
+      "simulation": true
+    },
+    {
+      "id": "03",
+      "branch": "nagelstudio",
+      "name": "Nagelstudio Form & Farbe – fiktiver Testbetrieb",
+      "plan": "Basis",
+      "slug": "9xdRrr4AFAUVtzPoYTzpVPon",
+      "successReturn": true,
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        1440
+      ],
+      "paidReturn": true,
+      "invoiceAssigned": true,
+      "onboarding": true,
+      "simulation": true
+    },
+    {
+      "id": "04",
+      "branch": "kosmetikstudio",
+      "name": "Kosmetikstudio Am Garten – fiktiver Testbetrieb",
+      "plan": "Care+",
+      "slug": "L4xubeET8CBRiJ72ti3Ashig",
+      "successReturn": true,
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        1440
+      ],
+      "paidReturn": true,
+      "invoiceAssigned": true,
+      "onboarding": true,
+      "simulation": true
+    },
+    {
+      "id": "05",
+      "branch": "restaurant",
+      "name": "Restaurant Kleine Küche – fiktiver Testbetrieb",
+      "plan": "Basis",
+      "slug": "aNmYaXDnCAHuVEFZLWMZYahU",
+      "successReturn": true,
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        1440
+      ],
+      "paidReturn": true,
+      "invoiceAssigned": true,
+      "onboarding": true,
+      "simulation": true
+    },
+    {
+      "id": "06",
+      "branch": "cafe",
+      "name": "Café Morgenlicht – fiktiver Testbetrieb",
+      "plan": "Care+",
+      "slug": "Yyf3rZWhG3P9ykyWwXMeZYon",
+      "successReturn": true,
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        1440
+      ],
+      "paidReturn": true,
+      "invoiceAssigned": true,
+      "onboarding": true,
+      "simulation": true
+    },
+    {
+      "id": "07",
+      "branch": "blumenladen",
+      "name": "Blumen & Zweige – fiktiver Testbetrieb",
+      "plan": "Basis",
+      "slug": "yXc5V3LZJP2NRfJonSCxFjZb",
+      "successReturn": true,
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        1440
+      ],
+      "paidReturn": true,
+      "invoiceAssigned": true,
+      "onboarding": true,
+      "simulation": true
+    },
+    {
+      "id": "08",
+      "branch": "modegeschaeft",
+      "name": "Modeatelier Lindenhof – fiktiver Testbetrieb",
+      "plan": "Care+",
+      "slug": "z45SBPdSTMUvEWsi8EnWqspK",
+      "successReturn": true,
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        1440
+      ],
+      "paidReturn": true,
+      "invoiceAssigned": true,
+      "onboarding": true,
+      "simulation": true
+    },
+    {
+      "id": "09",
+      "branch": "yogastudio",
+      "name": "Yoga Bewegungsraum – fiktiver Testbetrieb",
+      "plan": "Basis",
+      "slug": "veTgjFqmPvsWT33me4fuZhwD",
+      "successReturn": true,
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        1440
+      ],
+      "paidReturn": true,
+      "invoiceAssigned": true,
+      "onboarding": true,
+      "simulation": true
+    },
+    {
+      "id": "10",
+      "branch": "tanzschule",
+      "name": "Tanzschule Rhythmus & Raum – fiktiver Testbetrieb",
+      "plan": "Care+",
+      "slug": "pbi5G2f9LdRryvxvXKkmbekZ",
+      "successReturn": true,
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        1440
+      ],
+      "paidReturn": true,
+      "invoiceAssigned": true,
+      "onboarding": true,
+      "simulation": true
+    }
+  ]
+}

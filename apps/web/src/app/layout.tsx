@@ -5,8 +5,9 @@ import '@fontsource-variable/inter-tight';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: { default: 'Website-Brief', template: '%s · Website-Brief' },
+  title: { default: 'SeitenWerk', template: '%s · SeitenWerk' },
   robots: { index: false, follow: false },
+  icons: { icon: '/brand/seitenwerk-mark-32.png', apple: '/brand/seitenwerk-mark-180.png' },
 };
 
 export const viewport: Viewport = {

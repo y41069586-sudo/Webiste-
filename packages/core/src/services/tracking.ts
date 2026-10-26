@@ -78,9 +78,8 @@ export type DemoLookup =
   { state: 'ok'; demo: typeof demos.$inferSelect; lead: typeof leads.$inferSelect } | { state: 'gone' } | { state: 'not_found' };
 
 /** Veröffentlichte, nicht abgelaufene Demo per Slug. */
-export async function findPublicDemo(slug: string, now = new Date()): Promise<DemoLookup> {
+export async function findPublicDemo(slug: string, now = new Date(), db: DbOrTx = getDb()): Promise<DemoLookup> {
   if (!/^[A-Za-z0-9]{20,64}$/.test(slug)) return { state: 'not_found' };
-  const db = getDb();
   const demo = await db.query.demos.findFirst({ where: eq(demos.slug, slug) });
   if (!demo) return { state: 'not_found' };
   if (demo.status !== 'published' || demo.deletedAt || (demo.expiresAt && demo.expiresAt < now)) return { state: 'gone' };

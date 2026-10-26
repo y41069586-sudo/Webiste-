@@ -1,3 +1,4 @@
+import { brandMarkHtml } from './brand';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -182,7 +183,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 <body>
 <section class="page ${d.offerSummary ? 'v4-page' : ''}" aria-label="Seite 1">
   <header class="head">
-    <div><div class="brand">${esc(d.sender.company)}</div><div class="tag">Websites für lokale Betriebe</div></div>
+    <div><div class="brand" style="display:flex;align-items:center;gap:8px">${brandMarkHtml(26, true)}<span>${esc(d.sender.company)}</span></div><div class="tag">Websites für lokale Betriebe</div></div>
     <div class="web">${esc(d.sender.website)}</div>
   </header>
   <div class="address" id="anschrift">${d.recipientLines.map((l) => `<div>${esc(l)}</div>`).join('')}</div>

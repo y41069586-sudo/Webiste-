@@ -2,6 +2,7 @@ export * from './types';
 export * from './config/env';
 export * from './config/settings';
 export * from './config/service';
+export { publicOperatorSettings } from './config/operator';
 export * from './db/client';
 export * as schema from './db/schema';
 export { runMigrations } from './db/migrate';
@@ -127,3 +128,5 @@ export { closeBrowser } from './render/browser';
 
 export * from './quality/demo';
 export * from './quality/letter';
+
+export { brandMarkHtml } from '@wbm/templates';

@@ -1,0 +1,52 @@
+{
+  "checkedOn": "2026-10-26",
+  "scope": "read-only Stripe sandbox; no payment or account mutation",
+  "account": "acct_1UToabGn2A630LhH",
+  "prices": [
+    {
+      "id": "price_1UULX8Gn2A630LhH0F3MgcLP",
+      "active": true,
+      "livemode": false,
+      "currency": "eur",
+      "unitAmount": 9900,
+      "type": "recurring",
+      "recurring": {
+        "interval": "month",
+        "interval_count": 1,
+        "meter": null,
+        "trial_period_days": null,
+        "usage_type": "licensed"
+      },
+      "component": "care_plus",
+      "version": "v4"
+    },
+    {
+      "id": "price_1UULX3Gn2A630LhHDA6Or60k",
+      "active": true,
+      "livemode": false,
+      "currency": "eur",
+      "unitAmount": 1900,
+      "type": "recurring",
+      "recurring": {
+        "interval": "month",
+        "interval_count": 1,
+        "meter": null,
+        "trial_period_days": null,
+        "usage_type": "licensed"
+      },
+      "component": "basis",
+      "version": "v4"
+    },
+    {
+      "id": "price_1UULWxGn2A630LhHdvSaUslJ",
+      "active": true,
+      "livemode": false,
+      "currency": "eur",
+      "unitAmount": 59700,
+      "type": "one_time",
+      "recurring": null,
+      "component": "setup",
+      "version": "v4"
+    }
+  ]
+}

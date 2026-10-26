@@ -1,5 +1,13 @@
 import type { Metadata } from 'next';
-import { confirmCheckoutReturn, errInfo, getConfig, logger, type ReturnState } from '@wbm/core';
+import {
+  confirmCheckoutReturn,
+  errInfo,
+  getConfig,
+  DEFAULT_CONFIG,
+  publicOperatorSettings,
+  logger,
+  type ReturnState,
+} from '@wbm/core';
 import { PublicCard, PublicShell } from '@/components/public/shell';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +22,7 @@ export default async function SuccessPage({
 }) {
   const { slug } = await params;
   const { session_id: sessionId = '' } = await searchParams;
-  const cfg = await getConfig();
+  const cfg = publicOperatorSettings(await getConfig(), DEFAULT_CONFIG.sender);
   let res: ReturnState = { state: 'unknown' };
   try {
     res = await confirmCheckoutReturn(slug, sessionId);
@@ -34,8 +42,8 @@ export default async function SuccessPage({
             </p>
             <h2 className="mt-6 mb-2 text-lg font-semibold">Nächster Schritt: Ihre Angaben</h2>
             <p className="text-slate-700">
-              Für Impressum, Leistungen, Öffnungszeiten und gegebenenfalls Logo und Fotos brauchen wir noch ein paar Angaben – das
-              dauert etwa 10 Minuten. Den Link finden Sie auch in der E-Mail.
+              Für Impressum, Leistungen, Öffnungszeiten und gegebenenfalls Logo und Fotos brauchen wir noch ein paar Angaben – Sie
+              können die Inhalte in Ruhe zusammentragen. Den persönlichen Link finden Sie auch in der E-Mail.
             </p>
             {res.customerToken ? (
               <a href={`/onboarding/${res.customerToken}`} className="btn-site btn-primary mt-5">
@@ -47,8 +55,8 @@ export default async function SuccessPage({
           <>
             <h1 className="mb-3 text-2xl font-semibold">Danke – Ihre Zahlung wird bearbeitet</h1>
             <p className="text-slate-700">
-              Bei Lastschrift oder Überweisung dauert die Bestätigung ein paar Tage. Sobald die Zahlung eingegangen ist, schicken
-              wir Ihnen Rechnung und den Link für Ihre Angaben per E-Mail.
+              Die endgültige Bestätigung des Zahlungsanbieters steht noch aus. Bitte bestellen Sie nicht erneut. Sobald die
+              Zahlung eingegangen ist, schicken wir Ihnen Rechnung und den Link für Ihre Angaben per E-Mail.
             </p>
           </>
         ) : (
@@ -58,7 +66,7 @@ export default async function SuccessPage({
               Wir konnten die Zahlung gerade noch nicht bestätigen. Wenn Sie bezahlt haben, erhalten Sie in Kürze eine E-Mail.
               Andernfalls können Sie die Bestellung{' '}
               <a href={`/checkout/${slug}`} className="text-brand-700 underline">
-                erneut abschließen
+                prüfen
               </a>
               . Fragen: {cfg.sender.email}
             </p>

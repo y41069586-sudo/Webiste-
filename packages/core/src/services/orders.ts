@@ -74,7 +74,7 @@ export type CheckoutContext =
       monthly: { grossCents: number; netCents: number; vatCents: number; label: string } | null;
       prefill: { company: string; street: string; postalCode: string; city: string; domain: string };
     }
-  | { state: 'ordered' }
+  | { state: 'ordered'; paymentState: 'paid' | 'processing' }
   | { state: 'gone' }
   | { state: 'not_found' }
   | { state: 'disabled'; reason: string };
@@ -98,21 +98,20 @@ function paymentModeAtCheckout(): 'unknown' | 'live' | 'test' | 'mock' {
   return availability.ok ? availability.mode : 'unknown';
 }
 
-export async function getCheckoutContext(slug: string): Promise<CheckoutContext> {
+export async function getCheckoutContext(slug: string, db: DbOrTx = getDb()): Promise<CheckoutContext> {
   const avail = checkoutAvailability();
-  const found = await findPublicDemo(slug);
+  const found = await findPublicDemo(slug, new Date(), db);
   if (found.state !== 'ok') {
     // Bereits gekaufte Demos bleiben für den Käufer erreichbar
-    return found.state === 'gone' ? await orderedOrGone(slug) : found;
+    return found.state === 'gone' ? await orderedOrGone(slug, db) : found;
   }
-  const db = getDb();
   const paid = await db.query.orders.findFirst({
     where: and(eq(orders.leadId, found.lead.id), inArray(orders.status, ['paid', 'processing'])),
   });
   // Kein Onboarding-Link hier: der Demo-Link ist halböffentlich, der Link geht nur per E-Mail an den Käufer
-  if (paid) return { state: 'ordered' };
+  if (paid) return { state: 'ordered', paymentState: paid.status === 'paid' ? 'paid' : 'processing' };
   if (!avail.ok) return { state: 'disabled', reason: avail.reason };
-  const cfg = await getConfig();
+  const cfg = await getConfig({ db, fresh: true });
   // Echte Zahlungen erst, wenn Absenderdaten, Rechtstexte und AGB vollständig sind
   if (avail.mode === 'live' && goLiveBlockers(cfg).length)
     return { state: 'disabled', reason: 'Online-Bestellung ist noch nicht freigeschaltet.' };
@@ -138,14 +137,17 @@ export async function getCheckoutContext(slug: string): Promise<CheckoutContext>
   };
 }
 
-async function orderedOrGone(slug: string): Promise<CheckoutContext> {
-  const db = getDb();
+async function orderedOrGone(slug: string, db: DbOrTx): Promise<CheckoutContext> {
   const demo = await db.query.demos.findFirst({ where: eq(demos.slug, slug) });
   if (!demo) return { state: 'gone' };
   const paid = await db.query.orders.findFirst({
     where: and(eq(orders.leadId, demo.leadId), inArray(orders.status, ['paid', 'processing'])),
   });
-  return paid ? { state: 'ordered' } : { state: 'gone' };
+  return paid ? { state: 'ordered', paymentState: paid.status === 'paid' ? 'paid' : 'processing' } : { state: 'gone' };
+}
+
+function checkoutCancelUrl(slug: string, plan: string): string {
+  return appUrl(`/d/${slug}?abgebrochen=1&plan=${encodeURIComponent(plan)}#uebernehmen`);
 }
 
 export type StartCheckoutResult =
@@ -322,7 +324,24 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
  * AGB-Zustimmung erfasst der Anbieter; übernommen werden sie vor der Verbuchung (applyCollectedCustomer).
  */
 export async function startHostedCheckout(slug: string, planRaw: string, meta: RequestMeta): Promise<StartCheckoutResult> {
-  const ctx = await getCheckoutContext(slug);
+  const db = getDb();
+  const demo = await db.query.demos.findFirst({ where: eq(demos.slug, slug) });
+  if (!demo) return { ok: false, error: 'Dieser Entwurf ist nicht mehr verfügbar.' };
+  // Eine Verbindung für Sperre UND alle Queries verwenden (kein Pool-Deadlock bei Doppelklicks).
+  // Bestehende Lead-Zeile statt neuer Lock-Tabelle; fachlichen Zustand erst danach erneut lesen.
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT id FROM leads WHERE id = ${demo.leadId} FOR UPDATE`);
+    return startHostedCheckoutLocked(slug, planRaw, meta, tx);
+  });
+}
+
+async function startHostedCheckoutLocked(
+  slug: string,
+  planRaw: string,
+  meta: RequestMeta,
+  db: DbOrTx,
+): Promise<StartCheckoutResult> {
+  const ctx = await getCheckoutContext(slug, db);
   if (ctx.state === 'ordered') return { ok: false, error: 'Für diesen Entwurf liegt bereits eine Bestellung vor.' };
   if (ctx.state === 'disabled') return { ok: false, error: ctx.reason };
   if (ctx.state !== 'ok') return { ok: false, error: 'Dieser Entwurf ist nicht mehr verfügbar.' };
@@ -332,7 +351,6 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
   if (cfg.offers.activeVersion === 'v4' && !isV4Tier(plan)) return { ok: false, error: 'Bitte Basis oder Care+ wählen.' };
   if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
     return { ok: false, error: 'Die monatliche Zahlung ist derzeit nicht verfügbar.' };
-  const db = getDb();
   const rl = await rateLimit(db, `checkout:${meta.ipHash}`, 10, 3600);
   const rlLead = await rateLimit(db, `checkout-lead:${lead.id}`, 20, 86400);
   if (!rl.allowed || !rlLead.allowed)
@@ -352,7 +370,7 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
     orderBy: desc(orders.createdAt),
   });
   if (reusable?.checkoutUrl) return { ok: true, url: reusable.checkoutUrl, orderId: reusable.id };
-  await cancelOpenOrders(lead.id, 'neuer Checkout');
+  await cancelOpenOrders(lead.id, 'neuer Checkout', db);
 
   const avail = checkoutAvailability();
   const [order] = await db
@@ -412,7 +430,7 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
         : plan === 'monthly'
           ? `${formatEuro(p.monthlyCents)} pro Monat, erste Rate sofort. Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
           : `Einmalig ${formatEuro(p.packageCents)} inklusive Domain und ${p.hostingMonthsIncluded} Monaten Hosting.`,
-      g.enabled ? `${g.days} Tage Zufriedenheitsgarantie.` : '',
+      g.enabled && !isV4Tier(plan) ? `${g.days} Tage Garantie nach den verlinkten Garantiebedingungen.` : '',
       'Rechnung per E-Mail, danach tragen Sie Ihre Angaben für die Website ein.',
     ]
       .filter(Boolean)
@@ -427,7 +445,7 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
           250,
         ),
       productDescription: isV4Tier(plan)
-        ? v4PriceText()
+        ? v4CheckoutTerms(plan, cfg.offers.billingMode ?? 'saved_mandate')
         : plan === 'monthly'
           ? `${p.packageDescription} Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
           : p.packageDescription,
@@ -439,7 +457,7 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
         submitNote: note,
       },
       successUrl: appUrl(`/checkout/${slug}/erfolg?session_id={CHECKOUT_SESSION_ID}`),
-      cancelUrl: appUrl(`/d/${slug}#uebernehmen`),
+      cancelUrl: checkoutCancelUrl(slug, plan),
       metadata: {
         kind: 'order',
         orderId: order.id,
@@ -548,8 +566,7 @@ export async function applyCollectedCustomer(orderId: string, c: CollectedCustom
 }
 
 /** Offene Bestellungen eines Leads beenden (Session beim Anbieter ablaufen lassen). */
-export async function cancelOpenOrders(leadId: string, reason: string): Promise<number> {
-  const db = getDb();
+export async function cancelOpenOrders(leadId: string, reason: string, db: DbOrTx = getDb()): Promise<number> {
   const open = await db
     .select()
     .from(orders)
@@ -1205,7 +1222,8 @@ export async function simulateMockPayment(
   const info = await mockCheckoutInfo(sessionId);
   if (!info) throw new Error('Simulierte Zahlung nicht verfügbar');
   const { order, slug } = info;
-  if (outcome === 'cancel') return appUrl(info.hosted ? `/d/${slug}#uebernehmen` : `/checkout/${slug}?abgebrochen=1`);
+  if (outcome === 'cancel')
+    return info.hosted ? checkoutCancelUrl(slug, info.order.plan) : appUrl(`/checkout/${slug}?abgebrochen=1`);
   const p = getProviders().payment as unknown as PaymentProviderWithSign;
   const fire = async (ev: Omit<PaymentEvent, 'eventId' | 'rawType'> & { rawType: string }) => {
     const raw = JSON.stringify({

@@ -1,5 +1,8 @@
 # SeitenWerk V4/V5 – verbindlicher Handoff
 
+Aktuelle lokale Fortsetzung vom 26.10.2026: Aufgabe3 (Anbieterlogo und Kaufstrecke), siehe `docs/task3-checkout/status.md` und Prüfbericht. Vorherige Abnahmen bleiben zeitgebundene Nachweise; keine Live-Freigabe.
+
+
 Stand 25.10.2026. **Bereit für interne Tests. Kein Versand-/Verkaufsstart. Nicht veröffentlicht.**
 `DRY_RUN=true`; keine echten Briefe, Zahlungen/Erstattungen, Domainkäufe, DNS-/Produktionsänderungen.
 Die ausdrücklich autorisierten Stripe-Sandbox-Tests bewegten nur Testgeld; Testabos beendet.

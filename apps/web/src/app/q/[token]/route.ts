@@ -1,4 +1,4 @@
-import { getConfig, handleScan, esc } from '@wbm/core';
+import { getConfig, DEFAULT_CONFIG, publicOperatorSettings, handleScan, esc } from '@wbm/core';
 import { requestMetaFrom } from '@/lib/request';
 import { simplePage } from '@/lib/public-page';
 
@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
       headers: { location: res.redirect, 'cache-control': 'no-store', 'referrer-policy': 'no-referrer' },
     });
   }
-  const cfg = await getConfig();
+  const cfg = publicOperatorSettings(await getConfig(), DEFAULT_CONFIG.sender);
   if ('gone' in res) {
     return simplePage(
       'Dieser Entwurf ist nicht mehr verfügbar',
