@@ -29,7 +29,7 @@ export interface SharedParts {
   addressLines: string;
   mapsHref: string;
   faqList(opts: { itemClass: string; summaryClass: string; answerClass: string }): string;
-  footer(opts: { className: string; linkClass: string }): string;
+  footer(opts: { className: string; linkClass: string; omitOffer?: boolean }): string;
   /** Inhalt von „Über uns“ als Absätze */
   about(cls?: string): string;
   jsonLd: string;
@@ -113,7 +113,7 @@ function faviconDataUri(letter: string, color: string): string {
  * „Seite übernehmen“: zwei gleichwertige Preiskarten (keine Vorauswahl, keine versteckten Kosten) und
  * Vertrauensblock des Erstellers. Eigenes, neutrales Design – deutlich vom Entwurf des Betriebs abgesetzt.
  */
-function offerSection(demo: NonNullable<RenderInput['demo']>): string {
+export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { review?: boolean } = {}): string {
   const cards = demo.offers ?? [];
   if (!cards.length && !demo.trust) return '';
   const card = (
@@ -140,6 +140,7 @@ function offerSection(demo: NonNullable<RenderInput['demo']>): string {
   <div class="mx-auto max-w-4xl px-4">
     <p class="text-sm font-medium text-[#4b5563]">Angebot von ${esc(demo.sender.company)} – nicht Teil der Website</p>
     <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${demo.offerVersion === 'v4' ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${demo.offerVersion === 'v4' ? '<p class="mt-3 text-sm">Übernehmen Sie diesen Entwurf und lassen Sie ihn für Ihren Betrieb fertigstellen und veröffentlichen.</p>' : ''}
+    ${opts.review ? `<div class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><h3 class="text-base font-semibold">Was Sie beauftragen</h3><p class="mt-2">Die Fertigstellung Ihres Entwurfs und einen der beiden Monatstarife. Sie übermitteln Ihre echten Inhalte. Veröffentlicht wird nach Ihrer Freigabe; die Monatsgebühr beginnt mit dem bestätigten Go-Live.</p><ol class="mt-4 grid gap-3 sm:grid-cols-3"><li><strong>1. Online bestellen</strong><br>Tarif und Bedingungen prüfen.</li><li><strong>2. Inhalte ergänzen</strong><br>Angaben, Fotos und Wünsche übermitteln.</li><li><strong>3. Prüfen &amp; freigeben</strong><br>Finale Website gemeinsam abstimmen.</li></ol><p class="mt-4">Zusätzlich beauftragte Seiten und größere Umbauten sind nicht pauschal enthalten. Zusatzarbeiten benötigen ein gesondertes Angebot. Domainumfang, Übergabe und Kündigung stehen in den Bedingungen vor dem Checkout.</p></div>` : ''}
     ${cards.length ? `<ul class="mt-6 grid gap-4 ${cards.length > 1 ? 'sm:grid-cols-2' : ''}">${cards.map(card).join('')}</ul>` : ''}
     ${demo.guaranteeNote ? `<p class="mt-4 text-sm text-[#374151]">${esc(demo.guaranteeNote)}</p>` : ''}
     ${
@@ -396,10 +397,10 @@ ${jsonLd}
 </section>`;
   };
 
-  const footer = (o: { className: string; linkClass: string }) => {
+  const footer = (o: { className: string; linkClass: string; omitOffer?: boolean }) => {
     const year = new Date().getFullYear();
     if (isDemo && demo) {
-      return `${offerSection(demo)}<footer class="${o.className}">
+      return `${o.omitOffer ? '' : offerSection(demo)}<footer class="${o.className}">
   <div class="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:grid-cols-3">
     <div><p class="font-semibold">${esc(facts.name)}</p><p class="mt-2 text-sm opacity-90">${addressLines}</p>${facts.googleReviewsUrl ? `<p class="mt-2 text-sm"><a class="${o.linkClass}" href="${esc(facts.googleReviewsUrl)}" rel="noopener noreferrer">Bewertungen auf Google</a></p>` : ''}</div>
     <div class="text-sm opacity-90"><p>Dies ist ein unverbindlicher Entwurf. ${esc(facts.name)} hat diese Seite nicht beauftragt.</p><p class="mt-2">Der Entwurf ist bis ${esc(demo.expiresLabel.replace(/^am\s+/, ''))} online und wird danach automatisch gelöscht.</p></div>

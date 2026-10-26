@@ -166,6 +166,8 @@ export interface LiveOptions {
 }
 
 export interface RenderInput {
+  /** Internal opt-in for the pending painter design review; not a public URL parameter. */
+  designReview?: boolean;
   templateId: string;
   palette: string;
   mode: SiteMode;

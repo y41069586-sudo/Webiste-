@@ -1,0 +1,251 @@
+[
+  {
+    "id": "handwerk-klar",
+    "concept": "Premium Editorial",
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "question-open-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "question-open-konsole",
+        "passed": true
+      },
+      {
+        "name": "question-open-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "question-open-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "question-open-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "question-open-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "question-open-layout-mobil",
+        "passed": true
+      }
+    ],
+    "beforePerformance": {
+      "name": "lighthouse",
+      "passed": true,
+      "score": 66,
+      "details": "performance: 98, accessibility: 100, best-practices: 100, seo: 66"
+    },
+    "afterPerformance": {
+      "name": "lighthouse",
+      "passed": true,
+      "score": 66,
+      "details": "performance: 100, accessibility: 100, best-practices: 100, seo: 66"
+    },
+    "qrRedirect": true,
+    "pdfQr": true,
+    "pages": 1,
+    "heroHeight": 786,
+    "visualApproved": false
+  },
+  {
+    "id": "handwerk-solid",
+    "concept": "Modern Business",
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "question-open-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "question-open-konsole",
+        "passed": true
+      },
+      {
+        "name": "question-open-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "question-open-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "question-open-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "question-open-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "question-open-layout-mobil",
+        "passed": true
+      }
+    ],
+    "beforePerformance": {
+      "name": "lighthouse",
+      "passed": true,
+      "score": 66,
+      "details": "performance: 98, accessibility: 100, best-practices: 100, seo: 66"
+    },
+    "afterPerformance": {
+      "name": "lighthouse",
+      "passed": true,
+      "score": 66,
+      "details": "performance: 100, accessibility: 100, best-practices: 100, seo: 66"
+    },
+    "qrRedirect": true,
+    "pdfQr": true,
+    "pages": 1,
+    "heroHeight": 717,
+    "visualApproved": false
+  },
+  {
+    "id": "handwerk-werkstatt",
+    "concept": "Bold Creative",
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "question-open-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "question-open-konsole",
+        "passed": true
+      },
+      {
+        "name": "question-open-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "question-open-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "question-open-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "question-open-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "question-open-layout-mobil",
+        "passed": true
+      }
+    ],
+    "beforePerformance": {
+      "name": "lighthouse",
+      "passed": true,
+      "score": 66,
+      "details": "performance: 98, accessibility: 100, best-practices: 100, seo: 66"
+    },
+    "afterPerformance": {
+      "name": "lighthouse",
+      "passed": true,
+      "score": 66,
+      "details": "performance: 99, accessibility: 100, best-practices: 100, seo: 66"
+    },
+    "qrRedirect": true,
+    "pdfQr": true,
+    "pages": 1,
+    "heroHeight": 759,
+    "visualApproved": false
+  }
+]

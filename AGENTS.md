@@ -233,3 +233,14 @@ Fortlaufender Umsetzungsstand: `docs/v4-quality-handoff.md`; früherer Prüfstan
 - Vor Versand muss die Brief-Demo weiterhin die aktuell über QR erreichbare Demo sein. Ersetzte
   Demos und nachträglich fehlgeschlagene/offene Qualitätsprüfungen blockieren Versand erneut.
   Ein früheres approved darf diesen späteren Befund nicht umgehen.
+
+
+## Verbindliches Redesign-Gate (26.10.2026)
+
+- Frühere technische Ultimate-Abnahme ist keine gestalterische Freigabe. Drei Maler-Konzepte zuerst,
+  identische fiktive Fakten; Ergebnisse und Grenzen in `docs/design-review/README.md` und `status.md`.
+- `designReview` und `reviewOnly` sind interne Prüfparameter, keine Produktivaktivierung. Bestehende
+  IDs und Plakat erhalten. Vor ausdrücklicher visueller Zwischenabnahme keine Übertragung auf weitere
+  Branchen und kein allgemeines Firmenwebsite-Redesign. Nächste Sitzung dort fortsetzen, nicht neu bauen.
+- Screenshots/PDFs sind echte lokale Renderartefakte; QR-Testserver ist nur lokal, kein öffentliches
+  Briefziel. Lokale Mock-/Browserprüfungen nicht als echte Stripe-Sandbox-/Providerabnahme darstellen.

@@ -1,0 +1,61 @@
+SeitenWerk – lokaler Abschlusslauf 26.10.2026
+DRY_RUN=true; nur fiktive Daten; Core: entbehrliche lokale PostgreSQL-Testdatenbank.
+Kein tatsächlicher Stripe-/LetterXpress-/Resend-Providerlauf.
+Browser-/PDF-/Lighthouse-Ergebnisse: checks.json.
+
+redesign-template-tests.log
+ ✓ test/design-review.test.ts (3 tests) 8ms
+
+ Test Files  2 passed (2)
+      Tests  100 passed (100)
+   Start at  06:08:57
+   Duration  701ms (transform 201ms, setup 0ms, collect 290ms, tests 107ms, environment 0ms, prepare 98ms)
+
+
+redesign-core-tests.log
+ ✓ test/v5-letter-contract.test.ts (12 tests) 28ms
+
+ Test Files  6 passed (6)
+      Tests  45 passed (45)
+   Start at  06:08:58
+   Duration  48.17s (transform 936ms, setup 18ms, collect 7.33s, tests 38.67s, environment 1ms, prepare 276ms)
+
+
+redesign-release-types.log
+> website-brief-maschine@0.1.0 typecheck /workspace/seitenwerk-v4
+> pnpm -r typecheck
+
+Scope: 4 of 5 workspace projects
+packages/templates typecheck$ tsc --noEmit
+packages/templates typecheck: Done
+packages/core typecheck$ tsc -p tsconfig.json
+packages/core typecheck: Done
+apps/web typecheck$ tsc --noEmit
+apps/worker typecheck$ tsc --noEmit
+apps/worker typecheck: Done
+apps/web typecheck: Done
+
+redesign-release-lint.log
+
+> website-brief-maschine@0.1.0 lint /workspace/seitenwerk-v4
+> eslint .
+
+
+redesign-build.log
+├ ƒ /ueber-mich
+├ ƒ /verlaengern/[token]
+└ ƒ /verlaengern/mock/[session]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> @wbm/worker@0.1.0 build /workspace/seitenwerk-v4/apps/worker
+> tsc --noEmit
+
+
+Endgültige Prozesskette mit Renderer, PDF-Rasterung, Evidenzexport, Tests, Typen, Lint und Build: Exit 0.
+Build mit sieben dynamischen Dateizugriff-/Tracing-Warnungen; kein Provider-Bundle abgenommen.

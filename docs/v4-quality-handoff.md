@@ -199,3 +199,15 @@ anschließend genehmigte externe Sandbox-/Infrastrukturabnahme gemäß Abschluss
 Letzter sicherer Implementierungscommit: `c9af6a4515ebbcb6c07111a3382df081f2a2c827` auf `codex/conversion-v4`.
 Alle Implementierungsänderungen dieses Pakets darin enthalten; dieser anschließende Dokumentationscommit
 ergänzt nur den Wiederaufnahmepunkt. Tests und Grenzen siehe Ultimate-Abschluss.
+
+
+## Neue gestalterische Zwischenabnahme (26.10.2026)
+
+Der Betreiber hat die frühere visuelle Qualität ausdrücklich nicht abgenommen. Der obige technische
+Abschluss ersetzt keine Designfreigabe. Neues, isoliertes erstes Redesign-Paket:
+[Status](design-review/status.md), [zehn geprüfte Schwachstellen und Nachweise](design-review/README.md).
+Drei Maler-Konzepte, vollständige echte Screenshots/PDFs und Vorher/Nachher sind vorhanden. Standard-
+Renderer und andere Branchen unverändert. 100 Template-Tests, 45 relevante Core-Tests, Typen/Lint/Build
+für dieses Paket bestanden. Frühere komplette Testzahlen nicht als erneute Durchführung ausgeben.
+Funnel-Zustellschätzung/Testabgrenzung bleiben offene Kampagnenblocker. Keine Produktionsfreigabe.
+**Jetzt auf die ausdrückliche gestalterische Zwischenabnahme warten; danach erst Branchenübertragung.**

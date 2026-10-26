@@ -23,6 +23,7 @@ export interface StockPhoto {
   /** Stichwörter für die Auswahl passend zur Branche (z. B. „tanz“ für eine Tanzschule) */
   keywords?: string[];
   kind?: 'generated';
+  reviewOnly?: boolean;
 }
 
 export function imagesDir(): string {
@@ -44,12 +45,18 @@ export function stockPhotoManifest(): StockPhoto[] {
 }
 
 /** Fotos einer Gruppe in fester, vom Seed abhängiger Reihenfolge (Abwechslung zwischen Demos). */
-export function stockPhotos(group: BranchGroup, seed = 0, branchLabel = ''): StockPhoto[] {
+export function stockPhotos(
+  group: BranchGroup,
+  seed = 0,
+  branchLabel = '',
+  opts: { includeReview?: boolean } = {},
+): StockPhoto[] {
   const root = path.resolve(imagesDir());
   const list = stockPhotoManifest().filter((p) => {
     const file = path.resolve(root, p.file);
     return (
       p.group === group &&
+      (!p.reviewOnly || opts.includeReview) &&
       (p.license === 'CC0 1.0' ||
         (p.kind === 'generated' && p.source === 'OpenAI image generation' && p.license === 'Generated – OpenAI terms')) &&
       Boolean(p.sourceUrl && p.checkedAt) &&

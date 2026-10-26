@@ -1,3 +1,4 @@
+import { renderMalerDesignReview } from './sites/maler-design-review';
 import { buildParts } from './partials/shared';
 import { beautyElegant } from './sites/beauty-elegant';
 import { beautyModern } from './sites/beauty-modern';
@@ -44,7 +45,7 @@ export function renderSite(input: RenderInput): string {
   if (input.mode === 'demo' && !input.demo) throw new Error('Demo-Modus braucht demo-Optionen');
   if (input.mode === 'live' && !input.live) throw new Error('Live-Modus braucht live-Optionen');
   const parts = buildParts(input);
-  return tpl.render({ ...input, parts });
+  return input.designReview ? renderMalerDesignReview({ ...input, parts }) : tpl.render({ ...input, parts });
 }
 export { renderLetterHtml, embeddedFontCss, LETTER_GEOMETRY, type LetterData, type LetterSender } from './letter';
 export { renderInvoiceHtml, type InvoiceData, type InvoiceLine, type InvoiceBuyer, type InvoiceSeller } from './invoice';
