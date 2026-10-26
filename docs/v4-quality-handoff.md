@@ -241,3 +241,5 @@ gestalterische Betreiberfreigabe, keine Detailabnahme aller120 Screenshots, kein
 
 Kein Push/Deployment/Produktionsmigration/Versand/Zahlung. DRY_RUN=true. Keine weitere Aufgabe vorwegnehmen.
 Als Nächstes Aufgabe1-Ergebnisse vorstellen, Betreiberfeedback/nächsten Einzelprompt abwarten.
+
+Letzter sicherer Aufgabe1-Implementierungscommit: `beb1f9834be3f4da80c0270d576601c003bdef45` auf `codex/conversion-v4`.

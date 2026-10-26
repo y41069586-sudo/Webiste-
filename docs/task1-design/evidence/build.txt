@@ -26,9 +26,9 @@ packages/core build: Done
   Finished TypeScript in 7.6s ...
   Collecting page data using 2 workers ...
   Generating static pages using 2 workers (0/5) ...
-  Generating static pages using 2 workers (1/5) 
-  Generating static pages using 2 workers (2/5) 
-  Generating static pages using 2 workers (3/5) 
+  Generating static pages using 2 workers (1/5)
+  Generating static pages using 2 workers (2/5)
+  Generating static pages using 2 workers (3/5)
 ✓ Generating static pages using 2 workers (5/5) in 91ms
 [7 dynamic filesystem tracing warnings omitted here; see README]
 
@@ -38,4 +38,3 @@ packages/core build: Done
 
 > @wbm/worker@0.1.0 build /workspace/seitenwerk-v4/apps/worker
 > tsc --noEmit
-

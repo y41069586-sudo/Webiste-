@@ -36,3 +36,6 @@ physische Mobile-/Safari- und Kundentests. Technische QA ist keine Versandfreiga
 Brief-/Zahlungsüberarbeitung und weitere vier Aufgaben wurden nicht vorweggenommen. DRY_RUN=true.
 Kein Push/Deployment/Produktionszugriff. Nächster Schritt: Ergebnisse von Aufgabe1 zeigen und den nächsten
 Einzelprompt des Betreibers abwarten. Alte breitere Handoffs sind kein Auftrag zum Start weiterer Phasen.
+
+Letzter sicherer Implementierungscommit: `beb1f9834be3f4da80c0270d576601c003bdef45` auf `codex/conversion-v4`.
+Ein anschließender reiner Dokumentationscommit hält diesen Wiederaufnahmepunkt fest.
