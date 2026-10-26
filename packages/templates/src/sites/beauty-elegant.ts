@@ -12,7 +12,7 @@ export const beautyElegant: TemplateDef = {
   description: 'Serifenschrift, zentriert, feine Linien, ruhige Flächen',
   palettes: ['rose', 'noir', 'salbei'],
   render({ parts: p, content: c, facts: f }) {
-    const serviceLabel = /fris[öe]|friseur|haarsalon/i.test(f.branchLabel) ? 'Leistungen' : 'Behandlungen';
+    const serviceLabel = /fris[öe]|friseur|haarsalon|barber|barbier/i.test(f.branchLabel) ? 'Leistungen' : 'Behandlungen';
     const body = `
 <header class="border-b border-line bg-surface">
   <div class="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-5 md:flex-row md:justify-between">
@@ -21,22 +21,14 @@ export const beautyElegant: TemplateDef = {
       <li><a class="hover:text-ink" href="#leistungen">${serviceLabel}</a></li>
       <li><a class="hover:text-ink" href="#ueber-uns">Über uns</a></li>
       <li><a class="hover:text-ink" href="#oeffnungszeiten">Zeiten</a></li>
-      <li><a class="hover:text-ink" href="#frage">Kontakt</a></li>
+      <li><a class="hover:text-ink" href="${p.draft ? '#oeffnungszeiten' : '#frage'}">Kontakt</a></li>
     </ul></nav>
   </div>
 </header>
 <main id="inhalt">
-  <section class="bg-surface-alt py-16 md:py-24">
-    <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 md:grid-cols-2">
-      <div class="text-center md:text-left">
-        <p class="text-sm uppercase tracking-[0.3em] text-muted">${esc(f.branchLabel)} · ${esc(f.city)}</p>
-        <h1 class="mt-4 font-heading text-4xl leading-tight md:text-6xl">${esc(c.hero_headline)}</h1>
-        <div class="mx-auto mt-6 h-px w-24 bg-primary md:mx-0"></div>
-        <p class="mt-6 text-lg text-muted">${esc(c.hero_subline)}</p>
-        <a href="${esc(p.ctaHref)}" class="mt-8 inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold uppercase tracking-widest text-on-primary">${icon('calendar', 'h-4 w-4')}${esc(c.cta_text)}</a>
-      </div>
-      <div>${localProfile({ facts: f, parts: p, content: c }, 'studio')}</div>
-    </div>
+  <section class="sw-premium-hero sw-beauty-editorial">
+    <div class="sw-beauty-title"><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><p class="sw-hero-copy">${esc(c.hero_subline)}</p><a class="sw-hero-button" href="${esc(p.ctaHref)}">${esc(c.cta_text)}</a></div>
+    <div class="sw-beauty-media">${localProfile({ facts: f, parts: p, content: c }, 'studio')}</div>
   </section>
 
   <section id="leistungen" aria-labelledby="leistungen-titel" class="py-16 md:py-20">

@@ -95,7 +95,7 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   checks.push(await validateHtml(html));
 
   // 4) Browser: Konsole, axe, Layout
-  checks.push(...(await browserChecks({ html })));
+  checks.push(...(await browserChecks({ html, expectedFacts: { name: bizFacts.name, city: bizFacts.city } })));
 
   // 5) Lighthouse auf der Live-Variante (ohne Banner/noindex)
   if (opts.lighthouse !== false) {

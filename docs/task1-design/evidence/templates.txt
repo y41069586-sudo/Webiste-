@@ -1,0 +1,5 @@
+ ✓ test/templates.test.ts (97 tests) 196ms
+ ✓ test/design-review.test.ts (5 tests) 13ms
+ Test Files  2 passed (2)
+      Tests  102 passed (102)
+   Duration  1.22s (transform 297ms, setup 0ms, collect 396ms, tests 209ms, environment 0ms, prepare 176ms)

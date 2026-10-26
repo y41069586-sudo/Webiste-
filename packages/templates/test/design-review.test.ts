@@ -30,3 +30,17 @@ it('identifies the provider rather than the painter as recipient of demo questio
   expect(question).toContain('Anbieterweg 9');
   expect(question).not.toContain(input.facts.street);
 });
+it('keeps contact actions in the business draft and identifies the provider question address', () => {
+  const input = structuredClone(demoInput('handwerk-klar', 'werkblau', 'handwerk'));
+  const html = renderSite(input);
+  expect(html).toContain('data-template="handwerk-klar"');
+  expect(html).toContain('Kontakt ansehen');
+  expect(html).toContain('href="#oeffnungszeiten"');
+  const question = html.slice(html.indexOf('id="frage"')).split('</form>')[0]!;
+  expect(question).toContain(input.demo!.sender.street);
+  expect(question).not.toContain(input.facts.street);
+});
+it('does not imply ballet for a dance school with no confirmed specialization', () => {
+  expect(stockPhotos('kurse', 0, 'Tanzschule').some((p) => p.file.includes('ballett'))).toBe(false);
+  expect(stockPhotos('kurse', 0, 'Ballettschule').some((p) => p.file.includes('ballett'))).toBe(true);
+});

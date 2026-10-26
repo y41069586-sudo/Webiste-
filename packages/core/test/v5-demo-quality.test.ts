@@ -1,3 +1,4 @@
+import { imagesPainted } from '../src/render/screenshots';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { eq } from 'drizzle-orm';
@@ -84,6 +85,7 @@ describe('V5: zehn fiktive Demos durch bestehenden Generator und echte Browser-Q
       ] as const) {
         await withPage({ width, height }, async (page) => {
           await page.setContent(html, { waitUntil: 'load' });
+          await imagesPainted(page);
           await page.evaluate(() => document.fonts.ready);
           const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
           const broken = await page.evaluate(() => [...document.images].some((i) => !i.complete || i.naturalWidth === 0));
@@ -109,7 +111,10 @@ describe('V5: zehn fiktive Demos durch bestehenden Generator und echte Browser-Q
         qa.checks.filter((c) => !c.passed),
         `${templateId} QA`,
       ).toEqual([]);
-      expect(images.every((i) => !i.overflow && !i.broken)).toBe(true);
+      expect(
+        images.every((i) => !i.overflow && !i.broken),
+        JSON.stringify(images),
+      ).toBe(true);
       await expect(approveDemo(id, 'test:unreviewed', { manual: true })).rejects.toThrow(/manuell/);
       if (index === 0) expect((demo.contentJson?._meta as { source?: string })?.source).toBe('fallback');
     }

@@ -303,6 +303,70 @@ export const CONTENT_LIBRARY: Record<string, LibraryEntry> = {
 /** Additional specialties share the existing truthful fallback contract; services remain labelled examples. */
 const SPECIALTIES: { match: RegExp; headline: string; services: { title: string; text: string; icon: IconKey }[] }[] = [
   {
+    match: /barber|barbier/i,
+    headline: 'Barbershop in {stadt}',
+    services: [
+      {
+        title: 'Haarschnitt',
+        text: 'Schnittwunsch und gewünschte Haarlänge für eine Terminanfrage beschreiben.',
+        icon: 'sparkle',
+      },
+      {
+        title: 'Bartkonturen',
+        text: 'Mögliche Formen und Konturen im Überblick. Den angebotenen Umfang vorab anfragen.',
+        icon: 'sparkle',
+      },
+      {
+        title: 'Termin anfragen',
+        text: 'Wunsch und mögliche Besuchszeiten übermitteln. Der Termin wird anschließend bestätigt.',
+        icon: 'calendar',
+      },
+    ],
+  },
+  {
+    match: /buchladen|buchhandlung|bücher/i,
+    headline: 'Bücher in {stadt}',
+    services: [
+      { title: 'Bücher entdecken', text: 'Eine mögliche Übersicht verschiedener Themen und Bucharten.', icon: 'bag' },
+      { title: 'Titel anfragen', text: 'Titel oder Verfasser nennen und die Verfügbarkeit im Geschäft erfragen.', icon: 'chat' },
+      { title: 'Besuch planen', text: 'Standort, Kontakt und bekannte Öffnungszeiten für den Besuch nachsehen.', icon: 'pin' },
+    ],
+  },
+  {
+    match: /musikschule|musikunterricht/i,
+    headline: 'Musikunterricht in {stadt}',
+    services: [
+      {
+        title: 'Unterrichtsangebote',
+        text: 'Die angebotenen Instrumente und Unterrichtsformen vorab anfragen.',
+        icon: 'calendar',
+      },
+      {
+        title: 'Einstieg besprechen',
+        text: 'Instrument, Vorkenntnisse und Lernwunsch für eine erste Rückmeldung nennen.',
+        icon: 'chat',
+      },
+      { title: 'Zeiten abstimmen', text: 'Mögliche Unterrichtszeiten werden vor einer Anmeldung bestätigt.', icon: 'clock' },
+    ],
+  },
+  {
+    match: /fitness|training|gym/i,
+    headline: 'Training in {stadt}',
+    services: [
+      {
+        title: 'Trainingsangebote',
+        text: 'Eine mögliche Übersicht verschiedener Trainingsbereiche und Kursarten.',
+        icon: 'dumbbell',
+      },
+      { title: 'Einstieg anfragen', text: 'Trainingsziel und Vorerfahrung für eine erste Anfrage beschreiben.', icon: 'chat' },
+      {
+        title: 'Besuch abstimmen',
+        text: 'Betreuung, Kurszeiten und Zugang vor einem Besuch im Studio erfragen.',
+        icon: 'calendar',
+      },
+    ],
+  },
+  {
     match: /fris[öe]|friseur|haarsalon/i,
     headline: 'Ihr Friseursalon in {stadt}',
     services: [
@@ -388,10 +452,6 @@ function fill(s: string, vars: Record<string, string>): string {
   return s.replace(/\{(\w+)\}/g, (_, k: string) => vars[k] ?? '');
 }
 
-function pick<T>(arr: T[], seed: number, offset = 0): T {
-  return arr[(seed + offset) % arr.length]!;
-}
-
 /** Deterministischer Fallback-Inhalt (seed = Hash der Lead-ID). */
 export function libraryContent(
   branch: string,
@@ -400,11 +460,41 @@ export function libraryContent(
   seed: number,
 ): SiteContent {
   const specialty = SPECIALTIES.find((entry) => entry.match.test(`${branch} ${vars.branche}`));
+  const aliases: [RegExp, string][] = [
+    [/elektro|elektriker/i, 'elektriker'],
+    [/nagel|nail/i, 'nagelstudio'],
+    [/kosmetik|haut/i, 'kosmetikstudio'],
+    [/maler|anstrich/i, 'maler'],
+    [/restaurant|trattoria|pizzeria|bistro|gasthaus/i, 'restaurant'],
+    [/caf[eé]|kaffee/i, 'cafe'],
+    [/mode|boutique|bekleidung/i, 'modegeschaeft'],
+    [/blumen|florist/i, 'blumenladen'],
+    [/yoga|pilates/i, 'yogastudio'],
+    [/tanz|ballett/i, 'tanzschule'],
+  ];
+  const alias = aliases.find(([pattern]) => pattern.test(`${branch} ${vars.branche}`))?.[1];
   const lib = specialty
     ? { ...GENERIC[group], headlines: [specialty.headline], services: specialty.services }
-    : (CONTENT_LIBRARY[branch] ?? GENERIC[group]);
-  const v = { name: vars.name, stadt: vars.stadt, branche: vars.branche };
-  const services = lib.services.slice(0, 4 + (seed % 3)).map((s) => ({ ...s, title: fill(s.title, v), text: fill(s.text, v) }));
+    : (CONTENT_LIBRARY[branch] ?? (alias ? CONTENT_LIBRARY[alias] : undefined) ?? GENERIC[group]);
+  const serviceSource =
+    specialty || alias || CONTENT_LIBRARY[branch]
+      ? lib.services
+      : [
+          {
+            title: 'Angebot',
+            text: 'Die tatsächlichen Angebotsbereiche werden vor Veröffentlichung mit dem Betrieb abgestimmt.',
+            icon: 'chat' as const,
+          },
+          {
+            title: 'Anfrage',
+            text: 'Beschreiben Sie Ihren Wunsch und nennen Sie eine Möglichkeit zur Rückmeldung.',
+            icon: 'chat' as const,
+          },
+          { title: 'Standort', text: 'Anschrift, Kontakt und bekannte Öffnungszeiten auf einen Blick.', icon: 'pin' as const },
+        ];
+  const services = serviceSource
+    .slice(0, 4 + (seed % 3))
+    .map((s) => ({ ...s, title: fill(s.title, vars), text: fill(s.text, vars) }));
   const focus: Record<BranchGroup, string> = {
     handwerk: 'Arbeiten am Haus beginnen mit einer konkreten Frage. Hier finden Sie den Kontakt für Ihr Vorhaben.',
     beauty: 'Behandlungen kennenlernen und einen Termin anfragen. Die Übersicht führt Sie zum passenden Kontakt.',
@@ -436,10 +526,12 @@ export function libraryContent(
     },
   ];
   return {
-    hero_headline: fill(pick(lib.headlines, seed), v),
-    hero_subline: specialty
-      ? `${vars.branche} in ${vars.stadt}: Leistungen kennenlernen und Ihren Wunsch direkt anfragen.`
-      : focus[group],
+    hero_headline: `${vars.branche} in ${vars.stadt}`,
+    hero_subline: /barber|barbier|fris[öe]|friseur|haarsalon/i.test(`${branch} ${vars.branche}`)
+      ? 'Schnitt und Styling kennenlernen. Beschreiben Sie Ihren Wunsch und fragen Sie einen Termin an.'
+      : /nagel|nail/i.test(`${branch} ${vars.branche}`)
+        ? 'Ideen zur Nagelgestaltung im Überblick. Für Ihren Terminwunsch finden Sie hier den Kontakt.'
+        : focus[group],
     services,
     about: `${vars.name} ist als ${vars.branche} in ${vars.stadt} zu finden. Anschrift und Kontakt finden Sie auf dieser Seite.\n\nDie dargestellten Angebotsbereiche zeigen, wie sich die Website aufbauen lässt. Vor der Veröffentlichung werden Leistungen, Texte und Bilder mit dem Betrieb abgestimmt.`,
     cta_text: group === 'beauty' ? 'Termin anfragen' : group === 'kurse' ? 'Kurs anfragen' : 'Anfrage stellen',

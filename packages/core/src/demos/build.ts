@@ -228,7 +228,6 @@ export function chooseTemplate(
   usage: Record<string, number> = {},
 ): { templateId: string; palette: string } {
   const options = templatesForGroup(lead.branchGroup);
-  const seed = seedFromId(lead.id);
   const fresh = options.filter((t) => !previous.includes(t.id));
   const pool = fresh.length ? fresh : options;
   const tplUse = (id: string) =>
@@ -236,7 +235,7 @@ export function chooseTemplate(
       .filter(([k]) => k.startsWith(`${id}/`))
       .reduce((s, [, n]) => s + n, 0);
   const tpl = [...pool].sort(
-    (a, b) => tplUse(a.id) - tplUse(b.id) || ((seed + a.id.length) % 7) - ((seed + b.id.length) % 7),
+    (a, b) => tplUse(a.id) - tplUse(b.id) || seedFromId(`${lead.id}:${a.id}`) - seedFromId(`${lead.id}:${b.id}`),
   )[0]!;
   const natural = /garten|landschaft|gärtner|gaertner/i.test(lead.branch ?? '');
   const preference = (palette: string) => (natural && palette === 'waldgruen' ? -1 : 0);

@@ -75,7 +75,7 @@ HARTE REGELN (jeder Verstoß macht den Text unbrauchbar):
 7. Sprache: Deutsch, Sie-Form, freundlich-professionell, kurze und klare Sätze, keine Übertreibungen, keine Superlative („der beste“, „Nummer eins“).
 8. Der Firmenname und die Stadt dürfen vorkommen. Andere Fakten nur, wenn sie unten ausdrücklich genannt sind.
 9. Keine austauschbaren Werbesätze wie „Qualität und Kundenzufriedenheit stehen an erster Stelle“, „Ihr zuverlässiger Partner“ oder „wir nehmen uns Zeit“. Keine erfundenen Termine, Kurse, Behandlungen, Warenbestände oder verbindlichen Zusagen in FAQ. Eine Anfrage ist keine Buchung.
-10. Kurze, branchengerechte Überschriften. Namen, Stadt und Leistungen nicht in jedem Absatz wiederholen. Der Entwurf hat einen zentralen Hinweis auf Beispielinhalte; keine Serie auffälliger Platzhalterwarnungen im Fließtext.
+10. Die Hauptüberschrift nennt die bestätigte Tätigkeit oder Branche und den Ort in natürlichem Deutsch. Keine Versprechen über Eigenschaften, Arbeitsweise oder Spezialisierungen aus einem Firmennamen ableiten. Nur dokumentierte Spezialisierungen nennen. Kurze, branchengerechte Überschriften. Namen, Stadt und Leistungen nicht in jedem Absatz wiederholen. Der Entwurf hat einen zentralen Hinweis auf Beispielinhalte; keine Serie auffälliger Platzhalterwarnungen im Fließtext.
 
 FORMAT: Liefere die Inhalte ausschließlich über das Tool „${DEMO_TOOL_NAME}“. Icons wählst du passend zur Leistung aus der vorgegebenen Liste.`;
 
@@ -99,7 +99,7 @@ export function buildDemoPrompt(f: ContentFacts, seed: number, feedback?: string
     `Stadt: ${f.city}`,
     `Telefonnummer bekannt: ${f.phone ? 'ja (wird automatisch eingefügt, nicht im Text nennen)' : 'nein'}`,
     `Öffnungszeiten bekannt: ${f.hasOpeningHours ? 'ja (werden automatisch eingefügt)' : 'nein'}`,
-    `Online bisher nur über soziale Netzwerke präsent: ${f.socialOnly ? 'ja' : 'nein'}`,
+    `Bekannter Social-/Portal-Link: ${f.socialOnly ? 'ja' : 'nein'}. Daraus keine Aussage über das Fehlen einer eigenen Website ableiten.`,
     `Gewünschte Tonalität: ${TONES[seed % TONES.length]}`,
     `Design-Gruppe: ${f.group}`,
     `Passende Icons (bevorzugt): ${icons}`,

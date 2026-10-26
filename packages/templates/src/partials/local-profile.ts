@@ -6,8 +6,9 @@ export function localProfile(
   { facts: f, parts: p, content: c }: Pick<RenderContext, 'facts' | 'parts' | 'content'>,
   style: 'workshop' | 'studio' = 'workshop',
 ) {
-  const photo = p.photos(1)[0];
-  if (photo) return p.figure(photo, 'h-full min-h-72 w-full object-cover', 'overflow-hidden rounded-2xl');
+  const photos = p.photos(style === 'workshop' ? 2 : 1);
+  if (photos.length)
+    return `<div class="sw-photo-composition">${photos.map((photo) => p.figure(photo, 'w-full object-cover')).join('')}</div>${photos.some((photo) => photo.example) ? '<p class="sw-image-context">Illustrative Bildauswahl für diesen Entwurf · keine Aufnahmen des Betriebs.</p>' : ''}`;
   const studio = style === 'studio';
   return `<div class="sw-local-profile ${studio ? 'sw-local-profile-studio' : ''}">
     <p class="sw-profile-eyebrow">${esc(f.branchLabel)} · ${esc(f.city)}</p>
@@ -20,6 +21,6 @@ export function localProfile(
           `<li><span class="sw-profile-index" aria-hidden="true">0${index + 1}</span><div><strong>${esc(s.title)}</strong><p>${esc(s.text)}</p></div></li>`,
       )
       .join('')}</ul></div>
-    <a href="#frage" class="sw-profile-contact">${studio ? 'Eine Anfrage stellen' : 'Ihr Vorhaben anfragen'} <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+    <a href="${p.draft ? '#oeffnungszeiten' : '#frage'}" class="sw-profile-contact">${p.draft ? 'Kontakt ansehen' : studio ? 'Eine Anfrage stellen' : 'Ihr Vorhaben anfragen'} <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
   </div>`;
 }

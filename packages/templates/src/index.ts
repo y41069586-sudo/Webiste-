@@ -44,8 +44,18 @@ export function renderSite(input: RenderInput): string {
   if (!tpl.palettes.includes(input.palette)) throw new Error(`Palette ${input.palette} passt nicht zu ${tpl.id}`);
   if (input.mode === 'demo' && !input.demo) throw new Error('Demo-Modus braucht demo-Optionen');
   if (input.mode === 'live' && !input.live) throw new Error('Live-Modus braucht live-Optionen');
+  if (input.mode === 'demo' || input.mode === 'screenshot')
+    input = { ...input, content: { ...input.content, cta_text: 'Kontakt ansehen' } };
   const parts = buildParts(input);
-  return input.designReview ? renderMalerDesignReview({ ...input, parts }) : tpl.render({ ...input, parts });
+  const html = input.designReview ? renderMalerDesignReview({ ...input, parts }) : tpl.render({ ...input, parts });
+  const sector = /barber|barbier/i.test(input.facts.branchLabel)
+    ? 'barber'
+    : /nagel|nail/i.test(input.facts.branchLabel)
+      ? 'nails'
+      : /elektro|elektriker/i.test(input.facts.branchLabel)
+        ? 'electrical'
+        : 'general';
+  return html.replace('<body ', `<body data-template="${tpl.id}" data-sector="${sector}" `);
 }
 export { renderLetterHtml, embeddedFontCss, LETTER_GEOMETRY, type LetterData, type LetterSender } from './letter';
 export { renderInvoiceHtml, type InvoiceData, type InvoiceLine, type InvoiceBuyer, type InvoiceSeller } from './invoice';

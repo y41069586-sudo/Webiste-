@@ -20,25 +20,16 @@ export const handwerkSolid: TemplateDef = {
       <li><a class="hover:underline" href="#leistungen">Leistungen</a></li>
       <li><a class="hover:underline" href="#ueber-uns">Über uns</a></li>
       <li><a class="hover:underline" href="#oeffnungszeiten">Öffnungszeiten</a></li>
-      <li><a class="hover:underline" href="#frage">Kontakt</a></li>
+      <li><a class="hover:underline" href="${p.draft ? '#oeffnungszeiten' : '#frage'}">Kontakt</a></li>
     </ul></nav>
     ${p.callHref ? `<a href="${esc(p.callHref)}" class="inline-flex min-h-11 items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent">${icon('phone', 'h-4 w-4')}<span>Anrufen</span></a>` : ''}
   </div>
 </header>
 <main id="inhalt">
-  <section class="bg-primary pb-16 pt-8 text-on-primary md:pb-24 md:pt-16">
-    <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 md:grid-cols-2">
-      <div>
-        <p class="text-sm font-semibold uppercase tracking-widest opacity-90">${esc(f.branchLabel)} in ${esc(f.city)}</p>
-        <h1 class="mt-3 font-heading text-4xl font-extrabold leading-tight md:text-5xl">${esc(c.hero_headline)}</h1>
-        <p class="mt-5 max-w-xl text-lg opacity-95">${esc(c.hero_subline)}</p>
-        <div class="mt-8 flex flex-wrap gap-3">
-          <a href="${esc(p.ctaHref)}" class="inline-flex min-h-12 items-center gap-2 rounded-lg bg-accent px-6 py-3 font-semibold text-on-accent shadow-sm">${icon(p.callHref ? 'phone' : 'chat', 'h-5 w-5')}${esc(c.cta_text)}</a>
-          <a href="#frage" class="inline-flex min-h-12 items-center rounded-lg border-2 border-on-primary/70 px-6 py-3 font-semibold">Anfrage senden</a>
-        </div>
-      </div>
-      <div>${localProfile({ facts: f, parts: p, content: c }, 'workshop')}</div>
-    </div>
+  <section class="sw-premium-hero sw-business">
+    <div class="sw-business-title"><p class="sw-kicker">${esc(f.branchLabel)} in ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><p class="sw-hero-copy">${esc(c.hero_subline)}</p><a class="sw-hero-button" href="${esc(p.ctaHref)}">${esc(c.cta_text)} <span aria-hidden="true">→</span></a><a class="sw-text-link" href="#leistungen">Leistungen ansehen</a></div>
+    <div class="sw-business-media">${localProfile({ facts: f, parts: p, content: c }, 'workshop')}</div>
+    <div class="sw-business-facts"><span>${esc(f.branchLabel)}</span><span>${esc(f.city)}</span><a href="#oeffnungszeiten">Standort &amp; Kontakt</a></div>
   </section>
 
   <section id="leistungen" aria-labelledby="leistungen-titel" class="-mt-10 pb-16 md:-mt-14">

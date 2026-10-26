@@ -1,4 +1,5 @@
 import { esc } from '../html';
+import { localProfile } from '../partials/local-profile';
 import { icon } from '../icons';
 import { documentShell, type SharedParts } from '../partials/shared';
 import type { BranchGroup, IconKey, RenderContext, TemplateDef } from '../types';
@@ -27,8 +28,8 @@ function showOffer(group: PhotoGroup, p: SharedParts): boolean {
   return !(group === 'gastronomie' && p.draft);
 }
 
-function fallbackArt(i: IconKey, cls: string): string {
-  return `<div class="${cls} flex items-center justify-center bg-primary text-on-primary" aria-hidden="true">${icon(i, 'h-20 w-20')}</div>`;
+function fallbackArt(ctx: RenderContext, cls: string): string {
+  return `<div class="${cls} sw-photoless-composition">${localProfile(ctx, 'studio')}</div>`;
 }
 
 function common(ctx: RenderContext) {
@@ -79,7 +80,7 @@ function header(ctx: RenderContext, group: PhotoGroup, variant: 'light' | 'cente
     p.draft && group === 'gastronomie' ? '<li><a class="hover:text-ink" href="#speisekarte">Speisekarte</a></li>' : '',
     '<li><a class="hover:text-ink" href="#ueber-uns">Über uns</a></li>',
     '<li><a class="hover:text-ink" href="#oeffnungszeiten">Öffnungszeiten</a></li>',
-    '<li><a class="hover:text-ink" href="#frage">Kontakt</a></li>',
+    `<li><a class="hover:text-ink" href="${p.draft ? '#oeffnungszeiten' : '#frage'}">Kontakt</a></li>`,
   ].join('');
   const nav = `<nav aria-label="Hauptnavigation" class="hidden md:block"><ul class="flex gap-6 text-sm text-muted">${links}</ul></nav>`;
   if (variant === 'center') {
@@ -94,7 +95,7 @@ function header(ctx: RenderContext, group: PhotoGroup, variant: 'light' | 'cente
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
     <a href="#inhalt" class="flex items-center gap-2 text-lg font-bold"><span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-on-primary">${icon(c.icon, 'h-5 w-5')}</span>${p.brand()}</a>
     ${nav}
-    <a href="#frage" class="inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary">Kontakt</a>
+    <a href="${p.draft ? '#oeffnungszeiten' : '#frage'}" class="inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary">Kontakt</a>
   </div>
 </header>`;
 }
@@ -161,17 +162,18 @@ function fotoLayout(group: PhotoGroup): TemplateDef {
     render(ctx) {
       const { parts: p, content: c, facts: f } = ctx;
       const [hero, ...more] = p.photos(4);
-      const heroMedia = hero
-        ? p.figure(hero, 'h-full w-full object-cover', 'absolute inset-0 h-full w-full')
-        : fallbackArt(COPY[group].icon, 'absolute inset-0 h-full w-full');
+      const heroMedia = hero ? p.figure(hero, 'h-full w-full object-cover', 'absolute inset-0 h-full w-full') : '';
       const strip = more.length
         ? `<section aria-label="Eindrücke" class="py-12"><ul class="mx-auto grid max-w-6xl gap-4 px-4 sm:grid-cols-3">${more
             .map((ph) => `<li>${p.figure(ph, 'aspect-[4/3] w-full rounded-2xl object-cover')}</li>`)
             .join('')}</ul></section>`
         : '';
-      const body = `${header(ctx, group, 'light')}
-<main id="inhalt">
-  <section class="relative isolate overflow-hidden">
+      const heroSection =
+        group === 'einzelhandel'
+          ? `<section class="sw-retail-hero"><div class="sw-retail-image">${hero ? p.figure(hero, 'w-full h-full object-cover') : fallbackArt(ctx, '')}</div><div class="sw-retail-intro"><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><p class="sw-hero-copy">${esc(c.hero_subline)}</p>${heroCta(ctx)}<a class="sw-text-link" href="#oeffnungszeiten">Besuch &amp; Öffnungszeiten</a></div></section>`
+          : group === 'kurse'
+            ? `<section class="sw-course-hero"><div class="sw-course-heading"><div><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1></div><div><p class="sw-hero-copy">${esc(c.hero_subline)}</p>${heroCta(ctx)}</div></div><div class="sw-course-image">${hero ? p.figure(hero, 'w-full h-full object-cover') : fallbackArt(ctx, '')}</div></section>`
+            : `  <section class="relative isolate overflow-hidden">
     ${heroMedia}
     <div class="relative z-10 bg-black/65 md:bg-transparent md:bg-gradient-to-r md:from-black/80 md:via-black/60 md:to-black/20">
       <div class="mx-auto max-w-6xl px-4 py-24 md:py-32">
@@ -181,7 +183,10 @@ function fotoLayout(group: PhotoGroup): TemplateDef {
         ${heroCta(ctx, true)}
       </div>
     </div>
-  </section>
+  </section>`;
+      const body = `${header(ctx, group, 'light')}
+<main id="inhalt">
+  ${heroSection}
   ${offerCards(ctx, group, 'cards')}
   ${strip}
   ${about(ctx)}
@@ -203,7 +208,7 @@ function splitLayout(group: PhotoGroup): TemplateDef {
       const { parts: p, content: c, facts: f } = ctx;
       const [hero, second] = p.photos(2);
       const media = (ph: typeof hero, cls: string) =>
-        ph ? p.figure(ph, `${cls} w-full object-cover`) : fallbackArt(COPY[group].icon, `${cls} w-full`);
+        ph ? p.figure(ph, `${cls} w-full object-cover`) : fallbackArt(ctx, `${cls} w-full`);
       const body = `${header(ctx, group, 'light')}
 <main id="inhalt">
   <section class="py-14 md:py-20">
@@ -247,17 +252,17 @@ function magazinLayout(group: PhotoGroup): TemplateDef {
       const pair = [a, b].filter((x): x is NonNullable<typeof x> => Boolean(x));
       const body = `${header(ctx, group, 'center')}
 <main id="inhalt">
-  <section class="pt-14 text-center md:pt-20">
+  <section class="pt-10 text-center md:pt-14">
     <div class="mx-auto max-w-3xl px-4">
       <p class="text-sm font-semibold uppercase tracking-widest text-primary">${esc(f.branchLabel)} in ${esc(f.city)}</p>
       <h1 class="mt-3 font-heading text-4xl font-bold leading-tight md:text-6xl">${esc(c.hero_headline)}</h1>
       <p class="mx-auto mt-5 max-w-2xl text-lg text-muted">${esc(c.hero_subline)}</p>
       <div class="flex justify-center">${heroCta(ctx)}</div>
     </div>
-    <div class="mx-auto mt-12 max-w-6xl px-4">${
+    <div class="mx-auto mt-8 max-w-6xl px-4">${
       wide
         ? p.figure(wide, 'aspect-[16/7] w-full rounded-3xl object-cover')
-        : fallbackArt(COPY[group].icon, 'aspect-[16/7] w-full rounded-3xl')
+        : fallbackArt(ctx, 'aspect-[16/7] w-full rounded-3xl')
     }</div>
   </section>
   ${offerCards(ctx, group, 'columns')}

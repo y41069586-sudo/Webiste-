@@ -1,0 +1,3002 @@
+[
+  {
+    "template": "handwerk-solid",
+    "name": "Elektro Nordlicht",
+    "branch": "elektriker",
+    "label": "Elektrobetrieb",
+    "city": "Lübeck",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "handwerk-klar",
+    "name": "Farbwerk Linde",
+    "branch": "maler",
+    "label": "Malerbetrieb",
+    "city": "Bamberg",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "handwerk-werkstatt",
+    "name": "Wasserwerk West",
+    "branch": "sanitaer",
+    "label": "Sanitärbetrieb",
+    "city": "Bonn",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "beauty-elegant",
+    "name": "Studio Hautzeit",
+    "branch": "kosmetikstudio",
+    "label": "Kosmetikstudio",
+    "city": "Fulda",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "beauty-soft",
+    "name": "Nagelatelier Feinschliff",
+    "branch": "nagelstudio",
+    "label": "Nagelstudio",
+    "city": "Celle",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "beauty-modern",
+    "name": "Barber Kontur",
+    "branch": "barber",
+    "label": "Barbershop",
+    "city": "Essen",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "gastronomie-foto",
+    "name": "Restaurant Abendtisch",
+    "branch": "restaurant",
+    "label": "Restaurant",
+    "city": "Regensburg",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "gastronomie-split",
+    "name": "Café Mohnblüte",
+    "branch": "cafe",
+    "label": "Café",
+    "city": "Tübingen",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "gastronomie-magazin",
+    "name": "Bistro Marktseite",
+    "branch": "bistro",
+    "label": "Bistro",
+    "city": "Mainz",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "einzelhandel-foto",
+    "name": "Blütenraum",
+    "branch": "blumenladen",
+    "label": "Blumenladen",
+    "city": "Erfurt",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "einzelhandel-split",
+    "name": "Kontur & Stoff",
+    "branch": "boutique",
+    "label": "Modegeschäft",
+    "city": "Würzburg",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "einzelhandel-magazin",
+    "name": "Buchwinkel",
+    "branch": "buchladen",
+    "label": "Buchhandlung",
+    "city": "Göttingen",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "kurse-foto",
+    "name": "Studio Atemraum",
+    "branch": "yogastudio",
+    "label": "Yogastudio",
+    "city": "Kassel",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "kurse-split",
+    "name": "Trainingsraum West",
+    "branch": "fitnessstudio",
+    "label": "Trainingsstudio",
+    "city": "Aachen",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "kurse-magazin",
+    "name": "Tanzatelier Schrittwerk",
+    "branch": "tanzschule",
+    "label": "Tanzschule",
+    "city": "Ulm",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "handwerk-plakat",
+    "name": "Gartenwerk Grünraum",
+    "branch": "gartenbau",
+    "label": "Garten- und Landschaftsbau",
+    "city": "Potsdam",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "beauty-plakat",
+    "name": "Salon Schnittpunkt",
+    "branch": "friseur",
+    "label": "Friseursalon",
+    "city": "Dresden",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "gastronomie-plakat",
+    "name": "Kleine Tafel",
+    "branch": "restaurant",
+    "label": "Restaurant",
+    "city": "Koblenz",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "einzelhandel-plakat",
+    "name": "Seitenraum",
+    "branch": "buchladen",
+    "label": "Buchhandlung",
+    "city": "Jena",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  },
+  {
+    "template": "kurse-plakat",
+    "name": "Musikatelier Klangraum",
+    "branch": "musikschule",
+    "label": "Musikschule",
+    "city": "Passau",
+    "geometry": [
+      {
+        "width": 1440,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 390,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 430,
+        "overflow": false,
+        "broken": 0
+      },
+      {
+        "width": 360,
+        "stress": true,
+        "overflow": false,
+        "broken": 0
+      }
+    ],
+    "checks": [
+      {
+        "name": "html-validierung",
+        "passed": true
+      },
+      {
+        "name": "struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "konsole",
+        "passed": true
+      },
+      {
+        "name": "axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-konsole",
+        "passed": true
+      },
+      {
+        "name": "long-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "long-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "long-layout-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-konsole",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-desktop",
+        "passed": true
+      },
+      {
+        "name": "no-images-struktur-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-bilder-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-axe-mobil",
+        "passed": true
+      },
+      {
+        "name": "no-images-layout-mobil",
+        "passed": true
+      }
+    ],
+    "visualApproved": false
+  }
+]

@@ -250,3 +250,13 @@ Fortlaufender Umsetzungsstand: `docs/v4-quality-handoff.md`; früherer Prüfstan
 Kein Push ohne neue ausdrückliche Freigabe. Lokale allgemeine Funktionskorrekturen, Geräte-Mockups,
 Personalisierung und Abnahmegalerie sind beauftragt. Drei neue Maler-Stile weiterhin nicht auf andere
 Branchen übertragen. Vorhandene andere Templates dürfen mit fiktiven Profilen geprüft werden.
+
+
+## Aktueller Einzelauftrag 1 – Demoqualität
+
+Der Betreiber bearbeitet jetzt fünf Prompts nacheinander. Ausschließlich den aktuell beauftragten Prompt
+umsetzen; weitere Aufgaben nicht vorwegnehmen. Aufgabe1 autorisiert lokale Verbesserungen aller20
+bestehenden Demo-Vorlagen, Bild-/Textauswahl und QA; keine einheitliche Maler-Stilkopie. Belege und
+aktueller Stand in `docs/task1-design/`. Gerätegeometrie, Brief-/Zahlungsmodell und Marketingwebsite
+bleiben in dieser Aufgabe erhalten. Aufnahmehilfe darf für korrektes Lazy-Image-Rendering repariert werden.
+Kein Push/Deployment ohne neue Freigabe; technische Tests sind keine gestalterische Betreiberabnahme.

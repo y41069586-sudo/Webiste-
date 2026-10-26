@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-26",
+  "baseCommit": "fc2ab35",
+  "branch": "codex/conversion-v4",
+  "dryRun": true,
+  "pushed": false,
+  "deployed": false,
+  "templateTests": 102,
+  "coreTests": 151,
+  "browserChecks": 560,
+  "browserFailures": 0,
+  "profiles": 20,
+  "widths": [
+    1440,
+    360,
+    390,
+    430
+  ],
+  "typecheck": "passed",
+  "lint": "passed",
+  "build": "passed, 7 dynamic filesystem tracing warnings",
+  "visualOperatorApproval": false,
+  "externalProvidersTested": false,
+  "performance": [
+    {
+      "id": "handwerk-klar",
+      "before": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 98, accessibility: 100, best-practices: 100, seo: 66"
+      },
+      "after": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 99, accessibility: 100, best-practices: 100, seo: 66"
+      }
+    },
+    {
+      "id": "beauty-elegant",
+      "before": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 63,
+        "details": "performance: 100, accessibility: 100, best-practices: 100, seo: 63"
+      },
+      "after": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 63,
+        "details": "performance: 100, accessibility: 100, best-practices: 100, seo: 63"
+      }
+    },
+    {
+      "id": "gastronomie-foto",
+      "before": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 97, accessibility: 100, best-practices: 100, seo: 66"
+      },
+      "after": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 97, accessibility: 100, best-practices: 100, seo: 66"
+      }
+    },
+    {
+      "id": "einzelhandel-magazin",
+      "before": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 99, accessibility: 100, best-practices: 100, seo: 66"
+      },
+      "after": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 99, accessibility: 100, best-practices: 100, seo: 66"
+      }
+    },
+    {
+      "id": "kurse-split",
+      "before": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 98, accessibility: 100, best-practices: 100, seo: 66"
+      },
+      "after": {
+        "name": "lighthouse",
+        "passed": true,
+        "score": 66,
+        "details": "performance: 98, accessibility: 100, best-practices: 100, seo: 66"
+      }
+    }
+  ]
+}

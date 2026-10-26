@@ -24,6 +24,10 @@ export interface StockPhoto {
   keywords?: string[];
   kind?: 'generated';
   reviewOnly?: boolean;
+  width?: number;
+  height?: number;
+  focalPoint?: { x: number; y: number };
+  role?: 'work' | 'detail' | 'interior' | 'product';
 }
 
 export function imagesDir(): string {
@@ -71,6 +75,9 @@ export function stockPhotos(
   const label = branchLabel.toLowerCase();
   const fits = (p: StockPhoto) => (p.keywords ?? []).some((k) => label.includes(k));
   const matching = rotated.filter(fits);
+  // Prefer a relevant activity/detail over another generic interior. Ties keep stable variety.
+  const roleOrder = { work: 0, detail: 1, product: 1, interior: 2 };
+  matching.sort((a, b) => roleOrder[a.role ?? 'interior'] - roleOrder[b.role ?? 'interior']);
   // Unknown specialties must not silently receive an unrelated service photograph.
   return matching.length ? matching : label.trim() ? rotated.filter((p) => !p.keywords?.length) : rotated;
 }

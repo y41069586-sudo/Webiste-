@@ -20,28 +20,15 @@ export const handwerkKlar: TemplateDef = {
       <li><a class="hover:text-ink" href="#leistungen">Leistungen</a></li>
       <li><a class="hover:text-ink" href="#ueber-uns">Über uns</a></li>
       <li><a class="hover:text-ink" href="#oeffnungszeiten">Öffnungszeiten</a></li>
-      <li><a class="hover:text-ink" href="#frage">Kontakt</a></li>
+      <li><a class="hover:text-ink" href="${p.draft ? '#oeffnungszeiten' : '#frage'}">Kontakt</a></li>
     </ul></nav>
-    <a href="#frage" class="inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary">Anfrage</a>
+    <a href="${p.draft ? '#oeffnungszeiten' : '#frage'}" class="inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary">Anfrage</a>
   </div>
 </header>
 <main id="inhalt">
-  <section class="py-14 md:py-20">
-    <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 md:grid-cols-5">
-      <div class="md:col-span-3">
-        <h1 class="font-heading text-4xl font-bold leading-tight text-ink md:text-5xl">${esc(c.hero_headline)}</h1>
-        <p class="mt-5 max-w-2xl text-lg text-muted">${esc(c.hero_subline)}</p>
-        <div class="mt-8 flex flex-wrap items-center gap-4">
-          <a href="${esc(p.ctaHref)}" class="inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-on-primary">${icon(p.callHref ? 'phone' : 'chat', 'h-5 w-5')}${esc(c.cta_text)}</a>
-          ${p.phoneLabel ? `<span class="text-muted">oder direkt: <a class="font-semibold text-ink underline-offset-4 hover:underline" href="${esc(p.callHref)}">${esc(p.phoneLabel)}</a></span>` : ''}
-        </div>
-        <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
-          <li class="flex items-center gap-2"><span class="text-primary">${icon('pin', 'h-4 w-4')}</span>${esc(f.city)}</li>
-          <li class="flex items-center gap-2"><span class="text-primary">${icon('wrench', 'h-4 w-4')}</span>${esc(f.branchLabel)}</li>
-        </ul>
-      </div>
-      <div class="md:col-span-2">${localProfile({ facts: f, parts: p, content: c }, 'workshop')}</div>
-    </div>
+  <section class="sw-premium-hero sw-editorial">
+    <div class="sw-hero-heading"><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><div class="sw-hero-intro"><p>${esc(c.hero_subline)}</p><a class="sw-hero-button" href="${esc(p.ctaHref)}">${esc(c.cta_text)} <span aria-hidden="true">→</span></a></div></div>
+    <div class="sw-editorial-media">${localProfile({ facts: f, parts: p, content: c }, 'workshop')}</div>
   </section>
 
   <section id="leistungen" aria-labelledby="leistungen-titel" class="border-y border-line bg-surface-alt py-16">

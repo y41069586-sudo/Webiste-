@@ -14,7 +14,18 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 29204,
-    "keywords": ["café", "cafe", "kaffee"]
+    "keywords": [
+      "café",
+      "cafe",
+      "kaffee"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "product"
   },
   {
     "file": "gastronomie/pasta.jpg",
@@ -31,7 +42,19 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 56582,
-    "keywords": ["restaurant", "trattoria", "pizzeria", "gasthaus"]
+    "keywords": [
+      "restaurant",
+      "trattoria",
+      "pizzeria",
+      "gasthaus"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "product"
   },
   {
     "file": "gastronomie/gastraum.jpg",
@@ -48,7 +71,18 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 102141,
-    "keywords": ["restaurant", "gasthaus", "bistro"]
+    "keywords": [
+      "restaurant",
+      "gasthaus",
+      "bistro"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "gastronomie/backwaren.jpg",
@@ -65,7 +99,19 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 55196,
-    "keywords": ["bäckerei", "backstube", "café", "cafe"]
+    "keywords": [
+      "bäckerei",
+      "backstube",
+      "café",
+      "cafe"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "product"
   },
   {
     "file": "gastronomie/cafetisch.jpg",
@@ -82,7 +128,18 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 78700,
-    "keywords": ["café", "cafe", "kaffee"]
+    "keywords": [
+      "café",
+      "cafe",
+      "kaffee"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "einzelhandel/blumen.jpg",
@@ -99,7 +156,17 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 92990,
-    "keywords": ["blumen", "florist"]
+    "keywords": [
+      "blumen",
+      "florist"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "product"
   },
   {
     "file": "einzelhandel/kleiderstange.jpg",
@@ -116,7 +183,18 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 43559,
-    "keywords": ["mode", "boutique", "kleid"]
+    "keywords": [
+      "mode",
+      "boutique",
+      "kleid"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "einzelhandel/buecherregal.jpg",
@@ -133,7 +211,17 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 94117,
-    "keywords": ["buch", "bücher"]
+    "keywords": [
+      "buch",
+      "bücher"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "kurse/trainingsraum.jpg",
@@ -150,7 +238,18 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 50185,
-    "keywords": ["fitness", "training", "gym"]
+    "keywords": [
+      "fitness",
+      "training",
+      "gym"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "kurse/kettlebells.jpg",
@@ -167,7 +266,18 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 61179,
-    "keywords": ["fitness", "training", "gym"]
+    "keywords": [
+      "fitness",
+      "training",
+      "gym"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "detail"
   },
   {
     "file": "kurse/ballettschuhe.jpg",
@@ -184,7 +294,16 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 35377,
-    "keywords": ["tanz", "ballett"]
+    "keywords": [
+      "ballett"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "kurse/yogamatte.jpg",
@@ -201,7 +320,17 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 15215,
-    "keywords": ["yoga", "pilates"]
+    "keywords": [
+      "yoga",
+      "pilates"
+    ],
+    "width": 1000,
+    "height": 750,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "generated/maler.webp",
@@ -215,9 +344,19 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": ["maler", "anstrich"],
+    "keywords": [
+      "maler",
+      "anstrich"
+    ],
     "kind": "generated",
-    "bytes": 124428
+    "bytes": 124428,
+    "width": 1200,
+    "height": 800,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "generated/friseur.webp",
@@ -231,9 +370,22 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": ["friseur", "haarsalon", "frisör"],
+    "keywords": [
+      "friseur",
+      "haarsalon",
+      "frisör",
+      "barber",
+      "barbier"
+    ],
     "kind": "generated",
-    "bytes": 102408
+    "bytes": 102408,
+    "width": 1200,
+    "height": 800,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "generated/gartenbau.webp",
@@ -247,9 +399,20 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": ["garten", "landschaft", "gärtner"],
+    "keywords": [
+      "garten",
+      "landschaft",
+      "gärtner"
+    ],
     "kind": "generated",
-    "bytes": 140466
+    "bytes": 140466,
+    "width": 900,
+    "height": 600,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "generated/reinigung.webp",
@@ -263,9 +426,20 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": ["reinig", "gebäudeservice", "gebaeudeservice"],
+    "keywords": [
+      "reinig",
+      "gebäudeservice",
+      "gebaeudeservice"
+    ],
     "kind": "generated",
-    "bytes": 79958
+    "bytes": 79958,
+    "width": 1100,
+    "height": 733,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "generated/sanitaer.webp",
@@ -279,9 +453,20 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": ["sanitär", "sanitaer", "installat"],
+    "keywords": [
+      "sanitär",
+      "sanitaer",
+      "installat"
+    ],
     "kind": "generated",
-    "bytes": 94416
+    "bytes": 94416,
+    "width": 1100,
+    "height": 733,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   },
   {
     "file": "generated/maler-werkzeuge.webp",
@@ -295,10 +480,18 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-26",
-    "keywords": ["maler"],
+    "keywords": [
+      "maler"
+    ],
     "kind": "generated",
-    "reviewOnly": true,
-    "bytes": 39566
+    "bytes": 39566,
+    "width": 800,
+    "height": 534,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "detail"
   },
   {
     "file": "generated/maler-arbeit.webp",
@@ -312,10 +505,18 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-26",
-    "keywords": ["maler"],
+    "keywords": [
+      "maler"
+    ],
     "kind": "generated",
-    "reviewOnly": true,
-    "bytes": 39098
+    "bytes": 39098,
+    "width": 1000,
+    "height": 667,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "work"
   },
   {
     "file": "generated/maler-raum.webp",
@@ -329,9 +530,19 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": ["maler", "anstrich"],
+    "keywords": [
+      "maler",
+      "anstrich"
+    ],
     "kind": "generated",
     "bytes": 34160,
-    "reviewOnly": true
+    "reviewOnly": true,
+    "width": 800,
+    "height": 533,
+    "focalPoint": {
+      "x": 50,
+      "y": 45
+    },
+    "role": "interior"
   }
 ]

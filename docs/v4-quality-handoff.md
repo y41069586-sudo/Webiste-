@@ -224,3 +224,20 @@ Stand zur visuellen Zwischenabnahme, ausdrücklich keine gestalterische oder pro
 keine abschließende Design-/Produktionsfreigabe. Neuer Auftrag verbietet Push ohne Freigabe.
 Migration0018 ausschließlich gegen lokalen Testpostgres geprüft. Standardrenderer nicht auf neue
 Maler-Stile umgestellt. Bei Wiederaufnahme keine belegten Ergebnisse erneut bauen.
+
+## Neuester Einzelauftrag 1: Demoqualität (26.10.2026)
+
+Der Betreiber hat den Ablauf auf fünf getrennte Prompts umgestellt. Nur Aufgabe1 ist jetzt bearbeitet:
+[Abschlussbericht](task1-design/README.md), [Wiederaufnahmepunkt](task1-design/status.md),
+[20-Vorlagen-Matrix](task1-design/qualitaetsmatrix.md). Bestehende IDs, Plakat, V4/V5 und akzeptierte
+Laptop-/Handy-Geometrie erhalten. Bestehende Vorlagen lokal strukturell verbessert, keine Maler-Stilkopie
+auf alle Branchen. Frühere Aussagen „Standardrenderer unverändert“ beschreiben den jeweiligen früheren Stand.
+
+102 Template-/151 relevante Core-Tests, 560 Browserprüfungen für20 fiktive Profile, TypeScript/Lint/Build
+bestanden. Sieben Dateisystem-Tracingwarnungen im Build bleiben. Echte Vorher-/Nachher-Galerie und ZIP
+unter `data/exports/task1-design/`, ausgewählte Belege versioniert unter `docs/task1-design/evidence/`.
+Sichtprüfung: alle20 Desktop-/Mobilübersichten plus ausgewählte vollständige Seiten; keine individuelle
+gestalterische Betreiberfreigabe, keine Detailabnahme aller120 Screenshots, keine Provider-Liveabnahme.
+
+Kein Push/Deployment/Produktionsmigration/Versand/Zahlung. DRY_RUN=true. Keine weitere Aufgabe vorwegnehmen.
+Als Nächstes Aufgabe1-Ergebnisse vorstellen, Betreiberfeedback/nächsten Einzelprompt abwarten.

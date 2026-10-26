@@ -8,7 +8,15 @@ export interface Screenshots {
 
 /** Wartet, bis alle Bilder dekodiert sind – sonst fehlen eingebettete Fotos im Screenshot. */
 export async function imagesPainted(page: Page): Promise<void> {
-  await page.evaluate(() => Promise.all([...document.images].map((i) => i.decode().catch(() => undefined))));
+  await page.evaluate(() =>
+    Promise.all(
+      [...document.images].map((i) => {
+        // Capture-only: lazy images outside the viewport must load before PDF/screenshots.
+        i.loading = 'eager';
+        return i.decode().catch(() => undefined);
+      }),
+    ),
+  );
 }
 
 /** Screenshots ohne Banner (Screenshot-Modus): Desktop 1440×900, Mobil 390×844 (2×). */

@@ -1,3 +1,4 @@
+import { imagesPainted } from './screenshots';
 import { createServer } from 'node:http';
 import { createServer as createNetServer } from 'node:net';
 import AxeBuilder from '@axe-core/playwright';
@@ -118,6 +119,7 @@ async function layoutIssues(page: Page): Promise<LayoutIssue[]> {
 export interface BrowserQaOptions {
   /** HTML im Demo-Modus (mit Banner) – für axe, Konsole, Layout */
   html: string;
+  expectedFacts?: { name: string; city: string };
 }
 
 export async function browserChecks(opts: BrowserQaOptions): Promise<Check[]> {
@@ -136,6 +138,27 @@ export async function browserChecks(opts: BrowserQaOptions): Promise<Check[]> {
         });
         page.on('pageerror', (e) => consoleErrors.push(e.message.slice(0, 200)));
         await page.setContent(opts.html, { waitUntil: 'load' });
+        await imagesPainted(page);
+        const structureIssues = await page.evaluate((expected) => {
+          const problems: string[] = [];
+          if (document.querySelectorAll('main h1').length !== 1) problems.push('Genau eine Hauptüberschrift erforderlich.');
+          for (const anchor of document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')) {
+            const href = anchor.getAttribute('href')!;
+            if (href.length > 1 && !document.getElementById(decodeURIComponent(href.slice(1))))
+              problems.push(`Fehlendes Sprungziel: ${href}`);
+          }
+          const text = document.body.textContent?.replace(/\s+/g, ' ') ?? '';
+          if (expected)
+            for (const value of [expected.name, expected.city]) {
+              if (value && !text.includes(value.replace(/\s+/g, ' '))) problems.push('Erwartete Betriebsangabe fehlt.');
+            }
+          return [...new Set(problems)];
+        }, opts.expectedFacts);
+        checks.push({
+          name: `struktur-${vp.label}`,
+          passed: structureIssues.length === 0,
+          ...(structureIssues.length ? { details: structureIssues.join(' | ') } : {}),
+        });
         const brokenImages = await page.evaluate(() =>
           Array.from(document.images)
             .filter((image) => !image.complete || image.naturalWidth === 0)

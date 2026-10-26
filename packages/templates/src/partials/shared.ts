@@ -45,9 +45,15 @@ export interface SharedParts {
    * Fotos für die Gestaltung: Kundenfotos (Vorschau/Live) oder – nur im Entwurf – lizenzfreie
    * Beispielfotos der Gruppe. `example` = als „Beispielfoto“ kennzeichnen.
    */
-  photos(n: number): { src: string; alt: string; example: boolean }[];
+  photos(
+    n: number,
+  ): { src: string; alt: string; example: boolean; width?: number; height?: number; focalPoint?: { x: number; y: number } }[];
   /** Bild mit Kennzeichnung „Beispielfoto“ (im Entwurf) */
-  figure(photo: { src: string; alt: string; example: boolean }, imgClass: string, figClass?: string): string;
+  figure(
+    photo: { src: string; alt: string; example: boolean; width?: number; height?: number; focalPoint?: { x: number; y: number } },
+    imgClass: string,
+    figClass?: string,
+  ): string;
   /**
    * Branchen-Abschnitte (B3): Speisekarte, Einzugsgebiet, „Wir stellen ein“, Kursplan und Vorschau der
    * Anfrageformulare. Nur im Entwurf (Demo/Screenshot) – Platzhalter gehen nie live.
@@ -281,7 +287,7 @@ ${jsonLd}
 
   const callHref = facts.phoneHref ?? null;
   const phoneLabel = facts.phone ?? null;
-  const ctaHref = callHref ?? '#frage';
+  const ctaHref = mode === 'demo' || mode === 'screenshot' ? '#oeffnungszeiten' : '#frage';
   const mapsHref = mapsLink(facts.street, facts.houseNumber, facts.postalCode, facts.city);
   const addressLines = `${esc(facts.street)} ${esc(facts.houseNumber)}<br>${esc(facts.postalCode)} ${esc(facts.city)}`;
 
@@ -352,7 +358,7 @@ ${jsonLd}
           ? `<p class="mt-6 flex items-center gap-3"><span class="text-primary">${icon('phone', 'h-5 w-5')}</span><a class="font-semibold underline-offset-4 hover:underline" href="${esc(callHref)}">${esc(phoneLabel)}</a></p>`
           : ''
       }
-      <p class="mt-3 flex items-start gap-3"><span class="mt-0.5 text-primary">${icon('pin', 'h-5 w-5')}</span><span>${addressLines}</span></p>
+      <p class="mt-3 flex items-start gap-3"><span class="mt-0.5 text-primary">${icon('pin', 'h-5 w-5')}</span><span>${isDemo && demo ? `${esc(demo.sender.street)}<br>${esc(demo.sender.postalCode)} ${esc(demo.sender.city)}` : addressLines}</span></p>
     </div>
     <form class="${o.cardClass} md:col-span-3" method="post" action="${esc(action)}" accept-charset="utf-8">
       <div class="grid gap-4 sm:grid-cols-2">
@@ -463,12 +469,7 @@ ${jsonLd}
         (s) => `<li class="${o.cardClass}">
       <h3 class="text-lg font-semibold">${esc(s.title)}</h3>
       <p class="mt-1 text-muted">${esc(s.text)}</p>
-      <ul class="mt-4 space-y-2 text-muted" aria-label="Platzhalter für Gerichte">${['Ihr Gericht', 'Ihr Gericht', 'Ihr Gericht']
-        .map(
-          (g) =>
-            `<li class="flex items-end justify-between gap-3"><span>${g}</span><span aria-hidden="true" class="mb-1 flex-1 border-b border-dashed border-line"></span><span>–,– €</span></li>`,
-        )
-        .join('')}</ul>
+
     </li>`,
       )
       .join('')}</ul>
@@ -480,8 +481,8 @@ ${jsonLd}
   <div class="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-2">
     <div>
       <h2 id="gebiet-titel" class="${o.titleClass}">Einzugsgebiet</h2>
-      <p class="mt-3 text-lg">${esc(facts.city)} und Umgebung</p>
-      ${example('Beispiel – Ihr tatsächliches Einzugsgebiet tragen wir gemeinsam ein.')}
+      <p class="mt-3 text-lg">${esc(facts.city)}</p>
+      ${example('Erfasster Standort. Das tatsächliche Einzugsgebiet wird vor Veröffentlichung abgestimmt.')}
     </div>
     <details class="${o.cardClass}"><summary class="cursor-pointer font-semibold">Optional: Stellenbereich als Vorschau</summary>
       <h2 id="jobs-titel" class="mt-4 text-lg font-semibold">Wir stellen ein</h2>
@@ -495,13 +496,13 @@ ${jsonLd}
       out.push(`<section id="kursplan" aria-labelledby="kursplan-titel" class="${o.sectionClass}">
   <div class="mx-auto max-w-6xl px-4">
     <h2 id="kursplan-titel" class="${o.titleClass}">Kursplan</h2>
-    ${example('Platzhalter: Ihre Kurszeiten tragen wir gemeinsam ein.')}
+    ${example('Kursbeispiele zur Gestaltung. Verbindliche Tage und Zeiten werden vor Veröffentlichung ergänzt.')}
     <div class="mt-6"><table class="w-full text-left">
       <thead><tr class="border-b border-line text-sm text-muted"><th scope="col" class="py-2 pr-4 font-medium">Kurs</th><th scope="col" class="py-2 pr-4 font-medium">Tag</th><th scope="col" class="py-2 font-medium">Uhrzeit</th></tr></thead>
       <tbody>${content.services
         .map(
           (s) =>
-            `<tr class="border-b border-line"><th scope="row" class="py-3 pr-4 font-semibold">${esc(s.title)}</th><td class="py-3 pr-4 text-muted">nach Ihrem Plan</td><td class="py-3 text-muted">folgt</td></tr>`,
+            `<tr class="border-b border-line"><th scope="row" class="py-3 pr-4 font-semibold">${esc(s.title)}</th><td class="py-3 pr-4 text-muted">wird abgestimmt</td><td class="py-3 text-muted">wird abgestimmt</td></tr>`,
         )
         .join('')}</tbody>
     </table></div>
@@ -518,14 +519,31 @@ ${jsonLd}
     if (own.length || !draft) return own.slice(0, n);
     return stockPhotos(facts.group, seed, facts.branchLabel)
       .slice(0, n)
-      .map((ph) => ({ src: stockPhotoDataUri(ph), alt: ph.alt, example: true }));
+      .map((ph) => ({
+        src: stockPhotoDataUri(ph),
+        alt: ph.alt,
+        example: true,
+        width: ph.width,
+        height: ph.height,
+        focalPoint: ph.focalPoint,
+      }));
   };
-  const figure = (ph: { src: string; alt: string; example: boolean }, imgClass: string, figClass = '') =>
-    `<figure class="${/\babsolute\b/.test(figClass) ? figClass : `relative ${figClass}`}"><img src="${esc(ph.src)}" alt="${esc(ph.alt)}" class="${imgClass}" width="1000" height="750" decoding="async">${
-      ph.example
-        ? `<figcaption class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs font-medium text-white">${/^KI-generiertes/.test(ph.alt) ? 'KI-generiertes Beispielbild' : 'Beispielfoto'}</figcaption>`
-        : ''
-    }</figure>`;
+  let priorityImageUsed = false;
+  const figure = (
+    ph: { src: string; alt: string; example: boolean; width?: number; height?: number; focalPoint?: { x: number; y: number } },
+    imgClass: string,
+    figClass = '',
+  ) => {
+    const priority = !priorityImageUsed;
+    priorityImageUsed = true;
+    const point = ph.focalPoint;
+    const position =
+      point && Number.isFinite(point.x) && Number.isFinite(point.y)
+        ? ` style="object-position:${Math.min(100, Math.max(0, point.x))}% ${Math.min(100, Math.max(0, point.y))}%"`
+        : '';
+    const size = ph.width && ph.height ? ` width="${ph.width}" height="${ph.height}"` : '';
+    return `<figure class="${/\babsolute\b/.test(figClass) ? figClass : `relative ${figClass}`}"><img src="${esc(ph.src)}" alt="${esc(ph.alt)}" class="${imgClass}"${size}${position} loading="${priority ? 'eager' : 'lazy'}"${priority ? ' fetchpriority="high"' : ''} decoding="async">${ph.example ? `<figcaption class="absolute bottom-2 left-2 z-20 max-w-[calc(100%-1rem)] rounded bg-black/70 px-2 py-0.5 text-xs font-medium text-white">${/^KI-generiertes/.test(ph.alt) ? 'KI-generiertes Beispielbild' : 'Beispielfoto'}</figcaption>` : ''}</figure>`;
+  };
 
   return {
     head,

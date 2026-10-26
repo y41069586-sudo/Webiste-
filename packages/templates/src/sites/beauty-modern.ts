@@ -1,5 +1,6 @@
 import { esc } from '../html';
 import { icon } from '../icons';
+import { localProfile } from '../partials/local-profile';
 import { documentShell } from '../partials/shared';
 import type { TemplateDef } from '../types';
 
@@ -11,7 +12,6 @@ export const beautyModern: TemplateDef = {
   description: 'Große Typografie, asymmetrische Flächen, horizontale Karten',
   palettes: ['noir', 'rose', 'salbei'],
   render({ parts: p, content: c, facts: f }) {
-    const photo = p.photos(1)[0];
     const body = `
 <header class="bg-surface">
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5">
@@ -20,30 +20,14 @@ export const beautyModern: TemplateDef = {
       <li><a class="hover:underline" href="#leistungen">Leistungen</a></li>
       <li><a class="hover:underline" href="#ueber-uns">Studio</a></li>
       <li><a class="hover:underline" href="#oeffnungszeiten">Zeiten</a></li>
-      <li><a class="hover:underline" href="#frage">Kontakt</a></li>
+      <li><a class="hover:underline" href="${p.draft ? '#oeffnungszeiten' : '#frage'}">Kontakt</a></li>
     </ul></nav>
   </div>
 </header>
 <main id="inhalt">
-  <section class="relative overflow-hidden">
-    <div class="absolute inset-y-0 right-0 hidden w-2/5 bg-accent md:block" aria-hidden="true"></div>
-    <div class="relative mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-5 md:py-24">
-      <div class="md:col-span-3">
-        <p class="text-sm font-semibold uppercase tracking-[0.25em] text-primary">${esc(f.branchLabel)}</p>
-        <h1 class="mt-4 font-heading text-5xl leading-[1.05] md:text-7xl">${esc(c.hero_headline)}</h1>
-        <p class="mt-6 max-w-xl text-lg text-muted">${esc(c.hero_subline)}</p>
-        <a href="${esc(p.ctaHref)}" class="mt-8 inline-flex min-h-12 items-center gap-3 bg-primary px-7 py-3 font-semibold text-on-primary">${esc(c.cta_text)}<span aria-hidden="true">→</span></a>
-      </div>
-      <div class="md:col-span-2 md:pl-8">
-        ${photo ? p.figure(photo, 'w-full min-h-72 object-cover', 'mb-5 overflow-hidden') : ''}
-        <div class="bg-surface p-6 shadow-xl ring-1 ring-line">
-          <p class="text-sm uppercase tracking-widest text-muted">Besuchen Sie uns</p>
-          <p class="mt-3 text-lg font-semibold">${esc(f.name)}</p>
-          <p class="mt-1">${p.addressLines}</p>
-          ${p.phoneLabel ? `<p class="mt-4 flex items-center gap-2"><span class="text-primary">${icon('phone', 'h-4 w-4')}</span><a class="font-semibold underline-offset-4 hover:underline" href="${esc(p.callHref)}">${esc(p.phoneLabel)}</a></p>` : ''}
-        </div>
-      </div>
-    </div>
+  <section class="sw-premium-hero sw-beauty-graphic">
+    <div class="sw-graphic-title"><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><div><p class="sw-hero-copy">${esc(c.hero_subline)}</p><a class="sw-hero-button" href="${esc(p.ctaHref)}">${esc(c.cta_text)}</a></div></div>
+    <div class="sw-graphic-media">${localProfile({ facts: f, parts: p, content: c }, 'studio')}</div>
   </section>
 
   <section id="leistungen" aria-labelledby="leistungen-titel" class="bg-surface-alt py-16">

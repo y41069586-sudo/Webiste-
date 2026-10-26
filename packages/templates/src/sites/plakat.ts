@@ -1,4 +1,5 @@
 import { esc } from '../html';
+import { localProfile } from '../partials/local-profile';
 import { icon } from '../icons';
 import { documentShell, type SharedParts } from '../partials/shared';
 import type { BranchGroup, IconKey, RenderContext, TemplateDef } from '../types';
@@ -43,11 +44,7 @@ function heroMedia(ctx: RenderContext, group: BranchGroup): string {
         ${sticker('-top-4 -right-2 rotate-6')}
       </div>`;
   }
-  return `<div class="relative mx-auto aspect-square w-full max-w-sm" aria-hidden="true">
-        <div class="absolute inset-0 translate-x-4 translate-y-4 rounded-full border-4 border-on-accent"></div>
-        <div class="absolute inset-0 flex items-center justify-center rounded-full bg-primary text-on-primary">${icon(COPY[group].icon, 'h-1/2 w-1/2')}</div>
-      </div>
-      <div class="relative">${sticker('-bottom-4 left-2 -rotate-6 md:-left-6')}</div>`;
+  return `<div class="sw-plakat-profile"><p class="mb-4 text-sm font-bold uppercase">${esc(COPY[group].nav)}</p>${localProfile(ctx, 'studio')}</div>`;
 }
 
 function plakatLayout(group: BranchGroup): TemplateDef {
@@ -79,7 +76,7 @@ function plakatLayout(group: BranchGroup): TemplateDef {
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5">
     <a href="#inhalt" class="font-heading text-xl font-black uppercase tracking-tight">${p.brand()}</a>
     <nav aria-label="Hauptnavigation" class="hidden md:block"><ul class="flex gap-6 text-sm font-bold">${links}</ul></nav>
-    <a href="#frage" class="inline-flex min-h-11 items-center rounded-full bg-primary px-5 py-2 text-sm font-bold text-on-primary">Kontakt</a>
+    <a href="${p.draft ? '#oeffnungszeiten' : '#frage'}" class="inline-flex min-h-11 items-center rounded-full bg-primary px-5 py-2 text-sm font-bold text-on-primary">Kontakt</a>
   </div>
 </header>
 <main id="inhalt">
