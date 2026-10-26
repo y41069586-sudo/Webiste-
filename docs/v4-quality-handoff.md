@@ -243,3 +243,21 @@ Kein Push/Deployment/Produktionsmigration/Versand/Zahlung. DRY_RUN=true. Keine w
 Als Nächstes Aufgabe1-Ergebnisse vorstellen, Betreiberfeedback/nächsten Einzelprompt abwarten.
 
 Letzter sicherer Aufgabe1-Implementierungscommit: `beb1f9834be3f4da80c0270d576601c003bdef45` auf `codex/conversion-v4`.
+
+## Neuester Einzelauftrag2: Briefe und QR-Demofunnel (26.10.2026)
+
+[Abschluss](task2-letters/README.md), [Prüfmatrix](task2-letters/pruefmatrix.md),
+[Wiederaufnahme](task2-letters/status.md). Task1-Stand beibehalten. Normale V4-Briefe jetzt mit echter
+Laptop-/Handy-Komposition, getrennten Preisen, belegten manuellen Detailangaben und8pt-Pflichtfuß.
+Gemeinsame lokale Sperrlisten-/Dubletten-/Quellenprüfung, feste PDF-/Demo-/Bild-/Betriebsdaten-Hashes,
+atomarer DB-Ersatz erst nach bestandener Neu-Erzeugung. Alte V4-Dateien ohne Bild-QA-Nachweis neu prüfen;
+keine Migration. Gerätegeometrie, Preislogik und bestehende Claims/Slots/Quoten erhalten. Neue Folgebriefe pausiert.
+
+20/20 fiktive Erstbrief-Paare mit tatsächlichen PDFs, Druckraster-QR, gleichen lokalen Kurz-/QR-Zielen,
+Datums-/Preis-/Datenschutzkontrolle und390px ohne Überlauf bestanden.114 Core-Regressionen, anschließend8
+Sicherheitsfälle mit zusätzlichem positiven Folgebrief3 (115 unterschiedliche),102 Template-Tests,
+TypeScript/Lint/Build bestanden. Sieben bekannte Tracingwarnungen. Keine physische Druck-/Kameraprüfung,
+keine Betreiber-/Rechts-/Provider-/Versandfreigabe. Alle20 Nachher-PDFs und ausgewählte Originale versioniert.
+Volle Galerie und ZIP: data/exports/task2-letters/. Keine echten Geschäftsdaten oder Ereignisse.
+
+DRY_RUN=true. Kein Push/Deployment/Providerauftrag. Aufgabe3 nicht anfangen, bis deren Einzelprompt vorliegt.

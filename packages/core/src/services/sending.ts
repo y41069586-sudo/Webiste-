@@ -1,3 +1,5 @@
+import { assertLetterLeadEligible } from '../letters/eligibility';
+import { assertLetterBinding } from '../letters/binding';
 import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { getEnv } from '../config/env';
 import { effectiveSwitches, getConfig } from '../config/service';
@@ -76,6 +78,16 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
   if (!lead || lead.anonymizedAt || lead.status === 'suppressed') {
     await db.update(letters).set({ status: 'cancelled', statusReason: 'Lead gesperrt/gelöscht' }).where(eq(letters.id, letterId));
     return { state: 'skipped', reason: 'Lead gesperrt' };
+  }
+  try {
+    await assertLetterLeadEligible(db, lead, cfg);
+    await assertLetterBinding(db, letter, lead, cfg);
+  } catch (error) {
+    await db
+      .update(letters)
+      .set({ status: 'cancelled', statusReason: error instanceof Error ? error.message : 'Briefzuordnung nicht bestanden' })
+      .where(eq(letters.id, letterId));
+    return { state: 'skipped', reason: 'Sperrliste, Eignung oder Briefzuordnung geändert' };
   }
   // Wahrheits-Check (B5.4): kein Versand ohne passed; verwendete Claims müssen noch gültig sein
   if ((letter.truthCheckJson as { passed?: boolean } | null)?.passed !== true) {
@@ -338,6 +350,10 @@ export async function submitLxpTestJob(
   if ((letter.truthCheckJson as { passed?: boolean } | null)?.passed !== true) {
     throw new SendBlockedError('Nur Briefe mit bestandenem Wahrheits-Check.');
   }
+  const lead = await db.query.leads.findFirst({ where: eq(leads.id, letter.leadId) });
+  if (!lead) throw new SendBlockedError('Betrieb nicht vorhanden.');
+  await assertLetterLeadEligible(db, lead, cfg);
+  await assertLetterBinding(db, letter, lead, cfg);
   const pdf = await getProviders().storage.get(letter.pdfStorageKey);
   if (!pdf) throw new Error('Brief-PDF fehlt');
   const count = (await lxpTestJobCount(db)) + 1;

@@ -170,6 +170,13 @@ export async function validateLetterDom(html: string, position: 'left' | 'right'
         const r = rect(q);
         if (r.x2 - r.x1 < 39.5 || r.y2 - r.y1 < 39.5) out.push({ check: 'qr-groesse', detail: 'QR-Code ' + (r.x2 - r.x1).toFixed(1) + ' × ' + (r.y2 - r.y1).toFixed(1) + ' mm (mind. 40 × 40 mm)' });
       }
+      for (const line of addr.children) {
+        if (line.scrollWidth > line.clientWidth + 1) out.push({ check: 'anschrift-abgeschnitten', detail: 'Anschriftzeile passt nicht vollständig.' });
+      }
+      if (first.classList.contains('v4-page')) {
+        const font = parseFloat(getComputedStyle(document.getElementById('kleingedrucktes')).fontSize);
+        if (font < 10.6) out.push({ check: 'pflichttext-schrift', detail: 'Pflichtinformationen kleiner als 8 pt.' });
+      }
       const a = rect(addr);
       return { issues: out, address: a };
     })()`;

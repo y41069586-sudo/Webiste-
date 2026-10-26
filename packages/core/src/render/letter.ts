@@ -1,5 +1,9 @@
+import { randomUUID } from 'node:crypto';
+import { assertLetterLeadEligible } from '../letters/eligibility';
+import { letterDemoBinding, recipientFingerprint } from '../letters/binding';
+import { sha256 } from '../util/crypto';
 import { assessLetterQuality } from '../quality/letter';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNull, lt, sql } from 'drizzle-orm';
 import QRCode from 'qrcode';
 import { renderLetterHtml } from '@wbm/templates';
 import { appUrl, getEnv, trackUrl } from '../config/env';
@@ -126,7 +130,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const sw = effectiveSwitches(cfg);
   const lead = await db.query.leads.findFirst({ where: eq(leads.id, leadId) });
   if (!lead || lead.anonymizedAt) throw new Error('Lead nicht gefunden oder gelöscht');
-  if (lead.status === 'suppressed') throw new Error('Lead hat widersprochen');
+  await assertLetterLeadEligible(db, lead, cfg);
   const seqDb = opts.test ? 0 : sequence;
   const existing = await db.query.letters.findFirst({ where: and(eq(letters.leadId, leadId), eq(letters.sequence, seqDb)) });
   if (existing) {
@@ -139,7 +143,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
         pages: existing.pageCount,
       };
     }
-    await db.delete(letters).where(eq(letters.id, existing.id));
+    // Keep the previous PDF/approval intact until the replacement has fully passed.
   }
   const allowed = opts.regenerate ? ['demo_published', 'letter_generated', 'letter_approved'] : ['demo_published'];
   if (!opts.test && sequence === 1 && !allowed.includes(lead.status))
@@ -153,6 +157,15 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     (demo.qaResultJson.quality && !demo.qaResultJson.quality.passed)
   )
     throw new Error('Demo ist nicht technisch und gestalterisch freigegeben.');
+  if (!opts.test && sequence > 1) {
+    const earlier = await db
+      .select()
+      .from(letters)
+      .where(and(eq(letters.leadId, leadId), lt(letters.sequence, sequence), inArray(letters.status, ['sent', 'delivered'])));
+    if (!earlier.length) throw new Error('Folgebrief benötigt einen tatsächlich versendeten vorherigen Brief.');
+    if (sequence === 3 && (earlier.some((l) => l.demoId === demo.id) || !demo.qaResultJson?.review?.facts))
+      throw new Error('Dritter Brief benötigt eine tatsächlich neue, individuell geprüfte Demo.');
+  }
   const storage = getProviders().storage;
   const composite = demo.compositeKey ? await storage.get(demo.compositeKey) : null;
   if (!composite?.length) throw new Error('Demo-Screenshot fehlt; erst QA und Screenshot erneut erstellen.');
@@ -192,6 +205,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const url = trackUrl(`/q/${lead.trackToken}`);
   const code = await ensureShortCode(lead);
   const stated = statedExpiry(opts.test ? 1 : sequence, cfg, demo.expiresAt);
+  if (!opts.test) await extendDemoUntil(db, leadId, stated);
+  const binding = await letterDemoBinding({ ...lead, shortCode: code }, demo, cfg);
   const includePage2 = cfg.letter.includeScreenshotPage && demo.screenshotDesktopKey && demo.screenshotMobileKey;
   const screenshotPage = includePage2
     ? {
@@ -205,6 +220,16 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     cfg,
     recipient,
     branchLabel: cfg.targeting.branches.find((b) => b.key === lead.branch)?.label ?? lead.branch,
+    ...(demo.qaResultJson?.review?.facts
+      ? {
+          personalization: {
+            businessName: lead.businessName,
+            city: lead.city,
+            branchLabel: cfg.targeting.branches.find((b) => b.key === lead.branch)?.label ?? lead.branch,
+            details: demo.qaResultJson.review.letterFacts ?? [],
+          },
+        }
+      : {}),
     domain,
     rating: useRating ? { rating: lead.rating!, count: lead.ratingCount! } : null,
     desktopScreenshotDataUri: desktop ? `data:image/jpeg;base64,${desktop.toString('base64')}` : null,
@@ -264,47 +289,75 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   }
 
   const status: GeneratedLetter['status'] = issues.length || !truth.passed ? 'failed' : 'generated';
-  const [row] = await db
-    .insert(letters)
-    .values({
-      leadId,
-      demoId: demo.id,
-      variantId: variant.id,
-      sequence: seqDb,
-      format: 'letter',
-      statedExpiresAt: stated,
-      pageCount: pdfCheck.pages,
-      estimatedCostCents: estimate,
-      status,
-      statusReason:
-        issues.length || truthIssues.length
-          ? [...issues.map((i) => `${i.check}: ${i.detail}`), ...truthIssues].join(' | ').slice(0, 1000)
-          : null,
-      industry: lead.industry ?? null,
-      truthCheckJson: {
-        ...truth,
-        _quality: assessLetterQuality(
-          [{ passed: truth.passed }, { passed: issues.length === 0 }],
-          undefined,
-          cfg.review.letterQualityMinimum,
-        ),
-      } as unknown as Record<string, unknown>,
-      isTest: Boolean(opts.test),
-      dryRun: sw.dryRun,
-    })
-    .returning({ id: letters.id });
-  const letterId = row!.id;
-  if (truth.claims.length) {
-    await db
-      .insert(claimUsages)
-      .values(truth.claims.map((claimId) => ({ letterId, claimId })))
-      .onConflictDoNothing();
-  }
-  // Folgebriefe nennen ein neues Ablaufdatum – die Demo muss mindestens so lange online bleiben
-  if (!opts.test && sequence > 1) await extendDemoUntil(db, leadId, stated);
+  if (existing && status === 'failed') throw new Error('Neu-Erzeugung nicht bestanden; bisheriger Brief bleibt erhalten.');
+  const letterId = randomUUID();
   const key = `letters/${leadId}/${letterId}.pdf`;
   await storage.put(key, pdf, 'application/pdf');
-  await db.update(letters).set({ pdfStorageKey: key }).where(eq(letters.id, letterId));
+  try {
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT id FROM leads WHERE id=${leadId} FOR UPDATE`);
+      const currentCfg = await getConfig({ db: tx, fresh: true });
+      const fresh = await tx.query.leads.findFirst({ where: eq(leads.id, leadId) });
+      if (
+        !fresh ||
+        recipientFingerprint(fresh) !== binding.recipientHash ||
+        fresh.trackToken !== lead.trackToken ||
+        fresh.shortCode !== code
+      )
+        throw new Error('Empfänger oder QR-Zuordnung während der Erstellung geändert.');
+      await assertLetterLeadEligible(tx, fresh, currentCfg);
+      const current = await currentDemoForLead(tx, leadId);
+      if (current?.id !== demo.id) throw new Error('Demo während der Briefgenerierung ersetzt.');
+      const latestBinding = await letterDemoBinding(fresh, current, currentCfg);
+      if (JSON.stringify(latestBinding) !== JSON.stringify(binding))
+        throw new Error('Demo oder Bild während der Erstellung geändert.');
+      const previous = await tx.query.letters.findFirst({ where: and(eq(letters.leadId, leadId), eq(letters.sequence, seqDb)) });
+      if (previous?.id !== existing?.id || (previous && !['generated', 'failed', 'approved'].includes(previous.status)))
+        throw new Error('Brief parallel geändert oder bereits zum Versand übernommen.');
+      if (previous) await tx.delete(letters).where(eq(letters.id, previous.id));
+      await tx.insert(letters).values({
+        id: letterId,
+        pdfStorageKey: key,
+        leadId,
+        demoId: demo.id,
+        variantId: variant.id,
+        sequence: seqDb,
+        format: 'letter',
+        statedExpiresAt: stated,
+        pageCount: pdfCheck.pages,
+        estimatedCostCents: estimate,
+        status,
+        statusReason:
+          issues.length || truthIssues.length
+            ? [...issues.map((i) => `${i.check}: ${i.detail}`), ...truthIssues].join(' | ').slice(0, 1000)
+            : null,
+        industry: lead.industry ?? null,
+        truthCheckJson: {
+          ...truth,
+          _binding: { ...binding, pdfHash: sha256(pdf) },
+          _personalization: demo.qaResultJson?.review?.letterFacts ?? [],
+          _quality: assessLetterQuality(
+            [{ passed: truth.passed }, { passed: issues.length === 0 }],
+            undefined,
+            cfg.review.letterQualityMinimum,
+          ),
+        } as unknown as Record<string, unknown>,
+        isTest: Boolean(opts.test),
+        dryRun: sw.dryRun,
+      });
+      if (truth.claims.length) {
+        await tx
+          .insert(claimUsages)
+          .values(truth.claims.map((claimId) => ({ letterId, claimId })))
+          .onConflictDoNothing();
+      }
+    });
+  } catch (error) {
+    await storage.delete(key).catch(() => undefined);
+    throw error;
+  }
+  if (existing?.pdfStorageKey && existing.pdfStorageKey !== key)
+    await storage.delete(existing.pdfStorageKey).catch(() => undefined);
   await audit(db, {
     entity: 'letter',
     entityId: letterId,
@@ -314,6 +367,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       leadId,
       sequence,
       variant: variant.name,
+      replacedLetterId: existing?.id ?? null,
       domain,
       pages: pdfCheck.pages,
       issues: issues.length,

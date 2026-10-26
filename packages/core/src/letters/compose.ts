@@ -1,5 +1,10 @@
-import { letterBranchBenefit } from './personalization';
-import { v4PriceText } from '../services/offers-v4';
+import {
+  letterBranchBenefit,
+  personalizedLetterCopy,
+  reviewedLetterDetails,
+  type VerifiedLetterContext,
+} from './personalization';
+import { v4Offer, v4PriceText } from '../services/offers-v4';
 import type { LetterData } from '@wbm/templates/letter-types';
 import type { AppConfig } from '../config/settings';
 import { priceTaxSuffix } from '../invoices/build';
@@ -68,6 +73,7 @@ export interface ComposeInput {
   recipient: RecipientInput;
   /** Verified branch label only; never infer private facts or actual service promises. */
   branchLabel?: string;
+  personalization?: VerifiedLetterContext;
   domain: string | null;
   rating: { rating: number; count: number } | null;
   compositeDataUri: string | null;
@@ -108,13 +114,32 @@ export function letterTruthBlocklist(cfg: AppConfig): string[] {
   return [
     ...cfg.letter.truthCheckBlocklist,
     ...(cfg.offers.activeVersion === 'v4'
-      ? ['fertige Website', 'Website ist schon fertig', 'Sie ist fertig', '12 Monate Mindestlaufzeit']
+      ? [
+          'fertige Website',
+          'Website ist schon fertig',
+          'Sie ist fertig',
+          '12 Monate Mindestlaufzeit',
+          'keine eigene Website',
+          'keine Website',
+          'Website[^.]*haben Sie[^.]*nicht',
+          'automatisch gelöscht',
+          'nur noch kurz',
+          'nur noch bis',
+        ]
       : []),
   ];
 }
 
 function composeVars(i: ComposeInput): Record<string, string> {
+  const hasFacts = i.personalization && reviewedLetterDetails(i.personalization).length > 0;
+  const personal = hasFacts
+    ? personalizedLetterCopy(i.personalization!, /kennenlernen|überblicken/.test(i.variant.hook) ? 2 : 0).intro[0]!
+    : i.variant.hook === '{branch_benefit}'
+      ? 'Leistungen, Texte und Bilder sind Beispiele, bis Sie Ihre tatsächlichen Inhalte bestätigen.'
+      : letterBranchBenefit(i.branchLabel ?? '');
   return {
+    personal_context: personal,
+    absender_email: i.cfg.sender.email,
     firmenname: i.recipient.businessName,
     branch_benefit: letterBranchBenefit(i.branchLabel ?? ''),
     ort: i.recipient.city,
@@ -140,7 +165,7 @@ function composeVars(i: ComposeInput): Record<string, string> {
  */
 export function placeholderValues(i: ComposeInput): string[] {
   const vars = composeVars(i);
-  const keys = ['firmenname', 'domain_vorschlag', 'ablaufdatum', 'preise', 'garantie_satz', 'absender_name'];
+  const keys = ['firmenname', 'domain_vorschlag', 'ablaufdatum', 'preise', 'garantie_satz', 'absender_name', 'personal_context'];
   const out = keys.map((k) => vars[k]!).filter(Boolean);
   if (i.rating && i.variant.ratingSentence) out.push(fillPlaceholders(i.variant.ratingSentence, vars));
   return out;
@@ -154,6 +179,23 @@ export function composeLetter(i: ComposeInput): LetterData {
     .join(' ');
   const intro = [lowerFirstWord(first), ...v.intro.map((p) => fillPlaceholders(p, vars))].filter(Boolean);
   return {
+    ...(i.cfg.offers.activeVersion === 'v4'
+      ? {
+          offerSummary: {
+            setup: formatEuroShort(v4Offer('basis').setupCents),
+            basis: formatEuroShort(v4Offer('basis').monthlyCents),
+            care: formatEuroShort(v4Offer('care_plus').monthlyCents),
+            tax: !i.cfg.tax.operatorConfirmed
+              ? 'Steuerstatus ungeklärt · Entwurf, nicht zum Versand freigegeben.'
+              : i.cfg.tax.kleinunternehmer
+                ? 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.'
+                : priceTaxSuffix(i.cfg),
+            scope: `Standard-.de-Domain bis ${formatEuroShort(i.cfg.checkout.maxDomainPriceCents)}/Jahr, Hosting und SSL enthalten. Care+ inkl. Basis und bis zu ${v4Offer('care_plus').includedChangeMinutes} Min. kleinere Änderungen/Monat.`,
+            conditions: 'Monatsabrechnung erst ab bestätigtem Go-Live. Monatlich kündbar.',
+            guarantee: guaranteeSentence(i.cfg),
+          },
+        }
+      : {}),
     sender: {
       name: i.cfg.sender.name,
       company: i.cfg.sender.company,

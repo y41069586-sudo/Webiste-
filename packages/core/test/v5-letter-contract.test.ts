@@ -3,7 +3,7 @@ import { DEFAULT_CONFIG } from '../src/config/settings';
 import { composeLetter, letterTruthBlocklist, placeholderValues, type ComposeInput } from '../src/letters/compose';
 import { V4_LETTER_INDUSTRIES, v4LetterVariant } from '../src/letters/conversion-v4';
 import { checkLetterTruth } from '../src/letters/truth-check';
-import { LETTER_VARIANT_A } from '../src/letters/variants';
+import { LETTER_VARIANT_A, LETTER_VARIANT_B } from '../src/letters/variants';
 import { legalDrafts } from '../../../apps/web/src/lib/legal-drafts';
 
 const cfg = { ...DEFAULT_CONFIG, offers: { ...DEFAULT_CONFIG.offers, activeVersion: 'v4' as const } };
@@ -70,6 +70,9 @@ describe('V5: tatsächliche V4-Brief- und Vertragsbedingungen', () => {
   );
   it('alte gespeicherte Fertig-Versprechen bleiben gesperrt statt still überschrieben', () => {
     expect(truth(LETTER_VARIANT_A).check.violations.some((v) => v.rule === 'blocklist' && /fertig/i.test(v.detail))).toBe(true);
+  });
+  it('alte ungesicherte Website-Abwesenheitsbehauptungen bleiben unter V4 gesperrt', () => {
+    expect(truth(LETTER_VARIANT_B).check.violations.some((v) => v.rule === 'blocklist')).toBe(true);
   });
   it('V4-AGB-Entwurf nennt Pflicht-Monatstarif, wirklichen Abostart und Einrichtungsgarantie ohne Legacy-Bindung', () => {
     const text = legalDrafts(cfg).termsMarkdown.replace(/\u00a0/g, ' ');

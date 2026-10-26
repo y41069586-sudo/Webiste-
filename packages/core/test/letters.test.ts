@@ -210,7 +210,7 @@ describe('Alle Briefvarianten passen im ungünstigsten Fall auf eine Seite', () 
       };
       const data = composeLetter({
         variant: v.content,
-        cfg: DEFAULT_CONFIG,
+        cfg: { ...DEFAULT_CONFIG, offers: { ...DEFAULT_CONFIG.offers, activeVersion: 'legacy' } },
         recipient,
         domain: 'miras-kosmetikinstitut-dortmund.de',
         rating: { rating: 4.9, count: 213 },

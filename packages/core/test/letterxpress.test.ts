@@ -256,7 +256,7 @@ describe('LetterXpress im Versandablauf', () => {
       .values({
         source: 'mock',
         sourceId: randomToken(10),
-        businessName: 'Testbetrieb',
+        businessName: truthPassed ? 'Testbetrieb' : 'Ungeprüfter Testbetrieb',
         branch: 'maler',
         branchGroup: 'handwerk',
         city: 'Dortmund',

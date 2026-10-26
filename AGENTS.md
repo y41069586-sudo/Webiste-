@@ -260,3 +260,14 @@ bestehenden Demo-Vorlagen, Bild-/Textauswahl und QA; keine einheitliche Maler-St
 aktueller Stand in `docs/task1-design/`. Gerätegeometrie, Brief-/Zahlungsmodell und Marketingwebsite
 bleiben in dieser Aufgabe erhalten. Aufnahmehilfe darf für korrektes Lazy-Image-Rendering repariert werden.
 Kein Push/Deployment ohne neue Freigabe; technische Tests sind keine gestalterische Betreiberabnahme.
+
+## Aktueller Einzelauftrag 2 – Briefe und QR-Demofunnel
+
+Aufgabe1 ist lokal abgeschlossen. Jetzt ausschließlich bestehende Briefstrecke verbessern; Bericht und
+Wiederaufnahme unter `docs/task2-letters/`. Gerätegeometrie erhalten. Neue V4-Ansicht zeigt Laptop/Handy,
+41mm-QR und ruhige, getrennte Preise; Pflichttexte nicht zum Einpassen verkleinern oder abschneiden.
+Verifizierte Leistungsdetails nur aus manuellem `review.letterFacts` mit Quellenreferenz; Beispiel-Leistungen
+und generierter Demo-Text sind keine verifizierten Firmenfakten. Ohne Details neutral formulieren.
+Neue Briefdateien an QA-/PDF-/Empfänger-/Angebotshashes binden, vor Freigabe/Versand erneut prüfen.
+Fehlgeschlagene Regenerierung darf den bisherigen Brief nicht löschen. Neue Varianten bleiben pausiert;
+keine aktiven DB-Arme oder Quoten still überschreiben. Kein Push/Deployment oder echter Anbieterauftrag.

@@ -19,14 +19,14 @@ import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
 import { OPERATOR_TEST_CONFIG, resetDb } from './helpers';
 
-async function seed(opts: { status?: string; letterStatus?: string } = {}) {
+async function seed(opts: { status?: string; letterStatus?: string; businessName?: string } = {}) {
   const db = getDb();
   const [lead] = await db
     .insert(leads)
     .values({
       source: 'mock',
       sourceId: randomToken(10),
-      businessName: 'Testbetrieb',
+      businessName: opts.businessName ?? 'Testbetrieb',
       branch: 'maler',
       branchGroup: 'handwerk',
       city: 'Dortmund',
@@ -137,7 +137,7 @@ describe('Versand', () => {
   });
 
   it('Budget-Guard stoppt den Stapelversand', async () => {
-    for (let i = 0; i < 4; i++) await seed();
+    for (let i = 0; i < 4; i++) await seed({ businessName: `Testbetrieb Budget ${i}` });
     const res = await sendApprovedLetters('test');
     // Budget 3,00 € / Mock-Preis 1,35 € → 2 Briefe
     expect(res.sent).toBe(2);

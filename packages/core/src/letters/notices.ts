@@ -7,7 +7,9 @@ export function dataSourceText(source: LeadSourceKind): string {
     case 'osm':
       return 'öffentlich zugänglichen Firmeneinträgen (OpenStreetMap, © OpenStreetMap-Mitwirkende, ODbL)';
     case 'google_places':
-      return 'öffentlich zugänglichen Firmeneinträgen im Internet';
+      return 'öffentlich zugänglichen Firmeneinträgen bei Google Places';
+    case 'mock':
+      return 'fiktiven Testdaten';
     default:
       return 'öffentlich zugänglichen Firmeneinträgen';
   }

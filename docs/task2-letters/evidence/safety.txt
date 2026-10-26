@@ -1,0 +1,4 @@
+✓ test/task2-letter.test.ts (8 tests) 11573ms
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Duration  14.41s (transform 574ms, setup 8ms, collect 1.53s, tests 11.57s, environment 0ms, prepare 48ms)

@@ -72,6 +72,22 @@ export async function seedDefaults(db: DbOrTx = getDb()): Promise<void> {
         .onConflictDoNothing({ target: [variants.kind, variants.name] });
     }
   }
+  // Safe V4 follow-up copy is prepared for review, never silently replacing active legacy sequences.
+  for (const sequence of [2, 3] as const) {
+    await db
+      .insert(variants)
+      .values({
+        kind: 'letter',
+        name: sequence === 2 ? 'V4 F1 – Vorschau erneut' : 'V4 F2 – Geprüfter neuer Entwurf',
+        sequence,
+        content: v4LetterVariant('dienstleistung', 'A', sequence) as unknown as Record<string, unknown>,
+        active: false,
+        status: 'paused',
+        weight: 1,
+        hypothesis: 'Keine neue Wirkungshypothese: sachliche Folgekorrespondenz erst nach belegter vorheriger Sendung.',
+      })
+      .onConflictDoNothing({ target: [variants.kind, variants.name] });
+  }
   await db.execute(sql`INSERT INTO counters (name, value) VALUES ('demos_reviewed', 0) ON CONFLICT DO NOTHING`);
   // Claims-Bibliothek und Playbooks aus den YAML-Dateien (B2/B3)
   await maintainClaims(db);

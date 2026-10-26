@@ -1,3 +1,5 @@
+import { assertLetterLeadEligible } from '../letters/eligibility';
+import { assertLetterBinding } from '../letters/binding';
 import { assessLetterQuality, type LetterQualityScores, type LetterQualityAssessment } from '../quality/letter';
 import { and, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm';
 import { usableClaims, type ClaimRow } from '../claims/library';
@@ -156,6 +158,15 @@ export async function approveLetter(letterId: string, actor: string, scores?: Pa
     await tx.execute(sql`SELECT id FROM letters WHERE id=${letterId} FOR UPDATE`);
     const letter = await tx.query.letters.findFirst({ where: eq(letters.id, letterId) });
     if (!letter || letter.status !== 'generated') return false;
+    const cfg = await getConfig({ db: tx, fresh: true });
+    const lead = await tx.query.leads.findFirst({ where: eq(leads.id, letter.leadId) });
+    if (!lead) return false;
+    try {
+      await assertLetterLeadEligible(tx, lead, cfg);
+      await assertLetterBinding(tx, letter, lead, cfg);
+    } catch {
+      return false;
+    }
     // Kein Versand ohne bestandenen Wahrheits-Check (B5.4)
     if ((letter.truthCheckJson as { passed?: boolean } | null)?.passed !== true) return false;
     const previous = letter.truthCheckJson?._quality as LetterQualityAssessment | undefined;

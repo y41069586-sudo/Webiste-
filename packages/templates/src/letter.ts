@@ -36,6 +36,16 @@ export interface LetterSender {
 }
 
 export interface LetterData {
+  /** Presentation of the existing V4 offer; monetary labels come from core's central source. */
+  offerSummary?: {
+    setup: string;
+    basis: string;
+    care: string;
+    tax: string;
+    scope: string;
+    conditions: string;
+    guarantee: string;
+  };
   /** Explicit opt-in for the pending visual review; labels come from the V4 offer source. */
   reviewOffer?: { setup: string; basis: string; care: string; scope: string; conditions: string };
   sender: LetterSender;
@@ -152,6 +162,14 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .small p{margin:0 0 1.2mm}
 .small strong{color:#1d232b}
 .small .fn{color:#1d232b}
+.v4-letter{top:90mm}.v4-letter .intro{margin:1mm 0;font-size:9.6pt;line-height:1.4}
+.v4-letter .subject{margin-bottom:1.5mm}.v4-letter .visual{gap:6mm;margin:1mm 0;align-items:center}
+.v4-letter .composite{width:114mm;max-height:65mm;object-fit:contain;border-radius:0}
+.v4-letter .qrbox{flex:0 0 45mm;min-width:0}.v4-letter .qrbox strong{font-size:9pt}.v4-letter .short{font-size:8pt;color:#24364a;word-break:normal;overflow-wrap:anywhere}
+.offer-summary{margin:2mm 0;border-top:0.3mm solid #1d4e89;padding-top:2mm}
+.offer-prices{display:flex;gap:8mm;font-size:9.4pt;line-height:1.4}.offer-prices strong{font-weight:600}.offer-summary p{font-size:8.5pt;line-height:1.35;margin:1mm 0}.offer-summary .tax{font-size:8pt}
+.v4-letter .no-action{font-size:9pt;line-height:1.4}.v4-letter .sign{margin-top:0}
+.v4-page .small{font-size:8pt;color:#344054;line-height:1.32}
 .p2{position:absolute;left:25mm;right:20mm;top:25mm}
 .p2 h2{font-size:15pt;margin:0 0 2mm;color:#1d4e89}
 .muted{color:#4a5565}
@@ -162,7 +180,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .qrrow .qr{margin:0;width:41mm;height:41mm}
 </style></head>
 <body>
-<section class="page" aria-label="Seite 1">
+<section class="page ${d.offerSummary ? 'v4-page' : ''}" aria-label="Seite 1">
   <header class="head">
     <div><div class="brand">${esc(d.sender.company)}</div><div class="tag">Websites für lokale Betriebe</div></div>
     <div class="web">${esc(d.sender.website)}</div>
@@ -176,7 +194,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
     <div><span class="k">E-Mail</span> ${esc(d.sender.email)}</div>
     <div class="date">${esc(d.dateLine)}</div>
   </div>
-  <main class="body ${d.reviewOffer ? 'review-letter' : ''} ${premium ? 'premium' : ''}" id="brieftext">
+  <main class="body ${d.offerSummary && !d.reviewOffer ? 'v4-letter' : ''} ${d.reviewOffer ? 'review-letter' : ''} ${premium ? 'premium' : ''}" id="brieftext">
     <h1 class="subject">${esc(d.subject)}</h1>
     <p>${esc(d.greeting)}</p>
     ${
@@ -186,8 +204,20 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
     <div class="review-prices"><div><span>Einrichtung · einmalig</span><strong>${esc(d.reviewOffer.setup)}</strong></div><div><span>Basis · monatlich</span><strong>${esc(d.reviewOffer.basis)}</strong></div><div><span>Care+ · monatlich insgesamt</span><strong>${esc(d.reviewOffer.care)}</strong></div></div>
     <p class="review-conditions">${esc(d.reviewOffer.conditions)}</p><p>${esc(d.reviewOffer.scope)}</p>
     <p class="review-conditions">Rückfragen gern per E-Mail oder WhatsApp. Der Entwurf ist unverbindlich.</p><div class="sign">${esc(d.closing)}<br><strong>${esc(d.signatureName)}</strong></div>`
-        : premium
-          ? `
+        : d.offerSummary
+          ? `<p class="intro">${d.intro.map((p) => boldMd(p)).join(' ')}</p>
+    <div class="visual">
+      ${d.compositeDataUri ? `<img class="composite" src="${esc(d.compositeDataUri)}" alt="Echte Desktop- und Smartphone-Ansicht desselben Website-Entwurfs">` : ''}
+      <div class="qrbox"><img class="qr" src="${d.qrDataUri}" alt="QR-Code zum persönlichen Entwurf"><strong>${esc(d.qrCaption)}</strong><span class="short">${esc(d.shortUrl)}</span></div>
+    </div>
+    <section class="offer-summary" aria-label="Kosten bei späterer Beauftragung">
+      <div class="offer-prices"><div><strong>${esc(d.offerSummary.setup)} einmalig</strong><br>Einrichtung</div><div><strong>Basis ${esc(d.offerSummary.basis)}/Monat</strong><br>oder Care+ insgesamt ${esc(d.offerSummary.care)}/Monat</div></div>
+      <p>${esc(d.offerSummary.conditions)} ${esc(d.offerSummary.scope)}</p>
+      ${d.offerSummary.guarantee ? `<p>${esc(d.offerSummary.guarantee)}</p>` : ''}<p class="tax">${esc(d.offerSummary.tax)}</p>
+    </section>
+    <p class="no-action">${boldMd(d.noAction)}</p><div class="sign">${esc(d.closing)}<br><strong>${esc(d.signatureName)}</strong></div>`
+          : premium
+            ? `
     <p class="intro">${d.intro.map((p) => boldMd(p)).join(' ')}</p>
     <img class="hero-shot" src="${esc(d.desktopScreenshotDataUri!)}" alt="Persönlicher Website-Entwurf: tatsächlich gerenderter Hero-Bereich für ${esc(d.recipientLines.join(' '))}">
     <div class="offer-row"><div class="offer-copy">
@@ -195,7 +225,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
       <div class="sign"><div>${esc(d.closing)}</div><div class="name">${esc(d.signatureName)}</div></div>
     </div><div class="qrbox"><img class="qr" src="${d.qrDataUri}" alt="QR-Code zum persönlichen Entwurf"><strong>${esc(d.qrCaption)}</strong><span class="short">${esc(d.shortUrl)}</span></div></div>
     `
-          : `
+            : `
     ${d.intro.map((p) => `<p>${boldMd(p)}</p>`).join('\n    ')}
     <div class="visual">
       ${d.compositeDataUri ? `<img class="composite" src="${d.compositeDataUri}" alt="Ihre neue Website am Computer und auf dem Handy">` : ''}

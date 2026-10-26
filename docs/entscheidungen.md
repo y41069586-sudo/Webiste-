@@ -267,3 +267,14 @@ Firmenwebsite kompakter, Starteridentität nicht als echte Betreiberangaben ver�
 Fünf ausdrücklich fiktive KI-Branchenbilder, keine realen Referenzen oder CC0-Behauptung.
 Vollständige Nachweise/Grenzen im Ultimate-Handoff. Betreiberauftrag erlaubt Commit und Push,
 weiterhin keine Produktion; DRY_RUN=true und bisherige Go-Live-Sperren bleiben erhalten.
+
+## 26.10.2026 – Einzelauftrag 2: Briefe und QR-Strecke
+
+Bestehende V4/V5-Architektur und Gerätekomposition behalten; normale V4-Briefe wieder mit tatsächlichem
+Laptop-/Handy-Komposit. Preisquelle unverändert597+19 bzw.597+insgesamt99. Größere Pflichttexte und
+Überlaufprüfung, kein Abschneiden von Anschriften. Quellengebundene Detailangaben aus dem manuellen
+Demo-Faktenreview; keine Website-Abwesenheit aus fehlendem OSM-Tag behaupten. Neue V4-Folgebrieftexte
+nur pausiert vorbereiten; vorhandene aktive Varianten/Quoten nicht still verändern. Vor Generierung,
+Freigabe und Versand Sperrlisten, Dubletten, Quellenzulässigkeit und unveränderte Brief-/Demo-/Bildzuordnung
+lokal erneut prüfen. DRY_RUN=true, nur fiktive Testpaare, kein Push/Deployment oder echter Versand.
+Nachweise/Wiederaufnahme: `docs/task2-letters/`.

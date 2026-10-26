@@ -316,12 +316,15 @@ describe('Slot-Briefe im echten Ablauf', () => {
       })
       .onConflictDoNothing();
     await updateConfig({ letter: { maxStatistics: 2 } }, 'test');
-    const res = await generateLetter(leadId, 1, { actor: 'job:test', regenerate: true });
-    expect(res.status).toBe('failed');
-    expect(res.truthCheck?.passed).toBe(false);
-    const letter = (await db.query.letters.findFirst({ where: eq(letters.id, res.letterId) }))!;
-    expect(letter.statusReason).toMatch(/wahrheits_check/);
-    expect(await approveLetter(letter.id, 'admin:test')).toBe(false);
+    const previous = await db.query.letters.findFirst({ where: eq(letters.leadId, leadId) });
+    await expect(generateLetter(leadId, 1, { actor: 'job:test', regenerate: true })).rejects.toThrow(
+      /bisheriger Brief bleibt erhalten/,
+    );
+    const retained = await db.query.letters.findFirst({ where: eq(letters.leadId, leadId) });
+    expect(retained?.id).toBe(previous?.id);
+    expect(retained?.pdfStorageKey).toBe(previous?.pdfStorageKey);
+    // Existing claim was blocked in the preceding case; neither bad replacement nor old row is approvable.
+    expect(await approveLetter(retained!.id, 'admin:test')).toBe(false);
     await db.delete(variants).where(eq(variants.name, 'TEST_FALSCH'));
   }, 120_000);
 });

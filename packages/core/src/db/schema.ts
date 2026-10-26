@@ -131,11 +131,27 @@ export const leads = pgTable(
 // Demos
 // ---------------------------------------------------------------------------
 export interface QaResult {
+  renderedAssets?: {
+    businessFactsHash: string;
+    htmlHash: string;
+    desktopHash: string;
+    mobileHash: string;
+    compositeHash: string;
+  };
   quality?: import('../quality/demo').DemoQualityAssessment;
   passed: boolean;
   checkedAt: string;
   checks: { name: string; passed: boolean; details?: string; score?: number }[];
-  review?: { facts: boolean; desktop: boolean; mobile: boolean; images: boolean; text: boolean; actor: string; at: string };
+  review?: {
+    facts: boolean;
+    desktop: boolean;
+    mobile: boolean;
+    images: boolean;
+    text: boolean;
+    actor: string;
+    at: string;
+    letterFacts?: import('../letters/personalization').VerifiedLetterContext['details'];
+  };
 }
 
 export const demos = pgTable(

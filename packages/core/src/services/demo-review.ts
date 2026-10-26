@@ -34,6 +34,7 @@ export async function approveDemo(
     manual: boolean;
     note?: string;
     review?: {
+      letterFacts?: import('../letters/personalization').VerifiedLetterContext['details'];
       facts: boolean;
       desktop: boolean;
       mobile: boolean;

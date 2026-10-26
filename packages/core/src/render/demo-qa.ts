@@ -1,3 +1,4 @@
+import { recipientFingerprint } from '../letters/binding';
 import { sha256 } from '../util/crypto';
 import { assessDemoQuality, type ManualQualityScores } from '../quality/demo';
 import { eq } from 'drizzle-orm';
@@ -140,7 +141,19 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
         ) as Partial<ManualQualityScores>)
       : undefined;
   const quality = { ...assessDemoQuality(checks, previousScores, cfg.review.qualityMinimum), htmlHash };
-  const result: QaResult = { passed, checkedAt: new Date().toISOString(), checks, quality };
+  const result: QaResult = {
+    renderedAssets: {
+      businessFactsHash: recipientFingerprint(lead),
+      htmlHash,
+      desktopHash: sha256(shots.desktop),
+      mobileHash: sha256(shots.mobile),
+      compositeHash: sha256(composite),
+    },
+    passed,
+    checkedAt: new Date().toISOString(),
+    checks,
+    quality,
+  };
   // Bereits freigegebene/veröffentlichte Demos behalten ihren Status (QA-Wiederholung)
   const current = await db.query.demos.findFirst({ where: eq(demos.id, demoId), columns: { status: true, reviewNote: true } });
   const decide = ['building', 'pending_review', 'qa_failed'].includes(current?.status ?? '');
