@@ -75,3 +75,6 @@ Externe Restpunkte: freigegebene Testlaufzeit mit sicher gebundenem Stripe-Sandb
 komplette echte Hosted-/Monatsabrechnungs-Abnahme, tatsächlicher Stripe-Logo-/Händlerauftritt,
 Rechts-/Steuer-/Anbieter- und technische Betriebsabnahme. Keine neue Provider-/VPS-Auswahl erforderlich.
 Keine Produktivänderung, kein Push, kein Deploy. Keine Aufgabe 4/5 begonnen.
+
+Letzter sicherer Implementierungscommit: `5e7e7677ff798e97daa74338faddf86a7726f933` auf `codex/conversion-v4`.
+Der anschließende Handoff-Commit enthält nur Nachweis-/Dateilistenpflege. Kein Push/Deploy.

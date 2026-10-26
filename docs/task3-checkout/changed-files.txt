@@ -23,8 +23,10 @@ apps/web/src/components/public/shell.tsx
 apps/web/src/components/site/site-header.tsx
 apps/web/src/lib/public-page.ts
 docs/task3-checkout/README.md
+docs/task3-checkout/changed-files.txt
 docs/task3-checkout/evidence/01-abbruch.jpg
 docs/task3-checkout/evidence/01-angebot-390.jpg
+docs/task3-checkout/evidence/bestellung-processing-320.jpg
 docs/task3-checkout/evidence/demo-matrix.json
 docs/task3-checkout/evidence/journeys.json
 docs/task3-checkout/evidence/ledger-check.json
@@ -39,8 +41,12 @@ docs/task3-checkout/evidence/testbrief-logo.pdf
 docs/task3-checkout/evidence/testbrief-logo.png
 docs/task3-checkout/evidence/uebersicht-angebote.jpg
 docs/task3-checkout/evidence/uebersicht-mobile.jpg
+docs/task3-checkout/evidence/zahlung-ausstehend-320.jpg
+docs/task3-checkout/evidence/zahlung-fehlgeschlagen-430.jpg
 docs/task3-checkout/status.md
 docs/task3-checkout/stripe-readonly.json
+docs/ultimate-quality-handoff.md
+docs/v4-quality-handoff.md
 packages/core/scripts/e2e-offer-version.ts
 packages/core/scripts/e2e-seed-demo.ts
 packages/core/src/demos/build.ts

@@ -161,3 +161,7 @@ Lokal für interne Prüfung bereit. **Nicht für echte Zahlungen oder Briefe fre
 Das neue Logo ist im lokalen Quellstand eingebunden; veröffentlichte Netlify-Seiten und Stripe-Account
 bleiben unverändert. Vollständige tatsächliche Stripe-Sandbox-Abnahme sowie Rechts-/Steuer-/Anbieter-
 und Betriebsfreigaben bleiben offen. Keine Aufgabe 4/5 vorweggenommen.
+
+Lokaler Implementierungscommit: `5e7e7677ff798e97daa74338faddf86a7726f933`. Branch `codex/conversion-v4`.
+Die Hosted-Transaktionssperre umfasst die Provideranfrage; Verhalten bei echten Providerlatenzen/Poolergrenzen
+ist Teil der noch offenen Sandbox-/Infrastrukturabnahme. Keine Freigabe aus lokalen Tests ableiten.
