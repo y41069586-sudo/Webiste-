@@ -163,11 +163,11 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .small strong{color:#1d232b}
 .small .fn{color:#1d232b}
 .v4-letter{top:90mm}.v4-letter .intro{margin:1mm 0;font-size:9.6pt;line-height:1.4}
-.v4-letter .subject{margin-bottom:1.5mm}.v4-letter .visual{gap:6mm;margin:1mm 0;align-items:center}
+.v4-letter .subject{margin-bottom:1.5mm}.v4-letter .intro p{margin:0}.v4-letter .intro p+p{margin-top:0.7mm}.v4-letter .visual{gap:6mm;margin:1mm 0;align-items:center}
 .v4-letter .composite{width:114mm;max-height:65mm;object-fit:contain;border-radius:0}
 .v4-letter .qrbox{flex:0 0 45mm;min-width:0}.v4-letter .qrbox strong{font-size:9pt}.v4-letter .short{font-size:8pt;color:#24364a;word-break:normal;overflow-wrap:anywhere}
 .offer-summary{margin:2mm 0;border-top:0.3mm solid #1d4e89;padding-top:2mm}
-.offer-prices{display:flex;gap:8mm;font-size:9.4pt;line-height:1.4}.offer-prices strong{font-weight:600}.offer-summary p{font-size:8.5pt;line-height:1.35;margin:1mm 0}.offer-summary .tax{font-size:8pt}
+.offer-prices{display:flex;gap:4mm;font-size:9.4pt;line-height:1.4}.offer-prices strong{font-weight:600}.offer-summary p{font-size:8.5pt;line-height:1.35;margin:1mm 0}.offer-summary .tax{font-size:8pt}
 .v4-letter .no-action{font-size:9pt;line-height:1.4}.v4-letter .sign{margin-top:0}
 .v4-page .small{font-size:8pt;color:#344054;line-height:1.32}
 .p2{position:absolute;left:25mm;right:20mm;top:25mm}
@@ -205,17 +205,24 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
     <p class="review-conditions">${esc(d.reviewOffer.conditions)}</p><p>${esc(d.reviewOffer.scope)}</p>
     <p class="review-conditions">Rückfragen gern per E-Mail oder WhatsApp. Der Entwurf ist unverbindlich.</p><div class="sign">${esc(d.closing)}<br><strong>${esc(d.signatureName)}</strong></div>`
         : d.offerSummary
-          ? `<p class="intro">${d.intro.map((p) => boldMd(p)).join(' ')}</p>
+          ? `<div class="intro">${
+              d.intro.length > 1
+                ? `<p>${d.intro
+                    .slice(0, -1)
+                    .map((p) => boldMd(p))
+                    .join(' ')}</p>`
+                : ''
+            }<p>${boldMd(d.intro.at(-1) ?? '')}</p></div>
     <div class="visual">
       ${d.compositeDataUri ? `<img class="composite" src="${esc(d.compositeDataUri)}" alt="Echte Desktop- und Smartphone-Ansicht desselben Website-Entwurfs">` : ''}
       <div class="qrbox"><img class="qr" src="${d.qrDataUri}" alt="QR-Code zum persönlichen Entwurf"><strong>${esc(d.qrCaption)}</strong><span class="short">${esc(d.shortUrl)}</span></div>
     </div>
     <section class="offer-summary" aria-label="Kosten bei späterer Beauftragung">
-      <div class="offer-prices"><div><strong>${esc(d.offerSummary.setup)} einmalig</strong><br>Einrichtung</div><div><strong>Basis ${esc(d.offerSummary.basis)}/Monat</strong><br>oder Care+ insgesamt ${esc(d.offerSummary.care)}/Monat</div></div>
+      <div class="offer-prices"><div><strong>${esc(d.offerSummary.setup)} einmalig</strong> · Einrichtung</div><div>+ <strong>Basis ${esc(d.offerSummary.basis)}/Monat</strong> oder <strong>Care+ insgesamt ${esc(d.offerSummary.care)}/Monat</strong></div></div>
       <p>${esc(d.offerSummary.conditions)} ${esc(d.offerSummary.scope)}</p>
       ${d.offerSummary.guarantee ? `<p>${esc(d.offerSummary.guarantee)}</p>` : ''}<p class="tax">${esc(d.offerSummary.tax)}</p>
     </section>
-    <p class="no-action">${boldMd(d.noAction)}</p><div class="sign">${esc(d.closing)}<br><strong>${esc(d.signatureName)}</strong></div>`
+    <p class="no-action">${boldMd(d.noAction)}</p><div class="sign">${esc(d.closing)} · <strong>${esc(d.signatureName)}</strong></div>`
           : premium
             ? `
     <p class="intro">${d.intro.map((p) => boldMd(p)).join(' ')}</p>

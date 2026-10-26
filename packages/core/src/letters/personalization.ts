@@ -93,7 +93,7 @@ export function personalizedLetterCopy(context: VerifiedLetterContext, variant =
       : undefined;
   const detail = services.map((d) => d.text).join(' und ');
   const openings = [
-    `Im Mittelpunkt: ${detail} – für Ihren Betrieb in ${context.city}.`,
+    `Der Entwurf zeigt ${detail} – übersichtlich am Computer und Smartphone.`,
     `Für ${context.businessName} haben wir ${detail} in der Vorschau aufgegriffen.`,
     `Die Vorschau zeigt, wie sich ${detail} für Interessierte übersichtlich darstellen lassen.`,
   ];

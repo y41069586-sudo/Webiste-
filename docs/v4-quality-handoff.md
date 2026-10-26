@@ -265,3 +265,10 @@ DRY_RUN=true. Kein Push/Deployment/Providerauftrag. Aufgabe3 nicht anfangen, bis
 Letzter sicherer Aufgabe2-Implementierungscommit: `c621f9ef401588bdadcbfbd150babc0db11284a9` auf `codex/conversion-v4`.
 
 Zusatzfeedback zu Aufgabe2: recherchegebundene Einstiege mit frischem manuellem Prüfnachweis implementiert. Zwei ausdrücklich fiktive Muster und35 aktuelle Tests/Typen/Lint/Build bestanden; Bericht task2-letters/README.md. Keine echte Recherche oder Kunden-/Leadgarantie behaupten.
+
+Neuester Betreibertext für Aufgabe2 lokal optimiert: freundlicher Website-Ideen-Einstieg, kostenloser
+QR-CTA ohne Verkaufsgespräch, knappe Preiszeile und kein Kostenanfall ohne Bestellung.20/20 neue Paare,
+122 Core-/102 Template-Tests, Typen/Lint/Build bestanden; sieben bekannte Tracingwarnungen.
+Aktuelle Belege copy-* in docs/task2-letters/evidence/, neue Vergleichsgalerie galerie-refined/ und
+seitenwerk-aufgabe2-betreiberfassung.zip unter data/exports/task2-letters/. Alte Fassungen erhalten.
+Keine externen Aktionen oder Freigaben. Nächster Schritt: Betreiberfeedback/nächsten Einzelprompt abwarten.

@@ -140,8 +140,7 @@ function composeVars(i: ComposeInput): Record<string, string> {
       : letterBranchBenefit(i.branchLabel ?? ''));
   return {
     personal_context: personal,
-    research_opening:
-      personalized?.researchOpening ?? 'für Ihren Betrieb habe ich diese unverbindliche Website-Vorschau vorbereitet.',
+    research_opening: personalized?.researchOpening ?? 'wir haben eine Website-Idee speziell für Ihren Betrieb gestaltet.',
     absender_email: i.cfg.sender.email,
     firmenname: i.recipient.businessName,
     branch_benefit: personalized?.researchOpening ?? letterBranchBenefit(i.branchLabel ?? ''),
@@ -212,7 +211,7 @@ export function composeLetter(i: ComposeInput): LetterData {
               : i.cfg.tax.kleinunternehmer
                 ? 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.'
                 : priceTaxSuffix(i.cfg),
-            scope: `Standard-.de-Domain bis ${formatEuroShort(i.cfg.checkout.maxDomainPriceCents)}/Jahr, Hosting und SSL enthalten. Care+ inkl. Basis und bis zu ${v4Offer('care_plus').includedChangeMinutes} Min. kleinere Änderungen/Monat.`,
+            scope: `Fertigstellung mit Ihren bestätigten Inhalten, inkl. eigener Standard-.de-Domain bis ${formatEuroShort(i.cfg.checkout.maxDomainPriceCents)}/Jahr, Hosting/SSL. Care+ enthält Basis und bis zu ${v4Offer('care_plus').includedChangeMinutes} Min. kleinere Änderungen/Monat.`,
             conditions: 'Monatsabrechnung erst ab bestätigtem Go-Live. Monatlich kündbar.',
             guarantee: guaranteeSentence(i.cfg),
           },

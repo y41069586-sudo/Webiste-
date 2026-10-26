@@ -18,7 +18,13 @@ import { DEFAULT_CONFIG, deepMerge } from '../packages/core/src/config/settings'
 import { sha256 } from '../packages/core/src/util/crypto';
 const sharp = createRequire(new URL('../apps/web/node_modules/next/package.json', import.meta.url))('sharp');
 process.env.DRY_RUN = 'true';
-const phase = process.argv.includes('--before') ? 'before' : process.argv.includes('--research') ? 'research' : 'after';
+const phase = process.argv.includes('--before')
+  ? 'before'
+  : process.argv.includes('--research')
+    ? 'research'
+    : process.argv.includes('--refined')
+      ? 'refined'
+      : 'after';
 const root = 'data/exports/task2-letters',
   out = `${root}/${phase}`,
   fixtureDir = `${root}/fixtures`;

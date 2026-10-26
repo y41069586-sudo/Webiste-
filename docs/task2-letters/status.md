@@ -43,3 +43,11 @@ Zwei getrennte fiktive Recherche-Muster unter data/exports/task2-letters/researc
 Aktueller Nachlauf wird separat nachgewiesen;20 vorherige Paare bleiben unverändert archiviert.
 
 Recherche-Nachlauf abgeschlossen:35 Tests in4 Dateien, darunter7 neue Fälle zu unbestätigter/veralteter/unvollständiger/positiver Recherche und falschen Kundengarantien. Beide Muster-PDFs/QR-Raster bestanden; Typen/Lint/Build bestanden. Belege research-* unter evidence/.
+
+### Optimierter Betreibertext – abgeschlossen
+
+Aktuelle gewünschte Tonalität lokal in bestehende V4-Vorlage übernommen.20 neue Fälle separat unter
+refined/ und galerie-refined/, vorherige Daten erhalten.20/20 A4-/QR-/Routen-/Mobile-/Preise-/Rechtshinweis-
+Kontrollen bestanden.122 Core-/102 Template-Tests, Typen/Lint/Build bestanden. Sieben bekannte Buildwarnungen.
+Belege copy-* in evidence/. Neue ZIP seitenwerk-aufgabe2-betreiberfassung.zip. Keine aktiven DB-Varianten
+überschrieben/freigeschaltet. DRY_RUN=true. Keine weitere Aufgabe begonnen, kein Push/Deployment/Versand.

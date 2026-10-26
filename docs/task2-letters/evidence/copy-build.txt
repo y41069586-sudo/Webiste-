@@ -1,0 +1,39 @@
+> website-brief-maschine@0.1.0 build /workspace/seitenwerk-v4
+> pnpm -r --filter './packages/*' build && pnpm --filter @wbm/web build && pnpm --filter @wbm/worker build
+
+Scope: 2 of 5 workspace projects
+packages/templates build$ node scripts/build-css.mjs
+packages/templates build: ≈ tailwindcss v4.3.3
+packages/templates build: Done in 68ms
+packages/templates build: dist/site.css: 40.5 KB
+packages/templates build: Done
+packages/core build$ echo 'core wird von den Apps direkt transpiliert'
+packages/core build: core wird von den Apps direkt transpiliert
+packages/core build: Done
+
+> @wbm/web@0.1.0 build /workspace/seitenwerk-v4/apps/web
+> next build
+
+▲ Next.js 16.4.2 (Turbopack)
+✓ Running next.config.ts took 22ms
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1375ms
+  Running TypeScript ...
+  Finished TypeScript in 7.3s ...
+  Collecting page data using 2 workers ...
+  Generating static pages using 2 workers (0/5) ...
+  Generating static pages using 2 workers (1/5)
+  Generating static pages using 2 workers (2/5)
+  Generating static pages using 2 workers (3/5)
+✓ Generating static pages using 2 workers (5/5) in 95ms
+[7 known filesystem tracing warnings]
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> @wbm/worker@0.1.0 build /workspace/seitenwerk-v4/apps/worker
+> tsc --noEmit

@@ -189,3 +189,27 @@ Prüfpaare werden damit nicht nachträglich als recherchiert umetikettiert. Kein
 
 [Recherche-Muster1: Website-Suchbefund](evidence/recherche-01.pdf), [Muster2: konkreter öffentlicher Betriebsbefund](evidence/recherche-02.pdf).
 35 relevante Tests einschließlich7 neuer Recherchefälle, TypeScript/Lint/Build und beide PDF-/Druck-/QR-Prüfungen bestanden. Sieben bekannte Build-Tracingwarnungen bleiben.
+
+## Neueste Fassung: optimierter Betreiberentwurf
+
+Der Betreiber bevorzugt einen zugänglichen Einstieg mit eigener Website-Idee, Geräteansicht und
+kostenlosem Ansehen ohne Anmeldung/Verkaufsgespräch. Diese Richtung ist in die bestehenden V4-Kandidaten
+übernommen. Zwei kurze Absätze, sichtbarer Gratis-CTA, beruhigender Satz „Ohne Bestellung entstehen keine
+Kosten“. Konkrete bestätigte Leistungen bleiben enthalten. Dokumentierte Recherchebefunde ersetzen
+weiterhin den neutralen Einstieg nur bei vorhandenem Nachweis; kein erfundener Recherchekontakt.
+
+Einrichtung plus wahlweiser Monatstarif stehen in einer ruhigen eigenen Preiszeile; Fertigstellung mit
+bestätigten Inhalten, Domain/Hosting/SSL, Care+-Umfang, Go-Live-Abrechnungsbeginn und monatliche Kündigung
+bleiben sichtbar. Die Grußformel ist einzeilig, um beim langen Testnamen den vollständigen8pt-Pflichtfuß
+und das unverzerrte Gerätebild auf derselben A4-Seite zu erhalten. Frühere Fassungen nicht überschrieben.
+
+20/20 neue PDF-/Druckraster-/QR-/Zuordnungs-/Datum-/Preis-/Datenschutz-/Mobile-Prüfpaare bestanden.
+122 Core-Tests in15 Dateien,102 Template-Tests, TypeScript/Lint/Build bestanden. Die sieben bekannten
+Tracingwarnungen bleiben. Vergrößerte Druckansichten insbesondere01/20 selbst geprüft; ganze20er-
+Druckübersicht vorhanden. Kein Papier-/Kameratest und keine gestalterische Betreiberfreigabe behauptet.
+
+[Neuer Elektrobrief](evidence/copy-01.pdf), [Druckansicht](evidence/copy-01-print.webp),
+[Vergleichsgalerie zur unmittelbar vorherigen Version](../../data/exports/task2-letters/galerie-refined/index.html),
+[ZIP der optimierten Betreiberfassung](../../data/exports/task2-letters/seitenwerk-aufgabe2-betreiberfassung.zip).
+Sämtliche20 neuesten PDFs unter `evidence/copy-*.pdf`; Einzelprüfungen in `copy-checks.json`.
+Unveränderte Freigabegrenzen: fiktive Testdaten, keine Provider-/Kampagnenaktivierung, kein Push/Deploy.
