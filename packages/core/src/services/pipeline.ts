@@ -6,6 +6,7 @@ import { demos, leads, letters } from '../db/schema';
 import { enqueue, QUEUES } from '../queue';
 import type { LeadStatus } from '../types';
 import { budgetStatus } from './budget';
+import { preferredCampaignTier } from '../leads/acquisition';
 
 /** Leads, die bereits Budget „gebunden“ haben, aber noch keinen Brief verschickt haben. */
 const IN_FLIGHT: LeadStatus[] = ['demo_built', 'demo_approved', 'demo_published', 'letter_generated', 'letter_approved'];
@@ -113,7 +114,7 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
   // 2) Demos einreihen
   if (capacity > 0) {
     const pool = await db
-      .select({ id: leads.id, segment: leads.segmentKey, score: leads.score })
+      .select({ id: leads.id, segment: leads.segmentKey, score: leads.score, branch: leads.branch })
       .from(leads)
       .where(
         and(
@@ -130,7 +131,12 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
       .orderBy(desc(leads.score))
       .limit(2000);
     const bySeg = new Map<string, string[]>();
-    for (const l of pool) bySeg.set(l.segment, [...(bySeg.get(l.segment) ?? []), l.id]);
+    const preferred =
+      cfg.offers.activeVersion === 'v4' && cfg.targeting.acquisition.enabled
+        ? preferredCampaignTier(pool, cfg.targeting.acquisition)
+        : pool;
+    // Existing budget, capacity and segment allocation remain; each tick starts with the best available tier.
+    for (const l of preferred) bySeg.set(l.segment, [...(bySeg.get(l.segment) ?? []), l.id]);
     const segments = [...bySeg.keys()];
     if (segments.length) {
       const shares = segmentShares(cfg, segments);

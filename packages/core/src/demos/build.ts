@@ -1,4 +1,6 @@
 import { resolveBusinessDesign } from './business-design';
+import { leadResearch, researchLetterFacts, assertAcquisitionEligible } from '../services/lead-research';
+import { researchContentHash, type LeadResearch } from '../leads/acquisition';
 import { designTemplateRank, industryDirection, type ArtDirection } from '@wbm/templates';
 import { v4Offer, V4_TIERS } from '../services/offers-v4';
 import { eq, sql } from 'drizzle-orm';
@@ -36,6 +38,7 @@ import {
   DEMO_TOOL_NAME,
   normalizeContent,
   validateDemoContent,
+  verifiedServiceFallback,
   type ContentFacts,
   type RuleViolation,
 } from './content';
@@ -75,8 +78,9 @@ export function leadToFacts(lead: Lead, cfg: AppConfig): BusinessFacts {
   };
 }
 
-export function leadContentFacts(lead: Lead, cfg: AppConfig): ContentFacts {
+export function leadContentFacts(lead: Lead, cfg: AppConfig, research?: LeadResearch | null): ContentFacts {
   const branch = cfg.targeting.branches.find((b) => b.key === lead.branch);
+  const details = researchLetterFacts(research ?? null);
   return {
     name: lead.businessName,
     branchLabel: branch?.label ?? lead.branch,
@@ -89,6 +93,11 @@ export function leadContentFacts(lead: Lead, cfg: AppConfig): ContentFacts {
     phone: lead.phone,
     hasOpeningHours: Boolean(lead.openingHours?.days.length),
     socialOnly: lead.socialOnly,
+    verifiedServices: research?.signals
+      .filter((s) => s.kind === 'service' && details.some((f) => f.text === s.text))
+      .slice(0, 6)
+      .map((s) => s.text),
+    verifiedDetails: details.map((f) => f.text),
   };
 }
 
@@ -280,7 +289,11 @@ export interface GeneratedContent {
  * (der zweite mit konkretem Feedback), danach geprüfte Fallback-Texte.
  */
 export async function generateDemoContent(lead: Lead, cfg: AppConfig, direction?: ArtDirection): Promise<GeneratedContent> {
-  const facts = { ...leadContentFacts(lead, cfg), designCharacter: direction?.character };
+  const research = await leadResearch(lead);
+  const facts = {
+    ...leadContentFacts(lead, cfg, research),
+    designCharacter: direction?.character,
+  };
   const seed = seedFromId(lead.id);
   let feedback: string[] | undefined;
   let lastViolations: RuleViolation[] = [];
@@ -332,7 +345,7 @@ export async function generateDemoContent(lead: Lead, cfg: AppConfig, direction?
     { name: lead.businessName, stadt: lead.city, branche: branch?.label ?? lead.branch },
     seed,
   );
-  return { content, source: 'fallback', attempts: 2, violations: lastViolations };
+  return { content: verifiedServiceFallback(content, facts), source: 'fallback', attempts: 2, violations: lastViolations };
 }
 
 export function renderDemoHtml(input: {
@@ -384,6 +397,9 @@ export async function buildDemo(
   if (lead.anonymizedAt || ['suppressed', 'rejected', 'expired'].includes(lead.status)) {
     throw new Error(`Lead im Status ${lead.status} – keine Demo`);
   }
+  await assertAcquisitionEligible(lead);
+  const research = await leadResearch(lead);
+  const researchHash = researchContentHash(research);
   const existing = await db.select().from(demos).where(eq(demos.leadId, leadId));
   const open = existing.find((d) => ['building', 'pending_review', 'approved', 'published'].includes(d.status));
   if (open && !opts.regenerate) return open.id;
@@ -425,6 +441,8 @@ export async function buildDemo(
       const current = await tx.query.leads.findFirst({ where: eq(leads.id, leadId) });
       if (!current || current.anonymizedAt || ['suppressed', 'rejected', 'expired'].includes(current.status))
         throw Error('Betrieb inzwischen gesperrt; keine Demo gespeichert.');
+      if (researchContentHash(await leadResearch(current, tx)) !== researchHash)
+        throw Error('Recherche während der Demo-Erstellung geändert; neu prüfen.');
       const [demo] = await tx
         .insert(demos)
         .values({
@@ -443,6 +461,7 @@ export async function buildDemo(
               artDirection: design.direction,
               designSourceRef: design.sourceRef,
               designRequiresReview: design.requiresReview,
+              researchHash,
             },
           } as unknown as Record<string, unknown>,
         })

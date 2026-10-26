@@ -34,7 +34,7 @@ const REACTION_STATES: LeadStatus[] = ['scanned', 'cta_clicked', 'checkout_start
 /** Erlaubte Übergänge (von → nach). */
 export const TRANSITIONS: Record<LeadStatus, LeadStatus[]> = {
   discovered: ['qualified', 'rejected', 'suppressed', 'failed'],
-  qualified: ['demo_built', 'rejected', 'suppressed', 'failed', 'expired'],
+  qualified: ['discovered', 'demo_built', 'rejected', 'suppressed', 'failed', 'expired'],
   demo_built: ['demo_approved', 'qualified', 'suppressed', 'failed', 'rejected'],
   demo_approved: ['demo_published', 'qualified', 'suppressed', 'failed', 'expired'],
   demo_published: ['letter_generated', 'suppressed', 'failed', 'expired', ...REACTION_STATES],

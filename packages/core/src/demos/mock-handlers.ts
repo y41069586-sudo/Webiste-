@@ -1,6 +1,6 @@
 import type { BranchGroup } from '@wbm/templates/types';
 import { registerMockStructured } from '../providers/llm/mock';
-import { DEMO_TOOL_NAME, QA_TOOL_NAME } from './content';
+import { DEMO_TOOL_NAME, QA_TOOL_NAME, verifiedServiceFallback } from './content';
 import { libraryContent } from './library';
 
 function line(prompt: string, key: string): string {
@@ -20,7 +20,23 @@ registerMockStructured(DEMO_TOOL_NAME, (req) => {
   const key = line(req.prompt, 'Branchen-Schlüssel');
   const stadt = line(req.prompt, 'Stadt');
   const group = (line(req.prompt, 'Design-Gruppe') || 'handwerk') as BranchGroup;
-  return libraryContent(key, group, { name, stadt, branche }, seedOf(name));
+  const content = libraryContent(key, group, { name, stadt, branche }, seedOf(name));
+  const verified = line(req.prompt, 'Bestätigte Leistungen');
+  if (!verified) return content;
+  return verifiedServiceFallback(content, {
+    name,
+    branchKey: key,
+    branchLabel: branche,
+    group,
+    city: stadt,
+    postalCode: '',
+    street: '',
+    houseNumber: '',
+    phone: null,
+    hasOpeningHours: false,
+    socialOnly: false,
+    verifiedServices: JSON.parse(verified),
+  });
 });
 
 registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));

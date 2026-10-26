@@ -8,6 +8,7 @@ import { getProviders } from '../providers';
 import { currentDemoForLead } from '../services/demo-review';
 import { sha256 } from '../util/crypto';
 import { v4PriceText } from '../services/offers-v4';
+import { leadResearch } from '../services/lead-research';
 export interface LetterBinding {
   version: 1;
   demoId: string;
@@ -21,6 +22,7 @@ export interface LetterBinding {
   senderOfferHash: string;
   pdfHash: string;
   personalizationHash?: string;
+  acquisitionHash?: string;
 }
 export function recipientFingerprint(lead: typeof leads.$inferSelect) {
   return sha256(
@@ -86,6 +88,7 @@ export async function letterDemoBinding(
     ...(cfg.offers.activeVersion === 'v4'
       ? { personalizationHash: sha256(JSON.stringify(demo.qaResultJson?.review?.letterFacts ?? [])) }
       : {}),
+    ...(cfg.offers.activeVersion === 'v4' ? { acquisitionHash: sha256(JSON.stringify(await leadResearch(lead))) } : {}),
     demoId: demo.id,
     templateId: demo.templateId,
     htmlHash: htmlHash!,

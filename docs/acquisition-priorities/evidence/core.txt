@@ -1,0 +1,24 @@
+   ✓ Lead-Finder (Mock-Quelle) > findet, qualifiziert und begründet Ablehnungen  470ms
+   ✓ Lead-Finder (Mock-Quelle) > ist idempotent (zweiter Lauf legt nichts doppelt an)  583ms
+   ✓ Lead-Finder (Mock-Quelle) > Sperrliste greift bei erneuter Suche  490ms
+   ✓ Lead-Finder (Mock-Quelle) > Opt-out anonymisiert und speichert nur Hashes  333ms
+ ✓ test/preview-invitation.test.ts (11 tests) 911ms
+   ✓ keeps the formerly clipped medium-length company inside the actual rendered address window  608ms
+ ✓ test/demo-content.test.ts (6 tests) 911ms
+   ✓ Template-Rotation > verteilt gleichmäßig über Templates und Paletten  896ms
+ ✓ test/lead-state.test.ts (7 tests) 765ms
+ ✓ test/retention.test.ts (3 tests) 444ms
+ ✓ test/v5-letter-contract.test.ts (13 tests) 30ms
+ ✓ test/letter-writer.test.ts (9 tests) 25ms
+ ✓ test/acquisition.test.ts (14 tests) 16ms
+ ✓ test/letter-personalization.test.ts (7 tests) 17ms
+ ✓ test/lead-score-quality.test.ts (4 tests) 16ms
+ ✓ test/qualify.test.ts (15 tests) 9ms
+ ✓ test/lead-sources.test.ts (5 tests) 6ms
+ ✓ test/pipeline.test.ts (3 tests) 3ms
+
+ Test Files  17 passed (17)
+      Tests  127 passed (127)
+   Start at  23:00:42
+   Duration  136.67s (transform 1.92s, setup 77ms, collect 14.98s, tests 117.25s, environment 2ms, prepare 780ms)
+

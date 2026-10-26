@@ -132,3 +132,5 @@ export * from './quality/letter';
 export { brandMarkHtml } from '@wbm/templates';
 
 export { saveBusinessDesignEvidence, businessDesignEvidence, resolveBusinessDesign } from './demos/business-design';
+export * from './leads/acquisition';
+export * from './services/lead-research';

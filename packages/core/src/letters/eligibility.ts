@@ -3,8 +3,9 @@ import type { DbOrTx } from '../db/client';
 import { leads } from '../db/schema';
 import type { AppConfig } from '../config/settings';
 import { effectiveSwitches } from '../config/service';
-import { businessHash, normalizeBusinessName } from '../leads/normalize';
+import { businessHash, normalizeBusinessName, businessPhoneKey } from '../leads/normalize';
 import { isSuppressed } from '../services/suppression';
+import { assertAcquisitionEligible } from '../services/lead-research';
 
 /** Re-run locally before rendering, approving and sending; no source refresh/API calls. */
 export async function assertLetterLeadEligible(db: DbOrTx, lead: typeof leads.$inferSelect, cfg: AppConfig): Promise<void> {
@@ -34,7 +35,11 @@ export async function assertLetterLeadEligible(db: DbOrTx, lead: typeof leads.$i
       and(
         ne(leads.id, lead.id),
         isNull(leads.anonymizedAt),
-        or(eq(leads.identityHash, businessHash(lead.businessName, lead)), eq(leads.postalCode, lead.postalCode!)),
+        or(
+          eq(leads.identityHash, businessHash(lead.businessName, lead)),
+          eq(leads.postalCode, lead.postalCode!),
+          eq(leads.city, lead.city),
+        ),
       ),
     );
   if (
@@ -43,8 +48,12 @@ export async function assertLetterLeadEligible(db: DbOrTx, lead: typeof leads.$i
         businessHash(other.businessName, other) === businessHash(lead.businessName, lead) ||
         (normalizeBusinessName(other.businessName) === normalizeBusinessName(lead.businessName) &&
           other.street === lead.street &&
-          other.houseNumber === lead.houseNumber),
+          other.houseNumber === lead.houseNumber) ||
+        (businessPhoneKey(lead.phone) !== null &&
+          businessPhoneKey(other.phone) === businessPhoneKey(lead.phone) &&
+          normalizeBusinessName(other.businessName) === normalizeBusinessName(lead.businessName)),
     )
   )
     throw new Error('Mögliche Betriebsdublette: vor einem weiteren Brief zusammenführen und prüfen.');
+  await assertAcquisitionEligible(lead, db);
 }

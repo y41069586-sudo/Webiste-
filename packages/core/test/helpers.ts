@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { getDb } from '../src/db/client';
 import { invalidateConfigCache } from '../src/config/service';
+import { DEFAULT_BRANCHES } from '../src/config/settings';
 
 /** Leert alle fachlichen Tabellen (Schema bleibt). */
 export async function resetDb(): Promise<void> {
@@ -11,7 +12,12 @@ export async function resetDb(): Promise<void> {
     experiments, objections, weekly_reports RESTART IDENTITY CASCADE`);
   await db.execute(sql`UPDATE counters SET value = 0`);
   // Existing contract regression fixtures explicitly keep the legacy offer; V4 tests opt in.
-  await db.execute(sql`INSERT INTO settings (key, value) VALUES ('app_config', '{"offers":{"activeVersion":"legacy"}}'::jsonb)`);
+  await db.execute(
+    sql`INSERT INTO settings (key, value) VALUES ('app_config', ${JSON.stringify({
+      offers: { activeVersion: 'legacy' },
+      targeting: { branches: DEFAULT_BRANCHES },
+    })}::jsonb)`,
+  );
   invalidateConfigCache();
 }
 

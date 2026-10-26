@@ -1,4 +1,6 @@
 import { recipientFingerprint } from '../letters/binding';
+import { leadResearch } from '../services/lead-research';
+import { researchContentHash } from '../leads/acquisition';
 import { sha256 } from '../util/crypto';
 import { assessDemoQuality, type ManualQualityScores } from '../quality/demo';
 import { eq } from 'drizzle-orm';
@@ -44,9 +46,17 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   const html = (await storage.get(demo.htmlStorageKey ?? ''))?.toString('utf8');
   if (!html) throw new Error('Demo-HTML fehlt im Speicher');
 
-  const facts = leadContentFacts(lead, cfg);
+  const research = await leadResearch(lead);
+  const facts = leadContentFacts(lead, cfg, research);
   const bizFacts = leadToFacts(lead, cfg);
   const checks: Check[] = [];
+  const recordedResearch = (demo.contentJson?._meta as { researchHash?: string } | undefined)?.researchHash;
+  if (research || recordedResearch)
+    checks.push({
+      name: 'research_binding',
+      passed: recordedResearch === researchContentHash(research),
+      details: 'Betriebsfakten müssen zum tatsächlich gerenderten Entwurf passen.',
+    });
 
   // 1) Inhaltsregeln (Code)
   const violations = validateDemoContent(content, facts);

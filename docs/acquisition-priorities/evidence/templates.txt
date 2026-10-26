@@ -1,0 +1,16 @@
+
+> @wbm/templates@0.1.0 test /workspace/seitenwerk-v4/packages/templates
+> vitest run
+
+
+ RUN  v3.2.7 /workspace/seitenwerk-v4/packages/templates
+
+ ✓ test/templates.test.ts (97 tests) 185ms
+ ✓ test/art-direction.test.ts (6 tests) 15ms
+ ✓ test/design-review.test.ts (5 tests) 11ms
+
+ Test Files  3 passed (3)
+      Tests  108 passed (108)
+   Start at  23:03:48
+   Duration  1.46s (transform 421ms, setup 0ms, collect 610ms, tests 211ms, environment 0ms, prepare 185ms)
+

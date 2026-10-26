@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { BRANCH_GROUPS, INDUSTRIES, SUPPORT_CLASSES } from '../types';
+import { acquisitionPolicySchema, ACQUISITION_POLICY } from '../leads/acquisition';
 
 /** Versprechen von Funktionen, die es (noch) nicht gibt – Vorschläge damit werden verworfen. */
 export const DEFAULT_UNSUPPORTED_PROMISES = [
@@ -166,6 +167,7 @@ export const appConfigSchema = z.object({
     paymentMethods: z.array(z.enum(['card', 'sepa_debit'])).min(1),
   }),
   targeting: z.object({
+    acquisition: acquisitionPolicySchema.default(ACQUISITION_POLICY),
     cities: z.array(z.string()).min(1),
     branches: z.array(branchSchema).min(1),
     /** Bekannte Ketten-/Franchise-Namen (Teilstring, case-insensitive) */
@@ -487,6 +489,24 @@ export const DEFAULT_BRANCHES: BranchConfig[] = [
     weight: 1,
     active: false,
   },
+  ...(
+    [
+      ['fliesenleger', 'Fliesenleger', 'tiler', ['Fliesenleger', 'Fliesenarbeiten']],
+      ['bodenleger', 'Bodenleger', 'floorer', ['Bodenleger', 'Bodenverlegung']],
+      ['parkettleger', 'Parkettleger', 'parquet_layer', ['Parkettleger']],
+      ['entruempelung', 'Entrümpelungsunternehmen', 'clearance', ['Entrümpelung', 'Haushaltsauflösung']],
+    ] as const
+  ).map(([key, label, craft, queries]) => ({
+    key,
+    label,
+    group: 'handwerk' as const,
+    industry: 'handwerk' as const,
+    queries: [...queries],
+    osmTags: [{ key: 'craft', value: craft }],
+    googleTypes: [],
+    weight: 1,
+    active: false,
+  })),
 ];
 
 export const DEFAULT_CONFIG: AppConfig = {
@@ -553,8 +573,12 @@ export const DEFAULT_CONFIG: AppConfig = {
     kleinunternehmerNote: 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.',
   },
   targeting: {
+    acquisition: ACQUISITION_POLICY,
     cities: ['Dortmund'],
-    branches: DEFAULT_BRANCHES,
+    branches: DEFAULT_BRANCHES.map((branch) => ({
+      ...branch,
+      active: [...ACQUISITION_POLICY.primary, ...ACQUISITION_POLICY.secondary].includes(branch.key),
+    })),
     chainNames: [
       'Douglas',
       'Yves Rocher',

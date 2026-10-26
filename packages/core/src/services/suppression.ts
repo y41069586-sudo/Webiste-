@@ -108,7 +108,12 @@ export async function anonymizeLead(db: DbOrTx, leadId: string): Promise<void> {
     await tx
       .delete(settings)
       .where(
-        inArray(settings.key, [`lead-design-evidence:${leadId}`, `lead-design-result:${leadId}`, `lead-design-hint:${leadId}`]),
+        inArray(settings.key, [
+          `lead-design-evidence:${leadId}`,
+          `lead-design-result:${leadId}`,
+          `lead-design-hint:${leadId}`,
+          `lead-research:${leadId}`,
+        ]),
       );
     await tx
       .update(leads)

@@ -6,7 +6,7 @@ import { getConfig } from '../config/service';
 import type { AppConfig, BranchConfig } from '../config/settings';
 import { getDb, type DbOrTx } from '../db/client';
 import { leads, settings } from '../db/schema';
-import { businessHash, normalizeAddress, normalizeBusinessName, segmentKey } from '../leads/normalize';
+import { businessHash, normalizeAddress, normalizeBusinessName, segmentKey, businessPhoneKey } from '../leads/normalize';
 import { classifyWebsite, qualify, type RatingSignal, type RejectionReason } from '../leads/qualify';
 import { logger } from '../logger';
 import { classifyIndustry, exclusionFor } from '../playbooks';
@@ -19,6 +19,8 @@ import { audit } from './audit';
 import { assertBudgetAvailable, assertNotHalted, recordCost } from './budget';
 import { transitionLead } from './lead-state';
 import { isSuppressed } from './suppression';
+import { campaignBranches, assessAcquisition } from '../leads/acquisition';
+import { leadResearch } from './lead-research';
 
 export interface FindLeadsOptions {
   cities?: string[];
@@ -36,6 +38,7 @@ export interface FindLeadsSummary {
   skipped: number;
   qualified: number;
   rejected: number;
+  needsReview: number;
   byReason: Partial<Record<RejectionReason, number>>;
   costCents: number;
   googleLookups: number;
@@ -165,6 +168,20 @@ async function duplicateOf(db: DbOrTx, identity: string, selfId?: string): Promi
     .limit(1);
   return rows[0]?.id ?? null;
 }
+async function phoneDuplicateOf(db: DbOrTx, place: RawPlace, selfId?: string) {
+  const phone = businessPhoneKey(place.phone);
+  if (!phone || !place.city) return null;
+  const rows = await db
+    .select({ id: leads.id, name: leads.businessName, phone: leads.phone })
+    .from(leads)
+    .where(and(eq(leads.city, place.city), ne(leads.status, 'rejected'), selfId ? ne(leads.id, selfId) : undefined));
+  return (
+    rows.find(
+      (other) =>
+        businessPhoneKey(other.phone) === phone && normalizeBusinessName(other.name) === normalizeBusinessName(place.name),
+    )?.id ?? null
+  );
+}
 
 const UPDATABLE_STATUSES = new Set(['discovered', 'qualified', 'rejected']);
 
@@ -175,7 +192,11 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
   await assertNotHalted(cfg);
   const src = resolveLeadSources(cfg);
   const cities = opts.cities?.length ? opts.cities : cfg.targeting.cities;
-  const branches = cfg.targeting.branches.filter((b) => b.active && (!opts.branches?.length || opts.branches.includes(b.key)));
+  const selection =
+    cfg.offers.activeVersion === 'v4'
+      ? campaignBranches(cfg.targeting.branches, cfg.targeting.acquisition)
+      : cfg.targeting.branches.filter((b) => b.active);
+  const branches = selection.filter((b) => !opts.branches?.length || opts.branches.includes(b.key));
   const summary: FindLeadsSummary = {
     source: src.primary.kind,
     mode: src.mode,
@@ -186,6 +207,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
     skipped: 0,
     qualified: 0,
     rejected: 0,
+    needsReview: 0,
     byReason: {},
     costCents: 0,
     googleLookups: 0,
@@ -275,7 +297,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       sourceId: place.sourceId,
     });
     const contacted = await recentlyContacted(db, identity, place, cfg.filters.recontactMonths, existing?.id);
-    const dup = await duplicateOf(db, identity, existing?.id);
+    const dup = (await duplicateOf(db, identity, existing?.id)) ?? (await phoneDuplicateOf(db, place, existing?.id));
 
     // Bewertungssignal: Mock-Daten direkt; Google nur flüchtig im Signal-Modus
     let rating: RatingSignal | null = null;
@@ -387,7 +409,21 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       updatedAt: new Date(),
     };
 
-    const target = result.qualified ? 'qualified' : 'rejected';
+    const research = existing ? await leadResearch({ ...existing, ...values }) : null;
+    const acquisition =
+      cfg.offers.activeVersion === 'v4' && cfg.targeting.acquisition.enabled
+        ? assessAcquisition({ ...values }, research, cfg.targeting.acquisition)
+        : null;
+    if (acquisition) {
+      values.score = acquisition.score;
+      values.scoreReasons = acquisition.reasons;
+    }
+    // Mock discovery remains an offline fixture path, never a production verification.
+    const target = !result.qualified
+      ? 'rejected'
+      : acquisition && place.source !== 'mock' && acquisition.state !== 'ready'
+        ? 'discovered'
+        : 'qualified';
     await db.transaction(async (tx) => {
       let id: string;
       if (existing) {
@@ -421,7 +457,8 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
         });
       }
     });
-    if (result.qualified) summary.qualified++;
+    if (target === 'qualified') summary.qualified++;
+    else if (target === 'discovered') summary.needsReview++;
     else {
       summary.rejected++;
       for (const r of result.reasons) summary.byReason[r] = (summary.byReason[r] ?? 0) + 1;

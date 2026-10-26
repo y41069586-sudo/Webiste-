@@ -7,6 +7,8 @@ import { enqueue, QUEUES } from '../queue';
 import { addDays } from '../util/time';
 import { audit } from './audit';
 import { transitionLead } from './lead-state';
+import { leadResearch } from './lead-research';
+import { assessAcquisition } from '../leads/acquisition';
 
 /** Anzahl manuell geprüfter Demos (für die Regel „erste N manuell“). */
 export async function manuallyReviewedCount(db: DbOrTx): Promise<number> {
@@ -82,17 +84,20 @@ export async function approveDemo(
       const lead = await tx.query.leads.findFirst({ where: eq(leads.id, demo.leadId) });
       if (lead?.scoreReasons?.some((r) => r.criterion === 'suitability')) {
         const cfg = await getConfig({ db: tx });
-        const reasons = lead.scoreReasons
-          .filter((r) => r.criterion !== 'suitability')
-          .map((r) =>
-            r.criterion === 'operational'
-              ? { ...r, points: 10, verified: true, detail: 'Aktiver Betrieb im manuellen Faktenreview bestätigt' }
-              : r.criterion === 'website'
-                ? { ...r, points: 20, verified: true, detail: 'Fehlen einer eigenen Website im manuellen Faktenreview bestätigt' }
-                : r.criterion === 'demo_suitability'
-                  ? { ...r, points: 10, verified: true, detail: 'Demo technisch und gestalterisch einzeln geprüft' }
-                  : r,
-          );
+        const researched = await leadResearch(lead, tx);
+        const acquisition =
+          cfg.offers.activeVersion === 'v4' && cfg.targeting.acquisition.enabled
+            ? assessAcquisition(lead, researched, cfg.targeting.acquisition)
+            : null;
+        const reasons =
+          acquisition?.reasons ??
+          lead.scoreReasons
+            .filter((r) => r.criterion !== 'suitability')
+            .map((r) =>
+              r.criterion === 'demo_suitability'
+                ? { ...r, points: 10, verified: true, detail: 'Demo technisch und gestalterisch einzeln geprüft' }
+                : r,
+            );
         const score = Math.max(
           0,
           Math.min(
@@ -100,17 +105,18 @@ export async function approveDemo(
             reasons.reduce((sum, r) => sum + r.points, 0),
           ),
         );
-        reasons.push({
-          criterion: 'suitability',
-          points: 0,
-          verified: true,
-          detail:
-            score >= cfg.leadScoring.goodMin
-              ? 'Gute Eignung; weiterhin keine Versandfreigabe'
-              : score >= cfg.leadScoring.reviewMin
-                ? 'Manuelle Prüfung notwendig'
-                : 'Nicht geeignet nach aktuellem Prüfstand',
-        });
+        if (!acquisition)
+          reasons.push({
+            criterion: 'suitability',
+            points: 0,
+            verified: true,
+            detail:
+              score >= cfg.leadScoring.goodMin
+                ? 'Gute Eignung; weiterhin keine Versandfreigabe'
+                : score >= cfg.leadScoring.reviewMin
+                  ? 'Manuelle Prüfung notwendig'
+                  : 'Nicht geeignet nach aktuellem Prüfstand',
+          });
         await tx.update(leads).set({ score, scoreReasons: reasons, updatedAt: new Date() }).where(eq(leads.id, lead.id));
       }
     }

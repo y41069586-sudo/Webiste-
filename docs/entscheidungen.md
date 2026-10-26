@@ -309,3 +309,19 @@ Separate Fakten-/Sprachprüfung, einmal reparieren, danach kontrollierbare Ersat
 9,5/10-Score. Ohne Fakten manuell prüfen. Bilder und QR bleiben exakt an dieselbe Demo gebunden.
 Testbeispiele ausdrücklich fiktiv; offline vorgegebene Modellantworten als Fixtures kennzeichnen. Keine
 kostenpflichtigen Modellaufrufe, echten Briefe, Produktionsänderungen oder Veröffentlichungen in der Abnahme.
+
+### 26.10.2026 – Recherchebasierte Zielkampagne
+
+Maler mit Privatkunden-/Renovierungsfokus priorisieren, danach Gewerbereinigung und Fliesenleger mit
+Privatkunden-/Badrenovierungsfokus. Garten/Boden/Parkett/Entrümpelung zweite Wahl. Keine Website allein
+ist kein Versandgrund. Aktivität, unabhängiger Betrieb, verifizierte Zustelladresse, Fokus und aktuelle
+Leistungswerbung/freie Termine/neue Angebote/Expansion/Übernahme/aktive Profile gesondert belegen.
+Rückmeldungen und Arbeitsbilder sind zusätzliche Qualitätssignale, keine freie Kapazität.
+Website-Suche mit Namen/Ort, Telefon und verlinkten Verzeichnis-/Profilen dokumentieren.
+6–36Monate nur aus belegtem tatsächlichem Geschäftsbeginn plus Vollerwerb bevorzugen; neue
+Verzeichniseinträge nicht als Neugründung werten. Unbekannt bleibt offen. Geschlossen/reine
+Subunternehmer/ausgelastet ohne Wachstumsbeleg ausschließen. Neue Quellen-/Faktenprüfung im vorhandenen
+privaten Settings-/Adminpfad, keine neue Datenbank. Verifizierte Leistungen für Demo und Briefe
+wiederverwenden; keine erfundene Qualität, Referenzen, Kapazität oder zusätzliche Anfragen.
+Bestehende V4-Preise, direkter schriftlicher Kauf und preisfreie Briefe bleiben. Alles lokal/Mock,
+keine externe Recherche oder Produktionsänderung. Übergabe: docs/acquisition-priorities/.

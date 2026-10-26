@@ -115,3 +115,9 @@ export function phoneHref(phone: string | null | undefined): string | null {
   if (digits.startsWith('0')) return `tel:+49${digits.slice(1)}`;
   return `tel:${digits}`;
 }
+
+/** Comparison only; this is never permission to call or message a business. */
+export function businessPhoneKey(phone: string | null | undefined): string | null {
+  const normalized = phoneHref(formatPhoneDe(phone))?.replace(/[^0-9]/g, '') ?? '';
+  return normalized.length >= 8 ? normalized : null;
+}

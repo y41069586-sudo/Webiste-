@@ -162,7 +162,7 @@ export const SECTIONS: SectionDef[] = [
         path: 'segments.scoreBonus',
         label: 'Score-Bonus je Segment (JSON)',
         type: 'json',
-        hint: '{"neu": 6, "social_only": 3, "etabliert": 0} – Priorität neu > social_only > etabliert',
+        hint: 'Legacy-Suchsegmente: neu = neu entdeckt, kein Gründungsnachweis. V4 priorisiert belegte Eignung und Wachstum.',
       },
       { path: 'segments.weeklyLeadFinder', label: 'Lead-Finder wöchentlich (montags) ausführen', type: 'bool' },
     ],

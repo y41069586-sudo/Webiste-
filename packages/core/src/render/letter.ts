@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { assertLetterLeadEligible } from '../letters/eligibility';
 import { writePreviewInvitation } from '../letters/writer';
+import { leadResearch, researchLetterFacts } from '../services/lead-research';
+import { researchContentHash } from '../leads/acquisition';
 import { letterDemoBinding, recipientFingerprint } from '../letters/binding';
 import { sha256 } from '../util/crypto';
 import { assessLetterQuality } from '../quality/letter';
@@ -216,6 +218,13 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       }
     : null;
   const useRating = sw.useRatingInLetter && lead.rating && lead.ratingCount;
+  const research = await leadResearch(lead);
+  const researchedFacts = researchLetterFacts(research);
+  if (
+    research &&
+    (demo.contentJson?._meta as { researchHash?: string } | undefined)?.researchHash !== researchContentHash(research)
+  )
+    throw Error('Betriebsrecherche seit der Demo geändert; Demo mit aktuellen belegten Leistungen erneut prüfen.');
   const composeInput: ComposeInput = {
     variant: slotRender?.content ?? variant.content,
     sequence,
@@ -224,13 +233,15 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     cfg,
     recipient,
     branchLabel: cfg.targeting.branches.find((b) => b.key === lead.branch)?.label ?? lead.branch,
-    ...(demo.qaResultJson?.review?.facts
+    ...(demo.qaResultJson?.review?.facts || researchedFacts.length
       ? {
           personalization: {
             businessName: lead.businessName,
             city: lead.city,
             branchLabel: cfg.targeting.branches.find((b) => b.key === lead.branch)?.label ?? lead.branch,
-            details: demo.qaResultJson.review.letterFacts ?? [],
+            details: [...researchedFacts, ...(demo.qaResultJson?.review?.letterFacts ?? [])].filter(
+              (f, i, all) => all.findIndex((other) => other.text === f.text) === i,
+            ),
           },
         }
       : {}),
@@ -359,7 +370,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
         truthCheckJson: {
           ...truth,
           _binding: { ...binding, pdfHash: sha256(pdf) },
-          _personalization: demo.qaResultJson?.review?.letterFacts ?? [],
+          _personalization: composeInput.personalization?.details ?? [],
           _copy: data.copyEvidence,
           _quality: assessLetterQuality(
             [{ passed: truth.passed }, { passed: issues.length === 0 }],

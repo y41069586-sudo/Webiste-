@@ -1,0 +1,24 @@
+├ ƒ /onboarding/[token]
+├ ƒ /onboarding/[token]/bild/[id]
+├ ƒ /onboarding/[token]/upload
+├ ƒ /preise
+├ ƒ /preview/[token]
+├ ƒ /preview/[token]/site
+├ ƒ /q/[token]
+├ ƒ /quellen
+├ ○ /robots.txt
+├ ƒ /so-funktionierts
+├ ƒ /ueber-mich
+├ ƒ /verlaengern/[token]
+└ ƒ /verlaengern/mock/[session]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> @wbm/worker@0.1.0 build /workspace/seitenwerk-v4/apps/worker
+> tsc --noEmit
+

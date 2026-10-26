@@ -319,3 +319,30 @@ Quellen-/Demo-/Empfängerbindung, Slot-Claims, Sperrlisten, manuelle Qualitätsa
 alte PDFs vor Freigabe erneut prüfpflichtig, historische Dateien nicht pauschal löschen. Offline redaktionell
 vorgegebene Modellantworten als fixture kennzeichnen; keine echten LLM-Ergebnisse daraus behaupten.
 Stand und Belege: docs/letter-preview-upgrade/. Nur lokale Mocktests, kein Push/Deployment oder Versand.
+
+## Neueste Akquiseentscheidung – belegter Bedarf statt Website-Lücke (26.10.2026)
+
+Autoritativ: docs/acquisition-priorities/. Lokale V4-Kampagnenpriorität: Maler mit privatem
+Renovierungs-/Sanierungsangebot, Gewerbereinigung, Fliesenleger mit Privatkunden-/Badrenovierungsfokus.
+Zweite Wahl Garten, Boden, Parkett, Entrümpelung. Bestehende Templates/andere Branchen erhalten;
+Produktionskonfiguration nicht unbemerkt überschreiben. Beim Rollout gespeicherte Branchenlisten
+gegen die neue geprüfte Konfiguration abgleichen.
+
+Eigene Website anhand Namen/Ort, Telefon und verlinkten Verzeichnis-/Profilseiten aktuell prüfen.
+Leeres Website-Feld, OSM-OPERATIONAL-Default, neue Verzeichnisaufnahme und allgemeiner Demo-Faktenhaken
+sind keine Verifikation von Website-Abwesenheit, Aktivität oder Gründung. Postalische Eignung braucht
+belegte Aktivität, eigenständigen Betrieb, Anschrift, passenden Leistungs-/Kundenfokus und aktuelles
+Akquisesignal. Aktive Profile, Leistungswerbung/freie Termine, neues Angebot, Expansion oder Übernahme
+gesondert belegen; Bewertungen/Arbeitsbilder sind nur Qualitätssignale und keine Kapazitätsbelege.
+
+6–36 Monate nur aus tatsächlichem belegtem Geschäftsbeginn plus Vollerwerbsnachweis bevorzugen.
+Alter oder Vollerwerb unbekannt lassen; ältere wachsende Betriebe nicht pauschal ausschließen.
+Geschlossene/reine Subunternehmer und ausgelastete Betriebe ohne Wachstumsbeleg nicht anschreiben.
+Auslastung plus Expansion bleibt ein manueller Konflikt. Keine Kaufwahrscheinlichkeiten erfinden.
+
+Research im bestehenden privaten Settings-/Lead-/Reviewpfad, keine neue Tabelle/Produktionsmigration.
+Fakten mit Quelle/Datum an bestehende Demo-/Briefkomposition durchreichen; keine typischen
+Beispielleistungen als Betriebsfakten übernehmen. Inhaltsänderungen erfordern neue Demo-QA; reine
+Datums-/Bedarfsaktualisierung baut eine inhaltlich unveränderte Demo nicht neu. Brieffreigabe prüft
+den aktuellen Gesamtbelegstand erneut. Opt-out/Löschung entfernt auch Research. Google-Sperren,
+Foto-Nutzungsrechte, erste30-Review, V4-Preise, preisfreie Briefe und DRY_RUN unverändert erhalten.

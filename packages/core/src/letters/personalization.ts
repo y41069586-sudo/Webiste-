@@ -121,6 +121,41 @@ export const PREVIEW_ORDER_NOTICE =
   'Unabhängiger, nicht beauftragter Entwurf. Eine spätere Umsetzung ist kostenpflichtig. Leistungen, Preise und Vertragsbedingungen stehen in der Vorschau – vor jeder Bestellung.';
 const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; benefit: string; caption: string }[] = [
   {
+    key: 'painter-renovation',
+    branch: /maler|anstrich/i,
+    focus: /renovier|sanier/i,
+    title: 'Ein Website-Entwurf für Ihre Renovierungsarbeiten',
+    benefit:
+      'Wer Räume renovieren möchte, könnte passende Arbeiten überblicken und das Vorhaben für eine Angebotsanfrage beschreiben.',
+    caption: 'Ihre Renovierungs-Website-Idee ansehen',
+  },
+  {
+    key: 'cleaning-commercial',
+    branch: /reinig/i,
+    focus: /büro|buero|gewerbe|treppenhaus|fenster/i,
+    title: 'Ihr Reinigungsangebot als persönliche Website-Idee',
+    benefit:
+      'Eine Übersicht könnte Gewerbeinteressierten helfen, Reinigungsbereiche und Einsatzgebiet zu prüfen und eine Objektanfrage vorzubereiten.',
+    caption: 'Den Entwurf für Ihren Reinigungsbetrieb ansehen',
+  },
+  {
+    key: 'tiling-renovation',
+    branch: /fliesen/i,
+    focus: /bad|renovier|sanier/i,
+    title: 'Eine Website-Idee für Ihre Fliesenarbeiten',
+    benefit:
+      'Interessierte könnten den passenden Leistungsbereich finden und ihr Renovierungsvorhaben beschreiben. Eigene Projektbilder lassen sich nach Freigabe ergänzen.',
+    caption: 'Ihre persönliche Fliesen-Website-Idee ansehen',
+  },
+  {
+    key: 'tiling',
+    branch: /fliesen/i,
+    title: 'Ihr Fliesenangebot als Website-Entwurf',
+    benefit:
+      'Eine Website könnte die bestätigten Arbeiten übersichtlich zeigen und den Einstieg in eine Projektanfrage erleichtern.',
+    caption: 'Ihren Fliesen-Entwurf entdecken',
+  },
+  {
     key: 'painter-material',
     branch: /maler|anstrich/i,
     focus: /kalk|lehm|mineral|farbberat/i,

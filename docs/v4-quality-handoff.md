@@ -1,5 +1,10 @@
 # SeitenWerk V4/V5 – verbindlicher Handoff
 
+Neueste lokale Fortsetzung26.10.2026: Zielkampagne Maler→Reinigung→Fliesen, belegter Akquisebedarf,
+Website-/Aktivitäts-/Gründungsprüfung und Faktenübergabe. Wiederaufnahme:
+[Akquise-Handoff](acquisition-priorities/status.md), [Nachweis](acquisition-priorities/README.md).
+Keine Produktions-Konfiguration überschrieben, keine echte Recherche/Kontakte/Sendungen, DRY_RUN=true.
+
 Neuester lokaler Briefauftrag26.10.2026: persönliche, preisfreie Vorschau-Einladungen,
 zusammenhängender KI-Schreib-/Faktenprüfpfad im vorhandenen Provider und20 fiktive PDF-/QR-Paare.
 Autoritativ dazu: [Brief-Handoff](letter-preview-upgrade/status.md) und

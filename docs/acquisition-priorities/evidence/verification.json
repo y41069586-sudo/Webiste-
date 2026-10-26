@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-26",
+  "branch": "codex/conversion-v4",
+  "baseCommit": "807106e",
+  "dryRun": true,
+  "providers": "all mock",
+  "externalCalls": false,
+  "productionChanges": false,
+  "pushed": false,
+  "deployed": false,
+  "priority": [
+    "maler",
+    "reinigung",
+    "fliesenleger"
+  ],
+  "secondary": [
+    "gartenbau",
+    "bodenleger",
+    "parkettleger",
+    "entruempelung"
+  ],
+  "evidenceWindowDays": 30,
+  "intentWindowDays": 90,
+  "verifiedFullTimeAgeMonths": [
+    6,
+    36
+  ],
+  "tests": {
+    "core": {
+      "suites": 17,
+      "passed": 127
+    },
+    "lastPolicyRerun": {
+      "passed": 14,
+      "includedInCoreTotal": true
+    },
+    "templates": {
+      "suites": 3,
+      "passed": 108
+    },
+    "browser": {
+      "passed": 1,
+      "widths": [
+        390,
+        1440
+      ]
+    },
+    "typecheck": "passed",
+    "lint": "passed",
+    "fullBuild": "passed"
+  },
+  "functionalPairs": [
+    "maler",
+    "reinigung",
+    "fliesenleger"
+  ],
+  "renderedPdfAndDemo": true,
+  "pairsSource": "explicitly fictional rows with osm source type to exercise production-source rules; actual providers mock",
+  "codeScope": [
+    "campaign configuration and scheduling",
+    "source-bound private lead research",
+    "same facts for demo, QA and letters",
+    "approval/send gates and immutable binding",
+    "existing opt-out cleanup",
+    "existing admin form and mobile overflow fix"
+  ],
+  "unchanged": [
+    "V4 prices",
+    "hosted checkout architecture",
+    "monthly billing starts at go-live",
+    "price-free letters",
+    "20 template IDs",
+    "first-30 manual review",
+    "provider and live-action locks"
+  ],
+  "notVerified": [
+    "real industry search coverage",
+    "real research/LLM quality",
+    "provider/sandbox end-to-end",
+    "legal and tax approval",
+    "production infrastructure",
+    "real conversion"
+  ],
+  "rolloutNote": "Existing saved branch arrays are preserved; update them deliberately with the approved rollout, not by this local task."
+}

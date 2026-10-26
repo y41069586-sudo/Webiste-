@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { and, asc, desc, eq } from 'drizzle-orm';
 import {
   businessDesignEvidence,
+  storedLeadResearch,
+  assessAcquisition,
   formatOpeningHours,
   getConfig,
   getDb,
@@ -14,6 +16,7 @@ import { Badge, Card, PageHeader, StatusBadge, Table, Td, btn, input } from '@/c
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
 import { markUndeliverableAction, rejectLead, requalifyLead, suppressLead } from '../actions';
+import { ResearchForm } from './research-form';
 
 export const metadata = { title: 'Lead' };
 
@@ -48,6 +51,8 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
   const totalCostCents = costs.reduce((s, c) => s + c.amountCents + c.amountMicroCents / 1e6, 0);
   const designEvidence = await businessDesignEvidence(id);
   const branch = cfg.targeting.branches.find((b) => b.key === lead.branch);
+  const research = await storedLeadResearch(id);
+  const acquisition = assessAcquisition(lead, research, cfg.targeting.acquisition);
 
   return (
     <>
@@ -105,6 +110,35 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
           </>
         }
       />
+      <Card title="Akquise-Eignung: Recherche vor Briefversand" className="mb-6">
+        <p className="text-sm">
+          {acquisition.rank === null
+            ? 'Außerhalb der Zielkampagne'
+            : acquisition.rank <= cfg.targeting.acquisition.primary.length
+              ? `Priorität ${acquisition.rank}`
+              : 'Zweite Wahl'}{' '}
+          ·{' '}
+          {acquisition.state === 'ready'
+            ? 'Belegte Eignung, noch keine Versandfreigabe'
+            : acquisition.state === 'excluded'
+              ? 'Für diese Kampagne ausgeschlossen'
+              : 'Recherche / manuelle Prüfung offen'}
+        </p>
+        {[...acquisition.exclusions, ...acquisition.missing].length > 0 && (
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
+            {[...acquisition.exclusions, ...acquisition.missing].map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+        )}
+        <p className="mt-3 text-sm text-slate-600">
+          {acquisition.months === null
+            ? 'Geschäftsalter unbekannt. Eintragsalter ist kein Gründungsnachweis.'
+            : `Belegter Geschäftsbeginn vor ${acquisition.months} Monaten.`}{' '}
+          Kein Score ist eine Kaufwahrscheinlichkeit oder Versandfreigabe.
+        </p>
+        <ResearchForm id={id} research={research} />
+      </Card>
       <Card title="Charakter des Betriebs" className="mb-6">
         <p className="mb-4 text-sm text-slate-600">
           Farben, Typografie und Aufbau sollen zum tatsächlichen Betrieb passen. Hinterlege berechtigte Referenzen oder geprüfte
@@ -200,8 +234,8 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
           </form>
         </details>
       </Card>
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card title="Stammdaten" className="lg:col-span-1">
+      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-3">
+        <Card title="Stammdaten" className="min-w-0 lg:col-span-1">
           <dl className="space-y-2 text-sm">
             <div>
               <dt className="text-xs text-slate-500">Anschrift</dt>
@@ -268,7 +302,7 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
             ) : null}
           </dl>
         </Card>
-        <div className="space-y-6 lg:col-span-2">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           <Card title={`Demos (${demos.length})`}>
             <Table head={['Slug', 'Template', 'Status', 'QA', 'Veröffentlicht', 'Ablauf']} empty="Noch keine Demo">
               {demos.map((d) => (
@@ -347,9 +381,9 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
           <Card title="Timeline">
             <ol className="space-y-2 text-sm">
               {timeline.map((t, i) => (
-                <li key={i} className="flex gap-3 border-l-2 border-slate-200 pl-3">
+                <li key={i} className="flex flex-col gap-1 border-l-2 border-slate-200 pl-3 sm:flex-row sm:gap-3">
                   <span className="w-32 shrink-0 text-xs text-slate-500">{dt(t.at)}</span>
-                  <span>
+                  <span className="min-w-0">
                     <Badge color={t.kind === 'Event' ? 'purple' : 'gray'}>{t.kind}</Badge>{' '}
                     <span className="font-mono text-xs">{t.label}</span>
                     <div className="font-mono text-xs break-all text-slate-500">{t.detail}</div>

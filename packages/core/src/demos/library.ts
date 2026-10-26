@@ -438,6 +438,57 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
       },
     ],
   },
+  {
+    match: /fliesen/i,
+    headline: 'Fliesenarbeiten in {stadt}',
+    services: [
+      {
+        title: 'Fliesenarbeiten',
+        text: 'Mögliche Arbeiten an Wand- und Bodenflächen. Der konkrete Umfang wird vom Betrieb bestätigt.',
+        icon: 'house',
+      },
+      {
+        title: 'Renovierungsvorhaben',
+        text: 'Das Vorhaben und vorhandene Flächen für eine Anfrage beschreiben.',
+        icon: 'wrench',
+      },
+      { title: 'Projekt anfragen', text: 'Fragen und Wünsche über den angegebenen Kontaktweg abstimmen.', icon: 'chat' },
+    ],
+  },
+  {
+    match: /boden|parkett/i,
+    headline: 'Bodenarbeiten in {stadt}',
+    services: [
+      {
+        title: 'Bodenflächen',
+        text: 'Beispielhafte Übersicht zu Bodenarbeiten; angebotene Materialien und Leistungen werden bestätigt.',
+        icon: 'house',
+      },
+      { title: 'Raumvorhaben', text: 'Raum, Fläche und gewünschte Arbeiten für eine Anfrage beschreiben.', icon: 'wrench' },
+      {
+        title: 'Umfang abstimmen',
+        text: 'Den tatsächlichen Leistungsumfang über den angegebenen Kontaktweg klären.',
+        icon: 'chat',
+      },
+    ],
+  },
+  {
+    match: /entrümp|entruemp|haushaltsaufl/i,
+    headline: 'Entrümpelung in {stadt}',
+    services: [
+      { title: 'Räumung anfragen', text: 'Bereiche und gewünschten Umfang für eine erste Anfrage beschreiben.', icon: 'house' },
+      {
+        title: 'Zugang und Umfang',
+        text: 'Hinweise zum Objekt und Zugang für die weitere Abstimmung zusammenstellen.',
+        icon: 'chat',
+      },
+      {
+        title: 'Vorhaben abstimmen',
+        text: 'Leistungsumfang und Verfügbarkeit werden direkt mit dem Betrieb geklärt.',
+        icon: 'calendar',
+      },
+    ],
+  },
 ];
 
 const GENERIC: Record<BranchGroup, LibraryEntry> = {

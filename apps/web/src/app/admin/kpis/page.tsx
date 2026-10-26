@@ -164,7 +164,7 @@ export default async function KpiPage({ searchParams }: { searchParams: Promise<
         <Card title="Nach Segment (Stadt : Gruppe : Branche)">
           <FunnelTable rows={bySegment} first="Segment" />
         </Card>
-        <Card title="Nach Lead-Segment (neu / social_only / etabliert)">
+        <Card title="Nach Suchsegment (kein Nachweis des Geschäftsalters)">
           <FunnelTable rows={byLeadSegment} first="Lead-Segment" />
         </Card>
         <Card title="Nach Briefvariante">

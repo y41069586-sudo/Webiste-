@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 /workspace/seitenwerk-v4/packages/core
+
+ ✓ test/acquisition.test.ts (14 tests) 18ms
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  23:03:43
+   Duration  2.45s (transform 344ms, setup 19ms, collect 616ms, tests 18ms, environment 0ms, prepare 82ms)
+
