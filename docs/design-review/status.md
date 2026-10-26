@@ -28,3 +28,6 @@ Skip-Markierungen ist ausschließlich Codesicherung. DRY_RUN=true. Keine echten 
 
 **Nächster Schritt: gestalterische Rückmeldung zu diesen drei sichtbaren Konzepten. Hier stoppen.**
 Keine Branchenübertragung oder allgemeines Firmenwebsite-Redesign vor ausdrücklicher Zwischenabnahme.
+
+Letzter sicherer Implementierungscommit: `b618a7a2a9a0322f813906af4aa7320ee72189ab` auf `codex/conversion-v4`.
+Dieser folgende Dokumentationscommit hält nur den Wiederaufnahmepunkt fest.

@@ -211,3 +211,6 @@ Renderer und andere Branchen unverändert. 100 Template-Tests, 45 relevante Core
 für dieses Paket bestanden. Frühere komplette Testzahlen nicht als erneute Durchführung ausgeben.
 Funnel-Zustellschätzung/Testabgrenzung bleiben offene Kampagnenblocker. Keine Produktionsfreigabe.
 **Jetzt auf die ausdrückliche gestalterische Zwischenabnahme warten; danach erst Branchenübertragung.**
+
+Letzter sicherer Redesign-Implementierungscommit: `b618a7a2a9a0322f813906af4aa7320ee72189ab` auf `codex/conversion-v4`.
+Stand zur visuellen Zwischenabnahme, ausdrücklich keine gestalterische oder produktive Freigabe.
