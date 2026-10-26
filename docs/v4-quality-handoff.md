@@ -261,3 +261,5 @@ keine Betreiber-/Rechts-/Provider-/Versandfreigabe. Alle20 Nachher-PDFs und ausg
 Volle Galerie und ZIP: data/exports/task2-letters/. Keine echten Geschäftsdaten oder Ereignisse.
 
 DRY_RUN=true. Kein Push/Deployment/Providerauftrag. Aufgabe3 nicht anfangen, bis deren Einzelprompt vorliegt.
+
+Letzter sicherer Aufgabe2-Implementierungscommit: `c621f9ef401588bdadcbfbd150babc0db11284a9` auf `codex/conversion-v4`.

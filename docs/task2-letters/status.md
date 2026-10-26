@@ -31,3 +31,5 @@ Kein Push, Deployment, Providerauftrag oder echter Versand. DRY_RUN=true. Recht/
 Variantenaktivierung, Papier-/Fenster-/Smartphonescan und öffentliche Infrastruktur weiterhin freigabepflichtig.
 Keine echten Kauf-/Scanwirkungen bekannt. Keine Aufgabe3 vorwegnehmen. Nächster Schritt: Ergebnisse zeigen,
 gestalterisches Betreiberfeedback und nächsten Einzelprompt abwarten.
+
+Letzter sicherer Aufgabe2-Implementierungscommit: `c621f9ef401588bdadcbfbd150babc0db11284a9` auf `codex/conversion-v4`.
