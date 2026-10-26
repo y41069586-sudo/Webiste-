@@ -51,3 +51,5 @@ refined/ und galerie-refined/, vorherige Daten erhalten.20/20 A4-/QR-/Routen-/Mo
 Kontrollen bestanden.122 Core-/102 Template-Tests, Typen/Lint/Build bestanden. Sieben bekannte Buildwarnungen.
 Belege copy-* in evidence/. Neue ZIP seitenwerk-aufgabe2-betreiberfassung.zip. Keine aktiven DB-Varianten
 überschrieben/freigeschaltet. DRY_RUN=true. Keine weitere Aufgabe begonnen, kein Push/Deployment/Versand.
+
+Letzter sicherer Implementierungscommit der optimierten Betreiberfassung: `031ffe96678add462751ff08592b23625b3b20f4`.

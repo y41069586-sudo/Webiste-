@@ -272,3 +272,5 @@ QR-CTA ohne Verkaufsgespräch, knappe Preiszeile und kein Kostenanfall ohne Best
 Aktuelle Belege copy-* in docs/task2-letters/evidence/, neue Vergleichsgalerie galerie-refined/ und
 seitenwerk-aufgabe2-betreiberfassung.zip unter data/exports/task2-letters/. Alte Fassungen erhalten.
 Keine externen Aktionen oder Freigaben. Nächster Schritt: Betreiberfeedback/nächsten Einzelprompt abwarten.
+
+Letzter sicherer Implementierungscommit der optimierten Betreiberfassung: `031ffe96678add462751ff08592b23625b3b20f4`.
