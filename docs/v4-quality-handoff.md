@@ -195,3 +195,7 @@ Vorherige Abschnitte mit „in Arbeit“ sind zeitgebundene Zwischenstände und 
 Keine Produktionsmigration/Veröffentlichung/Zahlung/Briefe/Domainkäufe. DRY_RUN=true.
 Nächster Schritt: fachliche Anbieter-/Steuer-/Vertragsfreigaben und geschützte Runtimezugänge,
 anschließend genehmigte externe Sandbox-/Infrastrukturabnahme gemäß Abschlussbericht.
+
+Letzter sicherer Implementierungscommit: `c9af6a4515ebbcb6c07111a3382df081f2a2c827` auf `codex/conversion-v4`.
+Alle Implementierungsänderungen dieses Pakets darin enthalten; dieser anschließende Dokumentationscommit
+ergänzt nur den Wiederaufnahmepunkt. Tests und Grenzen siehe Ultimate-Abschluss.

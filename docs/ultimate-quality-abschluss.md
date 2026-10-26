@@ -154,3 +154,10 @@ Subjektive interne Einschätzung, keine unabhängige Zertifizierung:
 
 Damit ist das9–10/10-Ziel nicht pauschal als erreicht zu erklären. Reale individuelle Daten, eigene
 Kundenbilder und Betreiberfeedback sind für die endgültige gestalterische Abnahme notwendig.
+
+## Git-Übergabe
+
+Implementierung gesichert in `c9af6a4515ebbcb6c07111a3382df081f2a2c827`, Branch `codex/conversion-v4`.
+Nachfolgender Dokumentationscommit hält diesen Stand fest; beide tragen Skip-CI-/Skip-Netlify-Marker.
+Keine Produktionsveröffentlichung. Private Render-/Messartefakte liegen ignoriert unter `data/exports/`;
+Quellen, QA-Skripte und dieser Nachweisbericht sind versioniert.
