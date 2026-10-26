@@ -1,0 +1,31 @@
+
+ RUN  v3.2.7 /workspace/seitenwerk-v4/packages/core
+
+ ✓ test/task2-letter.test.ts (9 tests) 24143ms
+   ✓ V4 actual generation, reviewed facts and immutable print assignment > preserves previous PDF and row if regeneration fails its truth check  3403ms
+   ✓ V4 actual generation, reviewed facts and immutable print assignment > allows a third letter only after a simulated earlier send and a genuinely different reviewed demo  8389ms
+ ✓ test/letters.test.ts (9 tests) 17317ms
+   ✓ Brief-PDF (echter Browser) > erzeugt einen einseitigen Brief, Anschrift exakt im Pingen-Anschriftenfeld  1425ms
+   ✓ Brief-PDF (echter Browser) > Bewertungszeile nur mit USE_RATING_IN_LETTER; zweite Seite mit Screenshots optional  1113ms
+   ✓ Brief-PDF (echter Browser) > Freigabe setzt Lead auf letter_approved; Ablehnen mit Neu-Erzeugen setzt zurück  882ms
+   ✓ Brief-PDF (echter Browser) > Testbrief an die eigene Adresse ändert den Lead nicht  860ms
+   ✓ Alle Briefvarianten passen im ungünstigsten Fall auf eine Seite > langer Name, Bewertung, Domain, alle Varianten  3018ms
+ ✓ test/truth-check.test.ts (10 tests) 11881ms
+   ✓ Slot-Briefe passen im ungünstigsten Fall auf eine Seite > alle Startvarianten mit langem Namen, Domain und Fußnoten  5103ms
+   ✓ Slot-Briefe im echten Ablauf > mit freigegebenem Claim: Brief mit Fußnote, Wahrheits-Check bestanden, Nutzung protokolliert, Quellenseite  1030ms
+   ✓ Slot-Briefe im echten Ablauf > Abnahme: absichtlich falscher Testbrief wird blockiert und lässt sich nicht freigeben  957ms
+ ✓ test/followups-segments.test.ts (10 tests) 937ms
+ ✓ test/preview-invitation.test.ts (11 tests) 818ms
+   ✓ keeps the formerly clipped medium-length company inside the actual rendered address window  498ms
+ ✓ test/completion-quality.test.ts (3 tests) 315ms
+ ✓ test/v5-letter-contract.test.ts (13 tests) 30ms
+ ✓ test/letter-writer.test.ts (9 tests) 25ms
+ ✓ test/letter-personalization.test.ts (7 tests) 17ms
+ ✓ test/letter-research.test.ts (7 tests) 4ms
+ ✓ test/letter-quality-score.test.ts (2 tests) 2ms
+
+ Test Files  11 passed (11)
+      Tests  90 passed (90)
+   Start at  21:46:17
+   Duration  70.90s (transform 1.50s, setup 31ms, collect 11.95s, tests 55.49s, environment 1ms, prepare 661ms)
+

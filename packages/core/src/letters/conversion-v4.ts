@@ -1,3 +1,4 @@
+import { PREVIEW_ORDER_NOTICE } from './personalization';
 import type { Industry } from '../types';
 import { LETTER_VARIANT_A, LETTER_VARIANT_B, type LetterVariantContent } from './variants';
 
@@ -31,10 +32,8 @@ export function v4LetterVariant(industry: Industry, arm: 'A' | 'B' | 'C', sequen
       '{personal_context}',
       'Unabhängiger Entwurf. **Kostenlos ansehen**: QR-Code scannen – ohne Anmeldung, Kaufpflicht oder Verkaufsgespräch.',
     ],
-    offerWithDomain:
-      'Wenn der Entwurf zu Ihnen passt: {preise} Standard-Domain (z. B. **{domain_vorschlag}**) und Hosting sind im gewählten Tarif enthalten. Vor Veröffentlichung bestätigen Sie alle Inhalte. {garantie_satz}',
-    offerWithoutDomain:
-      'Wenn der Entwurf zu Ihnen passt: {preise} Standard-Domain und Hosting sind im gewählten Tarif enthalten. Vor Veröffentlichung bestätigen Sie alle Inhalte. {garantie_satz}',
+    offerWithDomain: PREVIEW_ORDER_NOTICE,
+    offerWithoutDomain: PREVIEW_ORDER_NOTICE,
     noAction: 'Ohne Bestellung entstehen keine Kosten. Vorschau online bis {ablaufdatum}.',
     qrCaption: 'Ihre persönliche Website-Vorschau kostenlos ansehen',
   };

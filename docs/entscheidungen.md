@@ -292,3 +292,20 @@ ersetzt wiederholte Bildbadges für nichtgenerierte Fotos. Tatsächliche Betrieb
 explizitem Darstellungsrecht. Keine Firmenfakten aus Bildinhalt ableiten.
 Vorhandener Admin/Settings/Storage/Anthropic-Provider erweitert, keine neue DB oder Bildanbieter-API.
 Lokale Mock-/SDK-/Browserprüfungen sind keine echte Anbieter-Bildanalyse oder Betreiberabnahme.
+
+### 26.10.2026 – Persönliche Vorschau-Einladung ohne Tarifblock
+
+Ausdrücklicher neuer Betreiberauftrag: Neue V4-Verkaufsbriefe verkaufen das kostenlose Ansehen der
+persönlichen Demo. Preise und Tarifdetails entfallen im Brief; Einrichtung und monatliche V4-Preise,
+Leistungen und Vertragsangaben bleiben unverändert und vor Bestellung in Demo/Checkout sichtbar.
+Dies ersetzt frühere Briefpreis-Vorgaben, nicht die tatsächlichen Preise oder historische Rechnungen.
+Spätere Umsetzung bleibt ausdrücklich kostenpflichtig; unabhängigen, nicht beauftragten Entwurf benennen.
+Vorhandene Pflichtinformationen erhalten, keine juristische Freigabe behaupten.
+
+Personalisierung bedeutet zusammenhängende Argumentation aus belegten Leistungen/Besonderheiten,
+nicht nur Name/Ort in feste Branchenabsätze einsetzen. Bestehenden budgetierten LLM-Service verwenden,
+Fakten und tatsächliche Demo getrennt übergeben, Demo-Beispiele nie als Betriebsnachweis übernehmen.
+Separate Fakten-/Sprachprüfung, einmal reparieren, danach kontrollierbare Ersatzfassung. Kein automatischer
+9,5/10-Score. Ohne Fakten manuell prüfen. Bilder und QR bleiben exakt an dieselbe Demo gebunden.
+Testbeispiele ausdrücklich fiktiv; offline vorgegebene Modellantworten als Fixtures kennzeichnen. Keine
+kostenpflichtigen Modellaufrufe, echten Briefe, Produktionsänderungen oder Veröffentlichungen in der Abnahme.

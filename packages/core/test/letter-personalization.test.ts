@@ -32,7 +32,8 @@ it('keeps verified recipient facts and resolves branch context through the exist
   const letter = composeLetter(input);
   expect(letter.subject).toContain('Gärten & Co');
   expect(letter.greeting).toBe('Guten Tag an das Team von Gärten & Co,');
-  expect(letter.intro.join(' ')).toContain('Gartenleistungen');
+  expect(letter.intro.join(' ')).toContain('Garten- und Landschaftsbau');
+  expect(letter.copyEvidence?.level).toBe('basic');
   expect(JSON.stringify(letter)).not.toMatch(/\{branch_benefit\}|Malerleistungen|Gesichtsbehandlungen/);
 });
 

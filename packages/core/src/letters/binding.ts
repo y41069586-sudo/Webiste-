@@ -1,3 +1,4 @@
+import { PREVIEW_LETTER_VERSION } from './personalization';
 import { getEnv, trackUrl } from '../config/env';
 import type { AppConfig } from '../config/settings';
 import type { DbOrTx } from '../db/client';
@@ -19,6 +20,7 @@ export interface LetterBinding {
   routeHash: string;
   senderOfferHash: string;
   pdfHash: string;
+  personalizationHash?: string;
 }
 export function recipientFingerprint(lead: typeof leads.$inferSelect) {
   return sha256(
@@ -44,6 +46,7 @@ function senderOfferFingerprint(cfg: AppConfig) {
   return sha256(
     JSON.stringify([
       cfg.sender,
+      ...(cfg.offers.activeVersion === 'v4' ? [PREVIEW_LETTER_VERSION] : []),
       cfg.tax,
       cfg.offers.activeVersion,
       cfg.offers.activeVersion === 'v4' ? v4PriceText() : cfg.pricing,
@@ -80,6 +83,9 @@ export async function letterDemoBinding(
     throw new Error('Demo-HTML oder Screenshot seit der QA geändert; erneut prüfen.');
   return {
     version: 1,
+    ...(cfg.offers.activeVersion === 'v4'
+      ? { personalizationHash: sha256(JSON.stringify(demo.qaResultJson?.review?.letterFacts ?? [])) }
+      : {}),
     demoId: demo.id,
     templateId: demo.templateId,
     htmlHash: htmlHash!,
@@ -116,7 +122,8 @@ export async function assertLetterBinding(
     throw new Error('Brief gehört nicht mehr zur aktuell freigegebenen Demo.');
   const now = await letterDemoBinding(lead, demo, cfg);
   for (const key of Object.keys(now) as (keyof typeof now)[]) {
-    if (recorded[key] !== now[key]) throw new Error('Empfänger, Demo, Bild, Route oder Angebot seit der Generierung geändert.');
+    if (recorded[key] !== now[key])
+      throw new Error('Empfänger, Fakten, Demo, Bild, Route oder Brief-/Angebotsstand seit der Generierung geändert.');
   }
   const pdf = await getProviders().storage.get(letter.pdfStorageKey);
   if (!pdf || sha256(pdf) !== recorded.pdfHash) throw new Error('Brief-PDF seit der Prüfung geändert oder gelöscht.');

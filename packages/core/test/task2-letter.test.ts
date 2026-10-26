@@ -14,9 +14,10 @@ import { sendLetter } from '../src/services/sending';
 import { addSuppression } from '../src/services/suppression';
 import { updateConfig } from '../src/config/service';
 import { v4LetterVariant } from '../src/letters/conversion-v4';
-import { personalizedLetterCopy } from '../src/letters/personalization';
+import { personalizedLetterCopy, PREVIEW_LETTER_VERSION } from '../src/letters/personalization';
 import { closeBrowser } from '../src/render/browser';
 import { stopBoss } from '../src/queue';
+import { assertLetterBinding } from '../src/letters/binding';
 import { sha256 } from '../src/util/crypto';
 const scores = { personalization: 90, industry: 90, text: 90, visual: 90, screenshot: 90 };
 it('only uses reviewed short facts with source references and rejects hidden claims', () => {
@@ -86,6 +87,9 @@ describe('V4 actual generation, reviewed facts and immutable print assignment', 
   afterAll(async () => {
     await closeBrowser();
     await stopBoss();
+    // This suite pauses campaign arms. Do not leak that state into the legacy-letter regressions.
+    await resetDb();
+    await resetVariants();
   });
   it('records exact PDF, current HTML, desktop, mobile and composite hashes without manufacturing visual approval', async () => {
     const b = letter.truthCheckJson?._binding as Record<string, string>;
@@ -102,9 +106,34 @@ describe('V4 actual generation, reviewed facts and immutable print assignment', 
       .map((i) => i.str)
       .join(' ');
     expect(text).toContain('Innenanstriche');
-    expect(text).toContain('597 €');
+    expect(text).not.toMatch(/\b(?:597|19|99)\s*€/);
+    expect(text).toContain('Vertragsbedingungen');
+    expect(letter.truthCheckJson?._copy).toMatchObject({
+      version: PREVIEW_LETTER_VERSION,
+      level: 'verified',
+      engine: 'fallback',
+    });
     expect(text).not.toContain('49 €');
-    expect(text).toContain('Steuerstatus ungeklärt');
+    expect(text).not.toContain('Steuerstatus ungeklärt');
+  });
+  it('invalidates an existing PDF when reviewed personalization facts change', async () => {
+    const original = demo.qaResultJson!;
+    await getDb()
+      .update(demos)
+      .set({
+        qaResultJson: {
+          ...original,
+          review: {
+            ...original.review!,
+            letterFacts: [{ text: 'Fassadenanstriche', source: 'fixture:new-reviewed-source', verified: true }],
+          },
+        },
+      })
+      .where(eq(demos.id, demo.id));
+    await expect(
+      assertLetterBinding(getDb(), letter, lead, await (await import('../src/config/service')).getConfig({ fresh: true })),
+    ).rejects.toThrow(/geändert/);
+    await getDb().update(demos).set({ qaResultJson: original }).where(eq(demos.id, demo.id));
   });
   it('checks suppression hashes again before regeneration and approval even when status was not changed', async () => {
     await addSuppression(getDb(), { name: lead.businessName, ...lead }, 'fixture:test');

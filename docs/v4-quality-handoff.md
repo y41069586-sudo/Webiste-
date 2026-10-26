@@ -1,5 +1,12 @@
 # SeitenWerk V4/V5 – verbindlicher Handoff
 
+Neuester lokaler Briefauftrag26.10.2026: persönliche, preisfreie Vorschau-Einladungen,
+zusammenhängender KI-Schreib-/Faktenprüfpfad im vorhandenen Provider und20 fiktive PDF-/QR-Paare.
+Autoritativ dazu: [Brief-Handoff](letter-preview-upgrade/status.md) und
+[Prüfbericht](letter-preview-upgrade/README.md). Ältere Pflicht zu Briefpreisen ersetzt;
+V4-Angebots-/Checkoutpreise unverändert. Offline-Beispieltexte sind Fixtures, keine echte
+KI-Textabnahme. DRY_RUN=true, kein Push/Deployment/Versand. Exakten lokalen Commit mit git log lesen.
+
 Aktuelle lokale Fortsetzung vom 26.10.2026: Aufgabe3 (Anbieterlogo und Kaufstrecke), siehe `docs/task3-checkout/status.md` und Prüfbericht. Vorherige Abnahmen bleiben zeitgebundene Nachweise; keine Live-Freigabe.
 
 

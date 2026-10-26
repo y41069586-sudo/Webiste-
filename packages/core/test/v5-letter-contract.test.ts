@@ -52,9 +52,11 @@ describe('V5: tatsächliche V4-Brief- und Vertragsbedingungen', () => {
       for (const arm of ['A', 'B', 'C'] as const) {
         const { letter, check } = truth(v4LetterVariant(industry, arm));
         expect(check.violations).toEqual([]);
-        expect(letter.offer).toContain('597 €');
-        expect(letter.offer).toContain('insgesamt 99');
-        expect(letter.offer).toContain('bestätigtem Go-Live');
+        expect(letter.previewInvitation).toBe(true);
+        expect(letter.offerSummary).toBeUndefined();
+        expect(JSON.stringify(letter)).not.toMatch(/(?:597|19|99)\s*€/);
+        expect(letter.offer).toContain('Vertragsbedingungen');
+        expect(letter.offer).toContain('vor jeder Bestellung');
         expect(JSON.stringify(letter)).not.toMatch(/fertige Website|Sie ist fertig|12 Monate Mindestlaufzeit/);
       }
     },

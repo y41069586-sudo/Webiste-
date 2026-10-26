@@ -299,3 +299,23 @@ Stilprofil bestimmt Farbe, Typografie, Komposition und passende bestehende Vorla
 Leistungen, Qualitätsaussagen oder Firmenfakten ableiten. Ohne Belege bleibt es ein Branchenvorschlag.
 Private Belege über bestehende Leadverwaltung/Settings/Storage, kein zweites Datenmodell. Bestehender
 Anthropic-Provider unterstützt Bildblöcke; Mock-Stilantworten sind keine echte Bildanalyse-Abnahme.
+
+## Neueste Briefentscheidung – persönliche Vorschau statt Preisangebot (26.10.2026)
+
+Die jüngste ausdrückliche Betreiberanweisung ersetzt für neue V4-Werbebriefe alle älteren Vorgaben,
+Preise/Tarife im Brief zu zeigen. Keine 597-/19-/99-Euro-Angaben im Einladungstext. Demo und bestehender
+Checkout behalten die vollständigen unveränderten V4-Kosten und Vertragsbedingungen vor jeder Bestellung.
+Kostenloses Ansehen und spätere kostenpflichtige Beauftragung klar unterscheiden.
+
+Nicht nur Name/Ort in Branchensätze einsetzen: vorhandenen budgetierten LLM-Provider für zusammenhängende
+Überschrift, Einstieg, konkreten möglichen Nutzen und QR-Satz aus überprüften Betriebsangaben verwenden.
+Nur quellengebundene review.letterFacts sind Betriebsfakten; generierte Demo-Beispieltexte sind es nicht.
+Demo-Funktionsabgleich und separate Fakten-/Sprachprüfung, höchstens ein Reparaturversuch. Unbekannte
+Fakten nicht erfinden. Fehlende Fakten, Anbieterfehler und Mockbetrieb ergeben eine ausdrücklich markierte
+Ersatzfassung zur individuellen Kontrolle, keine fingierte KI-/Rechercheabnahme.
+
+Quellen-/Demo-/Empfängerbindung, Slot-Claims, Sperrlisten, manuelle Qualitätsabnahme, echtes Gerätebild,
+41mm-QR, Art.-14/21-Texte und deren lesbare Größe erhalten. Neue Kopierrichtlinie/Faktenänderung macht
+alte PDFs vor Freigabe erneut prüfpflichtig, historische Dateien nicht pauschal löschen. Offline redaktionell
+vorgegebene Modellantworten als fixture kennzeichnen; keine echten LLM-Ergebnisse daraus behaupten.
+Stand und Belege: docs/letter-preview-upgrade/. Nur lokale Mocktests, kein Push/Deployment oder Versand.

@@ -1,10 +1,13 @@
 import {
   letterBranchBenefit,
+  previewInvitationCopy,
   personalizedLetterCopy,
   reviewedLetterDetails,
   type VerifiedLetterContext,
 } from './personalization';
-import { v4Offer, v4PriceText } from '../services/offers-v4';
+import { DEFAULT_BLOCKLIST } from './truth-check';
+import { invitationContextHash, type WrittenInvitation } from './writer';
+import { v4PriceText } from '../services/offers-v4';
 import type { LetterData } from '@wbm/templates/letter-types';
 import type { AppConfig } from '../config/settings';
 import { priceTaxSuffix } from '../invoices/build';
@@ -48,7 +51,7 @@ export function recipientLines(r: RecipientInput): string[] {
   if (!name) throw new Error('Firmenname fehlt; Anschrift prüfen.');
   const head = `An das Team von ${name}`;
   const wrapped = wrap(name, MAX_LINE);
-  const nameLines = head.length <= MAX_LINE ? [head] : wrapped.length <= 2 ? ['An das Team von', ...wrapped] : wrapped;
+  const nameLines = head.length <= 40 ? [head] : wrapped.length <= 2 ? ['An das Team von', ...wrapped] : wrapped;
   const street = `${r.street.trim()} ${r.houseNumber.trim()}`;
   const city = `${r.postalCode.trim()} ${r.city.trim()}`;
   if (nameLines.length > 3 || street.length > MAX_LINE || city.length > MAX_LINE)
@@ -74,6 +77,11 @@ export interface ComposeInput {
   /** Verified branch label only; never infer private facts or actual service promises. */
   branchLabel?: string;
   personalization?: VerifiedLetterContext;
+  invitationCopy?: WrittenInvitation;
+  sequence?: 1 | 2 | 3;
+  testRecipient?: boolean;
+  /** Approved slot claims remain verbatim with their existing footnotes. */
+  claimTexts?: string[];
   domain: string | null;
   rating: { rating: number; count: number } | null;
   compositeDataUri: string | null;
@@ -125,6 +133,8 @@ export function letterTruthBlocklist(cfg: AppConfig): string[] {
           'automatisch gelöscht',
           'nur noch kurz',
           'nur noch bis',
+          '\\d[\\d.,]*\\s*(?:€|Euro\\b|EUR\\b)',
+          'Care\\+',
         ]
       : []),
   ];
@@ -167,6 +177,17 @@ function composeVars(i: ComposeInput): Record<string, string> {
  */
 export function placeholderValues(i: ComposeInput): string[] {
   const vars = composeVars(i);
+  if (i.cfg.offers.activeVersion === 'v4')
+    return [
+      i.recipient.businessName,
+      i.recipient.city,
+      i.expiresLabel,
+      ...(i.personalization
+        ? reviewedLetterDetails(i.personalization)
+            .filter((f) => f.kind !== 'website_search')
+            .map((f) => f.text)
+        : []),
+    ];
   const keys = [
     'firmenname',
     'domain_vorschlag',
@@ -199,24 +220,7 @@ export function composeLetter(i: ComposeInput): LetterData {
     if (research) first = research;
   }
   const intro = [lowerFirstWord(first), ...v.intro.map((p) => fillPlaceholders(p, vars))].filter(Boolean);
-  return {
-    ...(i.cfg.offers.activeVersion === 'v4'
-      ? {
-          offerSummary: {
-            setup: formatEuroShort(v4Offer('basis').setupCents),
-            basis: formatEuroShort(v4Offer('basis').monthlyCents),
-            care: formatEuroShort(v4Offer('care_plus').monthlyCents),
-            tax: !i.cfg.tax.operatorConfirmed
-              ? 'Steuerstatus ungeklärt · Entwurf, nicht zum Versand freigegeben.'
-              : i.cfg.tax.kleinunternehmer
-                ? 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.'
-                : priceTaxSuffix(i.cfg),
-            scope: `Fertigstellung mit Ihren bestätigten Inhalten, inkl. eigener Standard-.de-Domain bis ${formatEuroShort(i.cfg.checkout.maxDomainPriceCents)}/Jahr, Hosting/SSL. Care+ enthält Basis und bis zu ${v4Offer('care_plus').includedChangeMinutes} Min. kleinere Änderungen/Monat.`,
-            conditions: 'Monatsabrechnung erst ab bestätigtem Go-Live. Monatlich kündbar.',
-            guarantee: guaranteeSentence(i.cfg),
-          },
-        }
-      : {}),
+  const data: LetterData = {
     sender: {
       name: i.cfg.sender.name,
       company: i.cfg.sender.company,
@@ -247,4 +251,49 @@ export function composeLetter(i: ComposeInput): LetterData {
     addressPosition: i.cfg.letter.addressPosition,
     screenshotPage: i.screenshotPage ?? null,
   };
+  if (i.cfg.offers.activeVersion === 'v4') {
+    const context: VerifiedLetterContext = i.personalization ?? {
+      businessName: i.recipient.businessName,
+      city: i.recipient.city,
+      branchLabel: i.branchLabel ?? 'Betrieb',
+      details: [],
+    };
+    if (
+      (!i.testRecipient && (context.businessName !== i.recipient.businessName || context.city !== i.recipient.city)) ||
+      (i.branchLabel && context.branchLabel !== i.branchLabel)
+    )
+      throw Error('Personalisierung gehört nicht zum adressierten Betrieb.');
+    if (i.invitationCopy && i.invitationCopy.contextHash !== invitationContextHash(context, i.sequence ?? 1))
+      throw Error('Brieftext gehört nicht zum aktuellen Faktenpaket oder zur Versandfolge.');
+    const copy =
+      i.invitationCopy?.copy ??
+      previewInvitationCopy(context, i.sequence ?? 1, /Leistungen auf einen Blick/.test(v.subject) ? 'B' : 'A');
+    // Never launder an unsafe stored arm through the new composer. Its offending text stays blockable.
+    const original = [v.subject, v.hook, ...v.intro, v.offerWithDomain, v.offerWithoutDomain, v.noAction].join(' ');
+    const unsafe =
+      DEFAULT_BLOCKLIST.some((rule) => rule.pattern.test(original)) ||
+      letterTruthBlocklist(i.cfg).some((pattern) => new RegExp(pattern, 'i').test(original));
+    if (!unsafe) {
+      data.subject = copy.subject;
+      data.intro = [lowerFirstWord(copy.opening), ...copy.intro, ...(i.claimTexts ?? []), copy.scan];
+      data.qrCaption = copy.qrCaption;
+      data.copyEvidence = {
+        version: copy.version,
+        level: copy.level,
+        profile: copy.profile,
+        usedFacts: copy.sources,
+        engine: i.invitationCopy?.engine ?? 'fallback',
+        attempts: i.invitationCopy?.attempts ?? 0,
+        reviewReasons: i.invitationCopy?.reviewReasons ?? [
+          'Regelbasierte Vorschau; individuelle Text- und Demoabnahme erforderlich.',
+        ],
+      };
+    }
+    data.previewInvitation = true;
+    if (!unsafe) {
+      data.offer = copy.next;
+      data.noAction = `Ohne Bestellung keine Kosten. Online bis ${i.expiresLabel}. Rückfragen gern per E-Mail.`;
+    }
+  }
+  return data;
 }

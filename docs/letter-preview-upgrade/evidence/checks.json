@@ -1,0 +1,634 @@
+[
+  {
+    "id": "01",
+    "name": "Elektro Nordlicht",
+    "branch": "Elektrobetrieb",
+    "template": "handwerk-solid",
+    "profile": "electric-renovation",
+    "usedFacts": [
+      {
+        "text": "Elektroinstallation",
+        "source": "fixture:01:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "c396c7c77629b9a98e248eb4321033c46058d63e1195af023663d6b2c1304f9c",
+    "desktopHash": "2d60308f4f23c14fcef7add00541b216ba48aad010a72e664ae8d33cf5b933f9",
+    "mobileHash": "75c07cbd64629a235018e0ce8beebfd5ca877ac6c9e5dbde8889f76a613fae20",
+    "deviceHash": "62c35e1bc463bcdf1c33ccb8acd40a50564e87fd4dab76c6c5b95a57d258d9ea",
+    "pdfHash": "1f483a426331b9737287ed4fc013e7e4e4ca39ce844e81cb0f5243654c0b8470",
+    "visualApproved": false
+  },
+  {
+    "id": "02",
+    "name": "Lichtwerk am Markt",
+    "branch": "Elektrobetrieb",
+    "template": "handwerk-klar",
+    "profile": "electric-light",
+    "usedFacts": [
+      {
+        "text": "Lichtplanung",
+        "source": "fixture:02:explicitly-fictional-facts"
+      },
+      {
+        "text": "Beleuchtung",
+        "source": "fixture:02:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "e2698aa675a1d4b9237b0bc218ac4b00085855b4504419b507f8654108797e16",
+    "desktopHash": "2b46fd1a8ba5e05fa97923745123868cf13b4199fae2bdcadad5dd1b7a669246",
+    "mobileHash": "844e2978a0b6fb0e94c4078fc3251d239de43c47922a0f3e998117f82098c7cd",
+    "deviceHash": "4422c8a4f91e2e085107fe2a7f19048edda0808c6a5ceb3cf5f7b74d33b11073",
+    "pdfHash": "01d701bd7c35e76dd069a74736d3db000ff1196f106e7da09c5289b10df9bb5d",
+    "visualApproved": false
+  },
+  {
+    "id": "03",
+    "name": "Elektrotechnik Fiktiv & Partner",
+    "branch": "Elektrobetrieb",
+    "template": "handwerk-werkstatt",
+    "profile": "electric-solar",
+    "usedFacts": [
+      {
+        "text": "Photovoltaik",
+        "source": "fixture:03:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "b8254fe422af4ac5cfc0edcfde661af101e267c7d833d7f5d8e83bb65361bd76",
+    "desktopHash": "d231f2391d5e464c3830010df16ffae1a20233e146e99b398ec081caf7d68068",
+    "mobileHash": "9ece08aef2846a87e6eef6407960509c684821dd2fcd77b9860773fadf1100ea",
+    "deviceHash": "64dbdfd52c116e94cb2c6e2592008abff3b7bcbd512552b2cb737edd13b5d60b",
+    "pdfHash": "49a55f5aece9260ff76f10576b7d08c21e4a3893ebbcfd267dd6735ef655b69b",
+    "visualApproved": false
+  },
+  {
+    "id": "04",
+    "name": "Farbwerk Linde",
+    "branch": "Malerbetrieb",
+    "template": "handwerk-klar",
+    "profile": "painter-material",
+    "usedFacts": [
+      {
+        "text": "Innenanstriche",
+        "source": "fixture:04:explicitly-fictional-facts"
+      },
+      {
+        "text": "Kalkfarben",
+        "source": "fixture:04:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "5ad798c922b552c9a06f8174db7b92fa2318d37e6e53e758864fb2f5c30a6bae",
+    "desktopHash": "4af75d86a10941735a9630006ccc99df0b4179699f9e3dadbd1ac4db4c1e535c",
+    "mobileHash": "b96923ce14f2cd8b2f6e94253b8c46236e479489d290927f225b8de6bc61664f",
+    "deviceHash": "448b1a689a6a6d273ccaeb09decc0dc14b34da908953d397acdefcdadaec2700",
+    "pdfHash": "95fd78385f375b16b9b0259531ee8d5d3eb1559c7a7729ff085c0a8bc37ba7e1",
+    "visualApproved": false
+  },
+  {
+    "id": "05",
+    "name": "Malerei Fassade & Treppenhaus",
+    "branch": "Malerbetrieb",
+    "template": "handwerk-solid",
+    "profile": "painter-stairway",
+    "usedFacts": [
+      {
+        "text": "Fassadenanstriche",
+        "source": "fixture:05:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "0ef37f8371c12079110c383b9b75f8e59b58997623fe5dbce076c6429780452a",
+    "desktopHash": "0a804c8fcc839b8dc05bdbcf9f2f6c82e39bcf77b41927e4c68bd633adab13ed",
+    "mobileHash": "06e9936a7c2f15910660f1ea8e9254ae59cb1057de5288cafd109938f3619d66",
+    "deviceHash": "bec03e39dcf5dff1cf27af2b5d5048dc8b819807a49ea4448d21c0570856093d",
+    "pdfHash": "4989055f48c4a36892c07ecf4455ff9d6e62e4683f80a72fb1190803e1326412",
+    "visualApproved": false
+  },
+  {
+    "id": "06",
+    "name": "Malerei Raumidee",
+    "branch": "Malerbetrieb",
+    "template": "handwerk-werkstatt",
+    "profile": "painter",
+    "usedFacts": [
+      {
+        "text": "Lackierarbeiten",
+        "source": "fixture:06:explicitly-fictional-facts"
+      },
+      {
+        "text": "Tapezierarbeiten",
+        "source": "fixture:06:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "6879c299bba1620dae5bd227b5ff93f8a0221c120f7ba67402424f5390db68ad",
+    "desktopHash": "38d50828e0b8b60b97727666ba5437da690bb374e62d7214f95c27f6f5b25f80",
+    "mobileHash": "7b3a5f98348866b31e8c938581c9fbb22d52723138eccd77391dc8fc8ebf172b",
+    "deviceHash": "f8d77877e8c7a0f48c400cb349f26bb9214340083fab7220f8185e5edb589e7f",
+    "pdfHash": "eb24055c4a2df725671caf85037b1c45a1cb057356ae72e500f4b4473ff59b73",
+    "visualApproved": false
+  },
+  {
+    "id": "07",
+    "name": "Gartenwerk Grünraum",
+    "branch": "Garten- und Landschaftsbau",
+    "template": "handwerk-plakat",
+    "profile": "garden-care",
+    "usedFacts": [
+      {
+        "text": "Gartenpflege",
+        "source": "fixture:07:explicitly-fictional-facts"
+      },
+      {
+        "text": "Heckenschnitt",
+        "source": "fixture:07:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "1a7d09823b997624e5c0a4f5ec3d587ce446114bc6e95240ae6b3f57398a69be",
+    "desktopHash": "ba77b3ec9ec31885278688940ff5b566beb5f8ec16277760a279d02c10fc8693",
+    "mobileHash": "9e2054a6d80f2cb6470e170fc7dee676972a5f55315951a7a8688f712712f260",
+    "deviceHash": "d5c7771d90635b0571b8448b190da7e34320085ecc83d0aa7b05f673ad6e5308",
+    "pdfHash": "93d9704dca14bf1f8a357ef79c645d5fde759c1d91cfda770d94cb1145e873a3",
+    "visualApproved": false
+  },
+  {
+    "id": "08",
+    "name": "Gartenatelier Freiraum",
+    "branch": "Garten- und Landschaftsbau",
+    "template": "handwerk-klar",
+    "profile": "garden",
+    "usedFacts": [
+      {
+        "text": "Gartenplanung",
+        "source": "fixture:08:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "004d3038efa7e2beb104d3ee06ba2483202f2816e79ea78fc20113128c69b446",
+    "desktopHash": "df49a37b215db4bcfef70960a2545ce4c174b80218636ebba30099c7dd2dd969",
+    "mobileHash": "5d7e79defcaf3a335775b5cf279cb03e9fd83cdab0504e94620d6101246c54b7",
+    "deviceHash": "d7fe2db7015dfa51f6b54300ee98881f26f92dfa62d90a34c45bad0db3261128",
+    "pdfHash": "72e4fbb0326d195ea15162002882483491dfb879ee8296985b9d10e38c945e53",
+    "visualApproved": false
+  },
+  {
+    "id": "09",
+    "name": "Klarblick Gebäudereinigung",
+    "branch": "Reinigungsunternehmen",
+    "template": "handwerk-solid",
+    "profile": "cleaning",
+    "usedFacts": [
+      {
+        "text": "Fensterreinigung",
+        "source": "fixture:09:explicitly-fictional-facts"
+      },
+      {
+        "text": "Büroreinigung",
+        "source": "fixture:09:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "9d2d41d1b453d510eb8c687a9ca77b5868e0fea91570ada4eea9bc7456792ffb",
+    "desktopHash": "473e3f920f7426f95123fb57ac7dd9e4ff4e15a8edb66e5534b36b5eca1591ab",
+    "mobileHash": "c656f8af89384bab5605fa4ebc9cc4539851b4f2b6eaa4e8b986e1ac29b5a736",
+    "deviceHash": "583f8f1594b1f65d54e881ed41f2267b2e773fce287413e945c4acdc7f9577d8",
+    "pdfHash": "825f184c54baa3752a6bf393f5c5b7f0f81b983dfa3027d586dbce67c8dc01ad",
+    "visualApproved": false
+  },
+  {
+    "id": "10",
+    "name": "Wasserwerk West – Sanitär und Badgestaltung",
+    "branch": "Sanitärbetrieb",
+    "template": "handwerk-werkstatt",
+    "profile": "plumbing",
+    "usedFacts": [
+      {
+        "text": "Badmodernisierung",
+        "source": "fixture:10:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "067053dfc922e160efc0525afc945e6dcffa17e0ba92ff052e0285f5189c4f48",
+    "desktopHash": "9b1959201e8d8c4d26dac8110370cec30ca83d36fd477f1ecbd9f8965eca70f0",
+    "mobileHash": "3b994c4e9dd4abab182149e90721bd5c0f739e480a56bb6009e1f6361a8603fd",
+    "deviceHash": "8f8a0a8fdc4aee92e94a0c3b0952576ba192cc160832f59ecf80ebafdf162519",
+    "pdfHash": "b810cfceb0504e4cf39633f294ec97ef67e898180eda64b0f95b58d7f3ffb8d1",
+    "visualApproved": false
+  },
+  {
+    "id": "11",
+    "name": "Barber Kontur",
+    "branch": "Barbershop",
+    "template": "beauty-modern",
+    "profile": "barber",
+    "usedFacts": [
+      {
+        "text": "Haarschnitte",
+        "source": "fixture:11:explicitly-fictional-facts"
+      },
+      {
+        "text": "Bartpflege",
+        "source": "fixture:11:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "915eb85786ceb0b415f51ac28564e9177d02ac7b503c877d173cb9525ec02ea5",
+    "desktopHash": "0ed85c38c2040221b3d23de03c8d7ae6c89a4ca6835b123067f958b91a94b555",
+    "mobileHash": "4e2db3f57f5d1c099b0f23679b1fd50c33c6cbbbf19f8a859ab572db327c50aa",
+    "deviceHash": "8cd996b5a1b406a16f4b1b2074135c95c037e60dde538ae0e8fe76c1ac6545b6",
+    "pdfHash": "8c6859543407ed13cabb40573e72bed15f4574ce3d9ccbd190c3db755de06d27",
+    "visualApproved": false
+  },
+  {
+    "id": "12",
+    "name": "Salon Schnittpunkt",
+    "branch": "Friseursalon",
+    "template": "beauty-elegant",
+    "profile": "hair-color",
+    "usedFacts": [
+      {
+        "text": "Farbbehandlungen",
+        "source": "fixture:12:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "ce96490f17e1ad8a258521c0393271ac2ebaa98f33a036023677729b3bd3d4fd",
+    "desktopHash": "7b8ed2319a83bef1553e1334d7ce7c554d2b9e3cb5b8c20ab13fc3536e12776f",
+    "mobileHash": "4d696b7ee2942d66a9da0885e223df9d75a1b1d3057a11af0f508964d5d7c932",
+    "deviceHash": "4f7fc6245ab6ad25db701cc8109b13edab608e34bfc623a5ee224fc267783f5d",
+    "pdfHash": "08da75105de1d1f0d651afe583051cc07f446d2a96333d991c7b3e2c6c6d1df3",
+    "visualApproved": false
+  },
+  {
+    "id": "13",
+    "name": "Nagelatelier Feinschliff",
+    "branch": "Nagelstudio",
+    "template": "beauty-soft",
+    "profile": "nails",
+    "usedFacts": [
+      {
+        "text": "Maniküre",
+        "source": "fixture:13:explicitly-fictional-facts"
+      },
+      {
+        "text": "Nagelgestaltung",
+        "source": "fixture:13:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "6c6130d80fc8ab88b39dc2162be8474f32e66c0f5c7fe933206ddcebb977b1cb",
+    "desktopHash": "c34ecb56914f6212435126d042e8cc2668b972c92dfe4b6e5231e0a8b29a2ca6",
+    "mobileHash": "deacf6dca124a0645d19a23f186649a7404657113aa4ed9b5829205dd0f1e8db",
+    "deviceHash": "9ad8ae8493f97063c1d22933c2f705979e81fecb55d1d73092a872ddba5a33dc",
+    "pdfHash": "997f858706a3b7c72de1879c5abad929c9bdd84f8905ca2649fee5e9aaa84b80",
+    "visualApproved": false
+  },
+  {
+    "id": "14",
+    "name": "Studio Hautzeit",
+    "branch": "Kosmetikstudio",
+    "template": "beauty-elegant",
+    "profile": "cosmetics",
+    "usedFacts": [
+      {
+        "text": "Gesichtsbehandlungen",
+        "source": "fixture:14:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "d9d61f06bdc0de5bbf5057a062a30d12c2963d35fdc13260488b72662e1a86af",
+    "desktopHash": "e17a986ceb7d2fe8d734ef33c1ebdae305cc4b5379a2a70620870de0c10a9758",
+    "mobileHash": "47c1a870940747f0e0996f952332a605ff6af3c5dc18b179b68e8ad394c6979a",
+    "deviceHash": "8b9f8629c3c86504a2d96e8b47b770a298518d1a0f84414bd6af10ba4fe49adc",
+    "pdfHash": "5859f22ad27a5883542938226165ee396d78986d81baf0ed57b4d18838a8476f",
+    "visualApproved": false
+  },
+  {
+    "id": "15",
+    "name": "Restaurant Abendtisch am Alten Markt",
+    "branch": "Restaurant",
+    "template": "gastronomie-foto",
+    "profile": "restaurant",
+    "usedFacts": [
+      {
+        "text": "Abendkarte",
+        "source": "fixture:15:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "42e1f8777bb5a6e6f2b880aeee319db62e959836c58ca11eac952be9fa2d01b1",
+    "desktopHash": "3f412f386607c3bc4f4cc0c167292a86ce955696233efeec18b45ec76b9cc038",
+    "mobileHash": "f0cf4e4c881933781186dae1d3c8d72c076b4f215453c3a4321ce24f7a9b13b4",
+    "deviceHash": "bb3e5605db21186e461c5cb1b607bb8de4cd78d429574ab5b7c513e95d55c2ff",
+    "pdfHash": "fc7befd592bbc1d707a38775ed66f0bba7dc7d9927dd94b09ea4e8b179f5599a",
+    "visualApproved": false
+  },
+  {
+    "id": "16",
+    "name": "Café Mohnblüte",
+    "branch": "Café",
+    "template": "gastronomie-split",
+    "profile": "cafe",
+    "usedFacts": [
+      {
+        "text": "Kaffee und Kuchen",
+        "source": "fixture:16:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "e7a897edc8a7b2d6f129f601e29f3e7cec6a32071fc123a129ebc4bad27c483a",
+    "desktopHash": "fe46b6486ac80c647f0b352077bf24d63b7a68e8b248d706317ee8712181cdb7",
+    "mobileHash": "d1376e9678aeaa8dad60402ea412b8c6690ed7fdd7f7a62cdb4a8a7c43354825",
+    "deviceHash": "e04c73c6c5123debabb365f6a16d1d3a28ceae58354bb3265de16898288ba548",
+    "pdfHash": "b30ec2ebad301c4d88f39f32648e028651daca11803d3b12a655d0eb59bbde3e",
+    "visualApproved": false
+  },
+  {
+    "id": "17",
+    "name": "Hafenküche Fiktiv",
+    "branch": "Restaurant",
+    "template": "gastronomie-magazin",
+    "profile": "restaurant-takeaway",
+    "usedFacts": [
+      {
+        "text": "Außer-Haus-Angebot",
+        "source": "fixture:17:explicitly-fictional-facts"
+      },
+      {
+        "text": "Abholung",
+        "source": "fixture:17:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "8e5bc1b42e83785eab1d6a101026715fef938e8a65e175214e4057c44598433b",
+    "desktopHash": "f6c0b508baa146e32c2bda38373d9d47c10415f0fe790d393cd3cf44c2674b3c",
+    "mobileHash": "fe6c6a35901bfe3b51afec9f0250e308fd16de391af4c58f6348498663a6b45e",
+    "deviceHash": "691d9af072264670c84fb811c60a3d5db9fcb321b3954131034371d3d651e16a",
+    "pdfHash": "a4aaa11cb33698e3a73126e6ee4bc1911771b9acee7d60c38540c00f4e9d6df0",
+    "visualApproved": false
+  },
+  {
+    "id": "18",
+    "name": "Buchwinkel",
+    "branch": "Buchhandlung",
+    "template": "einzelhandel-magazin",
+    "profile": "books",
+    "usedFacts": [
+      {
+        "text": "Buchbestellungen",
+        "source": "fixture:18:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "4baeeb450770cc79c9275f197ccb2427212086ef63591cfe79b7eded75525734",
+    "desktopHash": "a933479d9a1a15257a67070b19728b57f8f02a805a3e2faa115c1545f1ff26f2",
+    "mobileHash": "7d149c47f8523222bc471ee46af09813f85b93ebcc6ec719b3c9efb05eb94f9c",
+    "deviceHash": "550b8b82570ea45163b45b1505ba51c9ca6b8a5237d154668a44e3820aa25960",
+    "pdfHash": "753c4511e4477abd07fd9b52b729069eedb63e5768db157c55255bedb5055a12",
+    "visualApproved": false
+  },
+  {
+    "id": "19",
+    "name": "Musikatelier Klangraum – Unterricht & Begleitung",
+    "branch": "Musikschule",
+    "template": "kurse-plakat",
+    "profile": "music",
+    "usedFacts": [
+      {
+        "text": "Klavierunterricht",
+        "source": "fixture:19:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "58b1c3852018f24e588530f66fe210e34cb991c29c332139fb190af12fbf0816",
+    "desktopHash": "3013f2ad6465df6ad2a6fd82667cf46997f3e6650ec209b278d74c57321ee733",
+    "mobileHash": "c899a896a3130b390a2d87bbd8d8cc915ae320d1e1c7c773f312eee67ad2866e",
+    "deviceHash": "a353f928dd33ef6eb692b8389395b3a352dfb0cd7e7ac883c81e650d74049d33",
+    "pdfHash": "80b397fd8617d67f16eaca95e044c014641c797022c4021a7e6f3268c9a65ad0",
+    "visualApproved": false
+  },
+  {
+    "id": "20",
+    "name": "Tanzatelier Schrittwerk",
+    "branch": "Tanzschule",
+    "template": "kurse-magazin",
+    "profile": "dance",
+    "usedFacts": [
+      {
+        "text": "Paartanz",
+        "source": "fixture:20:explicitly-fictional-facts"
+      }
+    ],
+    "textSource": "fixture",
+    "issues": [],
+    "pages": 1,
+    "qrRaster": true,
+    "targets": true,
+    "noPrices": true,
+    "privacy": true,
+    "date": true,
+    "truth": true,
+    "truthViolations": [],
+    "mobileOverflow": false,
+    "demoHash": "97969a0da3ad4587d3b39a6c6771970534b03b2b1c7ef38615f8a289398cfdb7",
+    "desktopHash": "7dff3f527dcf8ee236b3ccbbca1d4bfd1b1aaf4eba9fe41b1e05084040033555",
+    "mobileHash": "bc7622ef36b6ec2eeaa3a5d383fbfb7e98fbbd2d752d49d037be4c64fb41bb4f",
+    "deviceHash": "3a1dfb70eec60e1059c735d75649f8a12324f94149e00be3a3b52d1c10a86886",
+    "pdfHash": "7ac462a088f7556365551d4844d0346b0a02f60f49bd7e97e80efb38e48d8f14",
+    "visualApproved": false
+  }
+]

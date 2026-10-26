@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { assertLetterLeadEligible } from '../letters/eligibility';
+import { writePreviewInvitation } from '../letters/writer';
 import { letterDemoBinding, recipientFingerprint } from '../letters/binding';
 import { sha256 } from '../util/crypto';
 import { assessLetterQuality } from '../quality/letter';
@@ -181,7 +182,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
         sourcesLabel,
       )
     : null;
-  const domain = await domainFor(lead, cfg);
+  const domain = cfg.offers.activeVersion === 'v4' ? null : await domainFor(lead, cfg);
 
   const recipient: RecipientInput = opts.test
     ? {
@@ -217,6 +218,9 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const useRating = sw.useRatingInLetter && lead.rating && lead.ratingCount;
   const composeInput: ComposeInput = {
     variant: slotRender?.content ?? variant.content,
+    sequence,
+    testRecipient: opts.test === true,
+    claimTexts: slotRender?.claimSpans.map((s) => s.text),
     cfg,
     recipient,
     branchLabel: cfg.targeting.branches.find((b) => b.key === lead.branch)?.label ?? lead.branch,
@@ -244,6 +248,26 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     screenshotPage,
     footnotes: slotRender?.footnotes,
   };
+  if (cfg.offers.activeVersion === 'v4') {
+    composeInput.personalization ??= {
+      businessName: lead.businessName,
+      city: lead.city,
+      branchLabel: composeInput.branchLabel ?? lead.branch,
+      details: [],
+    };
+    const demoHtml = demo.htmlStorageKey ? await storage.get(demo.htmlStorageKey) : null;
+    if (!demoHtml?.length) throw Error('Ausgelieferte Demo fehlt; kein persönlicher Brief ohne Abgleich.');
+    composeInput.invitationCopy = await writePreviewInvitation({
+      context: composeInput.personalization,
+      sequence,
+      variant: /Leistungen auf einen Blick/.test(composeInput.variant.subject) ? 'B' : 'A',
+      demoHtml: demoHtml.toString('utf8'),
+      leadId,
+    });
+    // The new text must be based on the exact delivered document already attested by QA.
+    if (composeInput.invitationCopy.demoHash !== binding.htmlHash)
+      throw Error('Demo während des Textabgleichs geändert; Brief erneut erstellen.');
+  }
   const data = composeLetter(composeInput);
   const html = renderLetterHtml(data);
   const pdf = await htmlToPdf(html);
@@ -330,12 +354,13 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
         statusReason:
           issues.length || truthIssues.length
             ? [...issues.map((i) => `${i.check}: ${i.detail}`), ...truthIssues].join(' | ').slice(0, 1000)
-            : null,
+            : data.copyEvidence?.reviewReasons?.join(' | ').slice(0, 1000) || null,
         industry: lead.industry ?? null,
         truthCheckJson: {
           ...truth,
           _binding: { ...binding, pdfHash: sha256(pdf) },
           _personalization: demo.qaResultJson?.review?.letterFacts ?? [],
+          _copy: data.copyEvidence,
           _quality: assessLetterQuality(
             [{ passed: truth.passed }, { passed: issues.length === 0 }],
             undefined,

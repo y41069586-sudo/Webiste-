@@ -58,6 +58,7 @@ export async function renderLetterPreview(i: LetterPreviewInput): Promise<Letter
   if (!variant) throw new Error('Variante fehlt');
   const composeInput: ComposeInput = {
     variant,
+    claimTexts: slotRender?.claimSpans.map((s) => s.text),
     cfg: i.cfg,
     recipient: i.recipient,
     domain: i.domain,

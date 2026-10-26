@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-26",
+  "branch": "codex/conversion-v4",
+  "baseCommit": "f09a840",
+  "scope": "Local invitation letters only",
+  "dryRun": true,
+  "externalCalls": false,
+  "deployed": false,
+  "pushed": false,
+  "realLetters": 0,
+  "tests": {
+    "core": {
+      "suites": 11,
+      "passed": 90
+    },
+    "templates": {
+      "suites": 3,
+      "passed": 108
+    },
+    "typecheck": "passed",
+    "lint": "passed",
+    "fullBuild": "passed"
+  },
+  "renderedPairs": 20,
+  "renderIssues": 0,
+  "singlePage": true,
+  "grayscaleFinalPdfQr": true,
+  "localTargetsMatch": true,
+  "noPrices": true,
+  "notices": true,
+  "mobile390NoOverflow": true,
+  "textSource": "editorial offline fixtures; grounding review mocked",
+  "realLlmQualityAccepted": false,
+  "publicQrAccepted": false,
+  "physicalPrintTest": false,
+  "conversionMeasured": false,
+  "lexicalDiagnostic": {
+    "comparisons": 190,
+    "identicalAfterFactRemoval": 0,
+    "maxSimilarity": 0.06097560975609756
+  },
+  "visualReview": "20 print pages in 4 contact sheets; 5 additional enlarged individual pages; no operator approval",
+  "knownVisualLimitation": "Case09 long business name is awkwardly broken inside the existing demo device image; manual review required",
+  "reproduce": [
+    "scripts/preview-invitation-review.mts --reuse-demo",
+    "scripts/preview-invitation-gallery.mts"
+  ],
+  "remaining": [
+    "External authorized LLM text and grounding quality",
+    "Real-source/right checks and manual approval",
+    "Public routes, worker/providers and legal/tax go-live approvals",
+    "Physical print and camera scan"
+  ]
+}

@@ -37,6 +37,17 @@ export interface LetterSender {
 }
 
 export interface LetterData {
+  /** Current copy policy: no prices or tariffs, invitation to an uncommissioned draft only. */
+  previewInvitation?: boolean;
+  copyEvidence?: {
+    version: string;
+    level: 'verified' | 'basic';
+    profile: string;
+    usedFacts: { text: string; source: string }[];
+    engine?: 'llm' | 'fixture' | 'fallback';
+    attempts?: number;
+    reviewReasons?: string[];
+  };
   /** Presentation of the existing V4 offer; monetary labels come from core's central source. */
   offerSummary?: {
     setup: string;
@@ -101,7 +112,7 @@ export function renderLetterHtml(d: LetterData): string {
     11 +
     53 +
     Math.max(53, Math.ceil((d.offer.length + d.noAction.length) / 68) * 4.7 + 12);
-  const premium = Boolean(d.desktopScreenshotDataUri && estimatedHeight <= 150);
+  const premium = Boolean(d.desktopScreenshotDataUri && estimatedHeight <= 150 && !d.previewInvitation);
   const right = d.addressPosition === 'right';
   const g = right ? LETTER_GEOMETRY.right : LETTER_GEOMETRY.left;
   // Anschrift 3 mm eingerückt im Feld, oben 1 mm Luft
@@ -169,7 +180,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .v4-letter .qrbox{flex:0 0 45mm;min-width:0}.v4-letter .qrbox strong{font-size:9pt}.v4-letter .short{font-size:8pt;color:#24364a;word-break:normal;overflow-wrap:anywhere}
 .offer-summary{margin:2mm 0;border-top:0.3mm solid #1d4e89;padding-top:2mm}
 .offer-prices{display:flex;gap:4mm;font-size:9.4pt;line-height:1.4}.offer-prices strong{font-weight:600}.offer-summary p{font-size:8.5pt;line-height:1.35;margin:1mm 0}.offer-summary .tax{font-size:8pt}
-.v4-letter .no-action{font-size:9pt;line-height:1.4}.v4-letter .sign{margin-top:0}
+.v4-letter .invitation-intro{font-size:10.5pt;line-height:1.42;margin:2mm 0 3mm}.v4-letter .invitation-intro p+p{margin-top:1.2mm}.invitation-next{font-size:9.5pt;line-height:1.4;margin:3mm 0}.invitation-next p+p{margin-top:1.5mm}.v4-letter .no-action{font-size:9pt;line-height:1.4}.v4-letter .sign{margin-top:0}
 .v4-page .small{font-size:8pt;color:#344054;line-height:1.32}
 .p2{position:absolute;left:25mm;right:20mm;top:25mm}
 .p2 h2{font-size:15pt;margin:0 0 2mm;color:#1d4e89}
@@ -181,7 +192,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .qrrow .qr{margin:0;width:41mm;height:41mm}
 </style></head>
 <body>
-<section class="page ${d.offerSummary ? 'v4-page' : ''}" aria-label="Seite 1">
+<section class="page ${d.offerSummary || d.previewInvitation ? 'v4-page' : ''}" aria-label="Seite 1">
   <header class="head">
     <div><div class="brand" style="display:flex;align-items:center;gap:8px">${brandMarkHtml(26, true)}<span>${esc(d.sender.company)}</span></div><div class="tag">Websites für lokale Betriebe</div></div>
     <div class="web">${esc(d.sender.website)}</div>
@@ -195,25 +206,29 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
     <div><span class="k">E-Mail</span> ${esc(d.sender.email)}</div>
     <div class="date">${esc(d.dateLine)}</div>
   </div>
-  <main class="body ${d.offerSummary && !d.reviewOffer ? 'v4-letter' : ''} ${d.reviewOffer ? 'review-letter' : ''} ${premium ? 'premium' : ''}" id="brieftext">
+  <main class="body ${(d.offerSummary || d.previewInvitation) && !d.reviewOffer ? 'v4-letter' : ''} ${d.reviewOffer ? 'review-letter' : ''} ${premium ? 'premium' : ''}" id="brieftext">
     <h1 class="subject">${esc(d.subject)}</h1>
     <p>${esc(d.greeting)}</p>
     ${
-      d.reviewOffer
-        ? `<p class="intro">${d.intro.map((p) => boldMd(p)).join(' ')}</p>
+      d.previewInvitation
+        ? `<div class="intro invitation-intro">${d.intro.map((p) => `<p>${boldMd(p)}</p>`).join('')}</div>
+    <div class="visual">${d.compositeDataUri ? `<img class="composite" src="${esc(d.compositeDataUri)}" alt="Echte Desktop- und Smartphone-Ansicht desselben Website-Entwurfs">` : ''}<div class="qrbox"><img class="qr" src="${esc(d.qrDataUri)}" alt="QR-Code zur persönlichen Website-Vorschau"><strong>${esc(d.qrCaption)}</strong><span class="short">${esc(d.shortUrl)}</span></div></div>
+    <div class="invitation-next"><p>${boldMd(d.offer)}</p><p>${boldMd(d.noAction)}</p></div><div class="sign">${esc(d.closing)}<br><strong>${esc(d.signatureName)}</strong></div>`
+        : d.reviewOffer
+          ? `<p class="intro">${d.intro.map((p) => boldMd(p)).join(' ')}</p>
     <div class="visual"><img class="hero-complete" src="${esc(d.compositeDataUri ?? d.desktopScreenshotDataUri ?? '')}" alt="Vollständiger Hero des persönlichen Website-Entwurfs"><div class="qrbox"><img class="qr" src="${d.qrDataUri}" alt="QR-Code zum Entwurf"><strong>Entwurf kostenlos ansehen</strong><span class="short">${esc(d.shortUrl)}</span></div></div>
     <div class="review-prices"><div><span>Einrichtung · einmalig</span><strong>${esc(d.reviewOffer.setup)}</strong></div><div><span>Basis · monatlich</span><strong>${esc(d.reviewOffer.basis)}</strong></div><div><span>Care+ · monatlich insgesamt</span><strong>${esc(d.reviewOffer.care)}</strong></div></div>
     <p class="review-conditions">${esc(d.reviewOffer.conditions)}</p><p>${esc(d.reviewOffer.scope)}</p>
     <p class="review-conditions">Rückfragen gern per E-Mail oder WhatsApp. Der Entwurf ist unverbindlich.</p><div class="sign">${esc(d.closing)}<br><strong>${esc(d.signatureName)}</strong></div>`
-        : d.offerSummary
-          ? `<div class="intro">${
-              d.intro.length > 1
-                ? `<p>${d.intro
-                    .slice(0, -1)
-                    .map((p) => boldMd(p))
-                    .join(' ')}</p>`
-                : ''
-            }<p>${boldMd(d.intro.at(-1) ?? '')}</p></div>
+          : d.offerSummary
+            ? `<div class="intro">${
+                d.intro.length > 1
+                  ? `<p>${d.intro
+                      .slice(0, -1)
+                      .map((p) => boldMd(p))
+                      .join(' ')}</p>`
+                  : ''
+              }<p>${boldMd(d.intro.at(-1) ?? '')}</p></div>
     <div class="visual">
       ${d.compositeDataUri ? `<img class="composite" src="${esc(d.compositeDataUri)}" alt="Echte Desktop- und Smartphone-Ansicht desselben Website-Entwurfs">` : ''}
       <div class="qrbox"><img class="qr" src="${d.qrDataUri}" alt="QR-Code zum persönlichen Entwurf"><strong>${esc(d.qrCaption)}</strong><span class="short">${esc(d.shortUrl)}</span></div>
@@ -224,8 +239,8 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
       ${d.offerSummary.guarantee ? `<p>${esc(d.offerSummary.guarantee)}</p>` : ''}<p class="tax">${esc(d.offerSummary.tax)}</p>
     </section>
     <p class="no-action">${boldMd(d.noAction)}</p><div class="sign">${esc(d.closing)} · <strong>${esc(d.signatureName)}</strong></div>`
-          : premium
-            ? `
+            : premium
+              ? `
     <p class="intro">${d.intro.map((p) => boldMd(p)).join(' ')}</p>
     <img class="hero-shot" src="${esc(d.desktopScreenshotDataUri!)}" alt="Persönlicher Website-Entwurf: tatsächlich gerenderter Hero-Bereich für ${esc(d.recipientLines.join(' '))}">
     <div class="offer-row"><div class="offer-copy">
@@ -233,7 +248,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
       <div class="sign"><div>${esc(d.closing)}</div><div class="name">${esc(d.signatureName)}</div></div>
     </div><div class="qrbox"><img class="qr" src="${d.qrDataUri}" alt="QR-Code zum persönlichen Entwurf"><strong>${esc(d.qrCaption)}</strong><span class="short">${esc(d.shortUrl)}</span></div></div>
     `
-            : `
+              : `
     ${d.intro.map((p) => `<p>${boldMd(p)}</p>`).join('\n    ')}
     <div class="visual">
       ${d.compositeDataUri ? `<img class="composite" src="${d.compositeDataUri}" alt="Ihre neue Website am Computer und auf dem Handy">` : ''}
