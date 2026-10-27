@@ -634,5 +634,35 @@
       "warm",
       "dark"
     ]
+  },
+  {
+    "file": "handwerk/maler-farbrolle-pexels-994164.jpg",
+    "group": "handwerk",
+    "alt": "Farbrolle beim Anstrich einer Wand, lizenziertes Beispielfoto",
+    "title": "Wall painting with a roller",
+    "creator": "Stephanie Ho",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/person-holding-paint-roller-while-painting-the-wall-994164/",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official image and license pages read; website/template/print use permitted. No endorsement or claim of business ownership.",
+    "bytes": 123111,
+    "width": 1400,
+    "height": 1400,
+    "keywords": [
+      "maler",
+      "anstrich"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 0.61,
+      "y": 0.46
+    },
+    "moods": [
+      "neutral",
+      "warm"
+    ]
   }
 ]

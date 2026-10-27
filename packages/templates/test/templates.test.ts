@@ -111,7 +111,7 @@ describe('Templates', () => {
 });
 
 describe('Beispielfotos (lizenzfrei, nur im Entwurf)', () => {
-  it('Manifest: jede Datei vorhanden, CC0, Quelle, Lizenz auch in den EXIF-Daten', async () => {
+  it('Manifest: jede Datei vorhanden, dokumentierte Lizenz und Quelle auch in den EXIF-Daten', async () => {
     const { readFileSync } = await import('node:fs');
     const path = await import('node:path');
     const { imagesDir, stockPhotoManifest } = await import('../src');
@@ -120,14 +120,19 @@ describe('Beispielfotos (lizenzfrei, nur im Entwurf)', () => {
     for (const g of ['gastronomie', 'einzelhandel', 'kurse'] as const)
       expect(list.filter((p) => p.group === g).length, g).toBeGreaterThanOrEqual(3);
     for (const p of list) {
-      expect(p.license, p.file).toMatch(p.kind === 'generated' ? /^Generated/ : /^CC0/);
+      expect(p.license, p.file).toMatch(p.kind === 'generated' ? /^Generated/ : /^(CC0 1\.0|Pexels License)$/);
       expect(p.sourceUrl).toMatch(/^https:\/\//);
       expect(p.alt.length).toBeGreaterThan(5);
       const bytes = readFileSync(path.join(imagesDir(), p.file));
       expect(bytes.length, p.file).toBeLessThan(150_000);
       if (p.kind !== 'generated') {
-        expect(bytes.toString('latin1'), `${p.file}: EXIF`).toContain('CC0');
+        expect(bytes.toString('latin1'), `${p.file}: EXIF`).toContain(p.license);
         expect(bytes.toString('latin1')).toContain(p.sourceUrl);
+        if (p.license === 'Pexels License') {
+          expect(p.source).toBe('Pexels');
+          expect(p.licenseUrl).toBe('https://www.pexels.com/license/');
+          expect(p.creator).toBeTruthy();
+        }
       } else expect(p.alt).toContain('KI-generiertes Beispielbild');
     }
   });

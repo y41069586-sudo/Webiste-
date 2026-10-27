@@ -411,6 +411,9 @@ header nav a {
   overflow: hidden;
   min-width: 0;
 }
+.sw-photo-composition > figure:only-child {
+  grid-column: 1 / -1;
+}
 .sw-photo-composition img {
   display: block;
   width: 100%;

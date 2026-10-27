@@ -1,0 +1,15 @@
+RUN  v3.2.7 /workspace/seitenwerk-v4/packages/core
+
+ ✓ test/acquisition-integration.test.ts (10 tests) 19830ms
+   ✓ injects source-backed maler services into the actual demo and matched letter  5992ms
+   ✓ injects source-backed reinigung services into the actual demo and matched letter  4578ms
+   ✓ injects source-backed fliesenleger services into the actual demo and matched letter  4493ms
+   ✓ a generic demo facts checkbox never verifies missing operational/website/acquisition evidence  3631ms
+ ✓ test/letter-writer.test.ts (9 tests) 26ms
+ ✓ test/acquisition.test.ts (16 tests) 21ms
+ ✓ test/letter-research.test.ts (7 tests) 4ms
+
+ Test Files  4 passed (4)
+      Tests  42 passed (42)
+   Start at  05:58:25
+   Duration  24.51s (transform 649ms, setup 14ms, collect 2.92s, tests 19.88s, environment 1ms, prepare 181ms)

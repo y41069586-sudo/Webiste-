@@ -346,3 +346,15 @@ Beispielleistungen als Betriebsfakten übernehmen. Inhaltsänderungen erfordern 
 Datums-/Bedarfsaktualisierung baut eine inhaltlich unveränderte Demo nicht neu. Brieffreigabe prüft
 den aktuellen Gesamtbelegstand erneut. Opt-out/Löschung entfernt auch Research. Google-Sperren,
 Foto-Nutzungsrechte, erste30-Review, V4-Preise, preisfreie Briefe und DRY_RUN unverändert erhalten.
+
+## 27.10.2026 – Realer Recherche-/Gestaltungsprobelauf
+
+Aktueller Handoff: `docs/real-painter-check/status.md`. Betreiber verlangt gründliche Suche nach
+tatsächlich passenden Betrieben; Mindestkriterien nicht für schnelle Ergebnisse lockern.
+Die abstrakte Farbflächen-Studie im Maler-Hero ist ausdrücklich nicht gewünscht. Bestehende Vorlagen
+verwenden passende rechtmäßig nutzbare Arbeitsmotive oder das sachliche Betriebs-/Leistungspanel.
+Kuratierte Pexels-Lizenz nicht als CC0 bezeichnen. Nichtgenerierte Beispielbildwelt weiterhin ehrlich
+kennzeichnen; fremde Arbeitsbilder nicht als echte Projekte des Betriebs ausgeben.
+Echter recherchierter Kontrollfall und reine redaktionelle Offline-KI-Fixture bleiben unterschiedliche
+Nachweise. Keine komplette echte LLM-/Stripe-Abnahme behaupten. Private Empfängerdaten/Quellenkopien
+nur in ignoriertem `data/`, keine Produktionsaufnahme oder Kontaktaufnahme. Alle bisherigen Gates erhalten.

@@ -59,8 +59,9 @@ export function ResearchForm({ id, research }: { id: string; research: LeadResea
           <legend className="font-medium">Belegte Angaben und Signale</legend>
           <p className="text-sm text-slate-600">
             Für die Eignung: Aktivität, Zustellanschrift, Eigenständigkeit, Leistungs-/Kundenfokus und mindestens ein aktuelles
-            Akquisesignal. Vollerwerb und echter Geschäftsbeginn sind zusätzliche Prioritätssignale. Für Beginn/Übernahme
-            zusätzlich das tatsächliche Ereignisdatum eintragen. Keine Gründung aus einem neuen Profil ableiten.
+            Akquisesignal. Vollerwerb und echter Geschäftsbeginn sind zusätzliche Prioritätssignale. Bekannte Ereignis- und
+            Veröffentlichungsdaten zusätzlich eintragen. Erneutes Lesen macht alte Anzeigen, Übernahmen oder Bilder nicht aktuell.
+            Nicht erreichbare Profile und reine Suchvorschauen sind kein abgeschlossener Quellencheck.
           </p>
           {Array.from({ length: Math.max(10, research?.signals.length ?? 0) }, (_, index) => {
             const signal = research?.signals[index];
@@ -94,7 +95,7 @@ export function ResearchForm({ id, research }: { id: string; research: LeadResea
                   />
                 </label>
                 <label className="text-sm">
-                  Geschäftsbeginn / Übernahmedatum (nur falls belegt)
+                  Ereignis / Veröffentlichung / Geschäftsbeginn (falls belegt)
                   <input type="date" name={`occurred${index}`} className={input} defaultValue={signal?.occurredOn} />
                 </label>
                 <label className="flex gap-2 text-sm sm:col-span-2">

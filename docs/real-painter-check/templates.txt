@@ -1,0 +1,10 @@
+RUN  v3.2.7 /workspace/seitenwerk-v4/packages/templates
+
+ ✓ test/art-direction.test.ts (7 tests) 22ms
+ ✓ test/templates.test.ts (97 tests) 159ms
+ ✓ test/design-review.test.ts (5 tests) 12ms
+
+ Test Files  3 passed (3)
+      Tests  109 passed (109)
+   Start at  05:54:24
+   Duration  1.02s (transform 214ms, setup 0ms, collect 353ms, tests 193ms, environment 0ms, prepare 169ms)

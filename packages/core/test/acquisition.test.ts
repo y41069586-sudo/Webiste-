@@ -186,6 +186,38 @@ it('invalidates stale evidence, old intent, changed identity and incomplete addr
   copy.evidence.identityHash = researchIdentity(missing);
   expect(assessAcquisition(missing, copy.evidence, ACQUISITION_POLICY, now).state).toBe('review');
 });
+it('does not renew historical acquisition events just because their source was reviewed today', () => {
+  for (const kind of [
+    'available_dates',
+    'service_advertising',
+    'new_offer',
+    'expansion',
+    'takeover',
+    'active_profile',
+  ] as const) {
+    const { lead, evidence, signal } = fixture();
+    evidence.signals = evidence.signals.filter((s) => s.kind !== 'service_advertising');
+    evidence.signals.push({ ...signal(kind, 'Historischer Beleg erneut gelesen'), occurredOn: '2024-03-14' });
+    const stale = assessAcquisition(lead, evidence, ACQUISITION_POLICY, now);
+    expect(stale.state, kind).toBe('review');
+    expect(stale.demand, kind).toEqual([]);
+    expect(stale.reasons.find((r) => r.criterion === 'lifecycle')?.points, kind).toBe(0);
+    evidence.signals.at(-1)!.occurredOn = '2026-10-16';
+    expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).state, kind).toBe('ready');
+    evidence.signals.at(-1)!.occurredOn = '2026-10-27';
+    expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).state, kind).toBe('review');
+  }
+});
+it('does not turn old reviews or photographs into fresh quality evidence by rereading them', () => {
+  const { lead, evidence, signal } = fixture();
+  evidence.signals.push(
+    { ...signal('recent_reviews', 'Historische Rückmeldung'), occurredOn: '2020-11-04' },
+    { ...signal('work_photos', 'Historische Arbeitsbilder'), occurredOn: '2021-10-01' },
+  );
+  const assessment = assessAcquisition(lead, evidence, ACQUISITION_POLICY, now);
+  expect(assessment.reasons.find((r) => r.criterion === 'quality_reviews')?.points).toBe(0);
+  expect(assessment.reasons.find((r) => r.criterion === 'quality_images')?.points).toBe(0);
+});
 it('phone duplicate comparison recognizes national and international notation without making a call', () => {
   expect(businessPhoneKey('+49 30 12345678')).toBe(businessPhoneKey('030 12345678'));
   expect(businessPhoneKey('0049 30 12345678')).toBe(businessPhoneKey('03012345678'));

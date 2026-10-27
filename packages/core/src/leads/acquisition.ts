@@ -69,7 +69,7 @@ export const researchSignalSchema = z.object({
   source: safeReference,
   observedAt: z.iso.datetime(),
   verified: z.literal(true),
-  /** An actual activity/takeover date, never a directory creation date. */
+  /** Actual event/publication date, or business start. Rereading a source does not renew its event. */
   occurredOn: z.iso.date().optional(),
 });
 export const WEBSITE_METHODS = ['name_city', 'phone', 'directory_links', 'profile_links'] as const;
@@ -160,9 +160,14 @@ const DEMAND = new Set<ResearchSignal['kind']>([
 export function assessAcquisition(lead: ResearchSubject, raw: unknown, policy = ACQUISITION_POLICY, now = new Date()) {
   const evidence = currentResearch(lead, raw, policy, now);
   const signals =
-    evidence?.signals.filter((s) =>
-      isFresh(s.observedAt, DEMAND.has(s.kind) ? policy.demandMaxDays : policy.evidenceMaxDays, now),
-    ) ?? [];
+    evidence?.signals.filter((s) => {
+      const maxDays = DEMAND.has(s.kind) ? policy.demandMaxDays : policy.evidenceMaxDays;
+      if (!isFresh(s.observedAt, maxDays, now)) return false;
+      // A current check of a historical ad, takeover, review or photograph is not current activity.
+      // Business/listing start dates deliberately remain historical facts for the lifecycle check.
+      const datedSignal = DEMAND.has(s.kind) || s.kind === 'recent_reviews' || s.kind === 'work_photos';
+      return !datedSignal || !s.occurredOn || isFresh(`${s.occurredOn}T00:00:00Z`, maxDays, now);
+    }) ?? [];
   const has = (kind: ResearchSignal['kind']) => signals.some((s) => s.kind === kind);
   const services = signals.filter((s) => s.kind === 'service' || s.kind === 'specialty');
   const serviceText = services.map((s) => s.text).join(' ');

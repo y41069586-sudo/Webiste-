@@ -299,3 +299,26 @@ Aktuelle Wiederaufnahme und vollständige Nachweise unter `docs/vibe-upgrade/sta
 Produktionsbuild-Wiederholungen. Alle Anbieteraufrufe im Test Mock. Kein Push/Deployment,
 keine reale Bildanalyse-Abnahme oder automatische Google-Maps-Fotorecherche behauptet.
 V4/V5-Architektur und reale Betriebsfreigaben bleiben erhalten.
+
+### 27.10.2026 – Echter Recherche-/Gestaltungsprobelauf
+
+Ausgangscommit `0ebc6e4`, weiterhin `codex/conversion-v4`. Aktueller Stand und konsolidierte
+Nachweise unter `docs/real-painter-check/status.md` und `verification.json`. Ein passender realer
+Privatkunden-/Renovierungsanbieter quellengebunden geprüft, keine eigene Website in dokumentierter
+Suche gefunden. Unbekanntes Alter/Vollerwerb/Auslastung nicht erfunden, keine Kundenkontakte.
+
+Bekannte historische Ereignisdaten können Signale jetzt nicht durch frische Sichtung verjüngen.
+Beanstandete abstrakte Maler-Grafik entfernt; passendes nichtgeneriertes Pexels-Foto mit eigener
+geprüfter Lizenz ergänzt. Echtes Einzelfoto-Rasterproblem (halbe Breite) behoben. Bestehende20 IDs,
+Plakat, V4-Preise, preisfreie Einladungsbriefe und Providerarchitektur unverändert.
+
+42 relevante Core-/109 Template-Tests, Typen/Lint und Web-/Workerbuild bestanden, sieben bekannte
+Tracingwarnungen. Ein echtes lokales Demo-/Brief-Kontrollpaar mit 360/390/430/1440px, korrekter
+QR-Zuordnung und einer A4-Seite in 300dpi geprüft. Axe ohne automatisch erkannte Verstöße;
+manuelle Kontrastfälle offen. Private Galerie/ZIP/Quellen und Empfängerdaten nur unter
+`data/exports/real-painter-check/`, nicht ins Git übernehmen.
+
+Text für diesen Kontrollfall redaktionelle Offline-Fixture, keine echte LLM-Abnahme. Aktuelle
+Laufzeit ohne Anthropic-/Stripe-Sandbox-/Webhook-Schlüssel. Kein echter externer E2E-Abschluss,
+keine Rechts-/Steuer-/Versandfreigabe. `DRY_RUN=true`, kein Push/Deploy/Versand. Nach Ansichtsprüfung
+weitere echte Kandidaten gleicher Nachweisqualität; echten Providerlauf erst sicher anbinden.

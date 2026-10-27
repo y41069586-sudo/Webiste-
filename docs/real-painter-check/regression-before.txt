@@ -1,0 +1,68 @@
+RUN  v3.2.7 /workspace/seitenwerk-v4/packages/core
+
+ ❯ test/acquisition.test.ts (16 tests | 2 failed) 24ms
+   ✓ uses the explicitly ordered target sectors, keeping the same templates and inactive choices respected 2ms
+   ✓ requires independent activity, a full website search, customer focus and an actual acquisition signal 7ms
+   ✓ never treats an empty website field or a social profile URL as a complete absence check 1ms
+   ✓ ratings and work photos are quality evidence, not spare capacity or acquisition intent 0ms
+   ✓ closed, subcontract-only, owned websites and busy businesses without growth are excluded 1ms
+   ✓ busy plus expansion is a review conflict, not invented availability 0ms
+   ✓ prefers the 6–36 month full-time test segment only from a proven start date 1ms
+   ✓ does not exclude a suitable older or very young business; takeovers/growth receive a documented bonus 1ms
+   ✓ invalidates stale evidence, old intent, changed identity and incomplete addresses 1ms
+   × does not renew historical acquisition events just because their source was reviewed today 5ms
+     → available_dates: expected 'ready' to be 'review' // Object.is equality
+   × does not turn old reviews or photographs into fresh quality evidence by rereading them 2ms
+     → expected 2 to be +0 // Object.is equality
+   ✓ phone duplicate comparison recognizes national and international notation without making a call 0ms
+   ✓ uses fact focus for branch-specific letters without asserting quality or lead guarantees 1ms
+   ✓ validates lifecycle policy boundaries 0ms
+   ✓ prioritizes the best available sector before a higher-scoring secondary lead 0ms
+   ✓ preserves unchanged demo content when only intent/date evidence is reviewed again 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/acquisition.test.ts > does not renew historical acquisition events just because their source was reviewed today
+AssertionError: available_dates: expected 'ready' to be 'review' // Object.is equality
+
+Expected: "review"
+Received: "ready"
+
+ ❯ test/acquisition.test.ts:195:31
+    193|     evidence.signals.push({ ...signal(kind, 'Historischer Beleg erneut…
+    194|     const stale = assessAcquisition(lead, evidence, ACQUISITION_POLICY…
+    195|     expect(stale.state, kind).toBe('review');
+       |                               ^
+    196|     expect(stale.demand, kind).toEqual([]);
+    197|     expect(stale.reasons.find((r) => r.criterion === 'lifecycle')?.poi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/acquisition.test.ts > does not turn old reviews or photographs into fresh quality evidence by rereading them
+AssertionError: expected 2 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ test/acquisition.test.ts:211:85
+    209|   );
+    210|   const assessment = assessAcquisition(lead, evidence, ACQUISITION_POL…
+    211|   expect(assessment.reasons.find((r) => r.criterion === 'quality_revie…
+       |                                                                                     ^
+    212|   expect(assessment.reasons.find((r) => r.criterion === 'quality_image…
+    213| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 14 passed (16)
+   Start at  05:38:26
+   Duration  1.93s (transform 203ms, setup 8ms, collect 553ms, tests 24ms, environment 0ms, prepare 44ms)
+
+undefined
+/workspace/seitenwerk-v4/packages/core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/acquisition.test.ts

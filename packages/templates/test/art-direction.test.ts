@@ -33,6 +33,25 @@ it('excludes generated assets even when review assets are listed without explici
   for (const g of ['handwerk', 'beauty', 'gastronomie', 'einzelhandel', 'kurse'] as const)
     expect(stockPhotos(g, 0, '', { includeReview: true }).some((p) => p.kind === 'generated')).toBe(false);
 });
+it('uses the licensed painter work photo only for relevant draft sectors, never as a business project', () => {
+  const photos = stockPhotos('handwerk', 0, 'Malerbetrieb');
+  expect(photos.some((p) => p.source === 'Pexels' && p.role === 'work')).toBe(true);
+  expect(stockPhotos('handwerk', 0, 'Elektriker').some((p) => p.source === 'Pexels')).toBe(false);
+  const input = demoInput('handwerk-klar', 'werkblau');
+  input.facts.branchLabel = 'Malerbetrieb';
+  expect(renderSite(input)).not.toContain('class="sw-material-study"');
+  expect(renderSite(input)).toContain('lizenzierte Beispielfotos, keine Aufnahmen des Betriebs');
+  expect(renderSite({ ...input, mode: 'screenshot' })).toContain('data:image/jpeg;base64,');
+  for (const mode of ['preview', 'live'] as const)
+    expect(
+      renderSite({
+        ...input,
+        mode,
+        demo: undefined,
+        live: { formAction: '/api/forms/test', imprintPath: 'impressum.html', privacyPath: 'datenschutz.html' },
+      }),
+    ).not.toContain('data:image/jpeg;base64,');
+});
 it('does not put an unlicensed business photo/logo in a draft; explicit permission permits it', () => {
   const input = demoInput('handwerk-klar', 'werkblau');
   const photo = 'data:image/png;base64,UNIQUE-PERMISSION-TEST';

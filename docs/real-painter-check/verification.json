@@ -1,0 +1,119 @@
+{
+  "checkedAt": "2026-10-27T06:02:42.709162+00:00",
+  "baseCommit": "0ebc6e4",
+  "branch": "codex/conversion-v4",
+  "dryRun": true,
+  "externalProviderCalls": false,
+  "published": false,
+  "pushed": false,
+  "core": {
+    "passed": 42,
+    "suites": 4,
+    "scope": "acquisition, acquisition-integration, letter-research, letter-writer",
+    "log": "core.txt"
+  },
+  "templates": {
+    "passed": 109,
+    "suites": 3,
+    "log": "templates.txt"
+  },
+  "types": {
+    "exitCode": 0,
+    "log": "types.txt"
+  },
+  "lint": {
+    "exitCode": 0,
+    "log": "lint.txt"
+  },
+  "build": {
+    "exitCode": 0,
+    "knownTracingWarnings": 7,
+    "log": "build.txt"
+  },
+  "newRegressionBeforeFix": {
+    "failed": 2,
+    "passed": 14,
+    "log": "regression-before.txt"
+  },
+  "browser": {
+    "widths": [
+      {
+        "width": 360,
+        "urlAssigned": true,
+        "overflow": false,
+        "brokenImages": 0,
+        "formsPointToLocalReview": true,
+        "singlePhotoFills": true
+      },
+      {
+        "width": 390,
+        "urlAssigned": true,
+        "overflow": false,
+        "brokenImages": 0,
+        "formsPointToLocalReview": true,
+        "singlePhotoFills": true
+      },
+      {
+        "width": 430,
+        "urlAssigned": true,
+        "overflow": false,
+        "brokenImages": 0,
+        "formsPointToLocalReview": true,
+        "singlePhotoFills": true
+      },
+      {
+        "width": 1440,
+        "urlAssigned": true,
+        "overflow": false,
+        "brokenImages": 0,
+        "formsPointToLocalReview": true,
+        "singlePhotoFills": true
+      }
+    ],
+    "axe": [
+      {
+        "width": 390,
+        "errors": [],
+        "violations": [],
+        "passes": 25,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 1440,
+        "errors": [],
+        "violations": [],
+        "passes": 25,
+        "incomplete": [
+          "color-contrast"
+        ]
+      }
+    ],
+    "notARealStripeOrLLMTest": true
+  },
+  "pdf": {
+    "pages": 1,
+    "issues": [],
+    "qrDecodedFromFinalPdf": true,
+    "priceFree": true,
+    "printDpi": 300,
+    "pdfHash": "5767ab887d3fa98188621174f178bd83d990c416796097724f9f4be75f2797db"
+  },
+  "copy": {
+    "source": "editorial offline fixture grounded in real public business descriptions",
+    "autoModelReview": false,
+    "realModelCall": false
+  },
+  "privateArtifacts": "data/exports/real-painter-check/proof/",
+  "privateZip": "data/exports/real-painter-check/seitenwerk-erster-realer-probelauf.zip",
+  "notVerified": [
+    "actual LLM output quality",
+    "real Stripe sandbox chain",
+    "legal approval for public-source postal campaign",
+    "original business branding/photo rights",
+    "production suppression/duplicates/address check",
+    "physical print/envelope/camera scan",
+    "manual axe contrast cases"
+  ]
+}

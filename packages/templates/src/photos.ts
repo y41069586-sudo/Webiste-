@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import type { BranchGroup } from './types';
 
 /**
- * CC0-Fotos und getrennt dokumentierte KI-Beispielbilder für Entwürfe. Herkunft und
- * Nutzungsgrundlage stehen in assets/images/manifest.json; nur CC0-JPEGs tragen EXIF-Lizenzdaten. Sie erscheinen nur im Entwurf und sind dort als
+ * Kuratierte CC0-/Pexels-Fotos und getrennt dokumentierte KI-Beispielbilder für Entwürfe. Herkunft und
+ * Nutzungsgrundlage stehen in assets/images/manifest.json und den EXIF-Lizenzdaten. Sie erscheinen nur im Entwurf und sind dort als
  * „Beispielfoto“ gekennzeichnet – auf Live-Seiten stehen nur Fotos des Kunden.
  */
 export interface StockPhoto {
@@ -63,6 +63,11 @@ export function stockPhotos(
       p.group === group &&
       (!p.reviewOnly || opts.includeReview) &&
       (p.license === 'CC0 1.0' ||
+        (p.license === 'Pexels License' &&
+          p.source === 'Pexels' &&
+          p.licenseUrl === 'https://www.pexels.com/license/' &&
+          /^https:\/\/www\.pexels\.com\/photo\/[a-z0-9-]+-\d+\/$/.test(p.sourceUrl) &&
+          Boolean(p.creator)) ||
         (opts.allowGenerated === true &&
           p.kind === 'generated' &&
           p.source === 'OpenAI image generation' &&

@@ -20,3 +20,8 @@ Bericht: README.md. Keine weiteren Featurepakete beginnen. Nächster Schritt: fa
 Regeln und später genehmigter Rollout einschließlich Abgleich bestehender gespeicherter Branchenlisten.
 Echte Recherche-/KI-/Provider-/Versandabnahme weiterhin offen. Keine automatische9,5/10- oder
 Conversionbewertung. Letzten sicheren Implementierungscommit mit git log lesen; kein Push/Deploy.
+
+27.10.2026: Ersten echten quellengebundenen Recherche-/Gestaltungsprobelauf ausgeführt;
+aktueller Anschlussstand unter `docs/real-painter-check/status.md`. Bekannte historische
+Ereignisdaten begrenzen nun auch bei frischer Sichtung die Signalaktualität. Echte LLM-/Provider-
+und Versandabnahme bleibt offen. Private Empfängerdaten nur unter ignoriertem `data/`.

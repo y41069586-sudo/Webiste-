@@ -325,3 +325,15 @@ privaten Settings-/Adminpfad, keine neue Datenbank. Verifizierte Leistungen für
 wiederverwenden; keine erfundene Qualität, Referenzen, Kapazität oder zusätzliche Anfragen.
 Bestehende V4-Preise, direkter schriftlicher Kauf und preisfreie Briefe bleiben. Alles lokal/Mock,
 keine externe Recherche oder Produktionsänderung. Übergabe: docs/acquisition-priorities/.
+
+### 27.10.2026 – Erster realer Recherche- und Gestaltungsprobelauf
+
+Betreiber beauftragt ausdrücklich passende reale Betriebe gründlich zu recherchieren, Mindestkriterien
+nicht für schnelle Ergebnisse abzusenken und daraus lokale Demo-/Briefprüfmuster zu erstellen.
+Die zwischenzeitliche Aufforderung, unklare Website-Suchen abzukürzen, wurde ausdrücklich korrigiert.
+Unbekannt bleibt unbekannt; technische Akquise-Eignung ist keine Versand-/Rechtsfreigabe.
+Die abstrakte Farbflächen-Grafik im Maler-Hero wurde ausdrücklich beanstandet. Passendes rechtmäßig
+nutzbares Arbeitsfoto verwenden; ohne Bild sachlichen Fallback, keine erfundenen Betriebsaufnahmen.
+Vorhandene V4/V5-Architektur und Anbieter behalten. Kein Push/Deploy, Kontakt oder kostenpflichtiger
+Geschäftsvorgang. Erster Kontrolltext redaktionelle Offline-Fixture, keine echte LLM-Abnahme.
+Nachweise: docs/real-painter-check/; Empfängerdaten und Renderexporte nur privat unter data/.
