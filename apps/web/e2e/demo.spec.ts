@@ -22,7 +22,7 @@ test.describe('Demo: Ansicht, Frage, Opt-out', () => {
     await expect(page.locator('#uebernehmen')).toContainText('49');
     await expect(page.getByRole('heading', { name: 'Wer hat diesen Entwurf gebaut?' })).toBeVisible();
     await expect(page.getByText('hat diese Seite nicht beauftragt')).toBeVisible();
-    await expect(page.getByText('Beispiel-Leistungen')).toBeVisible();
+    await expect(page.getByText('Beispiel-Leistungen').first()).toBeVisible();
 
     // Frage stellen → Formular an uns
     await page.getByRole('link', { name: 'Fragen', exact: true }).click();
