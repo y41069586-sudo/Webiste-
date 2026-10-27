@@ -682,7 +682,7 @@ h1 em {
 .mini {
   position: absolute;
   inset: 70px 0 0;
-  transition: transform 0.5s var(--ease);
+  transition: transform 0.5s cubic-bezier(0.45, 0, 0.2, 1);
 }
 .mini-hero {
   position: relative;
@@ -1949,9 +1949,11 @@ details[open] summary::after {
 .hb-formwrap.sent .done {
   display: flex;
 }
-.card.sent .cta-form,
-.hb-formwrap.sent .hb-form {
+.card.sent .cta-form {
   visibility: hidden;
+}
+.hb-formwrap.sent .hb-form {
+  display: none;
 }
 .done-art {
   position: relative;
@@ -2055,6 +2057,10 @@ details[open] summary::after {
 }
 .done .k {
   margin: 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  color: var(--blue);
   animation: rf-up 0.6s 0.9s both;
 }
 .done h3 {
@@ -2081,8 +2087,14 @@ details[open] summary::after {
   position: relative;
 }
 .hb-formwrap .done {
+  /* Im Hero ersetzt die Danke-Karte das niedrige Formular in voller Höhe */
+  position: relative;
+  inset: auto;
+  max-width: 520px;
+  padding: 26px 22px 24px;
+  border: 1px solid var(--line);
   border-radius: 18px;
-  min-height: 100%;
+  box-shadow: 0 24px 50px -30px rgb(10 29 74 / 0.4);
 }
 
 /* ---------- Footer ---------- */

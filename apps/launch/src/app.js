@@ -111,6 +111,7 @@
       $$('.sk', stage).forEach((n) => n.classList.remove('on'));
       $$('.hot', stage).forEach((n) => n.classList.remove('hot'));
       mini.classList.remove('s-photo');
+      mini.style.transitionDuration = '0.5s';
       mini.style.transform = '';
       live.classList.remove('on');
     }
@@ -169,10 +170,11 @@
       { from: () => item('telefon'), label: 'Telefon', to: () => $('.mini-top i', stage), top: true },
     ];
 
-    function scrollTo(node, min = 0) {
+    function scrollTo(node, min = 0, seconds = 0.5) {
       // Handy-Inhalt so weit hochschieben, dass der Kartenabschnitt sichtbar ist
       const room = screen.clientHeight - 70;
       const bottom = node.offsetTop + node.offsetHeight + 16;
+      mini.style.transitionDuration = `${seconds}s`;
       mini.style.transform = `translateY(${-Math.max(min, bottom - room)}px)`;
     }
 
@@ -189,6 +191,7 @@
             await wait(200);
           }
           if (step.top) {
+            mini.style.transitionDuration = '0.5s';
             mini.style.transform = '';
             await wait(200);
           }
@@ -201,10 +204,10 @@
           await wait(100);
         }
         // Fertige Seite: leicht nach unten scrollen, damit Karte und Ort sichtbar sind
-        scrollTo(parts('adresse')[0], 110);
-        await wait(450);
+        scrollTo(parts('adresse')[0], 110, 1.6);
+        await wait(300);
         live.classList.add('on');
-        await wait(2200);
+        await wait(3000);
         i = (i + 1) % BUSINESSES.length;
         reset();
         stage.animate([{ opacity: 1 }, { opacity: 0.35 }, { opacity: 1 }], { duration: 500 });
