@@ -94,6 +94,7 @@
       el('m-brand').textContent = b.name;
       el('m-kicker').textContent = b.kicker;
       el('m-name').textContent = b.name;
+      el('m-foot').textContent = b.name;
       el('m-claim').textContent = b.claim;
       el('m-chips').replaceChildren(
         ...b.chips.map((c) => {
@@ -168,11 +169,11 @@
       { from: () => item('telefon'), label: 'Telefon', to: () => $('.mini-top i', stage), top: true },
     ];
 
-    function scrollTo(node) {
+    function scrollTo(node, min = 0) {
       // Handy-Inhalt so weit hochschieben, dass der Kartenabschnitt sichtbar ist
       const room = screen.clientHeight - 70;
       const bottom = node.offsetTop + node.offsetHeight + 16;
-      mini.style.transform = `translateY(${-Math.max(0, bottom - room)}px)`;
+      mini.style.transform = `translateY(${-Math.max(min, bottom - room)}px)`;
     }
 
     (async () => {
@@ -199,6 +200,9 @@
           src.classList.remove('hot');
           await wait(100);
         }
+        // Fertige Seite: leicht nach unten scrollen, damit Karte und Ort sichtbar sind
+        scrollTo(parts('adresse')[0], 110);
+        await wait(450);
         live.classList.add('on');
         await wait(2200);
         i = (i + 1) % BUSINESSES.length;
