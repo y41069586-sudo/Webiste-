@@ -142,7 +142,7 @@
           { opacity: 0.9, strokeDashoffset: 0, offset: 0.8 },
           { opacity: 0, strokeDashoffset: 0 },
         ],
-        { duration: 1300, easing: 'ease-out' },
+        { duration: 750, easing: 'ease-out' },
       );
       flyer.textContent = label;
       const w = flyer.offsetWidth;
@@ -157,7 +157,7 @@
           opacity: i === 0 ? 0 : i === 16 ? 0 : 1,
         });
       }
-      await flyer.animate(frames, { duration: 1100, easing: 'cubic-bezier(.5,0,.3,1)' }).finished;
+      await flyer.animate(frames, { duration: 620, easing: 'cubic-bezier(.5,0,.3,1)' }).finished;
     }
 
     const STEPS = [
@@ -178,35 +178,35 @@
     (async () => {
       let i = 0;
       fill(BUSINESSES[0]);
-      await wait(900);
+      await wait(250);
       for (;;) {
         for (const step of STEPS) {
           const src = step.from();
           const target = step.to ? step.to() : parts(step.part)[0];
           if (step.scroll) {
             scrollTo(target);
-            await wait(700);
+            await wait(380);
           }
           if (step.top) {
             mini.style.transform = '';
-            await wait(700);
+            await wait(380);
           }
           src.classList.add('hot');
-          await wait(380);
+          await wait(160);
           await fly(src, target, step.label);
           if (step.part) parts(step.part).forEach((n) => n.classList.add('on'));
           step.then?.();
           src.classList.remove('hot');
-          await wait(420);
+          await wait(180);
         }
         live.classList.add('on');
-        await wait(3200);
+        await wait(2200);
         i = (i + 1) % BUSINESSES.length;
         reset();
-        stage.animate([{ opacity: 1 }, { opacity: 0.35 }, { opacity: 1 }], { duration: 700 });
-        await wait(350);
+        stage.animate([{ opacity: 1 }, { opacity: 0.35 }, { opacity: 1 }], { duration: 500 });
+        await wait(250);
         fill(BUSINESSES[i]);
-        await wait(900);
+        await wait(400);
       }
     })();
   }

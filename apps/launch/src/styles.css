@@ -369,16 +369,16 @@ h1 em {
 }
 .hero h1 .line span {
   display: inline-block;
-  animation: hb-rise 1.05s var(--ease) both;
+  animation: hb-rise 0.7s var(--ease) both;
 }
 .hero h1 .line:nth-child(2) span {
-  animation-delay: 0.08s;
+  animation-delay: 0.05s;
 }
 .hero h1 .line:nth-child(3) span {
-  animation-delay: 0.16s;
+  animation-delay: 0.1s;
 }
 .hero h1 .line:nth-child(4) span {
-  animation-delay: 0.24s;
+  animation-delay: 0.15s;
 }
 .hero h1 .accent {
   color: var(--blue);
@@ -393,16 +393,16 @@ h1 em {
   color: var(--ink);
 }
 .fade-up {
-  animation: fade-up 0.8s var(--ease) both;
+  animation: fade-up 0.55s var(--ease) both;
 }
 .d1 {
-  animation-delay: 0.35s;
+  animation-delay: 0.15s;
 }
 .d2 {
-  animation-delay: 0.5s;
+  animation-delay: 0.25s;
 }
 .d3 {
-  animation-delay: 0.65s;
+  animation-delay: 0.35s;
 }
 
 /* Formular im Hero */
@@ -682,7 +682,7 @@ h1 em {
 .mini {
   position: absolute;
   inset: 70px 0 0;
-  transition: transform 1.6s var(--ease);
+  transition: transform 0.9s var(--ease);
 }
 .mini-hero {
   position: relative;
