@@ -55,11 +55,11 @@ Claims-, AGB- und Betriebsdokumente in `docs/` ergänzen. Unter `apps/web` gilt 
   Eine Codeänderung oder ein früherer Phasenabschluss ist keine Live-Freigabe.
 - Automatische Schalter nicht eigenständig freischalten: insbesondere `AUTO_SEND`, `AUTO_REPLY`,
   `AUTO_OPTIMIZE`, `AUTO_ACTIVATE_VARIANTS`, Domainregistrierung und Echtbrief-Freigabe.
-  `LXP_MODE=test`, Registrar-Sandbox und `SITE_INDEXABLE=false` bis zur passenden Freigabe belassen.
+  `EASYNOVA_MODE=test` (bzw. `LXP_MODE=test`), Registrar-Sandbox und `SITE_INDEXABLE=false` bis zur passenden Freigabe belassen.
 - **DRY_RUN ist kein universeller Offline-Modus.** `effectiveSwitches` sperrt per ENV das Abschalten
   des Dry-Runs, aber Provider können weiterhin externe Aufrufe ausführen. E-Mail-Versand hat keinen
   generellen Dry-Run-Guard; Zahlung richtet sich auch nach dem Stripe-Key. LLM-Aufrufe, Hosting und
-  LetterXpress-Testaufträge sind ebenfalls nicht pauschal ausgeschlossen.
+  easyNova-/LetterXpress-Testaufträge sind ebenfalls nicht pauschal ausgeschlossen.
 - Für lokale Abläufe alle externen Provider ausdrücklich auf Mock setzen (`LLM_PROVIDER`,
   `LEAD_SOURCE`, `MAIL_PROVIDER`, `PAYMENT_PROVIDER`, `REGISTRAR_PROVIDER`, `HOSTING_PROVIDER`,
   `EMAIL_PROVIDER`), lokalen Speicher und eine isolierte lokale Datenbank verwenden. Worker nicht
@@ -107,8 +107,9 @@ Claims-, AGB- und Betriebsdokumente in `docs/` ergänzen. Unter `apps/web` gilt 
   Auth, Queue, Provider-Interfaces/Registry, Rendering per Playwright/Chromium, Claims/Playbooks.
 - `packages/templates`: bestehende Website-, Brief-, Rechnungs- und Wartungslayouts. Fünf Gruppen
   mit je drei Basislayouts plus Plakat; zentrale Registry/Paletten erhalten. `dienstleistung` ist Fallback.
-- Externe Anbieter hinter vorhandenen Interfaces: Anthropic, OSM/optionales Google, LetterXpress,
-  Stripe, INWX, Cloudflare/Netlify, Resend/Postmark, lokaler/S3-Speicher. Pingen nur inaktive Alternative.
+- Externe Anbieter hinter vorhandenen Interfaces: Anthropic, OSM/optionales Google, easyNova (Briefdienst,
+  Betreiberentscheidung 27.10.2026), Stripe, INWX, Cloudflare/Netlify, Resend/Postmark, lokaler/S3-Speicher.
+  LetterXpress und Pingen nur inaktive Alternativen.
   Kein zweites Interface/Schema für bereits abgebildete Information erfinden.
 - Konfiguration: `.env.example`, `src/config/env.ts`, `settings.ts`, `service.ts`; fachliche Werte in
   DB, Secrets aus Umgebung. Idempotenz, Audit-Log, Budget-Ledger und Freigaben erhalten.

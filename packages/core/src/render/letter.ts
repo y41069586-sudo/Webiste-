@@ -8,7 +8,7 @@ import { sha256 } from '../util/crypto';
 import { assessLetterQuality } from '../quality/letter';
 import { and, eq, inArray, isNull, lt, sql } from 'drizzle-orm';
 import QRCode from 'qrcode';
-import { renderLetterHtml } from '@wbm/templates';
+import { renderLetterHtml, returnAddressLine } from '@wbm/templates';
 import { appUrl, getEnv, trackUrl } from '../config/env';
 import { effectiveSwitches, getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
@@ -289,6 +289,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     recipientLines: recipientLines(recipient),
     position: cfg.letter.addressPosition,
     expectedPages,
+    returnAddressLine: returnAddressLine(data.sender),
   });
   const issues = [...domIssues, ...pdfCheck.issues];
 

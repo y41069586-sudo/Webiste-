@@ -463,3 +463,15 @@ Netlify-Projekt `seitenwerk-website` (seitenwerk.world), Formulare aktiviert und
 alte Pfade per `_redirects` auf Abschnitte umgeleitet, weiterhin noindex. Der Deploy ist bereit, aber noch nicht
 veröffentlicht, weil der vorherige Produktionsdeploy gesperrt ist (Auto-Publishing aus) → in Netlify
 „Publish deploy“ klicken. Formular-Benachrichtigung per E-Mail im Netlify-Dashboard einrichten.
+
+## Briefdienst easyNova (27.10.2026, lokal)
+
+Betreiberentscheidung: easyNova statt LetterXpress. Neuer `MailProvider` (`packages/core/src/providers/mail/easynova.ts`)
+nach offizieller OpenAPI V1: Token-Anmeldung, `Idempotency-Key`, Testmodus per `testFlag` (kein Druck, keine
+Kosten), Status 1–4/99, Preisvorschau, Guthaben. Freigabe wie bisher: 3 Testaufträge → 1 echter Brief an den
+Betreiber → Freischaltung. Brief trägt jetzt die von easyNova verlangte Absenderzeile über dem Adressfenster
+(DIN 5008), Layoutprüfung angepasst. Datenschutz Abschnitt 11 nennt easyNova. Admin-Testknopf für easyNova.
+Kein Konto, kein Aufruf mit Zugangsdaten, keine Kosten. Offen: Konto + AV-Vertrag, Zugangsdaten sicher
+hinterlegen (`EASYNOVA_USERNAME`, `EASYNOVA_PASSWORD`, `EASYNOVA_TEST_EMAIL`), Sperrflächen per `GET /api/account`
+mit unserem Brief abgleichen. Die veröffentlichte Landingpage-Vorschau nennt noch LetterXpress; der nächste
+Upload enthält den neuen Text.

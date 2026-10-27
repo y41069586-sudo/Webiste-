@@ -84,6 +84,8 @@ describe('V5: tatsächliche V4-Brief- und Vertragsbedingungen', () => {
     expect(text).toContain('Einrichtungsgebühr wird erstattet');
     expect(text).not.toContain('erste Rate bei Vertragsschluss');
     expect(text).not.toContain('spätestens der 14. Tag nach Zahlung');
-    expect(text).toContain('rechtlichen Freigabe');
+    // Entwurf tritt nicht als freigegebener Vertrag auf (öffentliche Fassung ohne interne Arbeitsvermerke, 27.10.2026)
+    expect(text).toContain('Verbindliche Bestellungen werden derzeit noch nicht angenommen');
+    expect(text).toContain('Derzeit sind echte Bestellungen gesperrt');
   });
 });

@@ -82,9 +82,9 @@ export function operationsPreflight(raw: Record<string, string | undefined>): Op
     'Vorhandenen Sandbox-Key und Signatursecret des dynamischen App-Webhooks sicher hinterlegen; vollständigen Sandbox-Ablauf abnehmen.',
   );
   check(
-    'letterxpress-test',
-    raw.MAIL_PROVIDER === 'letterxpress' && raw.LXP_MODE === 'test' && present('LXP_USERNAME', 'LXP_APIKEY'),
-    'LetterXpress-Testzugang sicher bereitstellen; kein Auftrag durch diesen Check.',
+    'easynova-test',
+    raw.MAIL_PROVIDER === 'easynova' && raw.EASYNOVA_MODE !== 'live' && present('EASYNOVA_USERNAME', 'EASYNOVA_PASSWORD'),
+    'easyNova-Zugang (Benutzername/Kennwort) sicher bereitstellen, EASYNOVA_MODE=test; kein Auftrag durch diesen Check.',
   );
   check(
     'resend',

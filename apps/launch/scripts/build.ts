@@ -259,7 +259,7 @@ for (const [route, html] of Object.entries({ ...pages, '/404': notFound })) {
   findings.push(...checkPublicPage(route, html));
   if (/\{\{[A-Z_]+\}\}/.test(html)) findings.push(`${route}: unersetzter Platzhalter`);
 }
-if (!/597\s€/.test(pages['/']!.replace(/ /g, ' '))) findings.push('/: aktuelle Einrichtung 597 € fehlt');
+if (!/597\s€/.test(pages['/']!.replace(/\u00a0/g, ' '))) findings.push('/: aktuelle Einrichtung 597 € fehlt');
 if (findings.length) {
   console.error(`Export gesperrt – ${findings.length} Befund(e):\n  ${findings.join('\n  ')}`);
   process.exit(1);

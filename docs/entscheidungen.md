@@ -364,3 +364,15 @@ Aktualisierung und VPS-/API-/ChatGPT-Abrechnung: docs/vibe-upgrade/automation-an
   per E-Mail nach bestätigtem Zahlungseingang). Künftige Dienste (LetterXpress, KI-Anbieter, Registrar/Hosting)
   als „vor Aktivierung zu ergänzen“. Keine anwaltliche Prüfung erfolgt. Fehlende Betreiberdaten bleiben als
   Markierung erhalten und sperren den Export.
+
+### 27.10.2026 – Briefdienst easyNova statt LetterXpress (Betreiberentscheidung)
+
+Betreiber: „Easynova benutzen wir, nicht LetterXpress.“ Neuer `MailProvider` `easynova` nach offizieller
+OpenAPI V1 (docs/integrations.md), gleiches Freigabe-Muster wie bisher: `EASYNOVA_MODE=test` als Standard,
+3 Testaufträge (testFlag, kein Druck) → 1 echter Brief an den Betreiber → erst nach Freischaltung echte Leads.
+LetterXpress bleibt als inaktive Alternative im Code (bestehende Tests grün). Weil easyNova Briefe ohne
+Absenderzeile über dem Adressfenster ablehnt, trägt jeder Brief jetzt eine Rücksendeangabe nach DIN 5008; die
+Layoutprüfung erlaubt nur diese Zeile im Fensterbereich und meldet sie, wenn sie fehlt oder abgeschnitten ist.
+Keine Adresskorrektur durch den Anbieter (lieber Ablehnung als veränderter Brief). Datenschutzabschnitt 11 nennt
+easyNova (SIECOM IT-Systemhaus GmbH); AV-Vertrag vor erster Beauftragung. Kein Konto angelegt, kein Aufruf mit
+Zugangsdaten, keine Kosten.

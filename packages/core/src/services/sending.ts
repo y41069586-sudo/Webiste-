@@ -28,12 +28,18 @@ export type SendResult =
   | { state: 'skipped'; reason: string };
 
 /** Echte Briefe an Leads erst nach erfolgreichem Testbrief (Schalter im Dashboard). */
-/** Mindestzahl erfolgreicher Testaufträge im LetterXpress-Testmodus vor dem ersten echten Brief (B5.2) */
+/** Mindestzahl erfolgreicher Testaufträge im Testmodus des Briefdienstes vor dem ersten echten Brief (B5.2) */
 export const LXP_REQUIRED_TEST_JOBS = 3;
 
+/** Briefdienste mit Testmodus (kein Druck) und Zähler der dort übertragenen Testaufträge */
+const TEST_JOB_COUNTERS: Record<string, { counter: string; label: string; setup: string }> = {
+  easynova: { counter: 'easynova_test_jobs', label: 'easyNova', setup: 'MAIL_PROVIDER=easynova und EASYNOVA_MODE=test' },
+  letterxpress: { counter: 'lxp_test_jobs', label: 'LetterXpress', setup: 'MAIL_PROVIDER=letterxpress und LXP_MODE=test' },
+};
+
 /**
- * Freigabe-Reihenfolge für echte Briefe: (LetterXpress) 3 Testaufträge im Testmodus → 1 echter Testbrief an
- * den Betreiber → erst nach Freischaltung echte Leads.
+ * Freigabe-Reihenfolge für echte Briefe: (easyNova/LetterXpress) 3 Testaufträge im Testmodus → 1 echter
+ * Testbrief an den Betreiber → erst nach Freischaltung echte Leads.
  */
 export function realLettersGate(
   providerName: string,
@@ -43,10 +49,11 @@ export function realLettersGate(
   lxpTestJobs = 0,
 ): string | null {
   const env = getEnv();
-  const lxpLive = providerName === 'letterxpress' && providerMode === 'live';
-  const production = (providerName === 'pingen' && env.PINGEN_ENV === 'production') || lxpLive;
-  if (lxpLive && lxpTestJobs < LXP_REQUIRED_TEST_JOBS) {
-    return `Erst ${LXP_REQUIRED_TEST_JOBS} Testaufträge im LetterXpress-Testmodus prüfen (bisher ${lxpTestJobs}).`;
+  const testJobProvider = TEST_JOB_COUNTERS[providerName];
+  const testJobLive = Boolean(testJobProvider) && providerMode === 'live';
+  const production = (providerName === 'pingen' && env.PINGEN_ENV === 'production') || testJobLive;
+  if (testJobLive && lxpTestJobs < LXP_REQUIRED_TEST_JOBS) {
+    return `Erst ${LXP_REQUIRED_TEST_JOBS} Testaufträge im ${testJobProvider!.label}-Testmodus prüfen (bisher ${lxpTestJobs}).`;
   }
   if (isTest) return null;
   if (production && !unlocked) return 'Echte Briefe an Leads sind noch gesperrt (erst Testbrief an dich, dann freischalten).';
@@ -54,7 +61,14 @@ export function realLettersGate(
 }
 
 export async function lxpTestJobCount(db: DbOrTx = getDb()): Promise<number> {
-  const r = await db.execute<{ value: number }>(sql`SELECT value FROM counters WHERE name = 'lxp_test_jobs'`);
+  return providerTestJobCount('letterxpress', db);
+}
+
+/** Bisher übertragene Testaufträge beim jeweiligen Briefdienst (0 für Dienste ohne Testmodus). */
+export async function providerTestJobCount(providerName: string, db: DbOrTx = getDb()): Promise<number> {
+  const t = TEST_JOB_COUNTERS[providerName];
+  if (!t) return 0;
+  const r = await db.execute<{ value: number }>(sql`SELECT value FROM counters WHERE name = ${t.counter}`);
   return Number(r.rows[0]?.value ?? 0);
 }
 
@@ -147,7 +161,7 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     letter.isTest,
     sw.realLettersUnlocked,
     provider.mode,
-    provider.name === 'letterxpress' ? await lxpTestJobCount(db) : 0,
+    await providerTestJobCount(provider.name, db),
   );
   if (gate) throw new SendBlockedError(gate);
   // Echte Briefe an Leads erst, wenn Absenderdaten, Rechtstexte und AGB vollständig sind
@@ -329,11 +343,13 @@ export async function balanceGuard(
 }
 
 /**
- * Testauftrag im LetterXpress-Testmodus (B5.2): Brief-PDF in die Postbox übertragen – kein Druck, keine
- * Kosten, nach 7 Tagen gelöscht. Erlaubt auch bei DRY_RUN, weil im Testmodus nichts versendet wird.
- * Ändert den Brief nicht; zählt für die Freigabe-Reihenfolge (3 Testaufträge).
+ * Testauftrag im Testmodus des Briefdienstes (B5.2): easyNova prüft die Sendung vollständig (testFlag, kein Druck,
+ * keine Zustellung), LetterXpress legt sie in die Postbox (kein Druck, nach 7 Tagen gelöscht). Erlaubt auch bei
+ * DRY_RUN, weil im Testmodus nichts versendet wird. Ändert den Brief nicht; zählt für die Freigabe (3 Testaufträge).
  */
-export async function submitLxpTestJob(
+export const submitLxpTestJob = submitProviderTestJob;
+
+export async function submitProviderTestJob(
   letterId: string,
   actor: string,
 ): Promise<{ jobId: string; status: string; count: number }> {
@@ -341,8 +357,13 @@ export async function submitLxpTestJob(
   const cfg = await getConfig({ fresh: true });
   if (effectiveSwitches(cfg).killSwitch) throw new KillSwitchError();
   const provider = getProviders().mail;
-  if (provider.name !== 'letterxpress' || provider.mode !== 'test') {
-    throw new SendBlockedError('Testaufträge nur mit MAIL_PROVIDER=letterxpress und LXP_MODE=test.');
+  const t = TEST_JOB_COUNTERS[provider.name];
+  if (!t || provider.mode !== 'test') {
+    throw new SendBlockedError(
+      `Testaufträge nur mit ${Object.values(TEST_JOB_COUNTERS)
+        .map((c) => c.setup)
+        .join(' oder ')}.`,
+    );
   }
   const letter = await db.query.letters.findFirst({ where: eq(letters.id, letterId) });
   if (!letter?.pdfStorageKey) throw new Error('Brief oder PDF nicht gefunden');
@@ -356,23 +377,23 @@ export async function submitLxpTestJob(
   await assertLetterBinding(db, letter, lead, cfg);
   const pdf = await getProviders().storage.get(letter.pdfStorageKey);
   if (!pdf) throw new Error('Brief-PDF fehlt');
-  const count = (await lxpTestJobCount(db)) + 1;
+  const count = (await providerTestJobCount(provider.name, db)) + 1;
   const res = await provider.send(pdf, {
     color: cfg.letter.color,
     deliveryProduct: cfg.letter.deliveryProduct,
     addressPosition: cfg.letter.addressPosition,
     recipientCountry: 'DE',
     pages: letter.pageCount,
-    idempotencyKey: `lxp-test-${letterId}-${count}`,
+    idempotencyKey: `${provider.name === 'letterxpress' ? 'lxp' : provider.name}-test-${letterId}-${count}`,
     reference: `wbm-test-${letterId}-${count}`,
   });
   await db.execute(
-    sql`INSERT INTO counters (name, value) VALUES ('lxp_test_jobs', 1) ON CONFLICT (name) DO UPDATE SET value = counters.value + 1`,
+    sql`INSERT INTO counters (name, value) VALUES (${t.counter}, 1) ON CONFLICT (name) DO UPDATE SET value = counters.value + 1`,
   );
   await audit(db, {
     entity: 'letter',
     entityId: letterId,
-    action: 'lxp_test_job',
+    action: provider.name === 'letterxpress' ? 'lxp_test_job' : `${provider.name}_test_job`,
     actor,
     context: { jobId: res.providerLetterId, status: res.status, costCents: res.costCents ?? null, count },
   });
@@ -494,6 +515,7 @@ export interface MailProviderOverview {
   balanceError: string | null;
   openJobs: number;
   avgCostCents: number | null;
+  /** Testaufträge beim aktiven Briefdienst (easyNova oder LetterXpress; Feldname historisch) */
   lxpTestJobs: number;
   requiredTestJobs: number;
 }
@@ -524,7 +546,7 @@ export async function mailProviderOverview(): Promise<MailProviderOverview> {
     balanceError,
     openJobs: Number(s?.open ?? 0),
     avgCostCents: s?.avg !== null && s?.avg !== undefined ? Math.round(Number(s.avg)) : null,
-    lxpTestJobs: await lxpTestJobCount(db),
+    lxpTestJobs: await providerTestJobCount(provider.name, db),
     requiredTestJobs: LXP_REQUIRED_TEST_JOBS,
   };
 }

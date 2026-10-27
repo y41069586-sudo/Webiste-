@@ -6,7 +6,7 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { renderSite, templatesForGroup, type BranchGroup } from '@wbm/templates';
+import { renderSite, returnAddressLine, templatesForGroup, type BranchGroup } from '@wbm/templates';
 import { loadClaimDefinitions } from '../src/claims/library';
 import { DEFAULT_CONFIG } from '../src/config/settings';
 import { libraryContent } from '../src/demos/library';
@@ -142,7 +142,12 @@ async function main(): Promise<void> {
         optOutEmail: 'widerspruch@seitenwerk.world',
       });
       const pdf = await htmlToPdf(p.html);
-      const check = await validateLetterPdf(pdf, { recipientLines: p.data.recipientLines, position: 'left', expectedPages: 1 });
+      const check = await validateLetterPdf(pdf, {
+        recipientLines: p.data.recipientLines,
+        position: 'left',
+        expectedPages: 1,
+        returnAddressLine: returnAddressLine(p.data.sender),
+      });
       const file = `${s.industry}-${i + 1}-${name.replace(/[^A-Za-z0-9]+/g, '_').replace(/_+$/, '')}.pdf`;
       writeFileSync(path.join(out, file), pdf);
       console.log(

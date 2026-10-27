@@ -40,8 +40,13 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: optStr,
   STRIPE_WEBHOOK_SECRET: optStr,
 
-  /** letterxpress ist der vorgesehene Briefdienst (Baustein L3); pingen bleibt nur als inaktive Alternative */
-  MAIL_PROVIDER: z.enum(['letterxpress', 'pingen', 'mock']).default('mock'),
+  /** easynova ist der Briefdienst (Betreiberentscheidung 27.10.2026); letterxpress und pingen bleiben inaktive Alternativen */
+  MAIL_PROVIDER: z.enum(['easynova', 'letterxpress', 'pingen', 'mock']).default('mock'),
+  EASYNOVA_USERNAME: optStr,
+  EASYNOVA_PASSWORD: optStr,
+  EASYNOVA_MODE: z.enum(['test', 'live']).default('test'),
+  /** Testmodus: verarbeitetes PDF mit eingezeichneten Prüfflächen an diese Adresse (nur eigene Adresse eintragen) */
+  EASYNOVA_TEST_EMAIL: optStr,
   LXP_USERNAME: optStr,
   LXP_APIKEY: optStr,
   LXP_MODE: z.enum(['test', 'live']).default('test'),

@@ -81,14 +81,14 @@ export async function sendApprovedNowAction(): Promise<void> {
   revalidatePath('/admin/letters');
 }
 
-/** Testauftrag im LetterXpress-Testmodus (Postbox, kein Druck, keine Kosten – auch bei DRY_RUN). */
+/** Testauftrag im Testmodus des Briefdienstes (easyNova/LetterXpress: kein Druck, keine Kosten – auch bei DRY_RUN). */
 export async function lxpTestJobAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
   const id = String(form.get('id'));
   let msg: string;
   try {
     const r = await submitLxpTestJob(id, actorOf(s));
-    msg = `Testauftrag ${r.jobId} in der LetterXpress-Postbox (Status ${r.status}). Bisher ${r.count} Testaufträge.`;
+    msg = `Testauftrag ${r.jobId} im Testmodus des Briefdienstes eingeliefert (Status ${r.status}). Bisher ${r.count} Testaufträge.`;
   } catch (err) {
     msg = `Testauftrag fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`;
   }

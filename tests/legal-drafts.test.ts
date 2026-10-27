@@ -70,8 +70,9 @@ test('contract prices come from existing configuration', () => {
 test('V4 legal drafts explain providers, truthful test status and unresolved mandatory details', () => {
   const cfg = deepMerge(DEFAULT_CONFIG, { sender: OPERATOR_PROFILE });
   const text = legalDrafts(cfg);
-  for (const provider of ['Netlify', 'Supabase', 'Stripe', 'Resend', 'LetterXpress', 'Anthropic'])
+  for (const provider of ['Netlify', 'Supabase', 'Stripe', 'Resend', 'easyNova', 'Anthropic'])
     assert.ok(text.privacyMarkdown.includes(provider), provider);
+  assert.ok(!text.privacyMarkdown.includes('LetterXpress'), 'Briefdienst ist easyNova (Betreiberentscheidung 27.10.2026)');
   assert.ok(text.privacyMarkdown.includes('Art. 14'));
   assert.ok(text.privacyMarkdown.includes('jederzeit ohne Begründung'));
   assert.ok(text.termsMarkdown.includes('60 Minuten'));

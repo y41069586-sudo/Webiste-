@@ -8,6 +8,13 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // Statische Launch-Seite: Skript läuft im Browser
+    files: ['apps/launch/src/**/*.js'],
+    languageOptions: {
+      globals: { matchMedia: 'readonly', IntersectionObserver: 'readonly', Image: 'readonly' },
+    },
+  },
+  {
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',

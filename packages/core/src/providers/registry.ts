@@ -5,6 +5,7 @@ import { NetlifyHosting } from './hosting/netlify';
 import { InwxRegistrar } from './registrar/inwx';
 import { ResendEmail } from './email/resend';
 import { OverpassLeadSource } from './lead-source/overpass';
+import { EasyNovaMailProvider } from './mail/easynova';
 import { LetterXpressMailProvider } from './mail/letterxpress';
 import { PingenMailProvider } from './mail/pingen';
 import { StripePayment } from './payment/stripe';
@@ -21,6 +22,17 @@ export const registry = {
     return [new OverpassLeadSource(env.OVERPASS_URL, `WebsiteBriefMaschine/0.1 (+${env.APP_URL})`)];
   },
   mail(kind: string, env: Env): MailProvider | undefined {
+    if (kind === 'easynova') {
+      if (!env.EASYNOVA_USERNAME || !env.EASYNOVA_PASSWORD) {
+        throw new Error('MAIL_PROVIDER=easynova verlangt EASYNOVA_USERNAME und EASYNOVA_PASSWORD (sonst MAIL_PROVIDER=mock).');
+      }
+      return new EasyNovaMailProvider({
+        username: env.EASYNOVA_USERNAME,
+        password: env.EASYNOVA_PASSWORD,
+        mode: env.EASYNOVA_MODE,
+        testEmail: env.EASYNOVA_TEST_EMAIL,
+      });
+    }
     if (kind === 'letterxpress') {
       if (!env.LXP_USERNAME || !env.LXP_APIKEY) {
         throw new Error('MAIL_PROVIDER=letterxpress verlangt LXP_USERNAME und LXP_APIKEY (sonst MAIL_PROVIDER=mock).');

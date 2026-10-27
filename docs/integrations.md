@@ -61,7 +61,42 @@ regularOpeningHours, nextPageToken`
 - **Kosten:** jede Anfrage wird mit Token-Zahlen im Budget-Ledger (Kategorie `llm`) gebucht.
 - Code: `packages/core/src/providers/llm/anthropic.ts`, `packages/core/src/services/llm.ts`
 
-## LetterXpress – Briefversand (aktiv ab L3, nur Testmodus freigegeben)
+## easyNova digiBrief – Briefversand (aktiver Dienst, Betreiberentscheidung 27.10.2026; nur Testmodus)
+
+Geprüft am 27.10.2026: OpenAPI 3.0 `https://digibrief-api.easynova.de/swagger/v1/swagger.json`
+(„EasyNova Api Letter Post Service“, V1, vollständig ausgewertet) und Produktseite
+`https://www.easynova.de/produkte/digibrief/automatisierung/api-schnittstelle/`. Anbieter: SIECOM IT-Systemhaus GmbH,
+Gutzkowstraße 30, 01069 Dresden (HRB 25046, AG Dresden). Erreichbarkeit: `GET /health` → 200; geschützte Endpunkte
+ohne Token → 401. Implementierung: `packages/core/src/providers/mail/easynova.ts`, Tests `test/easynova.test.ts`.
+
+- **Anmeldung:** `POST /api/Login` mit `ekp` (Benutzername, i. d. R. E-Mail) und `password` → `token`, 8 h gültig,
+  wiederverwenden (wir erneuern nach 7,5 h). 401 = einmal neu anmelden und wiederholen. Falsche Daten 400; nur Login
+  gedrosselt (429 + `Retry-After`). `vendorId`/`secret` werden nicht ausgewertet.
+- **Einlieferung:** `POST /api/letter`, Rumpf immer Array; Pflicht nur `fileName` + `data` (PDF Base64), A4 hoch,
+  20 MB je Sendung / 300 MB je Aufruf. Antwort `[{ fileName, letterID }]`. Kopfzeile `Idempotency-Key` (≤ 180
+  Zeichen; wir senden die Brief-ID) → Wiederholung liefert dieselbe `letterID`, nichts doppelt gedruckt. 503 +
+  `Retry-After` = nichts eingeliefert → gleichen Aufruf wiederholen (nur mit Schlüssel).
+- **Adresse:** Zustellung NUR nach der Anschrift im Adressfenster des PDFs (ggf. OCR); JSON-Adressfelder sind
+  Metadaten. **Absenderzeile über dem Adressfenster ist Pflicht**, sonst Ablehnung → Brief hat jetzt eine
+  Rücksendeangabe nach DIN 5008 direkt über der Anschrift (`returnAddressLine`, geprüft in `validateLetterPdf`).
+  Freimachungszone freihalten. `addressCorrection` senden wir bewusst nicht: falsch sitzende Anschrift → Status 99
+  statt still umgesetztem Brief. Genaue Sperr-/Auslesefelder (mm) liefert erst `GET /api/account` mit Zugang →
+  beim ersten Testauftrag mit `EASYNOVA_TEST_EMAIL` (Rückmail mit eingezeichneten Flächen) prüfen.
+- **Testmodus:** `testFlag: true` je Sendung: alle Prüfungen, kein Druck, keine Zustellung, keine Kosten; Status bleibt
+  dauerhaft 1. Mit `testEMail` + `testShowRestrictedArea` kommt das verarbeitete PDF mit Schablone per E-Mail.
+  Unser `EASYNOVA_MODE=test` setzt `testFlag` für jede Sendung.
+- **Status:** 1 Annahme, 2 Verarbeitung, 3 Einlieferung ins Druckzentrum, 4 Verarbeitung im Druckzentrum
+  (`processedDate` = Produktion), 99 Verarbeitungsfehler (`errorList`). Abbildung: 1–3 → queued, 4/processedDate →
+  sent, 99 → failed. Keine Webhooks, kein Storno-Endpunkt; Abfrage „mehrmals täglich genügt“ (unser Abgleich: 30 Min.).
+- **Kosten:** `priceNet`/`priceWithTax` erst nach Abrechnung (vorher leer, typischerweise morgens am nächsten
+  Produktionstag); wir buchen brutto. Vorab `POST /api/pricePreview` (unverbindlich). Guthaben `GET /api/companyBilling`
+  (`paymentBalance`, Vorkasse) für den Guthaben-Wächter. Listenpreise laut Website (netto): Standardbrief bis 20 g
+  s/w 0,65 €, Farbe 0,68 € einseitig; keine Grundgebühr, kein Mindestumsatz, keine Vertragsbindung. Einschreiben und
+  Duplex nutzen wir nicht.
+- **Offen vor dem ersten echten Brief:** Konto + AV-Vertrag nach Art. 28 DSGVO, `GET /api/account` (Ausgabekanal,
+  Sperrflächen) auswerten, 3 Testaufträge mit Rückmail sichten, dann 1 echter Brief an den Betreiber.
+
+## LetterXpress – Briefversand (inaktive Alternative seit 27.10.2026)
 
 Geprüft am 24.10.2026: offizielle PDF-Dokumentation `https://www.letterxpress.de/storage/files/lxp-api_dokumentation.pdf`
 („Stand Juli 2026“, 35 Seiten, vollständig gelesen) und Formblatt `https://www.letterxpress.de/storage/files/formblatt-letterxpress-pdf.pdf`

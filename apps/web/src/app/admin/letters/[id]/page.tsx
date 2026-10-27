@@ -130,15 +130,20 @@ export default async function LetterDetail({
               <p className="text-sm">{hinweis}</p>
             </Card>
           ) : null}
-          {mail.name === 'letterxpress' && mail.mode === 'test' && truth?.passed && letter.pdfStorageKey ? (
-            <Card title="LetterXpress-Testmodus">
+          {(mail.name === 'easynova' || mail.name === 'letterxpress') &&
+          mail.mode === 'test' &&
+          truth?.passed &&
+          letter.pdfStorageKey ? (
+            <Card title={mail.name === 'easynova' ? 'easyNova-Testmodus' : 'LetterXpress-Testmodus'}>
               <p className="mb-3 text-sm text-slate-600">
-                Überträgt dieses PDF in die Postbox – kein Druck, keine Kosten, nach 7 Tagen gelöscht.
+                {mail.name === 'easynova'
+                  ? 'Liefert dieses PDF als Testsendung ein: alle Prüfungen von easyNova, kein Druck, keine Zustellung, keine Kosten.'
+                  : 'Überträgt dieses PDF in die Postbox – kein Druck, keine Kosten, nach 7 Tagen gelöscht.'}
               </p>
               <form action={lxpTestJobAction}>
                 <input type="hidden" name="id" value={letter.id} />
                 <button className={btn.secondary} type="submit">
-                  Testauftrag an LetterXpress
+                  {mail.name === 'easynova' ? 'Testsendung an easyNova' : 'Testauftrag an LetterXpress'}
                 </button>
               </form>
             </Card>

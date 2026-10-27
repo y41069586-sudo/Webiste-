@@ -2,6 +2,10 @@
 
 > **Aktualisierung 25.10.2026:** Für Neukunden gilt jetzt Master V4: Basis 597 € + 19 €/Monat oder Care+ 597 € + insgesamt 99 €/Monat, Monatsstart erst nach bestätigtem Go-Live auf Basis der ausdrücklich erteilten Mandatszustimmung. Ältere manuelle V4-Snapshots behalten ihren Abo-Checkout. Legacy-Verträge bleiben unverändert. Neueste dauerhafte Anweisungen in [AGENTS.md](AGENTS.md), geprüfter aktueller Umsetzungsstand in [V5-Qualitätsprüfung](docs/v5-quality-pruefung.md) und [Handoff](docs/v4-quality-handoff.md). Frühere Neukundenpreise unten sind historisch. Kein persönliches Foto, VPS später. Nur sichere Entwicklung und ausdrücklich beauftragte Stripe-Sandbox; DRY_RUN=true, kein Live-Deployment.
 
+> **Aktualisierung 27.10.2026:** Briefdienst ist **easyNova** (digiBrief-API V1, `MAIL_PROVIDER=easynova`,
+> `EASYNOVA_MODE=test`), nicht mehr LetterXpress; LetterXpress-Angaben unten gelten nur noch für die inaktive
+> Alternative. Details: `docs/integrations.md`, `docs/entscheidungen.md`.
+
 > Maßgebliche Projektbeschreibung für Claude Code. Stand: Update 2 (`docs/spec-update-2.md`) ist
 > eingearbeitet. Bei Widersprüchen gilt `docs/spec-update-2.md` vor dieser Datei; offene Widersprüche
 > werden gesammelt beim Betreiber nachgefragt, nicht selbst entschieden. Entscheidungen und Abweichungen:

@@ -25,6 +25,14 @@ export const LETTER_GEOMETRY = {
   bottomLeftCornerMm: 15,
 } as const;
 
+/**
+ * Rücksendeangabe (DIN 5008) als eine Zeile direkt über der Anschrift im Fenster. easyNova lehnt Briefe ohne
+ * erkennbare Absenderzeile über dem Adressfenster ab (API-Doku, geprüft 27.10.2026).
+ */
+export function returnAddressLine(s: Pick<LetterSender, 'name' | 'company' | 'street' | 'postalCode' | 'city'>): string {
+  return [s.company || s.name, s.street, `${s.postalCode} ${s.city}`.trim()].filter((p) => p.trim()).join(' · ');
+}
+
 export interface LetterSender {
   name: string;
   company: string;
@@ -119,6 +127,9 @@ export function renderLetterHtml(d: LetterData): string {
   const addrX = g.addressArea.x + 3;
   const addrY = g.addressArea.y + 1;
   const infoX = right ? 25 : 125;
+  // Rücksendeangabe muss vollständig ins Fenster passen (ca. 60 Zeichen bei 6,5 pt auf 79,5 mm)
+  const retLength = returnAddressLine(d.sender).length;
+  const retFont = retLength <= 60 ? 6.5 : retLength <= 72 ? 5.5 : 4.8;
   const page2 = d.screenshotPage
     ? `<section class="page" aria-label="Seite 2">
   <div class="p2">
@@ -149,6 +160,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .web{font-size:8.5pt;color:#4a5565;text-align:right}
 .address{position:absolute;left:${addrX}mm;top:${addrY}mm;width:${g.addressArea.w - 6}mm;font-size:10pt;line-height:4.55mm;white-space:nowrap}
 .address div{overflow:hidden;text-overflow:clip}
+.retline{position:absolute;left:${addrX}mm;top:${addrY - 4.5}mm;width:${g.addressArea.w - 6}mm;font-size:${retFont}pt;line-height:3mm;color:#4a5565;white-space:nowrap;overflow:hidden;border-bottom:0.15mm solid #9aa3ae}
 .info{position:absolute;left:${infoX}mm;top:50mm;width:65mm;font-size:8.5pt;line-height:1.45;color:#3b4350}
 .info .k{color:#6b7280}
 .info .date{margin-top:3mm;color:#1d232b}
@@ -199,6 +211,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
     <div><div class="brand" style="display:flex;align-items:center;gap:8px">${brandMarkHtml(26, true)}<span>${esc(d.sender.company)}</span></div><div class="tag">Websites für lokale Betriebe</div></div>
     <div class="web">${esc(d.sender.website)}</div>
   </header>
+  <div class="retline" id="ruecksendeangabe">${esc(returnAddressLine(d.sender))}</div>
   <div class="address" id="anschrift">${d.recipientLines.map((l) => `<div>${esc(l)}</div>`).join('')}</div>
   <div class="info">
     <div>${esc(d.sender.name)}</div>

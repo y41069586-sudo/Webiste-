@@ -19,7 +19,7 @@ Legende: **I** implementiert · **L** lokal getestet · **M** nur mit Mock getes
 | 11 | Website/App/Routen | **beide öffentlich veraltet (590/49; statisch zusätzlich Platzhalter)**; Exportsperre + `/so-funktionierts`-Fix | F: Rechtstext-TODOs klären → Export → Deployment-Freigabe statisch; App-Deployment-Freigabe; DEMO_DOMAIN/TRACK_DOMAIN |
 | 12 | Stripe-Sandbox | A: Preise 597/19/99 aktiv, Webhook-Routing korrekt | E/F: App mit aktuellem Code deployen (Sandbox-Keys) → Basis und Care+ Kaufkette inkl. Fehlerfälle |
 | 13 | Resend/Support | A: Domain verifiziert, Senden/Empfang aktiv | F: ausdrücklich autorisierte eigene Testnachrichten |
-| 14 | LetterXpress | I (Adapter, Testmodus) | E/F: Zugang + Freigabe ggf. kostenpflichtiger Testaufträge |
+| 14 | Briefdienst **easyNova** (statt LetterXpress, Betreiberentscheidung) | I/M: Adapter nach OpenAPI V1, Testmodus, Rücksendeangabe im Brief, Tests mit nachgebauter API | E/F: Konto + AV-Vertrag, Zugang sicher hinterlegen, `GET /api/account` (Sperrflächen) prüfen, 3 kostenlose Testaufträge mit Rückmail |
 | 15 | Domain/Kundenhosting | I (INWX-Sandbox, Hostingadapter) | E/F: Sandbox-Zugang, Testausgabe |
 | 16 | Vollständige Anbieter-E2E | M (14/14 Browser-E2E, Codex) | nach 6–15 |
 | 17 | Funnel/Conversion | I/L: Test-/Kontroll-/Mock-/Nicht-Live-Ereignisse ausgeschlossen (0018, `funnel-v4.ts`) | echte Daten fehlen; 2 % bleibt Ziel, kein Messwert |

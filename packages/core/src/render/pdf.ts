@@ -81,7 +81,14 @@ function intersects(
  */
 export async function validateLetterPdf(
   pdf: Buffer,
-  opts: { qrExpectedUrl?: string; recipientLines: string[]; position: 'left' | 'right'; expectedPages: number },
+  opts: {
+    qrExpectedUrl?: string;
+    recipientLines: string[];
+    position: 'left' | 'right';
+    expectedPages: number;
+    /** Rücksendeangabe über der Anschrift – darf als einziger weiterer Text im Fenster stehen */
+    returnAddressLine?: string;
+  },
 ): Promise<{ issues: LayoutIssue[]; pages: number; addressBox: { x1: number; y1: number; x2: number; y2: number } | null }> {
   const g = LETTER_GEOMETRY[opts.position];
   const { pages, items } = await pdfTextItems(pdf);
@@ -121,6 +128,28 @@ export async function validateLetterPdf(
       });
     }
   }
+  // Rücksendeangabe (DIN 5008): eine Zeile im Fenster direkt über dem Anschriftenfeld – dort erlaubt
+  const retZone = { x: g.addressArea.x, y: g.addressArea.y - 6, w: g.addressArea.w, h: 6 };
+  const retParts = p1.filter(
+    (i) =>
+      !used.has(i) &&
+      i.str.trim() &&
+      i.xMm >= retZone.x &&
+      i.xMm + i.wMm <= retZone.x + retZone.w + 0.5 &&
+      i.yTopMm >= retZone.y - 0.5 &&
+      i.yBottomMm <= retZone.y + retZone.h + 0.5,
+  );
+  for (const i of retParts) used.add(i);
+  if (opts.returnAddressLine) {
+    const norm = (t: string) => t.replace(/\s+/g, ' ').trim();
+    const found = norm(retParts.map((i) => i.str).join(' '));
+    if (!found || !norm(opts.returnAddressLine).startsWith(found) || found.length < norm(opts.returnAddressLine).length * 0.95) {
+      issues.push({
+        check: 'ruecksendeangabe',
+        detail: 'Absenderzeile über dem Anschriftenfeld fehlt, ist abgeschnitten oder falsch platziert.',
+      });
+    }
+  }
   for (const it of items) {
     const r = { x1: it.xMm, y1: it.yTopMm, x2: it.xMm + it.wMm, y2: it.yBottomMm };
     if (it.page === 1 && !used.has(it) && intersects(g.keepFree, r)) {
@@ -154,9 +183,10 @@ export async function validateLetterDom(html: string, position: 'left' | 'right'
       const pr = first.getBoundingClientRect();
       const rect = (el) => { const r = el.getBoundingClientRect(); return { x1: (r.left - pr.left) / mm, y1: (r.top - pr.top) / mm, x2: (r.right - pr.left) / mm, y2: (r.bottom - pr.top) / mm, w: r.width, h: r.height }; };
       const addr = document.getElementById('anschrift');
+      const ret = document.getElementById('ruecksendeangabe');
       const out = [];
       for (const el of first.querySelectorAll('img, h1, p, div, header, footer, main')) {
-        if (addr.contains(el) || el.contains(addr)) continue;
+        if (addr.contains(el) || el.contains(addr) || el === ret) continue;
         if (el.children.length && el.tagName === 'DIV' && !el.classList.contains('visual')) continue;
         const r = rect(el);
         if (r.w === 0 || r.h === 0) continue;

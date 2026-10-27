@@ -97,7 +97,7 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
               <Badge color={mail.mode === 'live' ? 'red' : 'yellow'}>{mail.mode === 'live' ? 'Live' : 'Testmodus'}</Badge>
             ) : null}
           </p>
-          {mail.provider === 'letterxpress' ? (
+          {mail.provider === 'easynova' || mail.provider === 'letterxpress' ? (
             <p className="mt-1 text-xs text-slate-600">
               Testaufträge: {mail.lxpTestJobs} von {mail.requiredTestJobs}
             </p>
