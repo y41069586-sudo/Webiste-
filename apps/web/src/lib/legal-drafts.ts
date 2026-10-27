@@ -6,18 +6,23 @@ export function legalDrafts(cfg: AppConfig) {
   const s = cfg.sender;
   const p = sitePricing(cfg);
   const required = (value: string, label: string) => value.trim() || `TODO: ${label} ergänzen`;
-  const contact = `${required(s.name, 'vollständiger Vor- und Nachname')}, handelnd unter „${required(s.company, 'Geschäftsbezeichnung')}“, ${required(s.street, 'Straße und Hausnummer')}, ${required(s.postalCode, 'Postleitzahl')} ${required(s.city, 'Ort')}, Deutschland`;
+  const contact = `${required(s.name, 'vollständiger Vor- und Nachname')}, verantwortlich für das Projekt „${required(s.company, 'Geschäftsbezeichnung')}“, ${required(s.street, 'Straße und Hausnummer')}, ${required(s.postalCode, 'Postleitzahl')} ${required(s.city, 'Ort')}, Deutschland`;
   const email = required(s.email, 'Kontakt-E-Mail');
   const draft =
-    '**Entwurf, Stand 25.10.2026. Der Verkauf ist noch nicht freigeschaltet. Steuerstatus, Vertragsabwicklung und Dienstleisterkonfiguration werden vor dem Verkaufsstart abschließend geprüft.**';
+    '**Entwurf, Stand 27.10.2026. Projekt in der Gründungsphase: Noch keine Gewerbeanmeldung und kein Handelsregistereintrag. Es werden derzeit nur interne Tests durchgeführt, keine kostenpflichtigen Bestellungen angenommen und keine echten Werbebriefe verschickt. Vor einem gewerblichen Start müssen die Voraussetzungen nachweislich geklärt sein.**';
+  const taxClause = cfg.tax.operatorConfirmed && cfg.tax.kleinunternehmer
+    ? 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Die angegebenen Preise sind die zu zahlenden Gesamtbeträge; es wird keine Umsatzsteuer zusätzlich aufgeschlagen.'
+    : '**TODO: Der Steuerstatus ist ungeklärt. Vor verbindlichen Bestellungen sind Steuerbehandlung, Umsatzsteuerausweis und tatsächlich geschuldeter Gesamtpreis festzulegen. Es wird keine Steuerbefreiung nach § 19 UStG zugesichert.**';
   return {
     impressumMarkdown: `# Impressum
 
-## Anbieterin gemäß § 5 DDG
+## Anbieter gemäß § 5 DDG
 
 ${required(s.company, 'Geschäftsbezeichnung')}
 
-Inhaberin: ${required(s.name, 'vollständiger Vor- und Nachname')} (Einzelunternehmen)
+Verantwortliche Person: ${required(s.name, 'vollständiger Vor- und Nachname')}
+
+„${required(s.company, 'Geschäftsbezeichnung')}“ ist der Projektname. Das Projekt befindet sich in der Gründungsphase. Es besteht derzeit keine Gewerbeanmeldung und kein Handelsregistereintrag. Es wird keine eigenständige juristische Person behauptet.
 
 ${required(s.street, 'ladungsfähige Straße und Hausnummer')}
 
@@ -31,7 +36,7 @@ Telefon: ${required(s.phone, 'Telefonnummer')}
 
 E-Mail: ${email}
 
-Kein Handelsregistereintrag. ${s.vatId ? `Umsatzsteuer-Identifikationsnummer: ${s.vatId}.` : 'TODO: Prüfen, ob eine Umsatzsteuer-Identifikationsnummer zugeteilt wurde; nur eine tatsächlich vorhandene Nummer ergänzen.'} TODO: Wirtschafts-Identifikationsnummer prüfen und bei erfolgter Zuteilung ergänzen. Die persönliche Steuernummer wird hier nicht veröffentlicht.
+${s.vatId ? `Umsatzsteuer-Identifikationsnummer: ${s.vatId}.` : 'TODO: Prüfen, ob eine Umsatzsteuer-Identifikationsnummer zugeteilt wurde; nur eine tatsächlich vorhandene Nummer ergänzen.'} TODO: Wirtschafts-Identifikationsnummer prüfen und bei erfolgter Zuteilung ergänzen. Die persönliche Steuernummer wird hier nicht veröffentlicht.
 
 ## Angebot
 
@@ -42,6 +47,8 @@ Erstellung und Betreuung von Websites für Unternehmer. Die Website enthält kei
 Stand: 25. Oktober 2026
 
 ## 1. Verantwortliche und Kontakt
+
+Verantwortlich ist die nachfolgend genannte natürliche Person. SeitenWerk ist ein Projekt in der Gründungsphase, keine eingetragene Gesellschaft. Interne Tests werden mit fiktiven Daten durchgeführt; eine spätere gewerbliche Nutzung wird dadurch nicht freigegeben.
 
 ${contact}. E-Mail: ${email}; Telefon: ${required(s.phone, 'Telefonnummer')}. An diese Kontaktdaten können Sie auch Datenschutzanfragen richten.
 
@@ -153,7 +160,7 @@ Care+: ${p.oneTime} einmalige Einrichtung dazu insgesamt ${p.carePlus}/Monat. Di
 
 Rechnerische Übersicht bei zwölf vollständig berechneten Monaten: Basis ${formatEuroShort(v4FirstYearCents('basis'))}, Care+ ${formatEuroShort(v4FirstYearCents('care_plus'))}. Dies begründet keine Mindestlaufzeit oder Vorauszahlungspflicht.
 
-**TODO: Der Steuerstatus ist ungeklärt. Vor verbindlichen Bestellungen sind Steuerbehandlung, Umsatzsteuerausweis und tatsächlich geschuldeter Gesamtpreis festzulegen. Es wird keine Steuerbefreiung nach § 19 UStG zugesichert.** Änderungen des Steuerstatus ändern bestehende vereinbarte Gesamtpreise nicht automatisch.
+${taxClause} Änderungen des Steuerstatus ändern bestehende vereinbarte Gesamtpreise nicht automatisch.
 
 ## 5. Zahlung und Beginn der Monatsabrechnung
 
@@ -230,7 +237,7 @@ Einmalpaket: ${p.oneTime} einmalig, einschließlich Domain und ${p.hostingMonths
 
 Monatspaket: ${p.monthly} monatlich, erste Rate bei Vertragsschluss; Mindestlaufzeit ${p.minTerm} Monate ab Vertragsschluss. Die Mindestvergütung der ersten ${p.minTerm} Monate entspricht ${p.monthly} multipliziert mit ${p.minTerm}. Anschließend reduziert sich der Preis auf ${p.follow} monatlich und der Vertrag läuft bis zur Kündigung weiter.
 
-Der Umsatzsteuerstatus der Anbieterin ist noch zu klären. Deshalb sind diese Preisangaben noch nicht als endgültige steuerliche Vertragsangaben freigegeben. Ob Umsatzsteuer erhoben wird und welcher Gesamtbetrag gilt, muss vor einer verbindlichen Bestellung eindeutig angegeben werden. Eine Änderung des Steuerstatus ändert bestehende vereinbarte Gesamtpreise nicht automatisch.
+${taxClause} Eine Änderung des Steuerstatus ändert bestehende vereinbarte Gesamtpreise nicht automatisch.
 
 ## 5. Zahlung und Rechnungen
 

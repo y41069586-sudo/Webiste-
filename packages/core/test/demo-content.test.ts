@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CONTENT_LIBRARY, libraryContent } from '../src/demos/library';
-import { validateDemoContent, normalizeContent, type ContentFacts } from '../src/demos/content';
+import { validateDemoContent, normalizeContent, verifiedServiceFallback, type ContentFacts } from '../src/demos/content';
 
 const facts: ContentFacts = {
   name: 'Malermeister Kowalski GmbH',
@@ -17,6 +17,15 @@ const facts: ContentFacts = {
 };
 
 describe('Inhaltsregeln', () => {
+  it('requires a verified service above the fold without inventing a specialty', () => {
+    const f = { ...facts, verifiedServices: ['Tapezierarbeiten', 'Bodenverlegung'] };
+    const generic = libraryContent('maler', 'handwerk', { name: f.name, stadt: f.city, branche: f.branchLabel }, 0);
+    expect(validateDemoContent(generic, f).some((v) => v.rule === 'Betriebsbezug')).toBe(true);
+    const repaired = verifiedServiceFallback(generic, f);
+    expect(repaired.hero_headline).toContain('Tapezierarbeiten');
+    expect(repaired.hero_subline).toContain('Bodenverlegung');
+    expect(validateDemoContent(repaired, f)).toEqual([]);
+  });
   it('alle Fallback-Texte aller Branchen bestehen die Regeln', () => {
     for (const key of Object.keys(CONTENT_LIBRARY)) {
       const group = ['nagelstudio', 'kosmetikstudio'].includes(key) ? 'beauty' : 'handwerk';

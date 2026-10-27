@@ -16,6 +16,26 @@ const OPERATOR_PROFILE = {
 };
 import { legalDrafts } from '../apps/web/src/lib/legal-drafts';
 
+test('founding project identifies the natural person without inventing registrations', () => {
+  const cfg = deepMerge(DEFAULT_CONFIG, {
+    sender: OPERATOR_PROFILE,
+    tax: { operatorConfirmed: true, kleinunternehmer: true },
+    offers: { activeVersion: 'v4' },
+  });
+  const text = legalDrafts(cfg);
+  for (const key of ['impressumMarkdown', 'privacyMarkdown', 'termsMarkdown'] as const) {
+    assert.ok(text[key].includes(OPERATOR_PROFILE.name));
+    assert.ok(text[key].includes(OPERATOR_PROFILE.street));
+    assert.ok(text[key].includes(OPERATOR_PROFILE.email));
+  }
+  assert.ok(text.impressumMarkdown.includes('keine Gewerbeanmeldung und kein Handelsregistereintrag'));
+  assert.ok(!text.impressumMarkdown.includes('(Einzelunternehmen)'));
+  assert.ok(!/Registergericht|HRB|HRA|e\.K\./.test(text.impressumMarkdown));
+  assert.ok(text.termsMarkdown.includes('Gemäß § 19 UStG wird keine Umsatzsteuer berechnet'));
+  assert.ok(!text.termsMarkdown.includes('Steuerstatus ist ungeklärt'));
+  assert.equal(cfg.legal.termsMarkdown, '');
+});
+
 test('legal working texts use confirmed contact details and do not disclose tax/account secrets', () => {
   const cfg = deepMerge(DEFAULT_CONFIG, {
     sender: { ...OPERATOR_PROFILE, taxNumber: 'private-tax-number', bankIban: 'private-bank-account' },

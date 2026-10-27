@@ -31,6 +31,10 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         Zum Inhalt springen
       </a>
       <SiteHeader brand={brand} />
+      <p className="mx-auto w-full max-w-[90rem] px-5 py-3 text-sm text-slate-600 sm:px-8">
+        Projekt in der Gründungsphase. Verantwortlich: {s.name || 'TODO: vollständiger Name'}. Noch keine
+        Gewerbeanmeldung und kein Handelsregistereintrag. Derzeit interne Tests; keine kostenpflichtigen Bestellungen.
+      </p>
       <main id="inhalt" className="flex-1">
         {children}
       </main>

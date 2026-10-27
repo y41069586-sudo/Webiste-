@@ -1,5 +1,12 @@
 # SeitenWerk V4/V5 – verbindlicher Handoff
 
+Neueste Betreiberklarstellung und Anschlusskorrekturen: [Gründungsphase](founding-status/README.md).
+Natürliche Person, keine Gewerbeanmeldung/Handelsregistereintragung, steuerlich unbestätigt. Keine
+Behauptung eines bestehenden Einzelunternehmens. Anbietertexte lokal angepasst, private Entwürfe
+mit hinterlegter Identität erzeugt; kein Deploy. Zwischenzeitliche Steuerbestätigung zurückgenommen.
+Stripe-Sandboxrouting inzwischen korrigiert, noch keine vollständige Signatur-/Kaufabnahme.
+Frühere Auditwerte bleiben historische Momentaufnahme. Migrationen, Worker und Providerabnahmen offen.
+
 Aktuellster Gesamt-Audit **27.10.2026**: [Projekt-/Betriebs-/Conversionbericht](project-audit-2026-10-27/README.md).
 Nur Analyse und lesende Providerprüfung, keine Anwendungs- oder Produktionsänderung. Lokal a820158,
 17 Commits vor dem abgefragten GitHub-Entwicklungsbranch. Live-App weiterhin fbff0cc; statische

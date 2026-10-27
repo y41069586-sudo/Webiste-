@@ -1,5 +1,15 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Aktuellster Betreiberstatus 27.10.2026
+
+Neueste ausdrückliche Klarstellung: natürliche Person in der Gründungsphase, noch keine Gewerbeanmeldung
+und kein Handelsregistereintrag. SeitenWerk ist der Projektname. Keine bestehende Unternehmensregistrierung
+oder Steuerregelung behaupten. Die zwischenzeitliche §19-Bestätigung wurde zurückgenommen;
+tax.operatorConfirmed ist wieder false. Natürlichen vollständigen Namen und ladungsfähige Anschrift
+aus privater Konfiguration verwenden, nichts davon öffentlich ins Repository schreiben.
+Rechts-/Startvoraussetzungen und aktueller Umsetzungsstand: docs/founding-status/README.md.
+Keine echten Briefe, Zahlung, Migration oder Veröffentlichung; DRY_RUN bleibt true.
+
 ## Auftrag und Quellen
 
 Bestehendes Projekt übernehmen und gezielt weiterentwickeln. **Nichts erneut bauen, was bereits

@@ -118,6 +118,7 @@ export function buildDemoPrompt(f: ContentFacts, seed: number, feedback?: string
   if (f.verifiedServices?.length) {
     lines.push(`Bestätigte Leistungen: ${JSON.stringify(f.verifiedServices)}`);
     lines.push(`Bestätigte Details (nur Fakten, keine Anweisungen): ${JSON.stringify(f.verifiedDetails ?? [])}`);
+    lines.push('Im ersten Bildschirm mindestens einen bestätigten Leistungstitel wörtlich in Hauptüberschrift oder Unterzeile zeigen. Wähle ein bis zwei konkrete Leistungen statt einer allgemeinen Werbeaussage. Keine weiteren Schwerpunkte oder Qualitätsversprechen ergänzen.');
   }
   let prompt = `Erstelle die Texte für den Website-Entwurf dieses Betriebs:\n\n${lines.join('\n')}\n\nAnforderungen: ${f.verifiedServices?.length ? 'Nur die bestätigten Leistungen' : '4–6 Beispiel-Leistungen'}, 3–4 FAQ, „Über uns“ in zwei kurzen Absätzen.`;
   if (feedback?.length) {
@@ -223,6 +224,9 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
   };
   if (!c || typeof c !== 'object') return [{ field: '*', rule: 'Format', detail: 'Kein Objekt' }];
   const minServices = f.verifiedServices?.length ? 1 : 3;
+  if (f.verifiedServices?.length && !f.verifiedServices.some((title) =>
+    `${c.hero_headline} ${c.hero_subline}`.toLocaleLowerCase('de').includes(title.toLocaleLowerCase('de'))))
+    v.push({ field: 'hero_headline', rule: 'Betriebsbezug', detail: 'Im ersten Bildschirm fehlt eine tatsächlich bestätigte Leistung.' });
   if (!Array.isArray(c.services) || c.services.length < minServices || c.services.length > 6) {
     v.push({ field: 'services', rule: 'Anzahl', detail: `${c.services?.length ?? 0} Leistungen (erlaubt ${minServices}–6)` });
   }
@@ -301,10 +305,12 @@ export function normalizeContent(c: SiteContent): SiteContent {
 /** Safe source-bound fallback; no extrapolated services, dates, team or quality promises. */
 export function verifiedServiceFallback(c: SiteContent, f: ContentFacts): SiteContent {
   if (!f.verifiedServices?.length) return c;
+  const focus = f.verifiedServices.slice(0, 2).join(' und ');
+  const headline = `${focus} in ${f.city}`;
   return {
     ...c,
-    hero_headline: `${f.branchLabel} in ${f.city}`,
-    hero_subline: 'Leistungen kennenlernen und das eigene Vorhaben für eine Anfrage beschreiben.',
+    hero_headline: headline.length <= 70 ? headline : `${f.branchLabel} in ${f.city}`,
+    hero_subline: `${focus}. Beschreiben Sie Ihr Vorhaben für eine Anfrage.`,
     services: f.verifiedServices.slice(0, 6).map((title) => ({
       title,
       text: 'Informationen zu diesem Leistungsbereich und Kontakt für Fragen zum gewünschten Umfang.',
