@@ -457,3 +457,9 @@ Beispiele, Ablauf, Versprechen, qualitativer Vergleich, Preise aus `offers-v4.ts
 `legalDrafts()` plus Datenschutzabschnitt zu den Formularen. Build: `pnpm --filter @wbm/launch build` → `dist/`
 (noindex, Exportsperre aktiv). Kein Deployment: braucht ein neues Netlify-Projekt, Formularerkennung und
 Benachrichtigungs-E-Mail – erst nach Freigabe.
+
+**Deploy 27.10.2026 (vom Betreiber freigegeben):** Upload-Deploy `6ae0e479280cb6357aa4fb20` in das bestehende
+Netlify-Projekt `seitenwerk-website` (seitenwerk.world), Formulare aktiviert und erkannt (`anfrage`, `entfernen`),
+alte Pfade per `_redirects` auf Abschnitte umgeleitet, weiterhin noindex. Der Deploy ist bereit, aber noch nicht
+veröffentlicht, weil der vorherige Produktionsdeploy gesperrt ist (Auto-Publishing aus) → in Netlify
+„Publish deploy“ klicken. Formular-Benachrichtigung per E-Mail im Netlify-Dashboard einrichten.

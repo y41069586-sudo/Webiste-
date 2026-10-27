@@ -297,6 +297,18 @@ for (const pkg of new Set(FONTS.map(([p]) => p))) {
   if (existsSync(license)) cpSync(license, path.join(dist, 'fonts', `${pkg.split('/')[1]}-OFL.txt`));
 }
 
+// Alte Pfade der früheren Firmenwebsite auf seitenwerk.world auf die passenden Abschnitte umleiten
+writeFileSync(
+  path.join(dist, '_redirects'),
+  [
+    '/preise /#preise 301',
+    '/beispiele /#beispiele 301',
+    '/so-funktionierts /#ablauf 301',
+    '/kontakt /#anfrage 301',
+    '/garantie /agb/ 301',
+    '/quellen / 301',
+  ].join('\n') + '\n',
+);
 writeFileSync(path.join(dist, 'robots.txt'), indexable ? 'User-agent: *\nAllow: /\n' : 'User-agent: *\nDisallow: /\n');
 writeFileSync(
   path.join(dist, '_headers'),
