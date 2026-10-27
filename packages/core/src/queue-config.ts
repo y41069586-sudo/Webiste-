@@ -10,8 +10,23 @@ export function queueRuntimeConfig() {
   const schedule = process.env.BOSS_SCHEDULE ? process.env.BOSS_SCHEDULE === 'true' : worker || !production;
   const create = process.env.BOSS_CREATE_QUEUES === 'true' || (!production && process.env.BOSS_CREATE_QUEUES !== 'false');
   const url = process.env.QUEUE_DATABASE_URL || getEnv().DATABASE_URL;
+  assertSameQueueDatabase(getEnv().DATABASE_URL, url);
   assertQueueConnection(url, { migrate, supervise, schedule });
   return { ...getDatabaseConnectionConfig(url), migrate, supervise, schedule, create };
+}
+
+/** App producers and worker must use the same database, also across Supabase direct/session hosts. */
+export function assertSameQueueDatabase(appUrl: string, queueUrl: string) {
+  const identity = (value: string) => {
+    const u = new URL(value);
+    const directProject = u.hostname.match(/^db\.([a-z0-9]+)\.supabase\.co$/)?.[1];
+    const poolerProject = u.hostname.endsWith('.pooler.supabase.com')
+      ? decodeURIComponent(u.username).match(/\.([a-z0-9]+)$/)?.[1]
+      : undefined;
+    return `${directProject || poolerProject ? `supabase:${directProject ?? poolerProject}` : `${u.hostname}:${u.port || '5432'}`}${u.pathname || '/postgres'}`;
+  };
+  if (identity(appUrl) !== identity(queueUrl))
+    throw Error('App und Queue müssen dieselbe Datenbank verwenden; Verbindungsziele getrennt prüfen.');
 }
 
 export function assertQueueConnection(url: string, options: { migrate: boolean; supervise: boolean; schedule: boolean }) {

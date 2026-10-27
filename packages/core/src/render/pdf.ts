@@ -175,7 +175,8 @@ export async function validateLetterDom(html: string, position: 'left' | 'right'
       }
       if (first.classList.contains('v4-page')) {
         const font = parseFloat(getComputedStyle(document.getElementById('kleingedrucktes')).fontSize);
-        if (font < 10.6) out.push({ check: 'pflichttext-schrift', detail: 'Pflichtinformationen kleiner als 8 pt.' });
+        const min = first.classList.contains('invitation-page') ? 11.9 : 10.6;
+        if (font < min) out.push({ check: 'pflichttext-schrift', detail: first.classList.contains('invitation-page') ? 'Pflichtinformationen kleiner als 9 pt.' : 'Pflichtinformationen kleiner als 8 pt.' });
       }
       const a = rect(addr);
       return { issues: out, address: a };

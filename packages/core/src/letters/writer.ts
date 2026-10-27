@@ -182,6 +182,16 @@ export async function writePreviewInvitation(
       });
       reasons = invitationDraftIssues(draft, input.context, facts);
       if (reasons.length) continue;
+      // A source fact alone is not proof that the promised preview actually shows it.
+      // Keep this binding deterministic instead of trusting an approving model response alone.
+      const missingInDemo = facts.filter(
+        (f) => draft.factIds.includes(f.id) && !reading.toLocaleLowerCase('de').includes(f.text.toLocaleLowerCase('de')),
+      );
+      if (missingInDemo.length)
+        reasons.push(
+          'Hervorgehobene Betriebsangabe fehlt in der gespeicherten Demo; nur dort sichtbare belegte Angaben verwenden oder Demo zur Prüfung zurückstellen.',
+        );
+      if (reasons.length) continue;
       const review = await call<unknown>({
         tier: 'bulk',
         system: `Prüfe einen SeitenWerk-Einladungsbrief gegen die mitgelieferten Fakten und die Demo.

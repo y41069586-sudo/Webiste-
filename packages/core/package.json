@@ -19,6 +19,7 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "admin:create": "tsx scripts/create-admin.ts",
     "queue:prepare": "tsx scripts/prepare-queue.ts",
+    "operations:preflight": "tsx scripts/operations-preflight.ts",
     "storage:backup": "tsx scripts/backup-storage.ts"
   },
   "dependencies": {

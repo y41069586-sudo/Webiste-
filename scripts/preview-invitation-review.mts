@@ -7,6 +7,7 @@ import { chromium } from '../packages/core/node_modules/playwright/index.mjs';
 import jsQR from '../packages/core/node_modules/jsqr/dist/jsQR.js';
 import { renderSite, renderLetterHtml, TEMPLATES, industryDirection } from '../packages/templates/src';
 import { libraryContent } from '../packages/core/src/demos/library';
+import { verifiedServiceFallback } from '../packages/core/src/demos/content';
 import { demoOptions } from '../packages/core/src/demos/build';
 import { DEFAULT_CONFIG, deepMerge } from '../packages/core/src/config/settings';
 import { composeLetter, placeholderValues, letterTruthBlocklist, type ComposeInput } from '../packages/core/src/letters/compose';
@@ -21,7 +22,7 @@ import { sha256 } from '../packages/core/src/util/crypto';
 import { writePreviewInvitation, invitationDraftIssues, LETTER_WRITER_TOOL } from '../packages/core/src/letters/writer';
 import { letterCopyFixture } from './letter-copy-fixtures.mts';
 const sharp = createRequire(new URL('../apps/web/node_modules/next/package.json', import.meta.url))('sharp');
-const out = 'data/exports/letter-preview-upgrade';
+const out = process.argv.find((a) => a.startsWith('--out='))?.slice(6) ?? 'data/exports/letter-preview-upgrade';
 mkdirSync(out, { recursive: true });
 mkdirSync(`${out}/vorher`, { recursive: true });
 // Each row is expressly invented test data, not a discovered business or conducted research.
@@ -81,6 +82,10 @@ const cases = [
     'Einzelunterricht',
   ],
   ['Tanzatelier Schrittwerk', 'tanzschule', 'Tanzschule', 'kurse-magazin', 'Paartanz', 'Schnupperstunden'],
+  ['Fliesenatelier Fuge', 'fliesenleger', 'Fliesenleger', 'handwerk-klar', 'Fliesenverlegung', 'Badsanierung'],
+  ['Fliesenwerk Stein & Maß', 'fliesenleger', 'Fliesenleger', 'handwerk-werkstatt', 'Wandfliesen', 'Fugensanierung'],
+  ['Objektpflege Klarraum', 'reinigung', 'Gebäudereinigung', 'handwerk-solid', 'Büroreinigung', 'Treppenhausreinigung'],
+  ['Raumklar Gewerbeservice', 'reinigung', 'Gebäudereinigung', 'handwerk-klar', 'Unterhaltsreinigung', 'Büroreinigung'],
 ] as const;
 for (const [index, [name, , branchLabel, , first, second]] of cases.entries()) {
   const facts = [first, second].map((text, i) => ({ id: `F${i + 1}`, text }));
@@ -89,7 +94,7 @@ for (const [index, [name, , branchLabel, , first, second]] of cases.entries()) {
   if (issues.length) throw Error(`Testtext ${index + 1}: ${issues.join(' | ')}`);
 }
 if (process.argv.includes('--check-copy-only')) {
-  console.log('20 redaktionelle Offline-Testantworten haben die deterministischen Textregeln bestanden.');
+  console.log(`${cases.length} redaktionelle Offline-Testantworten haben die deterministischen Textregeln bestanden.`);
   process.exit(0);
 }
 const cfg = deepMerge(DEFAULT_CONFIG, {
@@ -128,7 +133,7 @@ const server = createServer((req, res) => {
 await new Promise<void>((r) => server.listen(PORT, '127.0.0.1', r));
 const browser = await chromium.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox', '--disable-dev-shm-usage'] });
 const oldChecks =
-  process.argv.includes('--reuse-demo') && existsSync(`${out}/checks.json`)
+  (process.argv.includes('--reuse-demo') || process.argv.includes('--resume')) && existsSync(`${out}/checks.json`)
     ? JSON.parse(readFileSync(`${out}/checks.json`, 'utf8'))
     : [];
 const only = process.argv.find((v) => v.startsWith('--only='))?.slice(7);
@@ -145,14 +150,24 @@ try {
         copyFileSync(`${out}/${id}-${suffix}`, `${out}/vorher/${id}-${suffix}`);
     const t = TEMPLATES.find((t) => t.id === template)!;
     const city = 'Fiktivstadt';
-    const content = libraryContent(branch, t.group, { name, stadt: city, branche: label }, index);
-    content.services = [
-      { title: first, text: 'Ausdrücklich vorgegebene Leistung dieses fiktiven Testbetriebs.', icon: 'chat' },
-      { title: second, text: 'Ausdrücklich vorgegebene Angabe dieses fiktiven Testbetriebs.', icon: 'chat' },
-    ];
+    const content = verifiedServiceFallback(libraryContent(branch, t.group, { name, stadt: city, branche: label }, index), {
+      name,
+      branchLabel: label,
+      branchKey: branch,
+      group: t.group,
+      city,
+      street: 'Fiktiver Musterweg',
+      houseNumber: String(index + 1),
+      postalCode: '12345',
+      phone: null,
+      hasOpeningHours: false,
+      socialOnly: false,
+      verifiedServices: [first, second],
+    });
     const facts = {
       name,
       branchLabel: label,
+      verifiedServices: [first, second],
       group: t.group,
       street: 'Fiktiver Musterweg',
       houseNumber: String(index + 1),
@@ -175,6 +190,10 @@ try {
     writeFileSync(`${out}/${id}-demo.html`, html);
     const old = oldChecks.find((r: { id: string; demoHash: string }) => r.id === id && r.demoHash === sha256(Buffer.from(html)));
     const cached = old && ['desktop', 'phone', 'devices'].every((s) => existsSync(`${out}/${id}-${s}.jpg`));
+    if (process.argv.includes('--resume') && cached && old.legalFontPt >= 9) {
+      results.push(old);
+      continue;
+    }
     const shots = cached
       ? { desktop: readFileSync(`${out}/${id}-desktop.jpg`), mobile: readFileSync(`${out}/${id}-phone.jpg`) }
       : await takeScreenshots(html, { hideDemoChrome: true });
@@ -212,7 +231,7 @@ try {
       compositeDataUri: `data:image/jpeg;base64,${devices.toString('base64')}`,
       qrDataUri: await qrDataUri(`http://127.0.0.1:${PORT}/q/${id}`),
       shortUrl: `127.0.0.1:${PORT}/s${id}`,
-      dateLine: 'Testort, 26. Oktober 2026',
+      dateLine: 'Testort, 27. Oktober 2026',
       expiresLabel: '26. November 2026',
       privacyNotice: privacyNoticeText(cfg, 'mock', 'example.test/datenschutz'),
       objectionNotice: objectionNoticeText('support@example.test'),
@@ -313,6 +332,9 @@ try {
     const scan = jsQR(rgba, raster.info.width, raster.info.height)?.data;
     await sharp(`${out}/${id}-print.png`).resize({ width: 1100 }).jpeg({ quality: 88 }).toFile(`${out}/${id}-print.jpg`);
     const text = (await pdfTextItems(pdf)).items.map((i) => i.str).join(' ');
+    const legalFontPt = await page
+      .locator('#kleingedrucktes')
+      .evaluate((el) => (parseFloat(getComputedStyle(el).fontSize) * 72) / 96);
     const targets = [];
     for (const url of [`http://127.0.0.1:${PORT}/q/${id}`, `http://127.0.0.1:${PORT}/s${id}`]) {
       const r = await fetch(url);
@@ -337,7 +359,8 @@ try {
       targets: targets.every(Boolean),
       noPrices: !/(?:597|590|49|19|99)\s*€|Care\+|Monatsabrechnung/.test(text),
       privacy: text.includes('Art. 14 DSGVO') && text.includes('Art. 21 DSGVO'),
-      date: text.includes('26. Oktober 2026'),
+      legalFontPt,
+      date: text.includes('27. Oktober 2026'),
       truth: truth.passed,
       truthViolations: truth.violations,
       mobileOverflow: await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1),

@@ -11,7 +11,7 @@ const g = globalThis as unknown as BrowserGlobal;
 export function getBrowser(): Promise<Browser> {
   if (!g.__wbmBrowser) {
     const executablePath = getEnv().CHROMIUM_EXECUTABLE_PATH;
-    g.__wbmBrowser = chromium
+    const pending = chromium
       .launch({
         headless: true,
         ...(executablePath ? { executablePath } : {}),
@@ -19,13 +19,15 @@ export function getBrowser(): Promise<Browser> {
       })
       .then((b) => {
         b.on('disconnected', () => {
-          g.__wbmBrowser = undefined;
+          // Closing an older process must not evict a newer renderer started meanwhile.
+          if (g.__wbmBrowser === pending) g.__wbmBrowser = undefined;
         });
         return b;
       });
-    g.__wbmBrowser.catch((err) => {
+    g.__wbmBrowser = pending;
+    pending.catch((err) => {
       logger.error({ err: err instanceof Error ? err.message : String(err) }, 'Chromium-Start fehlgeschlagen');
-      g.__wbmBrowser = undefined;
+      if (g.__wbmBrowser === pending) g.__wbmBrowser = undefined;
     });
   }
   return g.__wbmBrowser;
@@ -57,11 +59,12 @@ export async function withPage<T>(
     timezoneId: 'Europe/Berlin',
     reducedMotion: 'reduce',
   });
-  if (!opts.allowNetwork) {
-    await ctx.route(/^https?:\/\//, (route) => route.abort());
-  }
-  const page = await ctx.newPage();
   try {
+    // Stalled screenshots must fail into the existing job retry/review path, not hang forever.
+    ctx.setDefaultTimeout(45_000);
+    ctx.setDefaultNavigationTimeout(45_000);
+    if (!opts.allowNetwork) await ctx.route(/^https?:\/\//, (route) => route.abort());
+    const page = await ctx.newPage();
     return await fn(page, ctx);
   } finally {
     await ctx.close().catch(() => undefined);

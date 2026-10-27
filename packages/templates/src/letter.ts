@@ -182,6 +182,8 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .offer-prices{display:flex;gap:4mm;font-size:9.4pt;line-height:1.4}.offer-prices strong{font-weight:600}.offer-summary p{font-size:8.5pt;line-height:1.35;margin:1mm 0}.offer-summary .tax{font-size:8pt}
 .v4-letter .invitation-intro{font-size:10.5pt;line-height:1.42;margin:2mm 0 3mm}.v4-letter .invitation-intro p+p{margin-top:1.2mm}.invitation-next{font-size:9.5pt;line-height:1.4;margin:3mm 0}.invitation-next p+p{margin-top:1.5mm}.v4-letter .no-action{font-size:9pt;line-height:1.4}.v4-letter .sign{margin-top:0}
 .v4-page .small{font-size:8pt;color:#344054;line-height:1.32}
+/* Current invitations: readable disclosures without shrinking the real device preview or QR. */
+.invitation-page .v4-letter{top:88mm}.invitation-page .small{bottom:12mm;font-size:9pt}.invitation-page .invitation-next{margin:2mm 0}
 .p2{position:absolute;left:25mm;right:20mm;top:25mm}
 .p2 h2{font-size:15pt;margin:0 0 2mm;color:#1d4e89}
 .muted{color:#4a5565}
@@ -192,7 +194,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .qrrow .qr{margin:0;width:41mm;height:41mm}
 </style></head>
 <body>
-<section class="page ${d.offerSummary || d.previewInvitation ? 'v4-page' : ''}" aria-label="Seite 1">
+<section class="page ${d.offerSummary || d.previewInvitation ? 'v4-page' : ''} ${d.previewInvitation ? 'invitation-page' : ''}" aria-label="Seite 1">
   <header class="head">
     <div><div class="brand" style="display:flex;align-items:center;gap:8px">${brandMarkHtml(26, true)}<span>${esc(d.sender.company)}</span></div><div class="tag">Websites für lokale Betriebe</div></div>
     <div class="web">${esc(d.sender.website)}</div>

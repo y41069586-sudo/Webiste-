@@ -418,7 +418,11 @@ export async function buildDemo(
   const templateId = fixed?.id ?? rotated.templateId;
   const palette = fixed ? (fixed.palettes.includes(rotated.palette) ? rotated.palette : fixed.palettes[0]!) : rotated.palette;
   const generated = await generateDemoContent(lead, cfg, design.direction);
-  const facts = { ...leadToFacts(lead, cfg), photos: design.photos };
+  const facts = {
+    ...leadToFacts(lead, cfg),
+    verifiedServices: leadContentFacts(lead, cfg, research).verifiedServices,
+    photos: design.photos,
+  };
   const slug = randomToken(24);
   const html = renderDemoHtml({
     templateId,

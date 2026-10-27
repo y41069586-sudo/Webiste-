@@ -16,6 +16,7 @@ export function setOfferVersion(version: 'v4' | 'legacy'): void {
     cwd: root,
     env: { ...process.env, ...e2eEnv, LOG_LEVEL: 'silent' },
     encoding: 'utf8',
+    timeout: 30_000,
   });
 }
 
@@ -41,6 +42,7 @@ function seedDemo(pendingReview: boolean, profile?: { name: string; branch: stri
       ...(profile ? { E2E_DEMO_PROFILE: JSON.stringify(profile) } : {}),
     },
     encoding: 'utf8',
+    timeout: 180_000,
   });
   const json = out.slice(out.indexOf('{'));
   return JSON.parse(json) as SeededDemo;

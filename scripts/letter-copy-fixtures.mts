@@ -124,6 +124,30 @@ export function letterCopyFixture(index: number, name: string, facts: { id: stri
       'Dazu habe ich eine eigene Gestaltung für Ihr Tanzatelier vorbereitet. Öffnen Sie die persönliche Vorschau und sehen Sie sich an, wie Ihr Angebot auf dem Handy und am Computer wirken könnte.',
       'Die Vorschau für Ihr Tanzatelier ansehen',
     ],
+    [
+      `Ein Website-Entwurf für die Badideen von ${name}`,
+      'bei einer Badsanierung möchten Interessierte zunächst wissen, ob ihr Vorhaben zum Angebot eines Betriebs passt. Eine klare Leistungsübersicht könnte diesen Einstieg erleichtern.',
+      `Für ${name} habe ich eine eigene Website-Idee vorbereitet. Fliesenverlegung hat darin einen eigenen Platz – sehen Sie sich an, wie sich Ihr Angebot am Handy und am Computer präsentieren könnte.`,
+      'Den Website-Entwurf für Ihre Fliesenarbeiten ansehen',
+    ],
+    [
+      `${name}: Ihre Fliesenarbeiten als Website-Idee`,
+      'Wandfliesen und Fugensanierung sind unterschiedliche Anliegen. Auf einer eigenen Website könnten Interessierte das passende Angebot finden und ihre erste Anfrage vorbereiten.',
+      'Die persönliche Vorschau greift genau diese beiden Angaben auf. Öffnen Sie den Entwurf und prüfen Sie selbst, ob diese Präsentation zu Ihrem Betrieb passt.',
+      'Ihre persönliche Fliesen-Vorschau öffnen',
+    ],
+    [
+      `Eine Website-Idee für die Objektanfragen an ${name}`,
+      'bei einer Anfrage zur Büroreinigung sind andere Angaben wichtig als bei einem Treppenhaus. Eine übersichtliche Website könnte helfen, das gewünschte Objekt und den Umfang einzuordnen.',
+      'Dafür ist ein eigener Entwurf für Ihren Betrieb entstanden. Er zeigt Ihr bestätigtes Angebot und wie Interessierte den Kontakt zu Ihnen vorbereiten könnten.',
+      'Ihren Objektpflege-Entwurf kostenlos ansehen',
+    ],
+    [
+      `${name} – ein digitaler Einblick in Ihr Angebot`,
+      'Unterhaltsreinigung ist für Interessierte ein konkreter Ausgangspunkt. Vor einer Objektanfrage könnte eine eigene Website zeigen, welches Angebot sie bei Ihnen erwartet.',
+      'Ihre persönliche Vorschau stellt dafür Unterhaltsreinigung und Büroreinigung nebeneinander. Sehen Sie sich die Gestaltung unverbindlich an, bevor Sie über eine Umsetzung entscheiden.',
+      'Ihre Reinigungs-Website-Idee entdecken',
+    ],
   ][index]!;
   const [subject, opening, benefit, qrCaption] = texts;
   return {

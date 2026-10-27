@@ -159,6 +159,23 @@ export async function browserChecks(opts: BrowserQaOptions): Promise<Check[]> {
           passed: structureIssues.length === 0,
           ...(structureIssues.length ? { details: structureIssues.join(' | ') } : {}),
         });
+        const heroReadability = await page
+          .locator('main h1')
+          .first()
+          .evaluate((heading) => {
+            const rect = heading.getBoundingClientRect();
+            return { height: Math.round(rect.height), viewport: innerHeight, acceptable: rect.height <= innerHeight * 0.5 };
+          })
+          .catch(() => ({ height: 0, viewport: vp.height, acceptable: false }));
+        checks.push({
+          name: `hero-lesbarkeit-${vp.label}`,
+          passed: heroReadability.acceptable,
+          ...(!heroReadability.acceptable
+            ? {
+                details: `Hauptüberschrift benötigt ${heroReadability.height}px von ${heroReadability.viewport}px Bildschirmhöhe; individuelle Layoutprüfung erforderlich.`,
+              }
+            : {}),
+        });
         const brokenImages = await page.evaluate(() =>
           Array.from(document.images)
             .filter((image) => !image.complete || image.naturalWidth === 0)

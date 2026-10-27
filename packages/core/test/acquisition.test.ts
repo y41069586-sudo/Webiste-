@@ -98,6 +98,14 @@ it('requires independent activity, a full website search, customer focus and an 
     }
   }
 });
+it('never qualifies a nameless recipient even when other research fields appear complete', () => {
+  const { lead, evidence } = fixture();
+  lead.businessName = '   ';
+  evidence.identityHash = researchIdentity(lead);
+  const result = assessAcquisition(lead, evidence, ACQUISITION_POLICY, now);
+  expect(result.state).toBe('review');
+  expect(result.missing).toContain('Firmenname fehlt');
+});
 it('never treats an empty website field or a social profile URL as a complete absence check', () => {
   const { lead, evidence } = fixture();
   expect(assessAcquisition(lead, null, ACQUISITION_POLICY, now).state).toBe('review');

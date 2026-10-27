@@ -149,7 +149,7 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
   <div class="mx-auto max-w-4xl px-4">
     <p class="text-sm font-medium text-[#4b5563]">${brandMarkHtml(24)} Angebot von ${esc(demo.sender.name) || 'TODO: vollständiger Anbietername'}, ${esc(demo.sender.company)} – nicht Teil der Website</p>
     <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${demo.offerVersion === 'v4' ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${demo.offerVersion === 'v4' ? '<p class="mt-3 text-sm">Einrichtung, Ihre Inhalte und Fertigstellung dieses Entwurfs. Veröffentlichung erst nach Ihrer Freigabe. Wählen Sie dazu Ihren laufenden Tarif:</p>' : ''}
-    ${demo.offerVersion === 'v4' ? `<div class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><h3 class="font-semibold">Was die Einrichtung umfasst</h3><p class="mt-2">Wir stellen diesen Entwurf mit Ihren bestätigten Angaben, Texten und berechtigten Bildern fertig, stimmen die vereinbarten Anpassungen mit Ihnen ab und bereiten die technische Einrichtung vor. Ihre Inhalte und die fertige Vorschau geben Sie vor der Veröffentlichung frei.</p><p class="mt-3">Der Monatstarif deckt die laufende Bereitstellung ab und beginnt erst nach bestätigtem Go-Live. Care+ enthält Basis vollständig. Individuelle Zusatzfunktionen, größere Umbauten und Domains außerhalb des vereinbarten Umfangs benötigen Ihre gesonderte Zustimmung.</p></div>` : ''}
+    ${demo.offerVersion === 'v4' ? `<div class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><h3 class="font-semibold">Was die Einrichtung umfasst</h3><ul class="mt-3 space-y-3"><li><strong>Wir stellen den Entwurf fertig.</strong> Mit Ihren bestätigten Angaben, Texten, berechtigten Bildern und den vereinbarten Anpassungen.</li><li><strong>Sie behalten die Freigabe.</strong> Sie prüfen Ihre Inhalte und die fertige Vorschau, bevor wir die Website veröffentlichen.</li><li><strong>Wir richten die Website technisch ein.</strong> Der gewählte Monatstarif übernimmt anschließend Hosting, SSL und den vereinbarten Betreuungsumfang.</li></ul><p class="mt-4">Die Monatsgebühr beginnt erst nach bestätigtem Go-Live. Care+ enthält Basis vollständig. Zusatzfunktionen, größere Umbauten und Domains außerhalb des vereinbarten Umfangs benötigen Ihre gesonderte Zustimmung.</p></div>` : ''}
     ${cards.length ? `<ul class="mt-6 grid gap-4 ${cards.length > 1 ? 'sm:grid-cols-2' : ''}">${cards.map(card).join('')}</ul>` : ''}
     ${opts.review || demo.offerVersion === 'v4' ? `<details class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><summary class="cursor-pointer font-semibold">Was Sie beauftragen – Ablauf und Leistungsgrenzen</summary><p class="mt-3">Sie übermitteln Ihre tatsächlichen Inhalte und Änderungswünsche. Wir stellen den Entwurf fertig, richten die vereinbarten technischen Leistungen ein und veröffentlichen erst nach Ihrer Freigabe.</p><ol class="mt-4 space-y-3"><li><strong>1. Online bestellen</strong><br>Tarif und Bedingungen prüfen.</li><li><strong>2. Inhalte ergänzen</strong><br>Firmenangaben, rechtliche Texte, eigene Bilder und Wünsche übermitteln.</li><li><strong>3. Prüfen und freigeben</strong><br>Website abstimmen. Erst nach bestätigtem Go-Live beginnt die Monatsgebühr.</li></ol><p class="mt-4">Zusatzseiten, größere Umbauten und Leistungen außerhalb des Tarifs benötigen ein gesondertes Angebot. Domainumfang, Kündigungsfrist und Übergabe sind in den verlinkten Vertragsbedingungen beschrieben.</p></details>` : ''}
     ${demo.guaranteeNote ? `<p class="mt-4 text-sm text-[#374151]">${esc(demo.guaranteeNote)}</p>` : ''}
@@ -296,9 +296,11 @@ ${jsonLd}
   const addressLines = `${esc(facts.street)} ${esc(facts.houseNumber)}<br>${esc(facts.postalCode)} ${esc(facts.city)}`;
 
   const priceHint = industry === 'beauty' ? ' Preise auf Anfrage.' : '';
+  const servicesVerified =
+    content.services.length > 0 && content.services.every((s) => facts.verifiedServices?.includes(s.title));
   const servicesNote = (cls = 'text-sm text-muted') =>
     isDemo
-      ? `<p class="${cls}"><span aria-hidden="true">✎ </span>Beispiel-Leistungen – passen wir gemeinsam für Sie an.${priceHint}</p>`
+      ? `<p class="${cls}">${servicesVerified ? 'Leistungsübersicht aus geprüften Betriebsangaben. Vor Veröffentlichung vom Betrieb zu bestätigen.' : `<span aria-hidden="true">✎ </span>Beispiel-Leistungen – passen wir gemeinsam für Sie an.${priceHint}`}</p>`
       : priceHint
         ? `<p class="${cls}">${priceHint.trim()}</p>`
         : '';
@@ -306,7 +308,7 @@ ${jsonLd}
   const hoursList = (opts: { rowClass?: string; labelClass?: string; mutedClass?: string } = {}) => {
     const muted = opts.mutedClass ?? 'text-muted';
     if (!facts.openingLines.length) {
-      return `<p class="${muted}">Termine und Öffnungszeiten nach Vereinbarung${facts.phone ? ' – rufen Sie uns gern an' : ''}.</p>`;
+      return `<p class="${muted}">Öffnungszeiten sind noch nicht bestätigt. Bitte nutzen Sie die angegebenen Kontaktmöglichkeiten.</p>`;
     }
     return `<dl class="divide-y divide-line">${facts.openingLines
       .map(
@@ -523,7 +525,9 @@ ${jsonLd}
       .filter((ph) => !draft || ph.rightsConfirmed)
       .map((ph) => ({ src: ph.src, alt: ph.alt, example: ph.origin === 'example', focalPoint: ph.focalPoint }));
     if (own.length || !draft) return own.slice(0, n);
-    return stockPhotos(facts.group, seed, facts.branchLabel, { mood: input.artDirection?.imageMood })
+    return stockPhotos(facts.group, seed, [facts.branchLabel, ...(facts.verifiedServices ?? [])].join(' '), {
+      mood: input.artDirection?.imageMood,
+    })
       .slice(0, n)
       .map((ph) => ({
         src: stockPhotoDataUri(ph),

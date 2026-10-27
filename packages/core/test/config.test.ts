@@ -47,6 +47,11 @@ describe('Konfiguration', () => {
       'handwerk',
       'handwerk',
       'handwerk',
+      // New campaign sectors stay inactive in the explicit legacy regression fixture.
+      'handwerk',
+      'handwerk',
+      'handwerk',
+      'handwerk',
     ]);
   });
 

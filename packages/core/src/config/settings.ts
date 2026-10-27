@@ -637,7 +637,6 @@ export const DEFAULT_CONFIG: AppConfig = {
       'dasoertliche.de',
       'meinestadt.de',
       'yelp.de',
-      'jimdosite.com',
     ],
   },
   leadSource: {

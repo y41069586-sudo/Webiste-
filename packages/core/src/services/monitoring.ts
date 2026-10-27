@@ -10,10 +10,11 @@ export interface SystemHealth {
   storage: boolean;
   /** Sekunden seit dem letzten erfolgreichen Pipeline-Takt (Worker-Herzschlag) */
   workerHeartbeatAgeSec: number | null;
-  failedJobsLastHour: number;
-  deadLettersLastDay: number;
+  failedJobsLastHour: number | null;
+  deadLettersLastDay: number | null;
   /** Jobs, die seit über 30 Minuten auf Abarbeitung warten */
-  backlog: number;
+  backlog: number | null;
+  queueReadable: boolean;
   /** Letzter Wiederherstellungstest des Backups */
   backup: { status: string; at: string } | null;
   problems: string[];
@@ -30,9 +31,10 @@ export async function systemHealth(db: DbOrTx = getDb()): Promise<SystemHealth> 
       db: false,
       storage: false,
       workerHeartbeatAgeSec: null,
-      failedJobsLastHour: 0,
-      deadLettersLastDay: 0,
-      backlog: 0,
+      failedJobsLastHour: null,
+      deadLettersLastDay: null,
+      backlog: null,
+      queueReadable: false,
       backup: null,
       problems: ['Datenbank nicht erreichbar'],
     };
@@ -54,25 +56,31 @@ export async function systemHealth(db: DbOrTx = getDb()): Promise<SystemHealth> 
         (SELECT count(*)::int FROM pgboss.job WHERE name = 'dead-letters' AND created_on > now() - interval '1 day') AS dead,
         (SELECT count(*)::int FROM pgboss.job WHERE state = 'created' AND start_after < now() - interval '30 minutes') AS backlog`,
     )
-    .catch(() => ({ rows: [{ heartbeat: null, failed: 0, dead: 0, backlog: 0 }] }));
-  const row = q.rows[0]!;
-  const hb = row.heartbeat === null ? null : Number(row.heartbeat);
+    .catch(() => null);
+  const row = q?.rows[0] ?? null;
+  if (!row) problems.push('Aufgabenwarteschlange nicht lesbar: Schema, Berechtigungen und Verbindung prüfen');
+  const hb = row?.heartbeat == null ? null : Number(row.heartbeat);
   if (hb === null || hb > 15 * 60)
     problems.push(
       hb === null
         ? 'Worker hat noch keinen Pipeline-Takt abgeschlossen'
         : `Worker-Herzschlag seit ${Math.round(hb / 60)} Minuten aus`,
     );
-  if (row.failed > 10) problems.push(`${row.failed} fehlgeschlagene Jobs in der letzten Stunde`);
-  if (row.backlog > 50) problems.push(`${row.backlog} Jobs warten seit über 30 Minuten`);
-  const b = await db.execute<{ value: { status: string; at: string } }>(
-    sql`SELECT value FROM settings WHERE key = 'backup_status'`,
-  );
-  const backup = b.rows[0]?.value ?? null;
+  if (row && row.failed > 10) problems.push(`${row.failed} fehlgeschlagene Jobs in der letzten Stunde`);
+  if (row && row.backlog > 50) problems.push(`${row.backlog} Jobs warten seit über 30 Minuten`);
+  const b = await db
+    .execute<{ value: { status: string; at: string } }>(sql`SELECT value FROM settings WHERE key = 'backup_status'`)
+    .catch(() => null);
+  if (!b) problems.push('Backup-Nachweis nicht lesbar');
+  const backup = b?.rows[0]?.value ?? null;
   if (getEnv().NODE_ENV === 'production') {
     if (!backup) problems.push('Noch kein geprüftes Backup');
     else if (backup.status !== 'ok') problems.push('Letzter Backup-Wiederherstellungstest fehlgeschlagen');
-    else if (Date.now() - new Date(backup.at).getTime() > 36 * 3600 * 1000)
+    else if (
+      !Number.isFinite(new Date(backup.at).getTime()) ||
+      new Date(backup.at).getTime() > Date.now() ||
+      Date.now() - new Date(backup.at).getTime() > 36 * 3600 * 1000
+    )
       problems.push('Letztes geprüftes Backup älter als 36 Stunden');
   }
   return {
@@ -80,9 +88,10 @@ export async function systemHealth(db: DbOrTx = getDb()): Promise<SystemHealth> 
     db: true,
     storage,
     workerHeartbeatAgeSec: hb,
-    failedJobsLastHour: row.failed,
-    deadLettersLastDay: row.dead,
-    backlog: row.backlog,
+    queueReadable: Boolean(row),
+    failedJobsLastHour: row?.failed ?? null,
+    deadLettersLastDay: row?.dead ?? null,
+    backlog: row?.backlog ?? null,
     backup,
     problems,
   };

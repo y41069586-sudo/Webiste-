@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { CONTENT_LIBRARY, libraryContent } from '../src/demos/library';
-import { validateDemoContent, normalizeContent, verifiedServiceFallback, type ContentFacts } from '../src/demos/content';
+import {
+  validateDemoContent,
+  normalizeContent,
+  verifiedServiceFallback,
+  buildQaPrompt,
+  type ContentFacts,
+} from '../src/demos/content';
 
 const facts: ContentFacts = {
   name: 'Malermeister Kowalski GmbH',
@@ -25,6 +31,8 @@ describe('Inhaltsregeln', () => {
     expect(repaired.hero_headline).toContain('Tapezierarbeiten');
     expect(repaired.hero_subline).toContain('Bodenverlegung');
     expect(validateDemoContent(repaired, f)).toEqual([]);
+    expect(repaired.services[0]!.text).not.toBe(repaired.services[1]!.text);
+    expect(buildQaPrompt(f, repaired)).toContain('"leistungen":["Tapezierarbeiten","Bodenverlegung"]');
   });
   it('alle Fallback-Texte aller Branchen bestehen die Regeln', () => {
     for (const key of Object.keys(CONTENT_LIBRARY)) {

@@ -4,6 +4,7 @@ import { getDb } from '../db/client';
 import { logger } from '../logger';
 import { getProviders } from '../providers';
 import type { LlmStructuredRequest, LlmTextRequest, LlmUsage } from '../providers/types';
+import { LlmUsageError } from '../providers/types';
 import { assertBudgetAvailable, llmCostMicroCents, recordCost } from './budget';
 
 export type ModelTier = 'creative' | 'bulk';
@@ -45,14 +46,39 @@ async function book(usage: LlmUsage, purpose: string, leadId: string | undefined
 }
 
 /** Strukturierte LLM-Ausgabe mit Budget-Prüfung und Kostenbuchung. */
+async function bookAttempts(usages: LlmUsage[], purpose: string, leadId: string | undefined, key?: string) {
+  for (const [index, usage] of usages.entries())
+    await book(usage, purpose, leadId, key && index < usages.length - 1 ? `${key}:attempt:${index}` : key);
+}
+
+async function withUsageAccounting<T>(
+  run: () => Promise<{ data: T; usage: LlmUsage; usages?: LlmUsage[] }>,
+  purpose: string,
+  leadId?: string,
+  key?: string,
+): Promise<T> {
+  let res;
+  try {
+    res = await run();
+  } catch (error) {
+    if (error instanceof LlmUsageError) await bookAttempts(error.usages, purpose, leadId, key);
+    throw error;
+  }
+  await bookAttempts(res.usages ?? [res.usage], purpose, leadId, key);
+  return res.data;
+}
+
 export async function llmStructured<T>(
   req: Omit<LlmStructuredRequest, 'model'> & { tier: ModelTier; idempotencyKey?: string },
 ): Promise<T> {
   await assertBudgetAvailable('llm', 10);
   const { tier, idempotencyKey, ...rest } = req;
-  const res = await getProviders().llm.generateStructured<T>({ ...rest, model: modelFor(tier) });
-  await book(res.usage, req.purpose, req.leadId, idempotencyKey);
-  return res.data;
+  return withUsageAccounting(
+    () => getProviders().llm.generateStructured<T>({ ...rest, model: modelFor(tier) }),
+    req.purpose,
+    req.leadId,
+    idempotencyKey,
+  );
 }
 
 export async function llmText(
@@ -60,7 +86,10 @@ export async function llmText(
 ): Promise<string> {
   await assertBudgetAvailable('llm', 5);
   const { tier, idempotencyKey, ...rest } = req;
-  const res = await getProviders().llm.generateText({ ...rest, model: modelFor(tier) });
-  await book(res.usage, req.purpose, req.leadId, idempotencyKey);
-  return res.data;
+  return withUsageAccounting(
+    () => getProviders().llm.generateText({ ...rest, model: modelFor(tier) }),
+    req.purpose,
+    req.leadId,
+    idempotencyKey,
+  );
 }

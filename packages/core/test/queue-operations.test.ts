@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PgBoss } from 'pg-boss';
-import { assertQueueConnection, queueRuntimeConfig } from '../src/queue-config';
+import { assertQueueConnection, assertSameQueueDatabase, queueRuntimeConfig } from '../src/queue-config';
 import { resetEnvCache } from '../src/config/env';
 import { getDatabaseConnectionConfig } from '../src/db/client';
 
@@ -37,5 +37,14 @@ describe('Queue-Betriebsgrenzen', () => {
     boss.on('error', () => undefined);
     await expect(boss.start()).rejects.toThrow();
     await boss.stop();
+  });
+  it('refuses a queue pointed at another project/database while accepting direct/session for the same project', () => {
+    const direct = 'postgres://worker:fixture@db.projecta.supabase.co:5432/postgres';
+    const session = 'postgres://worker.projecta:fixture@aws-0-eu-west-1.pooler.supabase.com:5432/postgres';
+    expect(() => assertSameQueueDatabase(direct, session)).not.toThrow();
+    expect(() => assertSameQueueDatabase(direct, session.replace('worker.projecta', 'worker.projectb'))).toThrow(
+      /dieselbe Datenbank/,
+    );
+    expect(() => assertSameQueueDatabase(direct, session.replace('/postgres', '/other'))).toThrow(/dieselbe Datenbank/);
   });
 });

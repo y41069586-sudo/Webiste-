@@ -6,7 +6,7 @@ import { TEMPLATES, renderSite, industryDirection } from '../packages/templates/
 import { imagesPainted } from '../packages/core/src/render/screenshots';
 import { browserChecks, lighthouseCheck } from '../packages/core/src/render/qa';
 import { closeBrowser } from '../packages/core/src/render/browser';
-const out = 'data/exports/vibe-upgrade';
+const out = process.argv.find((a) => a.startsWith('--out='))?.slice(6) ?? 'data/exports/vibe-upgrade';
 mkdirSync(out, { recursive: true });
 const quick = process.argv.includes('--quick');
 const browser = await chromium.launch({
@@ -111,7 +111,7 @@ try {
     0,
   );
   original.content.hero_headline = original.facts.name;
-  for (const character of ['warm', 'refined', 'urban'] as const) {
+  for (const character of process.argv.includes('--templates-only') ? [] : (['warm', 'refined', 'urban'] as const)) {
     const input = {
       ...original,
       artDirection: {

@@ -291,6 +291,20 @@ export interface LlmTextRequest {
 export interface LlmResult<T> {
   data: T;
   usage: LlmUsage;
+  /** Every billed response, including failed tool-use attempts. Models may differ per attempt. */
+  usages?: LlmUsage[];
+}
+
+/** Known billed responses survive a later refusal/transport error; no prompt content is retained. */
+export class LlmUsageError extends Error {
+  constructor(
+    message: string,
+    public readonly usages: LlmUsage[],
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = 'LlmUsageError';
+  }
 }
 
 export interface LlmProvider {

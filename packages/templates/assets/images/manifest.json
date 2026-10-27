@@ -657,12 +657,137 @@
     ],
     "role": "work",
     "focalPoint": {
-      "x": 0.61,
-      "y": 0.46
+      "x": 61,
+      "y": 46
     },
     "moods": [
       "neutral",
       "warm"
+    ]
+  },
+  {
+    "file": "handwerk/reinigung-werkzeuge.webp",
+    "group": "handwerk",
+    "alt": "Reinigungsgeräte auf einem Holzboden – lizenziertes Gestaltungsbeispiel",
+    "title": "floor cleaning supplies",
+    "creator": "Shopify Partners",
+    "license": "Burst Some Rights Reserved",
+    "licenseUrl": "https://www.shopify.com/stock-photos/licenses/shopify-some-rights-reserved",
+    "source": "Burst",
+    "sourceUrl": "https://www.shopify.com/stock-photos/photos/floor-cleaning-supplies",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo page, license and terms; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 71056,
+    "keywords": [
+      "reinigung",
+      "büroreinigung",
+      "treppenhaus",
+      "unterhalt"
+    ],
+    "width": 1200,
+    "height": 801,
+    "focalPoint": {
+      "x": 50,
+      "y": 52
+    },
+    "role": "detail",
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/reinigung-arbeitsdetail.webp",
+    "group": "handwerk",
+    "alt": "Reinigung einer Oberfläche mit Handschuhen – lizenziertes Gestaltungsbeispiel",
+    "title": "wiping a sudsy countertop",
+    "creator": "Shopify Partners",
+    "license": "Burst Some Rights Reserved",
+    "licenseUrl": "https://www.shopify.com/stock-photos/licenses/shopify-some-rights-reserved",
+    "source": "Burst",
+    "sourceUrl": "https://www.shopify.com/stock-photos/photos/wiping-a-sudsy-countertop",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo page, license and terms; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 30114,
+    "keywords": [
+      "büroreinigung",
+      "treppenhausreinigung",
+      "unterhaltsreinigung",
+      "gewerbereinigung",
+      "reinigungsunternehmen"
+    ],
+    "width": 1200,
+    "height": 800,
+    "focalPoint": {
+      "x": 57,
+      "y": 52
+    },
+    "role": "work",
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/fliesen-oberflaeche.webp",
+    "group": "handwerk",
+    "alt": "Weiße Fliesenoberfläche – lizenziertes Materialbeispiel, kein Betriebsprojekt",
+    "title": "white bathroom tile texture",
+    "creator": "Matthew Henry",
+    "license": "Burst Some Rights Reserved",
+    "licenseUrl": "https://www.shopify.com/stock-photos/licenses/shopify-some-rights-reserved",
+    "source": "Burst",
+    "sourceUrl": "https://www.shopify.com/stock-photos/photos/white-bathroom-tile-texture",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo page, license and terms; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 29100,
+    "keywords": [
+      "fliesen",
+      "fliesenverlegung",
+      "badsanierung",
+      "fugensanierung"
+    ],
+    "width": 1200,
+    "height": 800,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/fliesen-duschgestaltung.webp",
+    "group": "handwerk",
+    "alt": "Geflieste Dusche – lizenziertes Gestaltungsbeispiel, kein Projekt des Betriebs",
+    "title": "Gray And White Tiled Shower",
+    "creator": "Christa Grover",
+    "license": "Burst Some Rights Reserved",
+    "licenseUrl": "https://www.shopify.com/stock-photos/licenses/shopify-some-rights-reserved",
+    "source": "Burst",
+    "sourceUrl": "https://www.shopify.com/stock-photos/photos/gray-and-white-tiled-shower",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo page/license/terms, image visually reviewed; not a business reference.",
+    "bytes": 130588,
+    "keywords": [
+      "fliesen",
+      "badsanierung",
+      "fliesenverlegung"
+    ],
+    "width": 1000,
+    "height": 1501,
+    "focalPoint": {
+      "x": 35,
+      "y": 30
+    },
+    "role": "interior",
+    "hero": true,
+    "moods": [
+      "neutral"
     ]
   }
 ]

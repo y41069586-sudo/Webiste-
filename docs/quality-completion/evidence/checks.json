@@ -1,0 +1,48 @@
+{
+  "test_data_only": true,
+  "demo_cases": 10,
+  "template_ids": 20,
+  "template_geometry_states": 120,
+  "template_browser_checks": 660,
+  "template_failures": [],
+  "primary_failures": [],
+  "letters": 24,
+  "letter_issues": 0,
+  "qr_decoded": 24,
+  "targets_correct": 24,
+  "price_free": 24,
+  "one_page": 24,
+  "minimum_legal_font_pt": 9,
+  "manually_released_production_demos": 0,
+  "actual_model_generation_accepted": false,
+  "actual_stripe_sandbox_accepted": false,
+  "e2e_cases_passed": 14,
+  "complete_mock_journeys": 10,
+  "text_similarity": {
+    "scope": "Personal subject/opening/benefit only, names/known fact strings removed. Authored offline fixtures; not real model quality or human authorship evidence.",
+    "pairs": 276,
+    "identical_after_fact_removal": 0,
+    "max_similarity": 0.07368421052631578
+  },
+  "public_database_read_only": {
+    "date": "2026-10-27",
+    "applied_migrations": 11,
+    "pgboss_schema": false,
+    "leads": 0,
+    "demos": 0,
+    "letters": 0,
+    "orders": 0,
+    "documented_backup_status": null
+  },
+  "final_checks": {
+    "typescript": true,
+    "lint": true,
+    "webpack_production_build": true,
+    "template_tests": 111,
+    "final_core_units": 53,
+    "final_letter_tests": 40,
+    "template_palette_browser_cases": 120,
+    "standard_turbopack_build": false,
+    "full_chromium_docker_image": false
+  }
+}

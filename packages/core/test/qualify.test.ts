@@ -92,6 +92,17 @@ describe('Qualifizierung', () => {
   it('Website-Klassifizierung ohne Protokoll', () => {
     expect(classifyWebsite('instagram.com/abc', DEFAULT_CONFIG.filters.socialDomains).socialOnly).toBe(true);
     expect(classifyWebsite('', DEFAULT_CONFIG.filters.socialDomains).hasWebsite).toBe(false);
+    for (const uri of [
+      'betrieb.jimdosite.com',
+      'betrieb.jimdofree.com',
+      'betrieb.jimdoweb.com',
+      'sites.google.com/view/betrieb',
+    ]) {
+      expect(classifyWebsite(uri, [...DEFAULT_CONFIG.filters.socialDomains, 'jimdosite.com', 'google.com'])).toMatchObject({
+        hasWebsite: true,
+        socialOnly: false,
+      });
+    }
   });
 });
 

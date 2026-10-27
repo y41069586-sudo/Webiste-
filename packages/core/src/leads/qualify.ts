@@ -50,7 +50,12 @@ export function classifyWebsite(uri: string | undefined | null, socialDomains: s
   } catch {
     return { hasWebsite: false, socialOnly: false, websiteUri: uri };
   }
-  const social = socialDomains.some((d) => host === d || host.endsWith(`.${d}`));
+  // A business website remains its own website when hosted on a free builder subdomain.
+  // This also overrides older saved social-domain lists containing jimdosite.com/google.com.
+  const hostedSite = ['jimdosite.com', 'jimdofree.com', 'jimdoweb.com', 'sites.google.com'].some(
+    (domain) => host === domain || host.endsWith(`.${domain}`),
+  );
+  const social = !hostedSite && socialDomains.some((d) => host === d || host.endsWith(`.${d}`));
   return social
     ? { hasWebsite: false, socialOnly: true, websiteUri: uri }
     : { hasWebsite: true, socialOnly: false, websiteUri: uri };

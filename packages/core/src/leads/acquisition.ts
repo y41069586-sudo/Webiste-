@@ -273,8 +273,9 @@ export function assessAcquisition(lead: ResearchSubject, raw: unknown, policy = 
   const missing = reasons
     .filter(
       (r) =>
-        ['postal_address', 'operational', 'independent', 'website', 'acquisition_need', 'campaign_focus'].includes(r.criterion) &&
-        !r.verified,
+        ['identity', 'postal_address', 'operational', 'independent', 'website', 'acquisition_need', 'campaign_focus'].includes(
+          r.criterion,
+        ) && !r.verified,
     )
     .map((r) => r.detail);
   if (has('fully_booked') && growth)

@@ -82,6 +82,8 @@ export interface OpeningLine {
 export interface BusinessFacts {
   name: string;
   branchLabel: string;
+  /** Exact service titles from the checked source snapshot, never inferred by a model. */
+  verifiedServices?: string[];
   group: BranchGroup;
   /** Playbook-Branche; ohne Angabe die Gruppe */
   industry?: IndustryKey;

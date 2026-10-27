@@ -68,6 +68,18 @@ it('rejects a false demo feature reported by the grounding review and repairs on
   expect(prompts[2]).toContain('Online-Shop');
   expect(result.copy.intro.join()).not.toContain('Online-Shop');
 });
+it('does not accept a letter promising an actual source service that the saved demo omits', async () => {
+  const r = await writePreviewInvitation(
+    { ...packet, demoHtml: '<h1>Elektro Testlicht</h1><p>Nur allgemeine Informationen.</p>' },
+    {
+      mock: false,
+      call: async <T>(request: { toolName: string }) =>
+        (request.toolName === LETTER_WRITER_TOOL ? draft : { passed: true, issues: [] }) as T,
+    },
+  );
+  expect(r.engine).toBe('fallback');
+  expect(r.reviewReasons.join(' ')).toContain('gespeicherten Demo');
+});
 it('bounds retries, ignores malformed reviews and leaves a human-review fallback', async () => {
   let n = 0;
   const result = await writePreviewInvitation(packet, {

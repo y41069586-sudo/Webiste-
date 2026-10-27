@@ -10,8 +10,8 @@ const out = path.resolve(process.env.QUALITY_EXPORT_DIR ?? '../../data/exports/t
 const profiles = [
   ['Maleratelier Nordlicht – fiktiver Testbetrieb', 'maler', 'Teststadt'],
   ['Elektro Nordlicht – fiktiver Testbetrieb', 'elektriker', 'Beispielort'],
-  ['Nagelstudio Form & Farbe – fiktiver Testbetrieb', 'nagelstudio', 'Teststadt'],
-  ['Kosmetikstudio Am Garten – fiktiver Testbetrieb', 'kosmetikstudio', 'Beispielort'],
+  ['Objektpflege Klarraum – fiktiver Testbetrieb', 'reinigung', 'Teststadt'],
+  ['Fliesenatelier Fuge – fiktiver Testbetrieb', 'fliesenleger', 'Beispielort'],
   ['Restaurant Kleine Küche – fiktiver Testbetrieb', 'restaurant', 'Teststadt'],
   ['Café Morgenlicht – fiktiver Testbetrieb', 'cafe', 'Beispielort'],
   ['Blumen & Zweige – fiktiver Testbetrieb', 'blumenladen', 'Teststadt'],
@@ -90,6 +90,7 @@ for (const [index, [name, branch, city]] of profiles.entries()) {
         baseURL!,
         [
           { label: 'demo', url: `/d/${demo.slug}` },
+          { label: 'startseite', url: '/' },
           { label: 'preise', url: '/preise' },
           { label: 'checkout-mock', url: page.url() },
         ],

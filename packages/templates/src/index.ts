@@ -71,7 +71,7 @@ export function renderSite(input: RenderInput): string {
         : 'general';
   return html.replace(
     '<body ',
-    `<body data-template="${tpl.id}" data-sector="${sector}" data-character="${input.artDirection?.character ?? 'legacy'}" data-type="${input.artDirection?.typography ?? 'legacy'}" data-composition="${input.artDirection?.composition ?? 'legacy'}" data-design-source="${input.artDirection?.source ?? 'legacy'}" `,
+    `<body data-template="${tpl.id}" data-headline="${input.content.hero_headline.length > 56 ? 'long' : 'standard'}" data-sector="${sector}" data-character="${input.artDirection?.character ?? 'legacy'}" data-type="${input.artDirection?.typography ?? 'legacy'}" data-composition="${input.artDirection?.composition ?? 'legacy'}" data-design-source="${input.artDirection?.source ?? 'legacy'}" `,
   );
 }
 export { renderLetterHtml, embeddedFontCss, LETTER_GEOMETRY, type LetterData, type LetterSender } from './letter';

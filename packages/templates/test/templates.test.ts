@@ -120,7 +120,9 @@ describe('Beispielfotos (lizenzfrei, nur im Entwurf)', () => {
     for (const g of ['gastronomie', 'einzelhandel', 'kurse'] as const)
       expect(list.filter((p) => p.group === g).length, g).toBeGreaterThanOrEqual(3);
     for (const p of list) {
-      expect(p.license, p.file).toMatch(p.kind === 'generated' ? /^Generated/ : /^(CC0 1\.0|Pexels License)$/);
+      expect(p.license, p.file).toMatch(
+        p.kind === 'generated' ? /^Generated/ : /^(CC0 1\.0|Pexels License|Burst Some Rights Reserved)$/,
+      );
       expect(p.sourceUrl).toMatch(/^https:\/\//);
       expect(p.alt.length).toBeGreaterThan(5);
       const bytes = readFileSync(path.join(imagesDir(), p.file));

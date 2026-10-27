@@ -1,5 +1,19 @@
 # SeitenWerk V4/V5 – verbindlicher Handoff
 
+##27.10.2026 – alle neun Qualitätsbereiche lokal bearbeitet
+
+Aktuellster Bericht und Wiederaufnahme: [Qualitätsabschluss](quality-completion/report.md),
+[Status](quality-completion/status.md), [sichtbare Galerie](quality-completion/evidence/galerie.html).
+Kein Push/Deploy, Produktionsmigration oder Echtweltauftrag. DRY_RUN=true und Mockadapter erhalten.
+14/14 finale Browserfälle auf dem Produktionsbuild grün,10 komplette Mock-Käufe;
+24 einseitige9pt-Briefe mit echten Gerätebildern/QR,20 Vorlagen mit660 Browserchecks.
+TypeScript/Lint,111 Template-Tests,53 finale gezielte Core-Tests,40 Brief-/QR-Tests bestanden.
+Next-Webpack-Build und lokaler Node22-Workerstart bestanden; Turbopack-Port und vollständiges
+Chromium-Dockerimage hier durch Umgebungsgrenzen nicht abgenommen. Details/Fehlerläufe erhalten.
+Supabase erneut rein lesend:11Migrationen, kein pgboss,0Produktionsobjekte, Backupabnahme offen.
+Alle neun Bereiche haben eine eigene ehrliche Bewertung; kein durchgehendes9,5/10 behauptet.
+Externe Restschritte und sichere Reihenfolge stehen im Bericht. Nicht wieder blind neu aufbauen.
+
 Neueste Betreiberklarstellung und Anschlusskorrekturen: [Gründungsphase](founding-status/README.md).
 Natürliche Person, keine Gewerbeanmeldung/Handelsregistereintragung, steuerlich unbestätigt. Keine
 Behauptung eines bestehenden Einzelunternehmens. Anbietertexte lokal angepasst, private Entwürfe

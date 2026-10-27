@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import type { BranchGroup } from './types';
 
 /**
- * Kuratierte CC0-/Pexels-Fotos und getrennt dokumentierte KI-Beispielbilder für Entwürfe. Herkunft und
+ * Kuratierte CC0-/Pexels-/Burst-Fotos und getrennt dokumentierte KI-Beispielbilder für Entwürfe. Herkunft und
  * Nutzungsgrundlage stehen in assets/images/manifest.json und den EXIF-Lizenzdaten. Sie erscheinen nur im Entwurf und sind dort als
  * „Beispielfoto“ gekennzeichnet – auf Live-Seiten stehen nur Fotos des Kunden.
  */
@@ -29,6 +29,8 @@ export interface StockPhoto {
   focalPoint?: { x: number; y: number };
   moods?: ('warm' | 'neutral' | 'dark' | 'natural')[];
   role?: 'work' | 'detail' | 'interior' | 'product';
+  /** Deliberately curated main composition, not a claim that this is the business's work. */
+  hero?: boolean;
 }
 
 export function imagesDir(): string {
@@ -68,6 +70,11 @@ export function stockPhotos(
           p.licenseUrl === 'https://www.pexels.com/license/' &&
           /^https:\/\/www\.pexels\.com\/photo\/[a-z0-9-]+-\d+\/$/.test(p.sourceUrl) &&
           Boolean(p.creator)) ||
+        (p.license === 'Burst Some Rights Reserved' &&
+          p.source === 'Burst' &&
+          p.licenseUrl === 'https://www.shopify.com/stock-photos/licenses/shopify-some-rights-reserved' &&
+          /^https:\/\/www\.shopify\.com\/stock-photos\/photos\/[a-z0-9-]+$/.test(p.sourceUrl) &&
+          Boolean(p.creator)) ||
         (opts.allowGenerated === true &&
           p.kind === 'generated' &&
           p.source === 'OpenAI image generation' &&
@@ -89,6 +96,7 @@ export function stockPhotos(
   matching.sort(
     (a, b) =>
       Number(Boolean(b.moods?.includes(opts.mood!))) - Number(Boolean(a.moods?.includes(opts.mood!))) ||
+      Number(Boolean(b.hero)) - Number(Boolean(a.hero)) ||
       roleOrder[a.role ?? 'interior'] - roleOrder[b.role ?? 'interior'],
   );
   // Unknown specialties must not silently receive an unrelated service photograph.

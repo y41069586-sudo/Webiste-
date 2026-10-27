@@ -33,6 +33,32 @@ it('excludes generated assets even when review assets are listed without explici
   for (const g of ['handwerk', 'beauty', 'gastronomie', 'einzelhandel', 'kurse'] as const)
     expect(stockPhotos(g, 0, '', { includeReview: true }).some((p) => p.kind === 'generated')).toBe(false);
 });
+it('provides checked, optimized draft motifs for the primary sectors without cross-trade substitution', () => {
+  for (const label of ['Büroreinigung', 'Fliesenleger']) {
+    const photos = stockPhotos('handwerk', 0, label);
+    expect(photos.length).toBeGreaterThan(0);
+    expect(photos.every((p) => p.license === 'Burst Some Rights Reserved' && p.source === 'Burst')).toBe(true);
+    expect(photos.every((p) => p.width && p.height && p.focalPoint!.x <= 100)).toBe(true);
+  }
+  expect(stockPhotos('handwerk', 0, 'Elektriker')).toEqual([]);
+  expect(stockPhotos('handwerk', 0, 'Fensterreinigung').some((p) => p.role === 'work')).toBe(false);
+  const input = demoInput('handwerk-klar', 'werkblau');
+  input.facts.branchLabel = 'Handwerksbetrieb';
+  input.facts.verifiedServices = ['Büroreinigung'];
+  expect(renderSite(input)).toContain('Reinigung einer Oberfläche');
+});
+it('distinguishes source-verified offerings from sample offerings and leaves unknown hours unknown', () => {
+  const input = demoInput('handwerk-klar', 'werkblau');
+  input.facts.openingLines = [];
+  input.facts.verifiedServices = input.content.services.map((s) => s.title);
+  const html = renderSite(input);
+  expect(html).toContain('Leistungsübersicht aus geprüften Betriebsangaben');
+  expect(html).not.toContain('Beispiel-Leistungen –');
+  expect(html).toContain('Öffnungszeiten sind noch nicht bestätigt');
+  expect(html).not.toContain('Termine und Öffnungszeiten nach Vereinbarung');
+  input.facts.verifiedServices = input.facts.verifiedServices.slice(0, 1);
+  expect(renderSite(input)).toContain('Beispiel-Leistungen –');
+});
 it('uses the licensed painter work photo only for relevant draft sectors, never as a business project', () => {
   const photos = stockPhotos('handwerk', 0, 'Malerbetrieb');
   expect(photos.some((p) => p.source === 'Pexels' && p.role === 'work')).toBe(true);
