@@ -682,7 +682,7 @@ h1 em {
 .mini {
   position: absolute;
   inset: 70px 0 0;
-  transition: transform 0.9s var(--ease);
+  transition: transform 0.5s var(--ease);
 }
 .mini-hero {
   position: relative;
