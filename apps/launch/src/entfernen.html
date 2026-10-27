@@ -1,0 +1,51 @@
+<section class="subhead">
+  <div class="wrap">
+    <p class="eyebrow">Entfernen</p>
+    <h1>Kein Interesse? <em>In Ordnung</em><span class="dot">.</span></h1>
+    <p>
+      Sie möchten nicht, dass wir einen Entwurf für Ihren Betrieb bauen oder Ihnen schreiben? Sagen Sie es uns hier. Wir löschen
+      einen vorhandenen Entwurf und nehmen Ihren Betrieb aus unserer Recherche.
+    </p>
+  </div>
+</section>
+<div class="wrap">
+  <div class="card remove-card">
+    <p class="k">BETRIEB ENTFERNEN</p>
+    <form
+      class="cta-form"
+      name="entfernen"
+      method="POST"
+      action="/danke/"
+      data-netlify="true"
+      netlify-honeypot="website"
+      data-request
+      novalidate
+    >
+      <input type="hidden" name="form-name" value="entfernen" />
+      <p class="hp">
+        <label>Nicht ausfüllen <input name="website" tabindex="-1" autocomplete="off" /></label>
+      </p>
+      <label><span>Name des Betriebs</span><input type="text" name="betrieb" autocomplete="organization" required /></label>
+      <label><span>Ort</span><input type="text" name="ort" required /></label>
+      <label><span>Code aus Brief oder Link (falls vorhanden)</span><input type="text" name="code" autocomplete="off" /></label>
+      <label><span>E-Mail für eine Bestätigung (freiwillig)</span><input type="email" name="email" autocomplete="email" /></label>
+      <p class="form-error" role="alert"></p>
+      <button class="btn btn-primary" type="submit">Betrieb entfernen</button>
+      <p class="under">Kein Konto, keine Begründung nötig</p>
+    </form>
+    <div class="done" aria-live="polite">
+      <div class="done-art" aria-hidden="true">
+        <div class="rf-rays"></div>
+        <div class="rf-sun"></div>
+        <span class="rf-stamp">ERLEDIGT</span>
+      </div>
+      <p class="k">ANFRAGE EINGEGANGEN</p>
+      <h3>Verstanden<em>.</em></h3>
+      <p>Wir entfernen Ihren Betrieb und löschen einen vorhandenen Entwurf. Mit E-Mail-Adresse bestätigen wir das kurz.</p>
+      <p class="note">
+        Damit wir Sie nicht erneut anschreiben, behalten wir dauerhaft nur einen nicht lesbaren Prüfwert Ihres Betriebs – keine
+        Kontaktdaten.
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SeitenWerk – Ihr Website-Entwurf, kostenlos angesehen</title>
+    <meta
+      name="description"
+      content="SeitenWerk baut lokalen Betrieben einen Website-Entwurf. Ansehen kostet nichts. Gefällt er: {{SETUP}} einmalig, danach {{BASIS}} im Monat ab Go-Live."
+    />
+    {{ROBOTS}}
+    <link rel="icon" href="/img/favicon.png" />
+    <link rel="preload" href="/fonts/fraunces-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/hanken-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/styles.css?v={{VERSION}}" />
+    <script>
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body data-mail="{{EMAIL}}">
+    <a class="skip" href="#inhalt">Zum Inhalt springen</a>
+
+    <header class="topnav">
+      <div class="wrap">
+        <a class="brand" href="/"><img src="/img/mark.png" alt="" width="32" height="32" />SeitenWerk</a>
+        <nav class="nav-links" aria-label="Hauptnavigation">
+          <a href="#ablauf">So funktioniert’s</a>
+          <a href="#beispiele">Beispiele</a>
+          <a href="#preise">Ab {{SETUP}} einmalig</a>
+          <a href="#fragen">Fragen</a>
+          <a class="btn btn-ghost" href="#anfrage">Entwurf anfragen</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="inhalt">
+      <!-- ============ HERO ============ -->
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="wrap hero-grid">
+          <div>
+            <p class="pill fade-up"><i aria-hidden="true"></i>Entwurf kostenlos · unverbindlich</p>
+            <h1 id="hero-title">
+              <span class="line"><span>Sie haben den</span></span>
+              <span class="line"><span>Betrieb aufgebaut.</span></span>
+              <span class="line accent"><span>Wir bauen</span></span>
+              <span class="line accent"><span>die Website.</span></span>
+            </h1>
+            <p class="hb-sub fade-up d1">
+              Aus Ihren öffentlichen Angaben – Leistungen, Öffnungszeiten, Kontakt – gestalten wir einen Website-Entwurf, der auf
+              jedem Handy funktioniert. <strong>Ansehen kostet nichts.</strong> Gefällt er Ihnen, sind es {{SETUP}} einmalig und
+              {{BASIS}} im Monat ab Go-Live.
+            </p>
+            <div class="hb-formwrap fade-up d2">
+              <form
+                class="hb-form"
+                name="anfrage"
+                method="POST"
+                action="/danke/"
+                data-netlify="true"
+                netlify-honeypot="website"
+                data-request
+                novalidate
+              >
+                <input type="hidden" name="form-name" value="anfrage" />
+                <input type="hidden" name="quelle" value="hero" />
+                <p class="hp">
+                  <label>Nicht ausfüllen <input name="website" tabindex="-1" autocomplete="off" /></label>
+                </p>
+                <label class="field"
+                  ><span>Name des Betriebs</span
+                  ><input type="text" name="betrieb" placeholder="So wie er im Netz steht" autocomplete="organization" required
+                /></label>
+                <div class="hb-row">
+                  <label class="field"
+                    ><span>Ort</span><input type="text" name="ort" placeholder="z. B. Passau" required
+                  /></label>
+                  <label class="field"
+                    ><span>E-Mail</span
+                    ><input type="email" name="email" placeholder="sie@ihr-betrieb.de" autocomplete="email" required
+                  /></label>
+                </div>
+                <label class="consent"
+                  ><input type="checkbox" name="einwilligung" value="ja" required /><span
+                    >Ich bin Unternehmer und möchte einen kostenlosen Entwurf. Die
+                    <a href="/datenschutz/">Datenschutzerklärung</a> habe ich gelesen.</span
+                  ></label
+                >
+                <p class="form-error" role="alert"></p>
+                <button class="btn btn-primary" type="submit">Kostenlosen Entwurf anfragen</button>
+              </form>
+              <div class="done" aria-live="polite">{{DONE}}</div>
+            </div>
+            <ul class="ticks fade-up d3">
+              <li>Ansehen kostenlos</li>
+              <li>Kein Verkaufsgespräch</li>
+              <li>Monatlich kündbar</li>
+            </ul>
+          </div>
+
+          <div class="hb-stagecol fade-up d2" aria-hidden="true">
+            <div class="hb-stage" data-stage>
+              <div class="listing">
+                <p class="listing-top">⌕ Ihr Eintrag im Netz</p>
+                <div class="listing-photo" data-l-photo></div>
+                <h3 data-l-name>Malerei Muster</h3>
+                <p class="meta" data-l-meta>Malerbetrieb · Musterstadt</p>
+                <ul>
+                  <li data-item="leistungen">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 7h16M4 12h16M4 17h10" /></svg
+                    >Leistungen
+                  </li>
+                  <li data-item="zeiten">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 7v5l3 2" /></svg
+                    >Öffnungszeiten
+                  </li>
+                  <li data-item="adresse">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11Z" />
+                      <circle cx="12" cy="10" r="2.5" /></svg
+                    >Adresse &amp; Karte
+                  </li>
+                  <li data-item="telefon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path
+                        d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"
+                      /></svg
+                    >Telefonnummer
+                  </li>
+                </ul>
+              </div>
+              <svg class="trail"><path data-trail d="" /></svg>
+              <div class="flyer" data-flyer></div>
+              <div class="phone">
+                <div class="screen">
+                  <div class="urlbar">
+                    <div>🔒 <b data-url>malerei-muster</b>.seitenwerk.world</div>
+                  </div>
+                  <span class="live" data-live><i></i>Entwurf fertig</span>
+                  <div class="mini" data-mini>
+                    <div class="mini-hero sk" data-part="foto">
+                      <img data-m-photo alt="" />
+                      <div class="mini-top"><span data-m-brand>Malerei Muster</span><i>Anrufen</i></div>
+                      <div class="mini-text">
+                        <small data-m-kicker>MALERBETRIEB · MUSTERSTADT</small>
+                        <strong data-m-name>Malerei Muster</strong>
+                        <span data-m-claim>Innen- und Außenanstrich, sauber geplant.</span>
+                        <em>Anfrage stellen</em>
+                      </div>
+                    </div>
+                    <div class="mini-body">
+                      <h4 class="sk" data-part="leistungen">Leistungen</h4>
+                      <div class="chips sk" data-part="leistungen" data-m-chips>
+                        <b>Innenanstrich</b><b>Fassade</b><b>Tapezieren</b>
+                      </div>
+                      <div class="hours sk" data-part="zeiten"><span>Heute</span><b data-m-hours>08:00 – 17:00</b></div>
+                      <div class="map sk" data-part="adresse"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="stage-cap">Fiktives Beispiel: <b data-cap>Malerei Muster</b>, Musterstadt.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ WAS SIE ERWARTET ============ -->
+      <section class="sec night" aria-labelledby="t-need">
+        <div class="wrap">
+          <p class="eyebrow" data-reveal>Was Sie erwartet</p>
+          <h2 id="t-need" data-reveal>
+            Ihre Kunden suchen im Netz.<br /><em>Wir sorgen dafür</em>, dass sie Sie finden<span class="dot">.</span>
+          </h2>
+          <div class="stats" data-reveal style="margin-top: 60px">
+            <div class="stat">
+              <small>Entwurf ansehen</small><b class="num">0 €</b><i class="bar" style="--w: 0.15"></i>
+              <p>Wir bauen den Entwurf, bevor Sie etwas bezahlen. Ansehen ist kostenlos und unverbindlich.</p>
+            </div>
+            <div class="stat">
+              <small>Wenn er gefällt</small><b class="num">{{SETUP}}</b><i class="bar" style="--w: 1"></i>
+              <p>Einmalig für Einrichtung, Anpassung an Ihre Angaben und {{ROUNDS}} Änderungsrunden.</p>
+            </div>
+            <div class="stat">
+              <small>Danach im Monat</small><b class="num">{{BASIS}}</b><i class="bar" style="--w: 0.35"></i>
+              <p>Basis: Hosting, SSL und Hilfe bei technischen Störungen – erst ab dem Go-Live.</p>
+            </div>
+            <div class="stat">
+              <small>Mit Care+</small><b class="num">60 Min.</b><i class="bar" style="--w: 0.6"></i>
+              <p>Kleine Änderungen pro Monat inklusive – für insgesamt {{CARE}} im Monat.</p>
+            </div>
+          </div>
+          <p class="fine" data-reveal>Alle Preise, Leistungen und Bedingungen sehen Sie vor jeder Bestellung.</p>
+        </div>
+      </section>
+
+      <!-- ============ BEISPIELE ============ -->
+      <section class="sec showcase" id="beispiele" aria-labelledby="t-ex">
+        <div class="wrap">
+          <div class="sec-head">
+            <div>
+              <p class="eyebrow" data-reveal>Beispiele</p>
+              <h2 id="t-ex" data-reveal>Jede Seite,<br /><em>passend gemacht</em><span class="dot">.</span></h2>
+            </div>
+            <p class="lead" data-reveal>
+              Keine zwei Entwürfe sehen gleich aus. Aufbau, Schrift und Farben richten sich nach Ihrem Handwerk – nicht nach einer
+              Schablone für alle.
+            </p>
+          </div>
+          <div class="browsers" data-reveal>
+            <figure class="browser">
+              <div class="bar"><i></i><i></i><i></i><span>malerei-muster.seitenwerk.world</span></div>
+              <img
+                src="/img/maler-desktop.webp"
+                alt="Entwurf für den fiktiven Malerbetrieb „Malerei Muster“"
+                width="1200"
+                height="750"
+                loading="lazy"
+              />
+              <figcaption><b>Malerbetrieb</b><span>fiktives Beispiel</span></figcaption>
+            </figure>
+            <figure class="browser">
+              <div class="bar"><i></i><i></i><i></i><span>reinigung-muster.seitenwerk.world</span></div>
+              <img
+                src="/img/reinigung-desktop.webp"
+                alt="Entwurf für die fiktive Gebäudereinigung „Reinigung Muster“"
+                width="1200"
+                height="750"
+                loading="lazy"
+              />
+              <figcaption><b>Gebäudereinigung</b><span>fiktives Beispiel</span></figcaption>
+            </figure>
+            <figure class="browser">
+              <div class="bar"><i></i><i></i><i></i><span>fliesen-muster.seitenwerk.world</span></div>
+              <img
+                src="/img/fliesen-desktop.webp"
+                alt="Entwurf für den fiktiven Fliesenleger „Fliesen Muster“"
+                width="1200"
+                height="750"
+                loading="lazy"
+              />
+              <figcaption><b>Fliesenleger</b><span>fiktives Beispiel</span></figcaption>
+            </figure>
+          </div>
+          <p class="after-note" data-reveal>
+            Drei erfundene Musterbetriebe, drei echte Entwürfe aus unserem System. Fotos darin sind gekennzeichnete
+            Beispielbilder; in Ihrer Website stehen später nur Ihre eigenen.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ WARUM ============ -->
+      <section class="sec story" aria-labelledby="t-why">
+        <div class="wrap story-grid">
+          <div class="search-phone" data-reveal aria-hidden="true">
+            <div class="screen">
+              <div class="search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+                Maler in der Nähe
+              </div>
+              <p class="res-label">ERGEBNISSE IN DER NÄHE</p>
+              <div class="res">
+                <span>Farbwerk Nord<small>1,2 km · geöffnet</small></span
+                ><em>WEBSITE</em>
+              </div>
+              <div class="res">
+                <span>Anstrich &amp; Co.<small>2,0 km · geöffnet</small></span
+                ><em>WEBSITE</em>
+              </div>
+              <div class="res you">
+                <span>Ihr Betrieb<small>0,3 km · geöffnet</small><span class="tag">AM NÄCHSTEN</span></span
+                ><em>KEINE WEBSITE</em>
+              </div>
+              <div class="ghost-row"></div>
+              <div class="ghost-row"></div>
+              <div class="ghost-row"></div>
+            </div>
+          </div>
+          <div>
+            <p class="eyebrow" data-reveal>Warum es SeitenWerk gibt</p>
+            <h2 id="t-why" data-reveal>Gute Arbeit verdient,<br /><em>gefunden zu werden</em><span class="dot">.</span></h2>
+            <blockquote data-reveal>Wer Sie auf dem Handy nicht findet, ruft beim Nächsten an.</blockquote>
+            <p data-reveal>
+              Viele gute Betriebe haben keine eigene Website – nicht aus Desinteresse, sondern weil im Alltag keine Zeit dafür
+              bleibt. Genau diese Arbeit nehmen wir Ihnen ab.
+            </p>
+            <p data-reveal>
+              Sie sehen zuerst einen fertigen Entwurf und entscheiden dann in Ruhe. Kein Baukasten, den Sie selbst pflegen müssen,
+              und kein Verkaufsgespräch.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ABLAUF ============ -->
+      <section class="sec how" id="ablauf" aria-labelledby="t-how">
+        <div class="wrap">
+          <div class="sec-head">
+            <div>
+              <p class="eyebrow" data-reveal>So funktioniert’s</p>
+              <h2 id="t-how" data-reveal>So arbeitet<br /><em>SeitenWerk</em><span class="dot">.</span></h2>
+            </div>
+            <p class="lead" data-reveal>
+              Kein Fragebogen, keine Hausaufgaben, kein Verkaufsgespräch. Sie nennen uns Ihren Betrieb, den Rest erledigen wir.
+            </p>
+          </div>
+          <div class="how-grid">
+            <ol class="steps" data-reveal>
+              <li>
+                <span class="n">1</span>
+                <h3>Sie nennen Ihren Betrieb.</h3>
+                <p>
+                  Name, Ort und E-Mail – mehr braucht das Formular nicht. Die öffentlichen Angaben zu Ihrem Betrieb suchen wir
+                  selbst zusammen.
+                </p>
+              </li>
+              <li>
+                <span class="n">2</span>
+                <h3>Wir bauen den Entwurf.</h3>
+                <p>
+                  Eine echte Website mit Ihren Leistungen, Ihren Zeiten und Ihrem Kontakt. Ein Mensch prüft jedes Wort, bevor Sie
+                  den Link bekommen. Keine Zahlungsdaten nötig.
+                </p>
+              </li>
+              <li>
+                <span class="n">3</span>
+                <h3>Sie sehen ihn an und entscheiden.</h3>
+                <p>
+                  Gefällt er Ihnen, übernehmen Sie ihn für {{SETUP}} einmalig und {{BASIS}} im Monat ab Go-Live.
+                  <b>Oder Sie lassen es.</b>
+                  Der Entwurf ist nicht in Suchmaschinen und wird nach {{DEMO_DAYS}} Tagen gelöscht.
+                </p>
+              </li>
+            </ol>
+            <div data-reveal>
+              <div class="mail" aria-hidden="true">
+                <div class="mail-head">
+                  <img src="/img/mark.png" alt="" width="34" height="34" />
+                  <div><b>SeitenWerk</b><small>Ihr Website-Entwurf ist fertig</small></div>
+                  <time>Kurz darauf</time>
+                </div>
+                <div class="mail-body">
+                  <span class="k">FERTIG</span>
+                  <h3>Ihr Entwurf ist <em style="color: var(--blue); font-style: normal">da</em>.</h3>
+                  <p>
+                    Sie hatten einen Entwurf für Malerei Muster angefragt. Hier ist er – gebaut aus Ihren öffentlichen Angaben.
+                  </p>
+                  <div class="mail-shot">
+                    <span>malerei-muster.seitenwerk.world</span>
+                    <img src="/img/maler-desktop.webp" alt="" width="1200" height="750" loading="lazy" />
+                  </div>
+                  <span class="btn btn-primary">Entwurf ansehen</span>
+                  <p class="mail-note">Ansehen kostet nichts und verpflichtet zu nichts.</p>
+                </div>
+              </div>
+              <p class="illu">Illustration der E-Mail · Malerei Muster ist ein fiktiver Betrieb</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ VERSPRECHEN ============ -->
+      <section class="sec promise" aria-labelledby="t-promise">
+        <div class="wrap">
+          <p class="eyebrow" data-reveal>Unser Versprechen</p>
+          <h2 id="t-promise" data-reveal>
+            Sie führen den Betrieb.<br /><em>Wir kümmern uns um die Seite</em><span class="dot">.</span>
+          </h2>
+          <p class="lead" data-reveal style="margin: 18px 0 56px">Sechs Dinge, um die Sie sich nicht mehr kümmern müssen.</p>
+          <div class="promise-grid" data-reveal>
+            <article>
+              <h3><span class="chk">✓</span>Nichts vorbereiten</h3>
+              <p>Kein Baukasten, kein freier Nachmittag. Wir bauen den Entwurf, bevor Sie sich überhaupt entscheiden.</p>
+            </article>
+            <article>
+              <h3><span class="chk">✓</span>Hosting und SSL inklusive</h3>
+              <p>Betrieb der Seite mit verschlüsselter Verbindung ist im Monatspreis enthalten – ohne Technik-Ärger.</p>
+            </article>
+            <article>
+              <h3><span class="chk">✓</span>Eigene Domain inklusive</h3>
+              <p>Eine verfügbare .de-Domain bis {{DOMAIN_MAX}} im Jahr ist dabei – registriert auf Sie als Inhaber.</p>
+            </article>
+            <article>
+              <h3><span class="chk">✓</span>Änderungen vor dem Start</h3>
+              <p>
+                {{ROUNDS}} Änderungsrunden vor der Veröffentlichung. Mit Care+ zusätzlich bis zu 60 Minuten kleine Änderungen pro
+                Monat.
+              </p>
+            </article>
+            <article>
+              <h3><span class="chk">✓</span>Persönlich per E-Mail</h3>
+              <p>Ihre Nachricht liest ein Mensch. Kein Callcenter, keine Warteschleife – schriftlich und nachvollziehbar.</p>
+            </article>
+            <article>
+              <h3><span class="chk">✓</span>Monatlich kündbar</h3>
+              <p>Keine Mindestlaufzeit. Kündigen Sie, endet die Monatsabrechnung zum Monatsende.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ VERGLEICH ============ -->
+      <section class="sec compare" aria-labelledby="t-compare">
+        <div class="wrap">
+          <div class="sec-head">
+            <div>
+              <p class="eyebrow" data-reveal>Die Alternativen</p>
+              <h2 id="t-compare" data-reveal>Der <em>Vergleich</em><span class="dot">.</span></h2>
+            </div>
+            <p class="lead" data-reveal>
+              Es gibt drei übliche Wege zur eigenen Website. So unterscheiden sie sich grundsätzlich.
+            </p>
+          </div>
+          <div class="table-wrap" data-reveal>
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col"><span class="sr">Merkmal</span></th>
+                  <th scope="col" class="us">SeitenWerk</th>
+                  <th scope="col">Baukasten<small>selbst bauen</small></th>
+                  <th scope="col">Agentur oder Freelancer<small>individuell</small></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Bevor Sie zahlen</th>
+                  <td class="us">Sie sehen den fertigen Entwurf</td>
+                  <td>Sie bauen selbst</td>
+                  <td>Angebot, Briefing, Termine</td>
+                </tr>
+                <tr>
+                  <th scope="row">Kosten</th>
+                  <td class="us">{{SETUP}} einmalig + {{BASIS}} oder {{CARE}} im Monat</td>
+                  <td>Abo des Anbieters, je nach Tarif</td>
+                  <td>Projektpreis nach Angebot</td>
+                </tr>
+                <tr>
+                  <th scope="row">Ihr Zeitaufwand</th>
+                  <td class="us">Angaben prüfen und freigeben</td>
+                  <td>Abende mit Kästchen und Vorlagen</td>
+                  <td>Abstimmungen und Feedbackrunden</td>
+                </tr>
+                <tr>
+                  <th scope="row">Technik und Betrieb</th>
+                  <td class="us">Machen wir: Hosting, SSL, Domain</td>
+                  <td>Ihre Aufgabe</td>
+                  <td>Je nach Vereinbarung</td>
+                </tr>
+                <tr>
+                  <th scope="row">Kleine Änderungen</th>
+                  <td class="us">Mit Care+ bis 60 Min. im Monat</td>
+                  <td>Selbst im Editor</td>
+                  <td>Meist nach Aufwand</td>
+                </tr>
+                <tr>
+                  <th scope="row">Aufhören</th>
+                  <td class="us">Monatlich kündbar</td>
+                  <td>Nach Bedingungen des Anbieters</td>
+                  <td>Nach Vertrag</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="fine" data-reveal>
+            Allgemeine Einordnung ohne Bezug auf bestimmte Anbieter. Eine individuelle Agentur-Website kann großartig sein – wir
+            lösen ein anderes Problem: schnell eine gute Seite für Betriebe, die keine Zeit für ein Projekt haben.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ PREISE ============ -->
+      <section class="sec pricing" id="preise" aria-labelledby="t-price">
+        <div class="wrap">
+          <p class="eyebrow" data-reveal>Preise</p>
+          <h2 id="t-price" data-reveal>Klare Preise. <em>Keine Überraschungen</em><span class="dot">.</span></h2>
+          <p class="lead" data-reveal style="margin: 18px 0 64px">
+            Einmal die Einrichtung, danach ein fester Monatsbetrag – erst ab dem Tag, an dem Ihre Seite online geht.
+          </p>
+          <div class="ticket" data-reveal>
+            <div class="stub">
+              <span class="tag">ENTWURF KOSTENLOS</span>
+              <p class="free">Ansehen: <b>0 €</b></p>
+              <div class="big"><b>{{SETUP}}</b><span>einmalig</span></div>
+              <p class="then">dann {{BASIS}} oder {{CARE}} im Monat ab Go-Live · monatlich kündbar</p>
+              <a class="btn btn-primary" href="#anfrage">Entwurf anfragen →</a>
+            </div>
+            <div class="body">
+              <div class="tier">
+                <h3>Basis</h3>
+                <p class="price">{{BASIS}} <small>/ Monat</small></p>
+                <p class="sub">ab Go-Live</p>
+                <ul>
+                  <li>Website nach Ihrem Entwurf, an Ihre Angaben angepasst</li>
+                  <li>Hosting und SSL-Verschlüsselung</li>
+                  <li>Eigene .de-Domain bis {{DOMAIN_MAX}}/Jahr</li>
+                  <li>Hilfe bei technischen Störungen</li>
+                </ul>
+              </div>
+              <div class="tier">
+                <h3>Care+</h3>
+                <p class="price">{{CARE}} <small>/ Monat insgesamt</small></p>
+                <p class="sub">Basis ist enthalten – nicht zusätzlich {{BASIS}}</p>
+                <ul>
+                  <li>Alles aus Basis</li>
+                  <li>Bis zu 60 Minuten kleine Änderungen pro Monat</li>
+                  <li>Monitoring und monatlicher Technik-Check</li>
+                  <li>Persönlicher schriftlicher Support</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <p class="price-note" data-reveal>
+            Die Einrichtung ({{SETUP}}) zahlen Sie erst, wenn Sie den Entwurf übernehmen. Die Monatsgebühr beginnt nach dem
+            bestätigten Go-Live. Keine Mindestlaufzeit. Nicht genutzte Care+-Minuten verfallen.{{GUARANTEE}} Das Angebot richtet
+            sich an Unternehmer; es gelten unsere <a href="/agb/">Vertragsbedingungen</a>. Entwürfe können Sie schon jetzt
+            anfragen – verbindliche Bestellungen nehmen wir derzeit noch nicht an.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ FAQ ============ -->
+      <section class="sec faq" id="fragen" aria-labelledby="t-faq">
+        <div class="wrap">
+          <p class="eyebrow center" data-reveal>Fragen</p>
+          <h2 id="t-faq" data-reveal>Ihre Fragen, <em>beantwortet</em><span class="dot">.</span></h2>
+          <div class="faq-list" data-reveal>{{FAQ}}</div>
+        </div>
+      </section>
+
+      <!-- ============ ANFRAGE ============ -->
+      <section class="cta" id="anfrage" aria-labelledby="t-cta">
+        <div class="wrap cta-grid">
+          <div>
+            <p class="eyebrow" data-reveal>Jetzt anfragen</p>
+            <h2 id="t-cta" data-reveal>Damit Ihre Kunden<br /><em>Sie finden</em><span class="dot">.</span></h2>
+            <p class="lead" data-reveal style="margin-top: 18px">
+              Nennen Sie uns Ihren Betrieb. Wir bauen den Entwurf kostenlos und schicken Ihnen den Link per E-Mail.
+            </p>
+            <ul class="mini-steps" data-reveal>
+              <li><b>Angaben senden</b><span>Name, Ort, E-Mail – das ist das ganze Formular.</span></li>
+              <li><b>Wir bauen den Entwurf</b><span>Aus Ihren öffentlichen Angaben. Keine Zahlung.</span></li>
+              <li>
+                <b>Sie entscheiden</b
+                ><span>Übernehmen für {{SETUP}} + {{BASIS}}/Monat, oder einfach nichts tun – dann wird er gelöscht.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="card" data-reveal>
+            <p class="k">KOSTENLOSEN ENTWURF ANFRAGEN</p>
+            <form
+              class="cta-form"
+              name="anfrage"
+              method="POST"
+              action="/danke/"
+              data-netlify="true"
+              netlify-honeypot="website"
+              data-request
+              novalidate
+            >
+              <input type="hidden" name="form-name" value="anfrage" />
+              <input type="hidden" name="quelle" value="cta" />
+              <p class="hp">
+                <label>Nicht ausfüllen <input name="website" tabindex="-1" autocomplete="off" /></label>
+              </p>
+              <label
+                ><span>Name des Betriebs</span
+                ><input type="text" name="betrieb" placeholder="Malerei Beispiel" autocomplete="organization" required
+              /></label>
+              <label><span>Ort</span><input type="text" name="ort" placeholder="Passau" required /></label>
+              <label
+                ><span>Ihre E-Mail</span
+                ><input type="email" name="email" placeholder="sie@ihr-betrieb.de" autocomplete="email" required
+              /></label>
+              <label class="consent"
+                ><input type="checkbox" name="einwilligung" value="ja" required /><span
+                  >Ich bin Unternehmer und möchte einen kostenlosen Entwurf. Die
+                  <a href="/datenschutz/">Datenschutzerklärung</a> habe ich gelesen.</span
+                ></label
+              >
+              <p class="form-error" role="alert"></p>
+              <button class="btn btn-primary" type="submit">Kostenlosen Entwurf anfragen</button>
+              <p class="under">Keine Zahlung · kein Verkaufsgespräch</p>
+            </form>
+            <div class="done" aria-live="polite">{{DONE}}</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {{FOOTER}}
+    <script src="/app.js?v={{VERSION}}" defer></script>
+  </body>
+</html>

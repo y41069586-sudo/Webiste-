@@ -1,0 +1,19 @@
+{
+  "name": "@wbm/launch",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Eigenständige Akquise-Landingpage (statisch, Netlify) – unabhängig von der Firmenwebsite in apps/web",
+  "scripts": {
+    "build": "tsx scripts/build.ts",
+    "shots": "tsx scripts/mockups.ts"
+  },
+  "devDependencies": {
+    "@fontsource-variable/fraunces": "^5.2.8",
+    "@fontsource/hanken-grotesk": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@wbm/core": "workspace:*",
+    "@wbm/templates": "workspace:*",
+    "tsx": "^4.20.6"
+  }
+}

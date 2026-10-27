@@ -447,3 +447,13 @@ Neueste Betreiberanweisung erlaubt ausdrücklich Commit und Push dieses vorhande
 `codex/conversion-v4`. Vorgesehene Commitmarker `[skip ci] [skip netlify]`, kein PR, kein Force-Push.
 Der ursprüngliche Claude-Branch bleibt erhalten. Die gesonderten Grenzen für Deployment, DNS,
 Migrationen, VPS, Live-Zahlung/Versand/Domainkauf bleiben unverändert. DRY_RUN=true.
+
+## Launch-Landingpage `apps/launch` (27.10.2026, lokal)
+
+Eigenständige statische Akquise-Seite, unabhängig von `apps/web` (Firmenwebsite unverändert). Helles Design (weiß,
+graues Punkteraster, blaue Akzente), Hero-Animation „Eintrag → iPhone“ mit drei fiktiven Musterbetrieben,
+Beispiele, Ablauf, Versprechen, qualitativer Vergleich, Preise aus `offers-v4.ts`, FAQ, Anfrageformular
+(Netlify Forms, Name/Ort/E-Mail + Einwilligung) mit Danke-Animation, `/entfernen/`, Rechtstexte aus
+`legalDrafts()` plus Datenschutzabschnitt zu den Formularen. Build: `pnpm --filter @wbm/launch build` → `dist/`
+(noindex, Exportsperre aktiv). Kein Deployment: braucht ein neues Netlify-Projekt, Formularerkennung und
+Benachrichtigungs-E-Mail – erst nach Freigabe.
