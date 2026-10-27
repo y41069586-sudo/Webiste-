@@ -357,3 +357,10 @@ Aktualisierung und VPS-/API-/ChatGPT-Abrechnung: docs/vibe-upgrade/automation-an
   veröffentlichten Schema `seitenwerk_ops` (Migration 0019) statt Eigentümerwechsel (auf Supabase ohne
   passende Rollenmitgliedschaft nicht zuverlässig möglich).
 - VPS-Vorschlag netcup VPS 500 G12.5 (4 GB) wegen gemessener Rendering-Spitze 623 MiB; nicht bestellt.
+- Rechtstexte (Betreiberanweisung 27.10.2026: „ohne TODOs, richtig hinschreiben“): interne Arbeitsvermerke durch
+  wahrheitsgemäße öffentliche Formulierungen ersetzt. Keine Steuer-/Gewerbe-/Registerangabe erfunden: USt-IdNr.
+  nur, wenn tatsächlich vorhanden; ungeklärter Steuerstatus als „wird vor Annahme der ersten Bestellung
+  festgelegt“, ausdrücklich ohne § 19-Zusage. Vertragsschluss gemäß tatsächlichem Ablauf (Bestellbestätigung
+  per E-Mail nach bestätigtem Zahlungseingang). Künftige Dienste (LetterXpress, KI-Anbieter, Registrar/Hosting)
+  als „vor Aktivierung zu ergänzen“. Keine anwaltliche Prüfung erfolgt. Fehlende Betreiberdaten bleiben als
+  Markierung erhalten und sperren den Export.

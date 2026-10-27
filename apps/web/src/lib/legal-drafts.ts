@@ -8,11 +8,11 @@ export function legalDrafts(cfg: AppConfig) {
   const required = (value: string, label: string) => value.trim() || `TODO: ${label} ergänzen`;
   const contact = `${required(s.name, 'vollständiger Vor- und Nachname')}, handelnd unter „${required(s.company, 'Geschäftsbezeichnung')}“, ${required(s.street, 'Straße und Hausnummer')}, ${required(s.postalCode, 'Postleitzahl')} ${required(s.city, 'Ort')}, Deutschland`;
   const email = required(s.email, 'Kontakt-E-Mail');
-  const draft =
-    '**Entwurf, Stand 27.10.2026. Noch nicht für verbindliche Bestellungen freigegeben.**';
-  const taxClause = cfg.tax.operatorConfirmed && cfg.tax.kleinunternehmer
-    ? 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Die angegebenen Preise sind die zu zahlenden Gesamtbeträge; es wird keine Umsatzsteuer zusätzlich aufgeschlagen.'
-    : '**TODO: Der Steuerstatus ist ungeklärt. Vor verbindlichen Bestellungen sind Steuerbehandlung, Umsatzsteuerausweis und tatsächlich geschuldeter Gesamtpreis festzulegen. Es wird keine Steuerbefreiung nach § 19 UStG zugesichert.**';
+  const draft = 'Stand: 27. Oktober 2026. Verbindliche Bestellungen werden derzeit noch nicht angenommen.';
+  const taxClause =
+    cfg.tax.operatorConfirmed && cfg.tax.kleinunternehmer
+      ? 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Die angegebenen Preise sind die zu zahlenden Gesamtbeträge; es wird keine Umsatzsteuer zusätzlich aufgeschlagen.'
+      : 'Die umsatzsteuerliche Behandlung wird vor Annahme der ersten Bestellung festgelegt und dann hier sowie im Checkout angegeben. Maßgeblich ist der bei der Bestellung angezeigte Gesamtpreis. Eine Steuerbefreiung nach § 19 UStG wird nicht zugesichert.';
   return {
     impressumMarkdown: `# Impressum
 
@@ -34,15 +34,14 @@ Telefon: ${required(s.phone, 'Telefonnummer')}
 
 E-Mail: ${email}
 
-${s.vatId ? `Umsatzsteuer-Identifikationsnummer: ${s.vatId}.` : 'TODO: Prüfen, ob eine Umsatzsteuer-Identifikationsnummer zugeteilt wurde; nur eine tatsächlich vorhandene Nummer ergänzen.'} TODO: Wirtschafts-Identifikationsnummer prüfen und bei erfolgter Zuteilung ergänzen. Die persönliche Steuernummer wird hier nicht veröffentlicht.
-
+${s.vatId ? `Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: ${s.vatId}\n` : ''}
 ## Angebot
 
 Erstellung und Betreuung von Websites für Unternehmer. Die Website enthält keine journalistisch-redaktionellen Angebote.
 `,
     privacyMarkdown: `# Datenschutzerklärung
 
-Stand: 25. Oktober 2026
+Stand: 27. Oktober 2026
 
 ## 1. Verantwortliche und Kontakt
 
@@ -54,13 +53,13 @@ ${contact}. E-Mail: ${email}; Telefon: ${required(s.phone, 'Telefonnummer')}. An
 
 Die öffentliche Firmenwebsite und die Verwaltungsanwendung werden über Netlify, Inc., USA, bereitgestellt. Bei Abrufen werden technisch notwendige Daten wie IP-Adresse, Zeitpunkt, angeforderte Adresse, Browserinformationen und Fehlerdaten verarbeitet. Dies dient der Auslieferung, Betriebssicherheit und Missbrauchsabwehr. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; unser Interesse ist ein zuverlässiger und geschützter Internetauftritt.
 
-Netlify verarbeitet Daten in einem international verteilten Netzwerk; eine ausschließliche Verarbeitung in der EU wird nicht zugesichert. Einzelheiten zu Auftragsverarbeitung, Übermittlungsmechanismen und Unterauftragnehmern finden Sie unter https://www.netlify.com/trust-center/ . Die konkreten accountabhängigen Logfristen und vertraglichen Übermittlungsgrundlagen müssen vor der endgültigen Freigabe dieser Arbeitsfassung dokumentiert werden. Anwendungseigene Logs sollen keine Nachrichteninhalte oder vollständigen IP-Adressen enthalten; dies ersetzt nicht die Verarbeitung beim Hostinganbieter.
+Netlify verarbeitet Daten in einem international verteilten Netzwerk; eine ausschließliche Verarbeitung in der EU wird nicht zugesichert. Einzelheiten zu Auftragsverarbeitung, Übermittlungsmechanismen und Unterauftragnehmern finden Sie unter https://www.netlify.com/trust-center/ . Die konkreten Logfristen und vertraglichen Übermittlungsgrundlagen teilen wir auf Anfrage mit. Anwendungseigene Logs sollen keine Nachrichteninhalte oder vollständigen IP-Adressen enthalten; dies ersetzt nicht die Verarbeitung beim Hostinganbieter.
 
 ## 3. Datenbank und Dateispeicher
 
 Für Firmenkonfiguration, interne Verwaltung sowie später erforderliche Vertragsdaten nutzen wir Supabase. Das Projekt ist in Irland eingerichtet. Die statische Firmenwebsite übernimmt öffentliche Firmeninformationen beim Erstellen der Dateien; ein reiner Websitebesuch legt kein Kundenkonto in Supabase an. Die nichtöffentliche Verwaltungsanwendung verarbeitet Zugangsdaten und Sitzungsinformationen. Dokumente werden nur in einem privaten Speicherbereich abgelegt; es gibt keinen öffentlichen Zugriff auf Rechnungen oder Supportdaten.
 
-Rechtsgrundlagen sind je nach Zweck Art. 6 Abs. 1 lit. b DSGVO (Anbahnung/Erfüllung von Verträgen) und lit. f DSGVO (sichere Verwaltung). EU-Projektregion bedeutet nicht, dass sämtliche Support-, Verwaltungs- und Unterauftragnehmerzugriffe ausschließlich in der EU erfolgen. Informationen: https://supabase.com/legal/dpa und https://supabase.com/privacy . Vertrags- und Zugriffsgrundlagen bleiben im internen Prüfprotokoll zu bestätigen.
+Rechtsgrundlagen sind je nach Zweck Art. 6 Abs. 1 lit. b DSGVO (Anbahnung/Erfüllung von Verträgen) und lit. f DSGVO (sichere Verwaltung). EU-Projektregion bedeutet nicht, dass sämtliche Support-, Verwaltungs- und Unterauftragnehmerzugriffe ausschließlich in der EU erfolgen. Informationen: https://supabase.com/legal/dpa und https://supabase.com/privacy .
 
 ## 4. Kontakt und E-Mail
 
@@ -102,29 +101,29 @@ Soweit nach dokumentierter Interessenabwägung zulässig, ist Grundlage Art. 6 A
 
 ## 11. LetterXpress und postalische Dienstleister
 
-LetterXpress ist als Druck- und Versanddienst vorbereitet, wird jedoch durch diesen Testbetrieb nicht mit echten Briefen beauftragt. Anbieter ist A&O Fischer GmbH & Co. KG, Maybachstraße 9, 21423 Winsen (Luhe), Deutschland. Erst nach gesonderter Freigabe würden Empfängername und Postanschrift, Absenderangaben, Brief-PDF einschließlich Website-Screenshot und personalisierter Zieladresse sowie Auftrags-/Versanddaten für Druck, Kuvertierung und Postzustellung übermittelt. Zustelldienste erhalten die zur Beförderung erforderlichen Daten. Grundlage ist je nach Briefzweck Art. 6 Abs. 1 lit. b, c oder f DSGVO; die Interessen bei Werbung entsprechen Ziffer 10. Informationen: https://www.letterxpress.de/datenschutzerklaerung . TODO vor Beauftragung: konkrete AV-Vereinbarung, Unterauftragnehmer, Lösch-/Archivfristen und Rollenverteilung mit den Postdiensten dokumentieren. Ein bloßes Dienstleisterkonto ist keine Versandfreigabe.
+LetterXpress ist als Druck- und Versanddienst vorbereitet, wird jedoch durch diesen Testbetrieb nicht mit echten Briefen beauftragt. Anbieter ist A&O Fischer GmbH & Co. KG, Maybachstraße 9, 21423 Winsen (Luhe), Deutschland. Erst nach gesonderter Freigabe würden Empfängername und Postanschrift, Absenderangaben, Brief-PDF einschließlich Website-Screenshot und personalisierter Zieladresse sowie Auftrags-/Versanddaten für Druck, Kuvertierung und Postzustellung übermittelt. Zustelldienste erhalten die zur Beförderung erforderlichen Daten. Grundlage ist je nach Briefzweck Art. 6 Abs. 1 lit. b, c oder f DSGVO; die Interessen bei Werbung entsprechen Ziffer 10. Informationen: https://www.letterxpress.de/datenschutzerklaerung . Vor einer ersten Beauftragung wird mit LetterXpress eine Vereinbarung zur Auftragsverarbeitung nach Art. 28 DSGVO geschlossen; Unterauftragnehmer und Löschfristen werden dann hier ergänzt.
 
 ## 12. KI-Unterstützung und Bildmaterial
 
 Die Demo-Erstellung verfügt über eine vorbereitete Anthropic-API-Anbindung; die lokale Abnahme nutzt Mock- und Fallback-Inhalte. Bei gesonderter Aktivierung würden erforderliche verifizierte Geschäftsinformationen und Textanweisungen an den jeweiligen Anthropic-Vertragspartner übermittelt, um einen Entwurf zu erstellen. Keine Zahlungsdaten, Zugangsdaten oder ungeprüften privaten Informationen gehören in diese Anfragen. Rechtsgrundlage ist je nach Auftrag Art. 6 Abs. 1 lit. b oder nach dokumentierter Abwägung lit. f DSGVO. Inhalte werden vor Freigabe geprüft; es gibt keine ausschließlich automatisierten Entscheidungen mit rechtlicher oder ähnlich erheblicher Wirkung.
 
-TODO vor Aktivierung: Vertragspartner, AV-Vertrag, internationale Übermittlungsgrundlage und modell-/accountabhängige Aufbewahrung festlegen; keine pauschale Zero-Retention-Zusage. Informationen: https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data . Beispielbilder werden lokal ausgeliefert und gekennzeichnet; der Besuch muss nicht automatisch einen externen Bildanbieter kontaktieren. Fremde Betriebsbilder werden nicht als Kundenprojekte ausgegeben.
+Vor einer Aktivierung werden der zuständige Vertragspartner, die Vereinbarung zur Auftragsverarbeitung, die Übermittlungsgrundlage und die Speicherdauer hier ergänzt. Eine Speicherung ohne jede Aufbewahrung wird nicht zugesagt. Informationen des Anbieters: https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data . Beispielbilder werden lokal ausgeliefert und gekennzeichnet; der Besuch muss nicht automatisch einen externen Bildanbieter kontaktieren. Fremde Betriebsbilder werden nicht als Kundenprojekte ausgegeben.
 
 ## 13. Personalisierte Links, Messung und Kundenprojekte
 
 Personalisierte Demo- und Kurzlinks können einem konkreten Entwurf zugeordnet werden. Aufrufe solcher Links können technisch Zeitpunkt, Ziel und Sicherheits-/Gerätedaten zur Auslieferung und Missbrauchsabwehr erzeugen. Ein Linkaufruf belegt weder einen QR-Scan noch eine Kaufabsicht oder eine bestimmte natürliche Person. Das optionale Engagement-Tracking ist standardmäßig deaktiviert und benötigt eine gesonderte technische und rechtliche Freigabe. Kein Fingerprinting und keine Marketing-Cookies werden durch diese Erklärung erlaubt.
 
-Kundenseiten erhalten eigene Pflichtinformationen des jeweiligen Kunden. Eine spätere Registrierung über INWX oder zusätzliches Kundenhosting über Cloudflare ist vorbereitet, aber nicht durch diesen Testbetrieb aktiviert. TODO vor Aktivierung: tatsächliche Empfänger, erforderliche Domaininhaberdaten, Vertragsrollen und Übermittlungen ergänzen. Diese Erklärung behauptet keine Nutzung sämtlicher im Quellcode vorhandener Provider.
+Kundenseiten erhalten eigene Pflichtinformationen des jeweiligen Kunden. Eine spätere Registrierung über INWX oder zusätzliches Kundenhosting über Cloudflare ist vorbereitet, aber nicht durch diesen Testbetrieb aktiviert. Vor einer Aktivierung werden die tatsächlichen Empfänger, die für eine Domainregistrierung erforderlichen Inhaberdaten und die Übermittlungen hier ergänzt. Diese Erklärung behauptet keine Nutzung sämtlicher im Quellcode vorhandener Provider.
 
 ## 14. Übermittlungen, Pflichtangaben und Rückfragen
 
-Einige Anbieter verarbeiten Daten außerhalb des EWR. Eine solche Übermittlung setzt eine tatsächlich anwendbare Grundlage nach Art. 44 ff. DSGVO voraus, beispielsweise einen einschlägigen Angemessenheitsbeschluss oder vereinbarte Standardvertragsklauseln mit erforderlichen ergänzenden Maßnahmen. TODO: die auf unseren konkreten Account anwendbare Grundlage je Anbieter dokumentieren. Informationen über die maßgeblichen Garantien oder verfügbare Kopien können über ${email} angefragt werden. Wir behaupten keine pauschale Zertifizierung oder ausschließlich europäische Verarbeitung.
+Einige Anbieter verarbeiten Daten außerhalb des EWR. Eine solche Übermittlung setzt eine tatsächlich anwendbare Grundlage nach Art. 44 ff. DSGVO voraus, beispielsweise einen einschlägigen Angemessenheitsbeschluss oder vereinbarte Standardvertragsklauseln mit erforderlichen ergänzenden Maßnahmen. Informationen über die maßgeblichen Garantien oder verfügbare Kopien können über ${email} angefragt werden. Wir behaupten keine pauschale Zertifizierung oder ausschließlich europäische Verarbeitung.
 
 Kontaktdaten für allgemeine Fragen werden freiwillig angegeben; ohne notwendige Angaben kann eine Anfrage nicht beantwortet werden. Bei verbindlicher Beauftragung sind die zur Vertragserfüllung und Rechnung erforderlichen Daten bereitzustellen; sonst ist eine Durchführung nicht möglich. Weitere freiwillige Angaben sind als solche zu behandeln. Für eine Zweckänderung werden erforderliche Informationen vorab bereitgestellt.
 
-## 15. Prüfstand
+## 15. Aktualisierung
 
-Dies ist eine Arbeitsfassung für den beschriebenen Aufbau. Noch offen sind insbesondere die Bestätigung der Dienstleisterverträge, der accountabhängigen Log-/Postfachfristen und der Steuer-/Verkaufsaktivierung. Die endgültige Fassung muss der dann tatsächlich verwendeten Konfiguration entsprechen.
+Diese Erklärung beschreibt den derzeitigen Aufbau. Werden weitere Dienste aktiviert oder ändern sich Abläufe, wird sie vor der Aktivierung angepasst.
 `,
     termsMarkdown:
       cfg.offers.activeVersion === 'v4'
@@ -142,7 +141,7 @@ Diese Bedingungen gelten für die Erstellung und den anschließenden technischen
 
 Die Demo dient der unverbindlichen Ansicht; ihr Aufruf erzeugt keine Zahlungspflicht. Vor Bestellung werden Tarif, Einmalpreis, Folgekosten, Leistungsumfang und diese Bedingungen angezeigt. Der Kunde kann Angaben vor Abgabe der Bestellung prüfen und korrigieren. Die Bestellung erfolgt über den gehosteten Stripe-Checkout unter ausdrücklicher Bestätigung der Unternehmereigenschaft und AGB. Maßgeblich bleibt der bei Bestellung gespeicherte Angebots- und Bedingungsstand.
 
-TODO vor Verkaufsfreigabe: Den rechtlichen Annahmezeitpunkt mit der tatsächlich automatisch versandten Bestellbestätigung verbindlich festlegen und den Checkout entsprechend abgleichen. Die technische Verbuchung nach bestätigter Zahlung allein ersetzt diese Festlegung nicht. Die Vertragssprache ist Deutsch. Eine Bestellbestätigung und die maßgeblichen Vertragsinformationen werden in Textform bereitgestellt; eine dauerhaft unbegrenzte Abrufbarkeit wird nicht zugesagt. Ein Telefonat oder persönlicher Termin ist keine Bestellvoraussetzung.
+Mit Abschluss des Checkouts gibt der Kunde ein verbindliches Angebot ab. Der Vertrag kommt mit unserer Bestellbestätigung per E-Mail zustande, die nach bestätigtem Zahlungseingang versandt wird. Nehmen wir eine Bestellung nicht an, wird eine bereits geleistete Zahlung vollständig erstattet. Die Vertragssprache ist Deutsch. Eine Bestellbestätigung und die maßgeblichen Vertragsinformationen werden in Textform bereitgestellt; eine dauerhaft unbegrenzte Abrufbarkeit wird nicht zugesagt. Ein Telefonat oder persönlicher Termin ist keine Bestellvoraussetzung.
 
 ## 3. Leistungsumfang und Mitwirkung
 
@@ -170,11 +169,11 @@ Die Monatsabrechnung beginnt erst nach dem tatsächlich bestätigten Go-Live, na
 
 Enthalten ist eine verfügbare Standard-.de-Domain im vereinbarten Kostenrahmen von ${formatEuroShort(cfg.checkout.maxDomainPriceCents)} pro Jahr. Premiumdomains, zusätzliche Domains und kostenpflichtige Sonderleistungen werden nur nach gesonderter Zustimmung bestellt. Die Domain wird auf den Kunden als Inhaber registriert. Verfügbarkeit und Rechte Dritter müssen vor Registrierung geprüft werden; ein bloßer Domainwunsch ist keine Registrierungszusage.
 
-Hosting umfasst die Bereitstellung der vereinbarten Website mit TLS-Verschlüsselung. Eine hundertprozentige oder unterbrechungsfreie Verfügbarkeit wird nicht zugesichert. Erforderliche Wartung und externe Störungen sind möglich; gesetzliche Rechte bei Leistungsmängeln bleiben bestehen. TODO vor Livebetrieb: tatsächlich eingesetzte Hostinganbieter, Wartungs-/Sicherungsumfang und Reaktionswege verbindlich dokumentieren.
+Hosting umfasst die Bereitstellung der vereinbarten Website mit TLS-Verschlüsselung. Eine hundertprozentige oder unterbrechungsfreie Verfügbarkeit wird nicht zugesichert. Erforderliche Wartung und externe Störungen sind möglich; gesetzliche Rechte bei Leistungsmängeln bleiben bestehen. Den eingesetzten Hostinganbieter nennen wir auf Anfrage.
 
 ## 7. Betreuung und Care+
 
-Basis-Support betrifft technische Störungen im vereinbarten Leistungsbereich. Laufende Text- und Bildänderungen sind im Basistarif nicht pauschal enthalten. Care+ umfasst zusätzlich Monitoring, monatlichen Technik-Check, persönlichen schriftlichen Support und bis zu 60 Minuten kleinere, abgestimmte Inhaltsänderungen pro Monat. Nicht verbrauchte Zeit wird nicht übertragen oder ausgezahlt. Größere Umgestaltungen und neue Funktionen sind ausgenommen. Zusatzkosten entstehen erst nach gesonderter Zustimmung. TODO: konkrete Supportzeiten und Reaktionsziele vor Vertragsstart festlegen; keine sofortige oder durchgehende Erreichbarkeit zugesichert.
+Basis-Support betrifft technische Störungen im vereinbarten Leistungsbereich. Laufende Text- und Bildänderungen sind im Basistarif nicht pauschal enthalten. Care+ umfasst zusätzlich Monitoring, monatlichen Technik-Check, persönlichen schriftlichen Support und bis zu 60 Minuten kleinere, abgestimmte Inhaltsänderungen pro Monat. Nicht verbrauchte Zeit wird nicht übertragen oder ausgezahlt. Größere Umgestaltungen und neue Funktionen sind ausgenommen. Zusatzkosten entstehen erst nach gesonderter Zustimmung. Anfragen werden werktags schriftlich bearbeitet; eine sofortige oder durchgehende Erreichbarkeit wird nicht zugesichert.
 
 ## 8. Fertigstellung, Prüfung und Veröffentlichung
 
@@ -192,11 +191,11 @@ Tarifwechsel werden ausdrücklich vereinbart und grundsätzlich zum nächsten Pe
 
 Nach vollständiger Zahlung erhält der Kunde die zur vereinbarten Nutzung erforderlichen Rechte an den individuell erstellten Arbeitsergebnissen. Allgemeine Vorlagen, Werkzeuge, Generatorsoftware und Rechte Dritter werden nicht exklusiv übertragen. Lizenzen von Schriftarten, Software und Bildern sind einzuhalten.
 
-Vor Abschaltung wird Gelegenheit zur Sicherung der kundeneigenen Inhalte und zur Domainübertragung gegeben. Ein verfügbarer Auth-Code wird ohne zusätzliche eigene Bearbeitungsgebühr bereitgestellt; externe Gebühren bleiben gesondert. Ein neuer Anbieter benötigt eine technisch kompatible Hostingumgebung; deren Einrichtung ist nicht automatisch enthalten. TODO: Umfang und Format des Website-Exports vor Vertragsabschluss ausdrücklich festlegen. Ohne Verlängerungsauftrag erfolgt keine weitere Domainverlängerung durch uns. Eine Kündigung löscht nicht gesetzlich aufzubewahrende Vertragsdaten.
+Vor Abschaltung wird Gelegenheit zur Sicherung der kundeneigenen Inhalte und zur Domainübertragung gegeben. Ein verfügbarer Auth-Code wird ohne zusätzliche eigene Bearbeitungsgebühr bereitgestellt; externe Gebühren bleiben gesondert. Ein neuer Anbieter benötigt eine technisch kompatible Hostingumgebung; deren Einrichtung ist nicht automatisch enthalten. Auf Wunsch stellen wir die veröffentlichten Website-Dateien (HTML und eingebundene Bilder) als Archiv bereit. Ohne Verlängerungsauftrag erfolgt keine weitere Domainverlängerung durch uns. Eine Kündigung löscht nicht gesetzlich aufzubewahrende Vertragsdaten.
 
 ## 11. Freiwillige Einrichtungsgarantie
 
-Vorgesehen sind ${cfg.guarantee.days} Tage Einrichtungsgarantie ab tatsächlichem bestätigtem Go-Live. Vorher läuft keine Garantiefrist ab. Eine formlose Nachricht an ${email} innerhalb dieser Frist genügt. Die Einrichtungsgebühr wird erstattet, das Monatsabo beendet und die Website offline genommen. Bereits erbrachte Monatsleistungen sind nicht Teil dieser freiwilligen Einrichtungsgarantie. Gesetzliche Mängel- und Erstattungsansprüche bleiben uneingeschränkt bestehen. TODO: diesen genauen Garantieumfang vor Livebetrieb ausdrücklich freigeben. Alte Verträge behalten ihre gespeicherten Bedingungen.
+Vorgesehen sind ${cfg.guarantee.days} Tage Einrichtungsgarantie ab tatsächlichem bestätigtem Go-Live. Vorher läuft keine Garantiefrist ab. Eine formlose Nachricht an ${email} innerhalb dieser Frist genügt. Die Einrichtungsgebühr wird erstattet, das Monatsabo beendet und die Website offline genommen. Bereits erbrachte Monatsleistungen sind nicht Teil dieser freiwilligen Einrichtungsgarantie. Gesetzliche Mängel- und Erstattungsansprüche bleiben uneingeschränkt bestehen. Alte Verträge behalten ihre gespeicherten Bedingungen.
 
 ## 12. Zahlungsverzug, Mängel und Haftung
 
@@ -208,7 +207,7 @@ Für Mängel gelten die gesetzlichen Vorschriften. Die Haftung richtet sich nach
 
 Unsere Verarbeitung von Kontakt- und Vertragsdaten wird in der Datenschutzerklärung beschrieben. Verarbeiten wir Daten im Auftrag des Kunden, etwa über ein Kontaktformular seiner Website, ist vor Aktivierung eine Vereinbarung nach Art. 28 DSGVO erforderlich. Ein Verweis in diesen AGB ersetzt sie nicht.
 
-Es gilt deutsches Recht unter Beachtung zwingender Vorschriften; die gesetzlichen Gerichtsstände bleiben bestehen. Unwirksame Klauseln werden durch die gesetzlichen Regelungen ersetzt. Diese Fassung wird nicht automatisch als freigegebener Checkout-Vertrag gespeichert. TODOs, gegebenenfalls erforderliche gesetzliche Vertretung oder Ermächtigung der Anbieterin sowie die tatsächliche Vertragsabwicklung sind vor produktiven Bestellungen zu klären. Diese Fassung bedarf noch der Betreiber- und rechtlichen Freigabe. Dies ist ein fachlich noch zu prüfender Entwurf.
+Es gilt deutsches Recht unter Beachtung zwingender Vorschriften; die gesetzlichen Gerichtsstände bleiben bestehen. Unwirksame Klauseln werden durch die gesetzlichen Regelungen ersetzt.
 
 `
         : `# Allgemeine Geschäftsbedingungen

@@ -46,7 +46,10 @@ test('legal working texts use confirmed contact details and do not disclose tax/
   assert.ok(texts.impressumMarkdown.includes('support@example.test'));
   assert.ok(!JSON.stringify(texts).includes('private-tax-number'));
   assert.ok(!JSON.stringify(texts).includes('private-bank-account'));
-  assert.ok(texts.termsMarkdown.includes('Steuerstatus ist ungeklärt'));
+  // Ungeklärter Steuerstatus: wahrheitsgemäßer öffentlicher Hinweis, keine § 19-Behauptung, kein interner Vermerk
+  assert.ok(texts.termsMarkdown.includes('umsatzsteuerliche Behandlung wird vor Annahme der ersten Bestellung festgelegt'));
+  assert.ok(texts.termsMarkdown.includes('Steuerbefreiung nach § 19 UStG wird nicht zugesichert'));
+  assert.ok(!texts.impressumMarkdown.includes('Umsatzsteuer-Identifikationsnummer'));
   assert.ok(texts.privacyMarkdown.includes('keine ausschließlich automatisierten Entscheidungen'));
   assert.equal(cfg.legal.termsMarkdown, '');
   assert.equal(cfg.switches.dryRun, true);
@@ -73,7 +76,10 @@ test('V4 legal drafts explain providers, truthful test status and unresolved man
   assert.ok(text.privacyMarkdown.includes('jederzeit ohne Begründung'));
   assert.ok(text.termsMarkdown.includes('60 Minuten'));
   assert.ok(text.termsMarkdown.includes('Monatsabrechnung beginnt erst'));
-  assert.ok(text.termsMarkdown.includes('TODO'));
+  // Vollständige Betreiberdaten: keine internen Arbeitsvermerke in öffentlichen Texten (Exportsperre)
+  for (const key of ['impressumMarkdown', 'privacyMarkdown', 'termsMarkdown'] as const)
+    assert.ok(!text[key].includes('TODO'), key);
+  assert.ok(text.termsMarkdown.includes('Der Vertrag kommt mit unserer Bestellbestätigung per E-Mail zustande'));
   assert.ok(!/49\s*€|590\s*€/.test(text.termsMarkdown));
   const incomplete = legalDrafts(deepMerge(cfg, { sender: { name: '', street: '' } }));
   assert.ok(incomplete.impressumMarkdown.includes('TODO: vollständiger Vor- und Nachname'));
