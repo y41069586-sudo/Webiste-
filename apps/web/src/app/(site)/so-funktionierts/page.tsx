@@ -44,13 +44,21 @@ export default async function HowPage() {
             {
               icon: ICONS.online,
               title: 'Ihre Website geht online',
-              text: (
-                <p>
-                  Gefällt er Ihnen, wählen Sie „Seite übernehmen“ und eine der zwei Zahlweisen ({p.oneTime} einmalig
-                  {p.monthlyEnabled ? ` oder ${p.monthly}/Monat` : ''}). Danach ergänzen Sie Ihre Angaben, sehen eine Vorschau,
-                  und die Seite geht auf Ihrer eigenen Domain online.
-                </p>
-              ),
+              text:
+                p.version === 'v4' ? (
+                  <p>
+                    Gefällt er Ihnen, wählen Sie „Seite übernehmen“ und einen der zwei Tarife: {p.oneTime} einmalige Einrichtung
+                    plus {p.basis} Basis oder insgesamt {p.carePlus} Care+ pro Monat. Die Monatsgebühr beginnt erst nach dem
+                    bestätigten Go-Live. Danach ergänzen Sie Ihre Angaben, sehen eine Vorschau, und die Seite geht auf Ihrer
+                    eigenen Domain online.
+                  </p>
+                ) : (
+                  <p>
+                    Gefällt er Ihnen, wählen Sie „Seite übernehmen“ und eine der zwei Zahlweisen ({p.oneTime} einmalig
+                    {p.monthlyEnabled ? ` oder ${p.monthly}/Monat` : ''}). Danach ergänzen Sie Ihre Angaben, sehen eine Vorschau,
+                    und die Seite geht auf Ihrer eigenen Domain online.
+                  </p>
+                ),
             },
           ]}
         />

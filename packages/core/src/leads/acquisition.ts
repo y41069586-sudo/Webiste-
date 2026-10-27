@@ -13,6 +13,13 @@ export const acquisitionPolicySchema = z
     demandMaxDays: z.number().int().min(1).max(180).default(90),
     youngMinMonths: z.number().int().min(0).max(120).default(6),
     youngMaxMonths: z.number().int().min(1).max(120).default(36),
+    /**
+     * Automatische Website-Vorprüfung (leads/website-probe.ts): ruft aus dem Namen abgeleitete .de-Domains ab.
+     * Standard aus – externe Abrufe nur nach Freigabe. Ein Fund schließt aus; kein Fund beweist nichts.
+     */
+    websiteProbe: z.boolean().default(false),
+    /** Höchstzahl geprüfter Betriebe je Lead-Suche (Zeitlimit: je Betrieb höchstens 4 Abrufe à 5 s) */
+    websiteProbeMax: z.number().int().min(0).max(500).default(50),
   })
   .refine((p) => p.youngMinMonths <= p.youngMaxMonths, 'Altersfenster ist nicht geordnet.');
 export const ACQUISITION_POLICY = acquisitionPolicySchema.parse({});

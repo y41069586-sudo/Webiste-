@@ -5,10 +5,12 @@
  *
  * Aufruf: node scripts/export-site.mjs [Basis-URL]   (Standard: http://localhost:3200)
  * Indexierung folgt SITE_INDEXABLE (Standard: aus → noindex per Header und robots.txt).
+ * Platzhalter-Anbieterdaten oder Legacy-Preise sperren den Export (export-guard.mjs).
  */
 import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkPublicPage } from './export-guard.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const app = path.join(here, '..');
@@ -39,12 +41,19 @@ async function page(route) {
 }
 
 async function main() {
+  // Erst alle Seiten laden und prüfen; bei Befunden wird nichts geschrieben (kein halber Export)
+  const pages = [];
+  for (const route of ROUTES) pages.push([route, await page(route)]);
+  const findings = pages.flatMap(([route, html]) => checkPublicPage(route, html));
+  if (findings.length) {
+    throw new Error(`Export gesperrt – nicht veröffentlichbar:\n- ${findings.join('\n- ')}`);
+  }
   rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
-  for (const route of ROUTES) {
+  for (const [route, html] of pages) {
     const file = route === '/' ? path.join(out, 'index.html') : path.join(out, route.slice(1), 'index.html');
     mkdirSync(path.dirname(file), { recursive: true });
-    writeFileSync(file, await page(route));
+    writeFileSync(file, html);
     console.log(`${route} ✓`);
   }
   // Fehlerseite für unbekannte Pfade (Netlify liefert 404.html automatisch aus)

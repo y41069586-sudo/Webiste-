@@ -21,6 +21,7 @@ import { transitionLead } from './lead-state';
 import { isSuppressed } from './suppression';
 import { campaignBranches, assessAcquisition } from '../leads/acquisition';
 import { leadResearch } from './lead-research';
+import { probeOwnWebsite } from '../leads/website-probe';
 
 export interface FindLeadsOptions {
   cities?: string[];
@@ -42,6 +43,9 @@ export interface FindLeadsSummary {
   byReason: Partial<Record<RejectionReason, number>>;
   costCents: number;
   googleLookups: number;
+  /** Automatische Website-Vorprüfungen (nur mit targeting.acquisition.websiteProbe) und deren Funde */
+  websiteProbes: number;
+  websiteProbeHits: number;
   errors: string[];
 }
 
@@ -211,6 +215,8 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
     byReason: {},
     costCents: 0,
     googleLookups: 0,
+    websiteProbes: 0,
+    websiteProbeHits: 0,
     errors: [],
   };
 
@@ -358,7 +364,38 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
         summary.errors.push(`signal: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
-    const placeForQualify = googleWebsite && !place.websiteUri ? { ...place, websiteUri: googleWebsite } : place;
+    let placeForQualify = googleWebsite && !place.websiteUri ? { ...place, websiteUri: googleWebsite } : place;
+    // Automatische Vorprüfung auf eine doch vorhandene eigene Website (nie für Mock-Quellen, standardmäßig aus)
+    const policy = cfg.targeting.acquisition;
+    if (
+      policy.websiteProbe &&
+      place.source !== 'mock' &&
+      prelim.qualified &&
+      !placeForQualify.websiteUri &&
+      summary.websiteProbes < policy.websiteProbeMax
+    ) {
+      summary.websiteProbes++;
+      const probe = await probeOwnWebsite({
+        businessName: place.name,
+        city,
+        branch: branch.key,
+        phone: place.phone,
+        street: place.street && place.houseNumber ? `${place.street} ${place.houseNumber}` : place.street,
+        postalCode: place.postalCode,
+      });
+      if (probe.result === 'found' && probe.url) {
+        summary.websiteProbeHits++;
+        placeForQualify = { ...placeForQualify, websiteUri: probe.url };
+        await audit(db, {
+          entity: 'lead_candidate',
+          entityId: identity,
+          actor: opts.actor,
+          action: 'website_probe_found',
+          // Keine URL im Audit-Log (Domain kann einen Personennamen enthalten); sie steht am Lead (websiteUri)
+          context: { matched: probe.matched, checkedAt: probe.checkedAt, candidates: probe.candidates.length },
+        });
+      }
+    }
     const result = qualify({
       place: placeForQualify,
       branch,
