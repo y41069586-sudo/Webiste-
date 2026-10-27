@@ -65,6 +65,15 @@ export async function refreshFunnel(db: DbOrTx = getDb()): Promise<void> {
       'EVALUATION_WINDOW_DAYS weicht vom Fenster der Funnel-Sicht ab (45 Tage) – Sicht nutzt 45',
     );
   }
+  // Supabase: die Backend-Rolle besitzt die Sichten nicht und darf sie nur über die Funktion aus 0019 auffrischen.
+  // Lokal/Test ist der Anwendungsnutzer Eigentümer und frischt direkt auf.
+  const viaFunction = await db.execute<{ owner: boolean }>(
+    sql`SELECT pg_has_role(current_user, (SELECT relowner FROM pg_class WHERE oid = 'public.letter_outcomes'::regclass), 'USAGE') AS owner`,
+  );
+  if (!viaFunction.rows[0]?.owner) {
+    await db.execute(sql`SELECT seitenwerk_ops.refresh_funnel_views()`);
+    return;
+  }
   await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY letter_outcomes`);
   await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY funnel_by_arm`);
 }

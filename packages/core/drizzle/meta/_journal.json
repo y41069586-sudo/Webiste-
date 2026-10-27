@@ -134,6 +134,13 @@
       "when": 1792996000000,
       "tag": "0018_measurement_truth",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793119655364,
+      "tag": "0019_funnel_view_access",
+      "breakpoints": true
     }
   ]
 }
