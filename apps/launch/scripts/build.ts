@@ -127,7 +127,6 @@ const footer = `<footer>
       <div>
         <a class="brand" href="/"><img src="/img/mark.png" alt="" width="32" height="32" />SeitenWerk</a>
         <p>Website-Entwürfe für lokale Betriebe. Erst ansehen, dann entscheiden.</p>
-        <div class="badges"><span>ENTWURF KOSTENLOS</span><span>MONATLICH KÜNDBAR</span><span>OHNE TRACKING-COOKIES</span></div>
       </div>
       <div>
         <h4>SEITE</h4>
