@@ -1,5 +1,9 @@
 # Qualitätsabschluss – alle neun Bereiche
 
+Letzter sicherer Implementierungscommit: **ef694ae**. Separat gesicherte vorherige
+Anbieterdarstellung: **7a2c6c0**. Beide nur lokal auf codex/conversion-v4, kein Push/Deploy.
+Dieser Dokumentationscheckpoint ergänzt die geprüfte Implementierung, keine neue Projektphase.
+
 Ausgangspunkt f8bdc43, 27.10.2026, codex/conversion-v4. Vier offene lokale Rechts-/Darstellungsänderungen
 aus dem letzten Betreiberauftrag bleiben erhalten. Kein Push, Deploy, bezahlter Anbieterauftrag,
 echter Versand, Kauf oder Produktionsmigration. DRY_RUN=true. Keine Unteragenten.
