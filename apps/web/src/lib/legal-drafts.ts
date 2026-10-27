@@ -6,10 +6,10 @@ export function legalDrafts(cfg: AppConfig) {
   const s = cfg.sender;
   const p = sitePricing(cfg);
   const required = (value: string, label: string) => value.trim() || `TODO: ${label} ergänzen`;
-  const contact = `${required(s.name, 'vollständiger Vor- und Nachname')}, verantwortlich für das Projekt „${required(s.company, 'Geschäftsbezeichnung')}“, ${required(s.street, 'Straße und Hausnummer')}, ${required(s.postalCode, 'Postleitzahl')} ${required(s.city, 'Ort')}, Deutschland`;
+  const contact = `${required(s.name, 'vollständiger Vor- und Nachname')}, handelnd unter „${required(s.company, 'Geschäftsbezeichnung')}“, ${required(s.street, 'Straße und Hausnummer')}, ${required(s.postalCode, 'Postleitzahl')} ${required(s.city, 'Ort')}, Deutschland`;
   const email = required(s.email, 'Kontakt-E-Mail');
   const draft =
-    '**Entwurf, Stand 27.10.2026. Projekt in der Gründungsphase: Noch keine Gewerbeanmeldung und kein Handelsregistereintrag. Es werden derzeit nur interne Tests durchgeführt, keine kostenpflichtigen Bestellungen angenommen und keine echten Werbebriefe verschickt. Vor einem gewerblichen Start müssen die Voraussetzungen nachweislich geklärt sein.**';
+    '**Entwurf, Stand 27.10.2026. Noch nicht für verbindliche Bestellungen freigegeben.**';
   const taxClause = cfg.tax.operatorConfirmed && cfg.tax.kleinunternehmer
     ? 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Die angegebenen Preise sind die zu zahlenden Gesamtbeträge; es wird keine Umsatzsteuer zusätzlich aufgeschlagen.'
     : '**TODO: Der Steuerstatus ist ungeklärt. Vor verbindlichen Bestellungen sind Steuerbehandlung, Umsatzsteuerausweis und tatsächlich geschuldeter Gesamtpreis festzulegen. Es wird keine Steuerbefreiung nach § 19 UStG zugesichert.**';
@@ -21,8 +21,6 @@ export function legalDrafts(cfg: AppConfig) {
 ${required(s.company, 'Geschäftsbezeichnung')}
 
 Verantwortliche Person: ${required(s.name, 'vollständiger Vor- und Nachname')}
-
-„${required(s.company, 'Geschäftsbezeichnung')}“ ist der Projektname. Das Projekt befindet sich in der Gründungsphase. Es besteht derzeit keine Gewerbeanmeldung und kein Handelsregistereintrag. Es wird keine eigenständige juristische Person behauptet.
 
 ${required(s.street, 'ladungsfähige Straße und Hausnummer')}
 
@@ -48,7 +46,7 @@ Stand: 25. Oktober 2026
 
 ## 1. Verantwortliche und Kontakt
 
-Verantwortlich ist die nachfolgend genannte natürliche Person. SeitenWerk ist ein Projekt in der Gründungsphase, keine eingetragene Gesellschaft. Interne Tests werden mit fiktiven Daten durchgeführt; eine spätere gewerbliche Nutzung wird dadurch nicht freigegeben.
+Verantwortlich für die nachfolgend beschriebene Datenverarbeitung ist die nachfolgend genannte natürliche Person.
 
 ${contact}. E-Mail: ${email}; Telefon: ${required(s.phone, 'Telefonnummer')}. An diese Kontaktdaten können Sie auch Datenschutzanfragen richten.
 

@@ -28,7 +28,7 @@ test('founding project identifies the natural person without inventing registrat
     assert.ok(text[key].includes(OPERATOR_PROFILE.street));
     assert.ok(text[key].includes(OPERATOR_PROFILE.email));
   }
-  assert.ok(text.impressumMarkdown.includes('keine Gewerbeanmeldung und kein Handelsregistereintrag'));
+  assert.ok(!/Gründungsphase|Gewerbeanmeldung|Handelsregistereintrag|juristische Person/.test(text.impressumMarkdown));
   assert.ok(!text.impressumMarkdown.includes('(Einzelunternehmen)'));
   assert.ok(!/Registergericht|HRB|HRA|e\.K\./.test(text.impressumMarkdown));
   assert.ok(text.termsMarkdown.includes('Gemäß § 19 UStG wird keine Umsatzsteuer berechnet'));

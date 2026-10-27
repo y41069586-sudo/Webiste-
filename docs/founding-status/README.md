@@ -79,3 +79,8 @@ Private Vorschauen mit dem tatsächlichen Namen und der Anschrift frisch erzeugt
 auf Übereinstimmung geprüft. Kein neuer visueller Browserlauf oder Produktionsbuild für die
 abschließende Statuskorrektur. Prüfprotokolle liegen in diesem Verzeichnis. Arbeitsstand lokal,
 keine Veröffentlichung oder echte Sendung.
+
+Neuere Darstellungsentscheidung: Gründungs-/Gewerbe-/Registerstatus wird nicht ungefragt öffentlich
+aufgeführt. Entsprechender Impressumsabsatz und Websitebanner entfernt; Datenschutz neutral formuliert.
+Interne Statusdokumentation, Testbetrieb, unbekannter Steuerstatus und Freigabesicherungen unverändert.
+Private Vorschauen neu erzeugt, Rechtstextprüfung wiederholt.
