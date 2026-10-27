@@ -346,28 +346,32 @@ export function verifiedServiceFallback(c: SiteContent, f: ContentFacts): SiteCo
   if (!f.verifiedServices?.length) return c;
   const focus = f.verifiedServices.slice(0, 2).join(' und ');
   const headline = `${f.verifiedServices[0]} in ${f.city}`;
+  // Stimme der künftigen Website des Betriebs („wir“), konkret und ohne Behauptungen über Qualität oder Kapazität
+  const contact = f.phone ? 'telefonisch oder per Nachricht' : 'per Nachricht';
   return {
     ...c,
     hero_headline: headline.length <= 70 ? headline : `${f.branchLabel} in ${f.city}`,
-    hero_subline: `${focus}. Beschreiben Sie Ihr Vorhaben für eine Anfrage.`,
+    hero_subline: `${f.name}, Ihr ${f.branchLabel} für ${focus}. Schildern Sie uns kurz Ihr Vorhaben, ${contact}.`,
     services: f.verifiedServices.slice(0, 6).map((title) => ({
       title,
       text: serviceRequestGuidance(title),
       icon: 'chat',
     })),
-    about: `${f.name} in ${f.city}. Hier finden Sie eine Übersicht des bestätigten Angebots.\n\nBeschreiben Sie Ihr Vorhaben und den gewünschten Umfang über die angegebenen Kontaktmöglichkeiten.`,
+    about: `${f.name} ist Ihr ${f.branchLabel} in ${f.city}. Hier sehen Sie auf einen Blick unser Angebot, den Weg zu uns und wie Sie uns am schnellsten erreichen.\n\nSchildern Sie kurz, was Sie vorhaben – je genauer Ihre Angaben, desto besser lässt sich Ihr Anliegen einordnen.`,
     faq: [
       {
         q: 'Wie kann ich mein Vorhaben anfragen?',
-        a: 'Nutzen Sie die angegebenen Kontaktmöglichkeiten und beschreiben Sie Ihr Anliegen.',
+        a: f.phone
+          ? 'Rufen Sie uns an oder schreiben Sie uns kurz, worum es geht – am besten mit Ort und gewünschtem Zeitraum.'
+          : 'Schreiben Sie uns kurz, worum es geht – am besten mit Ort und gewünschtem Zeitraum.',
       },
       {
-        q: 'Welche Leistungen werden angeboten?',
-        a: 'Die Leistungsübersicht nennt die bestätigten Angebotsbereiche. Den konkreten Umfang klären Sie direkt mit dem Betrieb.',
+        q: 'Welche Leistungen bieten Sie an?',
+        a: `Unser Schwerpunkt: ${focus}. Den genauen Umfang besprechen wir gern direkt mit Ihnen.`,
       },
       {
         q: 'Kann ich hier einen Termin buchen?',
-        a: 'Eine Anfrage ist keine Buchung. Termine und Verfügbarkeit werden direkt mit dem Betrieb abgestimmt.',
+        a: 'Eine Anfrage ist noch keine feste Buchung. Termin und Umfang stimmen wir anschließend direkt mit Ihnen ab.',
       },
     ],
   };

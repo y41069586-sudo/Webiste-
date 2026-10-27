@@ -161,6 +161,7 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
         return {
           title: tier === 'basis' ? 'SeitenWerk Basis' : 'SeitenWerk Care+',
           price: formatEuroShort(o.setupCents),
+          monthly: formatEuroShort(o.monthlyCents),
           unit: tax ? `einmalig ${tax}` : 'einmalig – Steuerstatus noch offen',
           points: [
             `+ ${formatEuroShort(o.monthlyCents)}/Monat insgesamt ab Go-Live`,
@@ -190,7 +191,7 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
         ? 'Testangebot: Rechtstexte und Steuerangaben sind noch nicht freigegeben. Kein Live-Verkauf.'
         : cfg.guarantee.enabled
           ? cfg.offers.activeVersion === 'v4'
-            ? 'Eine zusätzliche Einrichtungsgarantie gilt nur gemäß den ausdrücklich vereinbarten Garantiebedingungen. Gesetzliche Rechte bleiben unberührt.'
+            ? `${cfg.guarantee.days} Tage Einrichtungsgarantie ab Go-Live laut Vertragsbedingungen: Sind Sie nicht zufrieden, wird die Einrichtungsgebühr erstattet. Gesetzliche Rechte bleiben unberührt.`
             : `${cfg.guarantee.days} Tage Zufriedenheitsgarantie: Gefällt Ihnen die fertige Website nicht, bekommen Sie Ihr Geld zurück.`
           : null,
     // Über unsere Weiterleitung, damit der Klick gezählt wird (B6.1); Ziel bleibt der wa.me-Link

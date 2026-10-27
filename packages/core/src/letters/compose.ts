@@ -175,6 +175,24 @@ function composeVars(i: ComposeInput): Record<string, string> {
  * Ausgefüllte Platzhalter, die Ziffern enthalten dürfen (für den Wahrheits-Check): Firmenname, Domain,
  * Datum, Preise, Garantie, Absender und – nur mit USE_RATING_IN_LETTER – der Bewertungssatz.
  */
+/**
+ * Persönliche Absenderzeile unter dem QR-Bereich: hinterlegte Vorstellung des Betreibers (nur ohne Ziffern, damit der
+ * Wahrheits-Check keine unbelegte Zahl findet) und direkte Kontaktwege.
+ */
+export function senderContactLine(cfg: AppConfig, opts: { withIntro?: boolean } = {}): string {
+  // Nur der erste Satz der hinterlegten Vorstellung: wer schreibt – der Brief bleibt einseitig
+  const intro = (cfg.sender.intro.trim().match(/^.+?[.!?](?=\s|$)/)?.[0] ?? cfg.sender.intro.trim()).trim();
+  const phone = cfg.sender.phone.trim();
+  const email = cfg.sender.email.trim();
+  const ways = [phone && `Telefon ${phone}`, email && `E-Mail ${email}`].filter(Boolean).join(' oder ');
+  return [
+    opts.withIntro !== false && intro && !/\d/.test(intro) ? intro : '',
+    `Fragen beantworte ich gern${ways ? `: ${ways}` : ''}.`,
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
 export function placeholderValues(i: ComposeInput): string[] {
   const vars = composeVars(i);
   if (i.cfg.offers.activeVersion === 'v4')
@@ -182,6 +200,8 @@ export function placeholderValues(i: ComposeInput): string[] {
       i.recipient.businessName,
       i.recipient.city,
       i.expiresLabel,
+      i.cfg.sender.phone,
+      i.cfg.sender.email,
       ...(i.personalization
         ? reviewedLetterDetails(i.personalization)
             .filter((f) => f.kind !== 'website_search')
@@ -292,7 +312,8 @@ export function composeLetter(i: ComposeInput): LetterData {
     data.previewInvitation = true;
     if (!unsafe) {
       data.offer = copy.next;
-      data.noAction = `Ohne Bestellung keine Kosten. Online bis ${i.expiresLabel}. Rückfragen gern per E-Mail.`;
+      data.noAction = senderContactLine(i.cfg);
+      data.postscript = `**P. S.** Die Vorschau ist bis ${i.expiresLabel} online – schauen Sie in Ruhe rein, wann es Ihnen passt.`;
     }
   }
   return data;

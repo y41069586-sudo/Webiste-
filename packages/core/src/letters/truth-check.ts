@@ -31,7 +31,7 @@ export interface ClaimForCheck {
 }
 
 export interface TruthCheckInput {
-  letter: Pick<LetterData, 'subject' | 'greeting' | 'intro' | 'offer' | 'noAction' | 'qrCaption' | 'closing'> & {
+  letter: Pick<LetterData, 'subject' | 'greeting' | 'intro' | 'offer' | 'noAction' | 'qrCaption' | 'closing' | 'postscript'> & {
     footnotes?: string[];
   };
   /** Eingesetzte Claim-Texte (inkl. Fußnotenziffer) */
@@ -90,7 +90,7 @@ function plain(s: string): string {
 }
 
 export function letterBodyText(l: TruthCheckInput['letter']): string {
-  return plain([l.subject, l.greeting, ...l.intro, l.offer, l.noAction, l.qrCaption, l.closing].join('\n'));
+  return plain([l.subject, l.greeting, ...l.intro, l.offer, l.noAction, l.qrCaption, l.closing, l.postscript ?? ''].join('\n'));
 }
 
 /** Deterministischer Teil (Schritte 1–4). */

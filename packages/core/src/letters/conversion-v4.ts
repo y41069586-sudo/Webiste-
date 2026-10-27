@@ -18,7 +18,7 @@ export function v4LetterVariant(industry: Industry, arm: 'A' | 'B' | 'C', sequen
             : arm === 'B'
               ? '{firmenname}: Ihre Leistungen auf einen Blick'
               : 'Eine Website-Idee für {firmenname}',
-    greeting: 'Guten Tag an das Team von {firmenname},',
+    greeting: 'Guten Tag, liebes Team von {firmenname},',
     ratingSentence: '',
     hook:
       sequence === 2

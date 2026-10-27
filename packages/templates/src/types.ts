@@ -135,6 +135,8 @@ export interface OfferCard {
   unit: string;
   points: string[];
   href: string;
+  /** V4: laufender Monatsbetrag (z. B. „19 €“) – wird als Unterschied zwischen den Tarifen groß gezeigt */
+  monthly?: string;
 }
 
 export interface TrustInfo {

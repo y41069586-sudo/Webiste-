@@ -86,6 +86,8 @@ export interface LetterData {
   /** Angebot (mit **fett**) */
   offer: string;
   noAction: string;
+  /** Nachsatz unter der Unterschrift (P. S.), nur in der persönlichen Vorschau-Einladung */
+  postscript?: string;
   closing: string;
   signatureName: string;
   privacyNotice: string;
@@ -192,10 +194,10 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .v4-letter .qrbox{flex:0 0 45mm;min-width:0}.v4-letter .qrbox strong{font-size:9pt}.v4-letter .short{font-size:8pt;color:#24364a;word-break:normal;overflow-wrap:anywhere}
 .offer-summary{margin:2mm 0;border-top:0.3mm solid #1d4e89;padding-top:2mm}
 .offer-prices{display:flex;gap:4mm;font-size:9.4pt;line-height:1.4}.offer-prices strong{font-weight:600}.offer-summary p{font-size:8.5pt;line-height:1.35;margin:1mm 0}.offer-summary .tax{font-size:8pt}
-.v4-letter .invitation-intro{font-size:10.5pt;line-height:1.42;margin:2mm 0 3mm}.v4-letter .invitation-intro p+p{margin-top:1.2mm}.invitation-next{font-size:9.5pt;line-height:1.4;margin:3mm 0}.invitation-next p+p{margin-top:1.5mm}.v4-letter .no-action{font-size:9pt;line-height:1.4}.v4-letter .sign{margin-top:0}
+.v4-letter .invitation-intro{font-size:10.5pt;line-height:1.4;margin:1.5mm 0 2mm}.v4-letter .invitation-intro p+p{margin-top:1mm}.invitation-next{font-size:9.5pt;line-height:1.4;margin:3mm 0}.invitation-next p+p{margin-top:1.5mm}.v4-letter .no-action{font-size:9pt;line-height:1.4}.v4-letter .sign{margin-top:0}
 .v4-page .small{font-size:8pt;color:#344054;line-height:1.32}
 /* Current invitations: readable disclosures without shrinking the real device preview or QR. */
-.invitation-page .v4-letter{top:88mm}.invitation-page .small{bottom:12mm;font-size:9pt}.invitation-page .invitation-next{margin:2mm 0}
+.sign-row{display:flex;gap:8mm;align-items:flex-start}.sign-row .sign{flex:0 0 auto}.ps{margin:0;flex:1;font-size:9.5pt;line-height:1.4;padding-left:4mm;border-left:0.4mm solid #1d4e89}.invitation-page .v4-letter{top:88mm}.invitation-page .v4-letter .composite{max-height:53mm}.invitation-page .small{bottom:12mm;font-size:9pt}.invitation-page .invitation-next{margin:1mm 0 1.2mm}.invitation-page .invitation-next p+p{margin-top:1mm}
 .p2{position:absolute;left:25mm;right:20mm;top:25mm}
 .p2 h2{font-size:15pt;margin:0 0 2mm;color:#1d4e89}
 .muted{color:#4a5565}
@@ -228,7 +230,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
       d.previewInvitation
         ? `<div class="intro invitation-intro">${d.intro.map((p) => `<p>${boldMd(p)}</p>`).join('')}</div>
     <div class="visual">${d.compositeDataUri ? `<img class="composite" src="${esc(d.compositeDataUri)}" alt="Echte Desktop- und Smartphone-Ansicht desselben Website-Entwurfs">` : ''}<div class="qrbox"><img class="qr" src="${esc(d.qrDataUri)}" alt="QR-Code zur persönlichen Website-Vorschau"><strong>${esc(d.qrCaption)}</strong><span class="short">${esc(d.shortUrl)}</span></div></div>
-    <div class="invitation-next"><p>${boldMd(d.offer)}</p><p>${boldMd(d.noAction)}</p></div><div class="sign">${esc(d.closing)}<br><strong>${esc(d.signatureName)}</strong></div>`
+    <div class="invitation-next"><p>${boldMd(d.offer)}</p><p>${boldMd(d.noAction)}</p></div><div class="sign-row"><div class="sign">${esc(d.closing)}<br><strong>${esc(d.signatureName)}</strong></div>${d.postscript ? `<p class="ps">${boldMd(d.postscript)}</p>` : ''}</div>`
         : d.reviewOffer
           ? `<p class="intro">${d.intro.map((p) => boldMd(p)).join(' ')}</p>
     <div class="visual"><img class="hero-complete" src="${esc(d.compositeDataUri ?? d.desktopScreenshotDataUri ?? '')}" alt="Vollständiger Hero des persönlichen Website-Entwurfs"><div class="qrbox"><img class="qr" src="${d.qrDataUri}" alt="QR-Code zum Entwurf"><strong>Entwurf kostenlos ansehen</strong><span class="short">${esc(d.shortUrl)}</span></div></div>

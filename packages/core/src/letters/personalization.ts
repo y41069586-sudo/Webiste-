@@ -118,252 +118,241 @@ export function personalizedLetterCopy(context: VerifiedLetterContext, variant =
 /** New campaign copy is a source-bound invitation, not a priced offer. */
 export const PREVIEW_LETTER_VERSION = 'personal-preview-2';
 export const PREVIEW_ORDER_NOTICE =
-  'Unabhängiger, nicht beauftragter Entwurf. Eine spätere Umsetzung ist kostenpflichtig. Leistungen, Preise und Vertragsbedingungen stehen in der Vorschau – vor jeder Bestellung.';
+  '**So geht es weiter:** Gefällt Ihnen der Entwurf, passe ich ihn mit Ihnen an; online geht er erst nach Ihrer Freigabe. Sonst ist nichts zu tun. Unabhängiger, nicht beauftragter Entwurf: ohne Bestellung keine Kosten, die Umsetzung ist kostenpflichtig – Preise und Vertragsbedingungen stehen vor jeder Bestellung in der Vorschau.';
 const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; benefit: string; caption: string }[] = [
   {
     key: 'painter-renovation',
     branch: /maler|anstrich/i,
     focus: /renovier|sanier/i,
-    title: 'Ein Website-Entwurf für Ihre Renovierungsarbeiten',
+    title: 'Ihre Renovierungsarbeiten als eigene Website',
     benefit:
-      'Wer Räume renovieren möchte, könnte passende Arbeiten überblicken und das Vorhaben für eine Angebotsanfrage beschreiben.',
-    caption: 'Ihre Renovierungs-Website-Idee ansehen',
+      'Wer renovieren möchte, sieht im Entwurf sofort, was Sie anbieten, wo Sie arbeiten und wie man Sie erreicht – direkt am Handy.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'cleaning-commercial',
     branch: /reinig/i,
     focus: /büro|buero|gewerbe|treppenhaus|fenster/i,
-    title: 'Ihr Reinigungsangebot als persönliche Website-Idee',
+    title: 'Ihre Gebäudereinigung als eigene Website',
     benefit:
-      'Eine Übersicht könnte Gewerbeinteressierten helfen, Reinigungsbereiche und Einsatzgebiet zu prüfen und eine Objektanfrage vorzubereiten.',
-    caption: 'Den Entwurf für Ihren Reinigungsbetrieb ansehen',
+      'Gewerbekunden sehen im Entwurf auf einen Blick, welche Bereiche Sie reinigen, wo Ihr Betrieb sitzt und wie sie ein Objekt anfragen.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'tiling-renovation',
     branch: /fliesen/i,
     focus: /bad|renovier|sanier/i,
-    title: 'Eine Website-Idee für Ihre Fliesenarbeiten',
+    title: 'Ihre Fliesenarbeiten als eigene Website',
     benefit:
-      'Interessierte könnten den passenden Leistungsbereich finden und ihr Renovierungsvorhaben beschreiben. Eigene Projektbilder lassen sich nach Freigabe ergänzen.',
-    caption: 'Ihre persönliche Fliesen-Website-Idee ansehen',
+      'Wer Bad oder Boden erneuern will, findet im Entwurf Ihre Leistungen, Ihren Standort und den direkten Weg zur Anfrage. Eigene Projektfotos lassen sich jederzeit ergänzen.',
+    caption: 'Ihre Fliesen-Website ansehen',
   },
   {
     key: 'tiling',
     branch: /fliesen/i,
-    title: 'Ihr Fliesenangebot als Website-Entwurf',
-    benefit:
-      'Eine Website könnte die bestätigten Arbeiten übersichtlich zeigen und den Einstieg in eine Projektanfrage erleichtern.',
-    caption: 'Ihren Fliesen-Entwurf entdecken',
+    title: 'Ihr Fliesenbetrieb mit eigener Website',
+    benefit: 'Der Entwurf zeigt Ihre Fliesenarbeiten übersichtlich, mit Standort und Kontakt – am Computer genauso wie am Handy.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'painter-material',
     branch: /maler|anstrich/i,
     focus: /kalk|lehm|mineral|farbberat/i,
-    title: 'Ihre Farbideen als Website-Entwurf',
+    title: 'Ihre Farbideen als eigene Website',
     benefit:
-      'Eine Website könnte Interessierten einen ersten Eindruck Ihrer Gestaltung geben und die Vorbereitung einer passenden Anfrage erleichtern.',
-    caption: 'Entdecken Sie die Website-Idee für Ihren Betrieb',
+      'Der Entwurf gibt Ihren Farb- und Materialleistungen eine ruhige, hochwertige Bühne – mit Standort und direktem Kontakt.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'painter-stairway',
     branch: /maler|anstrich/i,
     focus: /treppen|fassad|außen/i,
-    title: 'Ein Website-Entwurf für Ihre Malerarbeiten',
+    title: 'Ihre Malerarbeiten als eigene Website',
     benefit:
-      'Interessierte könnten sich vor einer Anfrage über passende Arbeiten orientieren und ihr Vorhaben genauer beschreiben.',
-    caption: 'Sehen Sie sich Ihren Maler-Entwurf an',
+      'Interessierte sehen im Entwurf auf einen Blick, welche Arbeiten Sie übernehmen, wo Sie arbeiten und wie man Sie erreicht.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'painter',
     branch: /maler|anstrich/i,
-    title: 'So könnten Ihre Malerleistungen online wirken',
+    title: 'So sieht Ihr Malerbetrieb im Netz aus',
     benefit:
-      'Eine übersichtliche Leistungsdarstellung könnte zeigen, worum es bei einer Anfrage geht – vom ersten Eindruck bis zum Kontakt.',
-    caption: 'Ihre Website-Idee am Handy und Computer ansehen',
+      'Der Entwurf zeigt Ihre Leistungen, Ihren Standort und Ihre Kontaktwege auf einer Seite – gemacht für Kunden, die am Handy suchen.',
+    caption: 'Ihre Maler-Website ansehen',
   },
   {
     key: 'electric-solar',
     branch: /elektro/i,
     focus: /photovoltaik|solaranlag|pv-anlag/i,
-    title: 'Ihr Photovoltaik-Angebot als Website-Idee',
-    benefit:
-      'Wer sich für eine Anlage interessiert, könnte Ihr Angebot vorab kennenlernen und sein Vorhaben für eine erste Anfrage beschreiben.',
-    caption: 'Ihr Angebot als Website-Entwurf entdecken',
+    title: 'Ihr Photovoltaik-Angebot als eigene Website',
+    benefit: 'Wer eine Anlage plant, findet im Entwurf Ihr Angebot, Ihren Standort und den direkten Weg zur ersten Anfrage.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'electric-renovation',
     branch: /elektro/i,
     focus: /umbau|sanier|modernisier/i,
-    title: 'Ihre Elektroarbeiten übersichtlich im Web',
-    benefit:
-      'Wer einen Umbau plant, könnte sich vorab über Ihr Angebot informieren und die erste Projektanfrage gezielter vorbereiten.',
-    caption: 'Öffnen Sie Ihren persönlichen Website-Entwurf',
+    title: 'Ihre Elektroarbeiten als eigene Website',
+    benefit: 'Wer umbaut oder modernisiert, sieht im Entwurf auf einen Blick, was Sie übernehmen und wie man Sie erreicht.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'electric-light',
     branch: /elektro/i,
     focus: /licht|beleucht/i,
-    title: 'Ein digitaler Einblick in Ihr Elektroangebot',
+    title: 'Ihr Lichtangebot als eigene Website',
     benefit:
-      'Interessierte könnten sich zunächst zu ihrem Vorhaben orientieren und anschließend eine konkrete Frage an Ihren Betrieb richten.',
-    caption: 'So könnte Ihr Betrieb online aussehen',
+      'Der Entwurf stellt Ihr Angebot rund um Licht und Beleuchtung übersichtlich vor – mit Standort und direktem Kontakt.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'electric',
     branch: /elektro/i,
-    title: 'Ihr Elektroangebot als konkrete Website-Idee',
-    benefit:
-      'Eine Website könnte Leistungen und Kontakt an einer Stelle bündeln, damit Interessierte ihr Anliegen leichter zuordnen können.',
-    caption: 'Ihre persönliche Vorschau kostenlos ansehen',
+    title: 'Ihr Elektrobetrieb mit eigener Website',
+    benefit: 'Der Entwurf bündelt Ihre Leistungen, Ihren Standort und Ihre Kontaktwege auf einer übersichtlichen Seite.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'plumbing',
     branch: /sanitär|sanitaer|heizung|installat/i,
-    title: 'Eine Website-Idee für Ihre nächsten Anfragen',
-    benefit:
-      'Interessierte könnten ihr Vorhaben mit Ihrem Angebot abgleichen und die wichtigsten Angaben für eine erste Anfrage zusammentragen.',
-    caption: 'Entdecken Sie den Entwurf für Ihren Betrieb',
+    title: 'Ihr Installationsbetrieb mit eigener Website',
+    benefit: 'Wer ein Anliegen hat, sieht im Entwurf sofort, was Sie anbieten, wo Ihr Betrieb sitzt und wie man Sie erreicht.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'garden-care',
     branch: /garten|landschaft|gärtner|gaertner/i,
     focus: /pflege|schnitt/i,
-    title: 'Ihr Gartenangebot bekommt eine Website-Idee',
-    benefit:
-      'Wer Unterstützung im Garten sucht, könnte passende Leistungen überblicken und den gewünschten Umfang vor der ersten Anfrage beschreiben.',
-    caption: 'Ihre persönliche Garten-Website-Idee ansehen',
+    title: 'Ihre Gartenpflege als eigene Website',
+    benefit: 'Wer Hilfe im Garten sucht, sieht im Entwurf Ihre Leistungen, Ihren Standort und den direkten Weg zur Anfrage.',
+    caption: 'Ihre Garten-Website ansehen',
   },
   {
     key: 'garden',
     branch: /garten|landschaft|gärtner|gaertner/i,
-    title: 'Raum für Ihre Gartenideen – als Website-Entwurf',
+    title: 'Ihr Gartenbetrieb mit eigener Website',
     benefit:
-      'Eine Website könnte Ihr Angebot anschaulich gliedern und Interessierten den Einstieg in eine Projektanfrage erleichtern.',
-    caption: 'Schauen Sie in Ihren Website-Entwurf',
+      'Der Entwurf stellt Ihre Arbeiten im Grünen übersichtlich vor – mit Standort, Kontakt und Platz für eigene Projektfotos.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'cleaning',
     branch: /reinig/i,
-    title: 'Eine Website-Idee für Ihr Reinigungsangebot',
+    title: 'Ihr Reinigungsbetrieb mit eigener Website',
     benefit:
-      'Interessierte könnten prüfen, ob Ihr Angebot zu den gesuchten Reinigungsarbeiten passt, und den gewünschten Umfang schriftlich anfragen.',
-    caption: 'Ihre persönliche Vorschau öffnen',
+      'Der Entwurf zeigt, welche Reinigungsarbeiten Sie übernehmen und wie man Sie erreicht – übersichtlich am Computer und am Handy.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'barber',
     branch: /barber|barbier/i,
-    title: 'Ein erster Eindruck für Haar und Bart',
-    benefit: 'Eine Website könnte Ihr Angebot vor dem Besuch zeigen und den Weg zu einer unverbindlichen Terminanfrage erklären.',
-    caption: 'Entdecken Sie Ihren digitalen Auftritt',
+    title: 'Ihr Barbershop mit eigener Website',
+    benefit: 'Wer einen neuen Barbier sucht, sieht im Entwurf Ihr Angebot, Ihren Standort und den direkten Weg zum Termin.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'hair-color',
     branch: /fris[öe]|friseur|haarsalon/i,
     focus: /farb|color|balayage|strähn/i,
-    title: 'Ihre Farbangebote als Website-Idee entdecken',
+    title: 'Ihre Farbangebote als eigene Website',
     benefit:
-      'Eine Website könnte vor dem Salonbesuch Orientierung geben: Welche Farbangebote gibt es, und wie lässt sich ein Wunsch vorab besprechen?',
-    caption: 'Die Website-Idee für Ihren Salon ansehen',
+      'Wer über eine neue Haarfarbe nachdenkt, findet im Entwurf Ihr Angebot, Ihren Salon und den direkten Weg zur Terminanfrage.',
+    caption: 'Ihre Salon-Website ansehen',
   },
   {
     key: 'hair',
     branch: /fris[öe]|friseur|haarsalon/i,
-    title: 'Ihr Salon – schon als Website-Idee vorbereitet',
+    title: 'Ihr Salon mit eigener Website',
     benefit:
-      'Neue Interessierte könnten Leistungen und Kontaktdaten vor dem Besuch überblicken und ihren Terminwunsch passend formulieren.',
-    caption: 'So könnte Ihr Salon online wirken',
+      'Neue Kundinnen und Kunden sehen im Entwurf Ihr Angebot, Ihre Adresse und wie sie einen Termin anfragen – direkt am Handy.',
+    caption: 'Ihre Salon-Website ansehen',
   },
   {
     key: 'nails',
     branch: /nagel|nail/i,
-    title: 'Eine Website-Idee rund um Ihr Nagelangebot',
-    benefit:
-      'Interessierte könnten sich vor einer Terminanfrage über Ihr Angebot orientieren und den gewünschten Termin besser vorbereiten.',
-    caption: 'Öffnen Sie die Vorschau für Ihr Studio',
+    title: 'Ihr Nagelstudio mit eigener Website',
+    benefit: 'Der Entwurf zeigt Ihr Angebot, Ihren Standort und den Weg zur Terminanfrage – übersichtlich am Handy.',
+    caption: 'Ihre Studio-Website ansehen',
   },
   {
     key: 'cosmetics',
     branch: /kosmetik|haut/i,
-    title: 'Ihr Studio aus einer neuen Perspektive',
-    benefit:
-      'Eine Website könnte Ihr Angebot ruhig und übersichtlich vorstellen, damit Interessierte vor einer Anfrage eine erste Orientierung erhalten.',
-    caption: 'Ihr Studio als Website-Entwurf ansehen',
+    title: 'Ihr Kosmetikstudio mit eigener Website',
+    benefit: 'Der Entwurf stellt Ihr Angebot ruhig und übersichtlich vor – mit Adresse und direktem Weg zur Terminanfrage.',
+    caption: 'Ihre Studio-Website ansehen',
   },
   {
     key: 'cafe',
     branch: /café|cafe|kaffee/i,
-    title: 'Ein erster Eindruck vor dem Cafébesuch',
-    benefit:
-      'Gäste könnten sich vor dem Besuch über Ihr Angebot und den Standort orientieren – auch unterwegs auf dem Smartphone.',
-    caption: 'Entdecken Sie die Website-Idee für Ihr Café',
+    title: 'Ihr Café mit eigener Website',
+    benefit: 'Gäste sehen im Entwurf schon vor dem Besuch, was Sie anbieten und wo sie Sie finden – auch unterwegs am Handy.',
+    caption: 'Ihre Café-Website ansehen',
   },
   {
     key: 'restaurant-takeaway',
     branch: /restaurant|bistro|gasthaus|trattoria|pizzeria/i,
     focus: /abhol|außer haus|mitnehm/i,
-    title: 'Ihr Angebot vor dem Besuch entdecken',
-    benefit: 'Eine übersichtliche Website könnte Gästen helfen, den Besuch oder eine Anfrage zur Abholung vorzubereiten.',
-    caption: 'Ein Blick in Ihren Restaurant-Entwurf',
+    title: 'Ihr Restaurant mit eigener Website',
+    benefit: 'Gäste finden im Entwurf Ihr Angebot und die Anfahrt und können ihren Besuch oder die Abholung vorbereiten.',
+    caption: 'Ihre Restaurant-Website ansehen',
   },
   {
     key: 'restaurant',
     branch: /restaurant|bistro|gasthaus|trattoria|pizzeria|gastronom/i,
-    title: 'Ein Vorgeschmack auf Ihren Webauftritt',
+    title: 'Ihr Restaurant mit eigener Website',
     benefit:
-      'Gäste könnten Ihr Angebot und die Anfahrt vor dem Besuch überblicken und eine Reservierungsanfrage gezielt vorbereiten.',
-    caption: 'Ihre Restaurant-Vorschau kostenlos ansehen',
+      'Gäste sehen im Entwurf vor dem Besuch Ihr Angebot und die Anfahrt – und finden direkt den Weg zur Reservierungsanfrage.',
+    caption: 'Ihre Restaurant-Website ansehen',
   },
   {
     key: 'books',
     branch: /buch/i,
-    title: 'Eine digitale Bühne für Ihr Buchangebot',
-    benefit: 'Interessierte könnten Ihr Angebot kennenlernen und eine Buchanfrage oder den Besuch im Geschäft vorbereiten.',
-    caption: 'Entdecken Sie Ihren Buchhandlungs-Entwurf',
+    title: 'Ihre Buchhandlung mit eigener Website',
+    benefit: 'Leserinnen und Leser finden im Entwurf Ihr Angebot, Ihren Laden und den direkten Weg zu Ihnen.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'flowers',
     branch: /blumen|florist/i,
-    title: 'Ihr Blumenangebot als Website-Idee',
-    benefit:
-      'Interessierte könnten sich vor dem Besuch einen Überblick verschaffen und ihren Blumenwunsch für eine Anfrage zusammenstellen.',
-    caption: 'Ihre persönliche Website-Idee ansehen',
+    title: 'Ihr Blumengeschäft mit eigener Website',
+    benefit: 'Der Entwurf zeigt Ihr Angebot, Ihren Laden und wie man einen Blumenwunsch bei Ihnen anfragt.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'retail',
     branch: /handel|laden|boutique|mode|geschäft/i,
-    title: 'Ein digitaler Einblick in Ihr Geschäft',
-    benefit: 'Eine Website könnte Ihr Sortiment vorstellen, den Weg ins Geschäft zeigen und Fragen vor einem Besuch erleichtern.',
-    caption: 'Schauen Sie in den Entwurf für Ihr Geschäft',
+    title: 'Ihr Geschäft mit eigener Website',
+    benefit: 'Der Entwurf stellt Ihr Sortiment vor, zeigt den Weg in Ihr Geschäft und beantwortet erste Fragen vor dem Besuch.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'music',
     branch: /musik|klavier|instrument/i,
-    title: 'Ihr Unterrichtsangebot als Website-Entwurf',
-    benefit:
-      'Interessierte könnten sich über den Unterricht orientieren und vor einer Anfrage beschreiben, was sie lernen möchten.',
-    caption: 'Entdecken Sie Ihren Unterrichts-Entwurf',
+    title: 'Ihr Musikunterricht mit eigener Website',
+    benefit: 'Interessierte sehen im Entwurf, was sie bei Ihnen lernen können, und finden direkt den Weg zur Anfrage.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'yoga',
     branch: /yoga|pilates/i,
-    title: 'Eine Website-Idee für den Einstieg in Ihr Angebot',
-    benefit: 'Interessierte könnten passende Angebote kennenlernen und vor einer Anfrage ihre Fragen zur Teilnahme klären.',
-    caption: 'Ihre Kurs-Website-Idee kostenlos ansehen',
+    title: 'Ihr Kursangebot mit eigener Website',
+    benefit: 'Der Entwurf stellt Ihre Kurse übersichtlich vor und zeigt Interessierten den direkten Weg zur ersten Anfrage.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'dance',
     branch: /tanz|ballett/i,
-    title: 'Der erste Schritt zu Ihrem Website-Entwurf',
-    benefit: 'Interessierte könnten sich zu Ihrem Tanzangebot orientieren und eine Frage zum passenden Einstieg vorbereiten.',
-    caption: 'Ihr Tanzangebot als Website-Idee entdecken',
+    title: 'Ihre Tanzschule mit eigener Website',
+    benefit:
+      'Der Entwurf stellt Ihr Tanzangebot übersichtlich vor und zeigt den direkten Weg zur Frage nach dem passenden Einstieg.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'training',
     branch: /kurs|training|fitness/i,
-    title: 'Ihr Angebot auf einen Blick – als Website-Idee',
-    benefit:
-      'Interessierte könnten das Angebot überblicken und ihre Ziele oder Fragen vor einer Anfrage zur Teilnahme formulieren.',
-    caption: 'Öffnen Sie Ihre persönliche Kurs-Vorschau',
+    title: 'Ihr Trainingsangebot mit eigener Website',
+    benefit: 'Der Entwurf zeigt Ihr Angebot auf einen Blick und den direkten Weg zur Anfrage für die Teilnahme.',
+    caption: 'Ihre Website-Vorschau ansehen',
   },
 ];
 
@@ -377,9 +366,10 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
   const allDetail = usable.map((f) => f.text).join(' ');
   const profile = PROFILES.find((p) => p.branch.test(context.branchLabel) && (!p.focus || p.focus.test(allDetail))) ?? {
     key: 'general',
-    title: 'Eine Website-Idee speziell für Ihren Betrieb',
-    benefit: 'Interessierte könnten Ihr Angebot, den Standort und den passenden Kontakt auf einen Blick finden.',
-    caption: 'Ihre persönliche Website-Vorschau kostenlos ansehen',
+    title: 'Ihr Betrieb mit eigener Website',
+    benefit:
+      'Der Entwurf zeigt Ihr Angebot, Ihren Standort und Ihre Kontaktwege auf einer übersichtlichen Seite – gemacht fürs Handy.',
+    caption: 'Ihre Website-Vorschau ansehen',
   };
   const selected: typeof usable = [];
   for (const fact of usable) {
@@ -405,8 +395,8 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
       : sequence === 2
         ? 'hier finden Sie die Vorschau für Ihren Betrieb noch einmal – zum Ansehen, wann es für Sie passt.'
         : variant === 'B'
-          ? `für Ihren Betrieb${place} habe ich einen eigenen Website-Entwurf vorbereitet.`
-          : `für ${context.businessName} habe ich einen eigenen Website-Entwurf vorbereitet.`;
+          ? `für Ihren Betrieb${place} habe ich eine eigene Website entworfen.`
+          : 'ich habe für Ihren Betrieb eine eigene Website entworfen.';
   const personal = detail
     ? variant === 'B'
       ? `Gerade bei Themen wie ${detail} ist ein klarer Überblick hilfreich.`
@@ -424,13 +414,13 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
           ? `Ihre persönliche Website-Vorschau zum Wiederansehen`
           : headline,
     opening,
+    // Recherchehinweis im selben Absatz wie der Nutzen: ein Gedanke, und der Brief bleibt einseitig
     intro: [
       detail
-        ? `**${detail}** – ${profile.benefit.replace(/^(Eine|Wer|Neue)\b/, (s) => s.toLowerCase())}`
+        ? `**${detail}** – ${profile.benefit.replace(/^(Eine|Wer|Neue|Der)\b/, (s) => s.toLowerCase())}${research ? ` ${research}` : ''}`
         : `${personal} ${profile.benefit}`,
-      ...(research && detail ? [research] : []),
     ],
-    scan: 'QR-Code scannen, Vorschau kostenlos ansehen – ohne Anmeldung oder Verkaufsgespräch.',
+    scan: '**QR-Code scannen und kostenlos ansehen:** Ihre Website ist bereits online, aber nur über Ihren persönlichen Link erreichbar – ohne Anmeldung, ohne Verkaufsgespräch.',
     qrCaption: profile.caption,
     next: PREVIEW_ORDER_NOTICE,
     sources: [...selected, ...(website ? [website] : observation ? [observation] : [])].map((f) => ({

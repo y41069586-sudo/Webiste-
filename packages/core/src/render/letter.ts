@@ -19,6 +19,7 @@ import {
   letterTruthBlocklist,
   placeholderValues,
   recipientLines,
+  senderContactLine,
   type ComposeInput,
   type RecipientInput,
 } from '../letters/compose';
@@ -280,10 +281,20 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       throw Error('Demo während des Textabgleichs geändert; Brief erneut erstellen.');
   }
   const data = composeLetter(composeInput);
-  const html = renderLetterHtml(data);
+  let html = renderLetterHtml(data);
+  let domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
+  // Einladung zu lang (z. B. langer Firmenname): erst die Vorstellung, dann das P. S. weglassen – nie Pflichttext kürzen
+  for (const shorten of [
+    () => (data.noAction = senderContactLine(cfg, { withIntro: false })),
+    () => (data.postscript = undefined),
+  ]) {
+    if (!data.previewInvitation || !domIssues.some((i) => i.check === 'ueberlappung')) break;
+    shorten();
+    html = renderLetterHtml(data);
+    domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
+  }
   const pdf = await htmlToPdf(html);
   const expectedPages = screenshotPage ? 2 : 1;
-  const domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
   const pdfCheck = await validateLetterPdf(pdf, {
     qrExpectedUrl: url,
     recipientLines: recipientLines(recipient),

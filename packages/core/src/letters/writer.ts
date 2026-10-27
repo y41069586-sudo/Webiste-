@@ -51,6 +51,10 @@ als allgemeine Elektroinstallation. Verwende solche Schwerpunkte NUR, wenn sie i
 Nicht jede Einleitung beginnt mit "wir haben". Nutzen und Entwurf können in unterschiedlicher Reihenfolge
 stehen. Kein abgehacktes "Leistung – eine Website könnte ...", keine austauschbaren Qualitätsfloskeln.
 Kurze Sätze, respektvolles Sie, insgesamt höchstens 460 Zeichen für opening + benefit.
+Beschreibe im Indikativ, was der Entwurf tatsächlich zeigt ("Im Entwurf sehen Interessierte …"), nicht im
+Konjunktiv ("könnte …"). Steht der Firmenname im Betreff, wiederhole ihn im Einstieg nicht. Der Einstieg sagt
+in einem Satz, was vorbereitet wurde; der Nutzen beschreibt aus Sicht der Kundschaft des Betriebs, was sie dort
+auf einen Blick findet. Konkrete Tätigkeitswörter statt Floskeln.
 Keine Anrede, Grußformel, Preise, Rabatte, Tarife, Garantien oder rechtlichen Text selbst schreiben.
 Keine Zahlen außerhalb des Firmennamens oder wörtlicher belegter Angaben, keine Links oder Kontaktdaten.
 Der Firmenname muss im Betreff oder Einstieg wörtlich vorkommen. Für lange Namen kurzen Betreff wählen.

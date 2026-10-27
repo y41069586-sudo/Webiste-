@@ -125,17 +125,29 @@ function faviconDataUri(letter: string, color: string): string {
 export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { review?: boolean } = {}): string {
   const cards = demo.offers ?? [];
   if (!cards.length && !demo.trust) return '';
-  const card = (
-    c: (typeof cards)[number],
-  ) => `<li class="flex flex-col rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] shadow-sm">
+  const button = (c: (typeof cards)[number]) =>
+    `<a href="${esc(c.href)}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-4 py-2 font-semibold text-white hover:bg-[#1f2937] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827]">${demo.offerVersion === 'v4' ? `Mit ${esc(c.title.replace('SeitenWerk ', ''))} übernehmen` : `${esc(c.title)} wählen`}</a>`;
+  const points = (list: string[]) =>
+    `<ul class="mt-3 flex-1 space-y-1.5 text-sm text-[#374151]">${list.map((p) => `<li class="flex gap-2"><span aria-hidden="true" class="text-[#047857]">✓</span><span>${esc(p)}</span></li>`).join('')}</ul>`;
+  // V4: Einrichtung ist bei beiden Tarifen gleich – groß steht der Monatsbetrag, der den Unterschied macht
+  const card = (c: (typeof cards)[number]) =>
+    c.monthly
+      ? `<li class="flex flex-col rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] shadow-sm">
+      <h3 class="text-base font-semibold">${esc(c.title)}</h3>
+      <p class="mt-2"><span class="text-3xl font-bold tracking-tight">${esc(c.monthly)}</span> <span class="text-sm text-[#4b5563]">pro Monat ab Go-Live</span></p>
+      <p class="mt-1 text-sm text-[#4b5563]">zzgl. ${esc(c.price)} ${esc(c.unit)} für die Einrichtung</p>
+      ${points(c.points.filter((p) => !p.startsWith('+ ')))}
+      ${button(c)}
+    </li>`
+      : `<li class="flex flex-col rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] shadow-sm">
       <h3 class="text-base font-semibold">${esc(c.title)}</h3>
       <p class="mt-2 text-3xl font-bold tracking-tight">${esc(c.price)}</p><p class="mt-1 text-sm text-[#4b5563]">${esc(c.unit)}</p>
-      <ul class="mt-3 flex-1 space-y-1.5 text-sm text-[#374151]">${c.points.map((p) => `<li class="flex gap-2"><span aria-hidden="true" class="text-[#047857]">✓</span><span>${esc(p)}</span></li>`).join('')}</ul>
-      <a href="${esc(c.href)}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-4 py-2 font-semibold text-white hover:bg-[#1f2937] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827]">${demo.offerVersion === 'v4' ? `Mit ${esc(c.title.replace('SeitenWerk ', ''))} übernehmen` : `${esc(c.title)} wählen`}</a>
+      ${points(c.points)}
+      ${button(c)}
     </li>`;
   const t = demo.trust;
   const trust = t
-    ? `<div class="mt-10 flex flex-col gap-4 rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] sm:flex-row sm:items-start">
+    ? `<div class="mt-6 flex flex-col gap-4 rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] sm:flex-row sm:items-start">
       ${t.photoDataUri ? `<img src="${t.photoDataUri}" alt="${esc(t.name)}" width="96" height="96" class="h-24 w-24 shrink-0 rounded-full object-cover">` : ''}
       <div>
         <h3 class="text-base font-semibold">Wer hat diesen Entwurf gebaut?</h3>
@@ -148,7 +160,8 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
   return `<section id="uebernehmen" aria-labelledby="uebernehmen-titel" class="border-t border-[#dce2ed] bg-[#f3f4f6] py-12 text-[#111827]">
   <div class="mx-auto max-w-4xl px-4">
     <p class="text-sm font-medium text-[#4b5563]">${brandMarkHtml(24)} Angebot von ${esc(demo.sender.name) || 'TODO: vollständiger Anbietername'}, ${esc(demo.sender.company)} – nicht Teil der Website</p>
-    <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${demo.offerVersion === 'v4' ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${demo.offerVersion === 'v4' ? '<p class="mt-3 text-sm">Einrichtung, Ihre Inhalte und Fertigstellung dieses Entwurfs. Veröffentlichung erst nach Ihrer Freigabe. Wählen Sie dazu Ihren laufenden Tarif:</p>' : ''}
+    <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${demo.offerVersion === 'v4' ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${demo.offerVersion === 'v4' ? `<p class="mt-3 text-sm">Einmalig ${esc(demo.priceLabel)} für Einrichtung und Fertigstellung dieses Entwurfs – danach wählen Sie Ihren Monatstarif. Veröffentlicht wird erst nach Ihrer Freigabe, die Monatsgebühr beginnt erst mit dem Go-Live.</p>` : ''}
+    ${demo.offerVersion === 'v4' ? trust : ''}
     ${demo.offerVersion === 'v4' ? `<div class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><h3 class="font-semibold">Was die Einrichtung umfasst</h3><ul class="mt-3 space-y-3"><li><strong>Wir stellen den Entwurf fertig.</strong> Mit Ihren bestätigten Angaben, Texten, berechtigten Bildern und den vereinbarten Anpassungen.</li><li><strong>Sie behalten die Freigabe.</strong> Sie prüfen Ihre Inhalte und die fertige Vorschau, bevor wir die Website veröffentlichen.</li><li><strong>Wir richten die Website technisch ein.</strong> Der gewählte Monatstarif übernimmt anschließend Hosting, SSL und den vereinbarten Betreuungsumfang.</li></ul><p class="mt-4">Die Monatsgebühr beginnt erst nach bestätigtem Go-Live. Care+ enthält Basis vollständig. Zusatzfunktionen, größere Umbauten und Domains außerhalb des vereinbarten Umfangs benötigen Ihre gesonderte Zustimmung.</p></div>` : ''}
     ${cards.length ? `<ul class="mt-6 grid gap-4 ${cards.length > 1 ? 'sm:grid-cols-2' : ''}">${cards.map(card).join('')}</ul>` : ''}
     ${opts.review || demo.offerVersion === 'v4' ? `<details class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><summary class="cursor-pointer font-semibold">Was Sie beauftragen – Ablauf und Leistungsgrenzen</summary><p class="mt-3">Sie übermitteln Ihre tatsächlichen Inhalte und Änderungswünsche. Wir stellen den Entwurf fertig, richten die vereinbarten technischen Leistungen ein und veröffentlichen erst nach Ihrer Freigabe.</p><ol class="mt-4 space-y-3"><li><strong>1. Online bestellen</strong><br>Tarif und Bedingungen prüfen.</li><li><strong>2. Inhalte ergänzen</strong><br>Firmenangaben, rechtliche Texte, eigene Bilder und Wünsche übermitteln.</li><li><strong>3. Prüfen und freigeben</strong><br>Website abstimmen. Erst nach bestätigtem Go-Live beginnt die Monatsgebühr.</li></ol><p class="mt-4">Zusatzseiten, größere Umbauten und Leistungen außerhalb des Tarifs benötigen ein gesondertes Angebot. Domainumfang, Kündigungsfrist und Übergabe sind in den verlinkten Vertragsbedingungen beschrieben.</p></details>` : ''}
@@ -208,7 +221,7 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
             .join('')}</details>`
         : ''
     }
-    ${trust}
+    ${demo.offerVersion === 'v4' ? '' : trust}
     <div class="mt-6 flex flex-wrap gap-4 text-sm">${demo.whatsappUrl ? `<a href="${esc(demo.whatsappUrl)}" target="_blank" rel="noopener noreferrer" class="underline">Frage per WhatsApp</a>` : ''}${demo.sender.email ? `<a href="mailto:${esc(demo.sender.email)}" class="underline">Frage per E-Mail</a>` : ''}<a href="#frage" class="underline">Frageformular zu diesem Entwurf</a></div>
     <form method="post" action="${esc(demo.optOutUrl)}" class="sw-demo-optout"><button type="submit" class="min-h-11 underline">Kein Interesse – Entwurf und Werbung abbestellen</button></form>
   </div>
