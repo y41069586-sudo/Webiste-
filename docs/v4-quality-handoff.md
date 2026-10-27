@@ -50,6 +50,10 @@ Backend-Rolle, alle Anbieter Mock: Health ok, Queue-Job `refresh-funnel` erledig
 RAM-Spitze 623 MiB, SIGTERM sauber, Neustart gesund, Logs ohne Secrets. VPS-Vorschlag mit Messwerten:
 [vps-vorschlag-2026-10-27.md](vps-vorschlag-2026-10-27.md) (netcup VPS 500 G12.5, 9,50 €/Monat, nicht bestellt).
 
+**Tests nach allen Änderungen:** Core-Volllauf **577/577 in 65 Dateien, ein einziger Durchlauf**, Templates 111/111,
+Root-Prüfungen 25/25, TypeScript und Lint. Browser-E2E nicht erneut vollständig. Matrix aller 18 Restaufgaben:
+[claude-uebernahme-2026-10-27.md](claude-uebernahme-2026-10-27.md).
+
 ##27.10.2026 – alle neun Qualitätsbereiche lokal bearbeitet
 
 Sicherer Implementierungscommit ef694ae; vorherige Anbieterdarstellung7a2c6c0 separat erhalten.

@@ -23,7 +23,7 @@ Legende: **I** implementiert · **L** lokal getestet · **M** nur mit Mock getes
 | 15 | Domain/Kundenhosting | I (INWX-Sandbox, Hostingadapter) | E/F: Sandbox-Zugang, Testausgabe |
 | 16 | Vollständige Anbieter-E2E | M (14/14 Browser-E2E, Codex) | nach 6–15 |
 | 17 | Funnel/Conversion | I/L: Test-/Kontroll-/Mock-/Nicht-Live-Ereignisse ausgeschlossen (0018, `funnel-v4.ts`) | echte Daten fehlen; 2 % bleibt Ziel, kein Messwert |
-| 18 | Finale Qualität | TypeScript, Lint, Turbopack-Build, Templates 111, Root 25, gezielte Core-Tests grün; Core-Volllauf siehe Handoff | — |
+| 18 | Finale Qualität | **L: Core-Volllauf 577/577 (65 Dateien) in einem Durchlauf**, Templates 111/111, Root 25/25, TypeScript, Lint, Turbopack-Build | Browser-E2E (`pnpm test:e2e`) nach den Änderungen nicht erneut vollständig gelaufen; nur gezielte Website-Prüfung |
 
 ## Neue Befunde dieser Übernahme
 
