@@ -375,3 +375,21 @@ Provideranbindung, Produktionsänderung, VPS-Bereitstellung oder Veröffentlichu
 VPS-Worker fragt bei echter Anbindung den vorhandenen Anthropic-API-Provider ab und nutzt kein
 ChatGPT-Plus-/Codex-Kontingent. API-Kosten separat. Quellen-/Bildbeschaffung weiterhin nicht
 vollständig automatisch; ausreichend berechtigte Referenzen müssen im bestehenden Pfad vorliegen.
+
+### 27.10.2026 – Konsolidierte Qualitätsrunde und Claude-Übergabe
+
+Implementierungscheckpoint `ef694ae`, geprüfte Dokumentation `9bcd21a`. Der aktuelle
+[Qualitätsbericht](quality-completion/report.md) ersetzt überholte Test-/Restangaben früherer
+Abschnitte: alle neun Bereiche bearbeitet, 14/14 finale Mock-Browserfälle, 24 druckfertige lokale
+Testpaare, 20 Vorlagen mit Geometrie-/Palettenchecks. Tatsächliche Anbieter- und Betriebsabnahme
+bleibt offen; vollständiges Chromium-Image und Standard-Turbopack hier nicht erfolgreich geprüft.
+
+Vollständiger Fortsetzungsauftrag: [Claude-Handoff](claude-handoff-2026-10-27.md). Enthält aktuellen
+Preis-/Rechts-/Stilstand, bereits erledigte Änderungen, Testgrenzen und sämtliche Restarbeiten mit
+sicherer Reihenfolge. Claude soll zuerst den neuesten Remote-Stand erneut analysieren und nicht
+auf dem früheren Claude-Branch blind weiterarbeiten. Keine neue Architektur oder weitere Produktphase.
+
+Neueste Betreiberanweisung erlaubt ausdrücklich Commit und Push dieses vorhandenen Standes auf
+`codex/conversion-v4`. Vorgesehene Commitmarker `[skip ci] [skip netlify]`, kein PR, kein Force-Push.
+Der ursprüngliche Claude-Branch bleibt erhalten. Die gesonderten Grenzen für Deployment, DNS,
+Migrationen, VPS, Live-Zahlung/Versand/Domainkauf bleiben unverändert. DRY_RUN=true.

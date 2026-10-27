@@ -1,5 +1,14 @@
 # Qualitätsabschluss – alle neun Bereiche
 
+## Neue Übergabe an Claude / Push-Auftrag
+
+Der Betreiber hat anschließend ausdrücklich den GitHub-Push des vorhandenen Arbeitsstands samt
+vollständigem [Claude-Übergabeprompt](../claude-handoff-2026-10-27.md) beauftragt. Alle Angaben
+„nur lokal / kein Push“ unten beschreiben den damaligen Prüfzeitpunkt. Implementierungscheckpoint
+`ef694ae`, Dokumentationscheckpoint `9bcd21a`; der neue Handoff-Commit folgt darauf. Keine neue
+Produktions-, Migrations-, VPS- oder Anbieterfreigabe. Push nur auf `codex/conversion-v4`, ohne
+Force und mit `[skip ci] [skip netlify]`; Remote-HEAD nach dem Push separat verifizieren.
+
 Letzter sicherer Implementierungscommit: **ef694ae**. Separat gesicherte vorherige
 Anbieterdarstellung: **7a2c6c0**. Beide nur lokal auf codex/conversion-v4, kein Push/Deploy.
 Dieser Dokumentationscheckpoint ergänzt die geprüfte Implementierung, keine neue Projektphase.
