@@ -114,6 +114,68 @@ it('does not trust a malformed or low-confidence model response', async () => {
   spy.mockRestore();
   expect((await resolveBusinessDesign(l)).direction.source).toBe('business_evidence');
 });
+it.each([
+  { sufficient: false, confidence: 'high', colors: 'Fiktiv dunkle Gestaltung', atmosphere: 'Fiktiv ruhiger Raum' },
+  { sufficient: true, confidence: 'high', colors: 'Nur eine bestätigte Farbe', atmosphere: null },
+  { sufficient: true, confidence: 'low', colors: 'Unsicherer Farbeindruck', atmosphere: 'Unsicherer Raumeindruck' },
+])('does not invent a complete business vibe from an insufficient or uncertain finding: %j', async (finding) => {
+  const l = await lead();
+  await saveBusinessDesignEvidence(l.id, evidence(), 'test');
+  const spy = vi.spyOn(getProviders().llm, 'generateStructured').mockResolvedValueOnce({
+    data: {
+      character: 'urban',
+      typography: 'grotesk',
+      composition: 'poster',
+      primaryColor: '#ff00ff',
+      imageMood: 'dark',
+      confidence: finding.confidence,
+      evidenceSufficient: finding.sufficient,
+      observations: { colors: finding.colors, typography: null, atmosphere: finding.atmosphere, composition: null },
+      reasons: ['Ausdrücklich fiktiver Prüfbefund'],
+    },
+    usage: { model: 'mock', inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 },
+  });
+  const result = await resolveBusinessDesign(l);
+  expect(result.direction.source).toBe('industry_proposal');
+  expect(result.direction.primaryColor).toBeUndefined();
+  expect(result.requiresReview).toBe(true);
+  await resolveBusinessDesign(l);
+  expect(spy).toHaveBeenCalledTimes(1);
+});
+it('keeps unobserved brand colours and typography unknown even when other style dimensions are supported', async () => {
+  const l = await lead();
+  await saveBusinessDesignEvidence(l.id, evidence(), 'test');
+  vi.spyOn(getProviders().llm, 'generateStructured').mockResolvedValueOnce({
+    data: {
+      character: 'urban',
+      typography: 'grotesk',
+      composition: 'poster',
+      primaryColor: '#ff00ff',
+      imageMood: 'dark',
+      confidence: 'high',
+      evidenceSufficient: true,
+      observations: {
+        colors: null,
+        typography: null,
+        atmosphere: 'Fiktiv dunkler Raumeindruck',
+        composition: 'Fiktive markante Bildaufteilung',
+      },
+      reasons: ['Ausdrücklich fiktiver Prüfbefund'],
+    },
+    usage: { model: 'mock', inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 },
+  });
+  const result = await resolveBusinessDesign(l);
+  expect(result.direction.source).toBe('business_evidence');
+  expect(result.direction.primaryColor).toBeUndefined();
+  expect(result.direction.typography).toBe('editorial');
+  expect(result.direction.composition).toBe('poster');
+  const cache = await getSetting<{ observations: { colors: unknown; typography: unknown } } | null>(
+    `lead-design-result:${l.id}`,
+    null,
+  );
+  expect(cache?.observations.colors).toBeNull();
+  expect(cache?.observations.typography).toBeNull();
+});
 it('opt-out removes design sources/cache and prevents a delayed model response from restoring them', async () => {
   const l = await lead();
   await saveBusinessDesignEvidence(l.id, evidence(), 'test');

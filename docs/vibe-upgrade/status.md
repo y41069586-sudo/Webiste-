@@ -70,3 +70,12 @@ unterbrochen, aus gespeichertem Stand fortgesetzt; alle 20 finalen Fälle vorhan
 DRY_RUN=true. Alle Testanbieter explizit Mock, ausschließlich benannte lokale Wegwerf-/E2E-Datenbanken.
 Keine echten Briefe, Zahlungen, Erstattungen, Domainkäufe, Produktionsmigrationen, DNS- oder Deploy-Aktionen.
 Kein Google-Maps-Fotocrawler und keine behauptete echte Quellenanalyse. Keine Secrets in den Nachweisen.
+
+## 27.10.2026 – Ergänzung: ausreichende Stilbelege
+
+Neuerer Anschlussstand: `automation-and-billing.md` und `style-evidence-verification.json`.
+Betriebsspezifische Stilangleichung nur mit ausdrücklich ausreichenden, getrennten Beobachtungen;
+fehlende Informationen nicht aus Branchen-/Stockvorschlägen ergänzen. Cacheversion aktualisiert,
+manuelle Freigaben erhalten, gespeicherte Demos/Briefe unverändert. 46 relevante Coretests bestanden.
+Nur lokale Mockprüfungen, kein Push/Deploy oder echter Anbieteraufruf. Echte Bildanalyse-Abnahme
+und vollständige automatische Beschaffung berechtigter Referenzen bleiben offen.

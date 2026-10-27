@@ -1,0 +1,48 @@
+RUN  v3.2.7 /workspace/seitenwerk-v4/packages/core
+
+ ❯ test/business-design.test.ts (14 tests | 2 failed) 2179ms
+   ✓ keeps absence of evidence an explicit proposal, not a researched business character 128ms
+   ✓ uses fresh source colour hints without claiming photographic analysis 90ms
+   ✓ coalesces parallel analyses and caches responses without charging fictitious calls 142ms
+   ✓ never fetches source URLs and requires permission, valid files and source references without secrets 96ms
+   ✓ sends actual re-encoded image bytes to the mocked provider while keeping display rights separate  602ms
+   ✓ does not trust a malformed or low-confidence model response 109ms
+   × does not invent a complete business vibe from an insufficient or uncertain finding: {"sufficient":false,"confidence":"high","colors":"Fiktiv dunkle Gestaltung","atmosphere":"Fiktiv ruhiger Raum"} 93ms
+     → expected 'business_evidence' to be 'industry_proposal' // Object.is equality
+   × does not invent a complete business vibe from an insufficient or uncertain finding: {"sufficient":true,"confidence":"high","colors":"Nur eine bestätigte Farbe","atmosphere":null} 91ms
+     → expected 'business_evidence' to be 'industry_proposal' // Object.is equality
+   ✓ does not invent a complete business vibe from an insufficient or uncertain finding: {"sufficient":true,"confidence":"low","colors":"Unsicherer Farbeindruck","atmosphere":"Unsicherer Raumeindruck"} 108ms
+   ✓ opt-out removes design sources/cache and prevents a delayed model response from restoring them 111ms
+   ✓ rejects references crossing lead boundaries and expired non-owner evidence 86ms
+   ✓ also removes design references on retention anonymization 96ms
+   ✓ passes the evidence-derived style into the real existing demo generator and immutable HTML metadata 271ms
+   ✓ cannot recreate demo content after opt-out while the content model is still running 113ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/business-design.test.ts > does not invent a complete business vibe from an insufficient or uncertain finding: {"sufficient":false,"confidence":"high","colors":"Fiktiv dunkle Gestaltung","atmosphere":"Fiktiv ruhiger Raum"}
+ FAIL  test/business-design.test.ts > does not invent a complete business vibe from an insufficient or uncertain finding: {"sufficient":true,"confidence":"high","colors":"Nur eine bestätigte Farbe","atmosphere":null}
+AssertionError: expected 'business_evidence' to be 'industry_proposal' // Object.is equality
+
+Expected: "industry_proposal"
+Received: "business_evidence"
+
+ ❯ test/business-design.test.ts:134:35
+    132|   });
+    133|   const result = await resolveBusinessDesign(l);
+    134|   expect(result.direction.source).toBe('industry_proposal');
+       |                                   ^
+    135|   expect(result.direction.primaryColor).toBeUndefined();
+    136|   expect(result.requiresReview).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 12 passed (14)
+   Start at  06:19:47
+   Duration  4.99s (transform 614ms, setup 9ms, collect 1.32s, tests 2.18s, environment 0ms, prepare 46ms)
+
+undefined
+/workspace/seitenwerk-v4/packages/core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/business-design.test.ts

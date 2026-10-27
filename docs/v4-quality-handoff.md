@@ -322,3 +322,21 @@ Text für diesen Kontrollfall redaktionelle Offline-Fixture, keine echte LLM-Abn
 Laufzeit ohne Anthropic-/Stripe-Sandbox-/Webhook-Schlüssel. Kein echter externer E2E-Abschluss,
 keine Rechts-/Steuer-/Versandfreigabe. `DRY_RUN=true`, kein Push/Deploy/Versand. Nach Ansichtsprüfung
 weitere echte Kandidaten gleicher Nachweisqualität; echten Providerlauf erst sicher anbinden.
+
+### 27.10.2026 – Stilbelege und VPS-Abrechnung
+
+Anschluss an `12ad382`: `docs/vibe-upgrade/automation-and-billing.md`. Bestehende Stilauswertung
+verlangt jetzt getrennte Beobachtungen zu Farben, Typografie, Atmosphäre und Komposition sowie
+explizit ausreichende Belege. Eine Dimension oder niedrige Sicherheit reicht nicht. Fehlende
+Originalfarben/-schriften werden auch bei sonst passendem Stil nicht aus Modellantworten übernommen.
+Cacheversion erhöht, keine bestehende Demo still verändert, manuelle Freigaben erhalten.
+
+46 Coretests in fünf betroffenen Suiten bestanden, darunter vier neue Fälle zu fehlender Evidenz/
+Originalschrift, tatsächlicher Demo-/Briefpfad und unveränderter Gestaltung im Onboarding. Tests
+nutzen ausschließlich Mockanbieter und lokale wbm_visual_evidence_test. Typen und Lint bestanden.
+Build/Nachweisabschluss im verlinkten Bericht festhalten. Keine echte Bildanalyse, Kosten,
+Provideranbindung, Produktionsänderung, VPS-Bereitstellung oder Veröffentlichung.
+
+VPS-Worker fragt bei echter Anbindung den vorhandenen Anthropic-API-Provider ab und nutzt kein
+ChatGPT-Plus-/Codex-Kontingent. API-Kosten separat. Quellen-/Bildbeschaffung weiterhin nicht
+vollständig automatisch; ausreichend berechtigte Referenzen müssen im bestehenden Pfad vorliegen.

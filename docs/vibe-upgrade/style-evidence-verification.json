@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-10-27T06:29:19.004078+00:00",
+  "baseCommit": "12ad382",
+  "branch": "codex/conversion-v4",
+  "analysisCacheVersion": 2,
+  "core": {
+    "testsPassed": 46,
+    "suitesPassed": 5,
+    "suites": [
+      "business-design",
+      "acquisition-integration",
+      "demo-content",
+      "letter-writer",
+      "onboarding"
+    ]
+  },
+  "beforeFix": {
+    "failed": 2,
+    "passed": 12,
+    "note": "Negative cases reproduced before implementation; not a successful run."
+  },
+  "checks": {
+    "typecheck": 0,
+    "lint": 0,
+    "webAndWorkerBuild": 0,
+    "knownDynamicTracingWarnings": 7
+  },
+  "newCases": [
+    "Explicit insufficient evidence despite high model confidence uses industry proposal",
+    "One visual dimension is insufficient for a complete style profile",
+    "Low confidence uses industry proposal",
+    "Unobserved original colours and typography stay unknown even with other supported dimensions"
+  ],
+  "limits": {
+    "providers": "all seven mock",
+    "database": "dedicated local wbm_visual_evidence_test",
+    "dryRun": true,
+    "actualVisionModelTest": false,
+    "automaticExternalPhotoCollection": false,
+    "realProviderCosts": false,
+    "productionDeployment": false,
+    "push": false
+  },
+  "logs": {
+    "before": {
+      "path": "/tmp/vibe-evidence-before.log",
+      "sha256": "c1974e7a601b0940dc0343cb731de189baca5d790a350dd34aef2f613a8bcc57"
+    },
+    "core": {
+      "path": "/tmp/vibe-evidence-after.log",
+      "sha256": "6ab4e7d12415eb91a2e4775e7827d734bdb2d4ddf5957bf08ee79a3cc7a1010b"
+    },
+    "types": {
+      "path": "/tmp/vibe-evidence-types.log",
+      "sha256": "f1c8ee8cf5d22544af3bdd7aa03cd60adb628bd351038eb91b7569753fd81204"
+    },
+    "lint": {
+      "path": "/tmp/vibe-evidence-lint.log",
+      "sha256": "e076ffdd37880d079458dfcffc5a0c34977f4f4144b6e9b6cdd10a4300e4bd06"
+    },
+    "build": {
+      "path": "/tmp/vibe-evidence-build.log",
+      "sha256": "a1b81046ca23a1a9116d8ff4e8a221a0c38f894314675bc2cbd1d04b53b0dcbf"
+    }
+  }
+}

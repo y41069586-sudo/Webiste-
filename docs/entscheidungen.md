@@ -337,3 +337,12 @@ nutzbares Arbeitsfoto verwenden; ohne Bild sachlichen Fallback, keine erfundenen
 Vorhandene V4/V5-Architektur und Anbieter behalten. Kein Push/Deploy, Kontakt oder kostenpflichtiger
 Geschäftsvorgang. Erster Kontrolltext redaktionelle Offline-Fixture, keine echte LLM-Abnahme.
 Nachweise: docs/real-painter-check/; Empfängerdaten und Renderexporte nur privat unter data/.
+
+### 27.10.2026 – Ausreichende Stilbelege statt erzwungener Vibe
+
+Betreiber verlangt die Pflicht zur betriebsspezifischen visuellen Prüfung in der bestehenden
+Automatisierung; reicht der Informationsstand nicht aus, keine Stilangleichung erzwingen.
+Getrennte Beobachtungen und hinreichende Belege im vorhandenen Modell-/Cachepfad festhalten.
+Unbekannte Originalfarben, Schriften oder Bildrechte nicht erfinden. Branche und Beispielfoto
+sind keine tatsächliche visuelle Identität. Bestehende manuelle Freigaben bleiben.
+Aktualisierung und VPS-/API-/ChatGPT-Abrechnung: docs/vibe-upgrade/automation-and-billing.md.

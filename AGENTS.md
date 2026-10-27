@@ -358,3 +358,19 @@ kennzeichnen; fremde Arbeitsbilder nicht als echte Projekte des Betriebs ausgebe
 Echter recherchierter Kontrollfall und reine redaktionelle Offline-KI-Fixture bleiben unterschiedliche
 Nachweise. Keine komplette echte LLM-/Stripe-Abnahme behaupten. Private Empfängerdaten/Quellenkopien
 nur in ignoriertem `data/`, keine Produktionsaufnahme oder Kontaktaufnahme. Alle bisherigen Gates erhalten.
+
+## 27.10.2026 – Stilangleichung nur bei ausreichenden Informationen
+
+Vorhandenen berechtigten visuellen Kontext jedes Betriebs auf Farben/Materialien, sichtbare
+Schrift/Beschilderung, Atmosphäre/Bildsprache und Komposition prüfen. Branche, Name, Leistungen
+oder Stockfoto sind kein Nachweis eines tatsächlich ermittelten Betriebscharakters. Fehlendes
+unbekannt lassen. Ohne ausreichende Belege keine persönliche Stilangleichung erzwingen und keine
+vollständige Foto-/Markenanalyse behaupten. Bestehender Branchenvorschlag und manuelle Kontrolle
+bleiben möglich; ein einzelner echter Farbhinweis bleibt als Teilhinweis gekennzeichnet.
+Aktueller Code verlangt mindestens zwei beschriebene Dimensionen, ausdrücklich ausreichende
+Modellangaben und keine niedrige Sicherheit. Nicht belegte Originalfarben/-schriften nicht aus
+Modellvorschlägen übernehmen. Diese Schwelle ist keine automatische Qualitäts-/Faktenfreigabe.
+Bestehende Referenzrechte, Quellenbindung, Budgetprüfung und erste30-/Einzelprüfung erhalten.
+Dokumentiert in `docs/vibe-upgrade/automation-and-billing.md`. Kein automatischer Fotocrawler.
+VPS-Worker verwendet direkte Anthropic-API, kein ChatGPT-Plus-Login; API-Abrechnung und Chat-/Codex-
+Kontingent getrennt erklären. Lokale Mocktests sind keine echte Anbieter-/Kostenabnahme.

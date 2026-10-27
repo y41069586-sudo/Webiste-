@@ -1,0 +1,24 @@
+RUN  v3.2.7 /workspace/seitenwerk-v4/packages/core
+
+ ✓ test/acquisition-integration.test.ts (10 tests) 35306ms
+   ✓ blocks an otherwise qualified real-source lead without explicit research at render/approval/send gate  820ms
+   ✓ saves source-bound evidence and withdraws qualification when intent is removed  597ms
+   ✓ keeps research private and removes it on existing opt-out/anonymization path  539ms
+   ✓ rejects future research, unsafe references, unverified facts and oversized service titles  595ms
+   ✓ injects source-backed maler services into the actual demo and matched letter  13197ms
+   ✓ injects source-backed reinigung services into the actual demo and matched letter  10155ms
+   ✓ injects source-backed fliesenleger services into the actual demo and matched letter  5129ms
+   ✓ a generic demo facts checkbox never verifies missing operational/website/acquisition evidence  3786ms
+ ✓ test/onboarding.test.ts (6 tests) 26902ms
+   ✓ Onboarding → Vorschau → Freigabe → Veröffentlichung > behält die gekaufte Gestaltung über Onboarding und Textüberarbeitung  9523ms
+   ✓ Onboarding → Vorschau → Freigabe → Veröffentlichung > kompletter Ablauf mit Mock-Registrar und Mock-Hosting  17010ms
+ ✓ test/business-design.test.ts (15 tests) 2450ms
+   ✓ sends actual re-encoded image bytes to the mocked provider while keeping display rights separate  558ms
+ ✓ test/demo-content.test.ts (6 tests) 938ms
+   ✓ Template-Rotation > verteilt gleichmäßig über Templates und Paletten  922ms
+ ✓ test/letter-writer.test.ts (9 tests) 26ms
+
+ Test Files  5 passed (5)
+      Tests  46 passed (46)
+   Start at  06:25:28
+   Duration  76.01s (transform 1.88s, setup 64ms, collect 7.61s, tests 65.62s, environment 1ms, prepare 240ms)
