@@ -37,7 +37,13 @@ it('provides checked, optimized draft motifs for the primary sectors without cro
   for (const label of ['Büroreinigung', 'Fliesenleger']) {
     const photos = stockPhotos('handwerk', 0, label);
     expect(photos.length).toBeGreaterThan(0);
-    expect(photos.every((p) => p.license === 'Burst Some Rights Reserved' && p.source === 'Burst')).toBe(true);
+    expect(
+      photos.every(
+        (p) =>
+          (p.license === 'Burst Some Rights Reserved' && p.source === 'Burst') ||
+          (p.license === 'Pexels License' && p.source === 'Pexels'),
+      ),
+    ).toBe(true);
     expect(photos.every((p) => p.width && p.height && p.focalPoint!.x <= 100)).toBe(true);
   }
   expect(stockPhotos('handwerk', 0, 'Elektriker')).toEqual([]);

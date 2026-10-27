@@ -63,8 +63,9 @@ for (const [index, [name, branch, city]] of profiles.entries()) {
     const offer = page.locator('#uebernehmen');
     await expect(offer).toContainText('Was Sie beauftragen');
     await expect(offer).toContainText('597 €');
-    await expect(offer).toContainText('19 €/Monat');
-    await expect(offer).toContainText('99 €/Monat');
+    // Monatsbetrag groß, darunter die einmalige Einrichtung (gleich für beide Tarife)
+    await expect(offer).toContainText(/19\s*€\s*pro Monat ab Go-Live/);
+    await expect(offer).toContainText(/99\s*€\s*pro Monat ab Go-Live/);
     expect(await offer.innerText()).not.toMatch(/590\s*€|49\s*€|hallo@example\.com/);
     await offer.screenshot({
       path: path.join(out, `${id}-angebot-390.jpg`),

@@ -21,6 +21,6 @@ export function localProfile(
           `<li><span class="sw-profile-index" aria-hidden="true">0${index + 1}</span><div><strong>${esc(s.title)}</strong><p>${esc(s.text)}</p></div></li>`,
       )
       .join('')}</ul></div>
-    <a href="${p.draft ? '#oeffnungszeiten' : '#frage'}" class="sw-profile-contact">${p.draft ? 'Kontakt ansehen' : studio ? 'Eine Anfrage stellen' : 'Ihr Vorhaben anfragen'} <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+    <a href="${p.draft ? '#oeffnungszeiten' : '#frage'}" class="sw-profile-contact">${p.draft ? 'So erreichen Sie uns' : studio ? 'Eine Anfrage stellen' : 'Ihr Vorhaben anfragen'} <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
   </div>`;
 }

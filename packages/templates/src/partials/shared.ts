@@ -21,13 +21,20 @@ export interface SharedParts {
   phoneLabel: string | null;
   /** Primärer CTA-Link (Anrufen, sonst Kontaktformular) */
   ctaHref: string;
-  contactSection(opts: {
-    sectionClass: string;
-    cardClass: string;
-    titleClass: string;
-    buttonClass: string;
-    inputClass: string;
-  }): string;
+  /**
+   * Kontaktformular. Im Entwurf geht es an den Ersteller und steht deshalb erst am Seitenende beim Angebot
+   * (vom Footer gerendert); `keepInline` behält die Position (Designprüfung).
+   */
+  contactSection(opts: ContactSectionClasses): string;
+  /** Faktenzeile im Hero: Ort, Kontaktweg, Route (keine Behauptungen über den Betrieb) */
+  trustChips(): string;
+  /** Beispielablauf einer Anfrage (nur Entwurf, nur Branchen mit Anfrageablauf) */
+  process(opts: { sectionClass: string; titleClass: string; cardClass: string }): string;
+  /**
+   * Gebündelter Bereich „Kontakt & Anfahrt“ (id `oeffnungszeiten`): Telefon bzw. Anfrage, Adresse mit Route,
+   * Öffnungszeiten; im Entwurf zusätzlich Einzugsgebiet, Stellenbereich und Vorschau des Anfrageformulars.
+   */
+  contactHub(opts: ContactHubClasses): string;
   hoursList(opts?: { rowClass?: string; labelClass?: string; mutedClass?: string }): string;
   addressLines: string;
   mapsHref: string;
@@ -71,6 +78,29 @@ export interface IndustrySectionClasses {
   cardClass: string;
   inputClass: string;
   buttonClass: string;
+  /** Einzugsgebiet, Stellenbereich und Anfrage-Vorschau stehen bereits im Kontaktbereich (contactHub) */
+  inHub?: boolean;
+}
+
+export interface ContactSectionClasses {
+  sectionClass: string;
+  cardClass: string;
+  titleClass: string;
+  buttonClass: string;
+  inputClass: string;
+  mutedClass?: string;
+  iconClass?: string;
+  keepInline?: boolean;
+  /** intern: Aufruf aus dem Footer (Entwurf, nach dem Angebot) */
+  atEnd?: boolean;
+}
+
+export interface ContactHubClasses {
+  sectionClass: string;
+  titleClass: string;
+  cardClass: string;
+  buttonClass: string;
+  secondaryButtonClass: string;
 }
 
 /** Anfrageformular je Branche (Live: Zusatzfeld „wunsch“ geht als eigene Zeile in die Mail an den Kunden) */
@@ -339,13 +369,11 @@ ${jsonLd}
       )
       .join('');
 
-  const contactSection = (o: {
-    sectionClass: string;
-    cardClass: string;
-    titleClass: string;
-    buttonClass: string;
-    inputClass: string;
-  }) => {
+  const contactSection = (o: ContactSectionClasses) => {
+    // Fragen zum Entwurf gehen an den Ersteller: nicht mitten in der Website des Betriebs, sondern beim Angebot
+    if (isDemo && demo && !o.keepInline && !o.atEnd) return '';
+    const muted = o.mutedClass ?? 'text-muted';
+    const iconCls = o.iconClass ?? 'text-primary';
     const ts = String(input.renderedAt ?? Date.now());
     let title = 'Kontakt';
     let intro = `Schreiben Sie uns – wir melden uns schnellstmöglich bei Ihnen.`;
@@ -371,13 +399,13 @@ ${jsonLd}
   <div class="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-5">
     <div class="md:col-span-2">
       <h2 id="frage-titel" class="${o.titleClass}">${title}</h2>
-      <p class="mt-3 text-muted">${intro}</p>
+      <p class="mt-3 ${muted}">${intro}</p>
       ${
         phoneLabel && !isDemo
-          ? `<p class="mt-6 flex items-center gap-3"><span class="text-primary">${icon('phone', 'h-5 w-5')}</span><a class="font-semibold underline-offset-4 hover:underline" href="${esc(callHref)}">${esc(phoneLabel)}</a></p>`
+          ? `<p class="mt-6 flex items-center gap-3"><span class="${iconCls}">${icon('phone', 'h-5 w-5')}</span><a class="font-semibold underline-offset-4 hover:underline" href="${esc(callHref)}">${esc(phoneLabel)}</a></p>`
           : ''
       }
-      <p class="mt-3 flex items-start gap-3"><span class="mt-0.5 text-primary">${icon('pin', 'h-5 w-5')}</span><span>${isDemo && demo ? `${esc(demo.sender.street)}<br>${esc(demo.sender.postalCode)} ${esc(demo.sender.city)}` : addressLines}</span></p>
+      <p class="mt-3 flex items-start gap-3"><span class="mt-0.5 ${iconCls}">${icon('pin', 'h-5 w-5')}</span><span>${isDemo && demo ? `${esc(demo.sender.street)}<br>${esc(demo.sender.postalCode)} ${esc(demo.sender.city)}` : addressLines}</span></p>
     </div>
     <form class="${o.cardClass} md:col-span-3" method="post" action="${esc(action)}" accept-charset="utf-8">
       <div class="grid gap-4 sm:grid-cols-2">
@@ -390,7 +418,7 @@ ${jsonLd}
           <input id="f-email" name="email" type="email" autocomplete="email" required maxlength="200" class="${o.inputClass}"${dis}>
         </div>
         <div class="sm:col-span-2">
-          <label for="f-phone" class="mb-1 block text-sm font-medium">Telefon <span class="font-normal text-muted">(optional)</span></label>
+          <label for="f-phone" class="mb-1 block text-sm font-medium">Telefon <span class="font-normal ${muted}">(optional)</span></label>
           <input id="f-phone" name="phone" type="tel" autocomplete="tel" maxlength="40" class="${o.inputClass}"${dis}>
         </div>
         ${
@@ -425,7 +453,20 @@ ${jsonLd}
   const footer = (o: { className: string; linkClass: string; omitOffer?: boolean }) => {
     const year = new Date().getFullYear();
     if (isDemo && demo) {
-      return `${o.omitOffer ? '' : offerSection(demo)}<footer class="${o.className}">
+      const question = o.omitOffer
+        ? ''
+        : contactSection({
+            atEnd: true,
+            sectionClass: 'bg-[#f3f4f6] pb-14 pt-2 text-[#111827]',
+            cardClass: 'rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827]',
+            titleClass: 'text-2xl font-semibold tracking-tight',
+            buttonClass:
+              'inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-5 py-2 font-semibold text-white hover:bg-[#1f2937]',
+            inputClass: 'block w-full rounded-md border border-[#6b7280] bg-white px-3 py-2.5 text-[#111827]',
+            mutedClass: 'text-[#4b5563]',
+            iconClass: 'text-[#111827]',
+          });
+      return `${o.omitOffer ? '' : offerSection(demo)}${question}<footer class="${o.className}">
   <div class="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:grid-cols-3">
     <div><p class="font-semibold">${esc(facts.name)}</p><p class="mt-2 text-sm opacity-90">${addressLines}</p>${facts.googleReviewsUrl ? `<p class="mt-2 text-sm"><a class="${o.linkClass}" href="${esc(facts.googleReviewsUrl)}" rel="noopener noreferrer">Bewertungen auf Google</a></p>` : ''}</div>
     <div class="text-sm opacity-90">${photos(1).some((ph) => ph.example) ? '<p class="mb-3">Bildwelt zur Gestaltung: lizenzierte Beispielfotos, keine Aufnahmen des Betriebs.</p>' : ''}<p>Dies ist ein unverbindlicher Entwurf. ${esc(facts.name)} hat diese Seite nicht beauftragt.</p><p class="mt-2">Der Entwurf ist bis ${esc(demo.expiresLabel.replace(/^am\s+/, ''))} online und anschließend nicht mehr öffentlich erreichbar.</p></div>
@@ -495,7 +536,7 @@ ${jsonLd}
   </div>
 </section>`);
     }
-    if (industry === 'handwerk') {
+    if (industry === 'handwerk' && !o.inHub) {
       out.push(`<section id="einzugsgebiet" aria-labelledby="gebiet-titel" class="${o.sectionClass}">
   <div class="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-2">
     <div>
@@ -528,8 +569,111 @@ ${jsonLd}
   </div>
 </section>`);
     }
-    out.push(requestPreview(o));
+    if (!o.inHub) out.push(requestPreview(o));
     return out.join('\n');
+  };
+
+  const trustChips = () =>
+    `<ul class="sw-chips">
+      <li>${icon('pin', 'h-4 w-4')}<span>${esc(facts.branchLabel)} in ${esc(facts.city)}</span></li>
+      <li>${icon(callHref ? 'phone' : 'chat', 'h-4 w-4')}<span>${callHref ? 'Telefonisch erreichbar' : 'Anfrage per Nachricht'}</span></li>
+      <li><a href="${esc(mapsHref)}" rel="noopener" target="_blank">${icon('house', 'h-4 w-4')}<span>Route planen<span class="sr-only"> (OpenStreetMap, neuer Tab)</span></span></a></li>
+    </ul>`;
+
+  /** Ablauf einer Anfrage – im Entwurf als Beispiel gekennzeichnet, wird vor Veröffentlichung abgestimmt */
+  const process = (o: { sectionClass: string; titleClass: string; cardClass: string }) => {
+    if (!draft || industry !== 'handwerk') return '';
+    const steps: [string, string][] = [
+      [
+        'Vorhaben schildern',
+        callHref
+          ? 'Rufen Sie an oder beschreiben Sie kurz, worum es geht – am besten mit Ort und Wunschzeitraum.'
+          : 'Beschreiben Sie kurz, worum es geht – am besten mit Ort und Wunschzeitraum.',
+      ],
+      ['Rückmeldung erhalten', 'Sie bekommen eine Rückmeldung, bei Bedarf mit einem Termin zur Besichtigung vor Ort.'],
+      ['Gemeinsam festlegen', 'Umfang, Termin und Ausführung stimmen Sie gemeinsam ab, bevor die Arbeit beginnt.'],
+    ];
+    return `<section id="ablauf" aria-labelledby="ablauf-titel" class="${o.sectionClass}">
+  <div class="mx-auto max-w-6xl px-4">
+    <h2 id="ablauf-titel" class="${o.titleClass}">So läuft Ihre Anfrage ab</h2>
+    ${example('Beispielablauf – stimmen wir vor der Veröffentlichung mit Ihnen ab.')}
+    <ol class="mt-8 grid gap-5 md:grid-cols-3">${steps
+      .map(
+        ([title, text], i) =>
+          `<li class="sw-step ${o.cardClass}"><span class="sw-step-no" aria-hidden="true">${i + 1}</span><h3 class="mt-4 text-lg font-semibold">${title}</h3><p class="mt-2 text-muted">${text}</p></li>`,
+      )
+      .join('')}</ol>
+  </div>
+</section>`;
+  };
+
+  const contactHub = (o: ContactHubClasses) => {
+    const card = (ico: string, title: string, body: string) =>
+      `<div class="sw-hub-card ${o.cardClass}"><h3 class="flex items-center gap-3 text-lg font-semibold"><span class="sw-hub-icon">${icon(ico, 'h-5 w-5')}</span>${title}</h3>${body}</div>`;
+    const reach = callHref
+      ? card(
+          'phone',
+          'Anrufen',
+          `<p class="mt-3 text-muted">Ein Fingertipp genügt – direkt vom Handy.</p><a class="${o.buttonClass} mt-5" href="${esc(callHref)}">${icon('phone', 'h-5 w-5')}<span>${esc(phoneLabel)}</span></a>`,
+        )
+      : card(
+          'chat',
+          esc(request.title),
+          `<p class="mt-3 text-muted">${esc(request.intro)}</p>${draft ? example('Im Entwurf noch nicht aktiv – nach dem Start kommen Anfragen direkt per E-Mail zu Ihnen.') : `<a class="${o.buttonClass} mt-5" href="#frage">${esc(request.button)}</a>`}`,
+        );
+    const address = card(
+      'pin',
+      'Adresse',
+      `<p class="mt-3 text-lg">${addressLines}</p><a class="${o.secondaryButtonClass} mt-5" href="${esc(mapsHref)}" rel="noopener" target="_blank">Route planen<span class="sr-only"> (öffnet OpenStreetMap in neuem Tab)</span></a>`,
+    );
+    const hours = card(
+      'clock',
+      'Öffnungszeiten',
+      facts.openingLines.length
+        ? `<div class="mt-3">${hoursList()}</div>`
+        : draft
+          ? example('Öffnungszeiten sind noch nicht bestätigt – wir tragen sie vor der Veröffentlichung ein.')
+          : '<p class="mt-3 text-muted">Bitte nutzen Sie die angegebenen Kontaktmöglichkeiten.</p>',
+    );
+    const area =
+      draft && industry === 'handwerk'
+        ? `<div id="einzugsgebiet" class="sw-hub-row mt-5 grid gap-5 md:grid-cols-2">
+      <div class="${o.cardClass}"><h3 id="gebiet-titel" class="text-lg font-semibold">Einzugsgebiet</h3><p class="mt-2 text-lg">${esc(facts.city)} und Umgebung</p>${example('Erfasster Standort. Das tatsächliche Einzugsgebiet wird vor Veröffentlichung abgestimmt.')}</div>
+      <details class="${o.cardClass}"><summary class="cursor-pointer text-lg font-semibold">Optional: Stellenbereich als Vorschau</summary>
+        <h4 id="jobs-titel" class="mt-4 font-semibold">Wir stellen ein</h4>
+        <p class="mt-2">Hier stellen Sie offene Stellen und Ausbildungsplätze vor, zum Beispiel für Gesellinnen und Gesellen oder Auszubildende (m/w/d). Bewerbungen kommen direkt per Formular zu Ihnen.</p>
+        ${example('Gestaltungsbeispiel, keine tatsächliche Stellenausschreibung des Betriebs.')}
+      </details>
+    </div>`
+        : '';
+    const field = (label: string, tall = false) =>
+      `<div><span class="mb-1 block text-sm font-medium">${esc(label)}</span><span class="block w-full rounded-lg border border-line bg-surface ${tall ? 'h-20' : 'h-11'}"></span></div>`;
+    const requestMock =
+      draft && request.wish
+        ? `<div id="anfrage" class="sw-hub-row mt-5 grid items-start gap-6 ${o.cardClass} md:grid-cols-5">
+      <div class="md:col-span-2">
+        <h3 id="anfrage-titel" class="text-xl font-semibold">${esc(request.title)}: direkt über die Website</h3>
+        <p class="mt-3 text-muted">${esc(request.intro)}</p>
+        ${example(`Vorschau: Formular mit Name, E-Mail, „${esc(request.wish)}“ und Nachricht. Im Entwurf noch nicht aktiv – nach dem Start kommen Anfragen direkt per E-Mail zu Ihnen.`)}
+      </div>
+      <div class="sw-form-mock grid gap-4 sm:grid-cols-2 md:col-span-3" aria-hidden="true">
+        ${field('Name')}
+        ${field('E-Mail')}
+        <div class="sm:col-span-2">${field(request.wish)}</div>
+        <div class="sm:col-span-2">${field('Nachricht', true)}</div>
+        <div class="sm:col-span-2"><span class="${o.buttonClass}">${esc(request.button)}</span></div>
+      </div>
+    </div>`
+        : '';
+    return `<section id="oeffnungszeiten" aria-labelledby="kontakt-titel" class="${o.sectionClass}">
+  <div class="mx-auto max-w-6xl px-4">
+    <h2 id="kontakt-titel" class="${o.titleClass}">Kontakt &amp; Anfahrt</h2>
+    <p class="mt-2 max-w-2xl text-lg text-muted">So erreichen Sie ${esc(facts.name)} in ${esc(facts.city)}.</p>
+    <div class="mt-8 grid gap-5 md:grid-cols-3">${reach}${address}${hours}</div>
+    ${area}
+    ${requestMock}
+  </div>
+</section>`;
   };
 
   const seed = [...(demo?.slug ?? facts.name)].reduce((a, ch) => a + ch.charCodeAt(0), 0);
@@ -576,6 +720,9 @@ ${jsonLd}
     photos,
     figure,
     industrySections,
+    trustChips,
+    process,
+    contactHub,
     isDemo,
     isLive,
     servicesNote,

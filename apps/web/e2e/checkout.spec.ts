@@ -53,7 +53,7 @@ test.describe('Checkout über die Bezahlseite (Stripe, im Test simuliert)', () =
     await page.goto(`/d/${demo.slug}/uebernehmen?plan=monthly`);
     await expect(page.getByText(/12 Monate Mindestlaufzeit/)).toBeVisible();
     await page.getByRole('button', { name: 'Abbrechen' }).click();
-    await expect(page).toHaveURL(new RegExp(`/d/${demo.slug}#uebernehmen$`));
+    await expect(page).toHaveURL(new RegExp(`/d/${demo.slug}\\?abgebrochen=1&plan=monthly#uebernehmen$`));
     await page.goto(`/d/${demo.slug}/uebernehmen?plan=monthly`);
     await payOnMockCheckout(page, { name: 'Moritz Monat', email: 'moritz@example.org' });
     await expect(page.getByRole('heading', { name: 'Vielen Dank für Ihre Bestellung!' })).toBeVisible();

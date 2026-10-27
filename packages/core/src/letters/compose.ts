@@ -313,7 +313,7 @@ export function composeLetter(i: ComposeInput): LetterData {
     if (!unsafe) {
       data.offer = copy.next;
       data.noAction = senderContactLine(i.cfg);
-      data.postscript = `**P. S.** Die Vorschau ist bis ${i.expiresLabel} online – schauen Sie in Ruhe rein, wann es Ihnen passt.`;
+      data.postscript = `**P. S.** Ihre Vorschau ist bis ${i.expiresLabel} online. Schauen Sie gern vorher kurz rein – vielleicht gefällt sie Ihnen ja.`;
     }
   }
   return data;

@@ -36,7 +36,7 @@ it('keeps contact actions in the business draft and identifies the provider ques
   const input = structuredClone(demoInput('handwerk-klar', 'werkblau', 'handwerk'));
   const html = renderSite(input);
   expect(html).toContain('data-template="handwerk-klar"');
-  expect(html).toContain('Kontakt ansehen');
+  expect(html).toContain('So erreichen Sie uns');
   expect(html).toContain('href="#oeffnungszeiten"');
   const question = html.slice(html.indexOf('id="frage"')).split('</form>')[0]!;
   expect(question).toContain(input.demo!.sender.street);

@@ -46,6 +46,7 @@ export function renderMalerDesignReview(ctx: RenderContext): string {
       titleClass: 'text-2xl font-semibold',
       buttonClass: 'rw-button',
       inputClass: 'block w-full rounded-lg border border-line bg-white px-3 py-3',
+      keepInline: true,
     })
     .replace(
       p.addressLines,

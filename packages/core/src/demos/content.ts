@@ -347,17 +347,17 @@ export function verifiedServiceFallback(c: SiteContent, f: ContentFacts): SiteCo
   const focus = f.verifiedServices.slice(0, 2).join(' und ');
   const headline = `${f.verifiedServices[0]} in ${f.city}`;
   // Stimme der künftigen Website des Betriebs („wir“), konkret und ohne Behauptungen über Qualität oder Kapazität
-  const contact = f.phone ? 'telefonisch oder per Nachricht' : 'per Nachricht';
+  const contact = f.phone ? 'per Anruf oder Nachricht' : 'kurz per Nachricht';
   return {
     ...c,
     hero_headline: headline.length <= 70 ? headline : `${f.branchLabel} in ${f.city}`,
-    hero_subline: `${f.name}, Ihr ${f.branchLabel} für ${focus}. Schildern Sie uns kurz Ihr Vorhaben, ${contact}.`,
+    hero_subline: `${f.name}, Ihr ${f.branchLabel} für ${focus}. Schildern Sie uns Ihr Vorhaben – ${contact}.`,
     services: f.verifiedServices.slice(0, 6).map((title) => ({
       title,
       text: serviceRequestGuidance(title),
       icon: 'chat',
     })),
-    about: `${f.name} ist Ihr ${f.branchLabel} in ${f.city}. Hier sehen Sie auf einen Blick unser Angebot, den Weg zu uns und wie Sie uns am schnellsten erreichen.\n\nSchildern Sie kurz, was Sie vorhaben – je genauer Ihre Angaben, desto besser lässt sich Ihr Anliegen einordnen.`,
+    about: `${f.name} ist Ihr ${f.branchLabel} in ${f.city} – mit Schwerpunkt ${focus}.\n\nSie erreichen uns direkt ${f.phone ? 'per Telefon oder Nachricht' : 'per Nachricht'}. Je genauer Sie Ihr Vorhaben beschreiben, desto besser können wir es einordnen und mit Ihnen abstimmen.`,
     faq: [
       {
         q: 'Wie kann ich mein Vorhaben anfragen?',

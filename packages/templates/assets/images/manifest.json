@@ -789,5 +789,215 @@
     "moods": [
       "neutral"
     ]
+  },
+  {
+    "file": "handwerk/maler-materialien-pexels-7217935.jpg",
+    "group": "handwerk",
+    "alt": "Malerwerkzeug mit Farbwanne und Farbeimer auf abgedecktem Boden, lizenziertes Beispielfoto",
+    "title": "Painting Materials On Floor",
+    "creator": "Blue Bird",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/painting-materials-on-floor-7217935/",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 97845,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "maler",
+      "anstrich"
+    ],
+    "role": "detail",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/maler-farbwanne-pexels-5691700.jpg",
+    "group": "handwerk",
+    "alt": "Farbrolle in einer Wanne mit weißer Farbe, lizenziertes Beispielfoto",
+    "title": "Roller placed in paint tray with white paint",
+    "creator": "Ksenia Chernaya",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/roller-placed-in-paint-tray-with-white-paint-5691700/",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 86798,
+    "width": 1200,
+    "height": 801,
+    "keywords": [
+      "maler",
+      "anstrich"
+    ],
+    "role": "detail",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/maler-wandanstrich-pexels-7218011.jpg",
+    "group": "handwerk",
+    "alt": "Hand mit Farbrolle beim Streichen einer hellen Wand, lizenziertes Beispielfoto",
+    "title": "People Painting The Wall",
+    "creator": "Blue Bird",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/people-painting-the-wall-7218011/",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 78798,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "maler",
+      "anstrich"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/fliesen-nivellierung-pexels-11806476.jpg",
+    "group": "handwerk",
+    "alt": "Hand mit Handschuh setzt ein Nivelliersystem zwischen großformatigen Bodenfliesen, lizenziertes Beispielfoto",
+    "title": "Hand in a Glove Using a Tile Levelling Tool",
+    "creator": "Vladimir Srajber",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/hand-in-a-glove-using-a-tile-levelling-tool-11806476/",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 134030,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "fliesen",
+      "fliesenverlegung",
+      "badsanierung"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/fliesen-werkzeug-pexels-18861859.jpg",
+    "group": "handwerk",
+    "alt": "Fliesenwerkzeug und Zementfliesen auf einer Baustelle, lizenziertes Beispielfoto",
+    "title": "Tiling Equipment laid Out on a Job",
+    "creator": "Bimbim Sindu",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/tiling-equipment-laid-out-on-a-job-18861859/",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 98284,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "fliesen",
+      "fliesenverlegung"
+    ],
+    "role": "detail",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/reinigung-bodenpflege-pexels-6195949.jpg",
+    "group": "handwerk",
+    "alt": "Reinigungskraft in Arbeitskleidung saugt einen Fliesenboden, lizenziertes Beispielfoto",
+    "title": "A Close-Up Shot of a Person Using a Vacuum Cleaner",
+    "creator": "Tima Miroshnichenko",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/a-close-up-shot-of-a-person-using-a-vacuum-cleaner-6195949/",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 91185,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "büroreinigung",
+      "unterhaltsreinigung",
+      "gebäudereinigung",
+      "gewerbereinigung",
+      "reinigungsunternehmen"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/reinigung-sauger-pexels-6195273.jpg",
+    "group": "handwerk",
+    "alt": "Reinigung eines hellen Fliesenbodens mit einem Nasssauger, lizenziertes Beispielfoto",
+    "title": "Person Using a Vacuum",
+    "creator": "Tima Miroshnichenko",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/person-using-a-vacuum-6195273/",
+    "openverseId": "",
+    "checkedAt": "2026-10-27",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 88009,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "büroreinigung",
+      "unterhaltsreinigung",
+      "gebäudereinigung",
+      "gewerbereinigung",
+      "reinigungsunternehmen"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
   }
 ]

@@ -48,7 +48,7 @@ export function renderSite(input: RenderInput): string {
   if (input.mode === 'demo' && !input.demo) throw new Error('Demo-Modus braucht demo-Optionen');
   if (input.mode === 'live' && !input.live) throw new Error('Live-Modus braucht live-Optionen');
   if (input.mode === 'demo' || input.mode === 'screenshot')
-    input = { ...input, content: { ...input.content, cta_text: 'Kontakt ansehen' } };
+    input = { ...input, content: { ...input.content, cta_text: 'So erreichen Sie uns' } };
   if (input.artDirection || input.mode === 'demo' || input.mode === 'screenshot')
     input = {
       ...input,
@@ -74,7 +74,14 @@ export function renderSite(input: RenderInput): string {
     `<body data-template="${tpl.id}" data-headline="${input.content.hero_headline.length > 56 ? 'long' : 'standard'}" data-sector="${sector}" data-character="${input.artDirection?.character ?? 'legacy'}" data-type="${input.artDirection?.typography ?? 'legacy'}" data-composition="${input.artDirection?.composition ?? 'legacy'}" data-design-source="${input.artDirection?.source ?? 'legacy'}" `,
   );
 }
-export { renderLetterHtml, embeddedFontCss, LETTER_GEOMETRY, returnAddressLine, type LetterData, type LetterSender } from './letter';
+export {
+  renderLetterHtml,
+  embeddedFontCss,
+  LETTER_GEOMETRY,
+  returnAddressLine,
+  type LetterData,
+  type LetterSender,
+} from './letter';
 export { renderInvoiceHtml, type InvoiceData, type InvoiceLine, type InvoiceBuyer, type InvoiceSeller } from './invoice';
 export { renderSubpage } from './subpage';
 export { renderMaintenanceHtml } from './maintenance';

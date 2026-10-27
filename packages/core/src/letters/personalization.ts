@@ -118,240 +118,233 @@ export function personalizedLetterCopy(context: VerifiedLetterContext, variant =
 /** New campaign copy is a source-bound invitation, not a priced offer. */
 export const PREVIEW_LETTER_VERSION = 'personal-preview-2';
 export const PREVIEW_ORDER_NOTICE =
-  '**So geht es weiter:** Gefällt Ihnen der Entwurf, passe ich ihn mit Ihnen an; online geht er erst nach Ihrer Freigabe. Sonst ist nichts zu tun. Unabhängiger, nicht beauftragter Entwurf: ohne Bestellung keine Kosten, die Umsetzung ist kostenpflichtig – Preise und Vertragsbedingungen stehen vor jeder Bestellung in der Vorschau.';
+  '**Kein Verkaufsgespräch:** Ich rufe Sie nicht an. Gefällt Ihnen der Entwurf, passe ich ihn mit Ihnen an; online geht er erst nach Ihrer Freigabe. Sonst ist nichts zu tun. Unabhängiger, nicht beauftragter Entwurf: ohne Bestellung keine Kosten, die Umsetzung ist kostenpflichtig – Preise und Vertragsbedingungen stehen vor jeder Bestellung in der Vorschau.';
+
 const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; benefit: string; caption: string }[] = [
   {
     key: 'painter-renovation',
     branch: /maler|anstrich/i,
     focus: /renovier|sanier/i,
-    title: 'Ihre Renovierungsarbeiten als eigene Website',
-    benefit:
-      'Wer renovieren möchte, sieht im Entwurf sofort, was Sie anbieten, wo Sie arbeiten und wie man Sie erreicht – direkt am Handy.',
+    title: 'Ihre Website-Vorschau für Renovierungen ist online',
+    benefit: 'wer in {ort} renovieren möchte, sieht dort sofort, was Sie anbieten – und erreicht Sie mit einem Fingertipp.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'cleaning-commercial',
     branch: /reinig/i,
     focus: /büro|buero|gewerbe|treppenhaus|fenster/i,
-    title: 'Ihre Gebäudereinigung als eigene Website',
+    title: 'Ihre Website-Vorschau für Gebäudereinigung ist online',
     benefit:
-      'Gewerbekunden sehen im Entwurf auf einen Blick, welche Bereiche Sie reinigen, wo Ihr Betrieb sitzt und wie sie ein Objekt anfragen.',
+      'Firmen und Verwaltungen in {ort} sehen dort auf einen Blick, welche Bereiche Sie reinigen – und fragen ihr Objekt direkt an.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'tiling-renovation',
     branch: /fliesen/i,
     focus: /bad|renovier|sanier/i,
-    title: 'Ihre Fliesenarbeiten als eigene Website',
+    title: 'Ihre Website-Vorschau für Bad und Boden ist online',
     benefit:
-      'Wer Bad oder Boden erneuern will, findet im Entwurf Ihre Leistungen, Ihren Standort und den direkten Weg zur Anfrage. Eigene Projektfotos lassen sich jederzeit ergänzen.',
+      'wer in {ort} Bad oder Boden erneuern will, sieht dort sofort, was Sie anbieten – und erreicht Sie mit einem Fingertipp.',
     caption: 'Ihre Fliesen-Website ansehen',
   },
   {
     key: 'tiling',
     branch: /fliesen/i,
-    title: 'Ihr Fliesenbetrieb mit eigener Website',
-    benefit: 'Der Entwurf zeigt Ihre Fliesenarbeiten übersichtlich, mit Standort und Kontakt – am Computer genauso wie am Handy.',
+    title: 'Ihre Website-Vorschau für Fliesenarbeiten ist online',
+    benefit:
+      'wer in {ort} einen Fliesenleger sucht, sieht dort Ihre Leistungen, Ihren Standort und erreicht Sie mit einem Fingertipp.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'painter-material',
     branch: /maler|anstrich/i,
     focus: /kalk|lehm|mineral|farbberat/i,
-    title: 'Ihre Farbideen als eigene Website',
-    benefit:
-      'Der Entwurf gibt Ihren Farb- und Materialleistungen eine ruhige, hochwertige Bühne – mit Standort und direktem Kontakt.',
+    title: 'Ihre Website-Vorschau für Farbe und Material ist online',
+    benefit: 'Ihre Farb- und Materialarbeiten bekommen dort eine ruhige, hochwertige Bühne – mit Standort und direktem Kontakt.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'painter-stairway',
     branch: /maler|anstrich/i,
     focus: /treppen|fassad|außen/i,
-    title: 'Ihre Malerarbeiten als eigene Website',
+    title: 'Ihre Website-Vorschau für Malerarbeiten ist online',
     benefit:
-      'Interessierte sehen im Entwurf auf einen Blick, welche Arbeiten Sie übernehmen, wo Sie arbeiten und wie man Sie erreicht.',
+      'wer in {ort} einen Maler sucht, sieht dort sofort, welche Arbeiten Sie übernehmen – und erreicht Sie mit einem Fingertipp.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'painter',
     branch: /maler|anstrich/i,
-    title: 'So sieht Ihr Malerbetrieb im Netz aus',
-    benefit:
-      'Der Entwurf zeigt Ihre Leistungen, Ihren Standort und Ihre Kontaktwege auf einer Seite – gemacht für Kunden, die am Handy suchen.',
+    title: 'Ihre Website-Vorschau für Ihren Malerbetrieb ist online',
+    benefit: 'wer in {ort} einen Maler sucht, findet dort Ihre Leistungen, Ihren Standort und Ihre Nummer zum Antippen.',
     caption: 'Ihre Maler-Website ansehen',
   },
   {
     key: 'electric-solar',
     branch: /elektro/i,
     focus: /photovoltaik|solaranlag|pv-anlag/i,
-    title: 'Ihr Photovoltaik-Angebot als eigene Website',
-    benefit: 'Wer eine Anlage plant, findet im Entwurf Ihr Angebot, Ihren Standort und den direkten Weg zur ersten Anfrage.',
+    title: 'Ihre Website-Vorschau für Photovoltaik ist online',
+    benefit: 'wer in {ort} eine Anlage plant, sieht dort Ihr Angebot und erreicht Sie mit einem Fingertipp.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'electric-renovation',
     branch: /elektro/i,
     focus: /umbau|sanier|modernisier/i,
-    title: 'Ihre Elektroarbeiten als eigene Website',
-    benefit: 'Wer umbaut oder modernisiert, sieht im Entwurf auf einen Blick, was Sie übernehmen und wie man Sie erreicht.',
+    title: 'Ihre Website-Vorschau für Elektroarbeiten ist online',
+    benefit:
+      'wer in {ort} umbaut oder modernisiert, sieht dort sofort, was Sie übernehmen – und erreicht Sie mit einem Fingertipp.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'electric-light',
     branch: /elektro/i,
     focus: /licht|beleucht/i,
-    title: 'Ihr Lichtangebot als eigene Website',
-    benefit:
-      'Der Entwurf stellt Ihr Angebot rund um Licht und Beleuchtung übersichtlich vor – mit Standort und direktem Kontakt.',
+    title: 'Ihre Website-Vorschau für Licht und Beleuchtung ist online',
+    benefit: 'Ihr Angebot rund um Licht und Beleuchtung steht dort übersichtlich – mit Standort und direktem Kontakt.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'electric',
     branch: /elektro/i,
-    title: 'Ihr Elektrobetrieb mit eigener Website',
-    benefit: 'Der Entwurf bündelt Ihre Leistungen, Ihren Standort und Ihre Kontaktwege auf einer übersichtlichen Seite.',
+    title: 'Ihre Website-Vorschau für Ihren Elektrobetrieb ist online',
+    benefit: 'wer in {ort} einen Elektriker sucht, findet dort Ihre Leistungen, Ihren Standort und Ihre Nummer zum Antippen.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'plumbing',
     branch: /sanitär|sanitaer|heizung|installat/i,
-    title: 'Ihr Installationsbetrieb mit eigener Website',
-    benefit: 'Wer ein Anliegen hat, sieht im Entwurf sofort, was Sie anbieten, wo Ihr Betrieb sitzt und wie man Sie erreicht.',
+    title: 'Ihre Website-Vorschau für Ihren Installationsbetrieb ist online',
+    benefit: 'wer in {ort} Hilfe braucht, sieht dort sofort, was Sie anbieten – und erreicht Sie mit einem Fingertipp.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'garden-care',
     branch: /garten|landschaft|gärtner|gaertner/i,
     focus: /pflege|schnitt/i,
-    title: 'Ihre Gartenpflege als eigene Website',
-    benefit: 'Wer Hilfe im Garten sucht, sieht im Entwurf Ihre Leistungen, Ihren Standort und den direkten Weg zur Anfrage.',
+    title: 'Ihre Website-Vorschau für Gartenpflege ist online',
+    benefit: 'wer in {ort} Hilfe im Garten sucht, sieht dort Ihre Leistungen und erreicht Sie mit einem Fingertipp.',
     caption: 'Ihre Garten-Website ansehen',
   },
   {
     key: 'garden',
     branch: /garten|landschaft|gärtner|gaertner/i,
-    title: 'Ihr Gartenbetrieb mit eigener Website',
-    benefit:
-      'Der Entwurf stellt Ihre Arbeiten im Grünen übersichtlich vor – mit Standort, Kontakt und Platz für eigene Projektfotos.',
+    title: 'Ihre Website-Vorschau für Ihren Gartenbetrieb ist online',
+    benefit: 'Ihre Arbeiten im Grünen stehen dort übersichtlich – mit Standort, Kontakt und Platz für eigene Projektfotos.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'cleaning',
     branch: /reinig/i,
-    title: 'Ihr Reinigungsbetrieb mit eigener Website',
-    benefit:
-      'Der Entwurf zeigt, welche Reinigungsarbeiten Sie übernehmen und wie man Sie erreicht – übersichtlich am Computer und am Handy.',
+    title: 'Ihre Website-Vorschau für Ihren Reinigungsbetrieb ist online',
+    benefit: 'wer in {ort} eine Reinigung sucht, sieht dort sofort, was Sie übernehmen – und erreicht Sie mit einem Fingertipp.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'barber',
     branch: /barber|barbier/i,
-    title: 'Ihr Barbershop mit eigener Website',
-    benefit: 'Wer einen neuen Barbier sucht, sieht im Entwurf Ihr Angebot, Ihren Standort und den direkten Weg zum Termin.',
+    title: 'Ihre Website-Vorschau für Ihren Barbershop ist online',
+    benefit: 'wer in {ort} einen neuen Barbier sucht, sieht dort Ihr Angebot und findet direkt den Weg zum Termin.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'hair-color',
     branch: /fris[öe]|friseur|haarsalon/i,
     focus: /farb|color|balayage|strähn/i,
-    title: 'Ihre Farbangebote als eigene Website',
-    benefit:
-      'Wer über eine neue Haarfarbe nachdenkt, findet im Entwurf Ihr Angebot, Ihren Salon und den direkten Weg zur Terminanfrage.',
+    title: 'Ihre Website-Vorschau für Haarfarben ist online',
+    benefit: 'wer in {ort} über eine neue Haarfarbe nachdenkt, findet dort Ihr Angebot und den direkten Weg zur Terminanfrage.',
     caption: 'Ihre Salon-Website ansehen',
   },
   {
     key: 'hair',
     branch: /fris[öe]|friseur|haarsalon/i,
-    title: 'Ihr Salon mit eigener Website',
-    benefit:
-      'Neue Kundinnen und Kunden sehen im Entwurf Ihr Angebot, Ihre Adresse und wie sie einen Termin anfragen – direkt am Handy.',
+    title: 'Ihre Website-Vorschau für Ihren Salon ist online',
+    benefit: 'neue Kundinnen und Kunden in {ort} sehen dort Ihr Angebot und fragen ihren Termin direkt am Handy an.',
     caption: 'Ihre Salon-Website ansehen',
   },
   {
     key: 'nails',
     branch: /nagel|nail/i,
-    title: 'Ihr Nagelstudio mit eigener Website',
-    benefit: 'Der Entwurf zeigt Ihr Angebot, Ihren Standort und den Weg zur Terminanfrage – übersichtlich am Handy.',
+    title: 'Ihre Website-Vorschau für Ihr Nagelstudio ist online',
+    benefit: 'wer in {ort} ein Nagelstudio sucht, sieht dort Ihr Angebot und fragt den Termin direkt am Handy an.',
     caption: 'Ihre Studio-Website ansehen',
   },
   {
     key: 'cosmetics',
     branch: /kosmetik|haut/i,
-    title: 'Ihr Kosmetikstudio mit eigener Website',
-    benefit: 'Der Entwurf stellt Ihr Angebot ruhig und übersichtlich vor – mit Adresse und direktem Weg zur Terminanfrage.',
+    title: 'Ihre Website-Vorschau für Ihr Kosmetikstudio ist online',
+    benefit: 'Ihr Angebot steht dort ruhig und übersichtlich – mit Adresse und direktem Weg zur Terminanfrage.',
     caption: 'Ihre Studio-Website ansehen',
   },
   {
     key: 'cafe',
     branch: /café|cafe|kaffee/i,
-    title: 'Ihr Café mit eigener Website',
-    benefit: 'Gäste sehen im Entwurf schon vor dem Besuch, was Sie anbieten und wo sie Sie finden – auch unterwegs am Handy.',
+    title: 'Ihre Website-Vorschau für Ihr Café ist online',
+    benefit: 'Gäste in {ort} sehen dort schon vor dem Besuch, was Sie anbieten und wo sie Sie finden.',
     caption: 'Ihre Café-Website ansehen',
   },
   {
     key: 'restaurant-takeaway',
     branch: /restaurant|bistro|gasthaus|trattoria|pizzeria/i,
     focus: /abhol|außer haus|mitnehm/i,
-    title: 'Ihr Restaurant mit eigener Website',
-    benefit: 'Gäste finden im Entwurf Ihr Angebot und die Anfahrt und können ihren Besuch oder die Abholung vorbereiten.',
+    title: 'Ihre Website-Vorschau für Restaurant und Abholung ist online',
+    benefit: 'Gäste in {ort} finden dort Ihr Angebot und die Anfahrt und können Besuch oder Abholung vorbereiten.',
     caption: 'Ihre Restaurant-Website ansehen',
   },
   {
     key: 'restaurant',
     branch: /restaurant|bistro|gasthaus|trattoria|pizzeria|gastronom/i,
-    title: 'Ihr Restaurant mit eigener Website',
-    benefit:
-      'Gäste sehen im Entwurf vor dem Besuch Ihr Angebot und die Anfahrt – und finden direkt den Weg zur Reservierungsanfrage.',
+    title: 'Ihre Website-Vorschau für Ihr Restaurant ist online',
+    benefit: 'Gäste in {ort} sehen dort vor dem Besuch Ihr Angebot und finden direkt den Weg zur Reservierungsanfrage.',
     caption: 'Ihre Restaurant-Website ansehen',
   },
   {
     key: 'books',
     branch: /buch/i,
-    title: 'Ihre Buchhandlung mit eigener Website',
-    benefit: 'Leserinnen und Leser finden im Entwurf Ihr Angebot, Ihren Laden und den direkten Weg zu Ihnen.',
+    title: 'Ihre Website-Vorschau für Ihre Buchhandlung ist online',
+    benefit: 'Leserinnen und Leser in {ort} finden dort Ihr Angebot, Ihren Laden und den direkten Weg zu Ihnen.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'flowers',
     branch: /blumen|florist/i,
-    title: 'Ihr Blumengeschäft mit eigener Website',
-    benefit: 'Der Entwurf zeigt Ihr Angebot, Ihren Laden und wie man einen Blumenwunsch bei Ihnen anfragt.',
+    title: 'Ihre Website-Vorschau für Ihr Blumengeschäft ist online',
+    benefit: 'wer in {ort} Blumen sucht, sieht dort Ihr Angebot und fragt seinen Wunsch direkt an.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'retail',
     branch: /handel|laden|boutique|mode|geschäft/i,
-    title: 'Ihr Geschäft mit eigener Website',
-    benefit: 'Der Entwurf stellt Ihr Sortiment vor, zeigt den Weg in Ihr Geschäft und beantwortet erste Fragen vor dem Besuch.',
+    title: 'Ihre Website-Vorschau für Ihr Geschäft ist online',
+    benefit: 'Kundschaft in {ort} sieht dort Ihr Sortiment und den Weg in Ihr Geschäft – schon vor dem Besuch.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'music',
     branch: /musik|klavier|instrument/i,
-    title: 'Ihr Musikunterricht mit eigener Website',
-    benefit: 'Interessierte sehen im Entwurf, was sie bei Ihnen lernen können, und finden direkt den Weg zur Anfrage.',
+    title: 'Ihre Website-Vorschau für Ihren Musikunterricht ist online',
+    benefit: 'Interessierte in {ort} sehen dort, was sie bei Ihnen lernen können, und fragen direkt an.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'yoga',
     branch: /yoga|pilates/i,
-    title: 'Ihr Kursangebot mit eigener Website',
-    benefit: 'Der Entwurf stellt Ihre Kurse übersichtlich vor und zeigt Interessierten den direkten Weg zur ersten Anfrage.',
+    title: 'Ihre Website-Vorschau für Ihre Kurse ist online',
+    benefit: 'Interessierte in {ort} sehen dort Ihre Kurse und finden direkt den Weg zur ersten Anfrage.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'dance',
     branch: /tanz|ballett/i,
-    title: 'Ihre Tanzschule mit eigener Website',
-    benefit:
-      'Der Entwurf stellt Ihr Tanzangebot übersichtlich vor und zeigt den direkten Weg zur Frage nach dem passenden Einstieg.',
+    title: 'Ihre Website-Vorschau für Ihre Tanzschule ist online',
+    benefit: 'Interessierte in {ort} sehen dort Ihr Tanzangebot und fragen den passenden Einstieg direkt an.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'training',
     branch: /kurs|training|fitness/i,
-    title: 'Ihr Trainingsangebot mit eigener Website',
-    benefit: 'Der Entwurf zeigt Ihr Angebot auf einen Blick und den direkten Weg zur Anfrage für die Teilnahme.',
+    title: 'Ihre Website-Vorschau für Ihr Training ist online',
+    benefit: 'Interessierte in {ort} sehen dort Ihr Angebot auf einen Blick und fragen die Teilnahme direkt an.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
 ];
@@ -366,9 +359,8 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
   const allDetail = usable.map((f) => f.text).join(' ');
   const profile = PROFILES.find((p) => p.branch.test(context.branchLabel) && (!p.focus || p.focus.test(allDetail))) ?? {
     key: 'general',
-    title: 'Ihr Betrieb mit eigener Website',
-    benefit:
-      'Der Entwurf zeigt Ihr Angebot, Ihren Standort und Ihre Kontaktwege auf einer übersichtlichen Seite – gemacht fürs Handy.',
+    title: 'Ihre Website-Vorschau ist online',
+    benefit: 'Wer in {ort} nach Ihnen sucht, findet dort Ihr Angebot, Ihren Standort und Ihre Nummer zum Antippen.',
     caption: 'Ihre Website-Vorschau ansehen',
   };
   const selected: typeof usable = [];
@@ -385,7 +377,7 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
   const detail = (serviceFacts.length ? serviceFacts : selected).map((f) => f.text).join(' und ');
   const place = context.city.length <= 32 ? ` in ${context.city}` : '';
   const research = website
-    ? 'Bei unserer dokumentierten Suche haben wir keinen eigenen Webauftritt gefunden.'
+    ? 'Bei unserer dokumentierten Suche haben wir keinen eigenen Webauftritt von Ihnen gefunden.'
     : observation
       ? `In Ihrem öffentlichen Eintrag ist uns aufgefallen: ${observation.text}.`
       : undefined;
@@ -395,14 +387,16 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
       : sequence === 2
         ? 'hier finden Sie die Vorschau für Ihren Betrieb noch einmal – zum Ansehen, wann es für Sie passt.'
         : variant === 'B'
-          ? `für Ihren Betrieb${place} habe ich eine eigene Website entworfen.`
-          : 'ich habe für Ihren Betrieb eine eigene Website entworfen.';
+          ? `für Ihren Betrieb${place} habe ich eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.`
+          : 'ich habe für Ihren Betrieb eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.';
   const personal = detail
     ? variant === 'B'
       ? `Gerade bei Themen wie ${detail} ist ein klarer Überblick hilfreich.`
       : `${detail} – diese Angaben zu Ihrem Betrieb stehen im Mittelpunkt dieser Website-Idee.`
     : (research ?? `Der Entwurf greift die Branche ${context.branchLabel} und Ihren Standort auf.`);
   const headline = context.businessName.length < 58 ? `${context.businessName}: ${profile.title}` : profile.title;
+  // Lokaler Bezug im Nutzen-Satz („wer in Dortmund …“); ohne kurzen Ortsnamen neutral
+  const benefit = profile.benefit.replace(' in {ort}', place).replace(/^(Eine|Wer|Neue|Der)\b/, (w) => w.toLowerCase());
   return {
     version: PREVIEW_LETTER_VERSION,
     level: (selected.length || observation || website ? 'verified' : 'basic') as 'verified' | 'basic',
@@ -417,10 +411,10 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
     // Recherchehinweis im selben Absatz wie der Nutzen: ein Gedanke, und der Brief bleibt einseitig
     intro: [
       detail
-        ? `**${detail}** – ${profile.benefit.replace(/^(Eine|Wer|Neue|Der)\b/, (s) => s.toLowerCase())}${research ? ` ${research}` : ''}`
-        : `${personal} ${profile.benefit}`,
+        ? `**${detail}** – ${benefit}${research ? ` ${research}` : ''}`
+        : `${personal} ${benefit.charAt(0).toUpperCase()}${benefit.slice(1)}`,
     ],
-    scan: '**QR-Code scannen und kostenlos ansehen:** Ihre Website ist bereits online, aber nur über Ihren persönlichen Link erreichbar – ohne Anmeldung, ohne Verkaufsgespräch.',
+    scan: '**QR-Code mit der Handykamera scannen und kostenlos ansehen:** Ihre Website ist schon online, aber nur über Ihren persönlichen Link erreichbar. Ein Blick dauert keine Minute.',
     qrCaption: profile.caption,
     next: PREVIEW_ORDER_NOTICE,
     sources: [...selected, ...(website ? [website] : observation ? [observation] : [])].map((f) => ({

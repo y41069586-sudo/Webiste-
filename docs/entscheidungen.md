@@ -376,3 +376,24 @@ Layoutprüfung erlaubt nur diese Zeile im Fensterbereich und meldet sie, wenn si
 Keine Adresskorrektur durch den Anbieter (lieber Ablehnung als veränderter Brief). Datenschutzabschnitt 11 nennt
 easyNova (SIECOM IT-Systemhaus GmbH); AV-Vertrag vor erster Beauftragung. Kein Konto angelegt, kein Aufruf mit
 Zugangsdaten, keine Kosten.
+
+### 27.10.2026 – Brieftext nach Entscheidungspsychologie, Demo mit Ablauf und gebündeltem Kontakt
+
+Betreiber: Brief „wirklich human Psychologie“, Demo „high quality“. Umgesetzt innerhalb der Wahrheitsregeln
+(nur belegte Angaben, keine Zahlen, „kostenlos ansehen“ als einzige Kostenlos-Formulierung, Brief bleibt einseitig):
+
+- Brief: Betreff „{Name}: Ihre Website-Vorschau für {Thema} ist online“ (Eigentum + Neugier), Einstieg „habe für
+  Ihren Betrieb eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten“
+  (Vorleistung), Nutzen aus Kundensicht mit Ort („wer in Dortmund … erreicht Sie mit einem Fingertipp“), eine
+  einzige Handlung mit kleinem Aufwand („Ein Blick dauert keine Minute“), Angstabbau zuerst („Kein
+  Verkaufsgespräch: Ich rufe Sie nicht an.“), P. S. mit echtem Ablaufdatum. Pflichthinweise (nicht beauftragt,
+  kostenpflichtige Umsetzung, Preise und Vertragsbedingungen vor jeder Bestellung) unverändert enthalten.
+- Demo (handwerk-klar, handwerk-solid): Hero mit Telefon-Button und Faktenzeile (Ort, Kontaktweg, Route),
+  Leistungen mit Bild, als Beispiel gekennzeichneter Ablauf „So läuft Ihre Anfrage ab“, ein gebündelter Bereich
+  „Kontakt & Anfahrt“ (Telefon, Adresse/Route, Öffnungszeiten, Einzugsgebiet, Stellenbereich, sichtbare
+  Formular-Vorschau) statt vier dünner Hinweis-Abschnitte. Das an den Ersteller gerichtete Formular „Frage zu
+  diesem Entwurf“ steht jetzt am Seitenende beim Angebot, nicht mehr mitten in der Website des Betriebs.
+  Demo-CTA heißt „So erreichen Sie uns“ (führt weiter zum Kontaktbereich des Betriebs, nicht zu uns).
+- Sieben weitere Pexels-Fotos (Maler 3, Fliesen 2, Reinigung 2), nur ohne erkennbare Gesichter, Lizenz in
+  Manifest, EXIF und `assets/images/handwerk/README.md`. Reinigungsmotive nur für Büro-/Unterhalts-/
+  Gebäudereinigung.

@@ -163,7 +163,7 @@ it.each(['maler', 'reinigung', 'fliesenleger'])(
     });
     await publishDemo(id, 'test');
     const generated = await generateLetter(lead.id, 1, { actor: 'test' });
-    expect(generated.status).toBe('generated');
+    expect(generated.status, JSON.stringify([generated.issues, generated.truthCheck?.violations])).toBe('generated');
     expect(generated.issues).toEqual([]);
     const letter = (await getDb().query.letters.findFirst({ where: eq(letters.id, generated.letterId) }))!;
     expect(letter.truthCheckJson?._copy).toMatchObject({
