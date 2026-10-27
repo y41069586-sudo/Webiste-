@@ -346,3 +346,14 @@ Getrennte Beobachtungen und hinreichende Belege im vorhandenen Modell-/Cachepfad
 Unbekannte Originalfarben, Schriften oder Bildrechte nicht erfinden. Branche und Beispielfoto
 sind keine tatsächliche visuelle Identität. Bestehende manuelle Freigaben bleiben.
 Aktualisierung und VPS-/API-/ChatGPT-Abrechnung: docs/vibe-upgrade/automation-and-billing.md.
+
+## Claude-Übernahme 27.10.2026 (technische Entscheidungen, keine Betreiberfreigaben)
+
+- Statischer Firmenexport bricht bei Platzhalter-Anbieterdaten, Legacy-Preisen 590/49, `TODO`-Vermerken oder
+  fehlender 597-€-Einrichtung ab (`apps/web/scripts/export-guard.mjs`). Keine Umgehungsoption.
+- Website-Vorprüfung (`leads/website-probe.ts`) standardmäßig aus, weil sie Drittseiten abruft. Fund nur bei
+  Telefon oder PLZ+Straße; Fund schließt aus, Nicht-Fund beweist nichts.
+- Funnel-Sichten: Backend-Rolle erhält SELECT und eine `SECURITY DEFINER`-Auffrischfunktion im nicht
+  veröffentlichten Schema `seitenwerk_ops` (Migration 0019) statt Eigentümerwechsel (auf Supabase ohne
+  passende Rollenmitgliedschaft nicht zuverlässig möglich).
+- VPS-Vorschlag netcup VPS 500 G12.5 (4 GB) wegen gemessener Rendering-Spitze 623 MiB; nicht bestellt.

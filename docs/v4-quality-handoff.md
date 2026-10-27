@@ -1,5 +1,55 @@
 # SeitenWerk V4/V5 – verbindlicher Handoff
 
+## 27.10.2026 – Claude-Übernahme auf `codex/conversion-v4` (lokaler Branch `claude/v4-restarbeiten`)
+
+Ausgangspunkt `96498d3` (= Remote-HEAD bei Übernahme, keine neueren Arbeiten). Früherer Claude-Branch vollständig
+enthalten. Lokale Commits, **kein Push, kein Deploy**, DRY_RUN=true, nur lokale Wegwerf-DBs (`wbm_test`,
+`wbm_export_test`, `wbm_rehearsal_test`). Externe Anbieter ausschließlich lesend abgefragt.
+
+**Externer Stand rein lesend (27.10.2026):**
+
+- Supabase `nfecpmamgrcgnnyulioy`: 11 Migrationen, Hashes 0000–0010 identisch mit lokal; 0011–0018 fehlen
+  (lokal jetzt zusätzlich 0019). Kein `pgboss`. 0 Leads/Demos/Briefe/Bestellungen. RLS auf allen 32 Tabellen,
+  anon/authenticated ohne Lesezugriff, Rolle `seitenwerk_admin_backend` mit Richtlinie `admin_backend_access`.
+  Privater Bucket `seitenwerk-private` mit 1 Objekt. Standardrechte für neue Tabellen nur postgres/service_role.
+- Stripe-Sandbox: genau drei aktive V4-Preise (597 € einmalig, 19 €/Monat, 99 €/Monat) wie in
+  `stripe-v4-sandbox.json`. Webhook `seitenwerkworld.netlify.app/api/webhooks/stripe` aktiv, statischer
+  `seitenwerk.world`-Endpunkt deaktiviert – Routing korrekt. Keine Signatur-/Kaufkette geprüft.
+- Resend: Domain `seitenwerk.world` verifiziert, Senden und Empfangen aktiv, Tracking aus.
+- Netlify: `seitenwerk.world` (statisch) läuft noch mit dem Export vom 24.10.: **öffentlich 590 €/49 €,
+  example.com-Kontakt, „Vorname Nachname“, Musterstraße** (noindex). `seitenwerkworld.netlify.app` (App)
+  zeigt ebenfalls 590/49 auf Start-, Preis- und Ablaufseite. Beide brauchen ein freigegebenes Deployment.
+
+**Behoben bzw. ergänzt (lokale Commits):**
+
+- `3b3fb61` Exportsperre `apps/web/scripts/export-guard.mjs`: Export bricht ab bei Platzhalter-Anbieterdaten,
+  Legacy-Preisen 590/49, internen `TODO`-Vermerken oder fehlender 597-€-Einrichtung auf `/preise`.
+  Gegenprobe: der öffentliche Altstand liefert 19 Befunde. Gefundener echter Fehler: `/so-funktionierts`
+  zeigte „597 € einmalig oder 49 €/Monat“ – jetzt V4-Zweig (597 € + 19 € Basis / 99 € Care+ ab Go-Live).
+  Opt-in Website-Vorprüfung `leads/website-probe.ts` (Schalter `targeting.acquisition.websiteProbe`,
+  Standard aus, nie für Mock-Quellen, höchstens 4 Abrufe je Betrieb, Lauf-Obergrenze, keine Wiederholung).
+  Fund nur bei Telefon oder PLZ+Straße auf der Seite → Ausschluss über bestehende Qualifizierung. Kein Fund
+  beweist nichts; die vier manuellen WEBSITE_METHODS bleiben Pflicht. 7 neue Tests, ohne Netz.
+- `e7439a5` Migration **0019** nach Generalprobe: Backend-Rolle durfte die Funnel-Sichten nie auffrischen
+  (nur Eigentümer) und verliert nach 0018 sogar SELECT – Funnel und Sicherheitsnetze wären in Produktion
+  gebrochen. 0019: SELECT-Recht plus `SECURITY DEFINER`-Funktion `seitenwerk_ops.refresh_funnel_views()`
+  in nicht veröffentlichtem Schema; anon/authenticated ohne Zugriff; ohne Rolle wirkungslos.
+  `scripts/rehearse-production-upgrade.ts` wiederholt die ganze Probe (Produktionsstand → 0011–0019 →
+  Backend-Lesen/Auffrischen über App-Code → Browserrollen gesperrt → pg-boss-SQL, Queue-Anlage,
+  `queue-permissions.sql` → Job-Zyklus, Zeitplan, Wartung als Backend-Rolle): `ok: true`.
+  Grenze: lokales PostgreSQL 16 statt 17, keine Supabase-Pooler/-Erweiterungen; ersetzt kein Backup/Restore.
+
+**Statischer Export aktuell gesperrt** (richtig so): Impressum, Datenschutz und AGB aus der privaten
+Supabase-Konfiguration enthalten sichtbare `TODO`-Vermerke (USt-/W-IdNr., Steuerstatus,
+Vertragsannahmezeitpunkt, AV-Vertrag LLM-Anbieter, Kundenhosting). Erst nach Betreiberentscheidung exportierbar.
+Der Standard-Turbopack-Build lief in dieser Umgebung durch.
+
+**Vollständiges Chromium-Worker-Image** (vorher am vfs-Speicherlimit gescheitert): hier mit overlayfs gebaut
+(2,1 GB) und gehärtet gestartet (read-only, cap_drop ALL, 2 GB-Limit) gegen die Generalprobe-DB als
+Backend-Rolle, alle Anbieter Mock: Health ok, Queue-Job `refresh-funnel` erledigt, Chromium-PDF/-Screenshots,
+RAM-Spitze 623 MiB, SIGTERM sauber, Neustart gesund, Logs ohne Secrets. VPS-Vorschlag mit Messwerten:
+[vps-vorschlag-2026-10-27.md](vps-vorschlag-2026-10-27.md) (netcup VPS 500 G12.5, 9,50 €/Monat, nicht bestellt).
+
 ##27.10.2026 – alle neun Qualitätsbereiche lokal bearbeitet
 
 Sicherer Implementierungscommit ef694ae; vorherige Anbieterdarstellung7a2c6c0 separat erhalten.
