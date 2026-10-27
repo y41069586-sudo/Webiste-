@@ -1,0 +1,170 @@
+{
+  "images": [
+    {
+      "src": "https://seitenwerk.world/beispiele/gastronomie-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "eager",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/handwerk-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "eager",
+      "width": 960,
+      "rect": {
+        "w": 212.15623474121094,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/beauty-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "eager",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/einzelhandel-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "eager",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/kurse-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "eager",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/gastronomie-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "eager",
+      "width": 960,
+      "rect": {
+        "w": 212.15626525878906,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/handwerk-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "lazy",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/beauty-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "lazy",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/einzelhandel-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "lazy",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/kurse-karte.webp",
+      "alt": "",
+      "loaded": false,
+      "loading": "lazy",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/gastronomie-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "lazy",
+      "width": 960,
+      "rect": {
+        "w": 212.15618896484375,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/handwerk-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "lazy",
+      "width": 960,
+      "rect": {
+        "w": 212.15618896484375,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/beauty-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "lazy",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/einzelhandel-karte.webp",
+      "alt": "",
+      "loaded": true,
+      "loading": "lazy",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    },
+    {
+      "src": "https://seitenwerk.world/beispiele/kurse-karte.webp",
+      "alt": "",
+      "loaded": false,
+      "loading": "lazy",
+      "width": 960,
+      "rect": {
+        "w": 212.15625,
+        "h": 132.59375
+      }
+    }
+  ],
+  "failures": []
+}

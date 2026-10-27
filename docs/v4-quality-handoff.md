@@ -1,5 +1,16 @@
 # SeitenWerk V4/V5 – verbindlicher Handoff
 
+Aktuellster Gesamt-Audit **27.10.2026**: [Projekt-/Betriebs-/Conversionbericht](project-audit-2026-10-27/README.md).
+Nur Analyse und lesende Providerprüfung, keine Anwendungs- oder Produktionsänderung. Lokal a820158,
+17 Commits vor dem abgefragten GitHub-Entwicklungsbranch. Live-App weiterhin fbff0cc; statische
+Firmenwebsite vom 24.10. zeigt 590/49 und Musterdaten. Aktiver Stripe-Sandbox-Webhook zeigt auf
+statische 404-Route; dynamischer App-Endpunkt deaktiviert. Supabase hat 11 von 19 Migrationen,
+kein pgboss; offen sind jetzt **0011–0018**, nicht nur 0017. Keine Leads, Briefe oder Bestellungen.
+92 relevante Core-Tests, 109 Template-Tests, TypeScript/Lint frisch bestanden; keine neue vollständige
+E2E-/Build-/Dockerabnahme. Bestehende Schlüssel teilweise bereits in Netlify hinterlegt, Provider
+weiterhin Mock; nicht pauschal neue Schlüssel anfordern. Vollautomatische Quellen-/Bildreferenzbeschaffung
+und echte LLM-Qualität offen. DRY_RUN=true, kein Push/Deploy/Kontakt/Anbieterauftrag. Details im Audit.
+
 Neueste lokale Fortsetzung26.10.2026: Zielkampagne Maler→Reinigung→Fliesen, belegter Akquisebedarf,
 Website-/Aktivitäts-/Gründungsprüfung und Faktenübergabe. Wiederaufnahme:
 [Akquise-Handoff](acquisition-priorities/status.md), [Nachweis](acquisition-priorities/README.md).

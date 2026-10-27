@@ -1,0 +1,82 @@
+[
+  {
+    "label": "marketing",
+    "url": "https://seitenwerk.world/",
+    "status": 200,
+    "width": 390,
+    "scrollWidth": 390,
+    "height": 5534,
+    "h1": "Ihre Website ist schon fertig.",
+    "links": [
+      {
+        "text": "So funktioniert’s",
+        "href": "/so-funktionierts"
+      },
+      {
+        "text": "Preise",
+        "href": "/preise"
+      },
+      {
+        "text": "Der Ablauf im Detail",
+        "href": "/so-funktionierts"
+      },
+      {
+        "text": "Alle Details zu den Preisen",
+        "href": "/preise"
+      },
+      {
+        "text": "Kontakt aufnehmen",
+        "href": "/kontakt"
+      },
+      {
+        "text": "Wer steckt dahinter?",
+        "href": "/ueber-mich"
+      }
+    ],
+    "runtimeErrors": []
+  },
+  {
+    "label": "preise",
+    "url": "https://seitenwerk.world/preise/",
+    "status": 200,
+    "width": 390,
+    "scrollWidth": 390,
+    "height": 3674,
+    "h1": "Offene Preise. Zwei Wege, beide gleich viel wert.",
+    "links": [
+      {
+        "text": "So kommen Sie zu Ihrer Website",
+        "href": "/so-funktionierts"
+      },
+      {
+        "text": "14 Tagen Zufriedenheitsgarantie",
+        "href": "/garantie"
+      },
+      {
+        "text": "Beispiele ansehen",
+        "href": "/beispiele"
+      },
+      {
+        "text": "Frage stellen",
+        "href": "/kontakt"
+      }
+    ],
+    "runtimeErrors": []
+  },
+  {
+    "label": "kontakt",
+    "url": "https://seitenwerk.world/kontakt/",
+    "status": 200,
+    "width": 390,
+    "scrollWidth": 390,
+    "height": 1788,
+    "h1": "Schreiben Sie mir.",
+    "links": [
+      {
+        "text": "hallo@example.com",
+        "href": "mailto:hallo@example.com"
+      }
+    ],
+    "runtimeErrors": []
+  }
+]

@@ -1,0 +1,321 @@
+{
+  "checkedAt": "2026-10-27T06:58:22Z",
+  "scope": "Current repository and read-only connected-service audit; no external writes or paid model calls",
+  "git": {
+    "localBranch": "codex/conversion-v4",
+    "localHead": "a820158b06fee63cbb940b5d0b1889e16d944e14",
+    "initialWorkingTreeClean": true,
+    "remoteDevelopmentHead": "c7f3f2b5c6c8148a3e6b1acc41e59c16472cbae3",
+    "localCommitsAheadOfRemote": 17,
+    "remoteOriginalBranchHead": "fbff0cc69d0b8e7a786333730893f89123c91f32",
+    "repositoryVisibility": "public"
+  },
+  "netlify": {
+    "app": {
+      "url": "https://seitenwerkworld.netlify.app",
+      "publishedCommit": "fbff0cc69d0b8e7a786333730893f89123c91f32",
+      "publishedAt": "2026-10-25T06:17:36.543Z",
+      "state": "ready"
+    },
+    "marketing": {
+      "url": "https://seitenwerk.world",
+      "publishedAt": "2026-10-24T14:58:48.604Z",
+      "state": "ready",
+      "locked": true,
+      "functions": 0
+    },
+    "configuredProviders": {
+      "EMAIL_PROVIDER": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "mock"
+        }
+      ],
+      "MAIL_PROVIDER": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "mock"
+        }
+      ],
+      "RUN_MIGRATIONS": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "false"
+        }
+      ],
+      "APP_URL": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "https://seitenwerkworld.netlify.app"
+        }
+      ],
+      "DRY_RUN": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "true"
+        }
+      ],
+      "LLM_PROVIDER": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "mock"
+        }
+      ],
+      "HOSTING_PROVIDER": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "mock"
+        }
+      ],
+      "PAYMENT_PROVIDER": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "mock"
+        }
+      ],
+      "REGISTRAR_PROVIDER": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "mock"
+        }
+      ],
+      "LEAD_SOURCE": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "mock"
+        }
+      ],
+      "STORAGE_DRIVER": [
+        {
+          "context": "all",
+          "hasValue": true,
+          "value": "s3"
+        }
+      ]
+    },
+    "missingEnvNames": [
+      "DEMO_DOMAIN",
+      "TRACK_DOMAIN",
+      "ANTHROPIC_API_KEY",
+      "LXP_USERNAME",
+      "LXP_APIKEY",
+      "REGISTRAR_USER",
+      "REGISTRAR_PASSWORD",
+      "NETLIFY_API_TOKEN"
+    ],
+    "secretPresenceDoesNotVerifyAuthentication": true,
+    "unmarkedSensitiveEnvNames": [
+      {
+        "key": "ENCRYPTION_KEY",
+        "markedSecret": false
+      },
+      {
+        "key": "SESSION_SECRET",
+        "markedSecret": false
+      },
+      {
+        "key": "DATABASE_URL",
+        "markedSecret": false
+      }
+    ]
+  },
+  "supabase": {
+    "status": "ACTIVE_HEALTHY",
+    "postgresMajor": 17,
+    "publicTables": 32,
+    "appliedMigrations": 11,
+    "repositoryMigrations": 19,
+    "pendingMigrationTags": [
+      "0011_conversion_v4",
+      "0012_lead_priority_v4",
+      "0013_v4_operations",
+      "0014_billing_action",
+      "0015_v4_backend_rls",
+      "0016_refund_confirmation",
+      "0017_refund_documents",
+      "0018_measurement_truth"
+    ],
+    "pgbossSchema": false,
+    "orderPaymentModeColumn": false,
+    "counts": {
+      "leads": 0,
+      "demos": 0,
+      "letters": 0,
+      "orders": 0,
+      "customers": 0
+    },
+    "storageBucketPrivate": true,
+    "backupStatusRecord": false,
+    "tablesWithoutRls": 0,
+    "publiclyGrantedTablesOrViews": 0,
+    "config": {
+      "dryRun": true,
+      "autoSend": false,
+      "autoReply": false,
+      "autoOptimize": false,
+      "realLettersUnlocked": false,
+      "autoRegisterDomains": false,
+      "approvedImpressum": false,
+      "approvedPrivacy": false,
+      "approvedTerms": false,
+      "taxConfirmed": null,
+      "bankIbanPresent": false,
+      "legacyMonthlyCents": 4900,
+      "legacySetupCents": 59000,
+      "weeklyBudgetCents": 6000,
+      "weeklyLlmBudgetCents": 3000,
+      "weeklyPlacesBudgetCents": 2000
+    }
+  },
+  "stripe": {
+    "accountScope": "Website sandbox",
+    "livemode": false,
+    "activeEurPrices": [
+      {
+        "amount": 59700,
+        "type": "one_time"
+      },
+      {
+        "amount": 1900,
+        "type": "recurring",
+        "interval": "month"
+      },
+      {
+        "amount": 9900,
+        "type": "recurring",
+        "interval": "month"
+      }
+    ],
+    "webhooks": [
+      {
+        "url": "https://seitenwerk.world/api/webhooks/stripe",
+        "status": "enabled",
+        "targetStatic": true,
+        "httpGetStatus": 404
+      },
+      {
+        "url": "https://seitenwerkworld.netlify.app/api/webhooks/stripe",
+        "status": "disabled",
+        "targetStatic": false
+      }
+    ],
+    "fullHostedCheckoutAndApplicationWebhookChainVerified": false
+  },
+  "resend": {
+    "domain": "seitenwerk.world",
+    "domainVerified": true,
+    "sendingEnabled": true,
+    "receivingEnabled": true,
+    "openTracking": false,
+    "clickTracking": false,
+    "webhookEnabled": true,
+    "webhookUrl": "https://seitenwerkworld.netlify.app/api/webhooks/resend",
+    "applicationEmailProvider": "mock",
+    "fullOwnMessageFlowVerified": false
+  },
+  "automation": {
+    "externalResearchAndVisualReferenceCollectionComplete": false,
+    "existingLlmProvider": "anthropic",
+    "openAiOrCodexAdapterImplemented": false,
+    "realModelQualityVerified": false,
+    "manualFirst30ReviewRequired": true
+  },
+  "photos": {
+    "queryScope": "actual stockPhotos('handwerk',0,branch) with existing default filters",
+    "available": {
+      "Malerbetrieb": 1,
+      "Gebaeudereinigung": 0,
+      "Fliesenleger": 0,
+      "GartenUndLandschaftsbau": 0,
+      "Elektriker": 0,
+      "Sanitaerbetrieb": 0
+    },
+    "authorizedBusinessUploadsSeparate": true,
+    "generatedPhotosExcluded": true
+  },
+  "currentChecks": {
+    "typecheck": {
+      "exit": 0,
+      "log": "typecheck.txt"
+    },
+    "lint": {
+      "exit": 0,
+      "log": "lint.txt"
+    },
+    "core": {
+      "passed": 92,
+      "suites": 12,
+      "log": "core.txt",
+      "database": "wbm_audit_20261027_test",
+      "databaseLocation": "127.0.0.1:15432",
+      "allSevenProvidersMock": true,
+      "dryRun": true
+    },
+    "templates": {
+      "passed": 109,
+      "suites": 3,
+      "log": "templates.txt"
+    },
+    "liveBrowser": {
+      "width": 390,
+      "routes": [
+        "/",
+        "/preise/",
+        "/kontakt/"
+      ],
+      "overflow": false,
+      "pageErrors": [],
+      "marketingHeightAfterScroll": 5578,
+      "pricePageHeight": 3674,
+      "networkImageErrorsConfirmed": 0,
+      "lazyOffscreenElementsNotClassifiedAsBroken": true
+    },
+    "notRerun": [
+      "full 65-file core suite",
+      "complete current browser E2E suite",
+      "new production build",
+      "worker Docker rebuild",
+      "new 20-pair render",
+      "real external provider E2E",
+      "physical print/camera scan",
+      "real user testing",
+      "production Core Web Vitals"
+    ]
+  },
+  "publicFindings": [
+    "Legacy 590/49 prices still publicly visible",
+    "Placeholder contacts in public contact/footer",
+    "Impressum and AGB still placeholders",
+    "Unqualified ready-website promise in current hero",
+    "Enabled Stripe webhook points to static 404 route"
+  ],
+  "safety": {
+    "dryRunKept": true,
+    "productionWrites": false,
+    "migrations": false,
+    "deployments": false,
+    "push": false,
+    "outreach": false,
+    "payments": false,
+    "refunds": false,
+    "domainPurchases": false,
+    "secretValuesStored": false
+  },
+  "limitations": [
+    "A configured secret does not verify credential validity, permissions, webhook-secret matching or runtime propagation",
+    "A ready deploy is not business-readiness proof",
+    "Local and older visual evidence is not automatically current real-model/design approval",
+    "No conversion rate can be measured from zero sent letters and orders",
+    "Production health endpoint deliberately not requested: its implementation writes a storage health object"
+  ]
+}

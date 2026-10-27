@@ -1,0 +1,173 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "url": "https://seitenwerk.world/",
+    "h1": [
+      "Ihre Website ist schon fertig."
+    ],
+    "textChars": 3172,
+    "htmlBytes": 72022,
+    "noindex": true,
+    "findings": {
+      "hallo@example.com": [
+        "es Impressum Datenschutz AGB Quellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser W"
+      ],
+      "Musterstraße": [
+        "uellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser Website sind erfunden."
+      ],
+      "590 €": [
+        "e Verkaufsgespräch. So funktioniert’s Preise 590 € einmalig oder 49 €/Monat (12 Monate Mindestlaufzeit) · 14 Tage Garantie Bewegung anhalten Drei Schr",
+        "cheiden, was besser zu Ihnen passt. Einmalig 590 € Website, eigene Domain und 12 Monate Hosting inklusive Danach optional 19 € /Monat für Hosting & Pf"
+      ],
+      "49 €": [
+        "So funktioniert’s Preise 590 € einmalig oder 49 €/Monat (12 Monate Mindestlaufzeit) · 14 Tage Garantie Bewegung anhalten Drei Schritte. Kein Termin. ",
+        "osting & Pflege, monatlich kündbar Monatlich 49 € /Monat 12 Monate Mindestlaufzeit Ab Monat 13 nur noch 19 € /Monat, dann monatlich kündbar Endpreise"
+      ]
+    }
+  },
+  {
+    "path": "/preise/",
+    "status": 200,
+    "url": "https://seitenwerk.world/preise/",
+    "h1": [
+      "Offene Preise. Zwei Wege, beide gleich viel wert."
+    ],
+    "textChars": 1821,
+    "htmlBytes": 34016,
+    "noindex": true,
+    "findings": {
+      "hallo@example.com": [
+        "es Impressum Datenschutz AGB Quellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser W"
+      ],
+      "Musterstraße": [
+        "uellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser Website sind erfunden."
+      ],
+      "590 €": [
+        "orausgewählt wird beim Kauf nichts. Einmalig 590 € einmalig Website, Domain und 12 Monate Hosting – einmal bezahlt. Fertige Website mit Ihren Angaben ",
+        " der Zahlweisen Einmalig Monatlich Beim Kauf 590 € 49 € (erste Rate) Monat 2 bis 12 0 € (Hosting inklusive) 49 € /Monat Ab Monat 13 optional 19 € /Mon"
+      ],
+      "49 €": [
+        "ahlweisen Einmalig Monatlich Beim Kauf 590 € 49 € (erste Rate) Monat 2 bis 12 0 € (Hosting inklusive) 49 € /Monat Ab Monat 13 optional 19 € /Monat, m",
+        "Rate) Monat 2 bis 12 0 € (Hosting inklusive) 49 € /Monat Ab Monat 13 optional 19 € /Monat, monatlich kündbar 19 € /Monat, monatlich kündbar Laufzeit "
+      ]
+    }
+  },
+  {
+    "path": "/kontakt/",
+    "status": 200,
+    "url": "https://seitenwerk.world/kontakt/",
+    "h1": [
+      "Schreiben Sie mir."
+    ],
+    "textChars": 918,
+    "htmlBytes": 24556,
+    "noindex": true,
+    "findings": {
+      "hallo@example.com": [
+        "en Preisen – ich antworte persönlich. Direkt hallo@example.com 0231 000000 Keine Post mehr? Scannen Sie den Code in Ihrem Brief und tippen Sie auf „Kein Interesse",
+        "Kein Interesse“ – oder schreiben Sie kurz an hallo@example.com . Ihre Daten werden dann gelöscht. Seitenwerk Fertige Websites für lokale Betriebe ohne eigene Webs"
+      ],
+      "Musterstraße": [
+        "uellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser Website sind erfunden."
+      ]
+    }
+  },
+  {
+    "path": "/impressum/",
+    "status": 200,
+    "url": "https://seitenwerk.world/impressum/",
+    "h1": [
+      "Impressum"
+    ],
+    "textChars": 816,
+    "htmlBytes": 21755,
+    "noindex": true,
+    "findings": {
+      "hallo@example.com": [
+        " Nachname · Musterstraße 1, 44135 Dortmund · hallo@example.com · 0231 000000. Der vollständige Impressumstext wird vom Betreiber in den Einstellungen hinterlegt. ",
+        "es Impressum Datenschutz AGB Quellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser W"
+      ],
+      "Musterstraße": [
+        "ite-Brief (Platzhalter) · Vorname Nachname · Musterstraße 1, 44135 Dortmund · hallo@example.com · 0231 000000. Der vollständige Impressumstext wird vom Betre",
+        "uellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser Website sind erfunden."
+      ],
+      "Platzhalter": [
+        "takt Preise ansehen Impressum Website-Brief (Platzhalter) · Vorname Nachname · Musterstraße 1, 44135 Dortmund · hallo@example.com · 0231 000000. Der vollstä"
+      ]
+    }
+  },
+  {
+    "path": "/agb/",
+    "status": 200,
+    "url": "https://seitenwerk.world/agb/",
+    "h1": [
+      "Allgemeine Geschäftsbedingungen"
+    ],
+    "textChars": 709,
+    "htmlBytes": 21519,
+    "noindex": true,
+    "findings": {
+      "hallo@example.com": [
+        "es Impressum Datenschutz AGB Quellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser W"
+      ],
+      "Musterstraße": [
+        "uellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser Website sind erfunden."
+      ],
+      "Platzhalter": [
+        "m Betreiber in den Einstellungen hinterlegt (Platzhalter). Seitenwerk Fertige Websites für lokale Betriebe ohne eigene Website – mit eigener Domain und Host"
+      ]
+    }
+  },
+  {
+    "path": "/datenschutz/",
+    "status": 200,
+    "url": "https://seitenwerk.world/datenschutz/",
+    "h1": [
+      "Datenschutzerklärung"
+    ],
+    "textChars": 809,
+    "htmlBytes": 21743,
+    "noindex": true,
+    "findings": {
+      "hallo@example.com": [
+        "ür Auskunft, Widerspruch oder Löschung unter hallo@example.com. Seitenwerk Fertige Websites für lokale Betriebe ohne eigene Website – mit eigener Domain und Hosti",
+        "es Impressum Datenschutz AGB Quellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser W"
+      ],
+      "Musterstraße": [
+        "uellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser Website sind erfunden."
+      ]
+    }
+  },
+  {
+    "path": "/beispiele/",
+    "status": 200,
+    "url": "https://seitenwerk.world/beispiele/",
+    "h1": [
+      "So sieht ein Entwurf aus."
+    ],
+    "textChars": 1496,
+    "htmlBytes": 34993,
+    "noindex": true,
+    "findings": {
+      "hallo@example.com": [
+        "es Impressum Datenschutz AGB Quellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser W"
+      ],
+      "Musterstraße": [
+        "uellen Kontakt hallo@example.com 0231 000000 Musterstraße 1 , 44135 Dortmund © 2026 Seitenwerk . Alle Beispiel-Betriebe auf dieser Website sind erfunden."
+      ]
+    }
+  },
+  {
+    "path": "/api/webhooks/stripe",
+    "status": 404,
+    "url": "https://seitenwerk.world/api/webhooks/stripe",
+    "h1": [
+      "Seite nicht gefunden"
+    ],
+    "textChars": 102,
+    "htmlBytes": 948,
+    "noindex": true,
+    "findings": {}
+  }
+]

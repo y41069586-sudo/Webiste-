@@ -1,0 +1,184 @@
+[
+  {
+    "label": "marketing",
+    "height": 5578,
+    "overflow": false,
+    "revealElements": [
+      {
+        "tag": "H2",
+        "text": "Drei Schritte. Kein Termin.",
+        "opacity": "1"
+      },
+      {
+        "tag": "P",
+        "text": "Sie müssen nichts vorbereiten. Den Entwurf gibt es schon, bevor wir uns kennen.",
+        "opacity": "1"
+      },
+      {
+        "tag": "LI",
+        "text": "Schritt 1BriefSie bekommen Post mit einem QR-Code zu Ihrem fertigen Website-Entwurf.",
+        "opacity": "1"
+      },
+      {
+        "tag": "LI",
+        "text": "Schritt 2EntwurfSie sehen sich den Entwurf auf dem Handy an – in Ruhe, ohne Anmeldung.",
+        "opacity": "1"
+      },
+      {
+        "tag": "LI",
+        "text": "Schritt 3OnlineGefällt er Ihnen, ergänzen Sie Ihre Angaben, und er geht auf Ihrer Domain live.",
+        "opacity": "1"
+      },
+      {
+        "tag": "P",
+        "text": "Der Ablauf im Detail",
+        "opacity": "1"
+      },
+      {
+        "tag": "H2",
+        "text": "Alles drin, was eine Website braucht.",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "text": "Gebaut für das Handy, schnell geladen und mit Ihren echten Angaben. Texte und Leistungen passen wir ",
+        "opacity": "1"
+      },
+      {
+        "tag": "UL",
+        "text": "Eigene Domain inklusiveHosting und SSL inklusiveFür Handy, Tablet und ComputerAnfrageformular an Ihr",
+        "opacity": "1"
+      },
+      {
+        "tag": "H2",
+        "text": "Offene Preise.",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "text": "Zwei Wege, beide gleich viel wert. Sie entscheiden, was besser zu Ihnen passt.",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "text": "Einmalig590 €Website, eigene Domain und 12 Monate Hosting inklusiveDanach optional 19 €/Monat für Ho",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "text": "Monatlich49 €/Monat12 Monate MindestlaufzeitAb Monat 13 nur noch 19 €/Monat, dann monatlich kündbar",
+        "opacity": "1"
+      },
+      {
+        "tag": "P",
+        "text": "Endpreise, keine Einrichtungsgebühr. Alle Details zu den Preisen",
+        "opacity": "1"
+      },
+      {
+        "tag": "H2",
+        "text": "Fragen? Schreiben Sie mir direkt.",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "text": "Persönlich, ohne Callcenter. Und mit 14 Tagen Zufriedenheitsgarantie nach dem Start.Kontakt aufnehme",
+        "opacity": "1"
+      }
+    ],
+    "images": [
+      {
+        "loaded": true,
+        "alt": ""
+      },
+      {
+        "loaded": true,
+        "alt": ""
+      },
+      {
+        "loaded": true,
+        "alt": ""
+      },
+      {
+        "loaded": true,
+        "alt": ""
+      },
+      {
+        "loaded": true,
+        "alt": ""
+      },
+      {
+        "loaded": true,
+        "alt": ""
+      },
+      {
+        "loaded": true,
+        "alt": ""
+      },
+      {
+        "loaded": true,
+        "alt": ""
+      },
+      {
+        "loaded": true,
+        "alt": ""
+      },
+      {
+        "loaded": false,
+        "alt": ""
+      },
+      {
+        "loaded": false,
+        "alt": ""
+      },
+      {
+        "loaded": false,
+        "alt": ""
+      },
+      {
+        "loaded": false,
+        "alt": ""
+      },
+      {
+        "loaded": false,
+        "alt": ""
+      },
+      {
+        "loaded": false,
+        "alt": ""
+      }
+    ]
+  },
+  {
+    "label": "preise",
+    "height": 3674,
+    "overflow": false,
+    "revealElements": [
+      {
+        "tag": "H2",
+        "text": "Beide Wege im Vergleich",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "text": "Vergleich der ZahlweisenEinmaligMonatlichBeim Kauf590 €49 € (erste Rate)Monat 2 bis 120 € (Hosting i",
+        "opacity": "1"
+      },
+      {
+        "tag": "P",
+        "text": "Endpreise. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Das Angebot richtet sich an Unternehme",
+        "opacity": "1"
+      },
+      {
+        "tag": "H2",
+        "text": "Erst ansehen, dann entscheiden.",
+        "opacity": "1"
+      },
+      {
+        "tag": "DIV",
+        "text": "Ihr Entwurf ist fertig, bevor Sie etwas bezahlen.Beispiele ansehenFrage stellen",
+        "opacity": "1"
+      }
+    ],
+    "images": []
+  }
+]

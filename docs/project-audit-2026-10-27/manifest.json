@@ -1,0 +1,54 @@
+{
+  "README.md": {
+    "bytes": 17863,
+    "sha256": "a8c0d1b83d14573027f8bb7c8b3c5ca30f5ae9555d2af4d9226fb1f9f6f27a66"
+  },
+  "core.txt": {
+    "bytes": 2749,
+    "sha256": "df98ea42ee6fa099c0df31dea12688b8d9f9ff7c8ba91aaee439ad12a2396fd0"
+  },
+  "evidence.json": {
+    "bytes": 8357,
+    "sha256": "d558750f3fb82b6c4e3a8d85844c9463c0fa74bb7a6c86a021cf0e52c464f4b2"
+  },
+  "lint.txt": {
+    "bytes": 74,
+    "sha256": "e076ffdd37880d079458dfcffc5a0c34977f4f4144b6e9b6cdd10a4300e4bd06"
+  },
+  "live-browser.json": {
+    "bytes": 1722,
+    "sha256": "8cf1931fc5255d7dce7cb44b291c32d57871ed502137ca7cdbf0245d06743dd1"
+  },
+  "live-image-diagnostics.json": {
+    "bytes": 3673,
+    "sha256": "d6a1684141154d64cbfd01aae93b37cfdd79eaf2af308ecc29c92280ca0b7f95"
+  },
+  "live-marketing-hero-390.png": {
+    "bytes": 98094,
+    "sha256": "091c57e76ce19fcdcf8021193ab58240bc65c243177674652a2d1392da1638e1"
+  },
+  "live-marketing-scrolled-390.png": {
+    "bytes": 364900,
+    "sha256": "000fca36dbc5c7a461d3ee91f0595d5ac730608e3d111818b8d4a945480504b0"
+  },
+  "live-preise-scrolled-390.png": {
+    "bytes": 239531,
+    "sha256": "1f0a1db6c33179dec16907f1404344ba45c46938d42fc8d23383bbcbcc86f8f1"
+  },
+  "live-scroll-check.json": {
+    "bytes": 4330,
+    "sha256": "d4bca04affdb856c4ecf28974863de50a0883fb84f78982fce7cd15cf93c464c"
+  },
+  "public-snapshot.json": {
+    "bytes": 7440,
+    "sha256": "3d52c4dee1eb0b334b08c29e0a227e92d596330eeb2ac03a6b2467ea7c0ca1c7"
+  },
+  "templates.txt": {
+    "bytes": 473,
+    "sha256": "8627a820fdd2ca0999fe52c1a14a2cb7b63002e86544fb7a733c2fa991f05397"
+  },
+  "typecheck.txt": {
+    "bytes": 397,
+    "sha256": "476036d81a4830007a6fe80fb8a88ae3e1a4254a597edcf6b3edebadfe5044e6"
+  }
+}
