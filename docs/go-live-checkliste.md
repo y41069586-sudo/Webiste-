@@ -46,14 +46,15 @@ Stand 23.10.2026, eingerichtet über die Stripe-Anbindung (nur Sandbox „Websit
       Hintergrund Weiß – die Bezahlseite ist jetzt die einzige Bestellseite (Angaben, Domain, AGB erfasst Stripe)
 - [ ] Testkauf in der Sandbox: Firmenname, Adresse, Wunschdomain, „Unternehmer“ und „AGB“ erscheinen in der Bestellung
 
-## LetterXpress (Briefdienst)
+## easyNova (Briefdienst)
 
-- [ ] LetterXpress-Konto, API-Key unter _Mein Konto → Zugangsdaten → LXP API_ erzeugen
-- [ ] `.env`: `MAIL_PROVIDER=letterxpress`, `LXP_USERNAME`, `LXP_APIKEY`, `LXP_MODE=test`
+- [ ] easyNova-Konto (easynova.de) anlegen, Auftragsverarbeitungsvertrag nach Art. 28 DSGVO abschließen
+- [ ] Laufzeit-`.env`: `MAIL_PROVIDER=easynova`, `EASYNOVA_USERNAME` (Konto-E-Mail), `EASYNOVA_PASSWORD`,
+      `EASYNOVA_MODE=test`, `EASYNOVA_TEST_EMAIL` (eigene Adresse für Rückmails)
 - [ ] Guthaben aufladen (Dashboard → Briefe zeigt das Guthaben; der Versand stoppt, wenn es nicht reicht)
-- [ ] 3 Testaufträge über _Brief-Detail → „Testauftrag an LetterXpress“_; in der LetterXpress-Postbox Anschrift,
-      Layout, QR-Code und Preis (`amount` + `vat`) prüfen
-- [ ] Erst nach ausdrücklichem OK: `LXP_MODE=live`, 1 echter Testbrief an die eigene Adresse, QR-Code scannen
+- [ ] 3 Testaufträge über _Brief-Detail → „Testsendung an easyNova“_; Rückmail mit eingezeichneten Prüf- und
+      Adressflächen prüfen: Anschrift im Fenster, Absenderzeile erkannt, Freimachungszone frei, QR-Code, kein Status 99
+- [ ] Erst nach ausdrücklichem OK: `EASYNOVA_MODE=live`, 1 echter Testbrief an die eigene Adresse, QR-Code scannen
 - [ ] Schalter „Echte Briefe freigegeben“ setzen
 
 ## Technik vor dem Start

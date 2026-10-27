@@ -57,16 +57,16 @@ checkout_started → paid → onboarding → preview_approved → live` (Nebenzu
 
 **Externe Dienste** (alle hinter Interfaces, je mit Mock für Entwicklung/Tests):
 
-| Zweck                | Anbieter                                                                        | Umschalten                                 |
-| -------------------- | ------------------------------------------------------------------------------- | ------------------------------------------ |
-| Lead-Quelle          | OpenStreetMap/Overpass (Standard), Google Places (nur nach Compliance-Freigabe) | `LEAD_SOURCE`, Einstellungen → Lead-Quelle |
-| KI-Texte             | Anthropic Claude (`MODEL_CREATIVE`, `MODEL_BULK`)                               | `ANTHROPIC_API_KEY`                        |
-| Briefversand         | LetterXpress (ab Baustein L3; bis dahin Mock), Pingen nur inaktive Alternative  | `MAIL_PROVIDER`, `LXP_*`                   |
-| Zahlung              | Stripe Checkout                                                                 | `PAYMENT_PROVIDER`, `STRIPE_*`             |
-| Domains              | INWX                                                                            | `REGISTRAR_PROVIDER`, `REGISTRAR_ENV`      |
-| Hosting Kundenseiten | Cloudflare (Workers Static Assets) oder Netlify                                 | `HOSTING_PROVIDER`                         |
-| E-Mail               | Resend oder Postmark, Eingang per IMAP oder Webhook                             | `EMAIL_PROVIDER`, `IMAP_*`                 |
-| Dateien              | lokal oder S3-kompatibel                                                        | `STORAGE_DRIVER`                           |
+| Zweck                | Anbieter                                                                         | Umschalten                                 |
+| -------------------- | -------------------------------------------------------------------------------- | ------------------------------------------ |
+| Lead-Quelle          | OpenStreetMap/Overpass (Standard), Google Places (nur nach Compliance-Freigabe)  | `LEAD_SOURCE`, Einstellungen → Lead-Quelle |
+| KI-Texte             | Anthropic Claude (`MODEL_CREATIVE`, `MODEL_BULK`)                                | `ANTHROPIC_API_KEY`                        |
+| Briefversand         | easyNova digiBrief (Testmodus zuerst); LetterXpress/Pingen inaktive Alternativen | `MAIL_PROVIDER`, `EASYNOVA_*`              |
+| Zahlung              | Stripe Checkout                                                                  | `PAYMENT_PROVIDER`, `STRIPE_*`             |
+| Domains              | INWX                                                                             | `REGISTRAR_PROVIDER`, `REGISTRAR_ENV`      |
+| Hosting Kundenseiten | Cloudflare (Workers Static Assets) oder Netlify                                  | `HOSTING_PROVIDER`                         |
+| E-Mail               | Resend oder Postmark, Eingang per IMAP oder Webhook                              | `EMAIL_PROVIDER`, `IMAP_*`                 |
+| Dateien              | lokal oder S3-kompatibel                                                         | `STORAGE_DRIVER`                           |
 
 Details und geprüfte API-Stände: [docs/integrations.md](docs/integrations.md).
 
@@ -119,7 +119,7 @@ Empfohlen: Hetzner Cloud (Standort Deutschland), z. B. CX32 (4 vCPU, 8 GB RAM), 
      `customer.subscription.deleted`; Signing Secret in `STRIPE_WEBHOOK_SECRET`. Zahlungsarten im
      Stripe-Dashboard aktivieren: Karte und SEPA-Lastschrift;
      Smart Retries für fehlgeschlagene Abo-Zahlungen einschalten.
-   - Briefdienst: LetterXpress hat keine Webhooks – der Status wird abgefragt (Baustein L3).
+   - Briefdienst: easyNova hat keine Webhooks – der Status wird alle 30 Minuten abgefragt.
    - E-Mail-Eingang: IMAP-Zugang in `IMAP_*` **oder** Postmark-Inbound auf
      `https://APP_HOST/api/webhooks/email-inbound?token=EMAIL_INBOUND_SECRET`.
 5. **Monitoring:** externen Uptime-Check (z. B. UptimeRobot, Better Stack) auf
@@ -225,8 +225,8 @@ Budget nur bewusst wieder erhöhen.
 **… etwas grundsätzlich schiefläuft (falsche Briefe, Kostenexplosion)?**
 Dashboard → Einstellungen → **Not-Aus**. Alle Jobs mit Kostenfolge stoppen sofort (Lead-Suche mit
 Google, KI, Briefversand, Domainkäufe). Danach Ursache klären, Not-Aus wieder lösen. Bereits an den
-Briefdienst übergebene Aufträge lassen sich dort stornieren, solange sie nicht gedruckt sind
-(LetterXpress: nur innerhalb von 15 Minuten).
+Briefdienst übergebene Aufträge lassen sich über die Schnittstelle nicht stornieren (easyNova bietet keinen
+Storno-Endpunkt) – vor dem Druck beim Anbieter-Support melden.
 
 **… ein Kunde die Zufriedenheitsgarantie nutzt (innerhalb von 14 Tagen)?** Bestellungen → Bestellung →
 „Garantie ausführen“ (Bestätigung GARANTIE). Das erstattet die Zahlung (Option B: erste Rate und Vertrag

@@ -88,8 +88,8 @@ Jeder Übergang wird in `audit_log` protokolliert (Zeitstempel, Auslöser, Konte
 - PostgreSQL 16, Playwright (Screenshots, PDF), `qrcode`, Anthropic SDK
   (`MODEL_CREATIVE=claude-opus-5-5`, `MODEL_BULK=claude-sonnet-5-5`, Tool-Use mit JSON-Schema,
   Prompt-Caching, Token-Verbrauch im Budget-Ledger)
-- Stripe (Checkout, Subscriptions, Subscription Schedules), `MailProvider` (**LetterXpress API v3**
-  als aktiver Briefdienst ab Baustein L3; Mock bis dahin), `RegistrarProvider` (INWX),
+- Stripe (Checkout, Subscriptions, Subscription Schedules), `MailProvider` (**easyNova digiBrief-API V1**
+  als aktiver Briefdienst seit 27.10.2026; LetterXpress v3 und Pingen inaktive Alternativen), `RegistrarProvider` (INWX),
   `HostingProvider` (Cloudflare Workers Static Assets, Alternative Netlify), `EmailProvider`
   (Resend/Postmark), `LeadSource` (OSM Overpass, Google Places API (New) nur gemäß
   `docs/compliance-google.md`)
@@ -147,10 +147,11 @@ Website ansehen – online bis {Ablaufdatum}“), Kurz-URL als Alternative, **be
 Slot-Templates mit blockierendem Wahrheits-Check.
 
 5.6 Versand (MailProvider, Budget-Guard gegen `WEEKLY_BUDGET_CENTS`, Freigabe solange
-`AUTO_SEND=false`, `DRY_RUN`, Testmodus → Testbrief an Betreiber → echte Leads). Mit L3:
-LetterXpress v3 (Rate-Limiter, Status-Polling alle 30 Min., geschätzte Zustellung =
-Versand + `DELIVERY_BUSINESS_DAYS`, Guthaben-Wächter, 3 Testaufträge → 1 echter Brief an den
-Betreiber → erst dann echte Leads). Pingen bleibt nur als inaktive Alternative im Code.
+`AUTO_SEND=false`, `DRY_RUN`, Testmodus → Testbrief an Betreiber → echte Leads). Briefdienst
+easyNova (Idempotency-Key, Status-Polling alle 30 Min., geschätzte Zustellung =
+Versand + `DELIVERY_BUSINESS_DAYS`, Guthaben-Wächter, 3 Testaufträge mit `testFlag` → 1 echter Brief an den
+Betreiber → erst dann echte Leads; Absenderzeile über dem Adressfenster Pflicht). LetterXpress (L3) und Pingen
+bleiben nur als inaktive Alternativen im Code.
 
 5.7 Follow-up (max. **3 Sendungen** pro Lead, alle als Brief): (2) kein Scan 12 Tage nach
 geschätzter Zustellung → kurzer einseitiger Brief mit großem Demo-Bild „Ihre Website ist nur noch bis
@@ -192,8 +193,9 @@ Platzhalter für eigene Rechtstexte).
 
 Siehe `.env.example` und `packages/core/src/config/settings.ts`. Neu aus Update 2: Absender mit
 WhatsApp-Nummer, Foto und Kurzvorstellung; alle Preise (590 €, 49 €, 19 €), Laufzeiten (12 Monate),
-Garantie (an/aus, 14 Tage); `MAIL_PROVIDER=letterxpress`, `LXP_USERNAME`, `LXP_APIKEY`,
-`LXP_MODE=test`, `DELIVERY_BUSINESS_DAYS=3`, `MIN_LETTERS_PER_ARM=100`,
+Garantie (an/aus, 14 Tage); `MAIL_PROVIDER=easynova`, `EASYNOVA_USERNAME`, `EASYNOVA_PASSWORD`,
+`EASYNOVA_MODE=test`, `EASYNOVA_TEST_EMAIL` (LetterXpress-Variablen `LXP_*` nur für die Alternative),
+`DELIVERY_BUSINESS_DAYS=3`, `MIN_LETTERS_PER_ARM=100`,
 `AUTO_ACTIVATE_VARIANTS=false`, `MAX_CAC_CENTS=20000`, Auswertungsfenster 45 Tage.
 
 ## 7. Qualitätsregeln
@@ -204,22 +206,22 @@ Alerts per E-Mail, tägliche Backups mit Wiederherstellungstest, README mit Betr
 
 ## 8. Phasen
 
-| Phase | Inhalt                                                                                                                        | Stand                                                              |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| 1     | Fundament                                                                                                                     | fertig                                                             |
-| 2     | Lead-Finder und Compliance                                                                                                    | fertig                                                             |
-| 3     | Demo-Generator, Demo-Hosting, QR                                                                                              | fertig                                                             |
-| 4     | Brief-Generator                                                                                                               | fertig                                                             |
-| 4a    | **L1** Claims und Playbooks (vor Phase 4)                                                                                     | fertig, Claims-Freigabe im Dashboard offen                         |
-| 4b    | **L2** Branchen-Briefe, Slot-Templates, Wahrheits-Check, Quellenseite, Branchen-Demo-Abschnitte                               | fertig (Muster-PDFs zur Abnahme verschickt)                        |
-| 5     | Versand → ersetzt durch **L3** LetterXpress (Provider, Rate-Limiter, Polling, Laufzeitschätzung, Guthaben-Wächter, Testmodus) | fertig im Testmodus; live erst nach 3 Testaufträgen und OK         |
-| 6     | Checkout und Rechnung (inkl. Update 2 Teil A: 590 € / 49 €-Plan, Garantie, Abo-Webhooks)                                      | fertig                                                             |
-| 6a    | **L4** Messung (alle Events B6.1, Funnel-Sicht, Zeitfenster, Dashboard-Funnel)                                                | fertig (Mess-Skript: Rechtsprüfung § 25 TDDDG offen)               |
-| 7     | Onboarding und Go-Live                                                                                                        | fertig                                                             |
-| 8     | Support-Agent                                                                                                                 | fertig                                                             |
-| 9     | KPIs; Optimizer → ersetzt durch **L5** (Optimizer und Statistik) und **L6** (Lern-Agent)                                      | KPIs fertig, L5 fertig (Simulationsbericht), L6 fertig (Probelauf) |
-| 10    | Härtung und Go-Live-Vorbereitung                                                                                              | fertig                                                             |
-| –     | **L7** Zielgruppen-Modell und Timing (erst ab ≥ 300 ausgewerteten Briefen)                                                    | zurückgestellt                                                     |
+| Phase | Inhalt                                                                                                                                        | Stand                                                              |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 1     | Fundament                                                                                                                                     | fertig                                                             |
+| 2     | Lead-Finder und Compliance                                                                                                                    | fertig                                                             |
+| 3     | Demo-Generator, Demo-Hosting, QR                                                                                                              | fertig                                                             |
+| 4     | Brief-Generator                                                                                                                               | fertig                                                             |
+| 4a    | **L1** Claims und Playbooks (vor Phase 4)                                                                                                     | fertig, Claims-Freigabe im Dashboard offen                         |
+| 4b    | **L2** Branchen-Briefe, Slot-Templates, Wahrheits-Check, Quellenseite, Branchen-Demo-Abschnitte                                               | fertig (Muster-PDFs zur Abnahme verschickt)                        |
+| 5     | Versand → **L3** LetterXpress, seit 27.10.2026 ersetzt durch **easyNova** (Provider, Polling, Laufzeitschätzung, Guthaben-Wächter, Testmodus) | fertig im Testmodus; live erst nach 3 Testaufträgen und OK         |
+| 6     | Checkout und Rechnung (inkl. Update 2 Teil A: 590 € / 49 €-Plan, Garantie, Abo-Webhooks)                                                      | fertig                                                             |
+| 6a    | **L4** Messung (alle Events B6.1, Funnel-Sicht, Zeitfenster, Dashboard-Funnel)                                                                | fertig (Mess-Skript: Rechtsprüfung § 25 TDDDG offen)               |
+| 7     | Onboarding und Go-Live                                                                                                                        | fertig                                                             |
+| 8     | Support-Agent                                                                                                                                 | fertig                                                             |
+| 9     | KPIs; Optimizer → ersetzt durch **L5** (Optimizer und Statistik) und **L6** (Lern-Agent)                                                      | KPIs fertig, L5 fertig (Simulationsbericht), L6 fertig (Probelauf) |
+| 10    | Härtung und Go-Live-Vorbereitung                                                                                                              | fertig                                                             |
+| –     | **L7** Zielgruppen-Modell und Timing (erst ab ≥ 300 ausgewerteten Briefen)                                                                    | zurückgestellt                                                     |
 
 ## 9. Checkliste vor dem ersten echten Versand
 

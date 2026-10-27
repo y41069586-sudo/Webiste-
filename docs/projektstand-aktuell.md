@@ -80,7 +80,7 @@ Schnittstellen, Vorlagen, Node-/pg-boss-Worker. Kein Neuaufbau. Angebote 590 Eur
    Navigationstest, Not-Aus und Budgets, Retention, Opt-out, Rechnungs-/Steuerdaten prüfen.
 9. **Spätere Freigabe für echten Start.** Rechtstexte/Compliance derzeit ausdrücklich pausiert,
    bleiben aber Voraussetzung für Verkauf/Versand. Claims und Branchenbriefe abnehmen,
-   LetterXpress erst im Test und nach separater Freigabe echter Brief. DRY_RUN nicht selbst abschalten.
+   easyNova (Briefdienst seit 27.10.2026) erst im Test und nach separater Freigabe echter Brief. DRY_RUN nicht selbst abschalten.
 
 ## Bewusst später
 
