@@ -231,6 +231,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
   const candidates: Candidate[] = [];
   const seen = new Set<string>();
   for (const city of cities) {
+    const agsPrefix = cfg.targeting.cityAgs[city] ?? cfg.targeting.agsPrefix;
     for (const branch of branches) {
       // OSM sucht über Tags (einmal je Branche), Google über die Suchbegriffe
       const texts =
@@ -242,16 +243,17 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
           }
           let res;
           try {
-            res = await src.primary.search({ text, city, branch, maxPages: cfg.targeting.maxPagesPerQuery });
+            res = await src.primary.search({ text, city, branch, maxPages: cfg.targeting.maxPagesPerQuery, agsPrefix });
           } catch (err) {
             if (!src.fallback) throw err;
             logger.warn(
               { text, err: err instanceof Error ? err.message : String(err) },
               'lead-finder: Primärquelle fehlgeschlagen, nutze Fallback',
             );
-            res = await src.fallback.search({ text, city, branch, maxPages: cfg.targeting.maxPagesPerQuery });
+            res = await src.fallback.search({ text, city, branch, maxPages: cfg.targeting.maxPagesPerQuery, agsPrefix });
           }
           summary.queries++;
+          for (const w of res.warnings ?? []) if (!summary.errors.includes(w)) summary.errors.push(w);
           if (res.costCents > 0) {
             summary.costCents += res.costCents;
             await recordCost(db, {

@@ -92,7 +92,12 @@ function q(s: string): string {
   return `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 }
 
-export function buildOverpassQuery(city: string, osmTags: LeadSearchQuery['branch']['osmTags'], timeoutSec = 90): string {
+export function buildOverpassQuery(
+  city: string,
+  osmTags: LeadSearchQuery['branch']['osmTags'],
+  timeoutSec = 90,
+  agsPrefix = '',
+): string {
   const filters = osmTags
     .map((t) => {
       const extra = Object.entries(t.extra ?? {})
@@ -105,7 +110,8 @@ export function buildOverpassQuery(city: string, osmTags: LeadSearchQuery['branc
     })
     .join('\n');
   return `[out:json][timeout:${timeoutSec}];
-area["name"=${q(city)}]["boundary"="administrative"]["admin_level"~"^(6|8)$"]->.a;
+area["name"=${q(city)}]["boundary"="administrative"]["admin_level"~"^(6|8)$"]["de:amtlicher_gemeindeschluessel"~${q(`^${agsPrefix.replace(/\D/g, '')}`)}]->.a;
+.a out ids;
 (
 ${filters}
 );
@@ -222,16 +228,25 @@ export class OverpassLeadSource implements LeadSource {
   }
 
   async search(query: LeadSearchQuery): Promise<LeadSearchResult> {
-    const ql = buildOverpassQuery(query.city, query.branch.osmTags);
+    const ql = buildOverpassQuery(query.city, query.branch.osmTags, 90, query.agsPrefix);
     let lastErr: unknown;
     for (const endpoint of this.endpoints) {
       try {
         const data = await this.post(endpoint, ql);
+        // Erste Ausgabe: die gefundenen Gemeindegebiete. Mehr als eines = gleichnamige Gemeinden zusammengelegt.
+        const areas = (data.elements ?? []).filter((el) => el.type === 'area').length;
+        const warnings =
+          areas === 0
+            ? [`Gemeinde „${query.city}“ nicht gefunden (Name/Gemeindeschlüssel prüfen)`]
+            : areas > 1
+              ? [`„${query.city}“ ist mehrdeutig (${areas} Gemeinden) – Gemeindeschlüssel in targeting.cityAgs eintragen`]
+              : [];
         let places = (data.elements ?? [])
+          .filter((el) => el.type !== 'area')
           .map((el) => osmElementToPlace(el, query.city))
           .filter((p): p is RawPlace => p !== null);
         places = await this.enrich(endpoint, places);
-        return { places, requests: 1, costCents: 0 };
+        return { places, requests: 1, costCents: 0, ...(warnings.length ? { warnings } : {}) };
       } catch (err) {
         lastErr = err;
         logger.warn(

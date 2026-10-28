@@ -53,6 +53,8 @@ export interface LeadSearchQuery {
   city: string;
   branch: BranchConfig;
   maxPages: number;
+  /** Präfix des amtlichen Gemeindeschlüssels, um gleichnamige Gemeinden auszuschließen (nur OSM) */
+  agsPrefix?: string;
 }
 
 export interface LeadSearchResult {
@@ -61,6 +63,8 @@ export interface LeadSearchResult {
   requests: number;
   /** Geschätzte Kosten in Cent */
   costCents: number;
+  /** Hinweise ohne Abbruch, z. B. mehrdeutiger Stadtname */
+  warnings?: string[];
 }
 
 export interface LeadSource {

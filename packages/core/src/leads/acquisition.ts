@@ -23,6 +23,11 @@ export const acquisitionPolicySchema = z
         'heizung',
         'glaser',
       ]),
+    /**
+     * Dritte Stufe (28.10.2026): Beauty. Viele Salons arbeiten mit Instagram und Buchungsportalen und brauchen eine
+     * eigene Website seltener – deshalb nach allen Handwerksbranchen, aber mit großem Pool.
+     */
+    tertiary: z.array(z.string()).default(['friseur', 'kosmetikstudio']),
     evidenceMaxDays: z.number().int().min(1).max(90).default(30),
     demandMaxDays: z.number().int().min(1).max(180).default(90),
     youngMinMonths: z.number().int().min(0).max(120).default(6),
@@ -146,7 +151,9 @@ export function researchIdentity(lead: ResearchSubject) {
 }
 export function campaignRank(branch: string, policy = ACQUISITION_POLICY) {
   const first = policy.primary.indexOf(branch);
-  return first >= 0 ? first + 1 : policy.secondary.includes(branch) ? policy.primary.length + 1 : null;
+  if (first >= 0) return first + 1;
+  if (policy.secondary.includes(branch)) return policy.primary.length + 1;
+  return policy.tertiary.includes(branch) ? policy.primary.length + 2 : null;
 }
 /**
  * Branchen der laufenden Kampagne. `known` ergänzt Kampagnenbranchen, die in einer älter gespeicherten

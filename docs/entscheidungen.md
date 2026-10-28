@@ -505,3 +505,17 @@ Umgesetzt:
 
 Vor dem nächsten Deploy der Admin-App: Migration 0020 auf Supabase anwenden (Spalten werden von der Lead-Liste
 gelesen). Offen zur Entscheidung: weitere Städte (Ruhrgebiet) und/oder Beauty (Friseur/Kosmetik) in die Kampagne.
+
+Nachtrag (Entscheidung Betreiberin, 28.10.2026): Start mit Dortmund und Umgebung (Ruhrgebiet), später ganz
+Deutschland; Beauty (Friseur, Kosmetik) zusätzlich.
+
+- Beauty als dritte Kampagnenstufe (`acquisition.tertiary`): Salons arbeiten häufig mit Instagram und
+  Buchungsportalen und brauchen eine eigene Website seltener als Handwerksbetriebe. Deshalb nach allen
+  Handwerksbranchen; die Vorauswahl bevorzugt online aktive Salons ohne eigene Seite. Nach der ersten Charge Scan-
+  und Kaufquote je Gruppe vergleichen.
+- Gleichnamige Gemeinden (gemessen: Hagen 3 Treffer, Hamm 2, Essen 2, Kamen 2): Die OSM-Suche nimmt nur Gebiete mit
+  amtlichem Gemeindeschlüssel (= deutsche Gemeinden) und filtert über `targeting.agsPrefix` (Region, z. B. „05“ =
+  NRW) bzw. `targeting.cityAgs` (je Stadt). Mehr als ein Treffer erzeugt eine Warnung im Lauf.
+- Für „ganz Deutschland“ reicht die Schleife Stadt × Branche nicht (Fair-Use der Overpass-Instanz); dafür später
+  Abfragen je Bundesland/Kreis statt je Stadt.
+

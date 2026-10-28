@@ -81,7 +81,11 @@ it('uses the explicitly ordered target sectors, keeping the same templates and i
     'dachdecker',
     'heizung',
     'glaser',
+    // Beauty als dritte Stufe nach allem Handwerk
+    'kosmetikstudio',
+    'friseur',
   ]);
+  expect(campaignRank('friseur')).toBe(5);
   // Ältere gespeicherte Konfiguration ohne die neueren Kampagnenbranchen: fehlend ≠ abgeschaltet
   const legacy = DEFAULT_CONFIG.targeting.branches.filter((b) => ['maler', 'restaurant'].includes(b.key));
   expect(campaignBranches(legacy, ACQUISITION_POLICY, DEFAULT_CONFIG.targeting.branches).map((b) => b.key)).toContain(

@@ -10,6 +10,11 @@ describe('Overpass (OSM)', () => {
     expect(q).toContain('area["name"="Dortmund"]["boundary"="administrative"]');
     expect(q).toContain('nwr["shop"="beauty"]["beauty"="nails"](area.a);');
     expect(q).toContain('out center tags meta;');
+    // Nur deutsche Gemeinden; Gebietsausgabe erlaubt die Warnung bei gleichnamigen Gemeinden
+    expect(q).toContain('["de:amtlicher_gemeindeschluessel"~"^"]->.a;\n.a out ids;');
+    expect(buildOverpassQuery('Hagen', [{ key: 'craft', value: 'painter' }], 90, '05914')).toContain(
+      '["de:amtlicher_gemeindeschluessel"~"^05914"]',
+    );
   });
 
   it('wandelt Elemente in Rohdaten um (Website, Social, Öffnungszeiten, Telefon)', () => {

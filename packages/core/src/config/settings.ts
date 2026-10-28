@@ -169,6 +169,16 @@ export const appConfigSchema = z.object({
   targeting: z.object({
     acquisition: acquisitionPolicySchema.default(ACQUISITION_POLICY),
     cities: z.array(z.string()).min(1),
+    /**
+     * Amtlicher Gemeindeschlüssel (Präfix) als Eindeutigkeitsfilter für die OSM-Suche. `agsPrefix` gilt für alle
+     * Städte (z. B. „05“ = NRW, leer = ganz Deutschland), `cityAgs` je Stadt für doppelte Namen (Hagen, Hamm …).
+     * Ohne Schlüssel werden nur deutsche Gemeinden gesucht (Gebiete mit amtlichem Gemeindeschlüssel).
+     */
+    agsPrefix: z
+      .string()
+      .regex(/^\d{0,8}$/)
+      .default(''),
+    cityAgs: z.record(z.string(), z.string().regex(/^\d{2,8}$/)).default({}),
     branches: z.array(branchSchema).min(1),
     /** Bekannte Ketten-/Franchise-Namen (Teilstring, case-insensitive) */
     chainNames: z.array(z.string()),
@@ -582,9 +592,13 @@ export const DEFAULT_CONFIG: AppConfig = {
   targeting: {
     acquisition: ACQUISITION_POLICY,
     cities: ['Dortmund'],
+    agsPrefix: '',
+    cityAgs: {},
     branches: DEFAULT_BRANCHES.map((branch) => ({
       ...branch,
-      active: [...ACQUISITION_POLICY.primary, ...ACQUISITION_POLICY.secondary].includes(branch.key),
+      active: [...ACQUISITION_POLICY.primary, ...ACQUISITION_POLICY.secondary, ...ACQUISITION_POLICY.tertiary].includes(
+        branch.key,
+      ),
     })),
     chainNames: [
       'Douglas',
