@@ -179,11 +179,25 @@ function composeVars(i: ComposeInput): Record<string, string> {
  * Persönliche Absenderzeile unter dem QR-Bereich: hinterlegte Vorstellung des Betreibers (nur ohne Ziffern, damit der
  * Wahrheits-Check keine unbelegte Zahl findet) und direkte Kontaktwege.
  */
+/** Hinterlegte Telefonnummer ist dieselbe wie die WhatsApp-Nummer (Ziffernvergleich, 0… ↔ 49…) */
+export function whatsappMatchesPhone(cfg: AppConfig): boolean {
+  const digits = (v: string) => v.replace(/\D/g, '').replace(/^00/, '').replace(/^0/, '49');
+  const wa = digits(cfg.sender.whatsappNumber);
+  return Boolean(wa && cfg.sender.phone.trim() && digits(cfg.sender.phone) === wa);
+}
+
 export function senderContactLine(cfg: AppConfig, opts: { withIntro?: boolean } = {}): string {
   // Nur der erste Satz der hinterlegten Vorstellung: wer schreibt – der Brief bleibt einseitig
   const intro = (cfg.sender.intro.trim().match(/^.+?[.!?](?=\s|$)/)?.[0] ?? cfg.sender.intro.trim()).trim();
   const phone = cfg.sender.phone.trim();
   const email = cfg.sender.email.trim();
+  // Ist die Nummer zugleich die WhatsApp-Nummer, laden wir zur Nachricht ein (passt zu „Ich rufe Sie nicht an“)
+  if (whatsappMatchesPhone(cfg)) {
+    const ways = [`per WhatsApp-Nachricht an ${phone}`, email && `per E-Mail an ${email}`].filter(Boolean).join(' oder ');
+    return [opts.withIntro !== false && intro && !/\d/.test(intro) ? intro : '', `Fragen beantworte ich gern ${ways}.`]
+      .filter(Boolean)
+      .join(' ');
+  }
   const ways = [phone && `Telefon ${phone}`, email && `E-Mail ${email}`].filter(Boolean).join(' oder ');
   return [
     opts.withIntro !== false && intro && !/\d/.test(intro) ? intro : '',
@@ -249,6 +263,7 @@ export function composeLetter(i: ComposeInput): LetterData {
       city: i.cfg.sender.city,
       email: i.cfg.sender.email,
       phone: i.cfg.sender.phone,
+      ...(whatsappMatchesPhone(i.cfg) ? { phoneLabel: 'WhatsApp' } : {}),
       website: i.cfg.sender.website,
     },
     recipientLines: recipientLines(i.recipient),

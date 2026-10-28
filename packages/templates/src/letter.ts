@@ -41,6 +41,8 @@ export interface LetterSender {
   city: string;
   email: string;
   phone: string;
+  /** Beschriftung der Nummer im Briefkopf, z. B. „WhatsApp“ (Standard „Tel.“) */
+  phoneLabel?: string;
   website: string;
 }
 
@@ -219,7 +221,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
     <div>${esc(d.sender.name)}</div>
     <div>${esc(d.sender.street)}</div>
     <div>${esc(d.sender.postalCode)} ${esc(d.sender.city)}</div>
-    <div><span class="k">Tel.</span> ${esc(d.sender.phone)}</div>
+    <div><span class="k">${esc(d.sender.phoneLabel ?? 'Tel.')}</span> ${esc(d.sender.phone)}</div>
     <div><span class="k">E-Mail</span> ${esc(d.sender.email)}</div>
     <div class="date">${esc(d.dateLine)}</div>
   </div>
