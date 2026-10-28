@@ -1,9 +1,9 @@
 import { sql } from 'drizzle-orm';
-import { getConfig, getDb, QUEUES } from '@wbm/core';
+import { getConfig, getDb, queueState, QUEUES } from '@wbm/core';
 import { Badge, Card, PageHeader, Table, Td, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
-import { runJobNow, startFindLeads } from './actions';
+import { cancelFindLeads, runJobNow, startFindLeads } from './actions';
 
 export const metadata = { title: 'Jobs & Steuerung' };
 
@@ -19,7 +19,10 @@ type JobRow = {
 
 export default async function JobsPage() {
   await requireAdmin();
-  const cfg = await getConfig();
+  const [cfg, search] = await Promise.all([
+    getConfig(),
+    queueState(QUEUES.findLeads).catch(() => ({ waiting: [] as string[], active: 0 })),
+  ]);
   const jobs = await getDb()
     .execute<JobRow>(
       sql`SELECT id, name, state, created_on, completed_on, retry_count, output FROM pgboss.job ORDER BY created_on DESC LIMIT 60`,
@@ -30,6 +33,22 @@ export default async function JobsPage() {
       <PageHeader title="Jobs & Steuerung" subtitle="Manuelle Starts, letzte Läufe. Alle Jobs prüfen Not-Aus und Budget." />
       <div className="mb-6 grid gap-6 lg:grid-cols-2">
         <Card title="Lead-Suche starten">
+          {search.active || search.waiting.length ? (
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              <span>
+                {search.active ? 'Eine Lead-Suche läuft gerade.' : ''}
+                {search.waiting.length ? ` ${search.waiting.length} weitere warten.` : ''} Neue Klicks starten keine zusätzliche
+                Suche.
+              </span>
+              {search.waiting.length ? (
+                <form action={cancelFindLeads}>
+                  <button type="submit" className={btn.secondary}>
+                    Wartende Suchen abbrechen
+                  </button>
+                </form>
+              ) : null}
+            </div>
+          ) : null}
           <form action={startFindLeads} className="space-y-4">
             <fieldset>
               <legend className="mb-1 text-xs font-medium text-slate-600">Städte</legend>

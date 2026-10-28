@@ -157,3 +157,25 @@ export async function enqueue<Q extends QueueName>(
   const boss = await getBoss();
   return boss.send(name, data as object, options);
 }
+
+/** Wartende (`created`, `retry`) und laufende Aufträge einer Queue – z. B. gegen doppelt gestartete Lead-Suchen. */
+export async function queueState(name: QueueName): Promise<{ waiting: string[]; active: number }> {
+  const boss = await getBoss();
+  const db = boss.getDb();
+  const res = await db.executeSql(
+    `SELECT id, state FROM pgboss.job WHERE name = $1 AND state IN ('created', 'retry', 'active')`,
+    [name],
+  );
+  const rows = res.rows as { id: string; state: string }[];
+  return {
+    waiting: rows.filter((r) => r.state !== 'active').map((r) => r.id),
+    active: rows.filter((r) => r.state === 'active').length,
+  };
+}
+
+/** Bricht alle noch nicht gestarteten Aufträge einer Queue ab; laufende bleiben unberührt. */
+export async function cancelWaitingJobs(name: QueueName): Promise<number> {
+  const { waiting } = await queueState(name);
+  if (waiting.length) await (await getBoss()).cancel(name, waiting);
+  return waiting.length;
+}

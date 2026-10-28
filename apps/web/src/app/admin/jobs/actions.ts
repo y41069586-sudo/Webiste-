@@ -1,13 +1,19 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { audit, enqueue, getDb, QUEUES, type QueueName } from '@wbm/core';
+import { audit, cancelWaitingJobs, enqueue, getDb, queueState, QUEUES, type QueueName } from '@wbm/core';
 import { actorOf, requireAdmin } from '@/lib/auth';
 
 export async function startFindLeads(form: FormData): Promise<void> {
   const s = await requireAdmin();
   const cities = form.getAll('cities').map(String).filter(Boolean);
   const branches = form.getAll('branches').map(String).filter(Boolean);
+  // Nur eine Lead-Suche zur Zeit: weitere Klicks reihen nichts zusätzlich ein
+  const state = await queueState(QUEUES.findLeads);
+  if (state.active || state.waiting.length) {
+    revalidatePath('/admin/jobs');
+    return;
+  }
   await enqueue(QUEUES.findLeads, { cities, branches, triggeredBy: actorOf(s) }, { singletonKey: 'find-leads' });
   await audit(getDb(), {
     entity: 'job',
@@ -15,6 +21,20 @@ export async function startFindLeads(form: FormData): Promise<void> {
     action: 'enqueue',
     actor: actorOf(s),
     context: { cities, branches },
+  });
+  revalidatePath('/admin/jobs');
+}
+
+/** Noch nicht gestartete Lead-Suchen abbrechen (laufende Suche läuft zu Ende). */
+export async function cancelFindLeads(): Promise<void> {
+  const s = await requireAdmin();
+  const n = await cancelWaitingJobs(QUEUES.findLeads);
+  await audit(getDb(), {
+    entity: 'job',
+    entityId: QUEUES.findLeads,
+    action: 'cancel_waiting',
+    actor: actorOf(s),
+    context: { n },
   });
   revalidatePath('/admin/jobs');
 }
