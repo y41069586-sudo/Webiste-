@@ -567,3 +567,8 @@ Gefunden und behoben:
 - Queue: pg-boss-Schema (Version 46, 28 Queues) und Rechte für `seitenwerk_admin_backend` per SQL-Editor
   (`supabase-warteschlange.sql`, Dump + `infra/queue-permissions.sql`). Geprobt: Backend-Rolle kann ohne
   Migrationsrechte senden, abholen, abschließen und Zeitpläne setzen.
+- Nachtrag: Supabase schaltet auf neuen Tabellen automatisch RLS ein → die Backend-Rolle sah leere pgboss-Tabellen
+  („pg-boss database requires migrations“). Lösung `infra/queue-ownership-supabase.sql`: pgboss-Tabellen, Sequenzen,
+  Funktionen und Typen gehören `seitenwerk_admin_backend` (Besitzerin unterliegt RLS nicht und kann die täglichen
+  `queue_stats`-Partitionen anlegen/löschen); `postgres` erhält dafür nur innerhalb der Transaktion SET auf die Rolle.
+  Lokal mit eingeschaltetem RLS nachgestellt: Fehler reproduziert, nach dem Fix Senden/Abholen/Zeitplan/Partition OK.
