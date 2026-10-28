@@ -11,8 +11,8 @@ test('design sources require admin + same-origin; saving does not replace an exi
   const demo = seedPublishedDemo({ name: 'Fiktives Café für Stilprüfung', branch: 'cafe', city: 'Testort' });
   const path = `/admin/leads/${demo.leadId}/design`;
   const anonymous = await request.post(path, { multipart: { sourceRef: 'https://source.example.test' }, maxRedirects: 0 });
-  expect(anonymous.status()).toBe(307);
-  expect(anonymous.headers().location).toContain('/login');
+  // Ohne Sitzung: die Route selbst lehnt ab (kein vorgeschalteter Proxy mehr)
+  expect(anonymous.status()).toBe(401);
   expect(
     (
       await request.post(path, { headers: { cookie: 'wbm_admin=invalid' }, maxRedirects: 0, multipart: { notes: 'bad' } })
@@ -59,6 +59,6 @@ test('design sources require admin + same-origin; saving does not replace an exi
   await expect(photo).toBeVisible();
   const src = (await photo.getAttribute('src'))!;
   expect((await page.request.get(src)).status()).toBe(200);
-  expect((await request.get(src, { maxRedirects: 0 })).status()).toBe(307);
+  expect((await request.get(src, { maxRedirects: 0 })).status()).toBe(401);
   expect(await (await page.request.get(`/d/${demo.slug}`)).text()).toBe(original);
 });
