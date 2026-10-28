@@ -554,3 +554,16 @@ Gefunden und behoben:
   Fast-Forward auf den aktuellen Stand gebracht (vorher `fbff0cc` vom 25.10.). Datenbank vorher auf Migration 0020
   gebracht. Anbieter bleiben Mock, `DRY_RUN=true`. Der erste Push trug „[skip ci]“ (Netlify überspringt dann den Bau);
   der Bau wird mit einem Commit ohne Überspringen-Vermerk ausgelöst.
+
+### 28.10.2026 – Worker-Server (Contabo Cloud VPS 4, Ubuntu 24.04)
+
+- Kein SSH aus der Entwicklungsumgebung möglich → Einrichtung durch die Betreiberin per Termius mit einem Befehl
+  (`infra/vps/setup.sh`): Docker, ufw (nur SSH), fail2ban, Checkout des Branches nach `/opt/seitenwerk`, Worker per
+  `docker-compose.worker.yml` (DRY_RUN=true, keine offenen Ports). Erneuter Aufruf = Aktualisierung.
+- Geheimnisse nicht im Chat/Repository: Admin → Einstellungen erzeugt einen Einmal-Code (30 Min., einmalig, nur Hash
+  gespeichert, Audit-Eintrag); `/api/worker-bootstrap` tauscht ihn gegen `.env.worker` (Allowlist der Variablen,
+  Supabase-Session-Pooler 5432 statt Transaction-Pooler 6543; Rate-Limit 10/Std.). Anthropic-Schlüssel wird nicht
+  übergeben.
+- Queue: pg-boss-Schema (Version 46, 28 Queues) und Rechte für `seitenwerk_admin_backend` per SQL-Editor
+  (`supabase-warteschlange.sql`, Dump + `infra/queue-permissions.sql`). Geprobt: Backend-Rolle kann ohne
+  Migrationsrechte senden, abholen, abschließen und Zeitpläne setzen.
