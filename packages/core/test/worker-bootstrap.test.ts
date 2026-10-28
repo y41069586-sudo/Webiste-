@@ -43,10 +43,12 @@ describe('Worker-Umgebung', () => {
       S3_SECRET_ACCESS_KEY: "a b'c",
       NETLIFY_AUTH_TOKEN: 'geheim',
       EMAIL_API_KEY: '',
+      EASYNOVA_USERNAME: 'betrieb@example.org',
     });
     expect(file).toContain('QUEUE_DATABASE_URL=postgresql://u.p:pw@aws-0-eu-west-1.pooler.supabase.com:5432/postgres');
     expect(file).toContain('ENCRYPTION_KEY=abc');
     expect(file).toContain(`S3_SECRET_ACCESS_KEY='a b'\\''c'`);
+    expect(file).toContain('EASYNOVA_USERNAME=betrieb@example.org');
     expect(file).not.toContain('NETLIFY_AUTH_TOKEN');
     expect(file).not.toContain('EMAIL_API_KEY');
     expect(() => workerEnvFile({})).toThrow(/DATABASE_URL/);

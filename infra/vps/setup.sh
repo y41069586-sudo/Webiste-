@@ -6,6 +6,7 @@
 # Erster Lauf: Docker, Firewall und Brute-Force-Schutz installieren, Code holen, nach dem Einmal-Code aus
 # Admin → Einstellungen → „Worker-Server einrichten“ fragen und damit .env.worker von der Admin-App abholen,
 # Worker bauen und starten. Weitere Läufe: Code aktualisieren und Worker neu bauen (.env.worker bleibt).
+# Neue Zugangsdaten aus der Admin-App übernehmen (z. B. nach neuen Variablen in Netlify): ... | NEU=1 bash
 # Der Worker läuft immer mit DRY_RUN=true (docker-compose.worker.yml); es werden keine Ports geöffnet.
 set -euo pipefail
 
@@ -43,6 +44,12 @@ else
 fi
 cd "$DIR"
 git log -1 --format='Stand: %h %s'
+
+if [ "${NEU:-0}" = 1 ] && [ -s .env.worker ]; then
+  mv .env.worker .env.worker.alt
+  chmod 600 .env.worker.alt
+  echo "Bisherige Zugangsdaten gesichert als .env.worker.alt."
+fi
 
 if [ ! -s .env.worker ]; then
   step "Zugangsdaten per Einmal-Code abholen"
