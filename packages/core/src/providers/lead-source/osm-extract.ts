@@ -270,7 +270,9 @@ export class OsmExtractLeadSource implements LeadSource {
       }
       if (this.fresh(this.index, pairs)) return this.index;
     }
-    this.building ??= this.build([...new Set([...pairs, ...(this.index?.tagPairs ?? [])])].sort()).finally(() => {
+    // Vorhandene Tags behalten, damit ein Neubau keine früher gesuchten Branchen verliert
+    const known: string[] = (this.index as OsmExtractIndex | undefined)?.tagPairs ?? [];
+    this.building ??= this.build([...new Set([...pairs, ...known])].sort()).finally(() => {
       this.building = undefined;
     });
     this.index = await this.building;

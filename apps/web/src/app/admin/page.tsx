@@ -295,7 +295,7 @@ export default async function TodayPage() {
             <div className="admin-progress mt-3" aria-hidden="true">
               <span
                 style={{
-                  width: `${Math.min(100, Math.round((letterBudget.spentCents / Math.max(1, letterBudget.limitCents)) * 100))}%`,
+                  width: `${Math.min(100, Math.round((letterBudget.spentCents / Math.max(1, letterBudget.limitCents ?? 0)) * 100))}%`,
                 }}
               />
             </div>
