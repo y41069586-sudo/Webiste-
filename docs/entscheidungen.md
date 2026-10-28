@@ -544,3 +544,12 @@ Gefunden und behoben:
 - Restaurant-Demo (zentriertes Foto-Layout): Knopf und Info-Chips standen nebeneinander, der Knopf wurde zur runden
   Blase gequetscht. → untereinander, mittig.
 - Demo-Qualitätsprüfung (`render/qa.ts`) prüft das Layout zusätzlich bei 320 × 568; alle 127 Template-Varianten bestehen.
+
+### 28.10.2026 – Deploy auf Anweisung der Betreiberin („Beides deployen“)
+
+- Landingpage `seitenwerk-website` (seitenwerk.world): Upload-Deploy `6ae2157ec3a7ddea987bb56c` aus `apps/launch/dist`
+  (Handy-Korrekturen, Rechtstexte aus der Live-Konfiguration). Das Projekt hat Auto-Publishing aus (gesperrter
+  Produktionsdeploy) → Veröffentlichen per „Publish deploy“ im Netlify-Dashboard.
+- Admin-App `seitenwerkworld`: Netlify baut aus dem Branch `claude/website-brief-maschine-0d0s37`; dieser wird per
+  Fast-Forward auf den aktuellen Stand gebracht (vorher `fbff0cc` vom 25.10.). Datenbank vorher auf Migration 0020
+  gebracht. Anbieter bleiben Mock, `DRY_RUN=true`.
