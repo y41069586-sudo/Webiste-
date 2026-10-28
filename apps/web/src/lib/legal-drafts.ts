@@ -1,14 +1,20 @@
 import { formatEuroShort, v4FirstYearCents, type AppConfig } from '@wbm/core';
 import { sitePricing } from './site';
 
-/** Own working texts based on confirmed facts. Never silently approve these for live checkout. */
-export function legalDrafts(cfg: AppConfig) {
+/**
+ * Own working texts based on confirmed facts. Never silently approve these for live checkout.
+ * `adopt`: Fassung zur ausdrücklichen Übernahme durch den Betreiber (ohne Entwurfs-/Sperrvermerke);
+ * Freigabe nur per Admin-Aktion, keine anwaltliche Prüfung.
+ */
+export function legalDrafts(cfg: AppConfig, opts: { adopt?: boolean } = {}) {
   const s = cfg.sender;
   const p = sitePricing(cfg);
   const required = (value: string, label: string) => value.trim() || `TODO: ${label} ergänzen`;
   const contact = `${required(s.name, 'vollständiger Vor- und Nachname')}, handelnd unter „${required(s.company, 'Geschäftsbezeichnung')}“, ${required(s.street, 'Straße und Hausnummer')}, ${required(s.postalCode, 'Postleitzahl')} ${required(s.city, 'Ort')}, Deutschland`;
   const email = required(s.email, 'Kontakt-E-Mail');
-  const draft = 'Stand: 27. Oktober 2026. Verbindliche Bestellungen werden derzeit noch nicht angenommen.';
+  const draft = opts.adopt
+    ? 'Stand: 28. Oktober 2026.'
+    : 'Stand: 27. Oktober 2026. Verbindliche Bestellungen werden derzeit noch nicht angenommen.';
   const taxClause =
     cfg.tax.operatorConfirmed && cfg.tax.kleinunternehmer
       ? 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Die angegebenen Preise sind die zu zahlenden Gesamtbeträge; es wird keine Umsatzsteuer zusätzlich aufgeschlagen.'
@@ -133,9 +139,9 @@ ${draft}
 
 Anbieterin: ${contact}. Das Angebot richtet sich ausschließlich an Unternehmer (§ 14 BGB).
 
-## 1. Geltungsbereich und Testbetrieb
+## 1. Geltungsbereich${opts.adopt ? '' : ' und Testbetrieb'}
 
-Diese Bedingungen gelten für die Erstellung und den anschließenden technischen Betrieb der vereinbarten Website. Bestellungen sind ausschließlich für Unternehmer im Sinne von § 14 BGB für deren berufliche oder gewerbliche Tätigkeit vorgesehen. Individuelle Vereinbarungen haben Vorrang. Testentwürfe und Sandbox-Zahlungen begründen keine kostenpflichtige Bestellung. Derzeit sind echte Bestellungen gesperrt.
+Diese Bedingungen gelten für die Erstellung und den anschließenden technischen Betrieb der vereinbarten Website. Bestellungen sind ausschließlich für Unternehmer im Sinne von § 14 BGB für deren berufliche oder gewerbliche Tätigkeit vorgesehen. Individuelle Vereinbarungen haben Vorrang. Testentwürfe und Sandbox-Zahlungen begründen keine kostenpflichtige Bestellung.${opts.adopt ? '' : ' Derzeit sind echte Bestellungen gesperrt.'}
 
 ## 2. Entwurf, Bestellung und Vertragsschluss
 

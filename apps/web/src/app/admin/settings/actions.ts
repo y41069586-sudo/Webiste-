@@ -1,8 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { audit, getDb, updateConfig, type AppConfigPatch } from '@wbm/core';
+import { audit, getConfig, getDb, updateConfig, type AppConfigPatch } from '@wbm/core';
 import { actorOf, requireAdmin } from '@/lib/auth';
+import { legalDrafts } from '@/lib/legal-drafts';
 import { SECTIONS, setPath, SWITCHES } from './fields';
 
 export interface SaveState {
@@ -69,4 +70,32 @@ export async function toggleSwitch(form: FormData): Promise<void> {
   await updateConfig({ switches: { [key]: value } } as AppConfigPatch, actorOf(session));
   await audit(getDb(), { entity: 'switch', entityId: key, action: value ? 'on' : 'off', actor: actorOf(session) });
   revalidatePath('/admin', 'layout');
+}
+
+/**
+ * Übernimmt Impressum, Datenschutz und Vertragsbedingungen aus den Entwürfen als gültige Fassung – nur mit
+ * ausdrücklicher Bestätigung des Betreibers (eigene Verantwortung, keine anwaltliche Prüfung).
+ */
+export async function adoptLegalDrafts(_prev: SaveState, form: FormData): Promise<SaveState> {
+  const session = await requireAdmin();
+  if (form.get('confirm') !== 'on') return { error: 'Bitte die Übernahme ausdrücklich bestätigen.' };
+  const cfg = await getConfig({ fresh: true });
+  const texts = legalDrafts(cfg, { adopt: true });
+  const missing = Object.values(texts).some((t) => t.includes('TODO:'));
+  if (missing) return { error: 'Absenderangaben unvollständig – erst Name, Anschrift, Telefon und E-Mail eintragen.' };
+  const version = `v4-${new Date().toISOString().slice(0, 10)}`;
+  await updateConfig(
+    {
+      legal: {
+        impressumMarkdown: texts.impressumMarkdown,
+        privacyMarkdown: texts.privacyMarkdown,
+        termsMarkdown: texts.termsMarkdown,
+        termsVersion: version,
+      },
+    } as AppConfigPatch,
+    actorOf(session),
+  );
+  await audit(getDb(), { entity: 'legal', entityId: version, action: 'drafts_adopted', actor: actorOf(session) });
+  revalidatePath('/', 'layout');
+  return { ok: true };
 }

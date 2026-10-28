@@ -162,7 +162,8 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
           title: tier === 'basis' ? 'SeitenWerk Basis' : 'SeitenWerk Care+',
           price: formatEuroShort(o.setupCents),
           monthly: formatEuroShort(o.monthlyCents),
-          unit: tax ? `einmalig ${tax}` : 'einmalig – Steuerstatus noch offen',
+          // Ohne geklärten Steuerstatus kein Steuerzusatz; die Bestellung ist dann ohnehin noch nicht freigeschaltet
+          unit: tax ? `einmalig ${tax}` : 'einmalig',
           points: [
             `+ ${formatEuroShort(o.monthlyCents)}/Monat insgesamt ab Go-Live`,
             'Monatlich kündbar, keine zwölfmonatige Mindestbindung',
@@ -188,7 +189,7 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
     offers,
     guaranteeNote:
       !cfg.tax.operatorConfirmed || !cfg.legal.termsMarkdown.trim()
-        ? 'Testangebot: Rechtstexte und Steuerangaben sind noch nicht freigegeben. Kein Live-Verkauf.'
+        ? 'Die Online-Bestellung ist noch nicht freigeschaltet. Fragen zum Entwurf beantworte ich gern schon jetzt – per WhatsApp, E-Mail oder über das Formular unten.'
         : cfg.guarantee.enabled
           ? cfg.offers.activeVersion === 'v4'
             ? `${cfg.guarantee.days} Tage Einrichtungsgarantie ab Go-Live laut Vertragsbedingungen: Sind Sie nicht zufrieden, wird die Einrichtungsgebühr erstattet. Gesetzliche Rechte bleiben unberührt.`

@@ -5,6 +5,7 @@ import { requireAdmin } from '@/lib/auth';
 import { saveSection, toggleSwitch } from './actions';
 import { getPath, SECTIONS, SWITCHES } from './fields';
 import { SectionForm } from './section-form';
+import { AdoptLegalForm } from './adopt-legal-form';
 
 export const metadata = { title: 'Einstellungen' };
 
@@ -84,6 +85,10 @@ export default async function SettingsPage() {
             );
           })}
         </ul>
+      </Card>
+
+      <Card title="Rechtstexte übernehmen" className="mb-6">
+        <AdoptLegalForm adopted={Boolean(cfg.legal.termsMarkdown.trim())} />
       </Card>
 
       <div className="space-y-6">

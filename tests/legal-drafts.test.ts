@@ -87,3 +87,14 @@ test('V4 legal drafts explain providers, truthful test status and unresolved man
   assert.ok(incomplete.privacyMarkdown.includes('TODO: Straße und Hausnummer'));
   assert.equal(cfg.legal.termsMarkdown, '');
 });
+
+test('operator adoption removes the draft/locked notes but keeps the truthful tax clause', () => {
+  const cfg = deepMerge(DEFAULT_CONFIG, { sender: OPERATOR_PROFILE, offers: { activeVersion: 'v4' } });
+  const adopted = legalDrafts(cfg, { adopt: true });
+  assert.ok(!adopted.termsMarkdown.includes('Derzeit sind echte Bestellungen gesperrt'));
+  assert.ok(!adopted.termsMarkdown.includes('Verbindliche Bestellungen werden derzeit noch nicht angenommen'));
+  for (const text of Object.values(adopted)) assert.ok(!text.includes('TODO:'));
+  // Ohne bestätigten Steuerstatus wird keine § 19-Befreiung zugesichert
+  assert.ok(adopted.termsMarkdown.includes('Eine Steuerbefreiung nach § 19 UStG wird nicht zugesichert'));
+  assert.ok(legalDrafts(cfg).termsMarkdown.includes('Derzeit sind echte Bestellungen gesperrt'));
+});

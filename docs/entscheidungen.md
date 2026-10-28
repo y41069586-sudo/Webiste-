@@ -411,3 +411,20 @@ Betreiber: Brief „wirklich human Psychologie“, Demo „high quality“. Umge
   im Repository stehen weiterhin keine Betreiberdaten. Offen und nur durch den Betreiber zu entscheiden:
   Steuerstatus bestätigen, echte Steuernummer, Vertragsbedingungen übernehmen – erst dann entfällt
   „Testangebot“ auf der Demo.
+
+### 28.10.2026 – Steuerstatus ohne Gewerbe, Rechtstexte zur Übernahme
+
+Betreiber: „Hab halt kein Gewerbe – mach es so, als hätte man keins, wie man es richtig schreiben würde“ und
+„Entwurf übernehmen“. Umsetzung ohne erfundene Angaben:
+
+- Impressum nennt weiterhin nur die natürliche Person mit Anschrift und Kontakt, keine Register-, Gewerbe- oder
+  Steuernummer (keine vorhanden, im Impressum nicht vorgeschrieben). USt-IdNr. nur, wenn tatsächlich erteilt.
+- Ohne Steuernummer bleiben echte Rechnungen und damit echte Bestellungen gesperrt (Rechnungen über 250 € brauchen
+  sie nach § 14 Abs. 4 UStG). Weg dorthin: Gewerbeanmeldung → steuerliche Erfassung über ELSTER → Steuernummer im
+  Admin eintragen und Steuerstatus bestätigen.
+- Demo-Hinweis neutral statt „Testangebot … Kein Live-Verkauf“: „Die Online-Bestellung ist noch nicht freigeschaltet.
+  Fragen zum Entwurf beantworte ich gern schon jetzt …“. Preiskarten ohne „Steuerstatus noch offen“.
+- Admin → Einstellungen → „Rechtstexte übernehmen“: übernimmt Impressum, Datenschutz und Vertragsbedingungen
+  aus den Entwürfen (ohne Entwurfs-/Sperrvermerke) erst nach ausdrücklicher Bestätigung „in eigener
+  Verantwortung, keine anwaltliche Prüfung“; Audit-Eintrag `legal/drafts_adopted`. Ohne bestätigten Steuerstatus
+  sichert die Fassung keine § 19-Befreiung zu.
