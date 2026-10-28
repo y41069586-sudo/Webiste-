@@ -581,3 +581,7 @@ Gefunden und behoben:
   Pingen-Geometrie (Anschrift ab 60 mm) hätte dort gelegen → Ablehnung (Status 99). Neu: Rücksendeangabe in der
   Absenderfläche 45–51 mm, Anschrift 68,5–90 mm (5 Zeilen à 4,2 mm), Brieftext ab 92 mm (Einladungsseite 91 mm,
   Abstände dort leicht verringert). Rechnung und Claim-Brief nutzen dieselben Flächen. Alle Tests grün.
+- Netlify (Admin-App, auf Anweisung der Betreiberin): `DEMO_DOMAIN`/`TRACK_DOMAIN` = `seitenwerkworld.netlify.app`
+  und `PUBLIC_PROTOCOL=https` (vorher fehlend → QR-/Demo-Links fielen auf `localhost:3000` zurück), `LEAD_SOURCE=osm`
+  mit `OVERPASS_URL` (overpass-api.de, Ausweich maps.mail.ru), `MAIL_PROVIDER=easynova`. Kurzlink-Domain folgt später.
+  Worker übernimmt die Werte per `NEU=1` und neuem Einmal-Code.
