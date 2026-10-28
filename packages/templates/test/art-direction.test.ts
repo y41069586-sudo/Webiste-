@@ -46,7 +46,9 @@ it('provides checked, optimized draft motifs for the primary sectors without cro
     ).toBe(true);
     expect(photos.every((p) => p.width && p.height && p.focalPoint!.x <= 100)).toBe(true);
   }
-  expect(stockPhotos('handwerk', 0, 'Elektriker')).toEqual([]);
+  // Eigene Elektro-Motive, nie fachfremde (Maler/Fliesen/Reinigung); unbekannte Gewerke bleiben ohne Foto
+  expect(stockPhotos('handwerk', 0, 'Elektriker').every((p) => p.file.startsWith('handwerk/elektro-'))).toBe(true);
+  expect(stockPhotos('handwerk', 0, 'Dachdecker')).toEqual([]);
   expect(stockPhotos('handwerk', 0, 'Fensterreinigung').some((p) => p.role === 'work')).toBe(false);
   const input = demoInput('handwerk-klar', 'werkblau');
   input.facts.branchLabel = 'Handwerksbetrieb';
@@ -68,7 +70,7 @@ it('distinguishes source-verified offerings from sample offerings and leaves unk
 it('uses the licensed painter work photo only for relevant draft sectors, never as a business project', () => {
   const photos = stockPhotos('handwerk', 0, 'Malerbetrieb');
   expect(photos.some((p) => p.source === 'Pexels' && p.role === 'work')).toBe(true);
-  expect(stockPhotos('handwerk', 0, 'Elektriker').some((p) => p.source === 'Pexels')).toBe(false);
+  expect(stockPhotos('handwerk', 0, 'Elektriker').some((p) => p.file.includes('maler'))).toBe(false);
   const input = demoInput('handwerk-klar', 'werkblau');
   input.facts.branchLabel = 'Malerbetrieb';
   expect(renderSite(input)).not.toContain('class="sw-material-study"');

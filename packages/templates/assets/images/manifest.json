@@ -999,5 +999,255 @@
     "moods": [
       "neutral"
     ]
+  },
+  {
+    "file": "handwerk/elektro-verteiler-pexels-257736.jpg",
+    "group": "handwerk",
+    "alt": "Hand mit Werkzeug an einem geöffneten Sicherungsverteiler, lizenziertes Beispielfoto",
+    "title": "Electrician Fixing an Opened Switchboard",
+    "creator": "Pixabay",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/electrician-fixing-an-opened-switchboard-257736/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 130176,
+    "width": 1200,
+    "height": 798,
+    "keywords": [
+      "elektro",
+      "elektriker",
+      "elektroinstallation"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/elektro-steckdose-pexels-5691589.jpg",
+    "group": "handwerk",
+    "alt": "Hand montiert mit einem Schraubendreher eine Steckdose, lizenziertes Beispielfoto",
+    "title": "An Electrician Using Screwdriver to Repair the AC Power Plugs and Sockets",
+    "creator": "Ksenia Chernaya",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/an-electrician-using-screwdriver-to-repair-the-ac-power-plugs-and-sockets-5691589/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 63454,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "elektro",
+      "elektriker",
+      "elektroinstallation"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/elektro-sicherungen-pexels-28950842.jpg",
+    "group": "handwerk",
+    "alt": "Sicherungskasten mit farbig sortierter Verdrahtung, lizenziertes Beispielfoto",
+    "title": "Electrical Circuit Breaker Panel with Color-Coded Wiring",
+    "creator": "ranjeet .",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/electrical-circuit-breaker-panel-with-color-coded-wiring-28950842/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 139194,
+    "width": 1200,
+    "height": 747,
+    "keywords": [
+      "elektro",
+      "elektriker",
+      "elektroinstallation"
+    ],
+    "role": "detail",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/sanitaer-rohre-pexels-6419128.jpg",
+    "group": "handwerk",
+    "alt": "Hände verschrauben Rohrverbindungen einer Wasserleitung, lizenziertes Beispielfoto",
+    "title": "Plumber Installs Pipe Fittings",
+    "creator": "Anıl Karakaya",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/plumber-installs-pipe-fittings-6419128/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 129404,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "sanitär",
+      "sanitaer",
+      "installateur",
+      "klempner",
+      "heizung"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/sanitaer-heizung-pexels-29226620.jpg",
+    "group": "handwerk",
+    "alt": "Hände mit Arbeitshandschuhen montieren einen Heizkörperanschluss, lizenziertes Beispielfoto",
+    "title": "Professional Plumber Installing a Radiator Pipe",
+    "creator": "Sergei Starostin",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/professional-plumber-installing-a-radiator-pipe-29226620/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 102394,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "sanitär",
+      "sanitaer",
+      "installateur",
+      "klempner",
+      "heizung"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/garten-heckenschnitt-pexels-38936350.jpg",
+    "group": "handwerk",
+    "alt": "Heckenschnitt mit der Gartenschere im Abendlicht, lizenziertes Beispielfoto",
+    "title": "Gardener Pruning Hedge with Shears Outdoors",
+    "creator": "Magda Ehlers",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/gardener-pruning-hedge-with-shears-outdoors-38936350/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 106759,
+    "width": 1200,
+    "height": 800,
+    "keywords": [
+      "garten",
+      "gärtner",
+      "gaertner",
+      "landschaftsbau",
+      "gartenpflege"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/garten-hecke-pexels-38936334.jpg",
+    "group": "handwerk",
+    "alt": "Gartenschere an einer frisch geschnittenen Hecke, lizenziertes Beispielfoto",
+    "title": "Gardener Trimming Hedges with Shears Outdoors",
+    "creator": "Magda Ehlers",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/gardener-trimming-hedges-with-shears-outdoors-38936334/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 92463,
+    "width": 1200,
+    "height": 800,
+    "keywords": [
+      "garten",
+      "gärtner",
+      "gaertner",
+      "landschaftsbau",
+      "gartenpflege"
+    ],
+    "role": "detail",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "handwerk/garten-strauchschnitt-pexels-5231138.jpg",
+    "group": "handwerk",
+    "alt": "Strauchschnitt mit einer langen Astschere, lizenziertes Beispielfoto",
+    "title": "Crop gardener with secateurs working on bush",
+    "creator": "Anna Shvets",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/crop-gardener-with-secateurs-working-on-bush-5231138/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 137493,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "garten",
+      "gärtner",
+      "gaertner",
+      "landschaftsbau",
+      "gartenpflege"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
   }
 ]

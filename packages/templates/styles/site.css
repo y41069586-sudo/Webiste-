@@ -232,6 +232,17 @@
   }
 }
 
+.sw-hero-name {
+  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--c-primary);
+  margin-bottom: 10px;
+}
+.sw-editorial .sw-hero-name {
+  grid-column: 1/-1;
+}
 /* Conversion-Bausteine (27.10.2026): Hero-Aktionen, Faktenzeile, Ablauf, Kontaktbereich, Bild neben Leistungen */
 .sw-hero-actions {
   display: flex;

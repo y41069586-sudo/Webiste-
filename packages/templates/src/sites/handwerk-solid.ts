@@ -28,7 +28,7 @@ export const handwerkSolid: TemplateDef = {
 </header>
 <main id="inhalt">
   <section class="sw-premium-hero sw-business">
-    <div class="sw-business-title"><p class="sw-kicker">${esc(f.branchLabel)} in ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><p class="sw-hero-copy">${esc(c.hero_subline)}</p><div class="sw-hero-actions"><a class="sw-hero-button" href="${esc(p.ctaHref)}">${esc(c.cta_text)} <span aria-hidden="true">→</span></a>${p.callHref ? `<a class="sw-hero-secondary" href="${esc(p.callHref)}">${icon('phone', 'h-4 w-4')}<span>${esc(p.phoneLabel)}</span></a>` : `<a class="sw-text-link" href="#leistungen">Leistungen ansehen</a>`}</div>${p.trustChips()}</div>
+    <div class="sw-business-title">${c.hero_headline === f.name ? '' : `<p class="sw-hero-name">${esc(f.name)}</p>`}<p class="sw-kicker">${esc(f.branchLabel)} in ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><p class="sw-hero-copy">${esc(c.hero_subline)}</p><div class="sw-hero-actions"><a class="sw-hero-button" href="${esc(p.ctaHref)}">${esc(c.cta_text)} <span aria-hidden="true">→</span></a>${p.callHref ? `<a class="sw-hero-secondary" href="${esc(p.callHref)}">${icon('phone', 'h-4 w-4')}<span>${esc(p.phoneLabel)}</span></a>` : `<a class="sw-text-link" href="#leistungen">Leistungen ansehen</a>`}</div>${p.trustChips()}</div>
     <div class="sw-business-media">${localProfile({ facts: f, parts: p, content: c }, 'workshop')}</div>
   </section>
 

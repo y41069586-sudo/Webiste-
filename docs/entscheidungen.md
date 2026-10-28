@@ -397,3 +397,17 @@ Betreiber: Brief „wirklich human Psychologie“, Demo „high quality“. Umge
 - Sieben weitere Pexels-Fotos (Maler 3, Fliesen 2, Reinigung 2), nur ohne erkennbare Gesichter, Lizenz in
   Manifest, EXIF und `assets/images/handwerk/README.md`. Reinigungsmotive nur für Büro-/Unterhalts-/
   Gebäudereinigung.
+
+### 28.10.2026 – Angebotsbereich kompakter, Firmenname im Hero, Fotos für Elektro/Sanitär/Garten
+
+- Angebot (V4): Preiskarten zuerst, darunter drei kurze Schritte (Tarif wählen → Inhalte ergänzen → prüfen und
+  freigeben), dann „Wer hat diesen Entwurf gebaut?“. Ohne Foto (Betreibervorgabe: kein persönliches Foto)
+  stehen dort die Initialen. Die bisherige Box „Was die Einrichtung umfasst“ steckt jetzt im Aufklapper „Was Sie
+  beauftragen“; Inhalt unverändert.
+- Hero (handwerk-klar/-solid): Firmenname groß über der Branchenzeile, Überschrift bleibt Leistung + Ort.
+- Acht weitere Pexels-Fotos: Elektro 3, Sanitär/Heizung 2, Garten 3 (ohne erkennbare Gesichter, Lizenz in
+  Manifest/EXIF/README). Unbekannte Gewerke (z. B. Dachdecker) bleiben weiter ohne Foto.
+- Absenderdaten: in der Produktions-Konfiguration bereits vollständig (Name, Anschrift, Kontakt, Kurzvorstellung);
+  im Repository stehen weiterhin keine Betreiberdaten. Offen und nur durch den Betreiber zu entscheiden:
+  Steuerstatus bestätigen, echte Steuernummer, Vertragsbedingungen übernehmen – erst dann entfällt
+  „Testangebot“ auf der Demo.

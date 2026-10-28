@@ -155,6 +155,7 @@ function faviconDataUri(letter: string, color: string): string {
 export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { review?: boolean } = {}): string {
   const cards = demo.offers ?? [];
   if (!cards.length && !demo.trust) return '';
+  const v4 = demo.offerVersion === 'v4';
   const button = (c: (typeof cards)[number]) =>
     `<a href="${esc(c.href)}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-4 py-2 font-semibold text-white hover:bg-[#1f2937] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827]">${demo.offerVersion === 'v4' ? `Mit ${esc(c.title.replace('SeitenWerk ', ''))} übernehmen` : `${esc(c.title)} wählen`}</a>`;
   const points = (list: string[]) =>
@@ -176,25 +177,62 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
       ${button(c)}
     </li>`;
   const t = demo.trust;
+  const initials = (t?.name ?? '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('');
   const trust = t
     ? `<div class="mt-6 flex flex-col gap-4 rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] sm:flex-row sm:items-start">
-      ${t.photoDataUri ? `<img src="${t.photoDataUri}" alt="${esc(t.name)}" width="96" height="96" class="h-24 w-24 shrink-0 rounded-full object-cover">` : ''}
+      ${
+        t.photoDataUri
+          ? `<img src="${t.photoDataUri}" alt="${esc(t.name)}" width="96" height="96" class="h-24 w-24 shrink-0 rounded-full object-cover">`
+          : initials
+            ? `<span aria-hidden="true" class="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#1f4fd8] text-xl font-semibold text-white">${esc(initials)}</span>`
+            : ''
+      }
       <div>
         <h3 class="text-base font-semibold">Wer hat diesen Entwurf gebaut?</h3>
         <p class="mt-1 font-medium">${esc(t.name) || 'Anbieterangaben noch nicht vollständig – Veröffentlichung gesperrt'}</p>
         ${t.intro ? `<p class="mt-2 text-sm text-[#374151]">${esc(t.intro)}</p>` : ''}
-        <p class="mt-3 text-sm text-[#374151]">${t.email ? `<a class="underline" href="mailto:${esc(t.email)}">${esc(t.email)}</a>` : ''}${t.phone ? ` · ${esc(t.phone)}` : ''} · <a class="underline" href="${esc(t.imprintUrl)}">Impressum</a></p>
+        <p class="mt-3 text-sm text-[#374151]">${t.email ? `<a class="underline" href="mailto:${esc(t.email)}">${esc(t.email)}</a>` : ''}${t.phone ? ` · <a class="underline" href="tel:${esc(t.phone.replace(/[^+\d]/g, ''))}">${esc(t.phone)}</a>` : ''} · <a class="underline" href="${esc(t.imprintUrl)}">Impressum</a></p>
       </div>
     </div>`
     : '';
   return `<section id="uebernehmen" aria-labelledby="uebernehmen-titel" class="border-t border-[#dce2ed] bg-[#f3f4f6] py-12 text-[#111827]">
   <div class="mx-auto max-w-4xl px-4">
     <p class="text-sm font-medium text-[#4b5563]">${brandMarkHtml(24)} Angebot von ${esc(demo.sender.name) || 'TODO: vollständiger Anbietername'}, ${esc(demo.sender.company)} – nicht Teil der Website</p>
-    <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${demo.offerVersion === 'v4' ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${demo.offerVersion === 'v4' ? `<p class="mt-3 text-sm">Einmalig ${esc(demo.priceLabel)} für Einrichtung und Fertigstellung dieses Entwurfs – danach wählen Sie Ihren Monatstarif. Veröffentlicht wird erst nach Ihrer Freigabe, die Monatsgebühr beginnt erst mit dem Go-Live.</p>` : ''}
-    ${demo.offerVersion === 'v4' ? trust : ''}
-    ${demo.offerVersion === 'v4' ? `<div class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><h3 class="font-semibold">Was die Einrichtung umfasst</h3><ul class="mt-3 space-y-3"><li><strong>Wir stellen den Entwurf fertig.</strong> Mit Ihren bestätigten Angaben, Texten, berechtigten Bildern und den vereinbarten Anpassungen.</li><li><strong>Sie behalten die Freigabe.</strong> Sie prüfen Ihre Inhalte und die fertige Vorschau, bevor wir die Website veröffentlichen.</li><li><strong>Wir richten die Website technisch ein.</strong> Der gewählte Monatstarif übernimmt anschließend Hosting, SSL und den vereinbarten Betreuungsumfang.</li></ul><p class="mt-4">Die Monatsgebühr beginnt erst nach bestätigtem Go-Live. Care+ enthält Basis vollständig. Zusatzfunktionen, größere Umbauten und Domains außerhalb des vereinbarten Umfangs benötigen Ihre gesonderte Zustimmung.</p></div>` : ''}
+    <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${v4 ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${
+      v4
+        ? `<p class="mt-3">Fertigstellung einmalig ${esc(demo.priceLabel)}, danach ${cards[0]?.monthly ? `ab ${esc(cards[0].monthly)} im Monat` : 'Ihr Monatstarif'}. Online geht die Website erst nach Ihrer Freigabe – die Monatsgebühr beginnt erst mit dem Go-Live.</p>`
+        : ''
+    }
     ${cards.length ? `<ul class="mt-6 grid gap-4 ${cards.length > 1 ? 'sm:grid-cols-2' : ''}">${cards.map(card).join('')}</ul>` : ''}
-    ${opts.review || demo.offerVersion === 'v4' ? `<details class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><summary class="cursor-pointer font-semibold">Was Sie beauftragen – Ablauf und Leistungsgrenzen</summary><p class="mt-3">Sie übermitteln Ihre tatsächlichen Inhalte und Änderungswünsche. Wir stellen den Entwurf fertig, richten die vereinbarten technischen Leistungen ein und veröffentlichen erst nach Ihrer Freigabe.</p><ol class="mt-4 space-y-3"><li><strong>1. Online bestellen</strong><br>Tarif und Bedingungen prüfen.</li><li><strong>2. Inhalte ergänzen</strong><br>Firmenangaben, rechtliche Texte, eigene Bilder und Wünsche übermitteln.</li><li><strong>3. Prüfen und freigeben</strong><br>Website abstimmen. Erst nach bestätigtem Go-Live beginnt die Monatsgebühr.</li></ol><p class="mt-4">Zusatzseiten, größere Umbauten und Leistungen außerhalb des Tarifs benötigen ein gesondertes Angebot. Domainumfang, Kündigungsfrist und Übergabe sind in den verlinkten Vertragsbedingungen beschrieben.</p></details>` : ''}
+    ${
+      v4
+        ? `<ol class="mt-5 grid gap-3 text-sm sm:grid-cols-3">${[
+            ['Tarif wählen', 'Bedingungen in Ruhe prüfen und online bestellen.'],
+            ['Inhalte ergänzen', 'Ihre Angaben, Texte und Wünsche – wir stellen den Entwurf fertig.'],
+            ['Prüfen und freigeben', 'Erst nach Ihrer Freigabe geht die Website online.'],
+          ]
+            .map(
+              ([title, text], i) =>
+                `<li class="flex gap-3 rounded-xl border border-[#d1d5db] bg-white p-4"><span aria-hidden="true" class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#111827] text-xs font-bold text-white">${i + 1}</span><span><strong class="block">${title}</strong><span class="text-[#374151]">${text}</span></span></li>`,
+            )
+            .join('')}</ol>`
+        : ''
+    }
+    ${v4 ? trust : ''}
+    ${
+      opts.review || v4
+        ? `<details class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><summary class="cursor-pointer font-semibold">Was Sie beauftragen – Ablauf und Leistungsgrenzen</summary>${
+            v4
+              ? `<ul class="mt-3 space-y-3"><li><strong>Wir stellen den Entwurf fertig.</strong> Mit Ihren bestätigten Angaben, Texten, berechtigten Bildern und den vereinbarten Anpassungen.</li><li><strong>Sie behalten die Freigabe.</strong> Sie prüfen Ihre Inhalte und die fertige Vorschau, bevor wir die Website veröffentlichen.</li><li><strong>Wir richten die Website technisch ein.</strong> Der gewählte Monatstarif übernimmt anschließend Hosting, SSL und den vereinbarten Betreuungsumfang.</li></ul><p class="mt-4">Die Monatsgebühr beginnt erst nach bestätigtem Go-Live. Care+ enthält Basis vollständig. Zusatzfunktionen, größere Umbauten und Domains außerhalb des vereinbarten Umfangs benötigen Ihre gesonderte Zustimmung.</p>`
+              : ''
+          }<p class="mt-3">Sie übermitteln Ihre tatsächlichen Inhalte und Änderungswünsche. Wir stellen den Entwurf fertig, richten die vereinbarten technischen Leistungen ein und veröffentlichen erst nach Ihrer Freigabe.</p><ol class="mt-4 space-y-3"><li><strong>1. Online bestellen</strong><br>Tarif und Bedingungen prüfen.</li><li><strong>2. Inhalte ergänzen</strong><br>Firmenangaben, rechtliche Texte, eigene Bilder und Wünsche übermitteln.</li><li><strong>3. Prüfen und freigeben</strong><br>Website abstimmen. Erst nach bestätigtem Go-Live beginnt die Monatsgebühr.</li></ol><p class="mt-4">Zusatzseiten, größere Umbauten und Leistungen außerhalb des Tarifs benötigen ein gesondertes Angebot. Domainumfang, Kündigungsfrist und Übergabe sind in den verlinkten Vertragsbedingungen beschrieben.</p></details>`
+        : ''
+    }
     ${demo.guaranteeNote ? `<p class="mt-4 text-sm text-[#374151]">${esc(demo.guaranteeNote)}</p>` : ''}
     ${
       demo.offerVersion === 'v4'

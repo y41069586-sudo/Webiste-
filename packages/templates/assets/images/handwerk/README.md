@@ -36,3 +36,18 @@ Manifest und EXIF. Nur im Entwurf, gekennzeichnet als lizenzierte Beispielfotos.
 | `reinigung-sauger-pexels-6195273.jpg`      | Tima Miroshnichenko | https://www.pexels.com/photo/person-using-a-vacuum-6195273/                              |
 
 Reinigungsmotive nur für Büro-/Unterhalts-/Gebäudereinigung (nicht z. B. Fensterreinigung).
+
+## Ergänzung 28.10.2026: Elektro, Sanitär/Heizung, Garten
+
+Gleiche Regeln wie oben (Pexels-Lizenz, keine erkennbaren Gesichter, nur gekennzeichnet im Entwurf).
+
+| Datei                                      | Fotograf         | Quelle                                                                                                          |
+| ------------------------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------- |
+| `elektro-verteiler-pexels-257736.jpg`      | Pixabay          | https://www.pexels.com/photo/electrician-fixing-an-opened-switchboard-257736/                                   |
+| `elektro-steckdose-pexels-5691589.jpg`     | Ksenia Chernaya  | https://www.pexels.com/photo/an-electrician-using-screwdriver-to-repair-the-ac-power-plugs-and-sockets-5691589/ |
+| `elektro-sicherungen-pexels-28950842.jpg`  | ranjeet .        | https://www.pexels.com/photo/electrical-circuit-breaker-panel-with-color-coded-wiring-28950842/                 |
+| `sanitaer-rohre-pexels-6419128.jpg`        | Anıl Karakaya    | https://www.pexels.com/photo/plumber-installs-pipe-fittings-6419128/                                            |
+| `sanitaer-heizung-pexels-29226620.jpg`     | Sergei Starostin | https://www.pexels.com/photo/professional-plumber-installing-a-radiator-pipe-29226620/                          |
+| `garten-heckenschnitt-pexels-38936350.jpg` | Magda Ehlers     | https://www.pexels.com/photo/gardener-pruning-hedge-with-shears-outdoors-38936350/                              |
+| `garten-hecke-pexels-38936334.jpg`         | Magda Ehlers     | https://www.pexels.com/photo/gardener-trimming-hedges-with-shears-outdoors-38936334/                            |
+| `garten-strauchschnitt-pexels-5231138.jpg` | Anna Shvets      | https://www.pexels.com/photo/crop-gardener-with-secateurs-working-on-bush-5231138/                              |
