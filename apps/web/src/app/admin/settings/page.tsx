@@ -6,6 +6,7 @@ import { saveSection, toggleSwitch } from './actions';
 import { getPath, SECTIONS, SWITCHES } from './fields';
 import { SectionForm } from './section-form';
 import { AdoptLegalForm } from './adopt-legal-form';
+import { WorkerBootstrapForm } from './worker-bootstrap-form';
 
 export const metadata = { title: 'Einstellungen' };
 
@@ -89,6 +90,10 @@ export default async function SettingsPage() {
 
       <Card title="Rechtstexte übernehmen" className="mb-6">
         <AdoptLegalForm adopted={Boolean(cfg.legal.termsMarkdown.trim())} />
+      </Card>
+
+      <Card title="Worker-Server einrichten" className="mb-6">
+        <WorkerBootstrapForm />
       </Card>
 
       <div className="space-y-6">

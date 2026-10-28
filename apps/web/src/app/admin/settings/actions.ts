@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { audit, getConfig, getDb, updateConfig, type AppConfigPatch } from '@wbm/core';
+import { audit, createWorkerBootstrapCode, getConfig, getDb, updateConfig, type AppConfigPatch } from '@wbm/core';
 import { actorOf, requireAdmin } from '@/lib/auth';
 import { legalDrafts } from '@/lib/legal-drafts';
 import { SECTIONS, setPath, SWITCHES } from './fields';
@@ -98,4 +98,18 @@ export async function adoptLegalDrafts(_prev: SaveState, form: FormData): Promis
   await audit(getDb(), { entity: 'legal', entityId: version, action: 'drafts_adopted', actor: actorOf(session) });
   revalidatePath('/', 'layout');
   return { ok: true };
+}
+
+export interface BootstrapState {
+  code?: string;
+  expiresAt?: string;
+  error?: string;
+}
+
+/** Einmal-Code für die Worker-Server-Einrichtung (30 Minuten, einmal einlösbar) */
+export async function createBootstrapCode(_prev: BootstrapState, form: FormData): Promise<BootstrapState> {
+  const session = await requireAdmin();
+  if (form.get('confirm') !== 'on') return { error: 'Bitte bestätigen, dass Sie den Server gerade einrichten.' };
+  const { code, expiresAt } = await createWorkerBootstrapCode(actorOf(session));
+  return { code, expiresAt: expiresAt.toISOString() };
 }

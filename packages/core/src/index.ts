@@ -135,3 +135,4 @@ export { saveBusinessDesignEvidence, businessDesignEvidence, resolveBusinessDesi
 export * from './leads/acquisition';
 export * from './leads/prescreen';
 export * from './services/lead-research';
+export * from './services/worker-bootstrap';
