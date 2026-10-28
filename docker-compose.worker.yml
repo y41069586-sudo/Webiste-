@@ -26,6 +26,8 @@ services:
       WORKER_HEALTH_PORT: '3001'
       WORKER_HEALTH_HOST: 127.0.0.1
       STORAGE_DRIVER: s3
+      # Wöchentlicher OSM-Auszug (Geofabrik NRW, ca. 0,8 GB) für die Lead-Suche
+      OSM_EXTRACT_DIR: /data/osm
       AUTO_SEND: 'false'
       AUTO_REPLY: 'false'
       AUTO_OPTIMIZE: 'false'
@@ -35,6 +37,8 @@ services:
       REGISTRAR_ENV: sandbox
       SITE_INDEXABLE: 'false'
     read_only: true
+    volumes:
+      - osm-data:/data/osm
     tmpfs:
       - /tmp:size=512m,mode=1777
     shm_size: 512m
@@ -57,3 +61,5 @@ services:
       timeout: 5s
       start_period: 60s
       retries: 3
+volumes:
+  osm-data:

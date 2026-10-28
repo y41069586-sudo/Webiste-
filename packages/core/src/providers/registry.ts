@@ -4,6 +4,10 @@ import { CloudflareHosting } from './hosting/cloudflare';
 import { NetlifyHosting } from './hosting/netlify';
 import { InwxRegistrar } from './registrar/inwx';
 import { ResendEmail } from './email/resend';
+import os from 'node:os';
+import path from 'node:path';
+import { DEFAULT_CONFIG } from '../config/settings';
+import { OsmExtractLeadSource } from './lead-source/osm-extract';
 import { OverpassLeadSource } from './lead-source/overpass';
 import { EasyNovaMailProvider } from './mail/easynova';
 import { LetterXpressMailProvider } from './mail/letterxpress';
@@ -19,7 +23,18 @@ export const registry = {
   leadSources(kind: string, env: Env): LeadSource[] | undefined {
     if (kind === 'mock') return undefined;
     // Google wird – je nach Compliance-Modus – im Lead-Finder zugeschaltet
-    return [new OverpassLeadSource(env.OVERPASS_URL, `WebsiteBriefMaschine/0.1 (+${env.APP_URL})`)];
+    const userAgent = `SeitenWerk-LeadFinder/1.0 (+${env.APP_URL}; ${env.EMAIL_FROM?.match(/[^<\s]+@[^>\s]+/)?.[0] ?? 'kontakt über Website'})`;
+    const overpass = new OverpassLeadSource(env.OVERPASS_URL, userAgent);
+    if (!env.OSM_EXTRACT_URL) return [overpass];
+    return [
+      new OsmExtractLeadSource({
+        url: env.OSM_EXTRACT_URL,
+        dir: env.OSM_EXTRACT_DIR ?? path.join(os.tmpdir(), 'wbm-osm'),
+        userAgent,
+        baseTags: DEFAULT_CONFIG.targeting.branches.flatMap((b) => b.osmTags),
+        fallback: overpass,
+      }),
+    ];
   },
   mail(kind: string, env: Env): MailProvider | undefined {
     if (kind === 'easynova') {

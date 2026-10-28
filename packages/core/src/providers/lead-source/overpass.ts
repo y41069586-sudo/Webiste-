@@ -4,7 +4,7 @@ import { parseOsmOpeningHours } from '../../leads/opening-hours';
 import { HttpError, withRetry } from '../../util/retry';
 import type { LeadSearchQuery, LeadSearchResult, LeadSource, RawPlace, SourceMeta } from '../types';
 
-interface OsmElement {
+export interface OsmElement {
   type: 'node' | 'way' | 'relation' | 'area';
   id: number;
   tags?: Record<string, string>;

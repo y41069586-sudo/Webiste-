@@ -45,14 +45,14 @@ CMD ["node", "apps/web/server.js"]
 FROM base AS worker
 ENV NODE_ENV=production APP_NAME=wbm-worker MIGRATIONS_DIR=/repo/packages/core/drizzle \
     CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
-RUN apt-get update && apt-get install -y --no-install-recommends chromium fonts-liberation ca-certificates \
+RUN apt-get update && apt-get install -y --no-install-recommends chromium fonts-liberation ca-certificates osmium-tool \
     && rm -rf /var/lib/apt/lists/*
 COPY --chown=node:node . .
 RUN --mount=type=secret,id=proxy_ca --mount=type=cache,id=pnpm,target=/pnpm/store \
     if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi; \
     pnpm install --frozen-lockfile --prod --filter "@wbm/worker..."
 COPY --from=templates-build --chown=node:node /repo/packages/templates/dist packages/templates/dist
-RUN mkdir -p /data/storage /backups && chown -R node:node /data /backups
+RUN mkdir -p /data/storage /data/osm /backups && chown -R node:node /data /backups
 USER node
 WORKDIR /repo/apps/worker
 CMD ["node", "--import", "tsx", "src/index.ts"]

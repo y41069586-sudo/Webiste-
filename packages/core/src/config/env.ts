@@ -35,6 +35,9 @@ const envSchema = z.object({
   LEAD_SOURCE: z.enum(['google_places', 'osm', 'mock']).optional(),
   GOOGLE_PLACES_API_KEY: optStr,
   OVERPASS_URL: z.string().default('https://overpass-api.de/api/interpreter'),
+  /** Regionaler OSM-Auszug für die Lead-Suche (leer = nur Overpass); Geofabrik aktualisiert täglich */
+  OSM_EXTRACT_URL: z.string().default('https://download.geofabrik.de/europe/germany/nordrhein-westfalen-latest.osm.pbf'),
+  OSM_EXTRACT_DIR: optStr,
 
   PAYMENT_PROVIDER: z.enum(['stripe', 'mock']).optional(),
   STRIPE_SECRET_KEY: optStr,

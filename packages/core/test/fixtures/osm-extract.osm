@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="wbm-test">
+ <node id="1" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.50" lon="7.40"/>
+ <node id="2" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.50" lon="7.50"/>
+ <node id="3" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.56" lon="7.50"/>
+ <node id="4" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.56" lon="7.40"/>
+ <node id="5" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.50" lon="7.40"/>
+ <node id="6" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.50" lon="7.45"/>
+ <node id="7" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.53" lon="7.45"/>
+ <node id="8" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.53" lon="7.40"/>
+ <node id="30" version="1" timestamp="2024-01-01T00:00:00Z" lat="52.00" lon="8.00"/>
+ <node id="31" version="1" timestamp="2024-01-01T00:00:00Z" lat="52.00" lon="8.10"/>
+ <node id="32" version="1" timestamp="2024-01-01T00:00:00Z" lat="52.10" lon="8.10"/>
+ <node id="33" version="1" timestamp="2024-01-01T00:00:00Z" lat="52.10" lon="8.00"/>
+ <node id="10" version="3" timestamp="2025-05-01T10:00:00Z" lat="51.52" lon="7.42"><tag k="craft" v="painter"/><tag k="name" v="Malerbetrieb Test"/><tag k="addr:street" v="Teststraße"/><tag k="addr:housenumber" v="1"/><tag k="phone" v="0231 123456"/><tag k="fixme" v="egal"/></node>
+ <node id="11" version="1" timestamp="2025-05-01T10:00:00Z" lat="51.60" lon="7.45"><tag k="craft" v="painter"/><tag k="name" v="Maler außerhalb"/></node>
+ <node id="12" version="1" timestamp="2025-05-01T10:00:00Z" lat="51.51" lon="7.48"><tag k="craft" v="painter"/></node>
+ <node id="13" version="1" timestamp="2025-05-01T10:00:00Z" lat="51.51" lon="7.47"><tag k="shop" v="beauty"/><tag k="beauty" v="nails"/><tag k="name" v="Nagelstudio Test"/></node>
+ <node id="14" version="1" timestamp="2025-05-01T10:00:00Z" lat="51.51" lon="7.46"><tag k="shop" v="beauty"/><tag k="name" v="Kosmetik Test"/></node>
+ <node id="15" version="1" timestamp="2025-05-01T10:00:00Z" lat="52.05" lon="8.05"><tag k="craft" v="painter"/><tag k="name" v="Maler im anderen Dortmund"/></node>
+ <node id="20" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.530" lon="7.460"/>
+ <node id="21" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.530" lon="7.461"/>
+ <node id="22" version="1" timestamp="2024-01-01T00:00:00Z" lat="51.531" lon="7.461"/>
+ <way id="100" version="1" timestamp="2024-01-01T00:00:00Z"><nd ref="1"/><nd ref="2"/><nd ref="3"/><nd ref="4"/><nd ref="1"/></way>
+ <way id="101" version="1" timestamp="2024-01-01T00:00:00Z"><nd ref="5"/><nd ref="6"/><nd ref="7"/><nd ref="8"/><nd ref="5"/></way>
+ <way id="102" version="1" timestamp="2024-01-01T00:00:00Z"><nd ref="30"/><nd ref="31"/><nd ref="32"/><nd ref="33"/><nd ref="30"/></way>
+ <way id="200" version="2" timestamp="2025-02-02T00:00:00Z"><nd ref="20"/><nd ref="21"/><nd ref="22"/><nd ref="20"/><tag k="craft" v="painter"/><tag k="name" v="Maler im Gebäude"/><tag k="building" v="yes"/></way>
+ <relation id="1000" version="1" timestamp="2024-01-01T00:00:00Z"><member type="way" ref="100" role="outer"/><tag k="type" v="boundary"/><tag k="boundary" v="administrative"/><tag k="admin_level" v="6"/><tag k="name" v="Dortmund"/><tag k="de:amtlicher_gemeindeschluessel" v="05913000"/></relation>
+ <relation id="1001" version="1" timestamp="2024-01-01T00:00:00Z"><member type="way" ref="101" role="outer"/><tag k="type" v="boundary"/><tag k="boundary" v="postal_code"/><tag k="postal_code" v="44135"/></relation>
+ <relation id="1002" version="1" timestamp="2024-01-01T00:00:00Z"><member type="way" ref="102" role="outer"/><tag k="type" v="boundary"/><tag k="boundary" v="administrative"/><tag k="admin_level" v="8"/><tag k="name" v="Dortmund"/><tag k="de:amtlicher_gemeindeschluessel" v="03999001"/></relation>
+</osm>

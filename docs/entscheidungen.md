@@ -598,3 +598,17 @@ Gefunden und behoben:
 - Übersicht: „Wartet auf dich“ (Demos, Briefe, Anfragen, Meldungen), „Startklar machen“ (8 Schritte mit Links),
   Pipeline in Arbeitsreihenfolge. Einstellungen in Bereiche mit Reitern; offene Pflichtangaben markiert und verlinkt.
   Neuer Bereich „Steuern & Checkout“: der Steuerstatus war bei aktivem Angebot V4 nicht bestätigbar.
+
+### 28.10.2026 – Lead-Suche aus OSM-Auszug statt öffentlicher Overpass-Server
+
+- Erste echte Suche (16 Städte × 6 Branchen) hing: overpass-api.de antwortete auf jede Abfrage mit HTTP 406 (neue
+  Nutzungsregeln/Sperren für größere Nutzer, OSM-Forum), maps.mail.ru mit 504; private.coffee und kumi.systems
+  antworteten nach 2+ Minuten mit 504 bzw. gar nicht.
+- Neu: `OsmExtractLeadSource` – der Worker lädt höchstens wöchentlich den Geofabrik-Auszug NRW
+  (`OSM_EXTRACT_URL`, ODbL, gleiche Namensnennung wie OSM), filtert ihn mit `osmium tags-filter` auf die
+  Branchen-Tags plus Gemeinde- und PLZ-Grenzen, exportiert als GeoJSON-Sequenz und baut einen kleinen Index
+  (`/data/osm`, Docker-Volume). Stadtzuordnung wie bisher über admin_level 6/8 + Gemeindeschlüssel (inkl.
+  Mehrdeutigkeitswarnung), fehlende PLZ aus `boundary=postal_code`. Kein Anschriften-Nachtrag aus Gebäuden mehr
+  (Betriebe ohne Straße bleiben unqualifiziert). Ohne osmium/Auszug: Overpass als Ausweich. Overpass-Kennung jetzt mit
+  Kontakt (`SeitenWerk-LeadFinder/1.0 (+APP_URL; E-Mail)`).
+- Lead-Suche: nur eine gleichzeitig, wartende abbrechbar, Laufzeit bis 3 h, im Formular nur die erste Stadt vorausgewählt.
