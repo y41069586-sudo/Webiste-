@@ -61,20 +61,32 @@ function fixture(branch = 'maler') {
 }
 it('uses the explicitly ordered target sectors, keeping the same templates and inactive choices respected', () => {
   expect(
-    ['maler', 'reinigung', 'fliesenleger', 'gartenbau', 'bodenleger', 'parkettleger', 'entruempelung'].map((b) =>
+    ['maler', 'reinigung', 'fliesenleger', 'gartenbau', 'bodenleger', 'parkettleger', 'entruempelung', 'dachdecker'].map((b) =>
       campaignRank(b),
     ),
-  ).toEqual([1, 2, 3, 4, 4, 4, 4]);
+  ).toEqual([1, 2, 3, 4, 4, 4, 4, 4]);
   expect(campaignRank('restaurant')).toBeNull();
   expect(campaignBranches(DEFAULT_CONFIG.targeting.branches, ACQUISITION_POLICY).map((b) => b.key)).toEqual([
     'maler',
     'reinigung',
     'fliesenleger',
+    'elektriker',
     'gartenbau',
+    'sanitaer',
     'bodenleger',
     'parkettleger',
     'entruempelung',
+    'tischler',
+    'zimmerer',
+    'dachdecker',
+    'heizung',
+    'glaser',
   ]);
+  // Ältere gespeicherte Konfiguration ohne die neueren Kampagnenbranchen: fehlend ≠ abgeschaltet
+  const legacy = DEFAULT_CONFIG.targeting.branches.filter((b) => ['maler', 'restaurant'].includes(b.key));
+  expect(campaignBranches(legacy, ACQUISITION_POLICY, DEFAULT_CONFIG.targeting.branches).map((b) => b.key)).toContain(
+    'fliesenleger',
+  );
   expect(
     campaignBranches(
       [{ ...DEFAULT_CONFIG.targeting.branches.find((b) => b.key === 'maler')!, active: false }],

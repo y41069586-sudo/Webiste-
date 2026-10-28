@@ -74,6 +74,24 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
           </p>
         </Card>
       ) : null}
+      {lead.prescreenReasons?.length ? (
+        <Card title={`Automatische Vorauswahl: ${lead.prescreenScore} / 100`} className="mb-6">
+          <ul className="space-y-2">
+            {lead.prescreenReasons.map((reason) => (
+              <li key={reason.criterion} className="text-sm">
+                <strong>
+                  {reason.points > 0 ? '+' : ''}
+                  {reason.points}
+                </strong>{' '}
+                · {reason.detail}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-slate-500">
+            Ungeprüfte Quellsignale. Ordnet nur die Prüfreihenfolge – ersetzt keine Recherche und gibt nichts frei.
+          </p>
+        </Card>
+      ) : null}
       <PageHeader
         title={lead.businessName}
         subtitle={

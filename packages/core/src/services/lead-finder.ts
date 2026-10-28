@@ -3,7 +3,7 @@ import { setSetting } from '../config/service';
 import { and, eq, gt, ne, or, sql } from 'drizzle-orm';
 import { getEnv } from '../config/env';
 import { getConfig } from '../config/service';
-import type { AppConfig, BranchConfig } from '../config/settings';
+import { DEFAULT_BRANCHES, type AppConfig, type BranchConfig } from '../config/settings';
 import { getDb, type DbOrTx } from '../db/client';
 import { leads, settings } from '../db/schema';
 import { businessHash, normalizeAddress, normalizeBusinessName, segmentKey, businessPhoneKey } from '../leads/normalize';
@@ -19,7 +19,8 @@ import { audit } from './audit';
 import { assertBudgetAvailable, assertNotHalted, recordCost } from './budget';
 import { transitionLead } from './lead-state';
 import { isSuppressed } from './suppression';
-import { campaignBranches, assessAcquisition } from '../leads/acquisition';
+import { campaignBranches, campaignRank, assessAcquisition } from '../leads/acquisition';
+import { prescreen } from '../leads/prescreen';
 import { leadResearch } from './lead-research';
 import { probeOwnWebsite } from '../leads/website-probe';
 
@@ -46,6 +47,10 @@ export interface FindLeadsSummary {
   /** Automatische Website-Vorprüfungen (nur mit targeting.acquisition.websiteProbe) und deren Funde */
   websiteProbes: number;
   websiteProbeHits: number;
+  /** Vorprüfung fand eine wahrscheinliche, aber nicht belegte eigene Website */
+  websiteProbePossible: number;
+  /** Automatische Vorauswahl der qualifizierten bzw. zu prüfenden Leads (leads/prescreen.ts) */
+  prescreenTiers: { top: number; mittel: number; niedrig: number };
   errors: string[];
 }
 
@@ -198,7 +203,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
   const cities = opts.cities?.length ? opts.cities : cfg.targeting.cities;
   const selection =
     cfg.offers.activeVersion === 'v4'
-      ? campaignBranches(cfg.targeting.branches, cfg.targeting.acquisition)
+      ? campaignBranches(cfg.targeting.branches, cfg.targeting.acquisition, DEFAULT_BRANCHES)
       : cfg.targeting.branches.filter((b) => b.active);
   const branches = selection.filter((b) => !opts.branches?.length || opts.branches.includes(b.key));
   const summary: FindLeadsSummary = {
@@ -217,6 +222,8 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
     googleLookups: 0,
     websiteProbes: 0,
     websiteProbeHits: 0,
+    websiteProbePossible: 0,
+    prescreenTiers: { top: 0, mittel: 0, niedrig: 0 },
     errors: [],
   };
 
@@ -269,6 +276,15 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
     }
   }
   summary.found = candidates.length;
+  // Vielversprechende Treffer zuerst: die begrenzte Website-Vorprüfung trifft so die Leads, die zuerst recherchiert werden
+  const policy = cfg.targeting.acquisition;
+  const early = (c: Candidate) =>
+    prescreen({
+      place: c.place,
+      campaignRank: campaignRank(c.branch.key, policy),
+      socialOnly: classifyWebsite(c.place.websiteUri, cfg.filters.socialDomains).socialOnly,
+    }).score;
+  if (policy.websiteProbe && src.primary.kind !== 'mock') candidates.sort((a, b) => early(b) - early(a));
   const chains = await chainNames(db, candidates, cfg.targeting.chainMinCities);
   const firstScan = new Map<string, Date | null>();
   /** Erstes Auftauchen eines Segments (vor diesem Lauf) – Grundlage für „neu aufgetaucht“ */
@@ -365,13 +381,14 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       }
     }
     let placeForQualify = googleWebsite && !place.websiteUri ? { ...place, websiteUri: googleWebsite } : place;
-    // Automatische Vorprüfung auf eine doch vorhandene eigene Website (nie für Mock-Quellen, standardmäßig aus)
-    const policy = cfg.targeting.acquisition;
+    // Automatische Vorprüfung auf eine doch vorhandene eigene Website (nie für Mock-Quellen). Social-/Portal-Links
+    // sind keine eigene Website und werden deshalb ebenfalls geprüft.
+    let probeOutcome: 'found' | 'possible' | 'none' | undefined;
     if (
       policy.websiteProbe &&
       place.source !== 'mock' &&
       prelim.qualified &&
-      !placeForQualify.websiteUri &&
+      !classifyWebsite(placeForQualify.websiteUri, cfg.filters.socialDomains).hasWebsite &&
       summary.websiteProbes < policy.websiteProbeMax
     ) {
       summary.websiteProbes++;
@@ -382,7 +399,19 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
         phone: place.phone,
         street: place.street && place.houseNumber ? `${place.street} ${place.houseNumber}` : place.street,
         postalCode: place.postalCode,
+        emailDomain: place.sourceMeta?.emailDomain,
       });
+      probeOutcome = probe.result;
+      if (probe.result === 'possible') {
+        summary.websiteProbePossible++;
+        await audit(db, {
+          entity: 'lead_candidate',
+          entityId: identity,
+          actor: opts.actor,
+          action: 'website_probe_possible',
+          context: { checkedAt: probe.checkedAt, candidates: probe.candidates.length },
+        });
+      }
       if (probe.result === 'found' && probe.url) {
         summary.websiteProbeHits++;
         placeForQualify = { ...placeForQualify, websiteUri: probe.url };
@@ -410,6 +439,12 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       excludedIndustry,
     });
 
+    const pre = prescreen({
+      place,
+      campaignRank: campaignRank(branch.key, policy),
+      socialOnly: result.website.socialOnly,
+      probe: probeOutcome,
+    });
     // Google-Inhalte (Bewertung, Website, Name/Anschrift) werden NICHT gespeichert – nur place_id
     const persistRating = place.source === 'mock';
     const values = {
@@ -436,6 +471,8 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       rejectionReasons: result.reasons,
       score: result.score,
       scoreReasons: result.scoreReasons,
+      prescreenScore: result.qualified ? pre.score : 0,
+      prescreenReasons: result.qualified ? pre.reasons : null,
       leadSegment: result.segment,
       segmentKey: segKey,
       searchQuery: c.query,
@@ -494,6 +531,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
         });
       }
     });
+    if (target !== 'rejected') summary.prescreenTiers[pre.tier]++;
     if (target === 'qualified') summary.qualified++;
     else if (target === 'discovered') summary.needsReview++;
     else {

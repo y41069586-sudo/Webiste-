@@ -8,18 +8,33 @@ export const acquisitionPolicySchema = z
   .object({
     enabled: z.boolean().default(true),
     primary: z.array(z.string()).default(['maler', 'reinigung', 'fliesenleger']),
-    secondary: z.array(z.string()).default(['gartenbau', 'bodenleger', 'parkettleger', 'entruempelung']),
+    secondary: z
+      .array(z.string())
+      .default([
+        'gartenbau',
+        'bodenleger',
+        'parkettleger',
+        'entruempelung',
+        'sanitaer',
+        'elektriker',
+        'tischler',
+        'zimmerer',
+        'dachdecker',
+        'heizung',
+        'glaser',
+      ]),
     evidenceMaxDays: z.number().int().min(1).max(90).default(30),
     demandMaxDays: z.number().int().min(1).max(180).default(90),
     youngMinMonths: z.number().int().min(0).max(120).default(6),
     youngMaxMonths: z.number().int().min(1).max(120).default(36),
     /**
-     * Automatische Website-Vorprüfung (leads/website-probe.ts): ruft aus dem Namen abgeleitete .de-Domains ab.
-     * Standard aus – externe Abrufe nur nach Freigabe. Ein Fund schließt aus; kein Fund beweist nichts.
+     * Automatische Website-Vorprüfung (leads/website-probe.ts): ruft die E-Mail-Domain und aus dem Namen
+     * abgeleitete .de-Domains je einmal ab. Seit 28.10.2026 auf Wunsch der Betreiberin standardmäßig an
+     * (docs/entscheidungen.md). Ein Fund schließt aus; kein Fund beweist nichts.
      */
-    websiteProbe: z.boolean().default(false),
-    /** Höchstzahl geprüfter Betriebe je Lead-Suche (Zeitlimit: je Betrieb höchstens 4 Abrufe à 5 s) */
-    websiteProbeMax: z.number().int().min(0).max(500).default(50),
+    websiteProbe: z.boolean().default(true),
+    /** Höchstzahl geprüfter Betriebe je Lead-Suche (Zeitlimit: je Betrieb höchstens 5 Abrufe à 5 s) */
+    websiteProbeMax: z.number().int().min(0).max(500).default(150),
   })
   .refine((p) => p.youngMinMonths <= p.youngMaxMonths, 'Altersfenster ist nicht geordnet.');
 export const ACQUISITION_POLICY = acquisitionPolicySchema.parse({});
@@ -133,8 +148,17 @@ export function campaignRank(branch: string, policy = ACQUISITION_POLICY) {
   const first = policy.primary.indexOf(branch);
   return first >= 0 ? first + 1 : policy.secondary.includes(branch) ? policy.primary.length + 1 : null;
 }
-export function campaignBranches(branches: BranchConfig[], policy: AcquisitionPolicy) {
-  return branches
+/**
+ * Branchen der laufenden Kampagne. `known` ergänzt Kampagnenbranchen, die in einer älter gespeicherten
+ * Konfiguration noch gar nicht vorkommen (fehlend ≠ abgeschaltet); ausdrücklich deaktivierte bleiben aus.
+ */
+export function campaignBranches(branches: BranchConfig[], policy: AcquisitionPolicy, known: BranchConfig[] = []) {
+  const missing = policy.enabled
+    ? known
+        .filter((k) => campaignRank(k.key, policy) !== null && !branches.some((b) => b.key === k.key))
+        .map((k) => ({ ...k, active: true }))
+    : [];
+  return [...branches, ...missing]
     .filter((b) => b.active && (!policy.enabled || campaignRank(b.key, policy) !== null))
     .sort((a, b) => (campaignRank(a.key, policy) ?? 99) - (campaignRank(b.key, policy) ?? 99));
 }

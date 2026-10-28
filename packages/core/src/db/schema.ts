@@ -87,6 +87,9 @@ export const leads = pgTable(
     rejectionReasons: jsonb('rejection_reasons').$type<string[]>().default([]).notNull(),
     score: doublePrecision('score').default(0).notNull(),
     scoreReasons: jsonb('score_reasons').$type<import('../leads/priority-v4').PriorityReason[] | null>(),
+    /** Automatische Vorauswahl aus ungeprüften Quellsignalen (0–100); ordnet die Prüfreihenfolge, gibt nichts frei */
+    prescreenScore: integer('prescreen_score').default(0).notNull(),
+    prescreenReasons: jsonb('prescreen_reasons').$type<import('../leads/prescreen').PrescreenReason[] | null>(),
     segmentKey: text('segment_key').notNull(),
     /** Token für QR-Code (/q/{token}) – zufällig, nicht erratbar */
     trackToken: text('track_token').notNull(),
@@ -123,6 +126,7 @@ export const leads = pgTable(
     index('leads_status_idx').on(t.status),
     index('leads_segment_idx').on(t.segmentKey),
     index('leads_score_idx').on(t.score),
+    index('leads_prescreen_idx').on(t.prescreenScore),
     index('leads_identity_idx').on(t.identityHash),
   ],
 );

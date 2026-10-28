@@ -64,6 +64,38 @@ describe('Website-Vorprüfung (ohne Netz)', () => {
     expect(calls.every((u) => /^https:\/\/[a-z0-9-]+\.de\/$/.test(u))).toBe(true);
   });
 
+  it('prüft die geschäftliche E-Mail-Domain zuerst und meldet eine echte Seite dort als „möglich“', async () => {
+    const calls: string[] = [];
+    const text = '<h1>Willkommen</h1>' + '<p>Wir streichen, tapezieren und renovieren seit Jahren.</p>'.repeat(5);
+    const res = await probeOwnWebsite(
+      { ...subject, emailDomain: 'kowalski-farbe.com' },
+      {
+        fetchImpl: fakeFetch({ 'kowalski-farbe.com': text }, calls),
+      },
+    );
+    expect(calls[0]).toBe('https://kowalski-farbe.com/');
+    expect(res).toMatchObject({ result: 'possible', url: 'https://kowalski-farbe.com/' });
+    // Geparkte Domain ist kein Hinweis
+    const parked = await probeOwnWebsite(
+      { ...subject, emailDomain: 'kowalski-farbe.com' },
+      {
+        fetchImpl: fakeFetch({ 'kowalski-farbe.com': '<p>This domain may be for sale.</p>' + 'x '.repeat(200) }),
+      },
+    );
+    expect(parked.result).toBe('none');
+  });
+
+  it('Namens-Domain mit Firmenname und Stadt ist „möglich“, Name allein nicht', async () => {
+    const page = (city: string) =>
+      `<title>Malerbetrieb Kowalski</title><p>Ihr Malerbetrieb Kowalski in ${city}. ` +
+      'Wir freuen uns auf Ihre Anfrage. '.repeat(10) +
+      '</p>';
+    const possible = await probeOwnWebsite(subject, { fetchImpl: fakeFetch({ 'malerbetrieb-kowalski.de': page('Dortmund') }) });
+    expect(possible.result).toBe('possible');
+    const elsewhere = await probeOwnWebsite(subject, { fetchImpl: fakeFetch({ 'malerbetrieb-kowalski.de': page('München') }) });
+    expect(elsewhere.result).toBe('none');
+  });
+
   it('ruft ohne Telefon und vollständige Anschrift gar nichts ab', async () => {
     const calls: string[] = [];
     const res = await probeOwnWebsite({ ...subject, phone: null, street: null }, { fetchImpl: fakeFetch({}, calls) });
@@ -72,19 +104,19 @@ describe('Website-Vorprüfung (ohne Netz)', () => {
   });
 });
 
-describe('Lead-Finder: Vorprüfung nur mit Schalter und nie für Mock-Quellen', () => {
+describe('Lead-Finder: Vorprüfung mit Schalter und nie für Mock-Quellen', () => {
   beforeEach(resetDb);
   afterEach(() => vi.restoreAllMocks());
 
-  it('Standard: Schalter aus, keine Abrufe', async () => {
+  it('Standard: Schalter an, aber Mock-Quelle wird nie geprüft', async () => {
     const spy = vi.spyOn(globalThis, 'fetch');
     const s = await findLeads({ actor: 'job:test', branches: ['maler'] });
     expect(s.websiteProbes).toBe(0);
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it('Schalter an: Mock-Quelle wird trotzdem nicht geprüft', async () => {
-    await updateConfig({ targeting: { acquisition: { websiteProbe: true } } }, 'test');
+  it('Schalter aus: keine Abrufe', async () => {
+    await updateConfig({ targeting: { acquisition: { websiteProbe: false } } }, 'test');
     const spy = vi.spyOn(globalThis, 'fetch');
     const s = await findLeads({ actor: 'job:test', branches: ['maler'] });
     expect(s.websiteProbes).toBe(0);

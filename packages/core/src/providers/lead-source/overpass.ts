@@ -2,12 +2,14 @@ import { logger } from '../../logger';
 import { formatPhoneDe } from '../../leads/normalize';
 import { parseOsmOpeningHours } from '../../leads/opening-hours';
 import { HttpError, withRetry } from '../../util/retry';
-import type { LeadSearchQuery, LeadSearchResult, LeadSource, RawPlace } from '../types';
+import type { LeadSearchQuery, LeadSearchResult, LeadSource, RawPlace, SourceMeta } from '../types';
 
 interface OsmElement {
   type: 'node' | 'way' | 'relation' | 'area';
   id: number;
   tags?: Record<string, string>;
+  /** Nur mit `out … meta`: Zeitpunkt der letzten Bearbeitung (Bearbeiter-Felder werden ignoriert) */
+  timestamp?: string;
 }
 
 /**
@@ -107,11 +109,65 @@ area["name"=${q(city)}]["boundary"="administrative"]["admin_level"~"^(6|8)$"]->.
 (
 ${filters}
 );
-out center tags;`;
+out center tags meta;`;
 }
 
 /** OSM-Schlüssel, die für Branchen-Zuordnung und Ausschluss (Playbooks) gebraucht werden */
 const CLASSIFY_KEYS = ['amenity', 'shop', 'craft', 'leisure', 'healthcare', 'office', 'beauty', 'sport'] as const;
+
+const FREEMAIL = new Set(
+  'gmail.com googlemail.com web.de gmx.de gmx.net gmx.com gmx.at t-online.de outlook.com outlook.de hotmail.com hotmail.de live.com live.de yahoo.com yahoo.de ymail.com icloud.com me.com aol.com aol.de freenet.de mail.de mail.com posteo.de arcor.de online.de email.de protonmail.com proton.me vodafone.de kabelmail.de 1und1.de ewe.net'.split(
+    ' ',
+  ),
+);
+
+/** ISO-Datum (YYYY, YYYY-MM oder YYYY-MM-DD) aus einem OSM-Datumsfeld, sonst undefined. */
+function osmDate(v: string | undefined): string | undefined {
+  const m = /^\s*(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?/.exec(v ?? '');
+  if (!m) return undefined;
+  const year = Number(m[1]);
+  return year >= 1800 && year <= 2100 ? [m[1], m[2], m[3]].filter(Boolean).join('-') : undefined;
+}
+
+/**
+ * Ungeprüfte Aktivitäts- und Kontaktsignale für die Vorauswahl. Von einer E-Mail-Adresse wird nur die Domain
+ * behalten; Freemail-Domains gelten als „keine eigene Domain“ und werden als `freemail` markiert.
+ */
+export function osmSourceMeta(el: OsmElement): SourceMeta {
+  const t = el.tags ?? {};
+  const email = (t.email ?? t['contact:email'] ?? '')
+    .split(/[;,\s]/)[0]!
+    .trim()
+    .toLowerCase();
+  const domain = /^[^@\s]+@([a-z0-9.-]+\.[a-z]{2,})$/.exec(email)?.[1];
+  const checked = [
+    'check_date',
+    'survey:date',
+    'check_date:opening_hours',
+    'opening_hours:check_date',
+    'lastcheck',
+    'last_checked',
+  ]
+    .map((k) => osmDate(t[k]))
+    .filter((d): d is string => Boolean(d))
+    .sort()
+    .pop();
+  const socialLinks = [
+    'contact:instagram',
+    'contact:facebook',
+    'contact:tiktok',
+    'contact:youtube',
+    'contact:linkedin',
+    'contact:xing',
+  ].filter((k) => t[k]?.trim()).length;
+  return {
+    ...(el.timestamp && !Number.isNaN(Date.parse(el.timestamp)) ? { lastEditedAt: el.timestamp } : {}),
+    ...(checked ? { checkedOn: checked } : {}),
+    ...(osmDate(t.start_date) ? { startDate: osmDate(t.start_date) } : {}),
+    ...(domain ? { emailDomain: FREEMAIL.has(domain) ? 'freemail' : domain } : {}),
+    ...(socialLinks ? { socialLinks } : {}),
+  };
+}
 
 /** OSM-Element → RawPlace. Website/Social-Tags werden für die Qualifizierung übernommen. */
 export function osmElementToPlace(el: OsmElement, fallbackCity: string): RawPlace | null {
@@ -140,6 +196,7 @@ export function osmElementToPlace(el: OsmElement, fallbackCity: string): RawPlac
     types: [t.craft, t.shop, t.beauty].filter((x): x is string => Boolean(x)),
     osmTags: Object.fromEntries(CLASSIFY_KEYS.filter((k) => t[k]).map((k) => [k, t[k]!])),
     openingHours: parseOsmOpeningHours(t.opening_hours),
+    sourceMeta: osmSourceMeta(el),
     ...(/^#[0-9a-f]{6}$/i.test(t['brand:colour'] ?? '')
       ? { designHint: { primaryColor: t['brand:colour']!, sourceRef: `https://www.openstreetmap.org/${el.type}/${el.id}` } }
       : {}),
@@ -190,7 +247,7 @@ export class OverpassLeadSource implements LeadSource {
   async refresh(sourceId: string): Promise<{ place: RawPlace | null; costCents: number }> {
     const m = /^(node|way|relation)\/(\d+)$/.exec(sourceId);
     if (!m) return { place: null, costCents: 0 };
-    const ql = `[out:json][timeout:60];\n${m[1]}(${m[2]});\nout center tags;`;
+    const ql = `[out:json][timeout:60];\n${m[1]}(${m[2]});\nout center tags meta;`;
     let lastErr: unknown;
     for (const endpoint of this.endpoints) {
       try {

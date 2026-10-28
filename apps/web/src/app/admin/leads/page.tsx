@@ -1,6 +1,15 @@
 import Link from 'next/link';
 import { and, desc, eq, ilike, sql, type SQL } from 'drizzle-orm';
-import { getConfig, getDb, LEAD_STATUSES, REJECTION_LABELS, REJECTION_REASONS, schema, type RejectionReason } from '@wbm/core';
+import {
+  DEFAULT_BRANCHES,
+  getConfig,
+  getDb,
+  LEAD_STATUSES,
+  REJECTION_LABELS,
+  REJECTION_REASONS,
+  schema,
+  type RejectionReason,
+} from '@wbm/core';
 import { Card, PageHeader, StatusBadge, Table, Td, btn, input, label } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, num } from '@/lib/format';
@@ -29,7 +38,14 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       .select()
       .from(L)
       .where(where)
-      .orderBy(sp.sample ? sql`random()` : desc(L.score))
+      .orderBy(
+        ...(sp.sample
+          ? [sql`random()`]
+          : // Prüf-Warteschlange: automatische Vorauswahl zuerst, sonst der belegte Eignungs-Score
+            sp.status === 'discovered'
+            ? [desc(L.prescreenScore), desc(L.score)]
+            : [desc(L.score), desc(L.prescreenScore)]),
+      )
       .limit(sp.sample ? 20 : pageSize)
       .offset(sp.sample ? 0 : (page - 1) * pageSize),
     db
@@ -143,7 +159,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       </div>
 
       <Card>
-        <Table head={['Betrieb', 'Branche', 'Anschrift', 'Status', 'Gründe', 'Score', 'Quelle', 'Gefunden']}>
+        <Table head={['Betrieb', 'Branche', 'Anschrift', 'Status', 'Gründe', 'Score', 'Vorauswahl', 'Quelle', 'Gefunden']}>
           {rows.map((l) => (
             <tr key={l.id} className="hover:bg-slate-50">
               <Td>
@@ -152,7 +168,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                 </Link>
                 {l.socialOnly ? <div className="text-xs text-slate-500">nur Social Media</div> : null}
               </Td>
-              <Td>{cfg.targeting.branches.find((b) => b.key === l.branch)?.label ?? l.branch}</Td>
+              <Td>{[...cfg.targeting.branches, ...DEFAULT_BRANCHES].find((b) => b.key === l.branch)?.label ?? l.branch}</Td>
               <Td className="text-xs">
                 {l.street} {l.houseNumber}
                 <br />
@@ -167,6 +183,11 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
               <Td className="tabular-nums">
                 {l.score}
                 {l.scoreReasons?.some((r) => r.criterion === 'suitability') ? ' / 100' : ''}
+              </Td>
+              <Td className="tabular-nums">
+                <span title={l.prescreenReasons?.map((r) => `${r.points > 0 ? '+' : ''}${r.points} ${r.detail}`).join('\n')}>
+                  {l.prescreenReasons ? l.prescreenScore : '–'}
+                </span>
               </Td>
               <Td className="text-xs">{l.source}</Td>
               <Td className="text-xs whitespace-nowrap">{dt(l.createdAt)}</Td>

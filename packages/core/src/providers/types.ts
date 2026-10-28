@@ -30,6 +30,21 @@ export interface RawPlace {
   openingHours?: OpeningHours | null;
   /** Minimal styling hint from the permitted source, not a verified brand identity. */
   designHint?: { primaryColor: string; sourceRef: string };
+  /** Ungeprüfte Aktivitäts-/Kontaktsignale der Quelle für die automatische Vorauswahl (leads/prescreen.ts) */
+  sourceMeta?: SourceMeta;
+}
+
+export interface SourceMeta {
+  /** Letzte Bearbeitung des Eintrags (OSM-Metadaten; keine Bearbeiter-Daten) */
+  lastEditedAt?: string;
+  /** Letzte Vor-Ort-/Inhaltsprüfung laut Eintrag (check_date, survey:date …), ISO-Datum */
+  checkedOn?: string;
+  /** Angegebener Beginn der Geschäftstätigkeit (start_date), ISO-Datum oder Jahr */
+  startDate?: string;
+  /** Domain einer angegebenen geschäftlichen E-Mail-Adresse (keine Adresse selbst) */
+  emailDomain?: string;
+  /** Anzahl angegebener Social-/Profil-Links */
+  socialLinks?: number;
 }
 
 export interface LeadSearchQuery {

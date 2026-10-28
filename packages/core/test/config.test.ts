@@ -52,6 +52,12 @@ describe('Konfiguration', () => {
       'handwerk',
       'handwerk',
       'handwerk',
+      // Weitere Handwerksbranchen vom 28.10.2026 (Tischler, Zimmerer, Dachdecker, Heizung, Glaser)
+      'handwerk',
+      'handwerk',
+      'handwerk',
+      'handwerk',
+      'handwerk',
     ]);
   });
 

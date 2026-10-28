@@ -1,13 +1,17 @@
 import { domainCandidates } from '../letters/domain';
+import { foldUmlauts, normalizeBusinessName } from './normalize';
 
 /**
  * Automatische Vorprüfung „hat der Betrieb doch eine eigene Website?“ (Akquise-Restaufgabe A).
  *
- * Ruft höchstens `maxCandidates` aus dem Firmennamen abgeleitete .de-Domains einmal ab und meldet nur dann
- * einen Fund, wenn die Seite die Telefonnummer des Betriebs oder Postleitzahl UND Straße enthält – ein
- * ähnlicher Name allein ist kein Beleg (gleichnamige Betriebe anderswo). Ein Fund schließt den Lead über die
- * bestehende Qualifizierung aus; kein Fund beweist NICHTS und ersetzt nicht die manuelle Prüfung über
- * Name/Ort, Telefon, Verzeichnis- und Profillinks (WEBSITE_METHODS). Keine Wiederholung, harte Zeit-/Größenlimits.
+ * Ruft zuerst die Domain einer angegebenen geschäftlichen E-Mail-Adresse ab (stärkster Hinweis auf eine eigene
+ * Website), danach höchstens `maxCandidates` aus dem Firmennamen abgeleitete .de-Domains – jede einmal.
+ * - `found`: Die Seite enthält die Telefonnummer des Betriebs oder Postleitzahl UND Straße. Schließt den Lead aus.
+ * - `possible`: Die E-Mail-Domain liefert eine echte (nicht geparkte) Seite, oder eine Namens-Domain zeigt
+ *   Firmenname und Stadt. Kein Beleg (gleichnamige Betriebe anderswo) – der Lead rutscht in der Vorauswahl nach
+ *   hinten und muss vor allem anderen geprüft werden.
+ * - `none`: nichts gefunden. Das beweist NICHTS und ersetzt nicht die manuelle Prüfung über Name/Ort, Telefon,
+ *   Verzeichnis- und Profillinks (WEBSITE_METHODS). Keine Wiederholung, harte Zeit-/Größenlimits.
  */
 export interface WebsiteProbeSubject {
   businessName: string;
@@ -16,11 +20,13 @@ export interface WebsiteProbeSubject {
   phone?: string | null;
   street?: string | null;
   postalCode?: string | null;
+  /** Domain der geschäftlichen E-Mail-Adresse (ohne Freemail), wird zuerst geprüft */
+  emailDomain?: string | null;
 }
 
 export interface WebsiteProbeResult {
-  result: 'found' | 'none';
-  /** Gefundene Seite (nur bei `found`) */
+  result: 'found' | 'possible' | 'none';
+  /** Gefundene Seite (bei `found` und `possible`) */
   url?: string;
   /** Welche Betriebsangabe auf der Seite stand */
   matched: ('phone' | 'address')[];
@@ -76,6 +82,59 @@ export function matchBusiness(text: string, subject: WebsiteProbeSubject): ('pho
   return matched;
 }
 
+const PARKED =
+  /domain (is )?(for sale|parked|zu verkaufen)|diese domain (kaufen|steht zum verkauf|wurde registriert)|\bsedo\b|parkingcrew|bodis|dan\.com|this domain may be for sale|default (web )?page|coming soon|under construction|in k(ue|ü)rze online|hier entsteht|website (ist )?in arbeit|wartungsmodus|ihr neuer webspace|webspace (ist )?eingerichtet|index of \//i;
+
+const GENERIC_TOKENS = new Set([
+  'und',
+  'der',
+  'die',
+  'das',
+  'von',
+  'fuer',
+  'service',
+  'team',
+  'haus',
+  'meister',
+  'betrieb',
+  'firma',
+  'malerbetrieb',
+  'maler',
+  'malermeister',
+  'reinigung',
+  'gebaeudereinigung',
+  'fliesen',
+  'fliesenleger',
+  'garten',
+  'gartenbau',
+  'boden',
+  'bodenleger',
+  'parkett',
+  'entruempelung',
+  'handwerk',
+  'dienstleistungen',
+]);
+
+/** Unterscheidende Namensbestandteile (≥ 4 Zeichen, ohne Rechtsform, Branche, Stadt). */
+export function distinctiveTokens(name: string, city: string): string[] {
+  const c = foldUmlauts(city).replace(/[^a-z0-9]+/g, '');
+  return normalizeBusinessName(name)
+    .split(' ')
+    .filter((t) => t.length >= 4 && !GENERIC_TOKENS.has(t) && t !== c)
+    .slice(0, 3);
+}
+
+/** Seite zeigt Firmennamen (alle unterscheidenden Bestandteile) und die Stadt – Hinweis, kein Beleg. */
+export function looksLikeBusiness(text: string, subject: WebsiteProbeSubject): boolean {
+  const tokens = distinctiveTokens(subject.businessName, subject.city);
+  if (!tokens.length) return false;
+  const flat = foldUmlauts(text).replace(/[^a-z0-9]+/g, ' ');
+  const words = new Set(flat.split(' '));
+  return (
+    tokens.every((t) => words.has(t) || flat.includes(` ${t}`)) && words.has(foldUmlauts(subject.city).replace(/[^a-z0-9]+/g, ''))
+  );
+}
+
 function visible(html: string): string {
   return html
     .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
@@ -105,16 +164,20 @@ export async function probeOwnWebsite(subject: WebsiteProbeSubject, opts: Websit
   const fetchImpl = opts.fetchImpl ?? fetch;
   const timeoutMs = opts.timeoutMs ?? 5000;
   const maxBytes = opts.maxBytes ?? 250_000;
-  const candidates = domainCandidates(subject.businessName, { city: subject.city, branch: subject.branch }).slice(
-    0,
-    opts.maxCandidates ?? 4,
-  );
+  const emailDomain = subject.emailDomain?.toLowerCase().replace(/^www\./, '') ?? '';
+  const ownDomain = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(emailDomain) && emailDomain !== 'freemail' ? emailDomain : null;
+  const named = domainCandidates(subject.businessName, { city: subject.city, branch: subject.branch })
+    .filter((d) => d !== ownDomain)
+    .slice(0, opts.maxCandidates ?? 4);
+  const candidates = ownDomain ? [ownDomain, ...named] : named;
   const checkedAt = (opts.now?.() ?? new Date()).toISOString();
-  // Ohne Telefon und ohne vollständige Anschrift kann nichts belegt werden – dann gar nicht abrufen
-  if (!phoneDigits(subject.phone) && !(subject.postalCode && subject.street))
+  // Ohne Telefon, vollständige Anschrift und eigene E-Mail-Domain kann nichts belegt werden – dann gar nicht abrufen
+  if (!phoneDigits(subject.phone) && !(subject.postalCode && subject.street) && !ownDomain)
     return { result: 'none', matched: [], candidates, checkedAt };
+  let possible: string | undefined;
   for (const domain of candidates) {
-    if (!/^[a-z0-9-]+\.de$/.test(domain)) continue;
+    const isOwn = domain === ownDomain;
+    if (!isOwn && !/^[a-z0-9-]+\.de$/.test(domain)) continue;
     const url = `https://${domain}/`;
     try {
       const res = await fetchImpl(url, {
@@ -126,11 +189,16 @@ export async function probeOwnWebsite(subject: WebsiteProbeSubject, opts: Websit
         await res.body?.cancel().catch(() => undefined);
         continue;
       }
-      const matched = matchBusiness(visible(await readLimited(res, maxBytes)), subject);
+      const text = visible(await readLimited(res, maxBytes));
+      const matched = matchBusiness(text, subject);
       if (matched.length) return { result: 'found', url: res.url || url, matched, candidates, checkedAt };
+      const real = text.trim().length >= 200 && !PARKED.test(text);
+      if (!possible && real && (isOwn || looksLikeBusiness(text, subject))) possible = res.url || url;
     } catch {
       // DNS-/TLS-/Zeitfehler: Domain gilt als nicht belegt, keine Wiederholung
     }
   }
-  return { result: 'none', matched: [], candidates, checkedAt };
+  return possible
+    ? { result: 'possible', url: possible, matched: [], candidates, checkedAt }
+    : { result: 'none', matched: [], candidates, checkedAt };
 }

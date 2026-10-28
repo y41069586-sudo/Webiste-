@@ -9,7 +9,7 @@ describe('Overpass (OSM)', () => {
     const q = buildOverpassQuery('Dortmund', DEFAULT_CONFIG.targeting.branches[0]!.osmTags);
     expect(q).toContain('area["name"="Dortmund"]["boundary"="administrative"]');
     expect(q).toContain('nwr["shop"="beauty"]["beauty"="nails"](area.a);');
-    expect(q).toContain('out center tags;');
+    expect(q).toContain('out center tags meta;');
   });
 
   it('wandelt Elemente in Rohdaten um (Website, Social, Öffnungszeiten, Telefon)', () => {

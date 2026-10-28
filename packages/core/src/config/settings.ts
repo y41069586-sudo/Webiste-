@@ -495,6 +495,13 @@ export const DEFAULT_BRANCHES: BranchConfig[] = [
       ['bodenleger', 'Bodenleger', 'floorer', ['Bodenleger', 'Bodenverlegung']],
       ['parkettleger', 'Parkettleger', 'parquet_layer', ['Parkettleger']],
       ['entruempelung', 'Entrümpelungsunternehmen', 'clearance', ['Entrümpelung', 'Haushaltsauflösung']],
+      // Weitere Handwerksbranchen (28.10.2026): in Dortmund liefert OSM für die Kampagnen-Kernbranchen nur
+      // eine Handvoll adressierbarer Betriebe ohne Website (docs/entscheidungen.md)
+      ['tischler', 'Tischlerei', 'joiner|cabinet_maker', ['Tischlerei', 'Schreinerei']],
+      ['zimmerer', 'Zimmerei', 'carpenter', ['Zimmerei']],
+      ['dachdecker', 'Dachdeckerbetrieb', 'roofer', ['Dachdecker']],
+      ['heizung', 'Heizungs- und Klimatechnik', 'hvac', ['Heizungsbau', 'Klimatechnik']],
+      ['glaser', 'Glaserei', 'glaziery', ['Glaserei']],
     ] as const
   ).map(([key, label, craft, queries]) => ({
     key,
@@ -502,7 +509,7 @@ export const DEFAULT_BRANCHES: BranchConfig[] = [
     group: 'handwerk' as const,
     industry: 'handwerk' as const,
     queries: [...queries],
-    osmTags: [{ key: 'craft', value: craft }],
+    osmTags: craft.split('|').map((value) => ({ key: 'craft', value })),
     googleTypes: [],
     weight: 1,
     active: false,

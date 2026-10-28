@@ -469,3 +469,39 @@ Betreiber: Brief bei Go-Live mit KI-Schlüssel pro Betrieb persönlich. Umsetzun
   (Absatz-Erkennung passte nicht mehr); er wird jetzt systemseitig wörtlich angehängt.
 - Einseitigkeit: zusätzliche Kürzungsstufe (Eigentums-Zusatz entfällt vor dem P. S.), Pflichttexte nie gekürzt.
 - Admin-Recherche: Hinweis, Befunde als kurzen sachlichen Sie-Satz einzutragen.
+
+### 28.10.2026 – Lead-Suche: Vorauswahl, stärkere Website-Prüfung, alle Kampagnenbranchen
+
+Auftrag der Betreiberin: Lead-Suche deutlich verbessern; ohne zulässige Bewertungsquelle traf die Auswahl auch
+mittelmäßige oder bewusst website-lose Betriebe.
+
+Messung (OpenStreetMap, Raum Dortmund, 28.10.2026, Einträge mit Name, ohne Website, ohne Adress-Anreicherung):
+Maler 13 (5 mit vollständiger Anschrift), Reinigung 2 (1), Fliesen/Boden/Parkett 0, Garten 7 (1), Sanitär 11 (3),
+Tischler 7 (2), Dachdecker 6 (2), Heizung 5 (4), Glaser 3 (2); zum Vergleich Friseur 341 (120), Kosmetik 143 (36),
+Kfz-Werkstatt 88 (57). Die Handwerks-Kampagne ist in Dortmund durch die OSM-Abdeckung begrenzt, nicht durch die
+Filter.
+
+Gefunden: Die gespeicherte Produktionskonfiguration stammt aus einer älteren Fassung und enthält die Kampagnen-
+branchen Reinigung, Fliesen, Garten, Boden, Parkett, Entrümpelung gar nicht – die V4-Suche hätte nur Maler gesucht.
+
+Umgesetzt:
+
+- `campaignBranches`: In der gespeicherten Konfiguration fehlende Kampagnenbranchen werden aus den Standards ergänzt
+  (fehlend ≠ abgeschaltet); ausdrücklich deaktivierte bleiben aus.
+- Weitere Handwerksbranchen als Kampagne „sekundär“: Sanitär, Elektriker, Tischler/Schreiner, Zimmerer, Dachdecker,
+  Heizung/Klima, Glaser.
+- Overpass liest `meta` (nur Zeitpunkt der letzten Bearbeitung; Bearbeiter-Daten werden verworfen) sowie
+  check_date/survey:date, start_date, Social-Links und von einer E-Mail nur die Domain (Freemail → „keine eigene
+  Domain“).
+- Neue automatische Vorauswahl `leads/prescreen.ts` (0–100, eigene Spalten `prescreen_score`/`prescreen_reasons`,
+  Migration 0020, rein additiv): Kampagnenrang, Telefon, Öffnungszeiten, Aktivität (Eintrag ≤ 24 Monate geprüft/
+  bearbeitet; > 5 Jahre unverändert = Abzug), online aktiv ohne eigene Website, Freemail-Kontakt, junger Betrieb
+  (6–36 Monate), Abzug bei möglicher eigener Website. Ordnet nur die Prüfreihenfolge (Admin-Warteschlange
+  „discovered“ sortiert danach), ersetzt keine Recherche, gibt nichts frei, ist keine Kaufwahrscheinlichkeit.
+- Website-Vorprüfung jetzt standardmäßig an (Freigabe durch den Auftrag): prüft zuerst die Domain der geschäftlichen
+  E-Mail, dann bis zu 4 Namens-Domains; neues Ergebnis „möglich“ (echte, nicht geparkte Seite unter der E-Mail-Domain
+  oder Firmenname + Stadt auf einer Namens-Domain) → Abzug in der Vorauswahl statt Ausschluss. Social-only-Leads
+  werden jetzt ebenfalls geprüft. Höchstens 150 Betriebe je Lauf, die vielversprechendsten zuerst.
+
+Vor dem nächsten Deploy der Admin-App: Migration 0020 auf Supabase anwenden (Spalten werden von der Lead-Liste
+gelesen). Offen zur Entscheidung: weitere Städte (Ruhrgebiet) und/oder Beauty (Friseur/Kosmetik) in die Kampagne.
