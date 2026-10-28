@@ -519,3 +519,9 @@ Deutschland; Beauty (Friseur, Kosmetik) zusätzlich.
 - Für „ganz Deutschland“ reicht die Schleife Stadt × Branche nicht (Fair-Use der Overpass-Instanz); dafür später
   Abfragen je Bundesland/Kreis statt je Stadt.
 
+
+Stand Produktion 28.10.2026 (von der Betreiberin im Supabase SQL Editor ausgeführt, danach rein lesend geprüft):
+Rechtstexte v4-2026-10-28 übernommen, 16 Städte mit `agsPrefix` „05“, Migrationen 0011–0020 eingespielt
+(21 Einträge in `drizzle.__drizzle_migrations`, Vorauswahl-Spalten vorhanden, Backend-Rolle liest alle Tabellen).
+Die Migrationsdatei wurde vorher lokal gegen den Stand „11 Migrationen + Supabase-Rollen“ geprobt: Schema danach
+identisch mit Neuinstallation, regulärer Migrator anschließend ohne Änderung.
