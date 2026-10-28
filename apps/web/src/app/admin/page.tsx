@@ -1,7 +1,7 @@
 import { AdminArrow } from '@/components/admin-arrow';
 import Link from 'next/link';
 import { desc, isNull, sql } from 'drizzle-orm';
-import { budgetStatus, getConfig, getDb, goLiveBlockers, schema, systemHealth } from '@wbm/core';
+import { budgetStatus, getConfig, getDb, goLiveBlockers, letterBlockers, schema, systemHealth } from '@wbm/core';
 import { Card, Notice, PageHeader, Stat, StatusBadge } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur, num } from '@/lib/format';
@@ -25,6 +25,7 @@ export default async function Dashboard() {
     getConfig(),
   ]);
   const blockers = goLiveBlockers(cfg);
+  const letterBlocked = letterBlockers(cfg);
   const counts = Object.fromEntries(byStatus.map((r) => [r.status, r.n]));
   const total = byStatus.reduce((a, r) => a + r.n, 0);
   return (
@@ -78,11 +79,19 @@ export default async function Dashboard() {
           </Notice>
         </div>
       ) : null}
+      {letterBlocked.length ? (
+        <div className="mb-6">
+          <Notice kind="warn">
+            <strong>Echte Briefe gesperrt</strong> – es fehlt: {letterBlocked.map((b) => b.label).join(' · ')}. Einstellungen →
+            Absender bzw. Rechtstexte übernehmen.
+          </Notice>
+        </div>
+      ) : null}
       {blockers.length ? (
         <div className="mb-6">
           <Notice kind="warn">
-            <strong>Livegang gesperrt</strong> (echte Briefe an Leads, Live-Checkout) – es fehlt:{' '}
-            {blockers.map((b) => b.label).join(' · ')}. Einstellungen → Absender bzw. Rechtstexte.
+            <strong>Verkauf gesperrt</strong> (Live-Checkout und Rechnungen) – es fehlt:{' '}
+            {blockers.map((b) => b.label).join(' · ')}.
           </Notice>
         </div>
       ) : null}

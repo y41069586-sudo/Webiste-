@@ -12,7 +12,7 @@ import { addBusinessDays, addDays } from '../util/time';
 import { audit } from './audit';
 import { BudgetExceededError, KillSwitchError, raiseAlert, releaseReservation, reserveBudget, settleCost } from './budget';
 import { currentDemoForLead, extendDemoExpiry, extendDemoUntil } from './demo-review';
-import { GoLiveBlockedError, goLiveBlockers } from './readiness';
+import { GoLiveBlockedError, letterBlockers } from './readiness';
 import { transitionLead } from './lead-state';
 
 export class SendBlockedError extends Error {
@@ -164,9 +164,9 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     await providerTestJobCount(provider.name, db),
   );
   if (gate) throw new SendBlockedError(gate);
-  // Echte Briefe an Leads erst, wenn Absenderdaten, Rechtstexte und AGB vollständig sind
+  // Echte Briefe an Leads erst, wenn Absenderdaten, Impressum und Datenschutz vollständig sind (Verkauf separat gesperrt)
   if (!letter.isTest && !sw.dryRun) {
-    const blockers = goLiveBlockers(cfg);
+    const blockers = letterBlockers(cfg);
     if (blockers.length) throw new SendBlockedError(new GoLiveBlockedError(blockers).message);
   }
 

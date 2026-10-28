@@ -35,6 +35,17 @@ export function goLiveBlockers(cfg: AppConfig): GoLiveBlocker[] {
   return out;
 }
 
+/** Nur für Rechnungen und den Live-Checkout nötig – Briefversand hängt nicht daran (Betreiberentscheidung 28.10.2026) */
+const SALES_ONLY = new Set(['tax.operatorConfirmed', 'sender.taxNumber', 'sender.bankIban', 'legal.termsMarkdown']);
+
+/**
+ * Was vor echten Briefen an Leads fehlt: Absenderangaben (Brief, Art.-14-Hinweis), Impressum und
+ * Datenschutzerklärung. Steuer-/Rechnungsangaben und AGB sperren weiterhin nur den Verkauf.
+ */
+export function letterBlockers(cfg: AppConfig): GoLiveBlocker[] {
+  return goLiveBlockers(cfg).filter((b) => !SALES_ONLY.has(b.key));
+}
+
 export class GoLiveBlockedError extends Error {
   constructor(public readonly blockers: GoLiveBlocker[]) {
     super(`Livegang gesperrt – es fehlt: ${blockers.map((b) => b.label).join(', ')}`);
