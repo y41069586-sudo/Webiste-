@@ -53,9 +53,10 @@ export default async function JobsPage() {
             <fieldset>
               <legend className="mb-1 text-xs font-medium text-slate-600">Städte</legend>
               <div className="flex flex-wrap gap-3">
-                {cfg.targeting.cities.map((c) => (
+                {cfg.targeting.cities.map((c, i) => (
                   <label key={c} className="flex items-center gap-1 text-sm">
-                    <input type="checkbox" name="cities" value={c} defaultChecked /> {c}
+                    {/* Vorauswahl nur die erste Stadt: jede weitere Stadt verlängert die Suche deutlich */}
+                    <input type="checkbox" name="cities" value={c} defaultChecked={i === 0} /> {c}
                   </label>
                 ))}
               </div>

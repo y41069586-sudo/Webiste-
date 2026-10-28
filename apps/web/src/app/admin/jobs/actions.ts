@@ -14,7 +14,11 @@ export async function startFindLeads(form: FormData): Promise<void> {
     revalidatePath('/admin/jobs');
     return;
   }
-  await enqueue(QUEUES.findLeads, { cities, branches, triggeredBy: actorOf(s) }, { singletonKey: 'find-leads' });
+  await enqueue(
+    QUEUES.findLeads,
+    { cities, branches, triggeredBy: actorOf(s) },
+    { singletonKey: 'find-leads', expireInSeconds: 3 * 60 * 60 },
+  );
   await audit(getDb(), {
     entity: 'job',
     entityId: QUEUES.findLeads,

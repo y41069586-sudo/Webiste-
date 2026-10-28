@@ -77,7 +77,8 @@ interface QueueDef {
 const DEFAULT_DEF: QueueDef = { retryLimit: 3, retryDelay: 30, expireInSeconds: 15 * 60 };
 
 export const QUEUE_DEFS: Partial<Record<QueueName, Partial<QueueDef>>> = {
-  'find-leads': { retryLimit: 1, expireInSeconds: 60 * 60, policy: 'singleton' },
+  // Viele Städte × Branchen über öffentliche Overpass-Server dauern länger als eine Stunde
+  'find-leads': { retryLimit: 1, expireInSeconds: 3 * 60 * 60, policy: 'singleton' },
   'build-demo': { retryLimit: 2, expireInSeconds: 20 * 60 },
   'send-letter': { retryLimit: 3, retryDelay: 120 },
   'send-approved-letters': { policy: 'singleton', retryLimit: 1 },
