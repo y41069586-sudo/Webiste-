@@ -21,7 +21,7 @@ export default async function GuaranteePage() {
   const g = p.guarantee;
   return (
     <>
-      <PageIntro eyebrow="Garantie" title={`${g.days} Tage Zufriedenheitsgarantie.`}>
+      <PageIntro eyebrow="Garantie" title={`${g.days} Tage Zufriedenheits\u00ADgarantie.`}>
         {p.version === 'v4'
           ? 'Sind Sie mit Ihrer Website nicht zufrieden, erstatten wir die Einrichtungsgebühr innerhalb der Garantiefrist. Der Monatstarif wird beendet.'
           : 'Sind Sie mit Ihrer Website nicht zufrieden, bekommen Sie Ihr Geld zurück – vollständig und ohne Begründung.'}

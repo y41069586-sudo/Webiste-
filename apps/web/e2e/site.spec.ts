@@ -5,7 +5,7 @@ const PAGES: [string, RegExp][] = [
   ['/', /Erst sehen.*Dann entscheiden/s],
   ['/so-funktionierts', /drei Schritten/],
   ['/preise', /Zwei Tarife/],
-  ['/garantie', /Zufriedenheitsgarantie/],
+  ['/garantie', /Zufriedenheits\u00AD?garantie/],
   ['/beispiele', /So sieht ein Entwurf aus/],
   ['/ueber-mich', /Hallo, (ich bin|hier ist)/],
   ['/kontakt', /Schreiben Sie mir/],

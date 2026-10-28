@@ -2395,6 +2395,89 @@ footer a:hover {
   }
 }
 
+/* ---------- Handy: Kopfzeile, Preise, lange Wörter (28.10.2026) ---------- */
+.legal p,
+.legal li {
+  overflow-wrap: break-word;
+}
+h1,
+h2,
+h3 {
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+.topnav .wrap {
+  gap: 12px;
+}
+.brand {
+  min-width: 0;
+  white-space: nowrap;
+}
+.nav-links {
+  flex-shrink: 0;
+}
+.btn-ghost {
+  white-space: nowrap;
+}
+.lbl-short {
+  display: none;
+}
+@media (max-width: 520px) {
+  .topnav {
+    inset: 10px 0 auto;
+  }
+  .topnav .wrap {
+    width: calc(100% - 24px);
+    height: 58px;
+    padding: 0 8px 0 14px;
+  }
+  .brand {
+    font-size: 19px;
+    gap: 8px;
+  }
+  .brand img {
+    width: 28px;
+    height: 28px;
+  }
+  .btn-ghost {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  .subhead h1 {
+    font-size: clamp(30px, 9vw, 38px);
+  }
+  .ticket {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stub,
+  .body {
+    padding: 26px 22px;
+  }
+  .big {
+    flex-wrap: wrap;
+  }
+  .big b {
+    font-size: 64px;
+  }
+}
+@media (max-width: 389px) {
+  .lbl-long {
+    display: none;
+  }
+  .lbl-short {
+    display: inline;
+  }
+}
+@media (max-width: 340px) {
+  .brand {
+    font-size: 17px;
+  }
+  .hero h1 {
+    font-size: 36px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

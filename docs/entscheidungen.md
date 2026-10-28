@@ -525,3 +525,22 @@ Rechtstexte v4-2026-10-28 übernommen, 16 Städte mit `agsPrefix` „05“, Migr
 (21 Einträge in `drizzle.__drizzle_migrations`, Vorauswahl-Spalten vorhanden, Backend-Rolle liest alle Tabellen).
 Die Migrationsdatei wurde vorher lokal gegen den Stand „11 Migrationen + Supabase-Rollen“ geprobt: Schema danach
 identisch mit Neuinstallation, regulärer Migrator anschließend ohne Änderung.
+
+### 28.10.2026 – Handy-Layout auf kleinen und großen Handys (320–430 px)
+
+Rückmeldung der Betreiberin: auf dem Handy „verwackelt“, Elemente zu groß und übereinander. Neuer Regressionstest
+`apps/web/e2e/mobile-layout.spec.ts` prüft Firmen-Website, Kauf-Strecke und Demos (Maler, Reinigung, Friseur,
+Kosmetik, Restaurant, Tanzschule) auf 320, 360, 375, 390, 412 und 430 px: seitliches Überlaufen, über den Rand ragende
+Elemente, zu breite Texte, zu große Überschriften, Überlappungen, feste Leisten > 30 % der Höhe. Die Landingpage wurde
+mit derselben Prüfung gegen den gebauten Stand geprüft.
+
+Gefunden und behoben:
+- Landingpage: Logo und „Entwurf anfragen“ in der Kopfzeile lagen bis 389 px übereinander; Rechtsseiten waren durch
+  eine lange URL 392 px breit (seitliches Wackeln); Preiskarte bei 320 px zu breit; „Datenschutzerklärung“ ragte über
+  den Rand. → kompakte Kopfzeile, Kurzlabel „Anfragen“ unter 390 px, Umbruch für lange Wörter/URLs, kleinere Preiszahl.
+- Firmen-Website: Garantie-Seite 481 px breit („Zufriedenheitsgarantie“ ohne Umbruch, Rasterspalte wuchs mit),
+  AGB-Überschrift zu breit, Hauptüberschriften auf kleinen Handys zu wuchtig. → weiche Trennstriche in langen Titeln,
+  `min-width: 0` für Rasterspalten, Überschriften auf kleinen Handys kleiner.
+- Restaurant-Demo (zentriertes Foto-Layout): Knopf und Info-Chips standen nebeneinander, der Knopf wurde zur runden
+  Blase gequetscht. → untereinander, mittig.
+- Demo-Qualitätsprüfung (`render/qa.ts`) prüft das Layout zusätzlich bei 320 × 568; alle 127 Template-Varianten bestehen.

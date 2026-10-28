@@ -115,7 +115,7 @@ body {
   font-family: 'Inter Tight Variable', 'Inter Tight', 'Inter Variable', Inter, Arial, sans-serif;
 }
 .text-hero {
-  font-size: clamp(2.75rem, 7.4vw, 5rem);
+  font-size: clamp(2.25rem, 10.5vw, 5rem);
   line-height: 1;
   font-weight: 600;
   letter-spacing: -0.04em;
@@ -452,7 +452,7 @@ body {
 }
 
 .theme-site .prose-legal h1 {
-  font-size: clamp(2rem, 4.4vw, 3rem);
+  font-size: clamp(1.75rem, 7vw, 3rem);
   line-height: 1.1;
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -972,4 +972,24 @@ body {
     font-size: 0.65rem;
     gap: 0.5rem;
   }
+}
+
+/* Handy (28.10.2026): lange deutsche Wörter („Zufriedenheitsgarantie“, „Geschäftsbedingungen“) brechen um,
+ * statt die Seite seitlich zu verbreitern. Raster-Spalten dürfen schmaler als ihr längstes Wort werden. */
+h1,
+h2,
+h3,
+.text-hero,
+.text-editor,
+.text-section {
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+.prose-legal p,
+.prose-legal li {
+  overflow-wrap: break-word;
+}
+.grid > * {
+  min-width: 0;
 }

@@ -32,7 +32,7 @@ export default async function Home() {
         <div className="grid items-center gap-12 lg:grid-cols-[.9fr_1.2fr]">
           <div>
             <p className="text-sm font-medium tracking-wide text-[#5b6475]">Websites für lokale Betriebe</p>
-            <h1 className="mt-5 max-w-[12ch] text-[clamp(3.1rem,6vw,6rem)] font-semibold leading-[1.02] tracking-[-.065em] text-[#0f172a]">
+            <h1 className="mt-5 max-w-[12ch] text-[clamp(2.5rem,11vw,3.1rem)] sm:text-[clamp(3.1rem,6vw,6rem)] font-semibold leading-[1.02] tracking-[-.065em] text-[#0f172a]">
               Erst sehen.
               <br />
               <span className="text-[#1f4fd8]">Dann entscheiden.</span>

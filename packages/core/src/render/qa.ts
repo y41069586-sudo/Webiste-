@@ -127,6 +127,8 @@ export async function browserChecks(opts: BrowserQaOptions): Promise<Check[]> {
   const viewports = [
     { label: 'desktop', width: 1440, height: 900, isMobile: false },
     { label: 'mobil', width: 390, height: 844, isMobile: true },
+    // Kleinstes verbreitetes Handy (iPhone SE 1. Gen.): nur Lesbarkeit und Layout, axe/Struktur laufen oben
+    { label: 'klein', width: 320, height: 568, isMobile: true, layoutOnly: true },
   ];
   for (const vp of viewports) {
     await withPage(
@@ -139,6 +141,22 @@ export async function browserChecks(opts: BrowserQaOptions): Promise<Check[]> {
         page.on('pageerror', (e) => consoleErrors.push(e.message.slice(0, 200)));
         await page.setContent(opts.html, { waitUntil: 'load' });
         await imagesPainted(page);
+        if (vp.layoutOnly) {
+          const issues = await layoutIssues(page);
+          checks.push({
+            name: `layout-${vp.label}`,
+            passed: issues.length === 0,
+            ...(issues.length
+              ? {
+                  details: issues
+                    .slice(0, 8)
+                    .map((i) => `${i.kind}: ${i.detail}`)
+                    .join(' | '),
+                }
+              : {}),
+          });
+          return;
+        }
         const structureIssues = await page.evaluate((expected) => {
           const problems: string[] = [];
           if (document.querySelectorAll('main h1').length !== 1) problems.push('Genau eine Hauptüberschrift erforderlich.');

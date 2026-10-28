@@ -9,7 +9,7 @@ export default async function Page() {
   const cfg = await getSiteConfig();
   return (
     <LegalPage
-      title="Allgemeine Geschäftsbedingungen"
+      title={'Allgemeine Geschäfts\u00ADbedingungen'}
       markdown={cfg.legal.termsMarkdown || legalDrafts(cfg).termsMarkdown}
       placeholder="Die AGB werden vom Betreiber in den Einstellungen hinterlegt (Platzhalter)."
     />

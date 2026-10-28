@@ -186,7 +186,7 @@ function subpage(title: string, description: string, body: string) {
           <a href="/#ablauf">So funktioniert’s</a>
           <a href="/#preise">Preise</a>
           <a href="/#fragen">Fragen</a>
-          <a class="btn btn-ghost" href="/#anfrage">Entwurf anfragen</a>
+          <a class="btn btn-ghost" href="/#anfrage" aria-label="Entwurf anfragen"><span class="lbl-long">Entwurf anfragen</span><span class="lbl-short" aria-hidden="true">Anfragen</span></a>
         </nav>
       </div>
     </header>
@@ -203,7 +203,9 @@ ${body}
 function legalPage(markdown: string) {
   // Erste Überschrift wird Seitenkopf, der Rest der Fließtext
   const [, h1 = '', rest = markdown] = markdown.match(/^# (.+)\n([\s\S]*)$/) ?? [];
-  return `<section class="subhead"><div class="wrap"><p class="eyebrow">Rechtliches</p><h1>${esc(h1)}</h1></div></section>
+  // Lange Komposita mit weichem Trennstrich, damit sie auf kleinen Handys sauber umbrechen
+  const title = esc(h1).replace(/(Datenschutz|Vertrags|Geschäfts)(erklärung|bedingungen)/g, '$1&shy;$2');
+  return `<section class="subhead"><div class="wrap"><p class="eyebrow">Rechtliches</p><h1>${title}</h1></div></section>
 <section class="legal"><div class="wrap">${markdownToHtml(rest)}</div></section>`;
 }
 

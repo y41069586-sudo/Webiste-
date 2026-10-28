@@ -247,7 +247,7 @@ function magazinLayout(group: PhotoGroup): TemplateDef {
       ${p.heroName()}<p class="text-sm font-semibold uppercase tracking-widest text-primary">${esc(f.branchLabel)} in ${esc(f.city)}</p>
       <h1 class="mt-3 font-heading text-4xl font-bold leading-tight md:text-6xl">${esc(c.hero_headline)}</h1>
       <p class="mx-auto mt-5 max-w-2xl text-lg text-muted">${esc(c.hero_subline)}</p>
-      <div class="flex justify-center">${heroCta(ctx)}</div>
+      <div class="flex flex-col items-center sw-center-actions">${heroCta(ctx)}</div>
     </div>
     <div class="mx-auto mt-8 max-w-6xl px-4">${
       wide

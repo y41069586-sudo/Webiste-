@@ -1380,3 +1380,18 @@ body[data-character='urban'] .sw-dining-image:has(.sw-photoless-composition) {
 .sw-dining-foot a {
   gap: 6px;
 }
+
+/* Zentrierter Kopf (Foto-Layout „zentriert“): Knopf-Zeile und Info-Chips untereinander, beide mittig */
+.sw-center-actions > div,
+.sw-center-actions .sw-chips {
+  justify-content: center;
+}
+
+/* Lange Wörter/Firmennamen brechen auf dem Handy sauber um, statt seitlich überzustehen */
+h1,
+h2,
+h3 {
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
