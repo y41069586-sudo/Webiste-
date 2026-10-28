@@ -51,3 +51,10 @@ Gleiche Regeln wie oben (Pexels-Lizenz, keine erkennbaren Gesichter, nur gekennz
 | `garten-heckenschnitt-pexels-38936350.jpg` | Magda Ehlers     | https://www.pexels.com/photo/gardener-pruning-hedge-with-shears-outdoors-38936350/                              |
 | `garten-hecke-pexels-38936334.jpg`         | Magda Ehlers     | https://www.pexels.com/photo/gardener-trimming-hedges-with-shears-outdoors-38936334/                            |
 | `garten-strauchschnitt-pexels-5231138.jpg` | Anna Shvets      | https://www.pexels.com/photo/crop-gardener-with-secateurs-working-on-bush-5231138/                              |
+
+## Ergänzung 28.10.2026: Beauty (`../beauty/`) und Kurse (`../kurse/`)
+
+Gleiche Regeln (Pexels-Lizenz, keine erkennbaren Gesichter, nur gekennzeichnet im Entwurf). Fotograf, Lizenz und
+Quelle je Datei im Manifest und EXIF: Friseur (Kampus Production, Nataliya Vaitkevich, Matheus Wladeka),
+Barbier-Werkzeug (Pavel Danilyuk), Nagelstudio (Leeloo The First, cottonbro studio), Kosmetik (Roman Odintsov,
+Polina Tankilevitch), Tanz (Pavel Danilyuk, cottonbro studio), Musikunterricht (Yan Krukau, Charles Parker).

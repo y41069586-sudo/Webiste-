@@ -58,6 +58,7 @@ export const handwerkSolid: TemplateDef = {
         </ul>
       </div>
     </div>
+  ${p.exampleServices()}
   </section>
 
   ${p.process({ sectionClass: 'border-y border-line bg-surface-alt py-16 md:py-20', titleClass: 'font-heading text-3xl font-bold md:text-4xl', cardClass: 'rounded-2xl bg-surface p-6 shadow-sm ring-1 ring-line' })}

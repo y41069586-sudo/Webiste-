@@ -240,6 +240,36 @@
   color: var(--c-primary);
   margin-bottom: 10px;
 }
+.sw-examples {
+  border-top: 1px dashed var(--c-line);
+  padding-top: 18px;
+}
+.sw-example-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 0;
+  list-style: none;
+}
+.sw-example-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--c-line);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.sw-example-list svg {
+  color: var(--c-primary);
+}
+.sw-hero-name.is-plain {
+  color: inherit;
+}
 .sw-editorial .sw-hero-name {
   grid-column: 1/-1;
 }

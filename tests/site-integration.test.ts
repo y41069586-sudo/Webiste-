@@ -37,7 +37,9 @@ test('no personal photo is required while missing legal and fiscal information s
   const config = deepMerge(DEFAULT_CONFIG, { sender: OPERATOR_PROFILE });
   const keys = goLiveBlockers(config).map((b) => b.key);
   assert.ok(!keys.includes('sender.photoUrl'));
-  assert.ok(keys.includes('sender.taxNumber'));
+  // Steuernummer ist nach Betreiberentscheidung (28.10.2026) keine Freigabebedingung mehr
+  assert.ok(!keys.includes('sender.taxNumber'));
+  assert.ok(keys.includes('tax.operatorConfirmed'));
   assert.ok(keys.includes('legal.termsMarkdown'));
   assert.ok(keys.includes('legal.privacyMarkdown'));
   assert.equal(config.switches.dryRun, true);

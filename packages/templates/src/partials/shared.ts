@@ -28,6 +28,12 @@ export interface SharedParts {
   contactSection(opts: ContactSectionClasses): string;
   /** Faktenzeile im Hero: Ort, Kontaktweg, Route (keine Behauptungen über den Betrieb) */
   trustChips(): string;
+  /** Firmenname groß über der Überschrift (leer, wenn die Überschrift schon der Name ist) */
+  heroName(cls?: string): string;
+  /** Weitere typische Leistungen als gekennzeichnete Beispiele (nur Entwurf, nur neben belegten Leistungen) */
+  exampleServices(): string;
+  /** Hero-Aktionen: Haupt-Button, Telefon (falls vorhanden) und Faktenzeile */
+  heroActions(ctaText: string): string;
   /** Beispielablauf einer Anfrage (nur Entwurf, nur Branchen mit Anfrageablauf) */
   process(opts: { sectionClass: string; titleClass: string; cardClass: string }): string;
   /**
@@ -379,9 +385,10 @@ ${jsonLd}
   const priceHint = industry === 'beauty' ? ' Preise auf Anfrage.' : '';
   const servicesVerified =
     content.services.length > 0 && content.services.every((s) => facts.verifiedServices?.includes(s.title));
+  const someVerified = content.services.some((s) => facts.verifiedServices?.includes(s.title));
   const servicesNote = (cls = 'text-sm text-muted') =>
     isDemo
-      ? `<p class="${cls}">${servicesVerified ? 'Leistungsübersicht aus geprüften Betriebsangaben. Vor Veröffentlichung vom Betrieb zu bestätigen.' : `<span aria-hidden="true">✎ </span>Beispiel-Leistungen – passen wir gemeinsam für Sie an.${priceHint}`}</p>`
+      ? `<p class="${cls}">${servicesVerified ? 'Leistungsübersicht aus geprüften Betriebsangaben. Vor Veröffentlichung vom Betrieb zu bestätigen.' : `<span aria-hidden="true">✎ </span>${someVerified ? 'Erste Leistung aus Ihren Angaben, weitere als ' : ''}Beispiel-Leistungen – passen wir gemeinsam für Sie an.${priceHint}`}</p>`
       : priceHint
         ? `<p class="${cls}">${priceHint.trim()}</p>`
         : '';
@@ -618,24 +625,71 @@ ${jsonLd}
       <li><a href="${esc(mapsHref)}" rel="noopener" target="_blank">${icon('house', 'h-4 w-4')}<span>Route planen<span class="sr-only"> (OpenStreetMap, neuer Tab)</span></span></a></li>
     </ul>`;
 
-  /** Ablauf einer Anfrage – im Entwurf als Beispiel gekennzeichnet, wird vor Veröffentlichung abgestimmt */
+  /** Ablauf einer Anfrage je Branche – im Entwurf als Beispiel gekennzeichnet, wird vor Veröffentlichung abgestimmt */
   const process = (o: { sectionClass: string; titleClass: string; cardClass: string }) => {
-    if (!draft || industry !== 'handwerk') return '';
-    const steps: [string, string][] = [
-      [
-        'Vorhaben schildern',
-        callHref
-          ? 'Rufen Sie an oder beschreiben Sie kurz, worum es geht – am besten mit Ort und Wunschzeitraum.'
-          : 'Beschreiben Sie kurz, worum es geht – am besten mit Ort und Wunschzeitraum.',
-      ],
-      ['Rückmeldung erhalten', 'Sie bekommen eine Rückmeldung, bei Bedarf mit einem Termin zur Besichtigung vor Ort.'],
-      ['Gemeinsam festlegen', 'Umfang, Termin und Ausführung stimmen Sie gemeinsam ab, bevor die Arbeit beginnt.'],
-    ];
+    if (!draft) return '';
+    const by = callHref ? 'per Anruf oder Nachricht' : 'per Nachricht';
+    const flows: Record<IndustryKey, { title: string; steps: [string, string][] }> = {
+      handwerk: {
+        title: 'So läuft Ihre Anfrage ab',
+        steps: [
+          [
+            'Vorhaben schildern',
+            callHref
+              ? 'Rufen Sie an oder beschreiben Sie kurz, worum es geht – am besten mit Ort und Wunschzeitraum.'
+              : 'Beschreiben Sie kurz, worum es geht – am besten mit Ort und Wunschzeitraum.',
+          ],
+          ['Rückmeldung erhalten', 'Sie bekommen eine Rückmeldung, bei Bedarf mit einem Termin zur Besichtigung vor Ort.'],
+          ['Gemeinsam festlegen', 'Umfang, Termin und Ausführung stimmen Sie gemeinsam ab, bevor die Arbeit beginnt.'],
+        ],
+      },
+      beauty: {
+        title: 'So kommen Sie zu Ihrem Termin',
+        steps: [
+          ['Wunschtermin anfragen', `Nennen Sie Leistung und Wunschzeit – ${by}.`],
+          ['Bestätigung erhalten', 'Sie bekommen eine Rückmeldung mit Ihrem Termin.'],
+          ['Entspannt vorbeikommen', `Zum vereinbarten Termin sind Sie in ${esc(facts.city)} herzlich willkommen.`],
+        ],
+      },
+      gastronomie: {
+        title: 'So reservieren Sie',
+        steps: [
+          ['Tisch anfragen', `Datum, Uhrzeit und Personenzahl – ${by}.`],
+          ['Bestätigung erhalten', 'Sie bekommen eine Rückmeldung zu Ihrer Reservierung.'],
+          ['Genießen', `Wir freuen uns auf Ihren Besuch in ${esc(facts.city)}.`],
+        ],
+      },
+      einzelhandel: {
+        title: 'So einfach geht’s',
+        steps: [
+          ['Artikel anfragen', `Fragen Sie nach Ihrem Wunschartikel – ${by}.`],
+          ['Rückmeldung erhalten', 'Sie erfahren, ob er vorrätig ist, und können ihn zurücklegen lassen.'],
+          ['Im Geschäft abholen', `Holen Sie Ihren Artikel bei uns in ${esc(facts.city)} ab.`],
+        ],
+      },
+      kurse_training: {
+        title: 'So starten Sie',
+        steps: [
+          ['Probestunde anfragen', `Nennen Sie Kurs und Wunschtermin – ${by}.`],
+          ['Termin abstimmen', 'Sie bekommen eine Rückmeldung mit einem passenden Einstieg.'],
+          ['Ausprobieren', 'In der Probestunde lernen Sie Angebot und Ablauf kennen.'],
+        ],
+      },
+      dienstleistung: {
+        title: 'So läuft Ihre Anfrage ab',
+        steps: [
+          ['Anliegen schildern', `Beschreiben Sie kurz, worum es geht – ${by}.`],
+          ['Rückmeldung erhalten', 'Sie bekommen eine Rückmeldung mit den nächsten Schritten.'],
+          ['Gemeinsam festlegen', 'Umfang und Termin stimmen Sie gemeinsam ab.'],
+        ],
+      },
+    };
+    const flow = flows[industry];
     return `<section id="ablauf" aria-labelledby="ablauf-titel" class="${o.sectionClass}">
   <div class="mx-auto max-w-6xl px-4">
-    <h2 id="ablauf-titel" class="${o.titleClass}">So läuft Ihre Anfrage ab</h2>
+    <h2 id="ablauf-titel" class="${o.titleClass}">${flow.title}</h2>
     ${example('Beispielablauf – stimmen wir vor der Veröffentlichung mit Ihnen ab.')}
-    <ol class="mt-8 grid gap-5 md:grid-cols-3">${steps
+    <ol class="mt-8 grid gap-5 md:grid-cols-3">${flow.steps
       .map(
         ([title, text], i) =>
           `<li class="sw-step ${o.cardClass}"><span class="sw-step-no" aria-hidden="true">${i + 1}</span><h3 class="mt-4 text-lg font-semibold">${title}</h3><p class="mt-2 text-muted">${text}</p></li>`,
@@ -644,6 +698,24 @@ ${jsonLd}
   </div>
 </section>`;
   };
+
+  const heroActions = (ctaText: string) =>
+    `<div class="sw-hero-actions"><a class="sw-hero-button" href="${esc(ctaHref)}">${esc(ctaText)} <span aria-hidden="true">→</span></a>${
+      callHref
+        ? `<a class="sw-hero-secondary" href="${esc(callHref)}">${icon('phone', 'h-4 w-4')}<span>${esc(phoneLabel)}</span></a>`
+        : ''
+    }</div>${trustChips()}`;
+
+  const exampleServices = () => {
+    const list = draft ? (facts.exampleServices ?? []).slice(0, 4) : [];
+    if (!list.length) return '';
+    return `<div class="mx-auto mt-8 max-w-6xl px-4"><div class="sw-examples"><p class="text-sm font-semibold">Weitere typische Leistungen</p>${example('Beispiele für Ihre Website – welche Leistungen erscheinen, legen Sie fest.')}<ul class="sw-example-list">${list
+      .map((s) => `<li>${icon(s.icon, 'h-4 w-4')}<span>${esc(s.title)}</span></li>`)
+      .join('')}</ul></div></div>`;
+  };
+
+  const heroName = (cls = '') =>
+    content.hero_headline.trim() === facts.name.trim() ? '' : `<p class="sw-hero-name ${cls}">${esc(facts.name)}</p>`;
 
   const contactHub = (o: ContactHubClasses) => {
     const card = (ico: string, title: string, body: string) =>
@@ -759,6 +831,9 @@ ${jsonLd}
     figure,
     industrySections,
     trustChips,
+    heroName,
+    heroActions,
+    exampleServices,
     process,
     contactHub,
     isDemo,

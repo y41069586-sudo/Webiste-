@@ -1249,5 +1249,373 @@
     "moods": [
       "neutral"
     ]
+  },
+  {
+    "file": "beauty/friseur-schere-pexels-8834034.jpg",
+    "group": "beauty",
+    "alt": "Hände mit Schere und Kamm im Friseursalon, lizenziertes Beispielfoto",
+    "title": "Person Holding Comb and Scissor",
+    "creator": "Kampus Production",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/person-holding-comb-and-scissor-8834034/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 57195,
+    "width": 1200,
+    "height": 801,
+    "keywords": [
+      "friseur",
+      "frisör",
+      "haarsalon",
+      "haar"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "beauty/friseur-werkzeug-pexels-8468134.jpg",
+    "group": "beauty",
+    "alt": "Friseurwerkzeug mit Scheren, Kämmen und Pinseln von oben, lizenziertes Beispielfoto",
+    "title": "Top View of a Set of Hairdressers Tools on White Surface",
+    "creator": "Nataliya Vaitkevich",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/top-view-of-a-set-of-hairdressers-tools-on-white-surface-8468134/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 111402,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "friseur",
+      "frisör",
+      "haarsalon",
+      "haar"
+    ],
+    "role": "detail",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "beauty/friseur-haarschnitt-pexels-6487878.jpg",
+    "group": "beauty",
+    "alt": "Haarschnitt mit Schere und Kamm in Nahaufnahme, lizenziertes Beispielfoto",
+    "title": "Person Cutting Hair in Close Up Photography",
+    "creator": "Matheus Wladeka",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/person-cutting-hair-in-close-up-photography-6487878/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 64968,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "friseur",
+      "frisör",
+      "haarsalon",
+      "haar"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "beauty/barber-scheren-pexels-7518712.jpg",
+    "group": "beauty",
+    "alt": "Scheren und Haarschneider auf einem Handtuch, lizenziertes Beispielfoto",
+    "title": "Close-up Hair Cutting Tools",
+    "creator": "Pavel Danilyuk",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/close-up-hair-cutting-tools-7518712/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 139153,
+    "width": 960,
+    "height": 641,
+    "keywords": [
+      "barber",
+      "barbier",
+      "friseur",
+      "haarsalon"
+    ],
+    "role": "detail",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "beauty/nagel-lack-pexels-4677845.jpg",
+    "group": "beauty",
+    "alt": "Auftragen von Nagellack bei einer Maniküre, lizenziertes Beispielfoto",
+    "title": "A Person Getting a Nail Polish",
+    "creator": "Leeloo The First",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/a-person-getting-a-nail-polish-4677845/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 72226,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "nagel",
+      "nail",
+      "maniküre"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "beauty/nagel-rot-pexels-3997381.jpg",
+    "group": "beauty",
+    "alt": "Hände mit rot lackierten Nägeln, lizenziertes Beispielfoto",
+    "title": "Person With Red Nail Polish",
+    "creator": "cottonbro studio",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/person-with-red-nail-polish-3997381/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 76719,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "nagel",
+      "nail",
+      "maniküre"
+    ],
+    "role": "detail",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "beauty/kosmetik-pflege-pexels-7691112.jpg",
+    "group": "beauty",
+    "alt": "Pflegeprodukte und Handtücher auf einem hellen Tisch, lizenziertes Beispielfoto",
+    "title": "Close-Up Shot of Skincare Products",
+    "creator": "ROMAN ODINTSOV",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/close-up-shot-of-skincare-products-7691112/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 58978,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "kosmetik",
+      "beauty",
+      "haut",
+      "spa"
+    ],
+    "role": "product",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "beauty/kosmetik-studio-pexels-3736314.jpg",
+    "group": "beauty",
+    "alt": "Pflegeprodukte auf einem Rollwagen in einem hellen Studio, lizenziertes Beispielfoto",
+    "title": "Beauty Products in Salon",
+    "creator": "Polina Tankilevitch",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/beauty-products-in-salon-3736314/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 77179,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "kosmetik",
+      "beauty",
+      "haut",
+      "spa"
+    ],
+    "role": "interior",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "kurse/tanz-studio-pexels-6926602.jpg",
+    "group": "kurse",
+    "alt": "Tanzgruppe barfuß auf dem Holzboden eines Studios, lizenziertes Beispielfoto",
+    "title": "Barefooted People Standing on the Wooden Floor",
+    "creator": "Pavel Danilyuk",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/barefooted-people-standing-on-the-wooden-floor-6926602/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 122674,
+    "width": 1200,
+    "height": 801,
+    "keywords": [
+      "tanz",
+      "dance"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "kurse/tanz-bewegung-pexels-6221472.jpg",
+    "group": "kurse",
+    "alt": "Tanzschritt barfuß in einem hellen Raum, lizenziertes Beispielfoto",
+    "title": "Woman Legs In Dance Choreography",
+    "creator": "cottonbro studio",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/woman-legs-in-dance-choreography-6221472/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 88820,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "tanz",
+      "dance"
+    ],
+    "role": "detail",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "kurse/musik-klavierunterricht-pexels-8520461.jpg",
+    "group": "kurse",
+    "alt": "Zwei Hände am Klavier während einer Unterrichtsstunde, lizenziertes Beispielfoto",
+    "title": "Hands Pressing Piano Keys",
+    "creator": "Yan Krukau",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/hands-pressing-piano-keys-8520461/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 117520,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "musik",
+      "klavier",
+      "piano",
+      "musikschule",
+      "musikunterricht"
+    ],
+    "role": "work",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
+  },
+  {
+    "file": "kurse/musik-klavier-pexels-6647602.jpg",
+    "group": "kurse",
+    "alt": "Hände spielen auf einem Klavier, lizenziertes Beispielfoto",
+    "title": "Crop musician playing melody on piano",
+    "creator": "Charles Parker",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/crop-musician-playing-melody-on-piano-6647602/",
+    "openverseId": "",
+    "checkedAt": "2026-10-28",
+    "checkedVia": "Official photo and license pages read; website/template use and modification permitted; no identifiable faces; image visually reviewed. Draft illustration, no business/project attribution.",
+    "bytes": 89197,
+    "width": 1200,
+    "height": 799,
+    "keywords": [
+      "musik",
+      "klavier",
+      "piano",
+      "musikschule",
+      "musikunterricht"
+    ],
+    "role": "detail",
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "neutral"
+    ]
   }
 ]

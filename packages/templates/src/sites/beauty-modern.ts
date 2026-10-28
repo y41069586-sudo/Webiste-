@@ -26,7 +26,7 @@ export const beautyModern: TemplateDef = {
 </header>
 <main id="inhalt">
   <section class="sw-premium-hero sw-beauty-graphic">
-    <div class="sw-graphic-title"><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><div><p class="sw-hero-copy">${esc(c.hero_subline)}</p><a class="sw-hero-button" href="${esc(p.ctaHref)}">${esc(c.cta_text)}</a></div></div>
+    <div class="sw-graphic-title">${p.heroName()}<p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><div><p class="sw-hero-copy">${esc(c.hero_subline)}</p>${p.heroActions(c.cta_text)}</div></div>
     <div class="sw-graphic-media">${localProfile({ facts: f, parts: p, content: c }, 'studio')}</div>
   </section>
 
@@ -48,7 +48,10 @@ export const beautyModern: TemplateDef = {
           .join('')}
       </ul>
     </div>
+  ${p.exampleServices()}
   </section>
+
+  ${p.process({ sectionClass: 'py-16', titleClass: 'font-heading text-4xl', cardClass: 'bg-surface-alt p-6 ring-1 ring-line' })}
 
   <section id="ueber-uns" aria-labelledby="ueber-titel" class="py-16">
     <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-3">
@@ -57,19 +60,13 @@ export const beautyModern: TemplateDef = {
     </div>
   </section>
 
-  <section id="oeffnungszeiten" aria-labelledby="zeiten-titel" class="bg-primary py-16 text-on-primary">
-    <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-2">
-      <div>
-        <h2 id="zeiten-titel" class="font-heading text-4xl">Öffnungszeiten</h2>
-        <div class="mt-6 [&_dl]:divide-on-primary/20">${p.hoursList({ mutedClass: 'text-on-primary opacity-90' })}</div>
-      </div>
-      <div>
-        <h2 class="font-heading text-4xl">Anfahrt</h2>
-        <p class="mt-6 text-lg">${p.addressLines}</p>
-        <a class="mt-6 inline-flex min-h-11 items-center border border-on-primary px-5 py-2 font-semibold" href="${esc(p.mapsHref)}" rel="noopener" target="_blank">Route planen<span class="sr-only"> (OpenStreetMap, neuer Tab)</span></a>
-      </div>
-    </div>
-  </section>
+  ${p.contactHub({
+    sectionClass: 'bg-surface-alt py-16',
+    titleClass: 'font-heading text-4xl',
+    cardClass: 'bg-surface p-6 ring-1 ring-line',
+    buttonClass: 'inline-flex min-h-12 items-center gap-2 bg-primary px-6 py-3 font-semibold text-on-primary',
+    secondaryButtonClass: 'inline-flex min-h-11 items-center px-5 py-2 font-semibold text-primary ring-2 ring-primary',
+  })}
 
   ${p.industrySections({
     sectionClass: 'py-16',
@@ -78,6 +75,7 @@ export const beautyModern: TemplateDef = {
     buttonClass: 'inline-flex min-h-12 items-center bg-primary px-7 py-3 font-semibold text-on-primary disabled:opacity-60',
     inputClass: 'block w-full border border-line bg-surface px-3 py-2.5 focus:outline-2 focus:outline-primary',
     altSectionClass: 'bg-surface-alt py-16',
+    inHub: true,
   })}
   ${p.gallery()}
   ${p.contactSection({

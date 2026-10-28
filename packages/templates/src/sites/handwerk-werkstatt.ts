@@ -21,7 +21,7 @@ export const handwerkWerkstatt: TemplateDef = {
 </header>
 <main id="inhalt">
   <section class="sw-premium-hero sw-workshop">
-    <div class="sw-workshop-title"><div><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1></div><div><p class="sw-hero-copy">${esc(c.hero_subline)}</p><a class="sw-hero-button" href="${esc(p.ctaHref)}">${esc(c.cta_text)} <span aria-hidden="true">→</span></a></div></div>
+    <div class="sw-workshop-title"><div>${p.heroName()}<p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1></div><div><p class="sw-hero-copy">${esc(c.hero_subline)}</p>${p.heroActions(c.cta_text)}</div></div>
     <div class="sw-workshop-media">${localProfile({ facts: f, parts: p, content: c }, 'workshop')}</div>
   </section>
 
@@ -40,23 +40,27 @@ export const handwerkWerkstatt: TemplateDef = {
           .join('')}
       </ul>
     </div>
+  ${p.exampleServices()}
   </section>
 
   <section id="ueber-uns" aria-labelledby="ueber-titel" class="bg-surface-alt py-16">
-    <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-2">
+    <div class="mx-auto max-w-3xl px-4">
       <div>
         <h2 id="ueber-titel" class="font-heading text-3xl font-black uppercase tracking-wide">Über uns</h2>
         <div class="mt-5 space-y-4 text-lg leading-relaxed">${p.about()}</div>
       </div>
-      <div id="oeffnungszeiten" class="bg-surface p-6 shadow-sm">
-        <h2 class="flex items-center gap-2 font-heading text-xl font-bold uppercase"><span class="text-primary">${icon('clock', 'h-5 w-5')}</span>Öffnungszeiten</h2>
-        <div class="mt-3">${p.hoursList()}</div>
-        <h2 class="mt-8 flex items-center gap-2 font-heading text-xl font-bold uppercase"><span class="text-primary">${icon('pin', 'h-5 w-5')}</span>Anfahrt</h2>
-        <p class="mt-3">${p.addressLines}</p>
-        <a class="mt-4 inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4" href="${esc(p.mapsHref)}" rel="noopener" target="_blank">Route planen<span class="sr-only"> (OpenStreetMap, neuer Tab)</span></a>
-      </div>
     </div>
   </section>
+
+  ${p.process({ sectionClass: 'py-16', titleClass: 'font-heading text-3xl font-black uppercase tracking-wide', cardClass: 'border-t-4 border-primary bg-surface-alt p-6' })}
+
+  ${p.contactHub({
+    sectionClass: 'bg-surface-alt py-16',
+    titleClass: 'font-heading text-3xl font-black uppercase tracking-wide',
+    cardClass: 'bg-surface p-6 shadow-sm',
+    buttonClass: 'inline-flex min-h-12 items-center gap-2 bg-primary px-6 py-3 font-bold uppercase text-on-primary',
+    secondaryButtonClass: 'inline-flex min-h-11 items-center px-5 py-2 font-bold uppercase text-primary ring-2 ring-primary',
+  })}
 
   ${p.industrySections({
     sectionClass: 'py-16',
@@ -66,6 +70,7 @@ export const handwerkWerkstatt: TemplateDef = {
       'inline-flex min-h-12 items-center bg-primary px-6 py-3 font-bold uppercase tracking-wide text-on-primary disabled:opacity-60',
     inputClass: 'block w-full border border-line bg-surface px-3 py-2.5 focus:outline-2 focus:outline-primary',
     altSectionClass: 'bg-surface-alt py-16',
+    inHub: true,
   })}
   ${p.gallery()}
   ${p.contactSection({

@@ -437,3 +437,19 @@ oder als Platzhalter 000/000/00000. Hinweis an den Betreiber gegeben: § 34a USt
 Kleinunternehmer-Rechnungen vor; betroffene Rechnungen können nach Erteilung berichtigt werden. Die IBAN wurde
 in der Produktions-Konfiguration hinterlegt (nicht im Repository); die Platzhalter-Steuernummer dort geleert.
 Zahlungserinnerungen ohne IBAN verweisen auf Telefon/E-Mail statt auf ein Konto.
+
+### 28.10.2026 – Alle Branchen-Vorlagen auf dem Niveau der Handwerk-Demos, Beispiel-Leistungen
+
+Betreiber: „setz alles um … beauty, gastro und alle … krasse Demo-Websites“, Demos dürfen als Entwurf
+erkennbar unvollständig sein. Umgesetzt für alle 21 Vorlagen (Beauty ×3, Gastronomie/Einzelhandel/Kurse ×3,
+Plakat ×5, Handwerk ×3): Firmenname groß im Hero, Telefon-Button und Faktenzeile, Ablauf je Branche
+(„So kommen Sie zu Ihrem Termin“, „So reservieren Sie“, „So starten Sie“ …, als Beispiel gekennzeichnet),
+gebündelter Bereich „Kontakt & Anfahrt“ mit sichtbarer Formular-Vorschau; Gastro-Speisekarte vor Ablauf und Kontakt.
+
+Beispiel-Leistungen: Die Leistungsliste bleibt bei belegten Leistungen auf genau diese Titel beschränkt
+(Inhaltsregel, keine erfundenen Angebote). Darunter erscheint im Entwurf ein getrennter Block „Weitere typische
+Leistungen“ aus der Branchenbibliothek mit dem Hinweis „Beispiele für Ihre Website – welche Leistungen
+erscheinen, legen Sie fest“. Nie auf Live-Seiten.
+
+Zwölf weitere Pexels-Fotos ohne erkennbare Gesichter: Friseur 3, Barbier 1, Nagelstudio 2, Kosmetik 2, Tanz 2,
+Musikunterricht 2. Ballett bleibt nur bei bestätigter Ballett-Spezialisierung.

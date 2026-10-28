@@ -160,10 +160,13 @@ describe('Beispielfotos (lizenzfrei, nur im Entwurf)', () => {
 
   it('passende Fotos ohne unbestätigte Tanz-Spezialisierung', async () => {
     const { stockPhotos } = await import('../src');
-    expect(stockPhotos('kurse', 0, 'Tanzschule')).toEqual([]);
+    // Allgemeine Tanzmotive, nie Ballett ohne bestätigte Spezialisierung
+    const tanz = stockPhotos('kurse', 0, 'Tanzschule');
+    expect(tanz.length).toBeGreaterThan(0);
+    expect(tanz.every((p) => p.file.startsWith('kurse/tanz-'))).toBe(true);
     expect(stockPhotos('kurse', 0, 'Ballettschule')[0]!.file).toBe('kurse/ballettschuhe.jpg');
     expect(stockPhotos('kurse', 0, 'Yogastudio')[0]!.file).toBe('kurse/yogamatte.jpg');
-    expect(stockPhotos('kurse', 0, 'Musikunterricht')).toEqual([]);
+    expect(stockPhotos('kurse', 0, 'Musikunterricht').every((p) => p.file.startsWith('kurse/musik-'))).toBe(true);
     expect(stockPhotos('einzelhandel', 0, 'Fahrradgeschäft')).toEqual([]);
     expect(stockPhotos('kurse', -7, 'Ballettschule')[0]!.file).toBe('kurse/ballettschuhe.jpg');
   });

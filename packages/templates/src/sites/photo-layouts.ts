@@ -53,21 +53,6 @@ function common(ctx: RenderContext) {
       })}</div>
     </div>
   </section>`,
-    visit: `<section id="oeffnungszeiten" aria-labelledby="zeiten-titel" class="bg-surface-alt py-16">
-    <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-2">
-      <div>
-        <h2 id="zeiten-titel" class="font-heading text-2xl font-bold">Öffnungszeiten</h2>
-        <div class="mt-4 rounded-xl bg-surface p-5 ring-1 ring-line">${p.hoursList()}</div>
-      </div>
-      <div id="anfahrt">
-        <h2 class="font-heading text-2xl font-bold">Anfahrt</h2>
-        <div class="mt-4 rounded-xl bg-surface p-5 ring-1 ring-line">
-          <p class="flex items-start gap-3 text-lg"><span class="mt-1 text-primary">${icon('pin', 'h-5 w-5')}</span><span>${p.addressLines}</span></p>
-          <a class="mt-5 inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4" href="${esc(p.mapsHref)}" rel="noopener" target="_blank">Route bei OpenStreetMap planen<span class="sr-only"> (neuer Tab)</span></a>
-        </div>
-      </div>
-    </div>
-  </section>`,
     footer: p.footer({ className: 'border-t border-line bg-surface-alt text-ink', linkClass: 'underline underline-offset-4' }),
   };
 }
@@ -79,8 +64,7 @@ function header(ctx: RenderContext, group: PhotoGroup, variant: 'light' | 'cente
     showOffer(group, p) ? `<li><a class="hover:text-ink" href="#leistungen">${esc(c.nav)}</a></li>` : '',
     p.draft && group === 'gastronomie' ? '<li><a class="hover:text-ink" href="#speisekarte">Speisekarte</a></li>' : '',
     '<li><a class="hover:text-ink" href="#ueber-uns">Über uns</a></li>',
-    '<li><a class="hover:text-ink" href="#oeffnungszeiten">Öffnungszeiten</a></li>',
-    `<li><a class="hover:text-ink" href="${p.draft ? '#oeffnungszeiten' : '#frage'}">Kontakt</a></li>`,
+    '<li><a class="hover:text-ink" href="#oeffnungszeiten">Kontakt &amp; Anfahrt</a></li>',
   ].join('');
   const nav = `<nav aria-label="Hauptnavigation" class="hidden md:block"><ul class="flex gap-6 text-sm text-muted">${links}</ul></nav>`;
   if (variant === 'center') {
@@ -118,6 +102,7 @@ function offerCards(ctx: RenderContext, group: PhotoGroup, style: 'cards' | 'lis
       ${p.servicesNote('mt-2 text-sm text-muted')}
       <ul class="${grid}">${items}</ul>
     </div>
+  ${p.exampleServices()}
   </section>`;
 }
 
@@ -133,8 +118,20 @@ function about(ctx: RenderContext, cls = 'py-16'): string {
 function tail(ctx: RenderContext): string {
   const k = common(ctx);
   const p = ctx.parts;
-  return `${k.visit}
-  ${p.industrySections({ ...k.form, altSectionClass: 'bg-surface-alt py-16' })}
+  return `${p.industrySections({ ...k.form, altSectionClass: 'bg-surface-alt py-16', inHub: true })}
+  ${p.process({
+    sectionClass: 'py-16',
+    titleClass: 'font-heading text-3xl font-bold',
+    cardClass: 'rounded-2xl bg-surface-alt p-6 ring-1 ring-line',
+  })}
+  ${p.contactHub({
+    sectionClass: 'bg-surface-alt py-16',
+    titleClass: 'font-heading text-3xl font-bold',
+    cardClass: 'rounded-2xl bg-surface p-6 ring-1 ring-line',
+    buttonClass: 'inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-on-primary',
+    secondaryButtonClass:
+      'inline-flex min-h-11 items-center rounded-full px-5 py-2 font-semibold text-primary ring-2 ring-primary',
+  })}
   ${p.gallery()}
   ${p.contactSection(k.form)}
   ${k.faq}
@@ -148,7 +145,7 @@ function heroCta(ctx: RenderContext, light = false): string {
   return `<div class="mt-8 flex flex-wrap items-center gap-4">
           <a href="${esc(p.ctaHref)}" class="inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 font-semibold ${btn}">${icon(p.callHref ? 'phone' : 'chat', 'h-5 w-5')}${esc(c.cta_text)}</a>
           ${p.phoneLabel ? `<span class="${light ? 'text-white' : 'text-muted'}">oder direkt: <a class="font-semibold underline-offset-4 hover:underline" href="${esc(p.callHref)}">${esc(p.phoneLabel)}</a></span>` : ''}
-        </div>`;
+        </div>${p.trustChips()}`;
 }
 
 /** Branchenbezogene Foto-Komposition mit lesbarer Typografie außerhalb des Motivs. */
@@ -169,11 +166,11 @@ function fotoLayout(group: PhotoGroup): TemplateDef {
         : '';
       const heroSection =
         group === 'einzelhandel'
-          ? `<section class="sw-retail-hero"><div class="sw-retail-image">${hero ? p.figure(hero, 'w-full h-full object-cover') : fallbackArt(ctx, '')}</div><div class="sw-retail-intro"><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><p class="sw-hero-copy">${esc(c.hero_subline)}</p>${heroCta(ctx)}<a class="sw-text-link" href="#oeffnungszeiten">Besuch &amp; Öffnungszeiten</a></div></section>`
+          ? `<section class="sw-retail-hero"><div class="sw-retail-image">${hero ? p.figure(hero, 'w-full h-full object-cover') : fallbackArt(ctx, '')}</div><div class="sw-retail-intro">${p.heroName()}<p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1><p class="sw-hero-copy">${esc(c.hero_subline)}</p>${heroCta(ctx)}<a class="sw-text-link" href="#oeffnungszeiten">Besuch &amp; Öffnungszeiten</a></div></section>`
           : group === 'kurse'
-            ? `<section class="sw-course-hero"><div class="sw-course-heading"><div><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1></div><div><p class="sw-hero-copy">${esc(c.hero_subline)}</p>${heroCta(ctx)}</div></div><div class="sw-course-image">${hero ? p.figure(hero, 'w-full h-full object-cover') : fallbackArt(ctx, '')}</div></section>`
+            ? `<section class="sw-course-hero"><div class="sw-course-heading"><div>${p.heroName()}<p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1></div><div><p class="sw-hero-copy">${esc(c.hero_subline)}</p>${heroCta(ctx)}</div></div><div class="sw-course-image">${hero ? p.figure(hero, 'w-full h-full object-cover') : fallbackArt(ctx, '')}</div></section>`
             : `<section class="sw-dining-hero">
-    <div class="sw-dining-heading"><div><p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1></div><div class="sw-dining-description"><p>${esc(c.hero_subline)}</p>${heroCta(ctx)}</div></div>
+    <div class="sw-dining-heading"><div>${p.heroName()}<p class="sw-kicker">${esc(f.branchLabel)} · ${esc(f.city)}</p><h1>${esc(c.hero_headline)}</h1></div><div class="sw-dining-description"><p>${esc(c.hero_subline)}</p>${heroCta(ctx)}</div></div>
     <div class="sw-dining-image">${hero ? p.figure(hero, 'w-full h-full object-cover') : fallbackArt(ctx, '')}</div>
     <div class="sw-dining-foot"><a href="${p.draft ? '#speisekarte' : '#angebot'}">Angebot entdecken <span aria-hidden="true">↗</span></a><a href="#oeffnungszeiten">Öffnungszeiten &amp; Anfahrt</a></div>
   </section>`;
@@ -207,7 +204,7 @@ function splitLayout(group: PhotoGroup): TemplateDef {
   <section class="sw-split-hero py-14 md:py-20">
     <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 md:grid-cols-2">
       <div>
-        <p class="text-sm font-semibold uppercase tracking-widest text-primary">${esc(COPY[group].tag)} · ${esc(f.city)}</p>
+        ${p.heroName()}<p class="text-sm font-semibold uppercase tracking-widest text-primary">${esc(COPY[group].tag)} · ${esc(f.city)}</p>
         <h1 class="mt-3 font-heading text-4xl font-bold leading-tight md:text-5xl">${esc(c.hero_headline)}</h1>
         <p class="mt-5 max-w-xl text-lg text-muted">${esc(c.hero_subline)}</p>
         ${heroCta(ctx)}
@@ -247,7 +244,7 @@ function magazinLayout(group: PhotoGroup): TemplateDef {
 <main id="inhalt">
   <section class="pt-10 text-center md:pt-14">
     <div class="mx-auto max-w-3xl px-4">
-      <p class="text-sm font-semibold uppercase tracking-widest text-primary">${esc(f.branchLabel)} in ${esc(f.city)}</p>
+      ${p.heroName()}<p class="text-sm font-semibold uppercase tracking-widest text-primary">${esc(f.branchLabel)} in ${esc(f.city)}</p>
       <h1 class="mt-3 font-heading text-4xl font-bold leading-tight md:text-6xl">${esc(c.hero_headline)}</h1>
       <p class="mx-auto mt-5 max-w-2xl text-lg text-muted">${esc(c.hero_subline)}</p>
       <div class="flex justify-center">${heroCta(ctx)}</div>

@@ -62,7 +62,7 @@ function plakatLayout(group: BranchGroup): TemplateDef {
         offer ? `<li><a class="hover:underline" href="#leistungen">${esc(k.nav)}</a></li>` : '',
         p.draft && group === 'gastronomie' ? '<li><a class="hover:underline" href="#speisekarte">Speisekarte</a></li>' : '',
         '<li><a class="hover:underline" href="#ueber-uns">Über uns</a></li>',
-        '<li><a class="hover:underline" href="#oeffnungszeiten">Öffnungszeiten</a></li>',
+        '<li><a class="hover:underline" href="#oeffnungszeiten">Kontakt &amp; Anfahrt</a></li>',
       ].join('');
       const ticker = c.services.map((s) => esc(s.title));
       const form = {
@@ -83,6 +83,7 @@ function plakatLayout(group: BranchGroup): TemplateDef {
   <section class="overflow-hidden bg-accent text-on-accent">
     <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-8 pb-16 md:grid-cols-12 md:pt-12 md:pb-20">
       <div class="min-w-0 md:col-span-7">
+        ${p.heroName('is-plain')}
         <p class="inline-flex rounded-full border-2 border-on-accent px-4 py-1 text-xs font-bold uppercase tracking-widest">${esc(k.tag)} · ${esc(f.city)}</p>
         <h1 class="mt-6 font-heading text-[2rem] font-black uppercase leading-[0.95] tracking-tight [overflow-wrap:anywhere] sm:text-5xl md:text-6xl xl:text-7xl">${esc(c.hero_headline)}</h1>
         <p class="mt-6 max-w-lg text-lg font-medium">${esc(c.hero_subline)}</p>
@@ -90,6 +91,7 @@ function plakatLayout(group: BranchGroup): TemplateDef {
           <a href="${esc(p.ctaHref)}" class="${BTN}">${icon(p.callHref ? 'phone' : 'chat', 'h-5 w-5')}${esc(c.cta_text)}</a>
           ${p.phoneLabel ? `<span class="font-semibold">oder direkt: <a class="underline underline-offset-4" href="${esc(p.callHref)}">${esc(p.phoneLabel)}</a></span>` : ''}
         </div>
+        ${p.trustChips()}
       </div>
       <div class="md:col-span-5">${heroMedia(ctx, group)}</div>
     </div>
@@ -117,9 +119,13 @@ function plakatLayout(group: BranchGroup): TemplateDef {
         )
         .join('')}</ul>
     </div>
+  ${p.exampleServices()}
   </section>`
       : ''
   }
+
+  ${p.industrySections({ ...form, altSectionClass: 'bg-surface-alt py-16', inHub: true })}
+  ${p.process({ sectionClass: 'py-16', titleClass: 'font-heading text-[1.75rem] font-black uppercase tracking-tight [overflow-wrap:anywhere] sm:text-4xl', cardClass: 'rounded-3xl bg-surface p-6 ring-2 ring-ink' })}
 
   <section id="ueber-uns" aria-labelledby="ueber-titel" class="bg-surface-alt py-16">
     <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-3">
@@ -128,21 +134,14 @@ function plakatLayout(group: BranchGroup): TemplateDef {
     </div>
   </section>
 
-  <section id="oeffnungszeiten" aria-labelledby="zeiten-titel" class="bg-primary py-16 text-on-primary">
-    <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-2">
-      <div>
-        <h2 id="zeiten-titel" class="font-heading text-[1.75rem] font-black uppercase tracking-tight [overflow-wrap:anywhere] sm:text-4xl">Öffnungszeiten</h2>
-        <div class="mt-6 [&_dl]:divide-on-primary/20">${p.hoursList({ mutedClass: 'text-on-primary opacity-90' })}</div>
-      </div>
-      <div>
-        <h2 class="font-heading text-[1.75rem] font-black uppercase tracking-tight [overflow-wrap:anywhere] sm:text-4xl">Anfahrt</h2>
-        <p class="mt-6 text-lg">${p.addressLines}</p>
-        <a class="mt-6 inline-flex min-h-11 items-center rounded-full border-2 border-on-primary px-5 py-2 font-bold" href="${esc(p.mapsHref)}" rel="noopener" target="_blank">Route planen<span class="sr-only"> (OpenStreetMap, neuer Tab)</span></a>
-      </div>
-    </div>
-  </section>
+  ${p.contactHub({
+    sectionClass: 'py-16',
+    titleClass: 'font-heading text-[1.75rem] font-black uppercase tracking-tight [overflow-wrap:anywhere] sm:text-4xl',
+    cardClass: 'rounded-3xl bg-surface-alt p-6 ring-2 ring-ink',
+    buttonClass: BTN,
+    secondaryButtonClass: 'inline-flex min-h-11 items-center rounded-full border-2 border-ink px-5 py-2 font-bold',
+  })}
 
-  ${p.industrySections({ ...form, altSectionClass: 'bg-surface-alt py-16' })}
   ${p.gallery()}
   ${p.contactSection(form)}
 

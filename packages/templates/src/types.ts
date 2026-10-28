@@ -84,6 +84,11 @@ export interface BusinessFacts {
   branchLabel: string;
   /** Exact service titles from the checked source snapshot, never inferred by a model. */
   verifiedServices?: string[];
+  /**
+   * Nur im Entwurf: typische Leistungen der Branche als klar getrennte, gekennzeichnete Beispiele neben den
+   * belegten Leistungen (die Leistungsliste selbst bleibt auf belegte Titel beschränkt).
+   */
+  exampleServices?: { title: string; icon: IconKey }[];
   group: BranchGroup;
   /** Playbook-Branche; ohne Angabe die Gruppe */
   industry?: IndustryKey;

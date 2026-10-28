@@ -56,6 +56,7 @@ export const handwerkKlar: TemplateDef = {
       </div>
       ${ph[2] ? p.figure(ph[2], 'sw-feature-img w-full object-cover', 'sw-feature-figure') : ''}
     </div>
+  ${p.exampleServices()}
   </section>
 
   ${p.process({ sectionClass: 'py-16 md:py-20', titleClass: 'font-heading text-3xl font-bold md:text-4xl', cardClass: 'rounded-2xl bg-surface-alt p-6 ring-1 ring-line' })}

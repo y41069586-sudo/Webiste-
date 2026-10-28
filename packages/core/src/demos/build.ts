@@ -350,6 +350,29 @@ export async function generateDemoContent(lead: Lead, cfg: AppConfig, direction?
   return { content: verifiedServiceFallback(content, facts), source: 'fallback', attempts: 2, violations: lastViolations };
 }
 
+/** Ablauf-/Platzhalterkarten der Bibliothek sind keine Leistungen */
+const NOT_A_SERVICE =
+  /anfrag|abstimm|^(?:angebot|standort|ihr vorhaben|terminwünsche|zugang und umfang|besuch planen|vorab reservieren|vorbestellung)$/i;
+
+/**
+ * Typische Leistungen der Branche als getrennt gekennzeichnete Beispiele neben belegten Leistungen
+ * (Entwurf; die Leistungsliste selbst bleibt bei den belegten Titeln).
+ */
+export function exampleServicesFor(lead: Lead, cfg: AppConfig, verified: string[]) {
+  const branch = cfg.targeting.branches.find((b) => b.key === lead.branch);
+  const lib = libraryContent(
+    lead.branch,
+    lead.branchGroup,
+    { name: lead.businessName, stadt: lead.city, branche: branch?.label ?? lead.branch },
+    5,
+  );
+  const known = verified.map((v) => v.toLocaleLowerCase('de'));
+  return lib.services
+    .filter((s) => !NOT_A_SERVICE.test(s.title) && !known.includes(s.title.toLocaleLowerCase('de')))
+    .slice(0, 4)
+    .map((s) => ({ title: s.title, icon: s.icon }));
+}
+
 export function renderDemoHtml(input: {
   templateId: string;
   palette: string;
@@ -420,9 +443,11 @@ export async function buildDemo(
   const templateId = fixed?.id ?? rotated.templateId;
   const palette = fixed ? (fixed.palettes.includes(rotated.palette) ? rotated.palette : fixed.palettes[0]!) : rotated.palette;
   const generated = await generateDemoContent(lead, cfg, design.direction);
+  const verifiedServices = leadContentFacts(lead, cfg, research).verifiedServices;
   const facts = {
     ...leadToFacts(lead, cfg),
-    verifiedServices: leadContentFacts(lead, cfg, research).verifiedServices,
+    verifiedServices,
+    exampleServices: verifiedServices?.length ? exampleServicesFor(lead, cfg, verifiedServices) : undefined,
     photos: design.photos,
   };
   const slug = randomToken(24);
