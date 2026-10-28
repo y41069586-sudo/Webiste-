@@ -552,4 +552,5 @@ Gefunden und behoben:
   Produktionsdeploy) → Veröffentlichen per „Publish deploy“ im Netlify-Dashboard.
 - Admin-App `seitenwerkworld`: Netlify baut aus dem Branch `claude/website-brief-maschine-0d0s37`; dieser wird per
   Fast-Forward auf den aktuellen Stand gebracht (vorher `fbff0cc` vom 25.10.). Datenbank vorher auf Migration 0020
-  gebracht. Anbieter bleiben Mock, `DRY_RUN=true`.
+  gebracht. Anbieter bleiben Mock, `DRY_RUN=true`. Der erste Push trug „[skip ci]“ (Netlify überspringt dann den Bau);
+  der Bau wird mit einem Commit ohne Überspringen-Vermerk ausgelöst.
