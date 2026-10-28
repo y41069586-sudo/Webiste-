@@ -26,7 +26,7 @@ describe('Freigaben: Briefe getrennt vom Verkauf', () => {
       goLiveBlockers(cfg)
         .map((b) => b.key)
         .sort(),
-    ).toEqual(['legal.termsMarkdown', 'sender.bankIban', 'sender.taxNumber', 'tax.operatorConfirmed'].sort());
+    ).toEqual(['legal.termsMarkdown', 'sender.bankIban', 'tax.operatorConfirmed'].sort());
   });
   it('fehlende Absenderangaben oder Datenschutzerklärung sperren weiterhin echte Briefe', () => {
     const cfg = deepMerge(DEFAULT_CONFIG, { ...complete, legal: { impressumMarkdown: '# Impressum', privacyMarkdown: '' } });

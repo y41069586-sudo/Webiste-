@@ -59,6 +59,12 @@ export interface InvoiceData {
 }
 
 /** Rechnung bzw. Stornorechnung als A4-HTML (Anschrift im DIN-5008-Fenster, wie der Brief). */
+/** Steuernummer nur angeben, wenn tatsächlich erteilt (leer oder Platzhalter 000/000/00000 → weglassen) */
+export function hasTaxNumber(taxNumber: string): boolean {
+  const t = taxNumber.trim();
+  return Boolean(t) && !/^0+\/0+\/0+$/.test(t);
+}
+
 export function renderInvoiceHtml(d: InvoiceData): string {
   const g = LETTER_GEOMETRY.left;
   const title = d.kind === 'cancellation' ? 'Stornorechnung' : 'Rechnung';
@@ -73,7 +79,7 @@ export function renderInvoiceHtml(d: InvoiceData): string {
     .filter(Boolean);
   const sellerLine = `${d.seller.company} · ${d.seller.street} · ${d.seller.postalCode} ${d.seller.city}`;
   const bank = d.seller.bankIban
-    ? `<div>${esc(d.seller.bankName)}</div><div>IBAN ${esc(d.seller.bankIban)}</div>${d.seller.bankBic ? `<div>BIC ${esc(d.seller.bankBic)}</div>` : ''}`
+    ? `${d.seller.bankName ? `<div>${esc(d.seller.bankName)}</div>` : ''}<div>IBAN ${esc(d.seller.bankIban)}</div>${d.seller.bankBic ? `<div>BIC ${esc(d.seller.bankBic)}</div>` : ''}`
     : '';
   return `<!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><title>${esc(title)} ${esc(d.number)}</title>
@@ -116,7 +122,7 @@ td{vertical-align:top;padding:2mm 1mm;border-bottom:0.2mm solid #d9e0e8}
     <div><span class="k">Datum</span> ${esc(d.issueDate)}</div>
     ${d.originalNumber ? `<div><span class="k">Zu Rechnung</span> ${esc(d.originalNumber)}${d.originalDate ? ` vom ${esc(d.originalDate)}` : ''}</div>` : ''}
     <div><span class="k">Bestellung</span> ${esc(d.orderRef)}</div>
-    <div><span class="k">Steuernummer</span> ${esc(d.seller.taxNumber)}</div>
+    ${hasTaxNumber(d.seller.taxNumber) ? `<div><span class="k">Steuernummer</span> ${esc(d.seller.taxNumber)}</div>` : ''}
     ${d.seller.vatId ? `<div><span class="k">USt-IdNr.</span> ${esc(d.seller.vatId)}</div>` : ''}
   </div>
   <main class="body">
@@ -145,7 +151,7 @@ td{vertical-align:top;padding:2mm 1mm;border-bottom:0.2mm solid #d9e0e8}
   <footer class="foot">
     <div><div>${esc(d.seller.company)}</div><div>${esc(d.seller.name)}</div><div>${esc(d.seller.street)}</div><div>${esc(d.seller.postalCode)} ${esc(d.seller.city)}</div></div>
     <div><div>Tel. ${esc(d.seller.phone)}</div><div>${esc(d.seller.email)}</div><div>${esc(d.seller.website)}</div></div>
-    <div><div>Steuernummer ${esc(d.seller.taxNumber)}</div>${d.seller.vatId ? `<div>USt-IdNr. ${esc(d.seller.vatId)}</div>` : ''}${bank}</div>
+    <div>${hasTaxNumber(d.seller.taxNumber) ? `<div>Steuernummer ${esc(d.seller.taxNumber)}</div>` : ''}${d.seller.vatId ? `<div>USt-IdNr. ${esc(d.seller.vatId)}</div>` : ''}${bank}</div>
   </footer>
 </section>
 </body></html>`;

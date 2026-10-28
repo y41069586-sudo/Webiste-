@@ -428,3 +428,12 @@ Betreiber: „Hab halt kein Gewerbe – mach es so, als hätte man keins, wie ma
   aus den Entwürfen (ohne Entwurfs-/Sperrvermerke) erst nach ausdrücklicher Bestätigung „in eigener
   Verantwortung, keine anwaltliche Prüfung“; Audit-Eintrag `legal/drafts_adopted`. Ohne bestätigten Steuerstatus
   sichert die Fassung keine § 19-Befreiung zu.
+
+### 28.10.2026 – Steuernummer keine Voraussetzung mehr, Bankverbindung hinterlegt
+
+Betreiber: „Steuernummer entfernen“. Die Steuernummer ist keine Freigabebedingung mehr (weder Briefe noch
+Checkout). Rechnungen und Zahlungserinnerungs-Briefe nennen sie nur, wenn sie tatsächlich erteilt ist – nie leer
+oder als Platzhalter 000/000/00000. Hinweis an den Betreiber gegeben: § 34a UStDV sieht die Steuernummer auf
+Kleinunternehmer-Rechnungen vor; betroffene Rechnungen können nach Erteilung berichtigt werden. Die IBAN wurde
+in der Produktions-Konfiguration hinterlegt (nicht im Repository); die Platzhalter-Steuernummer dort geleert.
+Zahlungserinnerungen ohne IBAN verweisen auf Telefon/E-Mail statt auf ein Konto.

@@ -87,8 +87,11 @@ describe('Rechnungs-PDF und Versand', () => {
     const { pages, items } = await pdfTextItems(pdf);
     expect(pages).toBe(1);
     const text = items.map((i) => i.str).join(' ');
-    for (const s of [o.invoiceNumber!, '§ 19 UStG', 'Elektro Beispiel GmbH', 'Steuernummer', 'Leistungszeitpunkt', '590,00'])
+    for (const s of [o.invoiceNumber!, '§ 19 UStG', 'Elektro Beispiel GmbH', 'Leistungszeitpunkt', '590,00'])
       expect(text).toContain(s);
+    // Ohne erteilte Steuernummer weder Platzhalter noch leere Zeile (Betreiberentscheidung 28.10.2026)
+    expect(text).not.toContain('000/000/00000');
+    expect(text).not.toContain('Steuernummer');
     const layout = await validateLetterPdf(pdf, {
       recipientLines: ['Elektro Beispiel GmbH', 'Max Beispiel', 'Hohe Straße 12', '44139 Dortmund'],
       position: 'left',

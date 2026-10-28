@@ -1,3 +1,4 @@
+import { hasTaxNumber } from './invoice';
 import { esc } from './html';
 import { embeddedFontCss, LETTER_GEOMETRY, type LetterSender } from './letter';
 
@@ -54,10 +55,10 @@ td{padding:1.4mm 1mm;border-bottom:0.2mm solid #d9e0e8}
     <p>leider konnten wir die monatlichen Raten trotz mehrerer Versuche und zwei Erinnerungen nicht einziehen. Ihre Website ist deshalb pausiert. Der Vertrag hat eine Mindestlaufzeit bis zum ${esc(d.minTermEnds)}. Folgende Raten sind bis dahin offen:</p>
     <table>${d.rates.map((r) => `<tr><td>${esc(r.label)}</td><td class="num">${esc(r.amount)}</td></tr>`).join('')}
       <tr class="total"><td>Summe</td><td class="num">${esc(d.total)}</td></tr></table>
-    <p>Bitte überweisen Sie den Betrag bis zum ${esc(d.dueDate)} auf das unten genannte Konto (Verwendungszweck: ${esc(d.orderRef)}). Sobald die Zahlung eingegangen ist, schalten wir Ihre Website wieder frei.</p>
+    <p>Bitte überweisen Sie den Betrag bis zum ${esc(d.dueDate)} ${s.bankIban ? `auf das unten genannte Konto (Verwendungszweck: ${esc(d.orderRef)})` : `– die Zahlungsmöglichkeiten nennen wir Ihnen gern telefonisch oder per E-Mail (Verwendungszweck: ${esc(d.orderRef)})`}. Sobald die Zahlung eingegangen ist, schalten wir Ihre Website wieder frei.</p>
     <p>Gibt es einen Grund für den Zahlungsausfall oder möchten Sie eine Ratenlösung besprechen? Melden Sie sich gern – wir finden eine Lösung.</p>
     <p>Mit freundlichen Grüßen<br>${esc(s.name)}</p>
   </main>
-  <footer class="foot">${esc(s.company)} · ${esc(s.street)} · ${esc(s.postalCode)} ${esc(s.city)} · Steuernummer ${esc(s.taxNumber)}${s.bankIban ? ` · ${esc(s.bankName)} · IBAN ${esc(s.bankIban)}${s.bankBic ? ` · BIC ${esc(s.bankBic)}` : ''}` : ''}</footer>
+  <footer class="foot">${esc(s.company)} · ${esc(s.street)} · ${esc(s.postalCode)} ${esc(s.city)} ${hasTaxNumber(s.taxNumber) ? ` · Steuernummer ${esc(s.taxNumber)}` : ''}${s.bankIban ? `${s.bankName ? ` · ${esc(s.bankName)}` : ''} · IBAN ${esc(s.bankIban)}${s.bankBic ? ` · BIC ${esc(s.bankBic)}` : ''}` : ''}</footer>
 </section></body></html>`;
 }
