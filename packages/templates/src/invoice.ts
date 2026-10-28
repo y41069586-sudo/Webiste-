@@ -93,8 +93,8 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .head{position:absolute;left:25mm;right:20mm;top:13mm;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:0.4mm solid #1d4e89;padding-bottom:2.5mm}
 .brand{font-size:15pt;font-weight:700;color:#1d4e89}
 .web{font-size:8.5pt;color:#4a5565}
-.sender{position:absolute;left:${g.addressArea.x + 3}mm;top:${g.addressArea.y - 5}mm;font-size:6.5pt;color:#4a5565;white-space:nowrap}
-.address{position:absolute;left:${g.addressArea.x + 3}mm;top:${g.addressArea.y + 1}mm;width:${g.addressArea.w - 6}mm;font-size:10pt;line-height:4.55mm;white-space:nowrap;overflow:hidden}
+.sender{position:absolute;left:${g.addressArea.x + 3}mm;top:${g.returnArea.y + 1.5}mm;font-size:6.5pt;color:#4a5565;white-space:nowrap}
+.address{position:absolute;left:${g.addressArea.x + 3}mm;top:${g.addressArea.y + 0.5}mm;width:${g.addressArea.w - 6}mm;font-size:10pt;line-height:${LETTER_GEOMETRY.addressLineMm}mm;white-space:nowrap;overflow:hidden}
 .meta{position:absolute;left:125mm;top:50mm;width:65mm;font-size:8.5pt;line-height:1.55}
 .meta .k{color:#6b7280;display:inline-block;width:27mm}
 .body{position:absolute;left:25mm;right:20mm;top:100mm}

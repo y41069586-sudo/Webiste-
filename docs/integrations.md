@@ -80,8 +80,10 @@ ohne Token → 401. Implementierung: `packages/core/src/providers/mail/easynova.
   Metadaten. **Absenderzeile über dem Adressfenster ist Pflicht**, sonst Ablehnung → Brief hat jetzt eine
   Rücksendeangabe nach DIN 5008 direkt über der Anschrift (`returnAddressLine`, geprüft in `validateLetterPdf`).
   Freimachungszone freihalten. `addressCorrection` senden wir bewusst nicht: falsch sitzende Anschrift → Status 99
-  statt still umgesetztem Brief. Genaue Sperr-/Auslesefelder (mm) liefert erst `GET /api/account` mit Zugang →
-  beim ersten Testauftrag mit `EASYNOVA_TEST_EMAIL` (Rückmail mit eingezeichneten Flächen) prüfen.
+  statt still umgesetztem Brief. `GET /api/account` (abgerufen 28.10.2026, Gruppe Default.Document, mm ab links/oben):
+  Auslesefläche Absender 19–108 × 45–51, Adresse 19–108 × 52–90, Sperrfläche „DV-Freimachung“ 20–108 × 52–68
+  (Frankierung). → `LETTER_GEOMETRY`: Rücksendeangabe bei 46,5 mm, Anschrift ab 69 mm (max. 5 Zeilen à 4,2 mm),
+  Brieftext ab 91/92 mm. Rückmail der Testaufträge (`EASYNOVA_TEST_EMAIL`) mit eingezeichneten Flächen gegenprüfen.
 - **Testmodus:** `testFlag: true` je Sendung: alle Prüfungen, kein Druck, keine Zustellung, keine Kosten; Status bleibt
   dauerhaft 1. Mit `testEMail` + `testShowRestrictedArea` kommt das verarbeitete PDF mit Schablone per E-Mail.
   Unser `EASYNOVA_MODE=test` setzt `testFlag` für jede Sendung.

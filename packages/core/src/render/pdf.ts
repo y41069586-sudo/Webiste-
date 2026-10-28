@@ -128,8 +128,8 @@ export async function validateLetterPdf(
       });
     }
   }
-  // Rücksendeangabe (DIN 5008): eine Zeile im Fenster direkt über dem Anschriftenfeld – dort erlaubt
-  const retZone = { x: g.addressArea.x, y: g.addressArea.y - 6, w: g.addressArea.w, h: 6 };
+  // Rücksendeangabe (DIN 5008): eine Zeile in der Absenderfläche oben im Fenster – dort erlaubt
+  const retZone = g.returnArea;
   const retParts = p1.filter(
     (i) =>
       !used.has(i) &&

@@ -92,7 +92,7 @@ describe('Brief-PDF (echter Browser)', () => {
     await stopBoss();
   });
 
-  it('erzeugt einen einseitigen Brief, Anschrift exakt im Pingen-Anschriftenfeld', async () => {
+  it('erzeugt einen einseitigen Brief, Anschrift exakt im easyNova-Anschriftenfeld unter der Freimachung', async () => {
     const res = await generateLetter(leadId, 1, { actor: 'job:test' });
     expect(res.issues, JSON.stringify(res.issues)).toEqual([]);
     expect(res.status).toBe('generated');
@@ -114,9 +114,11 @@ describe('Brief-PDF (echter Browser)', () => {
     });
     expect(check.issues).toEqual([]);
     // Anschrift beginnt rechts von 22 mm und unterhalb von 60 mm, endet vor 85,5 mm
-    expect(check.addressBox!.x1).toBeGreaterThanOrEqual(22);
-    expect(check.addressBox!.y1).toBeGreaterThanOrEqual(60);
-    expect(check.addressBox!.y2).toBeLessThanOrEqual(85.5);
+    // easyNova: Anschrift unterhalb der Freimachung (52–68 mm), innerhalb 19–108 × 52–90 mm
+    expect(check.addressBox!.x1).toBeGreaterThanOrEqual(20);
+    expect(check.addressBox!.y1).toBeGreaterThanOrEqual(68);
+    expect(check.addressBox!.y2).toBeLessThanOrEqual(90);
+    expect(check.addressBox!.x2).toBeLessThanOrEqual(108);
     const text = (await pdfTextItems(pdf)).items.map((i) => i.str).join(' ');
     expect(text).toMatch(/Ihre neue Website ist schon fertig|Ein Website-Entwurf für/);
     expect(text).toContain('590 €');

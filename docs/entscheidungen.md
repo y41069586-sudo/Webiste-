@@ -572,3 +572,12 @@ Gefunden und behoben:
   Funktionen und Typen gehören `seitenwerk_admin_backend` (Besitzerin unterliegt RLS nicht und kann die täglichen
   `queue_stats`-Partitionen anlegen/löschen); `postgres` erhält dafür nur innerhalb der Transaktion SET auf die Rolle.
   Lokal mit eingeschaltetem RLS nachgestellt: Fehler reproduziert, nach dem Fix Senden/Abholen/Zeitplan/Partition OK.
+
+### 28.10.2026 – easyNova-Konto angelegt, Brief auf easyNova-Flächen umgestellt
+
+- Zugang in Netlify (EASYNOVA_USERNAME/PASSWORD als Secret, EASYNOVA_MODE=test, EASYNOVA_TEST_EMAIL), API-Login
+  erfolgreich; Guthaben 0 € (Vorkasse), keine Aufladung.
+- `GET /api/account` meldet die Freimachung (Frankierung) bei 52–68 mm von oben im Adressfeld. Die bisherige
+  Pingen-Geometrie (Anschrift ab 60 mm) hätte dort gelegen → Ablehnung (Status 99). Neu: Rücksendeangabe in der
+  Absenderfläche 45–51 mm, Anschrift 68,5–90 mm (5 Zeilen à 4,2 mm), Brieftext ab 92 mm (Einladungsseite 91 mm,
+  Abstände dort leicht verringert). Rechnung und Claim-Brief nutzen dieselben Flächen. Alle Tests grün.

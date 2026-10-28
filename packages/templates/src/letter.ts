@@ -5,22 +5,30 @@ import path from 'node:path';
 import { boldMd, esc } from './html';
 
 /**
- * Brief-Layout (A4, DIN 5008 Form B, Fensterumschlag links) nach den Vorgaben von Pingen:
- * Anschriftenfeld x 22 mm / y 60 mm, 85,5 × 25,5 mm; Zone x 20–109,5 mm / y 40–87,5 mm
- * sonst frei (Frankierung/Vermerke); 5 mm Rand; unten links 15 mm frei.
- * Quelle: help.pingen.com → Layout requirements (geprüft 23.10.2026).
+ * Brief-Layout (A4, DIN 5008 Form B, Fensterumschlag links) nach den Flächen, die easyNova für dieses Konto meldet
+ * (`GET /api/account`, abgerufen 28.10.2026, Gruppe Default.Document, mm ab links/oben):
+ * Absender (Auslesefläche) 19–108 × 45–51, Adresse 19–108 × 52–90, Sperrfläche „DV-Freimachung“ 20–108 × 52–68
+ * (dort druckt easyNova die Frankierung; muss leer bleiben). Die Anschrift steht deshalb unterhalb der Freimachung
+ * (68,5–90 mm, max. 5 Zeilen à 4,2 mm), die Rücksendeangabe in der Absenderfläche. Zone 19–108,5 × 40–90 sonst frei;
+ * 5 mm Rand; unten links 15 mm frei. Rechte Position (nur Alternativanbieter) entsprechend gespiegelt.
  */
 export const LETTER_GEOMETRY = {
   pageWidthMm: 210,
   pageHeightMm: 297,
   left: {
-    addressArea: { x: 22, y: 60, w: 85.5, h: 25.5 },
-    keepFree: { x: 20, y: 40, w: 89.5, h: 47.5 },
+    returnArea: { x: 19, y: 45, w: 89, h: 6 },
+    frankingArea: { x: 20, y: 52, w: 88, h: 16 },
+    addressArea: { x: 20, y: 68.5, w: 88, h: 21.5 },
+    keepFree: { x: 19, y: 40, w: 89.5, h: 50 },
   },
   right: {
-    addressArea: { x: 118, y: 60, w: 85.5, h: 25.5 },
-    keepFree: { x: 116, y: 40, w: 89.5, h: 47.5 },
+    returnArea: { x: 115, y: 45, w: 89, h: 6 },
+    frankingArea: { x: 116, y: 52, w: 88, h: 16 },
+    addressArea: { x: 116, y: 68.5, w: 88, h: 21.5 },
+    keepFree: { x: 115, y: 40, w: 89.5, h: 50 },
   },
+  /** Zeilenabstand der Anschrift (10 pt Schrift, 5 Zeilen passen in das Anschriftenfeld) */
+  addressLineMm: 4.2,
   edgeMarginMm: 5,
   bottomLeftCornerMm: 15,
 } as const;
@@ -127,9 +135,10 @@ export function renderLetterHtml(d: LetterData): string {
   const premium = Boolean(d.desktopScreenshotDataUri && estimatedHeight <= 150 && !d.previewInvitation);
   const right = d.addressPosition === 'right';
   const g = right ? LETTER_GEOMETRY.right : LETTER_GEOMETRY.left;
-  // Anschrift 3 mm eingerückt im Feld, oben 1 mm Luft
+  // Anschrift 3 mm eingerückt im Feld, oben 0,5 mm Luft; Rücksendeangabe mittig in der Absenderfläche
   const addrX = g.addressArea.x + 3;
-  const addrY = g.addressArea.y + 1;
+  const addrY = g.addressArea.y + 0.5;
+  const retY = g.returnArea.y + 1.5;
   const infoX = right ? 25 : 125;
   // Rücksendeangabe muss vollständig ins Fenster passen (ca. 60 Zeichen bei 6,5 pt auf 79,5 mm)
   const retLength = returnAddressLine(d.sender).length;
@@ -162,9 +171,9 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .brand{font-size:15pt;font-weight:700;letter-spacing:-0.01em;color:#1d4e89}
 .tag{font-size:8.5pt;color:#4a5565;margin-top:0.5mm}
 .web{font-size:8.5pt;color:#4a5565;text-align:right}
-.address{position:absolute;left:${addrX}mm;top:${addrY}mm;width:${g.addressArea.w - 6}mm;font-size:10pt;line-height:4.55mm;white-space:nowrap}
+.address{position:absolute;left:${addrX}mm;top:${addrY}mm;width:${g.addressArea.w - 6}mm;font-size:10pt;line-height:${LETTER_GEOMETRY.addressLineMm}mm;white-space:nowrap}
 .address div{overflow:hidden;text-overflow:clip}
-.retline{position:absolute;left:${addrX}mm;top:${addrY - 4.5}mm;width:${g.addressArea.w - 6}mm;font-size:${retFont}pt;line-height:3mm;color:#4a5565;white-space:nowrap;overflow:hidden;border-bottom:0.15mm solid #9aa3ae}
+.retline{position:absolute;left:${addrX}mm;top:${retY}mm;width:${g.addressArea.w - 6}mm;font-size:${retFont}pt;line-height:3mm;color:#4a5565;white-space:nowrap;overflow:hidden;border-bottom:0.15mm solid #9aa3ae}
 .info{position:absolute;left:${infoX}mm;top:50mm;width:65mm;font-size:8.5pt;line-height:1.45;color:#3b4350}
 .info .k{color:#6b7280}
 .info .date{margin-top:3mm;color:#1d232b}
@@ -190,16 +199,16 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .small p{margin:0 0 1.2mm}
 .small strong{color:#1d232b}
 .small .fn{color:#1d232b}
-.v4-letter{top:90mm}.v4-letter .intro{margin:1mm 0;font-size:9.6pt;line-height:1.4}
+.v4-letter{top:92mm}.v4-letter .intro{margin:1mm 0;font-size:9.6pt;line-height:1.4}
 .v4-letter .subject{margin-bottom:1.5mm}.v4-letter .intro p{margin:0}.v4-letter .intro p+p{margin-top:0.7mm}.v4-letter .visual{gap:6mm;margin:1mm 0;align-items:center}
 .v4-letter .composite{width:114mm;max-height:65mm;object-fit:contain;border-radius:0}
 .v4-letter .qrbox{flex:0 0 45mm;min-width:0}.v4-letter .qrbox strong{font-size:9pt}.v4-letter .short{font-size:8pt;color:#24364a;word-break:normal;overflow-wrap:anywhere}
 .offer-summary{margin:2mm 0;border-top:0.3mm solid #1d4e89;padding-top:2mm}
 .offer-prices{display:flex;gap:4mm;font-size:9.4pt;line-height:1.4}.offer-prices strong{font-weight:600}.offer-summary p{font-size:8.5pt;line-height:1.35;margin:1mm 0}.offer-summary .tax{font-size:8pt}
-.v4-letter .invitation-intro{font-size:10.5pt;line-height:1.4;margin:1.5mm 0 2mm}.v4-letter .invitation-intro p+p{margin-top:1mm}.invitation-next{font-size:9.5pt;line-height:1.4;margin:3mm 0}.invitation-next p+p{margin-top:1.5mm}.v4-letter .no-action{font-size:9pt;line-height:1.4}.v4-letter .sign{margin-top:0}
+.v4-letter .invitation-intro{font-size:10.5pt;line-height:1.4;margin:1mm 0 1.2mm}.v4-letter .invitation-intro p+p{margin-top:1mm}.invitation-next{font-size:9.5pt;line-height:1.4;margin:3mm 0}.invitation-next p+p{margin-top:1.5mm}.v4-letter .no-action{font-size:9pt;line-height:1.4}.v4-letter .sign{margin-top:0}
 .v4-page .small{font-size:8pt;color:#344054;line-height:1.32}
 /* Current invitations: readable disclosures without shrinking the real device preview or QR. */
-.sign-row{display:flex;gap:8mm;align-items:flex-start}.sign-row .sign{flex:0 0 auto}.ps{margin:0;flex:1;font-size:9.5pt;line-height:1.4;padding-left:4mm;border-left:0.4mm solid #1d4e89}.invitation-page .v4-letter{top:88mm}.invitation-page .v4-letter .composite{max-height:53mm}.invitation-page .small{bottom:12mm;font-size:9pt}.invitation-page .invitation-next{margin:1mm 0 1.2mm}.invitation-page .invitation-next p+p{margin-top:1mm}
+.sign-row{display:flex;gap:8mm;align-items:flex-start}.sign-row .sign{flex:0 0 auto}.ps{margin:0;flex:1;font-size:9.5pt;line-height:1.4;padding-left:4mm;border-left:0.4mm solid #1d4e89}.invitation-page .v4-letter{top:91mm}.invitation-page .v4-letter .composite{max-height:53mm}.invitation-page .small{bottom:12mm;font-size:9pt}.invitation-page .invitation-next{margin:0.6mm 0 0.8mm}.invitation-page .invitation-next p+p{margin-top:1mm}
 .p2{position:absolute;left:25mm;right:20mm;top:25mm}
 .p2 h2{font-size:15pt;margin:0 0 2mm;color:#1d4e89}
 .muted{color:#4a5565}
