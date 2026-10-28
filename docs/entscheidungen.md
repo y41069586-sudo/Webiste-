@@ -453,3 +453,19 @@ erscheinen, legen Sie fest“. Nie auf Live-Seiten.
 
 Zwölf weitere Pexels-Fotos ohne erkennbare Gesichter: Friseur 3, Barbier 1, Nagelstudio 2, Kosmetik 2, Tanz 2,
 Musikunterricht 2. Ballett bleibt nur bei bestätigter Ballett-Spezialisierung.
+
+### 28.10.2026 – Persönlicher Einstieg „mir ist aufgefallen: …“ nur aus belegten Befunden
+
+Betreiber: Brief bei Go-Live mit KI-Schlüssel pro Betrieb persönlich. Umsetzung ohne erfundene Beobachtungen:
+
+- Quelle ist ausschließlich der dokumentierte Recherche-Nachweis: die erste aktuelle (≤ 30 Tage geprüft, Ereignis
+  ≤ 12 Monate) Angabe der Art Neues Angebot, Betriebsübernahme, Erweiterung, aktive Social-/Plattformnutzung,
+  aktuelle Arbeitsbilder oder aktuelle Leistungswerbung. Nicht: Bewertungen, freie Termine, Verzeichnisdaten.
+- Ohne KI: Brief 1 beginnt „mir ist aufgefallen: {Befund}. Deshalb habe ich für Ihren Betrieb in {Ort} eine eigene
+  Website gebaut …“. Mit KI: eigenes Feld `observation` („Mir ist aufgefallen, dass …“); Code-Prüfung verlangt alle
+  Kernbegriffe des Befunds, keine Bewertung, keine fremden Zahlen; der Faktenprüfer gleicht zusätzlich ab. Ohne Befund
+  ist „aufgefallen“ gesperrt.
+- Behoben: In der KI-Fassung ging der geprüfte Hinweis „keinen eigenen Webauftritt gefunden“ verloren
+  (Absatz-Erkennung passte nicht mehr); er wird jetzt systemseitig wörtlich angehängt.
+- Einseitigkeit: zusätzliche Kürzungsstufe (Eigentums-Zusatz entfällt vor dem P. S.), Pflichttexte nie gekürzt.
+- Admin-Recherche: Hinweis, Befunde als kurzen sachlichen Sie-Satz einzutragen.

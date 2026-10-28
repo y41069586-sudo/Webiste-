@@ -63,6 +63,13 @@ export function ResearchForm({ id, research }: { id: string; research: LeadResea
             Veröffentlichungsdaten zusätzlich eintragen. Erneutes Lesen macht alte Anzeigen, Übernahmen oder Bilder nicht aktuell.
             Nicht erreichbare Profile und reine Suchvorschauen sind kein abgeschlossener Quellencheck.
           </p>
+          <p className="rounded-lg bg-sky-50 p-3 text-sm text-slate-700">
+            <strong>Persönlicher Einstieg im Brief:</strong> Die erste aktuelle Angabe der Art „Neues Angebot“,
+            „Betriebsübernahme“, „Nachgewiesene Erweiterung“, „Aktive Social-/Plattformnutzung“, „Aktuelle Arbeitsbilder“ oder
+            „Wirbt aktuell für Leistungen“ eröffnet den Brief mit „mir ist aufgefallen: …“. Dafür als kurzen, sachlichen Satz in
+            der Sie-Form eintragen, z. B. „Sie bieten seit Kurzem auch Fassadenarbeiten an“ oder „Sie zeigen auf Instagram
+            regelmäßig Ihre fertigen Bäder“ – ohne Bewertung, ohne Zahlen, die nicht in der Quelle stehen.
+          </p>
           {Array.from({ length: Math.max(10, research?.signals.length ?? 0) }, (_, index) => {
             const signal = research?.signals[index];
             return (

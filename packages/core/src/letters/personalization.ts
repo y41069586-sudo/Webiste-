@@ -78,7 +78,12 @@ export function reviewedLetterDetails(context: VerifiedLetterContext) {
     )
       throw new Error('Website-Recherche unvollständig oder eigene Website gefunden; Eignung manuell prüfen.');
   }
-  return facts.slice(0, 3).map((d) => ({ ...d, text: d.text.trim().replace(/[.!]$/, ''), source: d.source.trim() }));
+  // Bis zu drei Leistungsangaben plus je ein Recherchebefund (Website-Suche, Beobachtung) – kein Befund verdrängt den anderen
+  const kept = [
+    ...facts.filter((d) => !d.kind).slice(0, 3),
+    ...(['website_search', 'public_observation'] as const).flatMap((k) => facts.filter((d) => d.kind === k).slice(0, 1)),
+  ];
+  return kept.map((d) => ({ ...d, text: d.text.trim().replace(/[.!]$/, ''), source: d.source.trim() }));
 }
 export function personalizedLetterCopy(context: VerifiedLetterContext, variant = 0) {
   const facts = reviewedLetterDetails(context);
@@ -378,17 +383,19 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
   const place = context.city.length <= 32 ? ` in ${context.city}` : '';
   const research = website
     ? 'Bei unserer dokumentierten Suche haben wir keinen eigenen Webauftritt von Ihnen gefunden.'
-    : observation
-      ? `In Ihrem öffentlichen Eintrag ist uns aufgefallen: ${observation.text}.`
-      : undefined;
+    : undefined;
+  // Persönlicher Aufhänger nur aus einem belegten, aktuellen Recherchebefund – nie erfunden
+  const noticed = observation && sequence === 1 ? `mir ist aufgefallen: ${observation.text}.` : undefined;
   const opening =
     sequence === 3
       ? 'hier ist der überarbeitete, weiterhin unverbindliche Website-Entwurf für Ihren Betrieb.'
       : sequence === 2
         ? 'hier finden Sie die Vorschau für Ihren Betrieb noch einmal – zum Ansehen, wann es für Sie passt.'
-        : variant === 'B'
-          ? `für Ihren Betrieb${place} habe ich eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.`
-          : 'ich habe für Ihren Betrieb eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.';
+        : noticed
+          ? `${noticed} Deshalb habe ich für Ihren Betrieb${place} eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.`
+          : variant === 'B'
+            ? `für Ihren Betrieb${place} habe ich eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.`
+            : 'ich habe für Ihren Betrieb eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.';
   const personal = detail
     ? variant === 'B'
       ? `Gerade bei Themen wie ${detail} ist ein klarer Überblick hilfreich.`
@@ -417,7 +424,11 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
     scan: '**QR-Code mit der Handykamera scannen und kostenlos ansehen:** Ihre Website ist schon online, aber nur über Ihren persönlichen Link erreichbar. Ein Blick dauert keine Minute.',
     qrCaption: profile.caption,
     next: PREVIEW_ORDER_NOTICE,
-    sources: [...selected, ...(website ? [website] : observation ? [observation] : [])].map((f) => ({
+    /** Geprüfter Recherchehinweis (Website-Suche) – auch für KI-Fassungen unverändert angehängt */
+    research,
+    /** Belegter Befund für den persönlichen Einstieg (nur Brief 1) */
+    observation: observation && sequence === 1 ? { text: observation.text, source: observation.source } : undefined,
+    sources: [...selected, ...(website ? [website] : []), ...(noticed && observation ? [observation] : [])].map((f) => ({
       text: f.text,
       source: f.source,
     })),

@@ -286,6 +286,11 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   // Einladung zu lang (z. B. langer Firmenname): erst die Vorstellung, dann das P. S. weglassen – nie Pflichttext kürzen
   for (const shorten of [
     () => (data.noAction = senderContactLine(cfg, { withIntro: false })),
+    // Bei persönlichem Einstieg ist der Eigentums-Zusatz verzichtbar, die Beobachtung nicht
+    () => {
+      if (data.intro?.[0])
+        data.intro[0] = data.intro[0].replace(' – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.', '.');
+    },
     () => (data.postscript = undefined),
   ]) {
     if (!data.previewInvitation || !domIssues.some((i) => i.check === 'ueberlappung')) break;

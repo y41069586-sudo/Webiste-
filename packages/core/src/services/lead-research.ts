@@ -25,11 +25,35 @@ export async function storedLeadResearch(leadId: string, db: DbOrTx = getDb()) {
   const parsed = leadResearchSchema.safeParse(await getSetting<unknown>(leadResearchKey(leadId), null, db));
   return parsed.success ? parsed.data : null;
 }
+/**
+ * Belegte Befunde, die als persönlicher Einstieg taugen („mir ist aufgefallen: …“), in dieser Rangfolge.
+ * Bewusst nicht: Bewertungen (eigene Regeln), freie Termine (wirkt herabsetzend), reine Verzeichnisdaten.
+ */
+const OBSERVATION_KINDS = ['new_offer', 'takeover', 'expansion', 'active_profile', 'work_photos', 'service_advertising'] as const;
+
 export function researchLetterFacts(research: LeadResearch | null): VerifiedLetterContext['details'] {
   if (!research) return [];
+  const now = new Date();
   const details = research.signals
-    .filter((s) => ['service', 'specialty', 'area'].includes(s.kind) && isFresh(s.observedAt, 30, new Date()))
+    .filter((s) => ['service', 'specialty', 'area'].includes(s.kind) && isFresh(s.observedAt, 30, now))
     .map((s) => ({ text: s.text, source: s.source, verified: s.verified, checkedAt: s.observedAt }));
+  const observation = OBSERVATION_KINDS.map((kind) =>
+    research.signals.find(
+      (s) =>
+        s.kind === kind &&
+        isFresh(s.observedAt, 30, now) &&
+        // Ein lange zurückliegendes Ereignis ist keine aktuelle Beobachtung
+        (!s.occurredOn || isFresh(`${s.occurredOn}T00:00:00Z`, 365, now)),
+    ),
+  ).find(Boolean);
+  if (observation)
+    details.push({
+      text: observation.text,
+      source: observation.source,
+      verified: observation.verified,
+      checkedAt: observation.observedAt,
+      kind: 'public_observation' as const,
+    } as (typeof details)[number]);
   // Use the same defensive business-fact rules as the existing invitation composer.
   return details.flatMap((detail) => reviewedLetterDetails({ businessName: '', city: '', branchLabel: '', details: [detail] }));
 }
