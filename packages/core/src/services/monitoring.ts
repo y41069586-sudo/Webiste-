@@ -20,12 +20,43 @@ export interface SystemHealth {
   problems: string[];
 }
 
-/** Zustand von Datenbank, Speicher und Worker (für /api/health und den Watchdog). */
-export async function systemHealth(db: DbOrTx = getDb()): Promise<SystemHealth> {
+let healthCache: { at: number; value: SystemHealth } | undefined;
+
+/**
+ * Zustand von Datenbank, Speicher und Worker (für /api/health und den Watchdog). Die Prüfungen laufen parallel;
+ * `maxAgeMs` erlaubt Oberflächen (Dashboard) ein kurz zurückliegendes Ergebnis wiederzuverwenden.
+ */
+export async function systemHealth(db: DbOrTx = getDb(), opts: { maxAgeMs?: number } = {}): Promise<SystemHealth> {
+  if (opts.maxAgeMs && healthCache && Date.now() - healthCache.at < opts.maxAgeMs) return healthCache.value;
   const problems: string[] = [];
-  try {
-    await db.execute(sql`SELECT 1`);
-  } catch {
+  const [dbOk, storage, q, b] = await Promise.all([
+    db
+      .execute(sql`SELECT 1`)
+      .then(() => true)
+      .catch(() => false),
+    (async () => {
+      try {
+        const s = getProviders().storage;
+        await s.put('health/check.txt', new Date().toISOString(), 'text/plain');
+        return Boolean(await s.get('health/check.txt'));
+      } catch {
+        return false;
+      }
+    })(),
+    db
+      .execute<{ heartbeat: number | null; failed: number; dead: number; backlog: number }>(
+        sql`SELECT
+        (SELECT extract(epoch FROM now() - max(completed_on))::int FROM pgboss.job WHERE name = 'pipeline-tick' AND state = 'completed') AS heartbeat,
+        (SELECT count(*)::int FROM pgboss.job WHERE state = 'failed' AND completed_on > now() - interval '1 hour') AS failed,
+        (SELECT count(*)::int FROM pgboss.job WHERE name = 'dead-letters' AND created_on > now() - interval '1 day') AS dead,
+        (SELECT count(*)::int FROM pgboss.job WHERE state = 'created' AND start_after < now() - interval '30 minutes') AS backlog`,
+      )
+      .catch(() => null),
+    db
+      .execute<{ value: { status: string; at: string } }>(sql`SELECT value FROM settings WHERE key = 'backup_status'`)
+      .catch(() => null),
+  ]);
+  if (!dbOk) {
     return {
       status: 'down',
       db: false,
@@ -39,24 +70,7 @@ export async function systemHealth(db: DbOrTx = getDb()): Promise<SystemHealth> 
       problems: ['Datenbank nicht erreichbar'],
     };
   }
-  let storage = true;
-  try {
-    const s = getProviders().storage;
-    await s.put('health/check.txt', new Date().toISOString(), 'text/plain');
-    storage = Boolean(await s.get('health/check.txt'));
-  } catch {
-    storage = false;
-  }
   if (!storage) problems.push('Datei-Speicher nicht beschreibbar');
-  const q = await db
-    .execute<{ heartbeat: number | null; failed: number; dead: number; backlog: number }>(
-      sql`SELECT
-        (SELECT extract(epoch FROM now() - max(completed_on))::int FROM pgboss.job WHERE name = 'pipeline-tick' AND state = 'completed') AS heartbeat,
-        (SELECT count(*)::int FROM pgboss.job WHERE state = 'failed' AND completed_on > now() - interval '1 hour') AS failed,
-        (SELECT count(*)::int FROM pgboss.job WHERE name = 'dead-letters' AND created_on > now() - interval '1 day') AS dead,
-        (SELECT count(*)::int FROM pgboss.job WHERE state = 'created' AND start_after < now() - interval '30 minutes') AS backlog`,
-    )
-    .catch(() => null);
   const row = q?.rows[0] ?? null;
   if (!row) problems.push('Aufgabenwarteschlange nicht lesbar: Schema, Berechtigungen und Verbindung prüfen');
   const hb = row?.heartbeat == null ? null : Number(row.heartbeat);
@@ -68,9 +82,6 @@ export async function systemHealth(db: DbOrTx = getDb()): Promise<SystemHealth> 
     );
   if (row && row.failed > 10) problems.push(`${row.failed} fehlgeschlagene Jobs in der letzten Stunde`);
   if (row && row.backlog > 50) problems.push(`${row.backlog} Jobs warten seit über 30 Minuten`);
-  const b = await db
-    .execute<{ value: { status: string; at: string } }>(sql`SELECT value FROM settings WHERE key = 'backup_status'`)
-    .catch(() => null);
   if (!b) problems.push('Backup-Nachweis nicht lesbar');
   const backup = b?.rows[0]?.value ?? null;
   if (getEnv().NODE_ENV === 'production') {
@@ -83,7 +94,7 @@ export async function systemHealth(db: DbOrTx = getDb()): Promise<SystemHealth> 
     )
       problems.push('Letztes geprüftes Backup älter als 36 Stunden');
   }
-  return {
+  const value: SystemHealth = {
     status: problems.length ? 'degraded' : 'ok',
     db: true,
     storage,
@@ -95,6 +106,8 @@ export async function systemHealth(db: DbOrTx = getDb()): Promise<SystemHealth> 
     backup,
     problems,
   };
+  healthCache = { at: Date.now(), value };
+  return value;
 }
 
 /** Watchdog (läuft mit den Warn-Mails): Probleme als Meldung im Dashboard und per Mail. */

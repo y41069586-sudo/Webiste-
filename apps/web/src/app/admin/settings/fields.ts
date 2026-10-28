@@ -224,7 +224,7 @@ export const SECTIONS: SectionDef[] = [
     title: 'Brief & Versand',
     fields: [
       { path: 'letter.color', label: 'Farbdruck', type: 'bool' },
-      { path: 'letter.deliveryProduct', label: 'Versandart (Pingen delivery_product)', type: 'text', hint: 'z. B. cheap, fast' },
+      { path: 'letter.deliveryProduct', label: 'Versandart (nur Alternativanbieter Pingen)', type: 'text', hint: 'z. B. cheap, fast' },
       { path: 'letter.includeScreenshotPage', label: 'Seite 2 mit Screenshots', type: 'bool' },
       { path: 'letter.addressPosition', label: 'Anschriftenfeld (left = DE)', type: 'text' },
       { path: 'letter.maxLettersPerLead', label: 'Max. Sendungen pro Lead (1–3)', type: 'number' },
@@ -270,13 +270,21 @@ export const SECTIONS: SectionDef[] = [
 ];
 
 export const SWITCHES: { key: string; label: string; hint: string }[] = [
-  { key: 'dryRun', label: 'DRY_RUN', hint: 'Nur PDFs/Entwürfe erzeugen, keine kostenpflichtigen API-Aufrufe' },
-  { key: 'autoSend', label: 'AUTO_SEND', hint: 'Briefe ohne Einzel-Freigabe versenden' },
-  { key: 'autoApproveDemos', label: 'AUTO_APPROVE_DEMOS', hint: 'Nach den ersten N Demos nur Stichproben' },
-  { key: 'autoReply', label: 'AUTO_REPLY', hint: 'Support-Antworten der gewählten Klassen automatisch senden' },
-  { key: 'followupEnabled', label: 'FOLLOWUP_ENABLED', hint: 'Folgebriefe (ohne Scan nach 12 Tagen; heiße Leads)' },
-  { key: 'autoOptimize', label: 'AUTO_OPTIMIZE', hint: 'Optimizer setzt Budgetanteile automatisch' },
-  { key: 'useRatingInLetter', label: 'USE_RATING_IN_LETTER', hint: 'Bewertungszeile im Brief – nur nach Compliance-Freigabe' },
+  { key: 'dryRun', label: 'Testmodus (DRY_RUN)', hint: 'Nur PDFs/Entwürfe erzeugen, keine kostenpflichtigen API-Aufrufe' },
+  { key: 'autoSend', label: 'Briefe automatisch versenden', hint: 'Briefe ohne Einzel-Freigabe versenden' },
+  { key: 'autoApproveDemos', label: 'Demos automatisch freigeben', hint: 'Nach den ersten N Demos nur Stichproben' },
+  {
+    key: 'autoReply',
+    label: 'Support automatisch beantworten',
+    hint: 'Support-Antworten der gewählten Klassen automatisch senden',
+  },
+  { key: 'followupEnabled', label: 'Folgebriefe', hint: 'Folgebriefe (ohne Scan nach 12 Tagen; heiße Leads)' },
+  { key: 'autoOptimize', label: 'Optimizer automatisch', hint: 'Optimizer setzt Budgetanteile automatisch' },
+  {
+    key: 'useRatingInLetter',
+    label: 'Bewertung im Brief nennen',
+    hint: 'Bewertungszeile im Brief – nur nach Compliance-Freigabe',
+  },
   {
     key: 'realLettersUnlocked',
     label: 'Echte Briefe an Leads freigegeben',
@@ -293,6 +301,18 @@ export const SWITCHES: { key: string; label: string; hint: string }[] = [
     hint: 'Setzt das Sicherheitsnetz „unzustellbar“ (über 3 % Rückläufer); erst nach Prüfung der Lead-Qualität wieder ausschalten',
   },
 ];
+
+/**
+ * Steuern, Garantie und Checkout ohne die Alt-Preise (590/49): eigener Bereich, damit der Steuerstatus auch bei aktivem
+ * Angebot V4 bestätigt werden kann. Eigene Sektion, weil Speichern genau die angezeigten Felder schreibt.
+ */
+const pricingSection = SECTIONS.find((s) => s.id === 'pricing')!;
+SECTIONS.push({
+  id: 'taxCheckout',
+  title: 'Steuern, Garantie & Checkout',
+  description: 'Steuerstatus bestätigen, Rechnungsangaben und Checkout-Regeln. Die V4-Tarife sind fest hinterlegt.',
+  fields: pricingSection.fields.filter((f) => !f.path.startsWith('pricing.')),
+});
 
 export function getPath(obj: unknown, path: string): unknown {
   return path

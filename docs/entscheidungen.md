@@ -585,3 +585,16 @@ Gefunden und behoben:
   und `PUBLIC_PROTOCOL=https` (vorher fehlend → QR-/Demo-Links fielen auf `localhost:3000` zurück), `LEAD_SOURCE=osm`
   mit `OVERPASS_URL` (overpass-api.de, Ausweich maps.mail.ru), `MAIL_PROVIDER=easynova`. Kurzlink-Domain folgt später.
   Worker übernimmt die Werte per `NEU=1` und neuem Einmal-Code.
+
+### 28.10.2026 – Admin: Speicherfehler, Tempo, Übersicht
+
+- „Seite nicht gefunden“ beim Speichern: Netlify-Log „Failed to find Server Action … older or newer deployment“ – die
+  Seite stammte aus einem älteren Deploy. Abhilfe: `NETLIFY_NEXT_SKEW_PROTECTION=true` (Anfragen gehen an den Deploy
+  der geladenen Seite) und `app/admin/error.tsx` lädt in diesem Fall einmal automatisch neu.
+- Tempo: Next-Proxy (`proxy.ts`, nur optimistische Cookie-Prüfung) entfernt – lief als Edge-Funktion vor jeder
+  Admin-Anfrage (bis 2,7 s). Alle Admin-Seiten, -Aktionen und -APIs prüfen die Sitzung selbst. Layout lädt Sitzung und
+  Konfiguration parallel, `systemHealth` prüft parallel und das Dashboard nutzt ein 30-s-Ergebnis, Navigation
+  lädt Seiten vor. Netlify-Funktionen laufen weiter in Ohio (Region nur mit Pro-Tarif wählbar), Datenbank in Irland.
+- Übersicht: „Wartet auf dich“ (Demos, Briefe, Anfragen, Meldungen), „Startklar machen“ (8 Schritte mit Links),
+  Pipeline in Arbeitsreihenfolge. Einstellungen in Bereiche mit Reitern; offene Pflichtangaben markiert und verlinkt.
+  Neuer Bereich „Steuern & Checkout“: der Steuerstatus war bei aktivem Angebot V4 nicht bestätigbar.

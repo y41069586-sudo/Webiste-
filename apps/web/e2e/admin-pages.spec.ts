@@ -8,7 +8,7 @@ test('alle Admin-Seiten laden ohne Fehler', async ({ page }) => {
   page.on('pageerror', (e) => errors.push(e.message));
   await loginAsAdmin(page);
   const pages: [string, string][] = [
-    ['/admin', 'Dein Überblick'],
+    ['/admin', 'Übersicht'],
     ['/admin/kpis', 'Kennzahlen'],
     ['/admin/leads', 'Leads'],
     ['/admin/demos', 'Demos'],

@@ -9,8 +9,8 @@ import { requireAdmin } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const session = await requireAdmin();
-  const sw = effectiveSwitches(await getConfig());
+  const [session, cfg] = await Promise.all([requireAdmin(), getConfig()]);
+  const sw = effectiveSwitches(cfg);
   return (
     <div className="admin-shell">
       <a href="#admin-content" className="admin-skip">
