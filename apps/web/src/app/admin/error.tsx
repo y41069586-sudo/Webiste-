@@ -23,7 +23,7 @@ export default function AdminError({ error, reset }: { error: Error & { digest?:
   }, [stale]);
 
   return (
-    <div className="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+    <div className="ui-card mx-auto max-w-lg p-8 text-center">
       <h1 className="text-lg font-semibold">{stale ? 'Neue Version geladen' : 'Etwas ist schiefgelaufen'}</h1>
       <p className="mt-2 text-sm text-slate-600">
         {stale
@@ -31,19 +31,11 @@ export default function AdminError({ error, reset }: { error: Error & { digest?:
           : 'Die Seite konnte nicht vollständig geladen werden. Bitte noch einmal versuchen.'}
       </p>
       <div className="mt-4 flex justify-center gap-2">
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
+        <button type="button" onClick={() => window.location.reload()} className="ui-btn ui-btn-primary">
           Seite neu laden
         </button>
         {!stale ? (
-          <button
-            type="button"
-            onClick={reset}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
-          >
+          <button type="button" onClick={reset} className="ui-btn ui-btn-secondary">
             Erneut versuchen
           </button>
         ) : null}

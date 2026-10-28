@@ -6,6 +6,7 @@ import { Badge, Card, Notice, PageHeader, StatusBadge, btn, input, label } from 
 import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
 import { approveReplyAction, deleteAction, optOutAction, redraftAction, setStatusAction } from '../actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Support-Nachricht' };
 export const dynamic = 'force-dynamic';
@@ -98,7 +99,7 @@ export default async function SupportMessagePage({
                 Entwurf (Anrede und Signatur werden automatisch ergänzt)
               </label>
               <textarea id="text" name="text" rows={12} defaultValue={m.draftReply ?? ''} className={input} />
-              <button className={btn.primary}>Freigeben und senden</button>
+              <SubmitButton className={btn.primary}>Freigeben und senden</SubmitButton>
             </form>
           ) : (
             <pre className="text-sm whitespace-pre-wrap">{m.draftReply ?? '–'}</pre>
@@ -106,21 +107,21 @@ export default async function SupportMessagePage({
           <div className="mt-4 flex flex-wrap gap-2">
             <form action={redraftAction}>
               <input type="hidden" name="id" value={m.id} />
-              <button className={btn.secondary}>Neu klassifizieren & entwerfen</button>
+              <SubmitButton className={btn.secondary}>Neu klassifizieren & entwerfen</SubmitButton>
             </form>
             <form action={setStatusAction}>
               <input type="hidden" name="id" value={m.id} />
               <input type="hidden" name="status" value="done" />
-              <button className={btn.secondary}>Ohne Antwort erledigt</button>
+              <SubmitButton className={btn.secondary}>Ohne Antwort erledigt</SubmitButton>
             </form>
             <form action={setStatusAction}>
               <input type="hidden" name="id" value={m.id} />
               <input type="hidden" name="status" value="ignored" />
-              <button className={btn.secondary}>Spam</button>
+              <SubmitButton className={btn.secondary}>Spam</SubmitButton>
             </form>
             <form action={deleteAction}>
               <input type="hidden" name="id" value={m.id} />
-              <button className={btn.secondary}>Nachricht löschen (Newsletter, Werbung)</button>
+              <SubmitButton className={btn.secondary}>Nachricht löschen (Newsletter, Werbung)</SubmitButton>
             </form>
           </div>
           <form action={optOutAction} className="mt-6 space-y-2 border-t border-slate-100 pt-4">
@@ -133,7 +134,7 @@ export default async function SupportMessagePage({
               Lead-ID (falls nicht zugeordnet – aus der Lead-Liste kopieren)
             </label>
             <input id="leadId" name="leadId" defaultValue={m.leadId ?? ''} className={input} />
-            <button className={btn.danger}>Betrieb sperren und Daten löschen</button>
+            <SubmitButton className={btn.danger}>Betrieb sperren und Daten löschen</SubmitButton>
           </form>
         </Card>
         {thread.length ? (

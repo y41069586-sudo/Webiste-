@@ -18,6 +18,7 @@ import { Badge, Card, Notice, PageHeader, Stat, Table, Td, btn, input, label } f
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur, num, pct } from '@/lib/format';
 import { applyAllocationsAction, reactivateVariantAction } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Optimizer' };
 export const dynamic = 'force-dynamic';
@@ -93,9 +94,9 @@ export default async function OptimizerPage({
         subtitle={`Bayes-Modell mit Partial Pooling (Gesamt → Branche → Variante). Spannen mit 90 % Wahrscheinlichkeit. „Gewinner“ erst bei P(besser als Kontrolle) ≥ 90 % und ${num(getEnv().MIN_LETTERS_PER_ARM)} zugestellten Briefen je Arm.`}
         actions={
           <form action={applyAllocationsAction}>
-            <button type="submit" className={btn.primary}>
+            <SubmitButton type="submit" className={btn.primary}>
               Zuteilung jetzt berechnen und übernehmen
-            </button>
+            </SubmitButton>
           </form>
         }
       />
@@ -176,9 +177,9 @@ export default async function OptimizerPage({
                       {!a.eligible ? (
                         <form action={reactivateVariantAction} className="mt-1">
                           <input type="hidden" name="id" value={a.arm} />
-                          <button type="submit" className="text-xs text-brand-700 underline">
+                          <SubmitButton type="submit" className="text-xs text-brand-700 underline">
                             wieder aktivieren
-                          </button>
+                          </SubmitButton>
                         </form>
                       ) : null}
                     </Td>
@@ -251,9 +252,9 @@ export default async function OptimizerPage({
                 <input id="power" name="power" className={input} defaultValue={String(power * 100)} inputMode="decimal" />
               </div>
               <div className="sm:col-span-2 lg:col-span-5">
-                <button type="submit" className={btn.secondary}>
+                <SubmitButton type="submit" className={btn.secondary}>
                   Berechnen
-                </button>
+                </SubmitButton>
               </div>
             </form>
             {powerResult ? (

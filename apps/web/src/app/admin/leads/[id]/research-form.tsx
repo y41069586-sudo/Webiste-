@@ -1,6 +1,7 @@
 import { RESEARCH_SIGNAL_LABELS, WEBSITE_METHODS, type LeadResearch } from '@wbm/core';
 import { btn, input } from '@/components/ui';
 import { saveResearchAction } from '../actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 const methods = {
   name_city: 'Firmenname und Ort gesucht',
@@ -122,9 +123,9 @@ export function ResearchForm({ id, research }: { id: string; research: LeadResea
           Speichern aktualisiert die Eignung und den nächsten Entwurf. Bestehende Demos/Briefe werden nicht still verändert; sie
           benötigen bei geändertem Faktenstand eine erneute Prüfung. Kein Versand wird ausgelöst.
         </p>
-        <button type="submit" className={btn.primary}>
+        <SubmitButton type="submit" className={btn.primary}>
           Recherche und Eignung speichern
-        </button>
+        </SubmitButton>
       </form>
     </details>
   );

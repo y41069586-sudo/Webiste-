@@ -6,6 +6,7 @@ import { Card, Notice, PageHeader, Stat, Table, Td, btn, input, label } from '@/
 import { requireAdmin } from '@/lib/auth';
 import { eur, num, pct } from '@/lib/format';
 import { refreshFunnelAction } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Funnel' };
 export const dynamic = 'force-dynamic';
@@ -131,9 +132,9 @@ export default async function FunnelPage({
         subtitle={`Erstbriefe ab Versand; ein Brief gilt ${FUNNEL_WINDOW_DAYS} Tage nach Versand als ausgewertet. Kaufrate nur aus ausgewerteten Briefen.`}
         actions={
           <form action={refreshFunnelAction}>
-            <button type="submit" className={btn.secondary}>
+            <SubmitButton type="submit" className={btn.secondary}>
               Jetzt aktualisieren
-            </button>
+            </SubmitButton>
           </form>
         }
       />
@@ -179,9 +180,9 @@ export default async function FunnelPage({
           </label>
           <input id="bis" name="bis" type="date" defaultValue={sp.bis ?? ''} className={input} />
         </div>
-        <button type="submit" className={btn.primary}>
+        <SubmitButton type="submit" className={btn.primary}>
           Anzeigen
-        </button>
+        </SubmitButton>
         <Link href="/admin/funnel" className={btn.secondary}>
           Zurücksetzen
         </Link>

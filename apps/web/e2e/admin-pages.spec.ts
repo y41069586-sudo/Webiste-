@@ -8,7 +8,7 @@ test('alle Admin-Seiten laden ohne Fehler', async ({ page }) => {
   page.on('pageerror', (e) => errors.push(e.message));
   await loginAsAdmin(page);
   const pages: [string, string][] = [
-    ['/admin', 'Übersicht'],
+    ['/admin', 'Guten|Gute Nacht'],
     ['/admin/kpis', 'Kennzahlen'],
     ['/admin/leads', 'Leads'],
     ['/admin/demos', 'Demos'],
@@ -81,7 +81,7 @@ test('Qualitätsfreigabe: keine voreingestellten Noten, schwaches Design blockie
   await expect(form).toBeVisible();
   await fillReview('90');
   await form.getByRole('button', { name: 'Freigeben & veröffentlichen', exact: true }).click();
-  await expect(page.getByText(/^(approved|published)$/).first()).toBeVisible();
+  await expect(page.getByText(/^(Freigegeben|Online)$/).first()).toBeVisible();
   await expect(form).toHaveCount(0);
   await expect(page.getByText('Qualitätsbewertung unvollständig oder unter Mindestniveau.', { exact: false })).toHaveCount(0);
 });

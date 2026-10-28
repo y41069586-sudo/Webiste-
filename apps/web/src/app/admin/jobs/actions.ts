@@ -12,6 +12,7 @@ export async function startFindLeads(form: FormData): Promise<void> {
   const state = await queueState(QUEUES.findLeads);
   if (state.active || state.waiting.length) {
     revalidatePath('/admin/jobs');
+    revalidatePath('/admin/suche');
     return;
   }
   await enqueue(
@@ -27,6 +28,7 @@ export async function startFindLeads(form: FormData): Promise<void> {
     context: { cities, branches },
   });
   revalidatePath('/admin/jobs');
+  revalidatePath('/admin/suche');
 }
 
 /** Noch nicht gestartete Lead-Suchen abbrechen (laufende Suche läuft zu Ende). */
@@ -41,6 +43,7 @@ export async function cancelFindLeads(): Promise<void> {
     context: { n },
   });
   revalidatePath('/admin/jobs');
+  revalidatePath('/admin/suche');
 }
 
 const MANUAL: QueueName[] = [
@@ -62,4 +65,5 @@ export async function runJobNow(form: FormData): Promise<void> {
   await enqueue(name, data as never);
   await audit(getDb(), { entity: 'job', entityId: name, action: 'enqueue', actor: actorOf(s) });
   revalidatePath('/admin/jobs');
+  revalidatePath('/admin/suche');
 }

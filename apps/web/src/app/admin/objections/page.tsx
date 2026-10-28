@@ -13,6 +13,7 @@ import { Card, Notice, PageHeader, Table, Td, btn, input, label } from '@/compon
 import { requireAdmin } from '@/lib/auth';
 import { dt, num } from '@/lib/format';
 import { recordObjectionAction } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Einwände' };
 export const dynamic = 'force-dynamic';
@@ -122,9 +123,9 @@ export default async function ObjectionsPage({ searchParams }: { searchParams: P
               </select>
             </div>
             <div>
-              <button type="submit" className={btn.primary}>
+              <SubmitButton type="submit" className={btn.primary}>
                 Klassifizieren und speichern
-              </button>
+              </SubmitButton>
             </div>
           </form>
         </Card>

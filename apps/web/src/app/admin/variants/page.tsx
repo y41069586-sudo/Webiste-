@@ -23,6 +23,7 @@ import {
   retireVariantAction,
   runLearningAgentAction,
 } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Varianten-Labor' };
 export const dynamic = 'force-dynamic';
@@ -112,9 +113,9 @@ export default async function VariantsPage({ searchParams }: { searchParams: Pro
               Power-Rechner
             </Link>
             <form action={runLearningAgentAction}>
-              <button type="submit" className={btn.secondary}>
+              <SubmitButton type="submit" className={btn.secondary}>
                 Lern-Agent jetzt ausführen
-              </button>
+              </SubmitButton>
             </form>
           </div>
         }
@@ -163,9 +164,9 @@ export default async function VariantsPage({ searchParams }: { searchParams: Pro
                 <div className="mt-3 flex flex-wrap items-end gap-2">
                   <form action={approveProposalAction}>
                     <input type="hidden" name="id" value={v.id} />
-                    <button type="submit" className={btn.primary}>
+                    <SubmitButton type="submit" className={btn.primary}>
                       Freigeben und starten
-                    </button>
+                    </SubmitButton>
                   </form>
                   <form action={rejectProposalAction} className="flex flex-wrap items-end gap-2">
                     <input type="hidden" name="id" value={v.id} />
@@ -173,9 +174,9 @@ export default async function VariantsPage({ searchParams }: { searchParams: Pro
                       Grund der Ablehnung
                     </label>
                     <input id={`note-${v.id}`} name="note" className={input} placeholder="Grund (fürs Logbuch)" />
-                    <button type="submit" className={btn.secondary}>
+                    <SubmitButton type="submit" className={btn.secondary}>
                       Ablehnen
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               </article>
@@ -248,26 +249,26 @@ export default async function VariantsPage({ searchParams }: { searchParams: Pro
                               {v.status === 'active' ? (
                                 <form action={pauseVariantAction}>
                                   <input type="hidden" name="id" value={v.id} />
-                                  <button type="submit" className="text-xs text-brand-700 underline">
+                                  <SubmitButton type="submit" className="text-xs text-brand-700 underline">
                                     pausieren
-                                  </button>
+                                  </SubmitButton>
                                 </form>
                               ) : null}
                               {v.status === 'paused' ? (
                                 <form action={reactivateAction}>
                                   <input type="hidden" name="id" value={v.id} />
-                                  <button type="submit" className="text-xs text-brand-700 underline">
+                                  <SubmitButton type="submit" className="text-xs text-brand-700 underline">
                                     wieder aktivieren
-                                  </button>
+                                  </SubmitButton>
                                 </form>
                               ) : null}
                               {v.status === 'active' || v.status === 'paused' ? (
                                 <form action={retireVariantAction}>
                                   <input type="hidden" name="id" value={v.id} />
                                   <input type="hidden" name="note" value="Im Varianten-Labor beendet" />
-                                  <button type="submit" className="text-xs text-red-700 underline">
+                                  <SubmitButton type="submit" className="text-xs text-red-700 underline">
                                     beenden
-                                  </button>
+                                  </SubmitButton>
                                 </form>
                               ) : null}
                             </div>

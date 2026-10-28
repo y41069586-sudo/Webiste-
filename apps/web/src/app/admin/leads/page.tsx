@@ -13,6 +13,7 @@ import {
 import { Card, PageHeader, StatusBadge, Table, Td, btn, input, label } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, num } from '@/lib/format';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Leads' };
 
@@ -72,7 +73,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
             <Link href={qs({ sample: sp.sample ? undefined : '1', page: undefined })} className={btn.secondary}>
               {sp.sample ? 'Stichprobe beenden' : 'Stichprobe (20 zufällig)'}
             </Link>
-            <Link href="/admin/jobs" className={btn.primary}>
+            <Link href="/admin/suche" className={btn.primary}>
               Lead-Suche starten
             </Link>
           </>
@@ -128,9 +129,9 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
               <input id="q" name="q" defaultValue={sp.q ?? ''} className={input} />
             </div>
             <div className="sm:col-span-4">
-              <button className={btn.primary} type="submit">
+              <SubmitButton className={btn.primary} type="submit">
                 Anwenden
-              </button>
+              </SubmitButton>
               <Link href="/admin/leads" className={`${btn.ghost} ml-2`}>
                 Zurücksetzen
               </Link>

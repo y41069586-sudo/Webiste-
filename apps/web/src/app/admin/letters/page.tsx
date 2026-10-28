@@ -14,6 +14,7 @@ import { Badge, Card, Notice, PageHeader, StatusBadge, Table, Td, btn } from '@/
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
 import { bulkApproveLettersAction, createTestLetterAction, sendApprovedNowAction } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Briefe' };
 
@@ -64,14 +65,14 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
         actions={
           <>
             <form action={createTestLetterAction}>
-              <button type="submit" className={btn.secondary}>
+              <SubmitButton type="submit" className={btn.secondary}>
                 Testbrief an mich erzeugen
-              </button>
+              </SubmitButton>
             </form>
             <form action={sendApprovedNowAction}>
-              <button type="submit" className={btn.primary} disabled={sw.killSwitch}>
+              <SubmitButton type="submit" className={btn.primary} disabled={sw.killSwitch}>
                 Freigegebene jetzt versenden{sw.dryRun ? ' (DRY_RUN)' : ''}
-              </button>
+              </SubmitButton>
             </form>
           </>
         }
@@ -134,9 +135,9 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
         <form action={bulkApproveLettersAction}>
           {tab.key === 'review' && rows.length ? (
             <div className="mb-3 flex flex-wrap items-center gap-3">
-              <button className={btn.primary} type="submit">
+              <SubmitButton className={btn.primary} type="submit">
                 Markierte freigeben
-              </button>
+              </SubmitButton>
               <span className="text-sm text-slate-600">Geschätzte Kosten aller offenen Briefe: {eur(pendingCost)}</span>
             </div>
           ) : null}

@@ -2,6 +2,7 @@ import { kpiFilterOptions, kpiRows, kpiSummary, type KpiFilter, type KpiRow } fr
 import { Card, PageHeader, Stat, Table, Td, btn, input, label } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { eur, num, pct } from '@/lib/format';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Kennzahlen' };
 export const dynamic = 'force-dynamic';
@@ -138,7 +139,7 @@ export default async function KpiPage({ searchParams }: { searchParams: Promise<
             ))}
           </select>
         </div>
-        <button className={btn.primary}>Anwenden</button>
+        <SubmitButton className={btn.primary}>Anwenden</SubmitButton>
       </form>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

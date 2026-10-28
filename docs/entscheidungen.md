@@ -612,3 +612,18 @@ Gefunden und behoben:
   (Betriebe ohne Straße bleiben unqualifiziert). Ohne osmium/Auszug: Overpass als Ausweich. Overpass-Kennung jetzt mit
   Kontakt (`SeitenWerk-LeadFinder/1.0 (+APP_URL; E-Mail)`).
 - Lead-Suche: nur eine gleichzeitig, wartende abbrechbar, Laufzeit bis 3 h, im Formular nur die erste Stadt vorausgewählt.
+
+### 28.10.2026 – Verwaltung neu aufgebaut (Arbeitsplatz)
+
+- Gliederung nach Arbeitsabläufen statt 20 Menüpunkten: **Heute** (Eingang mit allem, was wartet: Demos, Briefe,
+  Anfragen, Meldungen; Startklar-Schritte; Pipeline), **Akquise** (Lead-Suche, Leads, Demos, Briefe, Postausgang),
+  **Kunden** (Support, Bestellungen, Kunden & Websites), **Auswertung** (Kennzahlen, Funnel, Budget, Berichte),
+  **Labor** (Varianten, Optimizer, Lern-Agent, Einwände, Claims), **System** (Einstellungen, Jobs, Protokoll).
+  Bereiche als Reiter über dem Inhalt; Adressen bleiben gleich. Lead-Suche hat eine eigene Seite (`/admin/suche`).
+- Eigenes Gestaltungssystem (`app/admin/admin.css`): dunkle Seitenleiste mit Zählern für offene Arbeit, Farbverläufe,
+  einheitliche Karten/Tabellen/Etiketten (Zustände auf Deutsch), Knöpfe mit Druck-, Lade- und Erledigt-Animation
+  (`SubmitButton`, verhindert Doppelklicks), Ladebalken beim Seitenwechsel, Seitenübergänge, Schimmer-Gerüst,
+  Seitenleiste als Schublade auf iPad hochkant. Bewegungen respektieren „reduzierte Bewegung“.
+- Fehler aus dem Rundgang (alle Seiten auf 820/1180 px, neuer Test `admin-audit.spec.ts`): Demo-Vorschau im Admin
+  blockierte Skripte und eingebettete Schriften (Sandbox ohne Skripte, CSP ohne `font-src`) → Skripte in eigener
+  undurchsichtiger Herkunft erlaubt, Schriften erlaubt. Sonst keine Konsolen-/Seitenfehler und kein Überlaufen.

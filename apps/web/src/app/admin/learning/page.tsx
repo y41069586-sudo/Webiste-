@@ -6,6 +6,7 @@ import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
 import { reportHtml } from '@/lib/report-html';
 import { runLearningAgentAction } from '../variants/actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Lern-Agent' };
 export const dynamic = 'force-dynamic';
@@ -26,9 +27,9 @@ export default async function LearningPage({ searchParams }: { searchParams: Pro
               Varianten-Labor
             </Link>
             <form action={runLearningAgentAction}>
-              <button type="submit" className={btn.secondary}>
+              <SubmitButton type="submit" className={btn.secondary}>
                 Jetzt ausführen
-              </button>
+              </SubmitButton>
             </form>
           </div>
         }

@@ -4,6 +4,7 @@ import { ActionForm } from '@/components/action-form';
 import { Card, Notice, Stat, Table, Td, btn, input, label } from '@/components/ui';
 import { eur, pct } from '@/lib/format';
 import { financeOperation } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export async function FinanceOperations({ from, to }: { from?: string; to?: string }) {
   let report;
@@ -28,7 +29,7 @@ export async function FinanceOperations({ from, to }: { from?: string; to?: stri
             bis
             <input name="to" type="date" className={input} defaultValue={report.range.to} />
           </label>
-          <button className={btn.secondary}>Zeitraum anzeigen</button>
+          <SubmitButton className={btn.secondary}>Zeitraum anzeigen</SubmitButton>
         </form>
         <p className="mt-3 text-sm text-slate-600">
           Zahlungen mit Zahlungseingang im Zeitraum, abzüglich aller dazu bislang bestätigten Erstattungen. Keine Umsatzprognose.

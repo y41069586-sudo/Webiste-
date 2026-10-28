@@ -6,6 +6,7 @@ import { Badge, Card, PageHeader, StatusBadge, Table, Td, btn, input, Notice } f
 import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
 import { approveDemoAction, rejectDemoAction } from '../actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Demo prüfen' };
 
@@ -62,7 +63,7 @@ export default async function DemoDetail({
               title="Demo-Vorschau"
               src={`/admin/demos/${demo.id}/html`}
               className="h-[720px] w-full rounded-lg border border-slate-200"
-              sandbox="allow-same-origin"
+              sandbox="allow-scripts"
             />
           </Card>
           <div className="grid gap-6 md:grid-cols-2">
@@ -128,9 +129,9 @@ export default async function DemoDetail({
                 ) : null}
                 <input type="hidden" name="id" value={demo.id} />
                 <textarea name="note" placeholder="Notiz (optional)" className={input} rows={2} />
-                <button className={btn.primary} type="submit">
+                <SubmitButton className={btn.primary} type="submit">
                   Freigeben &amp; veröffentlichen
-                </button>
+                </SubmitButton>
                 {demo.status === 'qa_failed' ? (
                   <p className="text-xs text-amber-700">
                     QA nicht bestanden: Befunde beheben und erneut prüfen. Eine manuelle Freigabe umgeht diese Sperre nicht.
@@ -142,12 +143,12 @@ export default async function DemoDetail({
                 <input type="hidden" name="id" value={demo.id} />
                 <textarea name="note" placeholder="Grund (Pflicht)" required className={input} rows={2} />
                 <div className="flex flex-wrap gap-2">
-                  <button className={btn.secondary} type="submit" name="regenerate" value="1">
+                  <SubmitButton className={btn.secondary} type="submit" name="regenerate" value="1">
                     Ablehnen &amp; neu generieren
-                  </button>
-                  <button className={btn.danger} type="submit" name="regenerate" value="0">
+                  </SubmitButton>
+                  <SubmitButton className={btn.danger} type="submit" name="regenerate" value="0">
                     Ablehnen (Lead verwerfen)
-                  </button>
+                  </SubmitButton>
                 </div>
               </form>
             </Card>

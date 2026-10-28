@@ -2,10 +2,11 @@
 
 import { useActionState } from 'react';
 import { adoptLegalDrafts, type SaveState } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 /** Ausdrückliche Übernahme der Rechtstext-Entwürfe durch den Betreiber */
 export function AdoptLegalForm({ adopted }: { adopted: boolean }) {
-  const [state, formAction, pending] = useActionState<SaveState, FormData>(adoptLegalDrafts, {});
+  const [state, formAction] = useActionState<SaveState, FormData>(adoptLegalDrafts, {});
   return (
     <form action={formAction} className="space-y-3 text-sm">
       <p className="text-slate-700">
@@ -20,13 +21,7 @@ export function AdoptLegalForm({ adopted }: { adopted: boolean }) {
           anwaltliche Prüfung hat nicht stattgefunden.
         </span>
       </label>
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex items-center justify-center gap-1 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700 disabled:opacity-50"
-      >
-        Rechtstexte übernehmen
-      </button>
+      <SubmitButton className="ui-btn ui-btn-primary">Rechtstexte übernehmen</SubmitButton>
       {state.ok ? <p className="text-emerald-700">Übernommen und im Audit-Log protokolliert.</p> : null}
       {state.error ? <p className="text-red-700">{state.error}</p> : null}
     </form>

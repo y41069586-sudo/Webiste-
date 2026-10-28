@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import type { FieldDef } from './fields';
 import type { SaveState } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 const input =
   'block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 focus:outline-none';
@@ -21,7 +22,7 @@ function display(f: FieldDef & { value: unknown }): string {
 }
 
 export function SectionForm({ fields, action }: SectionFormProps) {
-  const [state, formAction, pending] = useActionState<SaveState, FormData>(action, {});
+  const [state, formAction] = useActionState<SaveState, FormData>(action, {});
   return (
     <form action={formAction} className="grid gap-4 sm:grid-cols-2">
       {fields.map((f) => {
@@ -81,13 +82,7 @@ export function SectionForm({ fields, action }: SectionFormProps) {
         );
       })}
       <div className="flex items-center gap-3 sm:col-span-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-        >
-          {pending ? 'Speichere …' : 'Speichern'}
-        </button>
+        <SubmitButton className="ui-btn ui-btn-primary">Speichern</SubmitButton>
         {state.ok ? (
           <span className="text-sm text-emerald-700" role="status">
             Gespeichert.

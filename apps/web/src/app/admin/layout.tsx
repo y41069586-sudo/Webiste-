@@ -1,31 +1,67 @@
+import './admin.css';
 import { AdminArrow } from '@/components/admin-arrow';
 import { Brand } from '@/components/brand';
 import type { ReactNode } from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
-import { effectiveSwitches, getConfig } from '@wbm/core';
-import { AdminNav } from '@/components/admin-nav';
+import { sql } from 'drizzle-orm';
+import { effectiveSwitches, getConfig, getDb } from '@wbm/core';
+import { AdminNav, SectionTabs } from '@/components/admin-nav';
+import { NavProgress } from '@/components/admin/nav-progress';
+import { NavToggle } from '@/components/admin/nav-toggle';
+import { PageTransition } from '@/components/admin/page-transition';
 import { requireAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const [session, cfg] = await Promise.all([requireAdmin(), getConfig()]);
+  const [session, cfg, open] = await Promise.all([
+    requireAdmin(),
+    getConfig(),
+    // Offene Arbeit für die Zähler in der Navigation (eine Abfrage)
+    getDb()
+      .execute<{ demos: number; letters: number; support: number; alerts: number }>(
+        sql`SELECT
+          (SELECT count(*)::int FROM leads WHERE status = 'demo_built') AS demos,
+          (SELECT count(*)::int FROM leads WHERE status = 'letter_generated') AS letters,
+          (SELECT count(*)::int FROM support_messages WHERE status IN ('new', 'drafted', 'escalated')) AS support,
+          (SELECT count(*)::int FROM alerts WHERE acknowledged_at IS NULL) AS alerts`,
+      )
+      .then((r) => r.rows[0])
+      .catch(() => undefined),
+  ]);
   const sw = effectiveSwitches(cfg);
+  const auto = [
+    sw.autoSend && 'Versand',
+    sw.autoApproveDemos && 'Demo-Freigabe',
+    sw.followupEnabled && 'Folgebriefe',
+    sw.autoReply && 'Antworten',
+  ].filter(Boolean);
+  const chips: { label: string; tone: string }[] = [
+    ...(sw.killSwitch ? [{ label: 'NOT-AUS aktiv', tone: 'is-alarm' }] : []),
+    sw.dryRun
+      ? { label: `Testmodus${sw.dryRunLockedByEnv ? ' · gesichert' : ''}`, tone: 'is-test' }
+      : { label: 'LIVE – echte Aktionen', tone: 'is-live' },
+    auto.length ? { label: `Automatik: ${auto.join(', ')}`, tone: 'is-on' } : { label: 'Automatik aus', tone: '' },
+  ];
   return (
     <div className="admin-shell">
       <a href="#admin-content" className="admin-skip">
         Zum Inhalt
       </a>
-      <aside className="admin-sidebar">
+      <Suspense fallback={null}>
+        <NavProgress />
+      </Suspense>
+      <aside className="admin-sidebar" id="admin-sidebar" aria-label="Seitenleiste">
         <Link href="/admin" className="admin-brand">
-          <span className="admin-brand-mark !bg-white">
+          <span className="admin-brand-mark">
             <Brand compact />
           </span>
           <span>
             SeitenWerk<small>DEIN ARBEITSPLATZ</small>
           </span>
         </Link>
-        <AdminNav />
+        <AdminNav counts={open ?? {}} />
         <div className="admin-account">
           <span className="admin-avatar" aria-hidden="true">
             SW
@@ -38,35 +74,40 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           </div>
           <form action="/logout" method="post">
             <button className="admin-signout" type="submit" aria-label="Abmelden" title="Abmelden">
-              <AdminArrow />
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4" />
+              </svg>
             </button>
           </form>
         </div>
       </aside>
       <div className="admin-workspace">
         <header className="admin-topbar">
-          <div>
-            <span className="admin-status-dot" /> SeitenWerk Studio{' '}
-            <span className="hidden text-slate-400 sm:inline"> / Verwaltung</span>
+          <NavToggle />
+          <div className="admin-topbar-status" aria-label="Systemstatus">
+            {chips.map((c) => (
+              <span key={c.label} className={`admin-chip ${c.tone}`}>
+                {c.label}
+              </span>
+            ))}
           </div>
           <Link href="/" target="_blank" rel="noopener noreferrer" className="admin-website-link">
-            Website ansehen <AdminArrow />
+            <span>Website ansehen</span> <AdminArrow />
           </Link>
         </header>
-        <div className="admin-safety-bar">
-          {sw.killSwitch ? <span className="rounded bg-red-600 px-2 py-1 font-semibold text-white">NOT-AUS AKTIV</span> : null}
-          <span
-            className={`rounded px-2 py-1 font-medium ${sw.dryRun ? 'bg-amber-100 text-amber-900' : 'bg-red-100 text-red-900'}`}
-          >
-            {sw.dryRun ? `Testmodus${sw.dryRunLockedByEnv ? ' · gesichert' : ''}` : 'LIVE – echte Aktionen'}
-          </span>
-          <span className="rounded bg-slate-100 px-2 py-1">Briefversand: {sw.autoSend ? 'an' : 'aus'}</span>
-          <span className="rounded bg-slate-100 px-2 py-1">Demo-Freigabe: {sw.autoApproveDemos ? 'an' : 'aus'}</span>
-          <span className="rounded bg-slate-100 px-2 py-1">Folgebriefe: {sw.followupEnabled ? 'an' : 'aus'}</span>
-          <span className="rounded bg-slate-100 px-2 py-1">Auto-Antworten: {sw.autoReply ? 'an' : 'aus'}</span>
-        </div>
         <main id="admin-content" className="admin-main" tabIndex={-1}>
-          {children}
+          <SectionTabs counts={open ?? {}} />
+          <PageTransition>{children}</PageTransition>
         </main>
       </div>
     </div>

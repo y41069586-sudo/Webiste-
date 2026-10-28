@@ -5,6 +5,7 @@ import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
 import { reportHtml } from '@/lib/report-html';
 import { applyReportAction, runOptimizerAction } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Wochenberichte' };
 export const dynamic = 'force-dynamic';
@@ -19,7 +20,7 @@ export default async function ReportsPage() {
         subtitle="Sonntags 18 Uhr: Kennzahlen und Vorschlag für Budgetanteile und Briefvarianten (Thompson Sampling)."
         actions={
           <form action={runOptimizerAction}>
-            <button className={btn.secondary}>Bericht jetzt erstellen</button>
+            <SubmitButton className={btn.secondary}>Bericht jetzt erstellen</SubmitButton>
           </form>
         }
       />
@@ -38,7 +39,7 @@ export default async function ReportsPage() {
               !r.applied ? (
                 <form action={applyReportAction}>
                   <input type="hidden" name="id" value={r.id} />
-                  <button className={btn.primary}>Vorschlag übernehmen</button>
+                  <SubmitButton className={btn.primary}>Vorschlag übernehmen</SubmitButton>
                 </form>
               ) : null
             }

@@ -16,6 +16,7 @@ import {
   resolveChangeAction,
   suspendAction,
 } from '../actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Kunde' };
 export const dynamic = 'force-dynamic';
@@ -104,7 +105,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" name="confirm" className="h-4 w-4" /> Ich gebe die Registrierung von {c.domain} frei.
               </label>
-              <button className={btn.primary}>Domain registrieren und veröffentlichen</button>
+              <SubmitButton className={btn.primary}>Domain registrieren und veröffentlichen</SubmitButton>
             </form>
           </Card>
         </div>
@@ -158,7 +159,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                 </label>
                 <input id="domain" name="domain" defaultValue={c.domain ?? ''} className={input} />
               </div>
-              <button className={btn.secondary}>Prüfen und speichern</button>
+              <SubmitButton className={btn.secondary}>Prüfen und speichern</SubmitButton>
             </form>
           ) : null}
         </Card>
@@ -204,22 +205,22 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                 ) : null}
                 <form action={rebuildAction}>
                   {hidden}
-                  <button className={btn.secondary}>Vorschau neu bauen</button>
+                  <SubmitButton className={btn.secondary}>Vorschau neu bauen</SubmitButton>
                 </form>
                 <form action={redeployAction}>
                   {hidden}
-                  <button className={btn.secondary}>Neu veröffentlichen</button>
+                  <SubmitButton className={btn.secondary}>Neu veröffentlichen</SubmitButton>
                 </form>
                 <form action={liveCheckAction}>
                   {hidden}
-                  <button className={btn.secondary}>Live-Check jetzt</button>
+                  <SubmitButton className={btn.secondary}>Live-Check jetzt</SubmitButton>
                 </form>
                 <form action={suspendAction}>
                   {hidden}
                   <input type="hidden" name="suspend" value={site.status === 'suspended' ? '0' : '1'} />
-                  <button className={site.status === 'suspended' ? btn.secondary : btn.danger}>
+                  <SubmitButton className={site.status === 'suspended' ? btn.secondary : btn.danger}>
                     {site.status === 'suspended' ? 'Sperre aufheben' : 'Seite sperren'}
-                  </button>
+                  </SubmitButton>
                 </form>
               </div>
             </>
@@ -248,7 +249,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                         {hidden}
                         <input type="hidden" name="id" value={r.id} />
                         <input type="hidden" name="note" value="Vom Betreiber erledigt" />
-                        <button className={btn.ghost}>Als erledigt markieren</button>
+                        <SubmitButton className={btn.ghost}>Als erledigt markieren</SubmitButton>
                       </form>
                     ) : null}
                   </Td>
@@ -264,7 +265,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
                 Eigene Änderungsanweisung (zählt nicht als Kundenrunde, erzeugt neue Vorschau)
               </label>
               <textarea id="admin-text" name="text" rows={3} className={input} />
-              <button className={btn.primary}>Umsetzen</button>
+              <SubmitButton className={btn.primary}>Umsetzen</SubmitButton>
             </form>
           </Card>
         ) : null}

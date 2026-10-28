@@ -23,9 +23,9 @@ test.describe('Admin-Login', () => {
 
   test('Login mit Passwort + TOTP öffnet das Dashboard, Logout beendet die Session', async ({ page }) => {
     await loginAsAdmin(page);
-    await expect(page.getByRole('heading', { name: 'Übersicht', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /Guten|Gute Nacht/ })).toBeVisible();
     await expect(page.getByText('Testmodus · gesichert', { exact: true })).toBeVisible();
-    await page.getByRole('link', { name: 'Einstellungen', exact: true }).click();
+    await page.getByRole('link', { name: /^System/ }).click();
     await expect(page.getByRole('heading', { name: 'Einstellungen' })).toBeVisible();
     await page.getByRole('button', { name: 'Abmelden' }).click();
     await page.goto('/admin');

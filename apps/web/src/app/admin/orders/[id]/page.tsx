@@ -12,6 +12,7 @@ import {
   refundOrderAction,
   resendInvoiceAction,
 } from '../actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Bestellung' };
 export const dynamic = 'force-dynamic';
@@ -199,7 +200,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           {order.invoiceNumber ? (
             <form action={resendInvoiceAction} className="mt-4">
               <input type="hidden" name="id" value={order.id} />
-              <button className={btn.secondary}>Rechnung erneut senden</button>
+              <SubmitButton className={btn.secondary}>Rechnung erneut senden</SubmitButton>
             </form>
           ) : null}
         </Card>
@@ -264,13 +265,13 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                           </label>
                           <input id={`c-${c.id}`} name="confirm" required className={input} autoComplete="off" />
                         </div>
-                        <button className={btn.primary}>Freigeben und versenden</button>
+                        <SubmitButton className={btn.primary}>Freigeben und versenden</SubmitButton>
                       </form>
                       <form action={cancelClaimLetterAction} className="flex items-end gap-2">
                         <input type="hidden" name="id" value={c.id} />
                         <input type="hidden" name="orderId" value={order.id} />
                         <input name="note" placeholder="Grund (optional)" className={input} />
-                        <button className={btn.secondary}>Verwerfen</button>
+                        <SubmitButton className={btn.secondary}>Verwerfen</SubmitButton>
                       </form>
                     </div>
                   ) : null}
@@ -294,7 +295,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 </label>
                 <input id="g-confirm" name="confirm" required className={input} autoComplete="off" />
               </div>
-              <button className={btn.danger}>Garantie ausführen</button>
+              <SubmitButton className={btn.danger}>Garantie ausführen</SubmitButton>
             </form>
           </Card>
         ) : null}
@@ -317,7 +318,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 </label>
                 <input id="confirm" name="confirm" required className={input} autoComplete="off" />
               </div>
-              <button className={btn.danger}>Erstatten</button>
+              <SubmitButton className={btn.danger}>Erstatten</SubmitButton>
             </form>
           </Card>
         ) : null}

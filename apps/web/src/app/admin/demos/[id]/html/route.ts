@@ -20,7 +20,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       'cache-control': 'private, no-store',
       'x-robots-tag': 'noindex',
       'content-security-policy':
-        "default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; sandbox allow-same-origin",
+        // Eigenes Template-Skript (Menü, Animationen) darf laufen – aber in eigener, undurchsichtiger Herkunft
+        "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; font-src data:; script-src 'unsafe-inline'; form-action 'none'; sandbox allow-scripts",
     },
   });
 }

@@ -1,11 +1,42 @@
 import { sql } from 'drizzle-orm';
-import { getConfig, getDb, queueState, QUEUES } from '@wbm/core';
+import { getDb, QUEUES } from '@wbm/core';
 import { Badge, Card, PageHeader, Table, Td, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
-import { cancelFindLeads, runJobNow, startFindLeads } from './actions';
+import { runJobNow } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Jobs & Steuerung' };
+
+/** Lesbare Namen der Hintergrundaufgaben */
+const JOB_LABELS: Record<string, string> = {
+  'find-leads': 'Lead-Suche',
+  'build-demo': 'Demo bauen',
+  'qa-demo': 'Demo prüfen (automatisch)',
+  'publish-demo': 'Demo veröffentlichen',
+  'generate-letter': 'Brief erstellen',
+  'send-letter': 'Brief versenden',
+  'send-approved-letters': 'Freigegebene Briefe versenden',
+  'sync-letter-status': 'Briefstatus abgleichen',
+  'pipeline-tick': 'Pipeline-Takt',
+  'refresh-funnel': 'Funnel aktualisieren',
+  'alert-mails': 'Meldungen per Mail',
+  followup: 'Folgebriefe prüfen',
+  retention: 'Löschfristen',
+  'weekly-optimizer': 'Optimizer & Wochenbericht',
+  'renewal-reminders': 'Hosting-Erinnerungen',
+  'learning-agent': 'Lern-Agent',
+  'deploy-site': 'Kundenseite veröffentlichen',
+  'dead-letters': 'Fehlgeschlagene Aufträge',
+};
+const STATE_LABELS: Record<string, [string, 'green' | 'red' | 'blue' | 'gray' | 'yellow']> = {
+  completed: ['Erledigt', 'green'],
+  failed: ['Fehler', 'red'],
+  active: ['Läuft', 'blue'],
+  created: ['Wartet', 'yellow'],
+  retry: ['Neuer Versuch', 'yellow'],
+  cancelled: ['Abgebrochen', 'gray'],
+};
 
 type JobRow = {
   id: string;
@@ -19,69 +50,15 @@ type JobRow = {
 
 export default async function JobsPage() {
   await requireAdmin();
-  const [cfg, search] = await Promise.all([
-    getConfig(),
-    queueState(QUEUES.findLeads).catch(() => ({ waiting: [] as string[], active: 0 })),
-  ]);
   const jobs = await getDb()
     .execute<JobRow>(
-      sql`SELECT id, name, state, created_on, completed_on, retry_count, output FROM pgboss.job ORDER BY created_on DESC LIMIT 60`,
+      sql`SELECT id, name, state, created_on, completed_on, retry_count, output FROM pgboss.job WHERE name NOT LIKE '\_\_pgboss%' ORDER BY created_on DESC LIMIT 60`,
     )
     .catch(() => ({ rows: [] as JobRow[] }));
   return (
     <>
       <PageHeader title="Jobs & Steuerung" subtitle="Manuelle Starts, letzte Läufe. Alle Jobs prüfen Not-Aus und Budget." />
-      <div className="mb-6 grid gap-6 lg:grid-cols-2">
-        <Card title="Lead-Suche starten">
-          {search.active || search.waiting.length ? (
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              <span>
-                {search.active ? 'Eine Lead-Suche läuft gerade.' : ''}
-                {search.waiting.length ? ` ${search.waiting.length} weitere warten.` : ''} Neue Klicks starten keine zusätzliche
-                Suche.
-              </span>
-              {search.waiting.length ? (
-                <form action={cancelFindLeads}>
-                  <button type="submit" className={btn.secondary}>
-                    Wartende Suchen abbrechen
-                  </button>
-                </form>
-              ) : null}
-            </div>
-          ) : null}
-          <form action={startFindLeads} className="space-y-4">
-            <fieldset>
-              <legend className="mb-1 text-xs font-medium text-slate-600">Städte</legend>
-              <div className="flex flex-wrap gap-3">
-                {cfg.targeting.cities.map((c, i) => (
-                  <label key={c} className="flex items-center gap-1 text-sm">
-                    {/* Vorauswahl nur die erste Stadt: jede weitere Stadt verlängert die Suche deutlich */}
-                    <input type="checkbox" name="cities" value={c} defaultChecked={i === 0} /> {c}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-            <fieldset>
-              <legend className="mb-1 text-xs font-medium text-slate-600">Branchen</legend>
-              <div className="flex flex-wrap gap-3">
-                {cfg.targeting.branches
-                  .filter((b) => b.active)
-                  .map((b) => (
-                    <label key={b.key} className="flex items-center gap-1 text-sm">
-                      <input type="checkbox" name="branches" value={b.key} defaultChecked /> {b.label}
-                    </label>
-                  ))}
-              </div>
-            </fieldset>
-            <p className="text-xs text-slate-600">
-              Quelle: <strong>{cfg.leadSource.mode}</strong> (siehe docs/compliance-google.md). OSM ist kostenlos; Google-Modi
-              buchen Kosten ins Places-Budget.
-            </p>
-            <button type="submit" className={btn.primary}>
-              Suche einreihen
-            </button>
-          </form>
-        </Card>
+      <div className="mb-6">
         <Card title="Jobs manuell auslösen">
           <ul className="divide-y divide-slate-100">
             {[
@@ -98,37 +75,44 @@ export default async function JobsPage() {
                 <span>{label}</span>
                 <form action={runJobNow}>
                   <input type="hidden" name="queue" value={q} />
-                  <button className={btn.secondary} type="submit">
+                  <SubmitButton className={btn.secondary} type="submit">
                     Starten
-                  </button>
+                  </SubmitButton>
                 </form>
               </li>
             ))}
           </ul>
         </Card>
       </div>
-      <Card title="Letzte Jobs">
-        <Table head={['Queue', 'Status', 'Erstellt', 'Fertig', 'Versuche', 'Ergebnis']}>
-          {jobs.rows.map((j) => (
-            <tr key={j.id}>
-              <Td className="font-mono text-xs">{j.name}</Td>
-              <Td>
-                <Badge
-                  color={
-                    j.state === 'completed' ? 'green' : j.state === 'failed' ? 'red' : j.state === 'active' ? 'blue' : 'gray'
-                  }
-                >
-                  {j.state}
-                </Badge>
-              </Td>
-              <Td className="text-xs whitespace-nowrap">{dt(j.created_on)}</Td>
-              <Td className="text-xs whitespace-nowrap">{dt(j.completed_on)}</Td>
-              <Td>{j.retry_count}</Td>
-              <Td className="max-w-lg font-mono text-xs break-all text-slate-600">
-                {j.output ? JSON.stringify(j.output).slice(0, 400) : ''}
-              </Td>
-            </tr>
-          ))}
+      <Card title="Letzte Läufe">
+        <Table head={['Aufgabe', 'Status', 'Gestartet', 'Dauer', 'Details']}>
+          {jobs.rows.map((j) => {
+            const [stateLabel, color] = STATE_LABELS[j.state] ?? [j.state, 'gray'];
+            const secs = j.completed_on
+              ? Math.max(0, (new Date(j.completed_on).getTime() - new Date(j.created_on).getTime()) / 1000)
+              : null;
+            return (
+              <tr key={j.id}>
+                <Td className="font-medium">{JOB_LABELS[j.name] ?? j.name}</Td>
+                <Td>
+                  <Badge color={color}>{stateLabel}</Badge>
+                  {j.retry_count ? <span className="ml-2 text-xs text-slate-500">{j.retry_count}. Versuch</span> : null}
+                </Td>
+                <Td className="text-xs whitespace-nowrap text-slate-600">{dt(j.created_on)}</Td>
+                <Td className="text-xs whitespace-nowrap text-slate-600">
+                  {secs === null ? '–' : secs < 60 ? `${Math.round(secs)} s` : `${Math.round(secs / 60)} min`}
+                </Td>
+                <Td>
+                  {j.output ? (
+                    <details className="admin-details">
+                      <summary>Ergebnis</summary>
+                      <pre>{JSON.stringify(j.output, null, 2).slice(0, 2000)}</pre>
+                    </details>
+                  ) : null}
+                </Td>
+              </tr>
+            );
+          })}
         </Table>
       </Card>
     </>

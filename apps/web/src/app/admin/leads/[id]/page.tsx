@@ -17,6 +17,7 @@ import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
 import { markUndeliverableAction, rejectLead, requalifyLead, suppressLead } from '../actions';
 import { ResearchForm } from './research-form';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Lead' };
 
@@ -104,25 +105,25 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
             {lead.status === 'rejected' ? (
               <form action={requalifyLead}>
                 <input type="hidden" name="id" value={lead.id} />
-                <button className={btn.secondary} type="submit">
+                <SubmitButton className={btn.secondary} type="submit">
                   Manuell qualifizieren
-                </button>
+                </SubmitButton>
               </form>
             ) : null}
             {['qualified', 'discovered', 'demo_built'].includes(lead.status) ? (
               <form action={rejectLead}>
                 <input type="hidden" name="id" value={lead.id} />
-                <button className={btn.secondary} type="submit">
+                <SubmitButton className={btn.secondary} type="submit">
                   Ablehnen
-                </button>
+                </SubmitButton>
               </form>
             ) : null}
             {lead.status !== 'suppressed' ? (
               <form action={suppressLead}>
                 <input type="hidden" name="id" value={lead.id} />
-                <button className={btn.danger} type="submit">
+                <SubmitButton className={btn.danger} type="submit">
                   Sperren &amp; löschen
-                </button>
+                </SubmitButton>
               </form>
             ) : null}
           </>
@@ -246,9 +247,9 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
               Zusätzlich ist die Darstellung dieser Bilder im Entwurf ohne weitere Namens- oder Lizenzhinweise erlaubt. Ohne diese
               Bestätigung werden sie ausschließlich zur Gestaltungsauswertung genutzt.
             </label>
-            <button type="submit" className={btn.primary}>
+            <SubmitButton type="submit" className={btn.primary}>
               Gestaltungskontext speichern
-            </button>
+            </SubmitButton>
           </form>
         </details>
       </Card>
@@ -386,9 +387,9 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
                           placeholder="UNZUSTELLBAR"
                           className={`${input} w-36 text-xs`}
                         />
-                        <button type="submit" className={btn.secondary}>
+                        <SubmitButton type="submit" className={btn.secondary}>
                           Rücksendung erfassen
-                        </button>
+                        </SubmitButton>
                       </form>
                     ) : null}
                   </Td>

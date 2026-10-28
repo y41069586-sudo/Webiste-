@@ -13,6 +13,7 @@ import { Badge, Card, PageHeader, StatusBadge, btn, input } from '@/components/u
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
 import { approveLetterAction, lxpTestJobAction, rejectLetterAction } from '../actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Brief' };
 
@@ -106,21 +107,21 @@ export default async function LetterDetail({
                   </fieldset>
                 ) : null}
                 <input type="hidden" name="id" value={letter.id} />
-                <button className={btn.primary} type="submit">
+                <SubmitButton className={btn.primary} type="submit">
                   Freigeben
-                </button>
+                </SubmitButton>
               </form>
               <hr className="my-4" />
               <form action={rejectLetterAction} className="space-y-2">
                 <input type="hidden" name="id" value={letter.id} />
                 <textarea name="note" required placeholder="Grund" rows={2} className={input} />
                 <div className="flex flex-wrap gap-2">
-                  <button className={btn.secondary} name="regenerate" value="1" type="submit">
+                  <SubmitButton className={btn.secondary} name="regenerate" value="1" type="submit">
                     Verwerfen &amp; neu erzeugen
-                  </button>
-                  <button className={btn.danger} name="regenerate" value="0" type="submit">
+                  </SubmitButton>
+                  <SubmitButton className={btn.danger} name="regenerate" value="0" type="submit">
                     Verwerfen
-                  </button>
+                  </SubmitButton>
                 </div>
               </form>
             </Card>
@@ -142,9 +143,9 @@ export default async function LetterDetail({
               </p>
               <form action={lxpTestJobAction}>
                 <input type="hidden" name="id" value={letter.id} />
-                <button className={btn.secondary} type="submit">
+                <SubmitButton className={btn.secondary} type="submit">
                   {mail.name === 'easynova' ? 'Testsendung an easyNova' : 'Testauftrag an LetterXpress'}
-                </button>
+                </SubmitButton>
               </form>
             </Card>
           ) : null}

@@ -2,6 +2,7 @@ import { approvalBlocker, getPlaybooks, listClaims, type ClaimRow } from '@wbm/c
 import { Badge, Card, Notice, PageHeader, Stat, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { approveClaimAction, blockClaimAction, syncClaimsAction, unblockClaimAction } from './actions';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Claims & Playbooks' };
 export const dynamic = 'force-dynamic';
@@ -90,9 +91,9 @@ function ClaimCard({ c }: { c: ClaimRow }) {
               <label className="flex items-center gap-2 text-xs text-slate-700">
                 <input type="checkbox" name="checked" required /> Zahl, Wortlaut, Jahr und Stichprobe selbst geprüft
               </label>
-              <button type="submit" className={btn.primary}>
+              <SubmitButton type="submit" className={btn.primary}>
                 Freigeben
-              </button>
+              </SubmitButton>
             </form>
           ) : null}
           {c.status !== 'approved' && blocker ? (
@@ -101,17 +102,17 @@ function ClaimCard({ c }: { c: ClaimRow }) {
           {c.status !== 'blocked' ? (
             <form action={blockClaimAction}>
               <input type="hidden" name="id" value={c.id} />
-              <button type="submit" className={btn.secondary}>
+              <SubmitButton type="submit" className={btn.secondary}>
                 Sperren
-              </button>
+              </SubmitButton>
             </form>
           ) : null}
           {c.status === 'blocked' && c.blockedReason === 'manual' ? (
             <form action={unblockClaimAction}>
               <input type="hidden" name="id" value={c.id} />
-              <button type="submit" className={btn.secondary}>
+              <SubmitButton type="submit" className={btn.secondary}>
                 Sperre aufheben
-              </button>
+              </SubmitButton>
             </form>
           ) : null}
         </div>
@@ -134,9 +135,9 @@ export default async function ClaimsPage({ searchParams }: { searchParams: Promi
         subtitle="Nur freigegebene Claims dürfen in Briefen und Demos stehen (§ 5 UWG). Quellen gelten 24 Monate."
         actions={
           <form action={syncClaimsAction}>
-            <button type="submit" className={btn.secondary}>
+            <SubmitButton type="submit" className={btn.secondary}>
               Claims-Datei neu einlesen
-            </button>
+            </SubmitButton>
           </form>
         }
       />

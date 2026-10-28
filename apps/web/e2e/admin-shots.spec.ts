@@ -8,7 +8,16 @@ import { loginAsAdmin } from './helpers';
  * Nur mit ADMIN_SHOTS_DIR=<ordner>.
  */
 const DIR = process.env.ADMIN_SHOTS_DIR;
-const PAGES = ['/admin', '/admin/settings', '/admin/settings?bereich=letter', '/admin/leads', '/admin/letters', '/admin/demos', '/admin/jobs'];
+const PAGES = [
+  '/admin',
+  '/admin/suche',
+  '/admin/settings',
+  '/admin/settings?bereich=letter',
+  '/admin/leads',
+  '/admin/letters',
+  '/admin/demos',
+  '/admin/jobs',
+];
 const SIZES = [
   ['ipad-quer', 1180, 820],
   ['ipad-hoch', 820, 1180],

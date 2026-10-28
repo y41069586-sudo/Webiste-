@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, type ReactNode } from 'react';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export interface ActionResult {
   error?: string;
@@ -18,7 +19,7 @@ export function ActionForm({
   className?: string;
   submit?: string;
 }) {
-  const [state, formAction, pending] = useActionState(action, {});
+  const [state, formAction] = useActionState(action, {});
   return (
     <form action={formAction} className={`space-y-3 ${className}`}>
       {children}
@@ -32,13 +33,7 @@ export function ActionForm({
           {state.success}
         </p>
       ) : null}
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex min-h-11 items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-      >
-        {pending ? 'Wird gespeichert …' : submit}
-      </button>
+      <SubmitButton className="ui-btn ui-btn-primary">{submit}</SubmitButton>
     </form>
   );
 }

@@ -8,6 +8,7 @@ import { SectionForm } from './section-form';
 import { AdoptLegalForm } from './adopt-legal-form';
 import { WorkerBootstrapForm } from './worker-bootstrap-form';
 import { settingsTodos } from './todos';
+import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Einstellungen' };
 
@@ -91,9 +92,9 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               <form action={toggleSwitch}>
                 <input type="hidden" name="key" value="killSwitch" />
                 <input type="hidden" name="value" value={String(!sw.killSwitch)} />
-                <button type="submit" className={sw.killSwitch ? btn.secondary : btn.danger}>
+                <SubmitButton type="submit" className={sw.killSwitch ? btn.secondary : btn.danger}>
                   {sw.killSwitch ? 'Not-Aus aufheben' : 'NOT-AUS auslösen'}
-                </button>
+                </SubmitButton>
               </form>
             </div>
           </Card>
@@ -124,9 +125,9 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
                       </span>
                       <input type="hidden" name="key" value={s.key} />
                       <input type="hidden" name="value" value={String(!value)} />
-                      <button type="submit" className={btn.secondary} disabled={s.key === 'dryRun' && sw.dryRunLockedByEnv}>
+                      <SubmitButton type="submit" className={btn.secondary} disabled={s.key === 'dryRun' && sw.dryRunLockedByEnv}>
                         {value ? 'Ausschalten' : 'Einschalten'}
-                      </button>
+                      </SubmitButton>
                     </form>
                   </li>
                 );

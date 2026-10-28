@@ -224,7 +224,12 @@ export const SECTIONS: SectionDef[] = [
     title: 'Brief & Versand',
     fields: [
       { path: 'letter.color', label: 'Farbdruck', type: 'bool' },
-      { path: 'letter.deliveryProduct', label: 'Versandart (nur Alternativanbieter Pingen)', type: 'text', hint: 'z. B. cheap, fast' },
+      {
+        path: 'letter.deliveryProduct',
+        label: 'Versandart (nur Alternativanbieter Pingen)',
+        type: 'text',
+        hint: 'z. B. cheap, fast',
+      },
       { path: 'letter.includeScreenshotPage', label: 'Seite 2 mit Screenshots', type: 'bool' },
       { path: 'letter.addressPosition', label: 'Anschriftenfeld (left = DE)', type: 'text' },
       { path: 'letter.maxLettersPerLead', label: 'Max. Sendungen pro Lead (1–3)', type: 'number' },
