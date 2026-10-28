@@ -95,6 +95,8 @@ export function isAutomated(from: string, subject: string, headers: Record<strin
   const h = Object.fromEntries(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v.toLowerCase()]));
   if (h['auto-submitted'] && h['auto-submitted'] !== 'no') return true;
   if (h['x-autoreply'] || h['x-autorespond'] || h['precedence'] === 'bulk' || h['precedence'] === 'auto_reply') return true;
+  // Newsletter und Verteiler (RFC 2369/2919): Abmeldelink oder Listenkennung im Kopf
+  if (h['list-unsubscribe'] || h['list-id'] || h['precedence'] === 'list') return true;
   if (/mailer-daemon|postmaster|no-?reply|donotreply/i.test(from)) return true;
   return /^(automatische antwort|abwesenheit|out of office|autoreply|auto:|undeliver|unzustellbar|delivery status notification)/i.test(
     subject.trim(),

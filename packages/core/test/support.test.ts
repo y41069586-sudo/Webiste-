@@ -13,6 +13,7 @@ import {
   sendSupportReply,
   stripQuoted,
   approveSupportReply,
+  deleteSupportMessage,
 } from '../src/services/support';
 import { isAutomated } from '../src/support/prompts';
 import { randomToken } from '../src/util/crypto';
@@ -97,8 +98,26 @@ describe('Support: Eingang und Erkennung', () => {
     expect(isAutomated('mailer-daemon@x.de', 'Undeliverable')).toBe(true);
     expect(isAutomated('a@b.de', 'Automatische Antwort: Urlaub')).toBe(true);
     expect(isAutomated('a@b.de', 'Frage', { 'Auto-Submitted': 'auto-replied' })).toBe(true);
+    expect(isAutomated('news@e-recht24.de', 'Mehr als Rechtstexte', { 'List-Unsubscribe': '<https://x/abmelden>' })).toBe(true);
+    expect(isAutomated('a@b.de', 'Frage', { 'List-Id': 'Newsletter <news.example.org>' })).toBe(true);
     expect(isAutomated('a@b.de', 'Frage')).toBe(false);
     expect(stripQuoted('Danke!\n\nAm 20.10.2026 schrieb X:\n> alt')).toBe('Danke!');
+  });
+});
+
+describe('Support: Newsletter und Löschen', () => {
+  beforeEach(resetDb);
+
+  it('Newsletter landen als Spam, nicht als offene Anfrage; Admin kann Nachrichten löschen', async () => {
+    const news = await ingestInboundEmail(
+      mail({ from: 'news@e-recht24.de', subject: 'Neu im Blog', headers: { 'List-Unsubscribe': '<https://x/abmelden>' } }),
+      { queueProcessing: false },
+    );
+    const row = await getDb().query.supportMessages.findFirst({ where: eq(supportMessages.id, news.id) });
+    expect(row?.status).toBe('ignored');
+    const real = await ingestInboundEmail(mail(), { queueProcessing: false });
+    await deleteSupportMessage(real.id, 'admin:test');
+    expect(await getDb().query.supportMessages.findFirst({ where: eq(supportMessages.id, real.id) })).toBeUndefined();
   });
 });
 

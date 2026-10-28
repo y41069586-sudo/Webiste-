@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { adminOptOut, approveSupportReply, redraftSupport, setSupportStatus } from '@wbm/core';
+import { adminOptOut, approveSupportReply, deleteSupportMessage, redraftSupport, setSupportStatus } from '@wbm/core';
 import { actorOf, requireAdmin } from '@/lib/auth';
 
 export async function approveReplyAction(form: FormData): Promise<void> {
@@ -32,7 +32,24 @@ export async function optOutAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
   const leadId = String(form.get('leadId') ?? '').trim();
   if (leadId && !/^[0-9a-f-]{36}$/.test(leadId)) throw new Error('Ungültige Lead-ID');
-  await adminOptOut(String(form.get('id')), leadId || null, actorOf(s));
+  const id = String(form.get('id'));
+  let hinweis: string | null = null;
+  try {
+    await adminOptOut(id, leadId || null, actorOf(s));
+  } catch (err) {
+    hinweis = err instanceof Error ? err.message : String(err);
+  }
   revalidatePath('/admin/support');
+  // Fehler (z. B. kein Betrieb zugeordnet) als Hinweis auf der Nachricht statt Fehlerseite
+  redirect(hinweis ? `/admin/support/${id}?hinweis=${encodeURIComponent(hinweis)}` : '/admin/support');
+}
+
+/** Nachricht endgültig entfernen (Newsletter, Werbung, Fehlleitungen). */
+export async function deleteAction(form: FormData): Promise<void> {
+  const s = await requireAdmin();
+  const id = String(form.get('id'));
+  if (!/^[0-9a-f-]{36}$/.test(id)) throw new Error('Ungültige Nachricht');
+  await deleteSupportMessage(id, actorOf(s));
+  revalidatePath('/admin', 'layout');
   redirect('/admin/support');
 }

@@ -1,7 +1,17 @@
 import { and, desc, eq, or } from 'drizzle-orm';
 import { getConfig, effectiveSwitches } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
-import { changeRequests, customers, events, leads, orders, sites, supportMessages, suppressionList } from '../db/schema';
+import {
+  changeRequests,
+  customers,
+  events,
+  leads,
+  objections,
+  orders,
+  sites,
+  supportMessages,
+  suppressionList,
+} from '../db/schema';
 import { renderEmail } from '../emails/templates';
 import { emailHash, normalizeBusinessName } from '../leads/normalize';
 import { errInfo, logger } from '../logger';
@@ -447,6 +457,20 @@ export async function setSupportStatus(id: string, status: 'done' | 'ignored', a
   const db = getDb();
   await db.update(supportMessages).set({ status, updatedAt: new Date() }).where(eq(supportMessages.id, id));
   await audit(db, { entity: 'support_message', entityId: id, action: status, actor });
+}
+
+/**
+ * Admin: Nachricht endgültig entfernen (z. B. Newsletter oder Werbung an die Support-Adresse). Verweise darauf
+ * (Antwort-Kette, erfasste Einwände) bleiben bestehen, zeigen aber nicht mehr auf die gelöschte Nachricht.
+ */
+export async function deleteSupportMessage(id: string, actor: string): Promise<void> {
+  const db = getDb();
+  await db.transaction(async (tx) => {
+    await tx.update(supportMessages).set({ inReplyToId: null }).where(eq(supportMessages.inReplyToId, id));
+    await tx.update(objections).set({ supportMessageId: null }).where(eq(objections.supportMessageId, id));
+    await tx.delete(supportMessages).where(eq(supportMessages.id, id));
+    await audit(tx, { entity: 'support_message', entityId: id, action: 'deleted', actor });
+  });
 }
 
 /** Admin: Widerspruch für diese Nachricht manuell ausführen (z. B. mit gewähltem Lead). */

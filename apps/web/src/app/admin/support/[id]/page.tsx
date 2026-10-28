@@ -2,17 +2,23 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { asc, eq, or } from 'drizzle-orm';
 import { getDb, schema } from '@wbm/core';
-import { Badge, Card, PageHeader, StatusBadge, btn, input, label } from '@/components/ui';
+import { Badge, Card, Notice, PageHeader, StatusBadge, btn, input, label } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
-import { approveReplyAction, optOutAction, redraftAction, setStatusAction } from '../actions';
+import { approveReplyAction, deleteAction, optOutAction, redraftAction, setStatusAction } from '../actions';
 
 export const metadata = { title: 'Support-Nachricht' };
 export const dynamic = 'force-dynamic';
 
-export default async function SupportMessagePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function SupportMessagePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ hinweis?: string }>;
+}) {
   await requireAdmin();
-  const { id } = await params;
+  const [{ id }, { hinweis }] = await Promise.all([params, searchParams]);
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const db = getDb();
   const m = await db.query.supportMessages.findFirst({ where: eq(schema.supportMessages.id, id) });
@@ -52,6 +58,11 @@ export default async function SupportMessagePage({ params }: { params: Promise<{
           </Link>
         }
       />
+      {hinweis ? (
+        <div className="mb-6">
+          <Notice kind="warn">{hinweis}</Notice>
+        </div>
+      ) : null}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title={`Nachricht von ${m.fromEmail ?? 'unbekannt'} · ${dt(m.createdAt)}`}>
           {m.escalationReason ? (
@@ -107,15 +118,22 @@ export default async function SupportMessagePage({ params }: { params: Promise<{
               <input type="hidden" name="status" value="ignored" />
               <button className={btn.secondary}>Spam</button>
             </form>
+            <form action={deleteAction}>
+              <input type="hidden" name="id" value={m.id} />
+              <button className={btn.secondary}>Nachricht löschen (Newsletter, Werbung)</button>
+            </form>
           </div>
           <form action={optOutAction} className="mt-6 space-y-2 border-t border-slate-100 pt-4">
             <input type="hidden" name="id" value={m.id} />
-            <p className="text-sm font-medium">Widerspruch manuell umsetzen</p>
+            <p className="text-sm font-medium">Werbewiderspruch eines angeschriebenen Betriebs umsetzen</p>
+            <p className="text-xs text-slate-500">
+              Nur wenn ein Betrieb keine Post mehr möchte: sperrt den Lead dauerhaft und löscht seine Daten.
+            </p>
             <label htmlFor="leadId" className={label}>
               Lead-ID (falls nicht zugeordnet – aus der Lead-Liste kopieren)
             </label>
             <input id="leadId" name="leadId" defaultValue={m.leadId ?? ''} className={input} />
-            <button className={btn.danger}>Sperren und Daten löschen</button>
+            <button className={btn.danger}>Betrieb sperren und Daten löschen</button>
           </form>
         </Card>
         {thread.length ? (

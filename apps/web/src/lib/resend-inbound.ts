@@ -40,5 +40,7 @@ export async function readResendInbound(event: WebhookEventPayload, apiKey: stri
     // Message-ID deduplicates standard receiving and inbox events for the same email.
     providerMessageId: mail.message_id || `resend:${event.data.email_id}`,
     receivedAt: new Date('received_at' in mail ? mail.received_at : mail.created_at),
+    // Nur zur Erkennung automatischer Mails (Newsletter, Abwesenheitsnotiz); wird nicht gespeichert
+    ...('headers' in mail && mail.headers ? { headers: mail.headers } : {}),
   };
 }
