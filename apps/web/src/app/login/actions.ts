@@ -31,7 +31,10 @@ export async function loginAction(_prev: LoginState, form: FormData): Promise<Lo
   store.set(SESSION_COOKIE, res.token, {
     httpOnly: true,
     secure: getEnv().APP_URL.startsWith('https://'),
-    sameSite: 'strict',
+    // Lax statt Strict: Safari (iPad) sendet Strict-Cookies beim Neuladen eines Tabs, der über einen Link aus
+    // einer anderen App geöffnet wurde, nicht mit – das wirkte wie ein Rauswurf. POSTs bleiben geschützt
+    // (Lax sendet bei fremden POSTs nichts, Server Actions prüfen zusätzlich den Origin).
+    sameSite: 'lax',
     path: '/',
     expires: res.expiresAt,
   });
