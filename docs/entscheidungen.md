@@ -928,3 +928,11 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
 - Live-Checkout bleibt im Code gesperrt (`stripeV4Price` nur Sandbox; Tests sichern das), bis der Betreiber
   ausdrücklich „live schalten“ freigibt. Dann: Katalog einbinden, Sperrtests anpassen, `PAYMENT_PROVIDER=stripe`.
 - Logo und Farbe (Branding) lassen sich für das eigene Konto nicht per API setzen → im Dashboard.
+
+## 29.10.2026 – easyNova im Testmodus angebunden
+
+- Netlify (Produktion): `MAIL_PROVIDER=easynova`, `EASYNOVA_MODE=test`, `EASYNOVA_USERNAME`, `EASYNOVA_PASSWORD`
+  (geheim), `EASYNOVA_TEST_EMAIL`. Anmeldung bei der digiBrief-API geprüft (HTTP 200).
+- Testmodus: kein Druck, kein Versand, keine Kosten. `realLettersUnlocked` bleibt aus; live erst nach 3
+  Testaufträgen, geprüfter Rückmail und ausdrücklichem OK.
+- Der Worker übernimmt die Werte beim nächsten Neuabruf der Umgebung (`setup.sh` mit `NEU=1`).
