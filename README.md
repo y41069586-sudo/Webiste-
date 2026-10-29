@@ -1,5 +1,11 @@
 # Website-Brief-Maschine
 
+**Wiederaufnahme 29.10.2026:** [Aktueller Audit, Fortsetzung und Nachweise](docs/resume-2026-10-29/README.md).
+70 neue Claude-Commits gegenüber der Codex-Übergabe: App/Firmenwebsite aktualisiert,21Migrationen,
+Queue/Worker und echte Recherche angebunden, easyNova im Testmodus. Stripe-Live wird explizit
+vorbereitet; kein echter Versand oder Zahlungslauf aus dieser Fortsetzung. Ältere Statusberichte
+unten sind datierte Momentaufnahmen, keine erneute Bestandsprüfung.
+
 Findet lokale Betriebe ohne eigene Website, baut für jeden einen Website-Entwurf, schickt einen
 personalisierten Brief mit QR-Code und verkauft die fertige Website ohne Verkaufsgespräch:
 **Neukundenangebot V4:** Basis **597 € Einrichtung + 19 €/Monat** oder Care+ **597 € Einrichtung + insgesamt 99 €/Monat**. Neue Bestellungen speichern nach ausdrücklicher Zustimmung ein Zahlungsmittel/Mandat; genau ein Monatsabo startet erst nach bestätigtem Go-Live. Keine zwölfmonatige Mindestbindung. Ältere V4-Bestellungen mit separatem Abo-Checkout behalten ihr Verfahren.

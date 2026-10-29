@@ -1,0 +1,8 @@
+
+> @wbm/templates@0.1.0 build /workspace/seitenwerk-resume/packages/templates
+> node scripts/build-css.mjs
+
+≈ tailwindcss v4.3.3
+
+Done in 233ms
+dist/site.css: 47.8 KB

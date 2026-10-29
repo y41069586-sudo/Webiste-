@@ -1,3 +1,7 @@
+> **Aktueller Audit 29.10.2026:** [Wiederaufnahme nach Claude](resume-2026-10-29/README.md) mit
+> aktuellen GitHub-/Netlify-/Supabase-Befunden und tatsächlichen Restarbeiten. Die folgenden
+> Abschnitte sind historische Momentaufnahmen.
+>
 > Historischer Betriebsstand der Übernahme. Der neuere Entwicklungs-/Prüfstand und die V4-Preise
 > stehen im [Ultimate-Handoff](ultimate-quality-handoff.md) und [V4/V5-Handoff](v4-quality-handoff.md).
 > Codeänderungen auf dem Entwicklungsbranch sind kein Nachweis einer aktualisierten Live-Website.

@@ -1,0 +1,37 @@
+
+ RUN  v3.2.7 /workspace/seitenwerk-resume/packages/core
+
+ ✓ test/easynova.test.ts (9 tests) 643ms
+   ✓ easyNova im Versandablauf > Testauftrag auch bei DRY_RUN: Testsendung mit eigenem Schlüssel, Zähler, Brief unverändert  347ms
+ ✓ test/monthly-refunds.test.ts (6 tests) 7624ms
+   ✓ Bestätigte Erstattungen: richtige Rechnung und unveränderliche Differenzbelege > Teil-/Vollerstattung der Monatszahlung lässt 597-Euro-Bestellung unverändert; zwei Belege schreiben nur die Differenz gut  4110ms
+   ✓ Bestätigte Erstattungen: richtige Rechnung und unveränderliche Differenzbelege > falsche Summen/Währung und zu frühe unbekannte Rechnung bleiben retriable; verlorene Belegjobs werden nachgeholt  1010ms
+   ✓ Bestätigte Erstattungen: richtige Rechnung und unveränderliche Differenzbelege > ältere gespeicherte Stornorechnung behält PDF und Zustell-Idempotenz beim Retry  1045ms
+   ✓ Bestätigte Erstattungen: richtige Rechnung und unveränderliche Differenzbelege > auch Einrichtung: auf eine Teilerstattung folgt ein eigener ergänzender Beleg statt verlorener Restkorrektur  1364ms
+ ✓ test/v4-operations.test.ts (11 tests) 3931ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > basis startet genau ein Monatsabo erst nach belegtem Go-Live  574ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > care_plus startet genau ein Monatsabo erst nach belegtem Go-Live  360ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > fehlende oder zukünftige Zustimmung, ungezahlte oder beendete Bestellung blockiert den Start  304ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Tarifwechsel hat Zustimmung, Freigabe und Preisnachweis; Kauf-Snapshot bleibt unverändert  343ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > 60 Minuten pro Abrechnungsmonat sind auch bei parallelen Buchungen ein hartes Limit  392ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Basis enthält keine Inhaltsminuten, Zusatzarbeit benötigt gesonderte Kundenfreigabe  307ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > unbewertete Arbeit blockiert Beitrag; Bewertung und Storno buchen Kosten genau einmal  345ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Kosten vollständig nur für geprüften Fingerprint; neue Daten heben Bestätigung auf  345ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Monatscheck unterscheidet simuliert / technisch / manuell; keine Produktionsabnahme durch Mock  379ms
+ ✓ test/checkout-hosted.test.ts (10 tests) 2905ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > ohne gewählte Option kein Checkout (keine Vorauswahl)  331ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > basis: parallele Klicks, richtiger Snapshot und tarifbezogener Abbruch  301ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > Option wählen → Bezahlseite; Angaben aus dem Checkout landen in Bestellung, Kunde und Rechnung  369ms
+ ✓ test/conversion-v4.test.ts (8 tests) 1172ms
+   ✓ V4: versionierte Neukunden-Verträge > basis: nur 597 Euro Einrichtung, kein Abo vor tatsächlichem Go-Live, keine alte Hosting-Jahreszusage  485ms
+   ✓ V4: versionierte Neukunden-Verträge > care_plus: nur 597 Euro Einrichtung, kein Abo vor tatsächlichem Go-Live, keine alte Hosting-Jahreszusage  312ms
+   ✓ V4: versionierte Neukunden-Verträge > erste Abo-Rechnung vor Checkout-Webhook: einmal buchen; wiederholtes Event, Doppelabo und falscher Betrag werden abgefangen  321ms
+ ✓ test/v4-stripe-lifecycle.test.ts (11 tests) 58ms
+ ✓ test/worker-bootstrap.test.ts (5 tests) 627ms
+ ✓ test/stripe-runtime.test.ts (6 tests) 28ms
+
+ Test Files  8 passed (8)
+      Tests  66 passed (66)
+   Start at  20:40:31
+   Duration  30.07s (transform 1.21s, setup 31ms, collect 9.28s, tests 16.99s, environment 2ms, prepare 572ms)
+

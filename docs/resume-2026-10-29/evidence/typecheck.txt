@@ -1,0 +1,9 @@
+Scope: 5 of 6 workspace projects
+packages/templates typecheck$ tsc --noEmit
+packages/templates typecheck: Done
+packages/core typecheck$ tsc -p tsconfig.json
+packages/core typecheck: Done
+apps/web typecheck$ tsc --noEmit
+apps/worker typecheck$ tsc --noEmit
+apps/worker typecheck: Done
+apps/web typecheck: Done

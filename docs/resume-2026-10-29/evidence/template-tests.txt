@@ -1,0 +1,13 @@
+
+ RUN  v3.2.7 /workspace/seitenwerk-resume/packages/templates
+
+ ✓ test/templates.test.ts (97 tests) 1081ms
+ ✓ test/art-direction.test.ts (9 tests) 118ms
+ ✓ test/design-review.test.ts (5 tests) 106ms
+ ✓ test/tax-number.test.ts (1 test) 3ms
+
+ Test Files  4 passed (4)
+      Tests  112 passed (112)
+   Start at  20:50:17
+   Duration  5.95s (transform 1.03s, setup 0ms, collect 1.80s, tests 1.31s, environment 1ms, prepare 811ms)
+

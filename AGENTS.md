@@ -385,3 +385,27 @@ Bestehende Referenzrechte, Quellenbindung, Budgetprüfung und erste30-/Einzelpr�
 Dokumentiert in `docs/vibe-upgrade/automation-and-billing.md`. Kein automatischer Fotocrawler.
 VPS-Worker verwendet direkte Anthropic-API, kein ChatGPT-Plus-Login; API-Abrechnung und Chat-/Codex-
 Kontingent getrennt erklären. Lokale Mocktests sind keine echte Anbieter-/Kostenabnahme.
+
+## Wiederaufnahme 29.10.2026 – aktueller Claude-Stand und Live-Vorbereitung
+
+Der Betreiber hat seit der Codex-Übergabe mit Claude weitergearbeitet und die Fortsetzung anhand
+seiner letzten Screenshots beauftragt. 70 neue Commits bis `484b060`; aktueller Audit/Fortschritt
+unter `docs/resume-2026-10-29/README.md`. Alte Aussagen „keine Queue/kein Worker/alle Provider Mock/
+öffentliche590/49Preise“ sind überholt:21Migrationen, Queue/Worker-Takte, echte OSM-/Anthropic- und
+easyNova-Testanbindung sowie aktuelle öffentliche Preise wurden erneut gelesen. Kein Wiederaufbau.
+
+Die Screenshots enthalten das Betreiber-Ja zu Stripe/easyNova live. Bestehende Voraussetzungen
+nicht überspringen: easyNova erst1von3Testaufträgen, eigene echte Briefprüfung vor Empfängerfreigabe,
+Steuerbestätigung noch false, Backup-/E-Mail-Abnahme offen. Keine tatsächliche Zahlung ausführen.
+Neue explizite Stripe-Auswahl mit getrennten Secrets/Katalogen ist lokal vorbereitet; test bleibt
+Standard. Live-Schlüssel allein schalten nichts frei. ENV/DB-DRY_RUN und Produktion wurden in
+dieser Fortsetzung nicht verändert. Konkrete spätere Aktivierung getrennt protokollieren.
+
+Worker-Einmal-Code exportiert jetzt auch OPTOUT_EMAIL und die explizite Stripe-Auswahl; parallele
+Einlösung ist atomar. Das ersetzt kein tatsächliches Serverupdate. Fremde lokale Arbeiten im
+ursprünglichen Worktree unverändert lassen; Entwicklung auf `codex/resume-2026-10-29`.
+
+Eigener Probedruck: ausdrücklich markierte Testbriefe dürfen eine Mock-Demo verwenden, weil der
+Empfänger die konfigurierte eigene Testanschrift ist. Gewöhnliche Mock-Akquisepost bleibt im echten
+Betrieb gesperrt. Testanschrift und Testbrief-Kennzeichnung an PDF binden; Änderung verlangt neue
+Generierung. Drei Provider-Testaufträge, Opt-out und manuelle Empfängerfreigabe nicht umgehen.

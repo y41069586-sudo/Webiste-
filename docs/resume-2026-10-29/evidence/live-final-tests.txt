@@ -1,0 +1,44 @@
+
+ RUN  v3.2.7 /workspace/seitenwerk-resume/packages/core
+
+ ✓ test/v4-operations.test.ts (12 tests) 6795ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > basis startet genau ein Monatsabo erst nach belegtem Go-Live  1112ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > care_plus startet genau ein Monatsabo erst nach belegtem Go-Live  695ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > fehlende oder zukünftige Zustimmung, ungezahlte oder beendete Bestellung blockiert den Start  703ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Live-Monatsstart verweigert alte Testzahlungen und den Dashboard-Dry-Run  446ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Tarifwechsel hat Zustimmung, Freigabe und Preisnachweis; Kauf-Snapshot bleibt unverändert  473ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > fremder Token darf keinen Wechsel zurücknehmen; Kündigung stoppt geplanten Wechsel  431ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > 60 Minuten pro Abrechnungsmonat sind auch bei parallelen Buchungen ein hartes Limit  702ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Basis enthält keine Inhaltsminuten, Zusatzarbeit benötigt gesonderte Kundenfreigabe  591ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > unbewertete Arbeit blockiert Beitrag; Bewertung und Storno buchen Kosten genau einmal  563ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Kosten vollständig nur für geprüften Fingerprint; neue Daten heben Bestätigung auf  472ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Monatscheck unterscheidet simuliert / technisch / manuell; keine Produktionsabnahme durch Mock  398ms
+ ✓ test/checkout-hosted.test.ts (11 tests) 4710ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > ohne gewählte Option kein Checkout (keine Vorauswahl)  561ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > erfundene Testbetriebe können nach dem Live-Wechsel keine echte Zahlung starten  505ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > offene Sitzungen aus einer anderen Zahlungsumgebung werden nicht wiederverwendet  413ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > basis: parallele Klicks, richtiger Snapshot und tarifbezogener Abbruch  458ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > care_plus: parallele Klicks, richtiger Snapshot und tarifbezogener Abbruch  475ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > ausstehende Bestätigung wird nicht als bezahlt ausgegeben und sperrt erneuten Checkout  516ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > Option wählen → Bezahlseite; Angaben aus dem Checkout landen in Bestellung, Kunde und Rechnung  531ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > Monatlich: Abo über die Bezahlseite, Mindestlaufzeit gesetzt  347ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > vergebene Wunschdomain bleibt leer (Wahl im Onboarding); fehlende Bestätigung → Meldung  341ms
+ ✓ test/conversion-v4.test.ts (8 tests) 4716ms
+   ✓ V4: versionierte Neukunden-Verträge > basis: nur 597 Euro Einrichtung, kein Abo vor tatsächlichem Go-Live, keine alte Hosting-Jahreszusage  1893ms
+   ✓ V4: versionierte Neukunden-Verträge > care_plus: nur 597 Euro Einrichtung, kein Abo vor tatsächlichem Go-Live, keine alte Hosting-Jahreszusage  1680ms
+   ✓ V4: versionierte Neukunden-Verträge > erste Abo-Rechnung vor Checkout-Webhook: einmal buchen; wiederholtes Event, Doppelabo und falscher Betrag werden abgefangen  1034ms
+ ✓ test/easynova.test.ts (9 tests) 1707ms
+   ✓ easyNova im Versandablauf > Testauftrag auch bei DRY_RUN: Testsendung mit eigenem Schlüssel, Zähler, Brief unverändert  1032ms
+   ✓ easyNova im Versandablauf > Live ohne 3 Testaufträge gesperrt; danach Versand und Statusabgleich bis gedruckt  588ms
+ ✓ test/worker-bootstrap.test.ts (5 tests) 1733ms
+   ✓ Worker-Einrichtung per Einmal-Code > Code gilt genau einmal, Schreibweise egal  734ms
+   ✓ Worker-Einrichtung per Einmal-Code > abgelaufene und ersetzte Codes werden abgelehnt  434ms
+   ✓ Worker-Einrichtung per Einmal-Code > gleichzeitige Abrufe exportieren die Zugangsdaten genau einmal  559ms
+ ✓ test/v4-stripe-lifecycle.test.ts (11 tests) 109ms
+ ✓ test/stripe-runtime.test.ts (6 tests) 101ms
+
+ Test Files  7 passed (7)
+      Tests  62 passed (62)
+   Start at  21:07:26
+   Duration  47.78s (transform 3.24s, setup 147ms, collect 20.67s, tests 19.87s, environment 2ms, prepare 1.10s)
+

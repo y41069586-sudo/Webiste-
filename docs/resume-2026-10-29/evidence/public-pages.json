@@ -1,0 +1,137 @@
+{
+  "scope": "GET only; no personal values retained",
+  "pages": [
+    {
+      "url": "https://seitenwerk.world/",
+      "finalUrl": "https://seitenwerk.world/",
+      "status": 200,
+      "new597": true,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": false,
+      "textLength": 18884
+    },
+    {
+      "url": "https://seitenwerk.world/impressum/",
+      "finalUrl": "https://seitenwerk.world/impressum/",
+      "status": 200,
+      "new597": false,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": false,
+      "textLength": 1288
+    },
+    {
+      "url": "https://seitenwerk.world/datenschutz/",
+      "finalUrl": "https://seitenwerk.world/datenschutz/",
+      "status": 200,
+      "new597": false,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": true,
+      "textLength": 15922
+    },
+    {
+      "url": "https://seitenwerk.world/agb/",
+      "finalUrl": "https://seitenwerk.world/agb/",
+      "status": 200,
+      "new597": true,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": false,
+      "textLength": 10963
+    },
+    {
+      "url": "https://seitenwerkworld.netlify.app/preise",
+      "finalUrl": "https://seitenwerkworld.netlify.app/preise",
+      "status": 200,
+      "new597": true,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": false,
+      "textLength": 2076
+    },
+    {
+      "url": "https://seitenwerkworld.netlify.app/impressum",
+      "finalUrl": "https://seitenwerkworld.netlify.app/impressum",
+      "status": 200,
+      "new597": false,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": false,
+      "textLength": 954
+    },
+    {
+      "url": "https://seitenwerkworld.netlify.app/datenschutz",
+      "finalUrl": "https://seitenwerkworld.netlify.app/datenschutz",
+      "status": 200,
+      "new597": false,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": true,
+      "textLength": 13933
+    },
+    {
+      "url": "https://seitenwerkworld.netlify.app/agb",
+      "finalUrl": "https://seitenwerkworld.netlify.app/agb",
+      "status": 200,
+      "new597": true,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": false,
+      "textLength": 10487
+    },
+    {
+      "url": "https://seitenwerkworld.netlify.app/kontakt",
+      "finalUrl": "https://seitenwerkworld.netlify.app/kontakt",
+      "status": 200,
+      "new597": false,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": false,
+      "textLength": 1160
+    },
+    {
+      "url": "https://seitenwerkworld.netlify.app/so-funktionierts",
+      "finalUrl": "https://seitenwerkworld.netlify.app/so-funktionierts",
+      "status": 200,
+      "new597": true,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": false,
+      "textLength": 2076
+    },
+    {
+      "url": "https://seitenwerkworld.netlify.app/garantie",
+      "finalUrl": "https://seitenwerkworld.netlify.app/preise",
+      "status": 200,
+      "new597": true,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": false,
+      "textLength": 2076
+    },
+    {
+      "url": "https://seitenwerkworld.netlify.app/login",
+      "finalUrl": "https://seitenwerkworld.netlify.app/login",
+      "status": 200,
+      "new597": false,
+      "old590": false,
+      "old49": false,
+      "placeholderContact": false,
+      "easyNova": false,
+      "textLength": 127
+    }
+  ]
+}

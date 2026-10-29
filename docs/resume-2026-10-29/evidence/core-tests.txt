@@ -1,0 +1,372 @@
+
+ RUN  v3.2.7 /workspace/seitenwerk-resume/packages/core
+
+ ✓ test/templates-a11y.test.ts (147 tests) 680621ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-solid / werkblau / voll  8150ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-solid / werkblau / minimal  7785ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-solid / anthrazit / voll  7889ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-solid / anthrazit / minimal  7456ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-solid / waldgruen / voll  6755ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-solid / waldgruen / minimal  7579ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-klar / werkblau / voll  5277ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-klar / werkblau / minimal  4049ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-klar / anthrazit / voll  6302ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-klar / anthrazit / minimal  7182ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-klar / waldgruen / voll  5800ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-klar / waldgruen / minimal  3856ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-werkstatt / anthrazit / voll  3912ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-werkstatt / anthrazit / minimal  3930ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-werkstatt / werkblau / voll  3663ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-werkstatt / werkblau / minimal  3816ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-werkstatt / waldgruen / voll  4314ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-werkstatt / waldgruen / minimal  3820ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-elegant / rose / voll  3988ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-elegant / rose / minimal  4269ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-elegant / noir / voll  3786ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-elegant / noir / minimal  3953ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-elegant / salbei / voll  3764ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-elegant / salbei / minimal  3827ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-soft / salbei / voll  4017ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-soft / salbei / minimal  3765ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-soft / rose / voll  3626ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-soft / rose / minimal  3676ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-soft / noir / voll  4063ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-soft / noir / minimal  3759ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-modern / noir / voll  3889ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-modern / noir / minimal  3905ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-modern / rose / voll  4107ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-modern / rose / minimal  4880ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-modern / salbei / voll  3996ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-modern / salbei / minimal  3712ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-foto / espresso / voll  3983ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-foto / espresso / minimal  3979ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-foto / olive / voll  4344ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-foto / olive / minimal  4079ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-foto / tomate / voll  4091ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-foto / tomate / minimal  4294ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-split / olive / voll  4226ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-split / olive / minimal  4369ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-split / tomate / voll  4444ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-split / tomate / minimal  4355ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-split / espresso / voll  4120ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-split / espresso / minimal  3758ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-magazin / tomate / voll  3896ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-magazin / tomate / minimal  5126ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-magazin / espresso / voll  6485ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-magazin / espresso / minimal  6729ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-magazin / olive / voll  6570ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-magazin / olive / minimal  3807ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-foto / kiosk / voll  3715ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-foto / kiosk / minimal  3683ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-foto / flieder / voll  3944ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-foto / flieder / minimal  3806ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-foto / sand / voll  3836ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-foto / sand / minimal  4027ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-split / flieder / voll  3968ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-split / flieder / minimal  4019ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-split / sand / voll  4012ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-split / sand / minimal  3787ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-split / kiosk / voll  3848ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-split / kiosk / minimal  3763ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-magazin / sand / voll  3540ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-magazin / sand / minimal  4658ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-magazin / kiosk / voll  3993ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-magazin / kiosk / minimal  3926ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-magazin / flieder / voll  3810ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-magazin / flieder / minimal  3682ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-foto / energie / voll  4017ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-foto / energie / minimal  3896ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-foto / lagune / voll  4304ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-foto / lagune / minimal  3963ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-foto / nacht / voll  3843ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-foto / nacht / minimal  3768ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-split / lagune / voll  3936ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-split / lagune / minimal  3993ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-split / nacht / voll  4245ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-split / nacht / minimal  3948ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-split / energie / voll  3993ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-split / energie / minimal  3868ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-magazin / nacht / voll  4253ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-magazin / nacht / minimal  4069ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-magazin / energie / voll  4125ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-magazin / energie / minimal  3987ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-magazin / lagune / voll  4573ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-magazin / lagune / minimal  4040ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-plakat / signalgelb / voll  3943ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-plakat / signalgelb / minimal  3905ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-plakat / mandarine / voll  3845ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-plakat / mandarine / minimal  3576ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-plakat / minze / voll  3876ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > handwerk-plakat / minze / minimal  3926ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-plakat / pink / voll  4377ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-plakat / pink / minimal  4397ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-plakat / lavendel / voll  4141ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-plakat / lavendel / minimal  4109ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-plakat / koralle / voll  3894ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > beauty-plakat / koralle / minimal  3900ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-plakat / paprika / voll  4209ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-plakat / paprika / minimal  4081ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-plakat / senf / voll  4185ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-plakat / senf / minimal  3818ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-plakat / pistazie / voll  3984ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > gastronomie-plakat / pistazie / minimal  3780ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-plakat / limette / voll  4010ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-plakat / limette / minimal  3912ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-plakat / aprikose / voll  3779ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-plakat / aprikose / minimal  3915ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-plakat / flamingo / voll  4195ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > einzelhandel-plakat / flamingo / minimal  4519ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-plakat / tuerkis / voll  4037ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-plakat / tuerkis / minimal  4101ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-plakat / sonne / voll  4420ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-plakat / sonne / minimal  4229ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-plakat / neonrosa / voll  4149ms
+   ✓ Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Daten) > kurse-plakat / neonrosa / minimal  4365ms
+   ✓ Branchen-Abschnitte (B3): axe, HTML, Layout; Live ohne Platzhalter > gastronomie: Abschnitte im Entwurf sind barrierefrei  4557ms
+   ✓ Branchen-Abschnitte (B3): axe, HTML, Layout; Live ohne Platzhalter > handwerk: Abschnitte im Entwurf sind barrierefrei  4061ms
+   ✓ Branchen-Abschnitte (B3): axe, HTML, Layout; Live ohne Platzhalter > beauty: Abschnitte im Entwurf sind barrierefrei  4217ms
+   ✓ Branchen-Abschnitte (B3): axe, HTML, Layout; Live ohne Platzhalter > einzelhandel: Abschnitte im Entwurf sind barrierefrei  3982ms
+   ✓ Branchen-Abschnitte (B3): axe, HTML, Layout; Live ohne Platzhalter > kurse_training: Abschnitte im Entwurf sind barrierefrei  4097ms
+   ✓ Branchen-Abschnitte (B3): axe, HTML, Layout; Live ohne Platzhalter > dienstleistung: Abschnitte im Entwurf sind barrierefrei  3752ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > handwerk-solid  4864ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > handwerk-klar  7520ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > handwerk-werkstatt  7509ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > beauty-elegant  6764ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > beauty-soft  9118ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > beauty-modern  11719ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > gastronomie-foto  9456ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > gastronomie-split  7918ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > gastronomie-magazin  5441ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > einzelhandel-foto  3829ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > einzelhandel-split  3717ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > einzelhandel-magazin  3922ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > kurse-foto  4961ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > kurse-split  6022ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > kurse-magazin  5179ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > handwerk-plakat  5403ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > beauty-plakat  5621ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > gastronomie-plakat  5416ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > einzelhandel-plakat  10920ms
+   ✓ Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht > kurse-plakat  10598ms
+ ✓ test/v5-demo-quality.test.ts (1 test) 94791ms
+   ✓ V5: zehn fiktive Demos durch bestehenden Generator und echte Browser-QA > erzeugt Desktop- und Mobilbilder, prüft QA und erhält die manuelle Freigabesperre  94393ms
+ ✓ test/truth-check.test.ts (10 tests) 21095ms
+   ✓ Wahrheits-Check (Regeln) > neutraler Brief und alle Startvarianten bestehen (Claims als freigegeben angenommen)  322ms
+   ✓ Slot-Briefe passen im ungünstigsten Fall auf eine Seite > alle Startvarianten mit langem Namen, Domain und Fußnoten  8496ms
+   ✓ Slot-Briefe im echten Ablauf > mit freigegebenem Claim: Brief mit Fußnote, Wahrheits-Check bestanden, Nutzung protokolliert, Quellenseite  1768ms
+   ✓ Slot-Briefe im echten Ablauf > Abnahme: absichtlich falscher Testbrief wird blockiert und lässt sich nicht freigeben  1499ms
+ ✓ test/onboarding.test.ts (6 tests) 38398ms
+   ✓ Onboarding → Vorschau → Freigabe → Veröffentlichung > behält die gekaufte Gestaltung über Onboarding und Textüberarbeitung  13814ms
+   ✓ Onboarding → Vorschau → Freigabe → Veröffentlichung > kompletter Ablauf mit Mock-Registrar und Mock-Hosting  23984ms
+   ✓ Onboarding → Vorschau → Freigabe → Veröffentlichung > echter Registrar: ohne Freigabe kein Domainkauf; DRY_RUN registriert nie  364ms
+ ✓ test/acquisition-integration.test.ts (10 tests) 42387ms
+   ✓ blocks an otherwise qualified real-source lead without explicit research at render/approval/send gate  518ms
+   ✓ saves source-bound evidence and withdraws qualification when intent is removed  340ms
+   ✓ keeps research private and removes it on existing opt-out/anonymization path  346ms
+   ✓ rejects future research, unsafe references, unverified facts and oversized service titles  306ms
+   ✓ injects source-backed maler services into the actual demo and matched letter  10904ms
+   ✓ injects source-backed reinigung services into the actual demo and matched letter  9387ms
+   ✓ injects source-backed fliesenleger services into the actual demo and matched letter  10054ms
+   ✓ a generic demo facts checkbox never verifies missing operational/website/acquisition evidence  9247ms
+   ✓ keeps the same full costs and written purchase path before ordering for each target industry  428ms
+   ✓ catches the same business by phone despite a different source and changed address notation  420ms
+ ✓ test/image-qa.test.ts (3 tests) 23714ms
+   ✓ blocks broken inline images in both viewports without contacting an external host  5198ms
+   ✓ accepts a decoded local image without mistaking it for a design approval  6412ms
+   ✓ ignores summaries hidden by an outer disclosure but still catches genuine visible overlaps  11996ms
+ ✓ test/demo-pipeline.test.ts (5 tests) 56194ms
+   ✓ Demo-Pipeline (Mock-KI, echter Browser) > baut eine Demo, besteht die QA (inkl. axe und Lighthouse) und landet in der Review-Queue  16653ms
+   ✓ Demo-Pipeline (Mock-KI, echter Browser) > Ablehnen mit Neu-Generieren setzt Lead zurück auf qualified  13297ms
+   ✓ Demo-Pipeline (Mock-KI, echter Browser) > KI-Befund „hoch“: einmal automatisch mit den Befunden neu bauen, beim zweiten Mal nur melden  25159ms
+ ✓ test/task1-design.test.ts (6 tests) 6023ms
+   ✓ selects a stable fitting composition before usage rotation  1368ms
+   ✓ captures lazy images below the fold without waiting for a visitor to scroll  1263ms
+   ✓ blocks missing business identity and broken internal navigation  3379ms
+ ✓ test/task2-letter.test.ts (9 tests) 22338ms
+   ✓ V4 actual generation, reviewed facts and immutable print assignment > preserves previous PDF and row if regeneration fails its truth check  2403ms
+   ✓ V4 actual generation, reviewed facts and immutable print assignment > allows a third letter only after a simulated earlier send and a genuinely different reviewed demo  8337ms
+ ✓ test/letters.test.ts (10 tests | 1 skipped) 21063ms
+   ✓ Brief-PDF (echter Browser) > erzeugt einen einseitigen Brief, Anschrift exakt im easyNova-Anschriftenfeld unter der Freimachung  2355ms
+   ✓ Brief-PDF (echter Browser) > Bewertungszeile nur mit USE_RATING_IN_LETTER; zweite Seite mit Screenshots optional  1888ms
+   ✓ Brief-PDF (echter Browser) > Freigabe setzt Lead auf letter_approved; Ablehnen mit Neu-Erzeugen setzt zurück  1691ms
+   ✓ Brief-PDF (echter Browser) > Testbrief an die eigene Adresse ändert den Lead nicht  1566ms
+   ✓ Alle Briefvarianten passen im ungünstigsten Fall auf eine Seite > langer Name, Bewertung, Domain, alle Varianten  5122ms
+ ✓ test/monthly-refunds.test.ts (6 tests) 6960ms
+   ✓ Bestätigte Erstattungen: richtige Rechnung und unveränderliche Differenzbelege > Teil-/Vollerstattung der Monatszahlung lässt 597-Euro-Bestellung unverändert; zwei Belege schreiben nur die Differenz gut  3323ms
+   ✓ Bestätigte Erstattungen: richtige Rechnung und unveränderliche Differenzbelege > falsche Summen/Währung und zu frühe unbekannte Rechnung bleiben retriable; verlorene Belegjobs werden nachgeholt  1072ms
+   ✓ Bestätigte Erstattungen: richtige Rechnung und unveränderliche Differenzbelege > ältere gespeicherte Stornorechnung behält PDF und Zustell-Idempotenz beim Retry  965ms
+   ✓ Bestätigte Erstattungen: richtige Rechnung und unveränderliche Differenzbelege > auch Einrichtung: auf eine Teilerstattung folgt ein eigener ergänzender Beleg statt verlorener Restkorrektur  1505ms
+ ✓ test/queue-lifecycle.test.ts (1 test) 4245ms
+   ✓ Echte lokale pg-boss-Queue (keine externen Provider) > Schema, Verarbeitung, Retry, Dead-Letter und Cronregistrierung  4226ms
+ ✓ test/v4-operations.test.ts (12 tests) 4476ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > basis startet genau ein Monatsabo erst nach belegtem Go-Live  614ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > care_plus startet genau ein Monatsabo erst nach belegtem Go-Live  386ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > fehlende oder zukünftige Zustimmung, ungezahlte oder beendete Bestellung blockiert den Start  327ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Tarifwechsel hat Zustimmung, Freigabe und Preisnachweis; Kauf-Snapshot bleibt unverändert  340ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > fremder Token darf keinen Wechsel zurücknehmen; Kündigung stoppt geplanten Wechsel  374ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > 60 Minuten pro Abrechnungsmonat sind auch bei parallelen Buchungen ein hartes Limit  383ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Basis enthält keine Inhaltsminuten, Zusatzarbeit benötigt gesonderte Kundenfreigabe  328ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > unbewertete Arbeit blockiert Beitrag; Bewertung und Storno buchen Kosten genau einmal  333ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Kosten vollständig nur für geprüften Fingerprint; neue Daten heben Bestätigung auf  363ms
+   ✓ V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit > Monatscheck unterscheidet simuliert / technisch / manuell; keine Produktionsabnahme durch Mock  487ms
+ ✓ test/checkout.test.ts (19 tests) 4761ms
+   ✓ Checkout und Zahlung > Kontext: Vorbelegung aus dem Lead, Preis aus der Config  337ms
+   ✓ Checkout und Zahlung > Pflichtfelder und Checkboxen werden geprüft  307ms
+   ✓ Checkout und Zahlung > legt Bestellung an, setzt Lead auf checkout_started; Doppelklick liefert dieselbe Session  333ms
+   ✓ Checkout und Zahlung > Zahlung: Rechnungsnummer, Kunde, Lead „paid“, Demo läuft nicht mehr ab; Replay wird ignoriert  550ms
+   ✓ Checkout und Zahlung > gleichzeitige Verbuchung vergibt genau eine Nummer; Nummern laufen fortlaufend  419ms
+   ✓ Checkout und Zahlung > abweichender Betrag → keine Verbuchung, Alarm  334ms
+   ✓ Checkout und Zahlung > Lastschrift: erst „processing“, bei Fehlschlag „failed“ + E-Mail an den Käufer  480ms
+   ✓ Checkout und Zahlung > Erstattung: Status refunded, idempotent über den Betrag  348ms
+   ✓ Checkout und Zahlung > Preisänderung nach Bestellung ändert die Rechnung nicht  337ms
+ ✓ test/stats.test.ts (18 tests) 1435ms
+   ✓ Simulation (Abnahme L5) > Klarer Gewinner: meist gefunden, nie ein falscher Gewinner, Verteilung verschiebt sich  556ms
+   ✓ Simulation (Abnahme L5) > Kein Unterschied: selten ein (falscher) Gewinner am Ende  517ms
+   ✓ Simulation (Abnahme L5) > Erste Charge: nie ein Gewinner – zu wenig Daten  324ms
+ ✓ test/checkout-hosted.test.ts (11 tests) 3846ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > ohne gewählte Option kein Checkout (keine Vorauswahl)  373ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > erfundene Testbetriebe können nach dem Live-Wechsel keine echte Zahlung starten  304ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > offene Sitzungen aus einer anderen Zahlungsumgebung werden nicht wiederverwendet  345ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > gleichzeitige Tarifklicks erzeugen nur eine offene Checkout-Sitzung  385ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > basis: parallele Klicks, richtiger Snapshot und tarifbezogener Abbruch  435ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > care_plus: parallele Klicks, richtiger Snapshot und tarifbezogener Abbruch  381ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > Option wählen → Bezahlseite; Angaben aus dem Checkout landen in Bestellung, Kunde und Rechnung  406ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > Monatlich: Abo über die Bezahlseite, Mindestlaufzeit gesetzt  319ms
+   ✓ Checkout über die Bezahlseite des Anbieters (Stripe) > vergebene Wunschdomain bleibt leer (Wahl im Onboarding); fehlende Bestätigung → Meldung  308ms
+ ✓ test/business-design.test.ts (15 tests) 4651ms
+   ✓ coalesces parallel analyses and caches responses without charging fictitious calls  320ms
+   ✓ sends actual re-encoded image bytes to the mocked provider while keeping display rights separate  895ms
+   ✓ passes the evidence-derived style into the real existing demo generator and immutable HTML metadata  395ms
+ ✓ test/invoice-render.test.ts (2 tests) 3552ms
+   ✓ Rechnungs-PDF und Versand > erzeugt die Rechnung (Anschrift im Fenster, Pflichtangaben) und sendet sie genau einmal  1947ms
+   ✓ Rechnungs-PDF und Versand > Stornorechnung nach Erstattung mit eigener Nummer  1536ms
+ ✓ test/learning.test.ts (12 tests) 3812ms
+   ✓ Einwände (Support-Agent, B6.5) > Formularfrage „zu teuer“ → Einwand mit Branche und Text; Widerspruch nur Kategorie  512ms
+   ✓ Einwände (Support-Agent, B6.5) > WhatsApp-Frage von Hand erfassen; Texte nach 90 Tagen gelöscht, Kategorie bleibt  319ms
+   ✓ Lern-Agent: Probelauf auf simulierten Daten (Abnahme L6) > erzeugt einen verständlichen Bericht und regelkonforme Vorschläge in der Review-Queue  832ms
+   ✓ Lern-Agent: Probelauf auf simulierten Daten (Abnahme L6) > Freigabe und Ablehnung in der Review-Queue  588ms
+   ✓ Lern-Agent: Probelauf auf simulierten Daten (Abnahme L6) > Aufräumen: Variante mit P ≥ 95 % schlechter als die Kontrolle (genug Briefe) wird pausiert  1551ms
+ ✓ test/sending.test.ts (12 tests) 3076ms
+   ✓ Versand > blockiert einen alten Brief, wenn sein QR inzwischen eine neuere Demo öffnen würde  355ms
+   ✓ Versand > Budget-Guard stoppt den Stapelversand  342ms
+ ✓ test/monthly-plan.test.ts (14 tests) 3723ms
+   ✓ Option B „Monatlich“ und Garantie > Kauf: erste Rate sofort, Abo + Zeitplan, Mindestlaufzeit, Garantiefrist; Kunde ohne Verlängerungs-Erinnerung  434ms
+   ✓ Option B „Monatlich“ und Garantie > Zahlungsausfall: Smart Retries → 2 Erinnerungen → Wartungsmodus → Forderungsbrief zur Freigabe; Zahlung → online  1229ms
+   ✓ Option B „Monatlich“ und Garantie > Abo „unbezahlt“ startet das Mahnverfahren; Abo-Ende vor Mindestlaufzeit → Vertrag beendet, Meldung  317ms
+   ✓ Option B „Monatlich“ und Garantie > Garantie Option B: Vertrag beendet, erste Rate erstattet, Seite offline, Mail an den Kunden  344ms
+   ✓ Option B „Monatlich“ und Garantie > Garantie Option A: voller Betrag; registrierte Domain wird zur Übertragung gemeldet; nach Ablauf gesperrt  371ms
+ ✓ test/optimizer-l5.test.ts (8 tests) 3469ms
+   ✓ Optimizer je Branche (L5) > ohne Daten: Kontrolle = neutrale Variante, Gleichverteilung 50/50 (B10)  539ms
+   ✓ Optimizer je Branche (L5) > Quote je Charge: 13 Briefe bei 50/50 → 7/6; bei 15 % Kontrolle mindestens 2  459ms
+   ✓ Optimizer je Branche (L5) > mit Daten: Spannen, P(besser als Kontrolle), Tendenz statt Gewinner unter 100 Briefen  593ms
+   ✓ Sicherheitsnetze (B6.7) > Opt-out-Bremse: über 5 % der Scans → Variante pausiert, genau einmal  481ms
+   ✓ Sicherheitsnetze (B6.7) > ein einzelner Opt-out pausiert nicht  307ms
+   ✓ Sicherheitsnetze (B6.7) > Beschwerde „Abzocke/Täuschung“ → Variante sofort pausiert  316ms
+   ✓ Sicherheitsnetze (B6.7) > Unzustellbar-Bremse: mehr als 3 % einer Charge → Versand pausiert  415ms
+   ✓ Sicherheitsnetze (B6.7) > Kostenbremse: 4 ausgewertete Wochen über MAX_CAC → Wochenbudget halbiert, Bericht  356ms
+ ✓ test/retention.test.ts (3 tests) 806ms
+   ✓ Lösch-Job > abgelaufene Demo: Dateien weg, 410, ungesendete Briefe gestoppt, Lead „expired“  331ms
+ ✓ test/pingen.test.ts (4 tests) 14ms
+ ✓ test/workflow.test.ts (5 tests) 838ms
+ ✓ test/osm-extract.test.ts (4 tests | 2 skipped) 4ms
+ ✓ test/pdf-qr.test.ts (1 test) 2816ms
+   ✓ decodes the QR in the final PDF and rejects a wrong expected demo target  2775ms
+ ✓ test/lead-finder.test.ts (6 tests) 4064ms
+   ✓ Lead-Finder (Mock-Quelle) > findet, qualifiziert und begründet Ablehnungen  728ms
+   ✓ Lead-Finder (Mock-Quelle) > ist idempotent (zweiter Lauf legt nichts doppelt an)  851ms
+   ✓ Lead-Finder (Mock-Quelle) > Sperrliste greift bei erneuter Suche  1083ms
+   ✓ Lead-Finder (Mock-Quelle) > Opt-out anonymisiert und speichert nur Hashes  674ms
+   ✓ Lead-Finder (Mock-Quelle) > Kettenerkennung: gleicher Name an ≥ 3 Standorten  450ms
+ ✓ test/followups-segments.test.ts (10 tests) 1807ms
+   ✓ Folgesendungen, Kurz-URL, Erinnerungs-Mail > Kurz-URL: Kurzcode → QR-Token; ungültig/unbekannt → null; Durchprobieren wird gebremst  361ms
+   ✓ Folgesendungen, Kurz-URL, Erinnerungs-Mail > Sendung 2: ohne Scan nach geschätzter Zustellung + 12 Tage  310ms
+ ✓ test/demo-content.test.ts (7 tests) 1267ms
+   ✓ Template-Rotation > verteilt gleichmäßig über Templates und Paletten  1238ms
+ ✓ test/kpis-optimizer.test.ts (4 tests) 1194ms
+   ✓ KPIs und Wochenbericht > Funnel je Segment und Variante; Testbriefe zählen nicht; CAC und ROI  481ms
+   ✓ KPIs und Wochenbericht > Wochenbericht: Vorschlag ohne AUTO_OPTIMIZE, Übernahme setzt Segment-Anteile und Zuteilung je Branche  695ms
+ ✓ test/funnel.test.ts (5 tests) 1608ms
+   ✓ Messung und Funnel (L4) > Abnahme: simulierter Durchlauf Scan → Demo → Kauf erscheint vollständig im Funnel  621ms
+ ✓ test/failures.test.ts (5 tests) 1536ms
+   ✓ Fehlertoleranz > Absturz mitten in der Webhook-Verarbeitung: erneute Zustellung wird verarbeitet (nicht als Duplikat verworfen)  448ms
+   ✓ Fehlertoleranz > Hosting fällt beim Deploy aus: Seite bleibt „deploying“, Wiederholung veröffentlicht  343ms
+ ✓ test/claims-playbooks.test.ts (20 tests) 2374ms
+   ✓ Claims-Abgleich und Freigabe > echte Bibliothek: Startstatus, abgelaufene Gastro-Quelle gesperrt und gemeldet  342ms
+   ✓ Playbooks > Lead-Finder speichert die Branche je Lead; Tabelle playbooks wird gespiegelt  605ms
+ ✓ test/conversion-v4.test.ts (8 tests) 1284ms
+   ✓ V4: versionierte Neukunden-Verträge > basis: nur 597 Euro Einrichtung, kein Abo vor tatsächlichem Go-Live, keine alte Hosting-Jahreszusage  533ms
+   ✓ V4: versionierte Neukunden-Verträge > care_plus: nur 597 Euro Einrichtung, kein Abo vor tatsächlichem Go-Live, keine alte Hosting-Jahreszusage  354ms
+   ✓ V4: versionierte Neukunden-Verträge > erste Abo-Rechnung vor Checkout-Webhook: einmal buchen; wiederholtes Event, Doppelabo und falscher Betrag werden abgefangen  352ms
+ ✓ test/support.test.ts (9 tests) 1843ms
+   ✓ Support: Verarbeitung > Widerspruch eines Briefempfängers (über Demo-Formular bekannt) wird automatisch umgesetzt  365ms
+ ✓ test/preview-invitation.test.ts (11 tests) 1308ms
+   ✓ leaves the complete V4 prices on the demo before any order  364ms
+   ✓ keeps the formerly clipped medium-length company inside the actual rendered address window  841ms
+ ✓ test/letterxpress.test.ts (11 tests) 1170ms
+   ✓ LetterXpress im Versandablauf > Testauftrag auch bei DRY_RUN: Postbox, Zähler, Brief unverändert; ohne Wahrheits-Check verweigert  420ms
+ ✓ test/lead-state.test.ts (7 tests) 1437ms
+ ✓ test/easynova.test.ts (9 tests) 689ms
+   ✓ easyNova im Versandablauf > Testauftrag auch bei DRY_RUN: Testsendung mit eigenem Schlüssel, Zähler, Brief unverändert  361ms
+   ✓ easyNova im Versandablauf > Live ohne 3 Testaufträge gesperrt; danach Versand und Statusabgleich bis gedruckt  305ms
+ ✓ test/letter-writer.test.ts (10 tests) 38ms
+ ✓ test/acquisition.test.ts (17 tests) 32ms
+ ✓ test/website-probe.test.ts (9 tests) 776ms
+   ✓ Lead-Finder: Vorprüfung mit Schalter und nie für Mock-Quellen > Standard: Schalter an, aber Mock-Quelle wird nie geprüft  438ms
+   ✓ Lead-Finder: Vorprüfung mit Schalter und nie für Mock-Quellen > Schalter aus: keine Abrufe  324ms
+ ✓ test/letter-observation.test.ts (6 tests) 21ms
+ ✓ test/assistant-engine.test.ts (30 tests) 199ms
+ ✓ test/assistant-commands.test.ts (7 tests) 17ms
+ ✓ test/demo-revision.test.ts (2 tests) 7974ms
+ ✓ test/budget.test.ts (7 tests) 1854ms
+   ✓ Budget-Guard > parallele Reservierungen überschreiten das Budget nicht  335ms
+ ✓ test/lead-search-progress.test.ts (3 tests) 2058ms
+   ✓ Lead-Suche: Fortschritt, Stopp, Mindestgrenze > meldet Phasen, Zähler und Protokoll an die Verwaltung  764ms
+   ✓ Lead-Suche: Fortschritt, Stopp, Mindestgrenze > hält auf Wunsch an, ohne Geprüftes zu verlieren  619ms
+   ✓ Lead-Suche: Fortschritt, Stopp, Mindestgrenze > sortiert offene Leads unter der Mindestgrenze aus, ohne sie zu löschen  673ms
+ ✓ test/auth.test.ts (5 tests) 2407ms
+   ✓ Admin-Login mit 2FA > Login nur mit Passwort + gültigem TOTP, Session ist prüfbar  705ms
+   ✓ Admin-Login mit 2FA > derselbe TOTP-Code kann nicht zweimal verwendet werden  487ms
+   ✓ Admin-Login mit 2FA > Rate-Limit nach 5 Fehlversuchen  810ms
+ ✓ test/refund-confirmation.test.ts (2 tests) 869ms
+   ✓ Erstattung ist erst bei bestätigtem Erfolg ein Geldabgang > pending wird nicht als erstattet verbucht; parallele Wiederholung legt keine zweite Erstattung an  526ms
+   ✓ Erstattung ist erst bei bestätigtem Erfolg ein Geldabgang > bestätigte kumulative Erstattungen können bei Event-Überholung nicht kleiner werden  323ms
+ ✓ test/worker-bootstrap.test.ts (5 tests) 746ms
+   ✓ Worker-Einrichtung per Einmal-Code > Code gilt genau einmal, Schreibweise egal  323ms
+ ✓ test/config.test.ts (5 tests) 1104ms
+ ✓ test/providers-payment-email.test.ts (6 tests) 46ms
+ ✓ test/llm-accounting.test.ts (5 tests) 18ms
+ ✓ test/prescreen.test.ts (5 tests) 7ms
+ ✓ test/letter-variants-setup.test.ts (2 tests) 233ms
+ ✓ test/ai-research.test.ts (3 tests) 6ms
+ ✓ test/completion-quality.test.ts (3 tests) 696ms
+ ✓ test/queue-operations.test.ts (4 tests) 56ms
+ ✓ test/browser-lifecycle.test.ts (2 tests) 64ms
+ ✓ test/v4-stripe-lifecycle.test.ts (11 tests) 56ms
+ ✓ test/v5-letter-contract.test.ts (13 tests) 48ms
+ ✓ test/stripe-runtime.test.ts (6 tests) 19ms
+ ✓ test/hosting-registrar.test.ts (6 tests) 25ms
+ ✓ test/letter-personalization.test.ts (7 tests) 33ms
+ ✓ test/lead-score-quality.test.ts (4 tests) 24ms
+ ✓ test/tts.test.ts (2 tests) 273ms
+ ✓ test/storage-backup.test.ts (1 test) 28ms
+ ✓ test/monitoring-integrity.test.ts (2 tests) 12ms
+ ✓ test/qualify.test.ts (15 tests) 17ms
+ ✓ test/lead-sources.test.ts (5 tests) 11ms
+ ✓ test/letter-research.test.ts (7 tests) 8ms
+ ✓ test/vision-request.test.ts (1 test) 14ms
+ ✓ test/operations-preflight.test.ts (2 tests) 4ms
+ ✓ test/pipeline.test.ts (3 tests) 4ms
+ ✓ test/assistant-data.test.ts (1 test) 875ms
+   ✓ Assistent: Datenbank-Abfragen > liefert Zählungen, Listen und Namenssuche aus echten Tabellen  873ms
+ ✓ test/readiness.test.ts (2 tests) 10ms
+ ✓ test/totp.test.ts (4 tests) 7ms
+ ✓ test/demo-quality-score.test.ts (7 tests) 8ms
+ ✓ test/sender-contact.test.ts (2 tests) 4ms
+ ✓ test/letter-quality-score.test.ts (2 tests) 4ms
+ ✓ test/queue-cancel.test.ts (1 test) 127ms
+
+ Test Files  83 passed (83)
+      Tests  705 passed | 3 skipped (708)
+   Start at  20:56:51
+   Duration  1204.62s (transform 2.95s, setup 266ms, collect 79.31s, tests 1101.52s, environment 19ms, prepare 6.24s)
+

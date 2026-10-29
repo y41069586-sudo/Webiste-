@@ -419,6 +419,30 @@ Opt-out bereinigt Dateien/Settings einschließlich Schutz vor verspäteten Cache
 Abnahme: lokaler Mock und SDK-Request-Shape-Test, **keine echte Vision-Anbieterprüfung**. OSM liefert
 allenfalls einen Farbhinweis aus `brand:colour`; kein behaupteter Google-Maps-Fotodatenstrom.
 
+## 29.10.2026 – explizite Stripe-Live-Auswahl, Wiederaufnahme nach Claude
+
+Die bereits vorhandenen Live-Preisreferenzen in `stripe-v4-live.json` sind nun zusätzlich zum
+Sandbox-Katalog im Anwendungscode verwendbar. Keine neuen Produkte, SDK-Version oder API-Felder.
+Verwendete bestehende Checkout-/Billing-Methoden gegen das installierte stripe-node23.0.1 und die
+aktuellen Stripe-Anleitungen zu Signaturprüfung, Checkout-Fulfillment und Billing-Lifecycle abgeglichen.
+
+- `STRIPE_MODE=test` bleibt Vorgabe und liest `STRIPE_SECRET_KEY` plus `STRIPE_WEBHOOK_SECRET`.
+- Explizites `STRIPE_MODE=live` liest ausschließlich `STRIPE_SECRET_KEY_LIVE` plus
+  `STRIPE_WEBHOOK_SECRET_LIVE`; mit DRY_RUN=true weiterhin gesperrt. Kein Fallback auf das falsche Paar.
+- Vorhandene Einrichtung59700Cent, Basis1900Cent und Care+9900Cent bleiben unverändert. Katalog,
+  Betrag und Währung werden vor Verwendung geprüft. Abo erst nach bestätigtem Go-Live/Mandat.
+- Kündigung, Planfreigabe und Tarifwechsel nutzen ebenfalls die richtige Umgebung. Keine zweite
+  Subscription, keine Proration oder Rückdatierung durch diese Änderung.
+- Signierte Events der falschen Zahlungsumgebung werden abgelehnt; Mock-Betriebe dürfen im Live-
+  Provider keinen echten Checkout öffnen. Offene Sessions sind an Provider UND Zahlungsmodus gebunden.
+- Worker-Bootstrap übernimmt diese Konfiguration und OPTOUT_EMAIL. Einmalige Codes sind jetzt auch
+  bei parallelen Abrufen atomar. Secrets werden dabei nicht öffentlich protokolliert.
+
+Nur lokale Fake-Transport-/DB-Tests durchgeführt; aktuelle App/Worker noch nicht mit diesem Patch
+veröffentlicht. Tatsächlicher Live-Katalog, Webhook-Routing und Konto-Berechtigungen bedürfen der
+Anbieterabnahme. Steuerbestätigung, echter E-Mail-Fluss und vollständiger Testkauf bleiben offen.
+Aus dieser Dokumentation keine pauschale Freigabe für Zahlungen, Erstattungen oder Versand ableiten.
+
 ## OpenAI-Sprachausgabe (nur Jarvis-Stimme)
 
 - Stand 29.10.2026 (developers.openai.com/api/docs/guides/text-to-speech und …/pricing)

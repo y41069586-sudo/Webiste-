@@ -475,3 +475,27 @@ Kein Konto, kein Aufruf mit Zugangsdaten, keine Kosten. Offen: Konto + AV-Vertra
 hinterlegen (`EASYNOVA_USERNAME`, `EASYNOVA_PASSWORD`, `EASYNOVA_TEST_EMAIL`), Sperrflächen per `GET /api/account`
 mit unserem Brief abgleichen. Die veröffentlichte Landingpage-Vorschau nennt noch LetterXpress; der nächste
 Upload enthält den neuen Text.
+
+## 29.10.2026 – Wiederaufnahme nach70Claude-Commits
+
+Quelle `484b060`; eigener Zweig `codex/resume-2026-10-29`. Aktueller vollständiger Audit und
+Fortsetzungsstand: [resume-2026-10-29/README.md](resume-2026-10-29/README.md).
+Neue Implementierungscheckpoints `a01e02d` (expliziter Stripe-Live-Modus, Kataloge, Abo-Lifecycle,
+Test-/Live-Trennung, Worker-Export/atomarer Einmal-Code) und `0c18d92` (eigener Probedruck mit
+Mock-Demo ausschließlich an gebundene Testanschrift; normale Mock-Akquise weiter gesperrt).
+
+705Core-Tests bestanden,3übersprungen;2zusätzliche Eigenbrief-Tests,112Template-Tests,3Root-Dateien,
+Gesamt-Typecheck/Lint, finaler Standard-Turbopack-/Worker-Build, Compose/Bash und13Browser-E2E grün.
+Ein unveränderter langer Briefmatrixfall und2osmium-Fälle nicht abgeschlossen/ausgeführt; keine
+echte Stripe-Sandbox-/Live-Zahlung oder kostenpflichtige Briefaktion. Keine neue Modell-API-Abnahme.
+
+Produktionsstand neu gelesen: App aktuell auf484b060, Firmenwebsite aktuellere statische Fassung,
+21Migrationen, pgboss/Worker-Takte/privater Storage vorhanden.420Leads,4Mock-Demos,1Testbrief,
+0Bestellungen und0qualifizierte echte Leads. research-lead-Queue fehlt trotz implementiertem
+Handler. Vor Serverupdate kontrolliert vorbereiten; keine produktive DB-Schreibaktion hier.
+
+Steuerbestätigung weiter false (Frage gestellt), easyNova1von3Testaufträgen, E-Mail/Hosting/Registrar
+Mock, Backup-Nachweis offen. Betreiber-Ja zu Stripe/easyNova-live aus Screenshots berücksichtigt,
+keine neue Zustimmung dazu verlangen; tatsächliche Voraussetzungen und Empfängerfreigabe erhalten.
+Neue Implementierung noch nicht veröffentlicht. Server braucht die neue App-Umgebung inklusive
+OPTOUT_EMAIL; bestehende Test-PDF nach Update neu erzeugen. Teststandard bleibt DRY_RUN=true.

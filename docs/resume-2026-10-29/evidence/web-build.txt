@@ -1,0 +1,336 @@
+
+> @wbm/web@0.1.0 build /workspace/seitenwerk-resume/apps/web
+> next build
+
+▲ Next.js 16.4.2 (Turbopack)
+✓ Running next.config.ts took 46ms
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.2s
+  Running TypeScript ...
+  Finished TypeScript in 11.3s ...
+  Collecting page data using 2 workers ...
+  Generating static pages using 2 workers (0/5) ...
+  Generating static pages using 2 workers (1/5) 
+  Generating static pages using 2 workers (2/5) 
+  Generating static pages using 2 workers (3/5) 
+✓ Generating static pages using 2 workers (5/5) in 151ms
+Turbopack build encountered 7 warnings:
+./packages/core/src/claims/library.ts:77:8
+Warning: Dynamic filesystem access causes tracing of the whole project
+  75 | export function loadClaimDefinitions(file = claimsFilePath()): ClaimDefinition[] {
+  76 |   if (cache?.path === file) return cache.list;
+> 77 |   if (!existsSync(file)) throw new Error(`Claims-Datei fehlt (${file}).`);
+     |        ^^^^^^^^^^^^^^^^
+  78 |   const list = parseClaims(readFileSync(file, 'utf8'));
+  79 |   cache = { path: file, list };
+  80 |   return list;
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.existsSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  App Route:
+    ./packages/core/src/claims/library.ts
+    ./packages/core/src/services/learning.ts
+    ./apps/web/src/app/admin/variants/logbuch/route.ts
+
+  Server Component:
+    ./packages/core/src/claims/library.ts
+    ./packages/core/src/index.ts
+    ./apps/web/src/app/checkout/[slug]/page.tsx
+
+
+./packages/core/src/claims/library.ts:78:28
+Warning: Dynamic filesystem access causes tracing of the whole project
+  76 |   if (cache?.path === file) return cache.list;
+  77 |   if (!existsSync(file)) throw new Error(`Claims-Datei fehlt (${file}).`);
+> 78 |   const list = parseClaims(readFileSync(file, 'utf8'));
+     |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  79 |   cache = { path: file, list };
+  80 |   return list;
+  81 | }
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.readFileSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  App Route:
+    ./packages/core/src/claims/library.ts
+    ./packages/core/src/services/learning.ts
+    ./apps/web/src/app/admin/variants/logbuch/route.ts
+
+  Server Component:
+    ./packages/core/src/claims/library.ts
+    ./packages/core/src/index.ts
+    ./apps/web/src/app/checkout/[slug]/page.tsx
+
+
+./packages/core/src/playbooks/index.ts:63:8
+Warning: Dynamic filesystem access causes tracing of the whole project
+  61 | function load(dir = playbooksDir()): Loaded {
+  62 |   if (cache?.dir === dir) return cache;
+> 63 |   if (!existsSync(dir)) throw new Error(`Playbook-Ordner fehlt (${dir}).`);
+     |        ^^^^^^^^^^^^^^^
+  64 |   const files = readdirSync(dir).filter((f) => f.endsWith('.yaml'));
+  65 |   const list: Playbook[] = [];
+  66 |   let exclusion: ExclusionRules | undefined;
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.existsSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  App Route:
+    ./packages/core/src/playbooks/index.ts
+    ./packages/core/src/services/learning.ts
+    ./apps/web/src/app/admin/variants/logbuch/route.ts
+
+  Server Component:
+    ./packages/core/src/playbooks/index.ts
+    ./packages/core/src/index.ts
+    ./apps/web/src/app/admin/layout.tsx
+
+
+./packages/core/src/playbooks/index.ts:64:17
+Warning: Dynamic filesystem access causes tracing of the whole project
+  62 |   if (cache?.dir === dir) return cache;
+  63 |   if (!existsSync(dir)) throw new Error(`Playbook-Ordner fehlt (${dir}).`);
+> 64 |   const files = readdirSync(dir).filter((f) => f.endsWith('.yaml'));
+     |                 ^^^^^^^^^^^^^^^^
+  65 |   const list: Playbook[] = [];
+  66 |   let exclusion: ExclusionRules | undefined;
+  67 |   for (const f of files) {
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.readdir(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  App Route:
+    ./packages/core/src/playbooks/index.ts
+    ./packages/core/src/services/learning.ts
+    ./apps/web/src/app/admin/variants/logbuch/route.ts
+
+  Server Component:
+    ./packages/core/src/playbooks/index.ts
+    ./packages/core/src/index.ts
+    ./apps/web/src/app/admin/layout.tsx
+
+
+./packages/templates/src/css.ts:18:10
+Warning: Dynamic filesystem access causes tracing of the whole project
+  16 |   if (cached === undefined) {
+  17 |     const p = siteCssPath();
+> 18 |     if (!existsSync(p)) {
+     |          ^^^^^^^^^^^^^
+  19 |       throw new Error(`Template-CSS fehlt (${p}). Bitte \`pnpm --filter @wbm/templates bui...
+  20 |     }
+  21 |     cached = readFileSync(p, 'utf8');
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.existsSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  App Route:
+    ./packages/templates/src/css.ts
+    ./packages/templates/src/index.ts
+    ./packages/core/src/index.ts
+    ./apps/web/src/app/d/[slug]/danke/route.ts
+
+  Server Component:
+    ./packages/templates/src/css.ts
+    ./packages/templates/src/index.ts
+    ./packages/core/src/index.ts
+    ./apps/web/src/app/admin/layout.tsx
+
+
+./packages/templates/src/css.ts:21:14
+Warning: Dynamic filesystem access causes tracing of the whole project
+  19 |       throw new Error(`Template-CSS fehlt (${p}). Bitte \`pnpm --filter @wbm/templates bui...
+  20 |     }
+> 21 |     cached = readFileSync(p, 'utf8');
+     |              ^^^^^^^^^^^^^^^^^^^^^^^
+  22 |   }
+  23 |   return cached;
+  24 | }
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.readFileSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  App Route:
+    ./packages/templates/src/css.ts
+    ./packages/templates/src/index.ts
+    ./packages/core/src/index.ts
+    ./apps/web/src/app/d/[slug]/danke/route.ts
+
+  Server Component:
+    ./packages/templates/src/css.ts
+    ./packages/templates/src/index.ts
+    ./packages/core/src/index.ts
+    ./apps/web/src/app/admin/layout.tsx
+
+
+./packages/templates/src/photos.ts:61:16
+Warning: Dynamic filesystem access causes tracing of the whole project
+  59 |   opts: { includeReview?: boolean; allowGenerated?: boolean; mood?: 'warm' | 'neutral' | '...
+  60 | ): StockPhoto[] {
+> 61 |   const root = path.resolve(imagesDir());
+     |                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  62 |   const list = stockPhotoManifest().filter((p) => {
+  63 |     const file = path.resolve(root, p.file);
+  64 |     return (
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: path.resolve(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  App Route:
+    ./packages/templates/src/photos.ts
+    ./packages/templates/src/index.ts
+    ./packages/core/src/index.ts
+    ./apps/web/src/app/onboarding/[token]/upload/route.ts
+
+  Server Component:
+    ./packages/templates/src/photos.ts
+    ./packages/templates/src/index.ts
+    ./packages/core/src/index.ts
+    ./apps/web/src/app/admin/layout.tsx
+
+
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /[kurzcode]
+├ ƒ /abgemeldet
+├ ƒ /abmelden/[token]
+├ ƒ /admin
+├ ƒ /admin/ablauf
+├ ƒ /admin/ablauf/naechste-demo
+├ ƒ /admin/ablauf/naechster-brief
+├ ƒ /admin/ablauf/pruefen
+├ ƒ /admin/ablauf/testlauf
+├ ƒ /admin/audit
+├ ƒ /admin/budget
+├ ƒ /admin/claims
+├ ƒ /admin/customers
+├ ƒ /admin/customers/[id]
+├ ƒ /admin/demos
+├ ƒ /admin/demos/[id]
+├ ƒ /admin/demos/[id]/html
+├ ƒ /admin/files/[...key]
+├ ƒ /admin/funnel
+├ ƒ /admin/jobs
+├ ƒ /admin/kpis
+├ ƒ /admin/leads
+├ ƒ /admin/leads/[id]
+├ ƒ /admin/leads/[id]/design
+├ ƒ /admin/learning
+├ ƒ /admin/letters
+├ ƒ /admin/letters/[id]
+├ ƒ /admin/objections
+├ ƒ /admin/optimizer
+├ ƒ /admin/orders
+├ ƒ /admin/orders/[id]
+├ ƒ /admin/outbox
+├ ƒ /admin/reports
+├ ƒ /admin/settings
+├ ƒ /admin/suche
+├ ƒ /admin/support
+├ ƒ /admin/support/[id]
+├ ƒ /admin/variants
+├ ƒ /admin/variants/logbuch
+├ ƒ /agb
+├ ƒ /api/admin/integrations
+├ ƒ /api/admin/lead-search
+├ ƒ /api/admin/tts
+├ ƒ /api/domain-check
+├ ƒ /api/forms/[formKey]
+├ ƒ /api/health
+├ ƒ /api/webhooks/email-inbound
+├ ƒ /api/webhooks/pingen
+├ ƒ /api/webhooks/resend
+├ ƒ /api/webhooks/stripe
+├ ƒ /api/worker-bootstrap
+├ ƒ /beispiele
+├ ƒ /checkout/[slug]
+├ ƒ /checkout/[slug]/erfolg
+├ ƒ /checkout/mock/[session]
+├ ƒ /d/[slug]
+├ ƒ /d/[slug]/beacon
+├ ƒ /d/[slug]/danke
+├ ƒ /d/[slug]/frage
+├ ƒ /d/[slug]/kein-interesse
+├ ƒ /d/[slug]/uebernehmen
+├ ƒ /d/[slug]/vorschau.jpg
+├ ƒ /d/[slug]/whatsapp
+├ ƒ /datenschutz
+├ ƒ /garantie
+├ ƒ /impressum
+├ ƒ /kontakt
+├ ƒ /login
+├ ƒ /logout
+├ ƒ /mock-hosting/[...path]
+├ ƒ /onboarding/[token]
+├ ƒ /onboarding/[token]/bild/[id]
+├ ƒ /onboarding/[token]/upload
+├ ƒ /preise
+├ ƒ /preview/[token]
+├ ƒ /preview/[token]/site
+├ ƒ /q/[token]
+├ ƒ /quellen
+├ ○ /robots.txt
+├ ƒ /so-funktionierts
+├ ƒ /ueber-mich
+├ ƒ /verlaengern/[token]
+└ ƒ /verlaengern/mock/[session]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

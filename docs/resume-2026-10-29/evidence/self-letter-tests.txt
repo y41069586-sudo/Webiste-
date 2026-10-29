@@ -1,0 +1,12 @@
+
+ RUN  v3.2.7 /workspace/seitenwerk-resume/packages/core
+
+ ✓ test/self-test-letter.test.ts (2 tests) 740ms
+   ✓ Eigener Probedruck vor der Empfängerfreigabe > Live erlaubt nur den eigenen markierten Probedruck; Quelle und Sperrliste bleiben geschützt  382ms
+   ✓ Eigener Probedruck vor der Empfängerfreigabe > geänderte Testanschrift sperrt die alte PDF, ohne gewöhnliche Empfängerbindungen zu verändern  356ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  21:14:20
+   Duration  5.69s (transform 770ms, setup 17ms, collect 1.58s, tests 740ms, environment 0ms, prepare 92ms)
+

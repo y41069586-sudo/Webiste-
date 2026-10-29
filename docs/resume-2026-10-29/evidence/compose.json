@@ -1,0 +1,14 @@
+[
+  {
+    "liveOverride": false,
+    "DRY_RUN": "true",
+    "EASYNOVA_MODE": "test",
+    "ALLOW_REAL_LETTERS": "false"
+  },
+  {
+    "liveOverride": true,
+    "DRY_RUN": "false",
+    "EASYNOVA_MODE": "test",
+    "ALLOW_REAL_LETTERS": "false"
+  }
+]
