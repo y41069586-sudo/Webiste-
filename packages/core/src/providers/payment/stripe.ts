@@ -77,6 +77,8 @@ function metadataOf(m: Stripe.Metadata | null | undefined): Record<string, strin
 export interface StripePaymentConfig {
   secretKey: string;
   webhookSecret?: string;
+  /** Nur die explizit gewählte Live-Runtime darf den vorhandenen Live-Katalog nutzen. */
+  allowLive?: boolean;
   /** Nur für Tests: eigener HTTP-Client (z. B. Fake-fetch) */
   httpClient?: NonNullable<ConstructorParameters<typeof Stripe>[1]>['httpClient'];
 }
@@ -171,6 +173,8 @@ export class StripePayment implements PaymentProvider {
   private readonly stripe: Stripe;
 
   constructor(private readonly cfg: StripePaymentConfig) {
+    if (/^(sk|rk)_live_/.test(cfg.secretKey) && !cfg.allowLive)
+      throw new Error('Stripe-Live benötigt eine ausdrückliche Freigabe; Standard bleibt Sandbox.');
     this.stripe = new Stripe(cfg.secretKey, {
       maxNetworkRetries: 2,
       timeout: 30_000,
@@ -187,7 +191,7 @@ export class StripePayment implements PaymentProvider {
     const v4 = isV4Tier(input.metadata.plan ?? '');
     const savedMandate = v4 && input.metadata.billingMode !== 'manual_checkout';
     if (v4 && input.recurring) throw new Error('V4-Einrichtung darf noch kein Monatsabo starten.');
-    const setupPrice = v4 ? stripeV4Price('setup', this.testMode, input.amountCents, input.currency) : null;
+    const setupPrice = v4 ? stripeV4Price('setup', this.testMode, input.amountCents, input.currency, this.cfg.allowLive) : null;
     const minutes = Math.min(24 * 60, Math.max(30, input.expiresInMinutes ?? 60));
     if (input.recurring) {
       const session = await this.stripe.checkout.sessions.create(
@@ -292,7 +296,7 @@ export class StripePayment implements PaymentProvider {
     if (v4 && (!input.confirmedGoLive || !isV4Tier(input.metadata.tier ?? '')))
       throw new Error('V4-Monatsabo benötigt bestätigten Go-Live und einen gültigen Tarif.');
     const recurringPrice = v4
-      ? stripeV4Price(input.metadata.tier as 'basis' | 'care_plus', this.testMode, input.amountCents, 'eur')
+      ? stripeV4Price(input.metadata.tier as 'basis' | 'care_plus', this.testMode, input.amountCents, 'eur', this.cfg.allowLive)
       : null;
     if (input.confirmedGoLive && (!Number.isFinite(input.billingStartsAt.getTime()) || input.billingStartsAt > new Date()))
       throw new Error('Go-Live ist noch nicht bestätigt.');
@@ -371,14 +375,13 @@ export class StripePayment implements PaymentProvider {
   }
 
   async subscriptionState(id: string): Promise<SubscriptionState> {
-    if (!this.testMode) throw new Error('V4-Aboverwaltung bisher nur in der Sandbox freigegeben.');
     return this.subscriptionInfo(await this.stripe.subscriptions.retrieve(id, { expand: ['latest_invoice'] }));
   }
 
   async startSavedSubscription(
     input: Parameters<NonNullable<PaymentProvider['startSavedSubscription']>>[0],
   ): Promise<SubscriptionState> {
-    const price = stripeV4Price(input.tier, this.testMode, input.amountCents, 'eur');
+    const price = stripeV4Price(input.tier, this.testMode, input.amountCents, 'eur', this.cfg.allowLive);
     if (!Number.isFinite(input.liveAt.getTime()) || input.liveAt > new Date()) throw new Error('Bestätigter Go-Live fehlt.');
     const session = await this.stripe.checkout.sessions.retrieve(input.setupSessionId, {
       expand: ['payment_intent.payment_method'],
@@ -427,7 +430,7 @@ export class StripePayment implements PaymentProvider {
   async scheduleTariffChange(
     input: Parameters<NonNullable<PaymentProvider['scheduleTariffChange']>>[0],
   ): Promise<{ scheduleId: string; effectiveAt: Date }> {
-    const price = stripeV4Price(input.tier, this.testMode, input.amountCents, 'eur');
+    const price = stripeV4Price(input.tier, this.testMode, input.amountCents, 'eur', this.cfg.allowLive);
     const sub = await this.stripe.subscriptions.retrieve(input.subscriptionId);
     if (sub.status !== 'active' || sub.cancel_at_period_end || sub.items.data.length !== 1)
       throw new Error('Tarifwechsel erfordert ein aktives, ungekündigtes Einzelabo.');
@@ -472,14 +475,12 @@ export class StripePayment implements PaymentProvider {
   }
 
   async releaseTariffSchedule(id: string, idempotencyKey: string): Promise<void> {
-    if (!this.testMode) throw new Error('V4 bisher nur Sandbox.');
     const schedule = await this.stripe.subscriptionSchedules.retrieve(id);
     if (schedule.status === 'released') return;
     await this.stripe.subscriptionSchedules.release(id, {}, { idempotencyKey });
   }
 
   async cancelAtPeriodEnd(id: string, idempotencyKey: string): Promise<void> {
-    if (!this.testMode) throw new Error('V4 bisher nur Sandbox.');
     const sub = await this.stripe.subscriptions.retrieve(id);
     if (sub.status === 'canceled') return;
     if (sub.schedule) await this.releaseTariffSchedule(idOf(sub.schedule)!, `${idempotencyKey}-release`);
@@ -501,6 +502,8 @@ export class StripePayment implements PaymentProvider {
     if (!signatureHeader) throw new Error('Stripe-Signature fehlt');
     // wirft StripeSignatureVerificationError bei falscher Signatur oder zu altem Zeitstempel
     const event = this.stripe.webhooks.constructEvent(rawBody, signatureHeader, this.cfg.webhookSecret);
+    if (typeof event.livemode === 'boolean' && event.livemode === this.testMode)
+      throw new Error('Stripe-Ereignis gehört zur falschen Zahlungsumgebung.');
     const type = EVENT_TYPES[event.type] ?? 'other';
     const base: PaymentEvent = { eventId: event.id, type, rawType: event.type };
     if (event.type.startsWith('checkout.session.')) {

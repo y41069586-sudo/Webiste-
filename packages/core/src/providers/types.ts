@@ -513,6 +513,8 @@ export interface SubscriptionCheckoutInput {
 
 export interface PaymentProvider {
   readonly name: string;
+  /** Tatsächliche Schlüsselumgebung; Mock-Anbieter dürfen diesen Wert weglassen. */
+  readonly testMode?: boolean;
   createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSession>;
   /** Monatliches Abo (z. B. „Hosting & Pflege“ ab Monat 13) */
   createSubscriptionCheckout?(input: SubscriptionCheckoutInput): Promise<CheckoutSession>;

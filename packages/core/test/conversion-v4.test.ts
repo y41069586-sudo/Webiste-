@@ -96,9 +96,10 @@ describe('V4: versionierte Neukunden-Verträge', () => {
 
 describe('Stripe V4: echter SDK, ausschließlich aufgezeichnete Fake-HTTP-Aufrufe', () => {
   const captured: URLSearchParams[] = [];
-  function provider(key = 'rk_test_fixture') {
+  function provider(key = 'rk_test_fixture', allowLive = false) {
     return new StripePayment({
       secretKey: key,
+      allowLive,
       httpClient: Stripe.createFetchHttpClient((async (_url, init) => {
         captured.push(new URLSearchParams(String(init?.body ?? '')));
         return new Response(JSON.stringify({ id: 'cs_test_fixture', url: 'https://checkout.stripe.com/test-fixture' }), {
@@ -159,8 +160,32 @@ describe('Stripe V4: echter SDK, ausschließlich aufgezeichnete Fake-HTTP-Aufruf
     expect(p.get('line_items[0][price]')).toBe(price);
     expect(p.has('line_items[1][price]')).toBe(false);
     expect(p.has('subscription_data[trial_end]')).toBe(false);
-    await expect(provider('rk_live_fixture').createSubscriptionCheckout(input)).rejects.toThrow(/Sandbox/);
+    expect(() => provider('rk_live_fixture')).toThrow(/Sandbox/);
     await expect(provider().createSubscriptionCheckout({ ...input, confirmedGoLive: false })).rejects.toThrow(/Go-Live/);
     await expect(provider().createSubscriptionCheckout({ ...input, amountCents: 11800 })).rejects.toThrow(/Preis/);
   });
+
+  it.each(['basis', 'care_plus'] as const)(
+    '%s: Live-Checkout belastet nur 597 Euro, Monatskosten stehen im Text',
+    async (tier) => {
+      await provider('rk_live_fixture', true).createCheckoutSession({
+        orderId: 'fixture',
+        amountCents: 59700,
+        currency: 'eur',
+        productName: 'Einrichtung',
+        productDescription: 'Beschreibung',
+        successUrl: 'https://example.test/success',
+        cancelUrl: 'https://example.test/cancel',
+        metadata: { plan: tier },
+        idempotencyKey: `fixture-live-${tier}`,
+      });
+      const params = captured.at(-1)!;
+      expect(params.get('mode')).toBe('payment');
+      expect(params.get('line_items[0][price]')).toBe('price_1UVwvsKIPZjo7zRA07njiApb');
+      expect(params.has('line_items[1][price]')).toBe(false);
+      expect(params.has('subscription_data')).toBe(false);
+      expect(params.get('payment_intent_data[setup_future_usage]')).toBe('off_session');
+      expect(params.get('custom_text[submit][message]')).toContain(tier === 'basis' ? '19' : '99');
+    },
+  );
 });

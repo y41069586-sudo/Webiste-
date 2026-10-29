@@ -1,4 +1,5 @@
 import { randomInt } from 'node:crypto';
+import { sql } from 'drizzle-orm';
 import { getSetting, setSetting } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
 import { safeEqual, sha256 } from '../util/crypto';
@@ -34,14 +35,20 @@ export async function createWorkerBootstrapCode(actor: string, now = new Date(),
 
 /** true genau einmal für einen gültigen, nicht abgelaufenen Code; danach ist der Code verbraucht. */
 export async function redeemWorkerBootstrapCode(code: string, now = new Date(), db: DbOrTx = getDb()): Promise<boolean> {
-  const stored = await getSetting<StoredCode | null>(KEY, null, db);
   const input = normalize(code);
-  if (!stored || stored.usedAt || input.length !== 12) return false;
-  if (new Date(stored.expiresAt).getTime() < now.getTime()) return false;
-  if (!safeEqual(sha256(input), stored.hash)) return false;
-  await setSetting(KEY, { ...stored, usedAt: now.toISOString() }, 'worker:bootstrap', db);
-  await audit(db, { entity: 'worker', entityId: 'bootstrap', action: 'code_redeemed', actor: 'worker:bootstrap' });
-  return true;
+  if (input.length !== 12) return false;
+  return db.transaction(async (tx) => {
+    // Zwei gleichzeitige HTTP-Anfragen dürfen denselben Secret-Export nicht zweimal freigeben.
+    await tx.execute(sql`SELECT key FROM settings WHERE key = ${KEY} FOR UPDATE`);
+    const stored = await getSetting<StoredCode | null>(KEY, null, tx);
+    if (!stored || stored.usedAt) return false;
+    const expiry = new Date(stored.expiresAt).getTime();
+    if (!Number.isFinite(expiry) || expiry < now.getTime()) return false;
+    if (!safeEqual(sha256(input), stored.hash)) return false;
+    await setSetting(KEY, { ...stored, usedAt: now.toISOString() }, 'worker:bootstrap', tx);
+    await audit(tx, { entity: 'worker', entityId: 'bootstrap', action: 'code_redeemed', actor: 'worker:bootstrap' });
+    return true;
+  });
 }
 
 /** Variablen, die der Worker von der App übernimmt (alles andere setzt docker-compose.worker.yml fest). */
@@ -57,6 +64,7 @@ const PASSTHROUGH = [
   'S3_ACCESS_KEY_ID',
   'S3_SECRET_ACCESS_KEY',
   'EMAIL_FROM',
+  'OPTOUT_EMAIL',
   'EMAIL_API_KEY',
   'RESEND_API_KEY',
   'RESEND_WEBHOOK_SECRET',
@@ -64,6 +72,9 @@ const PASSTHROUGH = [
   'RESEND_INBOX_ID',
   'STRIPE_SECRET_KEY',
   'STRIPE_WEBHOOK_SECRET',
+  'STRIPE_MODE',
+  'STRIPE_SECRET_KEY_LIVE',
+  'STRIPE_WEBHOOK_SECRET_LIVE',
   'LLM_PROVIDER',
   'ANTHROPIC_API_KEY',
   'MODEL_CREATIVE',

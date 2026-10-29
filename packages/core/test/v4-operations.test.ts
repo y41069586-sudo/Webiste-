@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../src/db/client';
 import { budgetLedger, orders, tariffChanges } from '../src/db/schema';
@@ -27,6 +27,7 @@ import { stripeV4Price } from '../src/config/stripe-v4-prices';
 import { resetDb } from './helpers';
 import { buy, live, webhook } from './v4-helpers';
 import { randomToken } from '../src/util/crypto';
+import { getProviders, setProviders } from '../src/providers';
 
 describe('V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit', () => {
   beforeEach(async () => {
@@ -90,6 +91,31 @@ describe('V4 Betrieb: Mandat, Tarif, Betreuung und belegte Wirtschaftlichkeit', 
     await getDb().update(orders).set({ offerSnapshot: order.offerSnapshot, endedAt: new Date() }).where(eq(orders.id, order.id));
     await expect(startBillingV4(order.id)).rejects.toThrow(/Zustimmung/);
     expect((await currentOrder(order.id))?.stripeSubscriptionId).toBeNull();
+  });
+
+  it('Live-Monatsstart verweigert alte Testzahlungen und den Dashboard-Dry-Run', async () => {
+    const { order, customer } = await buy('basis');
+    await live(customer.id);
+    await getDb().update(orders).set({ provider: 'stripe', paymentMode: 'test' }).where(eq(orders.id, order.id));
+    const previous = getProviders().payment;
+    const start = vi.fn();
+    try {
+      setProviders({
+        payment: {
+          name: 'stripe',
+          testMode: false,
+          createCheckoutSession: vi.fn(),
+          parseWebhook: vi.fn(),
+          startSavedSubscription: start,
+        },
+      });
+      await expect(startBillingV4(order.id)).rejects.toThrow(/Testbestellungen/);
+      await getDb().update(orders).set({ paymentMode: 'live' }).where(eq(orders.id, order.id));
+      await expect(startBillingV4(order.id)).rejects.toThrow(/DRY_RUN/);
+      expect(start).not.toHaveBeenCalled();
+    } finally {
+      setProviders({ payment: previous });
+    }
   });
   it('Tarifwechsel hat Zustimmung, Freigabe und Preisnachweis; Kauf-Snapshot bleibt unverändert', async () => {
     const { order, customer } = await active('basis');

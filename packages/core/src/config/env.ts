@@ -44,8 +44,12 @@ const envSchema = z.object({
   OSM_EXTRACT_DIR: optStr,
 
   PAYMENT_PROVIDER: z.enum(['stripe', 'mock']).optional(),
+  /** Vorhandene Live-Secrets allein aktivieren keine echten Zahlungen. */
+  STRIPE_MODE: z.enum(['test', 'live']).default('test'),
   STRIPE_SECRET_KEY: optStr,
   STRIPE_WEBHOOK_SECRET: optStr,
+  STRIPE_SECRET_KEY_LIVE: optStr,
+  STRIPE_WEBHOOK_SECRET_LIVE: optStr,
 
   /** easynova ist der Briefdienst (Betreiberentscheidung 27.10.2026); letterxpress und pingen bleiben inaktive Alternativen */
   MAIL_PROVIDER: z.enum(['easynova', 'letterxpress', 'pingen', 'mock']).default('mock'),

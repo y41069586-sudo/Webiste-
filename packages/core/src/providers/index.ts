@@ -82,7 +82,8 @@ export function createProviders(): Providers {
   const hosting: HostingProvider = registry.hosting(env.HOSTING_PROVIDER, env) ?? new MockHosting(storage);
   const emailKind = env.EMAIL_PROVIDER || (env.EMAIL_API_KEY ? 'resend' : 'mock');
   const email: EmailProvider = registry.email(emailKind, env) ?? new MockEmail(storage, env.SESSION_SECRET);
-  const paymentKind = env.PAYMENT_PROVIDER ?? (env.STRIPE_SECRET_KEY ? 'stripe' : 'mock');
+  const paymentKey = env.STRIPE_MODE === 'live' ? env.STRIPE_SECRET_KEY_LIVE : env.STRIPE_SECRET_KEY;
+  const paymentKind = env.PAYMENT_PROVIDER ?? (paymentKey ? 'stripe' : 'mock');
   const payment: PaymentProvider = registry.payment(paymentKind, env) ?? new MockPayment(env.SESSION_SECRET);
   const tts: TtsProvider | null = env.OPENAI_API_KEY ? new OpenAiTts(env.OPENAI_API_KEY) : null;
 

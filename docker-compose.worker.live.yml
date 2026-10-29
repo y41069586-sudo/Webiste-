@@ -1,0 +1,7 @@
+# Nur explizit nach Betriebs-/Zahlungsfreigabe zusätzlich zur Basiskonfiguration verwenden.
+# Standard bleibt docker-compose.worker.yml mit DRY_RUN=true. Anbieter-Modi kommen weiter aus .env.worker.
+# Testaufträge, eigener Probedruck, realLettersUnlocked, erste30, Not-Aus und Budgets bleiben wirksam.
+services:
+  worker:
+    environment:
+      DRY_RUN: 'false'

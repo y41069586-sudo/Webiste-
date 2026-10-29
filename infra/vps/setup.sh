@@ -7,7 +7,9 @@
 # Admin → Einstellungen → „Worker-Server einrichten“ fragen und damit .env.worker von der Admin-App abholen,
 # Worker bauen und starten. Weitere Läufe: Code aktualisieren und Worker neu bauen (.env.worker bleibt).
 # Neue Zugangsdaten aus der Admin-App übernehmen (z. B. nach neuen Variablen in Netlify): ... | NEU=1 bash
-# Der Worker läuft immer mit DRY_RUN=true (docker-compose.worker.yml); es werden keine Ports geöffnet.
+# Standard bleibt DRY_RUN=true; nur nach freigegebenem Live-Start explizit LIVE=1 hinzufügen.
+# LIVE=1 verwendet die additive Live-Datei; weitere Versand-/Rechts-/Budgetgates bleiben wirksam.
+# Es werden keine Ports geöffnet.
 set -euo pipefail
 
 REPO_URL="${REPO_URL:-https://github.com/y41069586-sudo/Webiste-.git}"
@@ -15,6 +17,9 @@ BRANCH="${BRANCH:-claude/website-brief-maschine-0d0s37}"
 APP_URL="${APP_URL:-https://seitenwerkworld.netlify.app}"
 DIR="${DIR:-/opt/seitenwerk}"
 COMPOSE=(docker compose -f docker-compose.worker.yml)
+if [ "${LIVE:-0}" = 1 ]; then
+  COMPOSE+=(-f docker-compose.worker.live.yml)
+fi
 
 step() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
 fail() { printf '\n\033[1;31mFehler: %s\033[0m\n' "$*" >&2; exit 1; }
@@ -87,9 +92,15 @@ for _ in $(seq 1 40); do
   state="$(docker inspect -f '{{.State.Health.Status}}' "$("${COMPOSE[@]}" ps -q worker)" 2>/dev/null || echo unbekannt)"
   case "$state" in
     healthy)
-      printf '\n\033[1;32mFertig: Worker läuft (DRY_RUN=true).\033[0m\n'
-      echo "Status: cd $DIR && docker compose -f docker-compose.worker.yml ps"
-      echo "Aktualisieren: dieses Skript erneut ausführen."
+      if [ "${LIVE:-0}" = 1 ]; then
+        printf '\n\033[1;32mFertig: Worker läuft mit expliziter Live-Konfiguration (DRY_RUN=false).\033[0m\n'
+        echo "Status: cd $DIR && docker compose -f docker-compose.worker.yml -f docker-compose.worker.live.yml ps"
+        echo "Weitere Live-Aktualisierungen ebenfalls ausdrücklich mit LIVE=1 starten."
+      else
+        printf '\n\033[1;32mFertig: Worker läuft (DRY_RUN=true).\033[0m\n'
+        echo "Status: cd $DIR && docker compose -f docker-compose.worker.yml ps"
+        echo "Aktualisieren: dieses Skript erneut ausführen."
+      fi
       exit 0
       ;;
     unhealthy) break ;;

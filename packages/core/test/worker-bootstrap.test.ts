@@ -26,6 +26,12 @@ describe('Worker-Einrichtung per Einmal-Code', () => {
     expect(await redeemWorkerBootstrapCode(old.code, now)).toBe(false);
     expect(await redeemWorkerBootstrapCode(fresh.code, new Date(now.getTime() + 31 * 60_000))).toBe(false);
   });
+
+  it('gleichzeitige Abrufe exportieren die Zugangsdaten genau einmal', async () => {
+    const { code } = await createWorkerBootstrapCode('admin:test');
+    const results = await Promise.all(Array.from({ length: 5 }, () => redeemWorkerBootstrapCode(code)));
+    expect(results.filter(Boolean)).toHaveLength(1);
+  });
 });
 
 describe('Worker-Umgebung', () => {
@@ -44,11 +50,19 @@ describe('Worker-Umgebung', () => {
       NETLIFY_AUTH_TOKEN: 'geheim',
       EMAIL_API_KEY: '',
       EASYNOVA_USERNAME: 'betrieb@example.org',
+      OPTOUT_EMAIL: 'widerspruch@betrieb.example.org',
+      STRIPE_MODE: 'live',
+      STRIPE_SECRET_KEY_LIVE: 'rk_live_fixture',
+      STRIPE_WEBHOOK_SECRET_LIVE: 'whsec_live_fixture',
     });
     expect(file).toContain('QUEUE_DATABASE_URL=postgresql://u.p:pw@aws-0-eu-west-1.pooler.supabase.com:5432/postgres');
     expect(file).toContain('ENCRYPTION_KEY=abc');
     expect(file).toContain(`S3_SECRET_ACCESS_KEY='a b'\\''c'`);
     expect(file).toContain('EASYNOVA_USERNAME=betrieb@example.org');
+    expect(file).toContain('OPTOUT_EMAIL=widerspruch@betrieb.example.org');
+    expect(file).toContain('STRIPE_MODE=live');
+    expect(file).toContain('STRIPE_SECRET_KEY_LIVE=rk_live_fixture');
+    expect(file).toContain('STRIPE_WEBHOOK_SECRET_LIVE=whsec_live_fixture');
     expect(file).not.toContain('NETLIFY_AUTH_TOKEN');
     expect(file).not.toContain('EMAIL_API_KEY');
     expect(() => workerEnvFile({})).toThrow(/DATABASE_URL/);

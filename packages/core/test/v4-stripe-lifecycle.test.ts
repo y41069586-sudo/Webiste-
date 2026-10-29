@@ -5,7 +5,9 @@ import { stripeV4Price } from '../src/config/stripe-v4-prices';
 
 const basis = stripeV4Price('basis', true, 1900, 'eur');
 const care = stripeV4Price('care_plus', true, 9900, 'eur');
-function harness(opts: { paid?: boolean; method?: string; existing?: boolean; key?: string; scheduled?: boolean } = {}) {
+function harness(
+  opts: { paid?: boolean; method?: string; existing?: boolean; key?: string; scheduled?: boolean; allowLive?: boolean } = {},
+) {
   const calls: { path: string; method: string; body: URLSearchParams; key: string | null }[] = [];
   const start = Math.floor(Date.now() / 1000) - 30,
     end = start + 2592000;
@@ -14,13 +16,23 @@ function harness(opts: { paid?: boolean; method?: string; existing?: boolean; ke
     status: 'active',
     customer: 'cus_fixture',
     metadata: { orderId: 'order_fixture', offerVersion: 'v4' },
-    items: { data: [{ id: 'si_fixture', price: { id: basis }, current_period_start: start, current_period_end: end }] },
+    items: {
+      data: [
+        {
+          id: 'si_fixture',
+          price: { id: opts.allowLive ? stripeV4Price('basis', false, 1900, 'eur', true) : basis },
+          current_period_start: start,
+          current_period_end: end,
+        },
+      ],
+    },
     cancel_at_period_end: false,
     latest_invoice: { hosted_invoice_url: 'https://invoice.stripe.com/test-fixture' },
     schedule: opts.scheduled ? 'sched_fixture' : null,
   };
   const p = new StripePayment({
     secretKey: opts.key ?? 'rk_test_fixture',
+    allowLive: opts.allowLive,
     webhookSecret: 'whsec_fixture',
     httpClient: Stripe.createFetchHttpClient((async (url, init) => {
       const u = new URL(String(url)),
@@ -84,7 +96,7 @@ describe('V4 Stripe SDK: gespeichertes Mandat und ein einziger Tarif', () => {
   it('unbezahlte Einrichtung, unbekanntes Mandat, Live-Key und Zukunfts-Live blockieren', async () => {
     await expect(harness({ paid: false }).p.startSavedSubscription(input)).rejects.toThrow(/Einrichtungszahlung/);
     await expect(harness({ method: 'paypal' }).p.startSavedSubscription(input)).rejects.toThrow(/Mandat/);
-    await expect(harness({ key: 'rk_live_fixture' }).p.startSavedSubscription(input)).rejects.toThrow(/Sandbox/);
+    expect(() => harness({ key: 'rk_live_fixture' })).toThrow(/Sandbox/);
     await expect(harness().p.startSavedSubscription({ ...input, liveAt: new Date(Date.now() + 3600000) })).rejects.toThrow(
       /Go-Live/,
     );
@@ -135,5 +147,39 @@ describe('V4 Stripe SDK: gespeichertes Mandat und ein einziger Tarif', () => {
     expect(event.type).toBe('invoice.payment_failed');
     expect(event.subscriptionPriceId).toBe(basis);
     await expect(p.parseWebhook(payload, 'invalid')).rejects.toThrow();
+  });
+});
+
+describe('Freigegebener Live-Modus mit ausschließlich lokalem Fake-Transport', () => {
+  it.each(['basis', 'care_plus'] as const)('%s startet erst ab Go-Live und mit dem Live-Preis', async (tier) => {
+    const { p, calls } = harness({ key: 'rk_live_fixture', allowLive: true });
+    await p.startSavedSubscription({ ...input, tier, amountCents: tier === 'basis' ? 1900 : 9900 });
+    const create = calls.find((c) => c.path === '/v1/subscriptions' && c.method === 'POST')!;
+    expect(create.body.get('items[0][price]')).toBe(stripeV4Price(tier, false, tier === 'basis' ? 1900 : 9900, 'eur', true));
+    expect(create.body.has('items[1][price]')).toBe(false);
+    expect(create.body.has('backdate_start_date')).toBe(false);
+    await expect(p.startSavedSubscription({ ...input, liveAt: new Date(Date.now() + 60_000) })).rejects.toThrow(/Go-Live/);
+  });
+
+  it('Live-Kündigung und Tarifplanfreigabe bleiben verfügbar', async () => {
+    const { p, calls } = harness({ key: 'rk_live_fixture', allowLive: true, scheduled: true });
+    await p.subscriptionState('sub_fixture');
+    await p.cancelAtPeriodEnd('sub_fixture', 'cancel-live-fixture');
+    expect(calls.some((c) => c.path.endsWith('/sched_fixture/release'))).toBe(true);
+    expect(
+      calls.find((c) => c.path === '/v1/subscriptions/sub_fixture' && c.method === 'POST')?.body.get('cancel_at_period_end'),
+    ).toBe('true');
+  });
+
+  it('signierter Sandbox-Webhook kann die Live-Buchhaltung nicht erreichen', async () => {
+    const { p } = harness({ key: 'rk_live_fixture', allowLive: true });
+    const payload = JSON.stringify({
+      id: 'evt_wrong_mode',
+      type: 'checkout.session.completed',
+      livemode: false,
+      data: { object: {} },
+    });
+    const signature = Stripe.webhooks.generateTestHeaderString({ payload, secret: 'whsec_fixture' });
+    await expect(p.parseWebhook(payload, signature)).rejects.toThrow(/Zahlungsumgebung/);
   });
 });

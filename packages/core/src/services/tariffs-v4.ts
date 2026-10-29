@@ -79,7 +79,7 @@ export async function approveTariffChange(id: string, actor: string) {
       subscriptionId: sub.id,
       tier: prepared.to,
       amountCents: v4Offer(prepared.to).monthlyCents,
-      expectedPriceId: stripeV4Price(current.tier, true, current.monthlyCents, 'eur'),
+      expectedPriceId: stripeV4Price(current.tier, p.testMode !== false, current.monthlyCents, 'eur', p.testMode === false),
       idempotencyKey: `tariff-${request.id}`,
     });
     const [updated] = await tx
@@ -145,7 +145,8 @@ export async function reconcileTariffV4(orderId: string, actualPriceId?: string,
     const p = getProviders().payment;
     if (!actualPriceId) actualPriceId = (await p.subscriptionState?.(order.stripeSubscriptionId))?.priceId;
     const target = v4Offer(r.toTier, r.consentAt.toISOString(), order.offerSnapshot.billingMode);
-    if (actualPriceId !== stripeV4Price(r.toTier, true, target.monthlyCents, 'eur')) return false;
+    if (actualPriceId !== stripeV4Price(r.toTier, p.testMode !== false, target.monthlyCents, 'eur', p.testMode === false))
+      return false;
     await tx.update(orders).set({ activeOfferSnapshot: target, updatedAt: now }).where(eq(orders.id, orderId));
     await tx.update(tariffChanges).set({ status: 'applied', appliedAt: now }).where(eq(tariffChanges.id, r.id));
     await audit(tx, {

@@ -2,7 +2,7 @@ import { isV4Tier, v4Offer, v4CheckoutTerms } from './offers-v4';
 import { and, desc, eq, gt, inArray, isNull, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { appUrl, getEnv } from '../config/env';
-import { getConfig } from '../config/service';
+import { effectiveSwitches, getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
 import { getDb, type DbOrTx } from '../db/client';
 import { customers, demos, events, leads, orders, webhookEvents } from '../db/schema';
@@ -89,8 +89,7 @@ export function checkoutAvailability(): { ok: true; mode: 'live' | 'test' | 'moc
     }
     return { ok: true, mode: 'mock' };
   }
-  const key = env.STRIPE_SECRET_KEY ?? '';
-  return { ok: true, mode: key.startsWith('sk_live_') || key.startsWith('rk_live_') ? 'live' : 'test' };
+  return { ok: true, mode: p.testMode === false ? 'live' : 'test' };
 }
 
 function paymentModeAtCheckout(): 'unknown' | 'live' | 'test' | 'mock' {
@@ -111,7 +110,11 @@ export async function getCheckoutContext(slug: string, db: DbOrTx = getDb()): Pr
   // Kein Onboarding-Link hier: der Demo-Link ist halböffentlich, der Link geht nur per E-Mail an den Käufer
   if (paid) return { state: 'ordered', paymentState: paid.status === 'paid' ? 'paid' : 'processing' };
   if (!avail.ok) return { state: 'disabled', reason: avail.reason };
+  if (avail.mode === 'live' && found.lead.source === 'mock')
+    return { state: 'disabled', reason: 'Dies ist eine Testvorschau. Dafür ist keine kostenpflichtige Bestellung möglich.' };
   const cfg = await getConfig({ db, fresh: true });
+  if (avail.mode === 'live' && effectiveSwitches(cfg).dryRun)
+    return { state: 'disabled', reason: 'Online-Bestellungen sind im Testmodus noch nicht freigeschaltet.' };
   // Echte Zahlungen erst, wenn Absenderdaten, Rechtstexte und AGB vollständig sind
   if (avail.mode === 'live' && goLiveBlockers(cfg).length)
     return { state: 'disabled', reason: 'Online-Bestellung ist noch nicht freigeschaltet.' };
@@ -206,6 +209,8 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
     where: and(
       eq(orders.leadId, lead.id),
       eq(orders.status, 'pending'),
+      eq(orders.provider, getProviders().payment.name),
+      eq(orders.paymentMode, paymentModeAtCheckout()),
       eq(orders.customerEmail, input.email),
       eq(orders.domainWish, domain),
       eq(orders.plan, plan),
@@ -362,6 +367,8 @@ async function startHostedCheckoutLocked(
     where: and(
       eq(orders.leadId, lead.id),
       eq(orders.status, 'pending'),
+      eq(orders.provider, getProviders().payment.name),
+      eq(orders.paymentMode, paymentModeAtCheckout()),
       eq(orders.plan, plan),
       eq(orders.customerEmail, ''),
       eq(orders.amountCents, amounts.grossCents),
@@ -573,7 +580,7 @@ export async function cancelOpenOrders(leadId: string, reason: string, db: DbOrT
     .where(and(eq(orders.leadId, leadId), eq(orders.status, 'pending')));
   const p = getProviders().payment;
   for (const o of open) {
-    if (o.stripeSessionId && p.expireSession && o.provider === p.name) {
+    if (o.stripeSessionId && p.expireSession && o.provider === p.name && o.paymentMode === paymentModeAtCheckout()) {
       try {
         await p.expireSession(o.stripeSessionId);
       } catch (err) {

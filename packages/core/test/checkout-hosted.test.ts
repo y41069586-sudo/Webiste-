@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { updateConfig } from '../src/config/service';
 import { getDb } from '../src/db/client';
 import { alerts, customers, demos, events, leads, orders } from '../src/db/schema';
@@ -9,7 +9,8 @@ import { clearDomainCache } from '../src/services/domains';
 import { getCheckoutContext, simulateMockPayment, startHostedCheckout } from '../src/services/orders';
 import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
-import { resetDb } from './helpers';
+import { OPERATOR_TEST_CONFIG, resetDb } from './helpers';
+import { getProviders, setProviders } from '../src/providers';
 
 const meta = { ua: 'mobil/safari', ipHash: 'hosted1', isBot: false };
 
@@ -73,6 +74,57 @@ describe('Checkout über die Bezahlseite des Anbieters (Stripe)', () => {
     const { demo } = await seedDemo();
     const r = await startHostedCheckout(demo.slug, '', meta);
     expect(r.ok).toBe(false);
+  });
+
+  it('erfundene Testbetriebe können nach dem Live-Wechsel keine echte Zahlung starten', async () => {
+    await updateConfig(OPERATOR_TEST_CONFIG, 'test:operator');
+    const { demo } = await seedDemo();
+    const previous = getProviders().payment;
+    const create = vi.fn();
+    try {
+      setProviders({ payment: { name: 'stripe', testMode: false, createCheckoutSession: create, parseWebhook: vi.fn() } });
+      expect(await getCheckoutContext(demo.slug)).toMatchObject({
+        state: 'disabled',
+        reason: expect.stringContaining('Testvorschau'),
+      });
+      expect((await startHostedCheckout(demo.slug, 'one_time', meta)).ok).toBe(false);
+      expect(create).not.toHaveBeenCalled();
+    } finally {
+      setProviders({ payment: previous });
+    }
+  });
+
+  it('offene Sitzungen aus einer anderen Zahlungsumgebung werden nicht wiederverwendet', async () => {
+    const { demo } = await seedDemo();
+    const first = await startHostedCheckout(demo.slug, 'one_time', meta);
+    if (!first.ok) throw new Error(first.error);
+    await getDb()
+      .update(orders)
+      .set({ paymentMode: 'test', checkoutUrl: 'https://checkout.stripe.com/old-test' })
+      .where(eq(orders.id, first.orderId));
+    const next = await startHostedCheckout(demo.slug, 'one_time', meta);
+    expect(next.ok).toBe(true);
+    if (!next.ok) throw new Error(next.error);
+    expect(next.orderId).not.toBe(first.orderId);
+    expect(next.url).not.toContain('/old-test');
+  });
+
+  it('der Testschalter im Dashboard sperrt Live auch bei gewähltem Live-Provider', async () => {
+    await updateConfig({ ...OPERATOR_TEST_CONFIG, switches: { dryRun: true } }, 'test:operator');
+    const { lead, demo } = await seedDemo();
+    await getDb().update(leads).set({ source: 'osm' }).where(eq(leads.id, lead.id));
+    const previous = getProviders().payment;
+    const create = vi.fn();
+    try {
+      setProviders({ payment: { name: 'stripe', testMode: false, createCheckoutSession: create, parseWebhook: vi.fn() } });
+      expect(await getCheckoutContext(demo.slug)).toMatchObject({
+        state: 'disabled',
+        reason: expect.stringContaining('Testmodus'),
+      });
+      expect(create).not.toHaveBeenCalled();
+    } finally {
+      setProviders({ payment: previous });
+    }
   });
 
   it('gleichzeitige Tarifklicks erzeugen nur eine offene Checkout-Sitzung', async () => {

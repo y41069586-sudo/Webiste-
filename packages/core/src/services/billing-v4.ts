@@ -5,6 +5,7 @@ import { getProviders } from '../providers';
 import { assertV4BillingReady } from './offers-v4';
 import { audit } from './audit';
 import { assertNotHalted, raiseAlert } from './budget';
+import { effectiveSwitches, getConfig } from '../config/service';
 
 /** Called only after the existing live-check has committed actual publication evidence. */
 export async function startBillingV4(orderId: string, actor = 'job:go-live') {
@@ -29,6 +30,11 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
     if (!customer || !order.stripeSessionId) throw new Error('Einrichtungszahlung/Kunde fehlt.');
     const provider = getProviders().payment;
     if (provider.name !== order.provider) throw new Error('Zahlungsanbieter passt nicht zur bezahlten Bestellung.');
+    if (provider.testMode === false) {
+      if (order.paymentMode !== 'live') throw new Error('Testbestellungen dürfen kein echtes Monatsabo starten.');
+      if (effectiveSwitches(await getConfig({ db: tx, fresh: true })).dryRun)
+        throw new Error('DRY_RUN sperrt den Start echter Monatsabos.');
+    }
     if (!provider.startSavedSubscription) throw new Error('Anbieter unterstützt keinen Mandatsstart.');
     const sub = await provider.startSavedSubscription({
       orderId,
