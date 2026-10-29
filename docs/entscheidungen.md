@@ -756,3 +756,16 @@ Ziel: Alles läuft in einer festen Reihenfolge, und der Betreiber sieht immer se
   bleibt unverändert.
 - **Unverändert:** Briefe freigeben und Versand bleiben bei `AUTO_SEND=false` bzw. `DRY_RUN=true` eine bewusste
   Freigabe durch den Betreiber.
+
+## 29.10.2026 – KI-Schlüssel aktiv, Modelle
+
+- Der Betreiber hat den Anthropic-Schlüssel freigegeben. Er steht in der Netlify-Umgebung (`ANTHROPIC_API_KEY`) und
+  gelangt über den Einmal-Code (`setup.sh` mit `NEU=1`) in die `.env.worker`. Dafür steht er jetzt in der
+  Durchreiche-Liste von `workerEnvFile`, zusammen mit den `MODEL_*`-Variablen.
+- **Modelle:** Der Admin-Chat nutzt Haiku 5.5 (`MODEL_ASSISTANT`, neue Stufe `assistant`). Alles andere nutzt Opus
+  5.5: Demo-Texte, Briefe, Wahrheits-Check, Demo-QA, Support, Lern-Agent. `MODEL_BULK` ist damit standardmäßig
+  ebenfalls Opus 5.5.
+- **Kosten:** Mehrkosten gegenüber Sonnet 5.5 für die Prüfaufgaben: Input und Output kosten das Doppelte. Das
+  Wochenbudget für KI (`budget.weeklyLlmBudgetCents`) bleibt die harte Grenze.
+- Der KI-Modus des Assistenten (`assistant.useAi`) ist eingeschaltet. Aktionen laufen weiter nur nach Klick und
+  werden auf dem Server erneut geprüft.

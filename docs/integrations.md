@@ -48,7 +48,11 @@ regularOpeningHours, nextPageToken`
 - SDK `@anthropic-ai/sdk` (TypeScript), Endpoint `POST /v1/messages` (über `client.beta.messages` wegen
   serverseitiger Fallbacks)
 - **Modelle:** `MODEL_CREATIVE=claude-opus-5-5` (4 USD / 20 USD je 1 Mio. Input/Output-Tokens,
-  Cache-Read 0,20 USD), `MODEL_BULK=claude-sonnet-5-5` (2 USD / 10 USD, Cache-Read 0,20 USD)
+  Cache-Read 0,20 USD); seit 29.10.2026 auch `MODEL_BULK=claude-opus-5-5` (Betreiberwunsch: Briefe, Prüfungen,
+  Support alles mit Opus 5.5); `MODEL_ASSISTANT=claude-haiku-5-5` nur für den Admin-Chat (0,10 USD / 0,50 USD bis
+  100k Tokens Prompt, Cache-Read/-Write mit den üblichen Faktoren 0,1× / 1,25× angesetzt). Am 29.10.2026 geprüft:
+  `GET /v1/models` listet beide Modelle; Haiku 5.5 nimmt `strict`-Tool, `tool_choice: auto`, `effort` und
+  `fallbacks: "default"` an (Testaufruf HTTP 200, `tool_use`).
 - **Strukturierte Ausgabe:** Tool mit JSON-Schema und `strict: true`. Erzwungenes `tool_choice`
   (`any`/`tool`) liefert bei Opus 5.5 / Sonnet 5.5 HTTP 400 → `tool_choice: auto` + klare Anweisung +
   Prüfung auf `tool_use`-Block, sonst ein zweiter Versuch.

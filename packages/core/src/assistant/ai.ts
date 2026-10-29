@@ -45,7 +45,7 @@ export async function askAssistantAi(
     .map((h) => `${h.role === 'user' ? 'Betreiber' : 'Assistent'}: ${h.text.slice(0, 1500)}`)
     .join('\n');
   const res = await llmStructured<{ antwort: string; aktionen: unknown[] }>({
-    tier: 'bulk',
+    tier: 'assistant',
     purpose: 'admin_assistant',
     system: SYSTEM,
     prompt: `Stand der Verwaltung:\n${JSON.stringify(snapshot)}\n\nProjektwissen:\n${wissen || '–'}\n\nDaten aus der Datenbank (Befehlsmodus):\n${offline || '–'}\n\nGespräch:\n${convo}\n\nAntworte auf die letzte Nachricht des Betreibers.`,

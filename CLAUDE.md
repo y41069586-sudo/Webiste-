@@ -86,7 +86,7 @@ Jeder Übergang wird in `audit_log` protokolliert (Zeitstempel, Auslöser, Konte
 - `packages/core`: Drizzle ORM, Typen, Provider-Interfaces, Services, Prompts
 - `packages/templates`: Website-Templates (HTML + Tailwind kompiliert) und Brief-Template
 - PostgreSQL 16, Playwright (Screenshots, PDF), `qrcode`, Anthropic SDK
-  (`MODEL_CREATIVE=claude-opus-5-5`, `MODEL_BULK=claude-sonnet-5-5`, Tool-Use mit JSON-Schema,
+  (`MODEL_CREATIVE=claude-opus-5-5`, `MODEL_BULK=claude-opus-5-5` (seit 29.10.2026), `MODEL_ASSISTANT=claude-haiku-5-5` für den Admin-Chat, Tool-Use mit JSON-Schema,
   Prompt-Caching, Token-Verbrauch im Budget-Ledger)
 - Stripe (Checkout, Subscriptions, Subscription Schedules), `MailProvider` (**easyNova digiBrief-API V1**
   als aktiver Briefdienst seit 27.10.2026; LetterXpress v3 und Pingen inaktive Alternativen), `RegistrarProvider` (INWX),

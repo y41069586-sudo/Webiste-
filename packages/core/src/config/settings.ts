@@ -693,6 +693,12 @@ export const DEFAULT_CONFIG: AppConfig = {
         cacheReadPerMTokCents: 20,
         cacheWritePerMTokCents: 500,
       },
+      'claude-haiku-5-5': {
+        inputPerMTokCents: 10,
+        outputPerMTokCents: 50,
+        cacheReadPerMTokCents: 1,
+        cacheWritePerMTokCents: 12.5,
+      },
       'claude-sonnet-5-5': {
         inputPerMTokCents: 200,
         outputPerMTokCents: 1000,

@@ -30,7 +30,9 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: optStr,
   LLM_PROVIDER: z.enum(['anthropic', 'mock']).optional(),
   MODEL_CREATIVE: z.string().default('claude-opus-5-5'),
-  MODEL_BULK: z.string().default('claude-sonnet-5-5'),
+  MODEL_BULK: z.string().default('claude-opus-5-5'),
+  /** Admin-Assistent (KI-Chat): schnell und günstig */
+  MODEL_ASSISTANT: z.string().default('claude-haiku-5-5'),
 
   LEAD_SOURCE: z.enum(['google_places', 'osm', 'mock']).optional(),
   GOOGLE_PLACES_API_KEY: optStr,

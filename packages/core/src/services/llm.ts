@@ -7,11 +7,11 @@ import type { LlmStructuredRequest, LlmTextRequest, LlmUsage } from '../provider
 import { LlmUsageError } from '../providers/types';
 import { assertBudgetAvailable, llmCostMicroCents, recordCost } from './budget';
 
-export type ModelTier = 'creative' | 'bulk';
+export type ModelTier = 'creative' | 'bulk' | 'assistant';
 
 export function modelFor(tier: ModelTier): string {
   const env = getEnv();
-  return tier === 'creative' ? env.MODEL_CREATIVE : env.MODEL_BULK;
+  return tier === 'creative' ? env.MODEL_CREATIVE : tier === 'assistant' ? env.MODEL_ASSISTANT : env.MODEL_BULK;
 }
 
 async function book(usage: LlmUsage, purpose: string, leadId: string | undefined, idempotencyKey?: string): Promise<void> {
