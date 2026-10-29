@@ -1,4 +1,4 @@
-import { isV4Tier, v4Offer, v4PriceText, v4CheckoutTerms } from './offers-v4';
+import { isV4Tier, v4Offer, v4CheckoutTerms } from './offers-v4';
 import { and, desc, eq, gt, inArray, isNull, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { appUrl, getEnv } from '../config/env';
@@ -272,7 +272,7 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
       currency: 'eur',
       productName: `${isV4Tier(plan) ? `SeitenWerk ${plan === 'basis' ? 'Basis' : 'Care+'} – Einrichtung` : plan === 'monthly' ? p.monthlyName : p.packageName} – ${domain}`,
       productDescription: isV4Tier(plan)
-        ? v4PriceText()
+        ? v4CheckoutTerms(plan, cfg.offers.billingMode ?? 'saved_mandate')
         : plan === 'monthly'
           ? `${p.packageDescription} Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
           : p.packageDescription,
