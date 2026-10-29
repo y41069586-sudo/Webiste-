@@ -32,7 +32,7 @@ const FAKE_SPEECH = () => {
   };
   const synth = window.speechSynthesis;
   synth.speak = (u: SpeechSynthesisUtterance) => {
-    spoken.push(u.text);
+    if (u.text.trim()) spoken.push(u.text);
     setTimeout(() => u.onend?.(new Event('end') as SpeechSynthesisEvent), 10);
   };
   synth.cancel = () => {};
@@ -47,7 +47,7 @@ test('Jarvis: Weckwort, Begrüßung, gesprochene Antwort', async ({ page }) => {
   await fab.click();
   const panel = page.getByRole('dialog', { name: 'Jarvis' });
   await expect(panel).toBeVisible();
-  await expect.poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken[0] ?? '')).toMatch(/^Sers/);
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken.join(' '))).toMatch(/Sers/);
   // Dauer-Zuhören an, dann mit Weckwort fragen
   await panel.getByRole('button', { name: /Immer zuhören/ }).click();
   await panel.getByRole('button', { name: 'Schließen' }).click();
