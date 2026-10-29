@@ -339,6 +339,27 @@ export interface LlmProvider {
 }
 
 // ---------------------------------------------------------------------------
+// Sprachausgabe (Jarvis)
+// ---------------------------------------------------------------------------
+
+export interface TtsRequest {
+  text: string;
+  voice: string;
+  /** Stil-Anweisung (Sprache, Ton, Tempo) */
+  instructions?: string;
+}
+
+export interface TtsResult {
+  audio: Uint8Array;
+  contentType: string;
+}
+
+export interface TtsProvider {
+  readonly name: string;
+  synthesize(req: TtsRequest): Promise<TtsResult>;
+}
+
+// ---------------------------------------------------------------------------
 // Datei-Speicher
 // ---------------------------------------------------------------------------
 export interface StorageProvider {

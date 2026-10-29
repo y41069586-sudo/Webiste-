@@ -252,6 +252,7 @@ export const SECTIONS: SectionDef[] = [
       },
       { path: 'assistant.operatorName', label: 'Jarvis: dein Vorname für die Begrüßung („Sers …“)', type: 'text' },
       { path: 'assistant.voice', label: 'Jarvis anzeigen (Sprachassistent mit Stimme)', type: 'bool' },
+      { path: 'assistant.ttsVoice', label: 'Jarvis-Stimme (cedar, onyx, ash, echo – braucht OpenAI-Schlüssel)', type: 'text' },
       {
         path: 'research.autoAi',
         label: 'KI prüft gefundene Betriebe selbst im Internet (ca. 25–30 Cent je Betrieb, im KI-Budget)',

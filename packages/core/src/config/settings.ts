@@ -232,6 +232,8 @@ export const appConfigSchema = z.object({
     placesTextSearchPer1000UsdCents: z.number().int().min(0),
     /** Claude-Websuche (KI-Prüfung der Betriebe), Stand docs/integrations.md */
     webSearchPer1000UsdCents: z.number().int().min(0).default(1000),
+    /** Sprachausgabe (Schätzung: ca. 1,5 US-Cent je Minute ≈ 2 US-Cent je 1.000 Zeichen) */
+    ttsPer1000CharsUsdCents: z.number().min(0).default(2),
     /** LLM-Preise je Million Tokens in US-Cent */
     llm: z.record(
       z.string(),
@@ -311,8 +313,10 @@ export const appConfigSchema = z.object({
       operatorName: z.string().max(40).default(''),
       /** Jarvis antwortet mit Stimme */
       voice: z.boolean().default(true),
+      /** Stimme der OpenAI-Sprachausgabe (z. B. cedar, onyx, ash, echo) */
+      ttsVoice: z.string().max(20).default('cedar'),
     })
-    .default({ useAi: false, operatorName: '', voice: true }),
+    .default({ useAi: false, operatorName: '', voice: true, ttsVoice: 'cedar' }),
   /** KI-Prüfung gefundener Betriebe: Claude sucht selbst im Netz (statt Schnellprüfung von Hand) */
   research: z
     .object({
@@ -706,6 +710,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     // Places API (New) Text Search Enterprise (Stand siehe docs/integrations.md)
     placesTextSearchPer1000UsdCents: 3500,
     webSearchPer1000UsdCents: 1000,
+    ttsPer1000CharsUsdCents: 2,
     llm: {
       // Preise in US-Cent je 1 Mio. Tokens (Stand 2026-10, siehe docs/integrations.md)
       'claude-opus-5-5': {
@@ -783,7 +788,7 @@ export const DEFAULT_CONFIG: AppConfig = {
       city: '',
     },
   },
-  assistant: { useAi: false, operatorName: '', voice: true },
+  assistant: { useAi: false, operatorName: '', voice: true, ttsVoice: 'cedar' },
   research: { autoAi: false, perTick: 3, maxSearches: 8 },
   switches: {
     dryRun: true,

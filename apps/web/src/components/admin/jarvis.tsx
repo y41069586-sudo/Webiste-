@@ -38,6 +38,8 @@ const NO = /^(nein|nee|ne|stopp|stop|abbrechen|lass|nicht)\b/i;
 /** Männliche deutsche Stimmen, die auf iPad/iPhone, Mac und in Chrome vorkommen */
 const MALE =
   /(martin|markus|yannick|viktor|helmut|stefan|hans|thomas|daniel|ralf|klaus|reed|eddy|rocko|grandpa|conrad|killian|florian|bernd)/i;
+/** Kurze Stille zum Freischalten der Audio-Wiedergabe beim ersten Tippen */
+const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 const VOICE_KEY = 'sw-jarvis-voice';
 const WAKE_KEY = 'sw-jarvis-wake';
 
@@ -60,7 +62,18 @@ function store(key: string, value?: string): string | null {
   }
 }
 
-export function Jarvis({ name, enabled, aiOn }: { name: string; enabled: boolean; aiOn: boolean }) {
+export function Jarvis({
+  name,
+  enabled,
+  aiOn,
+  naturalVoice,
+}: {
+  name: string;
+  enabled: boolean;
+  aiOn: boolean;
+  /** OpenAI-Stimme eingerichtet (sonst Browser-Stimme) */
+  naturalVoice: boolean;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -81,6 +94,8 @@ export function Jarvis({ name, enabled, aiOn }: { name: string; enabled: boolean
   /** Laufende Äußerungen festhalten (Browser brechen sonst mitten im Satz ab) */
   const utterances = useRef<SpeechSynthesisUtterance[]>([]);
   const speakToken = useRef(0);
+  /** Wiederverwendetes Audio-Element: auf dem iPad nach der ersten Berührung freigeschaltet */
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const setP = (p: Phase) => {
     phaseRef.current = p;
@@ -192,66 +207,100 @@ export function Jarvis({ name, enabled, aiOn }: { name: string; enabled: boolean
           if (token === speakToken.current) listen(wakeRef.current);
         }, 250);
       };
-      if (!enabled || !('speechSynthesis' in window) || !t) return after();
+      if (!enabled || !t) return after();
       setP('speaking');
-      const parts = (t.match(/[^.!?]+[.!?]*/g) ?? [t]).map((x) => x.trim()).filter(Boolean);
-      const voice = pickVoice();
-      let index = 0;
-      let plainVoice = false;
-      let watchdog: ReturnType<typeof setTimeout> | undefined;
-      const keepAlive = setInterval(() => {
-        if (speechSynthesis.paused) speechSynthesis.resume();
-      }, 4000);
-      const done = () => {
-        clearInterval(keepAlive);
-        clearTimeout(watchdog);
-        utterances.current = [];
-        after();
-      };
-      const next = () => {
-        if (token !== speakToken.current) {
+      // Natürliche Stimme (OpenAI) zuerst; bei Fehler die Stimme des Browsers
+      if (naturalVoice) {
+        void (async () => {
+          try {
+            const res = await fetch('/api/admin/tts', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ text: t }),
+            });
+            if (!res.ok) throw new Error(String(res.status));
+            const url = URL.createObjectURL(await res.blob());
+            if (token !== speakToken.current) return URL.revokeObjectURL(url);
+            const audio = audioRef.current ?? new Audio();
+            audioRef.current = audio;
+            audio.onended = () => {
+              URL.revokeObjectURL(url);
+              after();
+            };
+            audio.onerror = () => {
+              URL.revokeObjectURL(url);
+              if (token === speakToken.current) browserSpeak();
+            };
+            audio.src = url;
+            await audio.play();
+          } catch {
+            if (token === speakToken.current) browserSpeak();
+          }
+        })();
+        return;
+      }
+      browserSpeak();
+      function browserSpeak() {
+        if (!('speechSynthesis' in window)) return after();
+        const parts = (t.match(/[^.!?]+[.!?]*/g) ?? [t]).map((x) => x.trim()).filter(Boolean);
+        const voice = pickVoice();
+        let index = 0;
+        let plainVoice = false;
+        let watchdog: ReturnType<typeof setTimeout> | undefined;
+        const keepAlive = setInterval(() => {
+          if (speechSynthesis.paused) speechSynthesis.resume();
+        }, 4000);
+        const done = () => {
           clearInterval(keepAlive);
           clearTimeout(watchdog);
-          return;
-        }
-        if (index >= parts.length) return done();
-        const part = parts[index]!;
-        const u = new SpeechSynthesisUtterance(part);
-        if (voice && !plainVoice) u.voice = voice;
-        u.lang = (!plainVoice && voice?.lang) || 'de-DE';
-        u.rate = 1;
-        u.pitch = 1;
-        let finished = false;
-        const advance = () => {
-          if (finished) return;
-          finished = true;
-          index++;
-          next();
+          utterances.current = [];
+          after();
         };
-        u.onend = advance;
-        u.onerror = (e) => {
-          if (finished) return;
-          // Gewählte Stimme geht nicht (z. B. nicht geladen): einmal mit der Standardstimme versuchen
-          if (!plainVoice && e.error !== 'interrupted' && e.error !== 'canceled') {
-            finished = true;
-            plainVoice = true;
-            setTimeout(next, 200);
+        const next = () => {
+          if (token !== speakToken.current) {
+            clearInterval(keepAlive);
+            clearTimeout(watchdog);
             return;
           }
-          advance();
+          if (index >= parts.length) return done();
+          const part = parts[index]!;
+          const u = new SpeechSynthesisUtterance(part);
+          if (voice && !plainVoice) u.voice = voice;
+          u.lang = (!plainVoice && voice?.lang) || 'de-DE';
+          u.rate = 1;
+          u.pitch = 1;
+          let finished = false;
+          const advance = () => {
+            if (finished) return;
+            finished = true;
+            index++;
+            next();
+          };
+          u.onend = advance;
+          u.onerror = (e) => {
+            if (finished) return;
+            // Gewählte Stimme geht nicht (z. B. nicht geladen): einmal mit der Standardstimme versuchen
+            if (!plainVoice && e.error !== 'interrupted' && e.error !== 'canceled') {
+              finished = true;
+              plainVoice = true;
+              setTimeout(next, 200);
+              return;
+            }
+            advance();
+          };
+          utterances.current.push(u);
+          clearTimeout(watchdog);
+          watchdog = setTimeout(advance, 3000 + part.length * 110);
+          speechSynthesis.speak(u);
         };
-        utterances.current.push(u);
-        clearTimeout(watchdog);
-        watchdog = setTimeout(advance, 3000 + part.length * 110);
-        speechSynthesis.speak(u);
-      };
-      setTimeout(() => {
-        if (token !== speakToken.current) return;
-        speechSynthesis.cancel();
-        setTimeout(next, 80);
-      }, 300);
+        setTimeout(() => {
+          if (token !== speakToken.current) return;
+          speechSynthesis.cancel();
+          setTimeout(next, 80);
+        }, 300);
+      }
     },
-    [enabled, listen, pickVoice],
+    [enabled, listen, naturalVoice, pickVoice],
   );
 
   const greet = useCallback(() => {
@@ -370,6 +419,12 @@ export function Jarvis({ name, enabled, aiOn }: { name: string; enabled: boolean
     history.current = [];
     pending.current = null;
     // Im Klick die Stimme „aufwecken“: iPad/iPhone erlauben Vorlesen nur nach einer Berührung
+    if (naturalVoice) {
+      const audio = audioRef.current ?? new Audio();
+      audioRef.current = audio;
+      audio.src = SILENT_WAV;
+      void audio.play().catch(() => {});
+    }
     if ('speechSynthesis' in window) {
       const unlock = new SpeechSynthesisUtterance(' ');
       unlock.volume = 0;
@@ -383,6 +438,7 @@ export function Jarvis({ name, enabled, aiOn }: { name: string; enabled: boolean
     pending.current = null;
     conversing.current = false;
     speakToken.current++;
+    audioRef.current?.pause();
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     setP('idle');
     if (wakeRef.current) listen(true);
@@ -452,6 +508,7 @@ export function Jarvis({ name, enabled, aiOn }: { name: string; enabled: boolean
                 disabled={!supported || phase === 'thinking'}
                 onClick={() => {
                   speakToken.current++;
+                  audioRef.current?.pause();
                   if ('speechSynthesis' in window) speechSynthesis.cancel();
                   conversing.current = true;
                   setP('listening');
@@ -468,7 +525,7 @@ export function Jarvis({ name, enabled, aiOn }: { name: string; enabled: boolean
               Schließen
             </button>
           </div>
-          {voices.length > 1 ? (
+          {!naturalVoice && voices.length > 1 ? (
             <label className="jarvis-voice">
               Stimme
               <select

@@ -117,6 +117,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         name={cfg.assistant.operatorName}
         enabled={cfg.assistant.voice}
         aiOn={cfg.assistant.useAi && Boolean(getEnv().ANTHROPIC_API_KEY)}
+        naturalVoice={Boolean(getEnv().OPENAI_API_KEY)}
       />
     </div>
   );

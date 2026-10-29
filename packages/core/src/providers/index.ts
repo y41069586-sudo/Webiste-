@@ -10,6 +10,7 @@ import { MockPayment } from './mock/payment';
 import { MockRegistrar } from './mock/registrar';
 import { LocalStorage } from './storage/local';
 import { S3Storage } from './storage/s3';
+import { OpenAiTts } from './tts/openai';
 import type {
   EmailProvider,
   HostingProvider,
@@ -19,6 +20,7 @@ import type {
   PaymentProvider,
   RegistrarProvider,
   StorageProvider,
+  TtsProvider,
 } from './types';
 import { registry } from './registry';
 
@@ -42,6 +44,8 @@ export interface Providers {
   hosting: HostingProvider;
   email: EmailProvider;
   payment: PaymentProvider;
+  /** Natürliche Stimme für Jarvis; ohne Schlüssel null (dann Browser-Stimme) */
+  tts: TtsProvider | null;
 }
 
 let cached: Providers | undefined;
@@ -80,6 +84,7 @@ export function createProviders(): Providers {
   const email: EmailProvider = registry.email(emailKind, env) ?? new MockEmail(storage, env.SESSION_SECRET);
   const paymentKind = env.PAYMENT_PROVIDER ?? (env.STRIPE_SECRET_KEY ? 'stripe' : 'mock');
   const payment: PaymentProvider = registry.payment(paymentKind, env) ?? new MockPayment(env.SESSION_SECRET);
+  const tts: TtsProvider | null = env.OPENAI_API_KEY ? new OpenAiTts(env.OPENAI_API_KEY) : null;
 
   logger.info(
     {
@@ -91,10 +96,11 @@ export function createProviders(): Providers {
       hosting: hosting.name,
       email: email.name,
       payment: payment.name,
+      tts: tts?.name ?? 'browser',
     },
     'providers initialisiert',
   );
-  return { storage, llm, leadSources, mail, registrar, hosting, email, payment };
+  return { storage, llm, leadSources, mail, registrar, hosting, email, payment, tts };
 }
 
 export function getProviders(): Providers {

@@ -868,3 +868,10 @@ Für alle Arbeitsseiten gilt dasselbe Muster: eine Karte, wenige große Knöpfe,
   - Fragen gehen über `askAssistant(…, { voice: true })` an Haiku 5.5 (Stufe `assistant`) und kommen als kurze,
     gesprochene Antworten zurück.
   - Aktionen laufen nur nach gesprochenem oder getipptem „Ja“, über dieselben geprüften Server-Aktionen.
+
+- **Jarvis-Stimme (Nachtrag):**
+  - Eine Claude-Stimme gibt es nicht als API.
+  - Auf Wunsch des Betreibers spricht Jarvis mit OpenAI `gpt-4o-mini-tts` (`TtsProvider`, Route `/api/admin/tts`, nur
+    für den angemeldeten Betreiber).
+  - Bei Fehlern fällt er auf die Browser-Stimme zurück.
+  - Das Denken bleibt bei Haiku 5.5.

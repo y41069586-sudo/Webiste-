@@ -418,3 +418,20 @@ Quellen und Ergebnis in bestehenden Settings, Bilder im privaten Storage unter `
 Opt-out bereinigt Dateien/Settings einschließlich Schutz vor verspäteten Cache-Antworten.
 Abnahme: lokaler Mock und SDK-Request-Shape-Test, **keine echte Vision-Anbieterprüfung**. OSM liefert
 allenfalls einen Farbhinweis aus `brand:colour`; kein behaupteter Google-Maps-Fotodatenstrom.
+
+## OpenAI-Sprachausgabe (nur Jarvis-Stimme)
+
+- Stand 29.10.2026 (developers.openai.com/api/docs/guides/text-to-speech und …/pricing)
+- **Endpunkt:** `POST https://api.openai.com/v1/audio/speech`, Felder `model`, `input`, `voice`, `instructions`,
+  `response_format` (Standard mp3)
+- **Modell:** `gpt-4o-mini-tts`. Deutsch wird unterstützt, die Stimmen sind auf Englisch optimiert. Stimmen: alloy,
+  ash, ballad, coral, echo, fable, nova, onyx, sage, shimmer, verse, marin, cedar. Standard hier ist `cedar`
+  (`assistant.ttsVoice`).
+- **Preis:** 0,60 USD je 1 Mio. Text-Tokens, 12 USD je 1 Mio. Audio-Tokens. Gebucht wird eine Schätzung von 2 US-Cent je
+  1.000 Zeichen (`costs.ttsPer1000CharsUsdCents`) im KI-Budget.
+- **Abschaltung:** OpenAI schaltet `tts-1`, `tts-1-hd` und `gpt-4o-mini-tts` am **06.01.2027** ab. Vorher auf den
+  empfohlenen Nachfolger umstellen.
+- **Schlüssel:** `OPENAI_API_KEY` nur in Netlify (geheim), nicht im Worker. Ohne Schlüssel nutzt Jarvis die Stimme des
+  Browsers.
+- **Daten:** Es geht nur der vorzulesende Antworttext an OpenAI, kein Mikrofon-Audio. Die Spracherkennung läuft im
+  Browser.

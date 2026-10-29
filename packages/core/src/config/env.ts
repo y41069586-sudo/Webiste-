@@ -28,6 +28,8 @@ const envSchema = z.object({
   ENCRYPTION_KEY: optStr,
 
   ANTHROPIC_API_KEY: optStr,
+  /** Nur für die Stimme von Jarvis (OpenAI-Sprachausgabe) */
+  OPENAI_API_KEY: optStr,
   LLM_PROVIDER: z.enum(['anthropic', 'mock']).optional(),
   MODEL_CREATIVE: z.string().default('claude-opus-5-5'),
   MODEL_BULK: z.string().default('claude-opus-5-5'),
