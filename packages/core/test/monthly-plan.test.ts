@@ -116,7 +116,8 @@ describe('Preise und Rechnungstexte (Update 2)', () => {
       subscriptionCents: 1900,
       monthlyEnabled: true,
     });
-    expect(DEFAULT_CONFIG.guarantee).toEqual({ enabled: true, days: 14, latestStartDays: 14 });
+    // Garantie seit 29.10.2026 standardmäßig aus (abschaltbar, Frist bleibt eingestellt)
+    expect(DEFAULT_CONFIG.guarantee).toEqual({ enabled: false, days: 14, latestStartDays: 14 });
     expect(planAmounts(DEFAULT_CONFIG, 'monthly').grossCents).toBe(4900);
   });
 
@@ -251,6 +252,8 @@ describe('Option B „Monatlich“ und Garantie', () => {
   beforeEach(async () => {
     await resetDb();
     clearDomainCache();
+    // Diese Tests prüfen die (abschaltbare) Garantie-Funktion selbst
+    await updateConfig({ guarantee: { enabled: true } }, 'test');
   });
   afterAll(async () => {
     await stopBoss();

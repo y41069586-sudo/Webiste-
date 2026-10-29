@@ -5,7 +5,6 @@ const PAGES: [string, RegExp][] = [
   ['/', /Erst sehen.*Dann entscheiden/s],
   ['/so-funktionierts', /drei Schritten/],
   ['/preise', /Zwei Tarife/],
-  ['/garantie', /Zufriedenheits\u00AD?garantie/],
   ['/beispiele', /So sieht ein Entwurf aus/],
   ['/ueber-mich', /Hallo, (ich bin|hier ist)/],
   ['/kontakt', /Schreiben Sie mir/],
@@ -49,10 +48,17 @@ test.describe('Firmen-Website', () => {
     await expect(tariffs).toContainText('597 €');
     await expect(tariffs).toContainText('19 €/Monat insgesamt ab Go-Live');
     await expect(tariffs).toContainText('99 €/Monat insgesamt ab Go-Live');
-    for (const route of ['/', '/preise', '/agb', '/garantie']) {
+    for (const route of ['/', '/preise', '/agb']) {
       await page.goto(route);
       await expect(page.locator('main')).not.toContainText(/49\s*€|590\s*€/);
     }
+  });
+
+  test('ohne Garantie: kein Menüpunkt, alte Garantie-Links führen zu den Preisen', async ({ page }) => {
+    await page.goto('/garantie');
+    await expect(page).toHaveURL(/\/preise$/);
+    await expect(page.locator('main')).not.toContainText(/Zufriedenheits\u00AD?garantie|Geld zurück/);
+    await expect(page.getByRole('link', { name: 'Garantie', exact: true })).toHaveCount(0);
   });
 
   test('Startseite: ruhige Produktvorschau und tatsächlich ansehbare Muster', async ({ page }) => {

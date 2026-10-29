@@ -19,7 +19,7 @@ const PHONES = [
   { name: 'promax-430', width: 430, height: 932 },
 ] as const;
 
-const SITE = ['/', '/so-funktionierts', '/preise', '/garantie', '/beispiele', '/ueber-mich', '/kontakt', '/impressum', '/agb'];
+const SITE = ['/', '/so-funktionierts', '/preise', '/beispiele', '/ueber-mich', '/kontakt', '/impressum', '/agb'];
 
 const DEMOS = [
   { name: 'Malerbetrieb Großkopf-Schwarzenberger', branch: 'maler' },

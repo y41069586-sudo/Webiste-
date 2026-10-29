@@ -45,7 +45,7 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     text: (c) =>
       c.guarantee.enabled
         ? `Die Zufriedenheitsgarantie ist an: ${c.guarantee.days} Tage. Erstattet wird per Knopf an der Bestellung (Kunden → Bestellungen); die Seite geht dann offline. Ich löse Erstattungen nicht aus.`
-        : 'Die Zufriedenheitsgarantie ist ausgeschaltet (Einstellungen → Preise).',
+        : 'Wir bieten keine Zufriedenheitsgarantie an. Es gelten nur die gesetzlichen Rechte. Vertrauen schafft die fertige Demo: Der Betrieb sieht seine Website, bevor er etwas kauft.',
     links: [{ href: '/admin/orders', label: 'Bestellungen' }],
   },
   {

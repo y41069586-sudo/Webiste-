@@ -1,5 +1,6 @@
 import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Check, DarkBand, PageIntro } from '@/components/site/section';
 import { sitePricing } from '@/lib/site';
 
@@ -11,13 +12,8 @@ export const metadata = {
 export default async function GuaranteePage() {
   const cfg = await getSiteConfig();
   const p = sitePricing(cfg);
-  if (!p.guarantee) {
-    return (
-      <PageIntro eyebrow="Garantie" title="Derzeit ohne Zufriedenheitsgarantie.">
-        Sie sehen Ihren fertigen Entwurf, bevor Sie etwas bezahlen. Fragen beantworte ich gern über das Kontaktformular.
-      </PageIntro>
-    );
-  }
+  // Ohne Garantie gibt es keine eigene Seite (alte Links aus Briefen führen zu den Preisen)
+  if (!p.guarantee) redirect('/preise');
   const g = p.guarantee;
   return (
     <>

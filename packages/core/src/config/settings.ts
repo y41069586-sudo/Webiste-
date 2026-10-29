@@ -103,7 +103,7 @@ export const appConfigSchema = z.object({
     packageDescription: z.string(),
   }),
   guarantee: z.object({
-    /** 14-Tage-Zufriedenheitsgarantie: Erstattung per Admin-Button, Seite offline, Domain freigeben */
+    /** Zufriedenheitsgarantie (seit 29.10.2026 aus): Erstattung per Admin-Button, Seite offline, Domain freigeben */
     enabled: z.boolean(),
     days: z.number().int().min(1).max(60),
     /** Garantie beginnt mit dem Go-Live, spätestens aber so viele Tage nach der Zahlung */
@@ -570,7 +570,7 @@ export const DEFAULT_CONFIG: AppConfig = {
       'Ihre Website auf Basis des Entwurfs, eigene Domain auf Ihren Namen, Hosting mit SSL für 12 Monate ab Veröffentlichung, bis zu 2 Änderungsrunden vor dem Start.',
   },
   guarantee: {
-    enabled: true,
+    enabled: false,
     days: 14,
     latestStartDays: 14,
   },

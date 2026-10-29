@@ -76,12 +76,17 @@ describe('V5: tatsächliche V4-Brief- und Vertragsbedingungen', () => {
   it('alte ungesicherte Website-Abwesenheitsbehauptungen bleiben unter V4 gesperrt', () => {
     expect(truth(LETTER_VARIANT_B).check.violations.some((v) => v.rule === 'blocklist')).toBe(true);
   });
-  it('V4-AGB-Entwurf nennt Pflicht-Monatstarif, wirklichen Abostart und Einrichtungsgarantie ohne Legacy-Bindung', () => {
+  it('V4-AGB-Entwurf nennt Pflicht-Monatstarif und wirklichen Abostart, Garantie nur wenn aktiv', () => {
     const text = legalDrafts(cfg).termsMarkdown.replace(/\u00a0/g, ' ');
     expect(text).toContain('dazu insgesamt 99 €/Monat');
     expect(text).toContain('erst nach dem tatsächlich bestätigten Go-Live');
     expect(text).toContain('monatlich zum Ende des laufenden Abrechnungszeitraums kündbar');
-    expect(text).toContain('Einrichtungsgebühr wird erstattet');
+    // Garantie standardmäßig aus: kein Garantie-Abschnitt, Ziffern rücken auf
+    expect(text).not.toContain('Einrichtungsgarantie');
+    expect(text).toContain('## 11. Zahlungsverzug, Mängel und Haftung');
+    const withG = legalDrafts({ ...cfg, guarantee: { ...cfg.guarantee, enabled: true } }).termsMarkdown;
+    expect(withG).toContain('Einrichtungsgebühr wird erstattet');
+    expect(withG).toContain('## 12. Zahlungsverzug, Mängel und Haftung');
     expect(text).not.toContain('erste Rate bei Vertragsschluss');
     expect(text).not.toContain('spätestens der 14. Tag nach Zahlung');
     // Entwurf tritt nicht als freigegebener Vertrag auf (öffentliche Fassung ohne interne Arbeitsvermerke, 27.10.2026)

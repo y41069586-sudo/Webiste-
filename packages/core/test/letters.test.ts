@@ -125,7 +125,8 @@ describe('Brief-PDF (echter Browser)', () => {
     // Beide Preisoptionen, Mindestlaufzeit direkt daneben, Garantie, „online bis …“, Kurz-URL
     expect(text).toMatch(/49\s€ pro Monat/);
     expect(text).toContain('12 Monate Mindestlaufzeit');
-    expect(text).toContain('Geld zurück');
+    // Keine Garantie mehr (Standard seit 29.10.2026)
+    expect(text).not.toContain('Geld zurück');
     expect(text).toMatch(/online bis \d{1,2}\. \p{L}+ \d{4}/u);
     expect(text).not.toMatch(/nach \d+ Tagen automatisch gelöscht/);
     const l = (await getDb().query.leads.findFirst({ where: eq(leads.id, lead!.id) }))!;

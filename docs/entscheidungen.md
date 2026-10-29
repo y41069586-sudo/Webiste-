@@ -664,3 +664,15 @@ Gefunden und behoben:
   - Fragen nach dem Stand („Wie viele Briefe wurden verschickt?“) werden beantwortet. Aufträge zu Versand, Zahlung,
     Domain, Modus oder Löschen lehnt er ab.
   - Im KI-Modus bekommt Claude dieselben Daten und Wissenseinträge als Grundlage.
+
+## 29.10.2026 – Keine Zufriedenheitsgarantie mehr
+
+Auf Wunsch des Betreibers ist die Garantie aus:
+- Standard ist `guarantee.enabled=false`. Die gespeicherte Produktionseinstellung wurde ebenfalls umgestellt, mit
+  Audit-Eintrag.
+- Brief, Demo, Preise-Seite, Startseite, E-Mails und Rechnungen zeigen nichts mehr dazu, weil alles an der
+  Einstellung hängt.
+- Der Menüpunkt „Garantie“ ist entfernt. `/garantie` leitet auf `/preise` weiter.
+- Die AGB-Entwürfe lassen den Garantie-Abschnitt weg, die folgenden Ziffern rücken auf.
+- Die Funktion selbst bleibt im Code und lässt sich in den Einstellungen wieder einschalten. Für ältere Bestellungen
+  mit gespeicherter Frist bleibt die Erstattung im Admin möglich.

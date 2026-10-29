@@ -2,7 +2,6 @@
 export const SITE_NAV = [
   { href: '/so-funktionierts', label: 'So funktioniert’s' },
   { href: '/preise', label: 'Preise' },
-  { href: '/garantie', label: 'Garantie' },
   { href: '/beispiele', label: 'Beispiele' },
   { href: '/ueber-mich', label: 'Über mich' },
   { href: '/kontakt', label: 'Kontakt' },

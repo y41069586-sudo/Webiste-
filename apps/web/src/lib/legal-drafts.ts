@@ -12,6 +12,9 @@ export function legalDrafts(cfg: AppConfig, opts: { adopt?: boolean } = {}) {
   const required = (value: string, label: string) => value.trim() || `TODO: ${label} ergänzen`;
   const contact = `${required(s.name, 'vollständiger Vor- und Nachname')}, handelnd unter „${required(s.company, 'Geschäftsbezeichnung')}“, ${required(s.street, 'Straße und Hausnummer')}, ${required(s.postalCode, 'Postleitzahl')} ${required(s.city, 'Ort')}, Deutschland`;
   const email = required(s.email, 'Kontakt-E-Mail');
+  // Garantie-Abschnitte nur, solange eine Garantie angeboten wird; nachfolgende Ziffern rücken auf
+  const g = cfg.guarantee.enabled;
+  const after = (n: number) => (g ? n : n - 1);
   const draft = opts.adopt
     ? 'Stand: 28. Oktober 2026.'
     : 'Stand: 27. Oktober 2026. Verbindliche Bestellungen werden derzeit noch nicht angenommen.';
@@ -199,17 +202,21 @@ Nach vollständiger Zahlung erhält der Kunde die zur vereinbarten Nutzung erfor
 
 Vor Abschaltung wird Gelegenheit zur Sicherung der kundeneigenen Inhalte und zur Domainübertragung gegeben. Ein verfügbarer Auth-Code wird ohne zusätzliche eigene Bearbeitungsgebühr bereitgestellt; externe Gebühren bleiben gesondert. Ein neuer Anbieter benötigt eine technisch kompatible Hostingumgebung; deren Einrichtung ist nicht automatisch enthalten. Auf Wunsch stellen wir die veröffentlichten Website-Dateien (HTML und eingebundene Bilder) als Archiv bereit. Ohne Verlängerungsauftrag erfolgt keine weitere Domainverlängerung durch uns. Eine Kündigung löscht nicht gesetzlich aufzubewahrende Vertragsdaten.
 
-## 11. Freiwillige Einrichtungsgarantie
+${
+  g
+    ? `## 11. Freiwillige Einrichtungsgarantie
 
 Vorgesehen sind ${cfg.guarantee.days} Tage Einrichtungsgarantie ab tatsächlichem bestätigtem Go-Live. Vorher läuft keine Garantiefrist ab. Eine formlose Nachricht an ${email} innerhalb dieser Frist genügt. Die Einrichtungsgebühr wird erstattet, das Monatsabo beendet und die Website offline genommen. Bereits erbrachte Monatsleistungen sind nicht Teil dieser freiwilligen Einrichtungsgarantie. Gesetzliche Mängel- und Erstattungsansprüche bleiben uneingeschränkt bestehen. Alte Verträge behalten ihre gespeicherten Bedingungen.
 
-## 12. Zahlungsverzug, Mängel und Haftung
+`
+    : ''
+}## ${after(12)}. Zahlungsverzug, Mängel und Haftung
 
 Zahlungsverzug und Verzugsfolgen richten sich nach den gesetzlichen Voraussetzungen. Eine notwendige Sperrung setzt eine berechtigte Forderung, vorherige Ankündigung und angemessene Möglichkeit zur Abhilfe voraus. Es gibt keine pauschale sofortige Fälligstellung nicht vereinbarter künftiger Raten und kein automatisches Inkasso durch diese Bedingungen.
 
 Für Mängel gelten die gesetzlichen Vorschriften. Die Haftung richtet sich nach den gesetzlichen Regelungen; insbesondere wird sie für Vorsatz, grobe Fahrlässigkeit sowie Schäden an Leben, Körper oder Gesundheit nicht ausgeschlossen. Eine bestimmte Anzahl von Anfragen, Umsätze, Suchmaschinenpositionen oder geschäftlicher Erfolg werden nicht garantiert.
 
-## 13. Datenschutz und Schlussbestimmungen
+## ${after(13)}. Datenschutz und Schlussbestimmungen
 
 Unsere Verarbeitung von Kontakt- und Vertragsdaten wird in der Datenschutzerklärung beschrieben. Verarbeiten wir Daten im Auftrag des Kunden, etwa über ein Kontaktformular seiner Website, ist vor Aktivierung eine Vereinbarung nach Art. 28 DSGVO erforderlich. Ein Verweis in diesen AGB ersetzt sie nicht.
 
@@ -252,29 +259,33 @@ Das Monatspaket kann mit einer Frist von einem Monat zum Ende der Mindestlaufzei
 
 Nach Vertragsende endet die Hostingpflicht. Rechtzeitig vor Abschaltung wird Gelegenheit zur Sicherung der kundeneigenen Inhalte und zur Domainübertragung gegeben. Die Domain wird auf den Kunden registriert; auf Wunsch stellen wir einen verfügbaren Auth-Code ohne zusätzliche Bearbeitungsgebühr bereit. Gebühren des neuen Anbieters sind nicht eingeschlossen. Ohne Verlängerungsauftrag wird die Domain nicht weiter verlängert.
 
-## 7. Zufriedenheitsgarantie
+${
+  g
+    ? `## 7. Zufriedenheitsgarantie
 
 Zusätzlich zu gesetzlichen Rechten ist eine freiwillige Garantie von ${cfg.guarantee.days} Tagen vorgesehen. Ihr Beginn ist die Veröffentlichung, spätestens der ${cfg.guarantee.latestStartDays}. Tag nach Zahlung. Die Garantie kann innerhalb der Frist formlos per E-Mail an ${email} geltend gemacht werden. Beim Einmalpaket wird der Einmalbetrag, beim Monatspaket die erste Monatsrate erstattet; der Vertrag endet und die Website wird offline genommen. Die Domain kann auf Wunsch wie in Ziffer 6 übertragen werden. Gesetzliche Mängel- und Erstattungsansprüche werden nicht eingeschränkt. Die technische Fristberechnung und Behandlung einer von uns verursachten Verzögerung sind vor Verkaufsfreigabe abschließend abzugleichen.
 
-## 8. Nutzungsrechte und Betrieb
+`
+    : ''
+}## ${after(8)}. Nutzungsrechte und Betrieb
 
 Nach vollständiger Zahlung der geschuldeten Vergütung erhält der Kunde die für die vertragsgemäße Nutzung seiner Website erforderlichen Nutzungsrechte an unseren hierfür erstellten Arbeitsergebnissen. Rechte Dritter, etwa an Schriftarten, Softwarebibliotheken oder Bildern, richten sich nach deren jeweiligen Lizenzen. Rechte an vorbestehenden allgemeinen Werkzeugen und Vorlagen werden nicht exklusiv übertragen. Eine Übertragung des gesamten Generators oder seiner Quelltexte ist nicht Teil des Websitepakets.
 
 Hosting wird mit angemessenen technischen und organisatorischen Maßnahmen betrieben. Eine unterbrechungsfreie Verfügbarkeit oder ein bestimmtes Verfügbarkeitsprozent wird nicht zugesichert. Wartungsarbeiten und Störungen sind nach Möglichkeit zu begrenzen. Bei erheblichen Pflichtverletzungen bleiben gesetzliche Ansprüche unberührt. Eine Sperrung wegen Zahlungsrückständen setzt die gesetzlichen Voraussetzungen, eine vorherige Ankündigung und eine angemessene Möglichkeit zur Abhilfe voraus; unberechtigte Forderungen rechtfertigen keine Sperrung.
 
-## 9. Datenschutz und Auftragsverarbeitung
+## ${after(9)}. Datenschutz und Auftragsverarbeitung
 
 Unsere Verarbeitung eigener Kontakt- und Vertragsdaten beschreibt die Datenschutzerklärung. Soweit wir personenbezogene Daten im Auftrag des Kunden verarbeiten, insbesondere über ein Kontaktformular auf seiner Website, muss vor dessen Aktivierung eine Vereinbarung nach Art. 28 DSGVO abgeschlossen werden. Ein bloßer Hinweis in diesen AGB ersetzt diese Vereinbarung nicht. Ohne passende Vereinbarung werden solche Funktionen nicht freigeschaltet.
 
-## 10. Mängel und Haftung
+## ${after(10)}. Mängel und Haftung
 
 Für Mängel gelten die gesetzlichen Vorschriften. Bitte teilen Sie festgestellte Fehler nachvollziehbar mit, damit wir sie prüfen und beheben können. Wir haften unbeschränkt bei Vorsatz, grober Fahrlässigkeit sowie bei Verletzung von Leben, Körper oder Gesundheit und soweit zwingendes Recht dies verlangt. Bei einfach fahrlässiger Verletzung wesentlicher Vertragspflichten ist die Haftung auf den vorhersehbaren, vertragstypischen Schaden begrenzt. Wesentlich sind Pflichten, deren Erfüllung die ordnungsgemäße Vertragsdurchführung erst ermöglicht und auf deren Einhaltung der Kunde regelmäßig vertrauen darf. Im Übrigen ist die Haftung für einfache Fahrlässigkeit ausgeschlossen. Die Haftung nach dem Produkthaftungsgesetz und für ausdrücklich übernommene Garantien bleibt unberührt.
 
-## 11. Änderungen und Schlussregelungen
+## ${after(11)}. Änderungen und Schlussregelungen
 
 Vertragsänderungen bedürfen einer Vereinbarung; wir ändern Preise oder Leistungen laufender Verträge nicht allein durch Änderung dieser Website. Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts; zwingende gesetzliche Vorschriften bleiben unberührt. Es gelten die gesetzlichen Gerichtsstände. Eine unwirksame Bestimmung wird nicht durch eine frei erfundene wirtschaftlich ähnliche Klausel ersetzt; die gesetzlichen Regelungen treten an ihre Stelle.
 
-## 12. Noch keine Verkaufsfreigabe
+## ${after(12)}. Noch keine Verkaufsfreigabe
 
 Diese Arbeitsfassung wird nicht automatisch zur freigegebenen Checkout-Fassung. Vor echtem Verkauf sind Steuerangaben, tatsächliche Vertragsannahme, Kündigungs-/Garantieablauf, Auftragsverarbeitung und die technische Zahlungsabwicklung abzugleichen. Die allgemeinen Live-Sperren bleiben aktiv.
 `,

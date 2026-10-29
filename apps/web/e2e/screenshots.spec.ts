@@ -13,7 +13,6 @@ const SITE = [
   '/',
   '/so-funktionierts',
   '/preise',
-  '/garantie',
   '/beispiele',
   '/ueber-mich',
   '/kontakt',

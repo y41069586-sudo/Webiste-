@@ -30,9 +30,6 @@ export function PublicShell({ company, children, wide = false }: { company: stri
           <Link href="/agb" className="hover:text-slate-900">
             AGB
           </Link>
-          <Link href="/garantie" className="hover:text-slate-900">
-            Garantie
-          </Link>
         </div>
       </footer>
     </div>
