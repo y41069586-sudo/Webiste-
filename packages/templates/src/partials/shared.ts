@@ -207,13 +207,15 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
         <h3 class="text-base font-semibold">Wer hat diesen Entwurf gebaut?</h3>
         <p class="mt-1 font-medium">${esc(t.name) || esc(providerName)}</p>
         ${t.intro ? `<p class="mt-2 text-sm text-[#374151]">${esc(t.intro)}</p>` : ''}
-        <p class="mt-3 text-sm text-[#374151]">${[
+        <ul class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[#374151]">${[
           t.email ? `<a class="underline" href="mailto:${esc(t.email)}">${esc(t.email)}</a>` : '',
           t.phone ? `<a class="underline" href="tel:${esc(t.phone.replace(/[^+\d]/g, ''))}">${esc(t.phone)}</a>` : '',
           `<a class="underline" href="${esc(t.imprintUrl)}">Impressum</a>`,
         ]
           .filter(Boolean)
-          .join(' · ')}</p>
+          // Eigene Zeilenblöcke statt „ · “-Text: auf 320 px umbrechen, ohne sich zu überlappen
+          .map((x) => `<li class="break-words">${x}</li>`)
+          .join('')}</ul>
       </div>
     </div>`
     : '';

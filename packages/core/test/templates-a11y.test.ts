@@ -149,3 +149,39 @@ describe('Branchen-Abschnitte (B3): axe, HTML, Layout; Live ohne Platzhalter', (
     expect(render('dienstleistung', 'live')).not.toContain('name="wunsch"');
   });
 });
+
+describe('Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys nicht', () => {
+  afterAll(closeBrowser);
+  for (const t of TEMPLATES) {
+    it(`${t.id}`, async () => {
+      const content = libraryContent('maler', t.group, { name: fullFacts.name, stadt: 'Dortmund', branche: 'Betrieb' }, 3);
+      const html = renderSite({
+        templateId: t.id,
+        palette: t.palettes[0]!,
+        mode: 'demo',
+        content,
+        facts: { ...fullFacts, group: t.group },
+        demo: {
+          slug: 'abcdefghijklmnopqrstuvwx',
+          priceLabel: '597 €',
+          checkoutUrl: '/x',
+          questionUrl: '/y',
+          optOutUrl: '/z',
+          expiresLabel: 'am 21.11.2026',
+          sender,
+          // Fiktive Angaben in der Länge echter Betreiberdaten (Fund aus dem Testlauf 29.10.2026)
+          trust: {
+            name: 'Max Mustermann',
+            intro: 'Ich baue Websites für Betriebe in Dortmund.',
+            email: 'kontakt@beispiel-webdesign.world',
+            phone: '+49 1521 0000000',
+            imprintUrl: 'https://app.example.de/impressum',
+          },
+        },
+      });
+      const checks = await browserChecks({ html });
+      const failed = checks.filter((c) => !c.passed);
+      expect(failed, JSON.stringify(failed, null, 1)).toEqual([]);
+    }, 60_000);
+  }
+});
