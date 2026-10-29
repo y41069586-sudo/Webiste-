@@ -1,0 +1,30 @@
+{
+  "account": "Seitenwerk",
+  "livemode": true,
+  "prices": [
+    {
+      "component": "setup",
+      "productId": "prod_VX0x8hlHp1unuw",
+      "priceId": "price_1UVwvsKIPZjo7zRA07njiApb",
+      "amountCents": 59700,
+      "currency": "eur",
+      "livemode": true
+    },
+    {
+      "component": "basis",
+      "productId": "prod_VX0xXzaFYB1kZT",
+      "priceId": "price_1UVwvuKIPZjo7zRAMohkkSTh",
+      "amountCents": 1900,
+      "currency": "eur",
+      "livemode": true
+    },
+    {
+      "component": "care_plus",
+      "productId": "prod_VX0xxaajmEyXLh",
+      "priceId": "price_1UVwvwKIPZjo7zRAy5UBiKhH",
+      "amountCents": 9900,
+      "currency": "eur",
+      "livemode": true
+    }
+  ]
+}

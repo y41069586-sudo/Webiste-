@@ -919,3 +919,12 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
   einmal neu. Scheitert er wieder, bleibt er zur Prüfung stehen.
 - Kein Fehler: Gastronomie, Yoga, Blumenladen u. a. lehnt die Recherche-Bewertung ab („Branche außerhalb dieser
   Zielkampagne“). Das ist gewollt (Kampagne seit 28.10.: Handwerk, danach Friseur/Kosmetik).
+
+## 29.10.2026 – Stripe-Live-Konto „Seitenwerk“ vorbereitet
+
+- Live-Produkte mit Preisen angelegt (kein Geldfluss): Website-Einrichtung 597 € einmalig, Basis 19 €/Monat,
+  Care+ 99 €/Monat. IDs in `packages/core/src/config/stripe-v4-live.json` (nur Referenz, noch nicht verwendet).
+- Live-Webhook `seitenwerkworld.netlify.app/api/webhooks/stripe` war bereits aktiv (alle benötigten Ereignisse).
+- Live-Checkout bleibt im Code gesperrt (`stripeV4Price` nur Sandbox; Tests sichern das), bis der Betreiber
+  ausdrücklich „live schalten“ freigibt. Dann: Katalog einbinden, Sperrtests anpassen, `PAYMENT_PROVIDER=stripe`.
+- Logo und Farbe (Branding) lassen sich für das eigene Konto nicht per API setzen → im Dashboard.
