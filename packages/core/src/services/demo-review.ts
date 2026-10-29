@@ -135,7 +135,10 @@ export async function approveDemo(
         updatedAt: new Date(),
       })
       .where(eq(demos.id, demoId));
-    if (opts.manual) await tx.execute(sql`UPDATE counters SET value = value + 1 WHERE name = 'demos_reviewed'`);
+    // Testläufe (erfundene Betriebe) zählen nicht zu den ersten 30 Pflichtprüfungen
+    const source = (await tx.query.leads.findFirst({ where: eq(leads.id, demo.leadId), columns: { source: true } }))?.source;
+    if (opts.manual && source !== 'mock')
+      await tx.execute(sql`UPDATE counters SET value = value + 1 WHERE name = 'demos_reviewed'`);
     await transitionLead(tx, demo.leadId, 'demo_approved', { actor, soft: true });
     await audit(tx, {
       entity: 'demo',

@@ -875,3 +875,16 @@ Für alle Arbeitsseiten gilt dasselbe Muster: eine Karte, wenige große Knöpfe,
     für den angemeldeten Betreiber).
   - Bei Fehlern fällt er auf die Browser-Stimme zurück.
   - Das Denken bleibt bei Haiku 5.5.
+
+## 29.10.2026 – Testlauf im Admin
+
+- `/admin/ablauf/testlauf` (Knopf „Testlauf ausprobieren“ im Ablauf) legt einen erfundenen Betrieb an, z. B.
+  „Malerbetrieb Beispiel Dortmund“, Quelle `mock`.
+- Er geht den echten Weg: Demo bauen (Worker) → Demo freigeben → online → QR-Code → „Übernehmen“ → Bezahlseite.
+- Die Seite zeigt den QR-Code zum Scannen mit dem Handy und denselben Link zum direkten Öffnen.
+- Sicherheit:
+  - Betriebe mit Quelle `mock` bekommen nie einen echten Brief (vorhandene Versandsperre).
+  - Testfreigaben zählen nicht zu den ersten 30 Pflichtprüfungen (`approveDemo` zählt nur echte Quellen).
+  - In der aktuellen Umgebung laufen Zahlung, E-Mail, Domain und Hosting über die Test-Anbieter
+    (`PAYMENT_PROVIDER=mock` usw.); es fließt kein Geld.
+- E2E `testlauf.spec.ts` deckt den ganzen Weg bis zur Danke-Seite ab.

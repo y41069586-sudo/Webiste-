@@ -2935,3 +2935,43 @@ html[data-admin-nav='open'] .admin-overlay {
     animation: none !important;
   }
 }
+
+/* Testlauf */
+.testrun-steps {
+  display: grid;
+  gap: 10px;
+}
+.testrun-steps li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+}
+.testrun-steps li.is-now {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--text);
+}
+.testrun-steps li.is-done {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+.testrun-steps li span {
+  font-size: 14px;
+}
+.testrun-qr {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+.testrun-qr img {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+@media (max-width: 640px) {
+  .testrun-qr {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}

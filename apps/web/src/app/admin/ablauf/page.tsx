@@ -22,6 +22,11 @@ export default async function WorkflowPage() {
       <PageHeader
         title="Ablauf"
         subtitle="Grüne Schritte laufen von selbst. Du kümmerst dich nur um die lila Schritte – oben steht immer, was als Nächstes dran ist."
+        actions={
+          <Link href="/admin/ablauf/testlauf" className="ui-btn ui-btn-secondary">
+            Testlauf ausprobieren
+          </Link>
+        }
       />
       {next ? (
         <div className="flow-next">
