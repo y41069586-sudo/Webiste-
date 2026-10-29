@@ -30,7 +30,9 @@ export async function assertLetterLeadEligible(
     throw new Error('Datenquelle nicht nachvollziehbar.');
   if (lead.source === 'google_places' && !cfg.leadSource.googleTextSearchApproval.trim())
     throw new Error('Freigabe für Google als gespeicherte Primärquelle fehlt.');
-  if (lead.source === 'mock' && !effectiveSwitches(cfg).dryRun && process.env.NODE_ENV !== 'test')
+  // Nur der separat markierte Probedruck wird an cfg.letter.testRecipient adressiert.
+  // Fiktive Firmen dürfen weiterhin niemals echte Akquisepost erhalten.
+  if (lead.source === 'mock' && !opts.testLetter && !effectiveSwitches(cfg).dryRun && process.env.NODE_ENV !== 'test')
     throw new Error('Fiktive Testdaten sind nicht für echten Versand zulässig.');
   if (lead.hasWebsite && !lead.socialOnly) throw new Error('Eigene Website vorhanden; Eignung erneut prüfen.');
   // Testbrief an die eigene Adresse: der Betrieb ist nur Vorlage, eine Dublette kann keinen zweiten Brief bekommen

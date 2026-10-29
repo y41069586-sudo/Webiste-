@@ -243,7 +243,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const stated = statedExpiry(opts.test ? 1 : sequence, cfg, demo.expiresAt);
   // Auch beim Testbrief: das genannte „online bis …“ muss stimmen (verlängert nur, kürzt nie)
   await extendDemoUntil(db, leadId, stated);
-  const binding = await letterDemoBinding({ ...lead, shortCode: code }, demo, cfg);
+  const binding = await letterDemoBinding({ ...lead, shortCode: code }, demo, cfg, opts.test === true);
   const includePage2 = cfg.letter.includeScreenshotPage && demo.screenshotDesktopKey && demo.screenshotMobileKey;
   const screenshotPage = includePage2
     ? {
@@ -377,7 +377,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       await assertLetterLeadEligible(tx, fresh, currentCfg, { testLetter: opts.test === true });
       const current = await currentDemoForLead(tx, leadId);
       if (current?.id !== demo.id) throw new Error('Demo während der Briefgenerierung ersetzt.');
-      const latestBinding = await letterDemoBinding(fresh, current, currentCfg);
+      const latestBinding = await letterDemoBinding(fresh, current, currentCfg, opts.test === true);
       if (JSON.stringify(latestBinding) !== JSON.stringify(binding))
         throw new Error('Demo oder Bild während der Erstellung geändert.');
       const previous = await tx.query.letters.findFirst({ where: and(eq(letters.leadId, leadId), eq(letters.sequence, seqDb)) });

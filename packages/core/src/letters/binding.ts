@@ -23,6 +23,7 @@ export interface LetterBinding {
   pdfHash: string;
   personalizationHash?: string;
   acquisitionHash?: string;
+  testRecipientHash?: string;
 }
 export function recipientFingerprint(lead: typeof leads.$inferSelect) {
   return sha256(
@@ -64,6 +65,7 @@ export async function letterDemoBinding(
   lead: typeof leads.$inferSelect,
   demo: typeof demos.$inferSelect,
   cfg: AppConfig,
+  isTest = false,
 ): Promise<Omit<LetterBinding, 'pdfHash'>> {
   const storage = getProviders().storage;
   const keys = [demo.htmlStorageKey, demo.screenshotDesktopKey, demo.screenshotMobileKey, demo.compositeKey];
@@ -98,6 +100,7 @@ export async function letterDemoBinding(
     recipientHash: recipientFingerprint(lead),
     routeHash: sha256(JSON.stringify([trackUrl(`/q/${lead.trackToken}`), trackUrl(`/${lead.shortCode}`)])),
     senderOfferHash: senderOfferFingerprint(cfg),
+    ...(isTest ? { testRecipientHash: sha256(JSON.stringify(cfg.letter.testRecipient)) } : {}),
   };
 }
 export async function assertLetterBinding(
@@ -123,7 +126,9 @@ export async function assertLetterBinding(
     demo.qaResultJson.quality?.passed === false
   )
     throw new Error('Brief gehört nicht mehr zur aktuell freigegebenen Demo.');
-  const now = await letterDemoBinding(lead, demo, cfg);
+  const now = await letterDemoBinding(lead, demo, cfg, letter.isTest);
+  if (recorded.testRecipientHash !== now.testRecipientHash)
+    throw new Error('Testempfänger oder Testbrief-Kennzeichnung seit der Generierung geändert.');
   for (const key of Object.keys(now) as (keyof typeof now)[]) {
     if (recorded[key] !== now[key])
       throw new Error('Empfänger, Fakten, Demo, Bild, Route oder Brief-/Angebotsstand seit der Generierung geändert.');
