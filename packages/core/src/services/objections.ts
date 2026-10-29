@@ -65,7 +65,7 @@ export async function recordManualObjection(
     toolName: CLASSIFY_TOOL,
     toolDescription: 'Klassifiziert die Nachricht.',
     inputSchema: CLASSIFY_SCHEMA as unknown as Record<string, unknown>,
-    maxTokens: 400,
+    maxTokens: 1500,
     effort: 'low',
     purpose: 'objection_classify',
     leadId: input.leadId ?? undefined,

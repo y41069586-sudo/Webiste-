@@ -154,7 +154,7 @@ async function classify(msg: SupportMessage): Promise<Classification> {
       toolName: CLASSIFY_TOOL,
       toolDescription: 'Klassifiziert die Nachricht.',
       inputSchema: CLASSIFY_SCHEMA as unknown as Record<string, unknown>,
-      maxTokens: 800,
+      maxTokens: 2000,
       effort: 'low',
       purpose: 'support_classify',
       leadId: msg.leadId ?? undefined,

@@ -60,3 +60,16 @@ it('preserves both billed responses when neither produces the required tool', as
   });
   expect(mocks.create).toHaveBeenCalledTimes(2);
 });
+it('never uses a tool call cut off at max_tokens; retries with twice the room and books both', async () => {
+  mocks.create
+    .mockResolvedValueOnce({
+      ...response('fixture-a'),
+      stop_reason: 'max_tokens',
+      content: [{ type: 'tool_use', name: 'answer', input: { ok: true } }],
+    })
+    .mockResolvedValueOnce(response('fixture-a', true));
+  const result = await new AnthropicLlm('fixture', false).generateStructured({ ...req, maxTokens: 600 });
+  expect(result.data).toEqual({ ok: true });
+  expect(result.usages).toHaveLength(2);
+  expect(mocks.create.mock.calls.map((c) => c[0].max_tokens)).toEqual([600, 1200]);
+});

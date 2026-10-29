@@ -64,6 +64,7 @@ export class AnthropicLlm implements LlmProvider {
   async generateStructured<T>(req: LlmStructuredRequest): Promise<LlmResult<T>> {
     let lastErr: unknown;
     const usages: LlmUsage[] = [];
+    let maxTokens = req.maxTokens ?? 8000;
     for (let attempt = 0; attempt < 2; attempt++) {
       const instruction =
         attempt === 0
@@ -72,7 +73,7 @@ export class AnthropicLlm implements LlmProvider {
       const res = await this.client.beta.messages
         .create({
           model: req.model,
-          max_tokens: req.maxTokens ?? 8000,
+          max_tokens: maxTokens,
           system: [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }],
           tools: [
             {
@@ -114,11 +115,16 @@ export class AnthropicLlm implements LlmProvider {
       const block = res.content.find(
         (b): b is Anthropic.Beta.BetaToolUseBlock => b.type === 'tool_use' && b.name === req.toolName,
       );
-      if (block) {
+      // Abgeschnittene Antwort (max_tokens): Tool-Eingabe ist unvollständig – nie verwenden, mit mehr Platz wiederholen
+      if (block && res.stop_reason !== 'max_tokens') {
         // Eingaben immer als Objekt behandeln (SDK liefert geparstes JSON)
         return { data: block.input as T, usage, usages };
       }
-      logger.warn({ purpose: req.purpose, stopReason: res.stop_reason, attempt }, 'llm: kein Tool-Aufruf, wiederhole');
+      if (res.stop_reason === 'max_tokens') maxTokens = Math.min(maxTokens * 2, 32000);
+      logger.warn(
+        { purpose: req.purpose, stopReason: res.stop_reason, attempt },
+        'llm: kein vollständiger Tool-Aufruf, wiederhole',
+      );
       lastErr = new LlmNoToolCallError(req.toolName, [...usages]);
     }
     throw lastErr;

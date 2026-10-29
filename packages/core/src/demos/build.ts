@@ -305,14 +305,20 @@ export interface GeneratedContent {
  * Inhalte per Claude (MODEL_CREATIVE) mit Regelprüfung. Bis zu zwei Versuche
  * (der zweite mit konkretem Feedback), danach geprüfte Fallback-Texte.
  */
-export async function generateDemoContent(lead: Lead, cfg: AppConfig, direction?: ArtDirection): Promise<GeneratedContent> {
+export async function generateDemoContent(
+  lead: Lead,
+  cfg: AppConfig,
+  direction?: ArtDirection,
+  qaFeedback?: string[],
+): Promise<GeneratedContent> {
   const research = await leadResearch(lead);
   const facts = {
     ...leadContentFacts(lead, cfg, research),
     designCharacter: direction?.character,
   };
   const seed = seedFromId(lead.id);
-  let feedback: string[] | undefined;
+  // Befunde der KI-Prüfung eines früheren Entwurfs gleich im ersten Versuch mitgeben
+  let feedback: string[] | undefined = qaFeedback?.length ? qaFeedback.slice(0, 12) : undefined;
   let lastViolations: RuleViolation[] = [];
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
@@ -428,6 +434,8 @@ export async function buildDemo(
     reviewNote?: string;
     /** festes Template (z. B. bestes der Branche laut Lernsystem) */
     templateId?: string;
+    /** Befunde der KI-Prüfung des vorigen Entwurfs (automatischer Neubau, höchstens einmal) */
+    qaFeedback?: string[];
   },
 ): Promise<string> {
   const db = getDb();
@@ -457,7 +465,7 @@ export async function buildDemo(
   const fixed = opts.templateId ? templatesForGroup(lead.branchGroup).find((t) => t.id === opts.templateId) : undefined;
   const templateId = fixed?.id ?? rotated.templateId;
   const palette = fixed ? (fixed.palettes.includes(rotated.palette) ? rotated.palette : fixed.palettes[0]!) : rotated.palette;
-  const generated = await generateDemoContent(lead, cfg, design.direction);
+  const generated = await generateDemoContent(lead, cfg, design.direction, opts.qaFeedback);
   const verifiedServices = leadContentFacts(lead, cfg, research).verifiedServices;
   const facts = {
     ...leadToFacts(lead, cfg),
@@ -508,6 +516,7 @@ export async function buildDemo(
               designSourceRef: design.sourceRef,
               designRequiresReview: design.requiresReview,
               researchHash,
+              ...(opts.qaFeedback?.length ? { qaRetry: 1 } : {}),
             },
           } as unknown as Record<string, unknown>,
         })

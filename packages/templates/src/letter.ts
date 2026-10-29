@@ -98,6 +98,8 @@ export interface LetterData {
   noAction: string;
   /** Nachsatz unter der Unterschrift (P. S.), nur in der persönlichen Vorschau-Einladung */
   postscript?: string;
+  /** Engere Zeilen und kleineres Vorschaubild, wenn der Text sonst ans Kleingedruckte stößt (Schriftgrößen bleiben) */
+  compact?: boolean;
   closing: string;
   signatureName: string;
   privacyNotice: string;
@@ -209,6 +211,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .v4-page .small{font-size:8pt;color:#344054;line-height:1.32}
 /* Current invitations: readable disclosures without shrinking the real device preview or QR. */
 .sign-row{display:flex;gap:8mm;align-items:flex-start}.sign-row .sign{flex:0 0 auto}.ps{margin:0;flex:1;font-size:9.5pt;line-height:1.4;padding-left:4mm;border-left:0.4mm solid #1d4e89}.invitation-page .v4-letter{top:91mm}.invitation-page .v4-letter .composite{max-height:53mm}.invitation-page .small{bottom:12mm;font-size:9pt}.invitation-page .invitation-next{margin:0.6mm 0 0.8mm}.invitation-page .invitation-next p+p{margin-top:1mm}
+.is-compact .subject{margin-bottom:2mm}.is-compact .v4-letter .invitation-intro{font-size:10pt}.is-compact .v4-letter .invitation-intro,.is-compact .invitation-next,.is-compact .ps,.is-compact .v4-letter .no-action{line-height:1.3}.is-compact.invitation-page .v4-letter .composite{max-height:41mm;width:auto;max-width:72mm}.is-compact .v4-letter .qrbox{flex:1 1 auto;display:grid;grid-template-columns:41mm 1fr;column-gap:3mm;align-items:center;text-align:left}.is-compact .v4-letter .qrbox .qr{grid-row:1 / span 2;margin:0}.is-compact .v4-letter .qrbox strong{align-self:end}.is-compact .v4-letter .qrbox .short{align-self:start;margin-top:1mm}
 .p2{position:absolute;left:25mm;right:20mm;top:25mm}
 .p2 h2{font-size:15pt;margin:0 0 2mm;color:#1d4e89}
 .muted{color:#4a5565}
@@ -219,7 +222,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:#1d232b;font-size
 .qrrow .qr{margin:0;width:41mm;height:41mm}
 </style></head>
 <body>
-<section class="page ${d.offerSummary || d.previewInvitation ? 'v4-page' : ''} ${d.previewInvitation ? 'invitation-page' : ''}" aria-label="Seite 1">
+<section class="page ${d.offerSummary || d.previewInvitation ? 'v4-page' : ''} ${d.previewInvitation ? 'invitation-page' : ''}${d.compact ? ' is-compact' : ''}" aria-label="Seite 1">
   <header class="head">
     <div><div class="brand" style="display:flex;align-items:center;gap:8px">${brandMarkHtml(26, true)}<span>${esc(d.sender.company)}</span></div><div class="tag">Websites für lokale Betriebe</div></div>
     <div class="web">${esc(d.sender.website)}</div>

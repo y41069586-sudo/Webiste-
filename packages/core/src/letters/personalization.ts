@@ -140,7 +140,7 @@ const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; be
     focus: /büro|buero|gewerbe|treppenhaus|fenster/i,
     title: 'Ihre Website-Vorschau für Gebäudereinigung ist online',
     benefit:
-      'Firmen und Verwaltungen in {ort} sehen dort auf einen Blick, welche Bereiche Sie reinigen – und fragen ihr Objekt direkt an.',
+      'Firmen und Verwaltungen in {ort} sehen dort auf einen Blick, welche Bereiche Sie reinigen – und den direkten Weg zur Objektanfrage.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
@@ -264,14 +264,14 @@ const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; be
     key: 'hair',
     branch: /fris[öe]|friseur|haarsalon/i,
     title: 'Ihre Website-Vorschau für Ihren Salon ist online',
-    benefit: 'neue Kundinnen und Kunden in {ort} sehen dort Ihr Angebot und fragen ihren Termin direkt am Handy an.',
+    benefit: 'wer in {ort} einen Friseur sucht, findet dort Ihr Angebot und den direkten Weg zur Terminanfrage.',
     caption: 'Ihre Salon-Website ansehen',
   },
   {
     key: 'nails',
     branch: /nagel|nail/i,
     title: 'Ihre Website-Vorschau für Ihr Nagelstudio ist online',
-    benefit: 'wer in {ort} ein Nagelstudio sucht, sieht dort Ihr Angebot und fragt den Termin direkt am Handy an.',
+    benefit: 'wer in {ort} ein Nagelstudio sucht, findet dort Ihr Angebot und den direkten Weg zur Terminanfrage.',
     caption: 'Ihre Studio-Website ansehen',
   },
   {
@@ -293,7 +293,7 @@ const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; be
     branch: /restaurant|bistro|gasthaus|trattoria|pizzeria/i,
     focus: /abhol|außer haus|mitnehm/i,
     title: 'Ihre Website-Vorschau für Restaurant und Abholung ist online',
-    benefit: 'Gäste in {ort} finden dort Ihr Angebot und die Anfahrt und können Besuch oder Abholung vorbereiten.',
+    benefit: 'Gäste in {ort} finden dort Ihr Angebot, die Anfahrt und den Weg zu Besuch oder Abholung.',
     caption: 'Ihre Restaurant-Website ansehen',
   },
   {
@@ -314,7 +314,7 @@ const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; be
     key: 'flowers',
     branch: /blumen|florist/i,
     title: 'Ihre Website-Vorschau für Ihr Blumengeschäft ist online',
-    benefit: 'wer in {ort} Blumen sucht, sieht dort Ihr Angebot und fragt seinen Wunsch direkt an.',
+    benefit: 'wer in {ort} Blumen sucht, findet dort Ihr Angebot und den direkten Weg zur Anfrage.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
@@ -328,7 +328,7 @@ const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; be
     key: 'music',
     branch: /musik|klavier|instrument/i,
     title: 'Ihre Website-Vorschau für Ihren Musikunterricht ist online',
-    benefit: 'Interessierte in {ort} sehen dort, was sie bei Ihnen lernen können, und fragen direkt an.',
+    benefit: 'Interessierte in {ort} sehen dort, was Sie unterrichten, und finden direkt den Weg zur Anfrage.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
@@ -342,14 +342,14 @@ const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; be
     key: 'dance',
     branch: /tanz|ballett/i,
     title: 'Ihre Website-Vorschau für Ihre Tanzschule ist online',
-    benefit: 'Interessierte in {ort} sehen dort Ihr Tanzangebot und fragen den passenden Einstieg direkt an.',
+    benefit: 'Interessierte in {ort} sehen dort Ihr Tanzangebot und finden direkt den Weg zur Anfrage.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
   {
     key: 'training',
     branch: /kurs|training|fitness/i,
     title: 'Ihre Website-Vorschau für Ihr Training ist online',
-    benefit: 'Interessierte in {ort} sehen dort Ihr Angebot auf einen Blick und fragen die Teilnahme direkt an.',
+    benefit: 'Interessierte in {ort} sehen dort Ihr Angebot auf einen Blick und finden direkt den Weg zur Anfrage.',
     caption: 'Ihre Website-Vorschau ansehen',
   },
 ];

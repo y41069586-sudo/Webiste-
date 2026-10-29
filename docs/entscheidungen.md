@@ -888,3 +888,34 @@ Für alle Arbeitsseiten gilt dasselbe Muster: eine Karte, wenige große Knöpfe,
   - In der aktuellen Umgebung laufen Zahlung, E-Mail, Domain und Hosting über die Test-Anbieter
     (`PAYMENT_PROVIDER=mock` usw.); es fließt kein Geld.
 - E2E `testlauf.spec.ts` deckt den ganzen Weg bis zur Danke-Seite ab.
+
+## 29.10.2026 – Gesamtprüfung mit echter KI („nie wieder Fehler“)
+
+Anlass: Die Demo des Testlaufs blieb mit „KI-Prüfung fehlgeschlagen“ stehen. Neues Prüfskript
+`packages/core/scripts/real-ai-check.ts`: Es läuft nur lokal (eigene Datenbank `wbm_realcheck_test`, alle Anbieter
+außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Veröffentlichung und Erstbrief;
+`--fakten` ergänzt belegte Rechercheangaben. Gefundene und behobene Fehler:
+
+- **KI-Prüfung der Demo**: Gekennzeichnete Beispiel-Leistungen galten als „erfunden“ (hoch). Der QA-Prompt kennt
+  jetzt die Kennzeichnung; „hoch“ gilt nur noch für harte erfundene Fakten. Ohne bestätigte Leistungen nennen
+  Überschrift, Unterzeile und Suchtexte keine Einzelleistungen mehr.
+- **Selbstheilung Demo**: Scheitert die QA nur an Textbefunden (Inhaltsregeln/KI-Prüfung), baut der Worker die Demo
+  einmal automatisch neu und gibt der KI die Befunde mit (`qaFeedback`, `_meta.qaRetry`). Erst beim zweiten
+  Scheitern kommt die Meldung.
+- **Nutzen-Sätze im Brief** (§ 5 UWG): Sätze wie „neue Kundinnen und Kunden … fragen an“ wertete die
+  Wahrheitsprüfung als Wirkungsversprechen. Alle Branchensätze beschreiben jetzt nur, was auf der Seite steht
+  („findet dort Ihr Angebot und den direkten Weg zur Terminanfrage“).
+- **Brief zu lang**: Bei vielen Branchen stieß der Text ans Kleingedruckte, besonders mit Rechercheangaben.
+  `fitLetterLayout` setzt erst enger (Zeilenabstand, Bild kleiner, QR-Text neben dem QR-Code; QR bleibt 4,1 cm,
+  Pflichttexte unverändert), danach entfallen schrittweise nur Zusatzsätze. Das Längenbudget des KI-Schreibers
+  (`LETTER_TEXT_LIMITS`) ist so bemessen, dass jede gültige Fassung passt. Neuer Test: alle Branchen ×
+  Varianten × Folgebriefe, mit und ohne Fakten, KI-Fassung an der Längengrenze.
+- **Abgeschnittene KI-Antworten**: Endet eine Antwort mit `max_tokens`, war die Tool-Eingabe unvollständig und wurde
+  trotzdem benutzt (Wahrheitsprüfung: „Cannot read properties of undefined“ → Brief gesperrt). Der Anbieter verwirft
+  solche Antworten jetzt und wiederholt mit doppeltem Platz. Zu knappe Budgets (Wahrheitsprüfung, Briefschreiber,
+  Support, Einwände) sind erhöht. Die Wahrheitsprüfung liest Antworten defensiv; ohne eindeutiges Ergebnis bleibt
+  der Brief gesperrt.
+- **Selbstheilung Brief**: Scheitert ein automatisch erzeugter Brief, erzeugt der Worker ihn nach einer Minute
+  einmal neu. Scheitert er wieder, bleibt er zur Prüfung stehen.
+- Kein Fehler: Gastronomie, Yoga, Blumenladen u. a. lehnt die Recherche-Bewertung ab („Branche außerhalb dieser
+  Zielkampagne“). Das ist gewollt (Kampagne seit 28.10.: Handwerk, danach Friseur/Kosmetik).

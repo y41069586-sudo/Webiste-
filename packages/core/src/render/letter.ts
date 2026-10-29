@@ -91,6 +91,38 @@ export function statedExpiry(
   return demoExpiresAt && demoExpiresAt > target ? endOfDayBerlin(demoExpiresAt) : target;
 }
 
+/**
+ * Brief rendern und prüfen. Stößt die Einladung ans Kleingedruckte (z. B. langer Firmenname): erst enger setzen,
+ * dann Vorstellung, Eigentums-Zusatz und P. S. weglassen – nie Pflichttext kürzen. Verändert `data`.
+ */
+export async function fitLetterLayout(
+  data: ReturnType<typeof composeLetter>,
+  cfg: AppConfig,
+): Promise<{ html: string; domIssues: LayoutIssue[] }> {
+  let html = renderLetterHtml(data);
+  let domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
+  const dropFromIntro = (text: string, by = '') => {
+    // als Satzteil (mit Leerzeichen davor) oder als eigener Absatz (KI-Fassung)
+    if (data.intro)
+      data.intro = data.intro.map((p) => (p.trim() === text.trim() ? '' : p.replace(text, by)).trim()).filter(Boolean);
+  };
+  for (const shorten of [
+    () => (data.compact = true),
+    () => dropFromIntro(' Ein Blick dauert keine Minute.'),
+    () => (data.noAction = senderContactLine(cfg, { withIntro: false })),
+    // Recherchehinweis ist Zusatz; Beobachtung und belegte Angaben bleiben
+    () => dropFromIntro(' Bei unserer dokumentierten Suche haben wir keinen eigenen Webauftritt von Ihnen gefunden.'),
+    () => dropFromIntro(' – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.', '.'),
+    () => (data.postscript = undefined),
+  ]) {
+    if (!data.previewInvitation || !domIssues.some((i) => i.check === 'ueberlappung')) break;
+    shorten();
+    html = renderLetterHtml(data);
+    domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
+  }
+  return { html, domIssues };
+}
+
 export interface GenerateLetterOptions {
   actor: string;
   /** Testbrief an eigene Adresse (z. B. erster echter Brief) */
@@ -281,23 +313,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       throw Error('Demo während des Textabgleichs geändert; Brief erneut erstellen.');
   }
   const data = composeLetter(composeInput);
-  let html = renderLetterHtml(data);
-  let domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
-  // Einladung zu lang (z. B. langer Firmenname): erst die Vorstellung, dann das P. S. weglassen – nie Pflichttext kürzen
-  for (const shorten of [
-    () => (data.noAction = senderContactLine(cfg, { withIntro: false })),
-    // Bei persönlichem Einstieg ist der Eigentums-Zusatz verzichtbar, die Beobachtung nicht
-    () => {
-      if (data.intro?.[0])
-        data.intro[0] = data.intro[0].replace(' – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.', '.');
-    },
-    () => (data.postscript = undefined),
-  ]) {
-    if (!data.previewInvitation || !domIssues.some((i) => i.check === 'ueberlappung')) break;
-    shorten();
-    html = renderLetterHtml(data);
-    domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
-  }
+  const { html, domIssues } = await fitLetterLayout(data, cfg);
   const pdf = await htmlToPdf(html);
   const expectedPages = screenshotPage ? 2 : 1;
   const pdfCheck = await validateLetterPdf(pdf, {

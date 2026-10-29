@@ -54,16 +54,20 @@ export async function runTruthCheck(input: TruthCheckInput, opts: RunTruthCheckO
       toolName: TRUTH_TOOL_NAME,
       toolDescription: 'Ergebnis der Prüfung auf unbelegte Wirkungsaussagen',
       inputSchema: TRUTH_TOOL_SCHEMA as unknown as Record<string, unknown>,
-      maxTokens: 600,
+      maxTokens: 2000,
+      effort: 'low',
       purpose: 'truth_check',
       leadId: opts.leadId,
       idempotencyKey: opts.idempotencyKey,
     });
-    result.llm = { unbackedEffectClaim: answer.unbacked_effect_claim, statements: answer.statements };
+    // Antwort defensiv lesen: ohne eindeutiges Ergebnis bleibt der Brief gesperrt (catch unten)
+    if (typeof answer?.unbacked_effect_claim !== 'boolean') throw Error('Prüfergebnis unvollständig');
+    const statements = Array.isArray(answer.statements) ? answer.statements.filter((s) => typeof s === 'string') : [];
+    result.llm = { unbackedEffectClaim: answer.unbacked_effect_claim, statements };
     if (answer.unbacked_effect_claim) {
       result.violations.push({
         rule: 'llm',
-        detail: `Unbelegte Wirkungsaussage: ${answer.statements.map((s) => `„${s}“`).join(', ') || '(ohne Zitat)'}`,
+        detail: `Unbelegte Wirkungsaussage: ${statements.map((s) => `„${s}“`).join(', ') || '(ohne Zitat)'}`,
       });
     }
   } catch (err) {

@@ -16,6 +16,7 @@ import { audit } from '../services/audit';
 import { raiseAlert } from '../services/budget';
 import { approveDemo, requiresManualReview } from '../services/demo-review';
 import { llmStructured } from '../services/llm';
+import { enqueue, QUEUES } from '../queue';
 import { browserChecks, lighthouseCheck, validateHtml } from './qa';
 import { renderComposite, takeScreenshots } from './screenshots';
 
@@ -72,7 +73,9 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
         }
       : {}),
   });
-  const meta = (demo.contentJson as { _meta?: { source?: string } } | null)?._meta;
+  const meta = (demo.contentJson as { _meta?: { source?: string; qaRetry?: number } } | null)?._meta;
+  // Korrekturhinweise für einen automatischen Neubau (Inhaltsregeln + harte KI-Befunde)
+  const rebuildFeedback = violations.slice(0, 8).map((v) => `${v.field}: ${v.rule} – ${v.detail}`);
   if (meta?.source === 'fallback')
     checks.push({ name: 'inhaltsquelle', passed: true, details: 'Geprüfte Standardtexte (KI-Ausgabe verworfen)' });
 
@@ -92,6 +95,7 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
         leadId: lead.id,
       });
       const high = res.issues.filter((i) => i.severity === 'hoch');
+      rebuildFeedback.push(...high.slice(0, 8).map((i) => `${i.field}: ${i.problem}`));
       checks.push({
         name: 'ki-pruefung',
         passed: high.length === 0,
@@ -194,7 +198,23 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
     actor,
     context: { failed: checks.filter((c) => !c.passed).map((c) => c.name) },
   });
-  if (!passed && decide) {
+  const failedNames = checks.filter((c) => !c.passed).map((c) => c.name);
+  const contentOnly = failedNames.length > 0 && failedNames.every((n) => n === 'ki-pruefung' || n === 'inhaltsregeln');
+  if (!passed && decide && contentOnly && !meta?.qaRetry && rebuildFeedback.length) {
+    // Nur Textbefunde: einmal automatisch neu schreiben lassen (mit den Befunden), statt liegen zu bleiben
+    await enqueue(
+      QUEUES.buildDemo,
+      {
+        leadId: lead.id,
+        triggeredBy: 'qa-rebuild',
+        templateId: demo.templateId,
+        ...(current?.reviewNote ? { reviewNote: current.reviewNote } : {}),
+        qaFeedback: rebuildFeedback,
+      },
+      { singletonKey: `demo-rebuild:${demoId}` },
+    );
+    await audit(db, { entity: 'demo', entityId: demoId, action: 'qa_auto_rebuild', actor, context: { failed: failedNames } });
+  } else if (!passed && decide) {
     await raiseAlert(db, {
       level: 'warn',
       code: `demo_qa_failed:${demoId}`,

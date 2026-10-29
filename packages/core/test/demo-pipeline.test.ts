@@ -7,7 +7,10 @@ import { findLeads } from '../src/services/lead-finder';
 import { approveDemo, publishDemo, rejectDemo, requiresManualReview } from '../src/services/demo-review';
 import { updateConfig } from '../src/config/service';
 import { getProviders } from '../src/providers';
-import { stopBoss } from '../src/queue';
+import { getBoss, stopBoss } from '../src/queue';
+import { registerMockStructured } from '../src/providers';
+import { QA_TOOL_NAME } from '../src/demos/content';
+import { alerts } from '../src/db/schema';
 import { resetDb } from './helpers';
 
 describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
@@ -98,4 +101,53 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
     expect(await requiresManualReview(getDb(), 0.5)).toBe(false);
     expect(await requiresManualReview(getDb(), 0.05)).toBe(true);
   });
+
+  it('KI-Befund „hoch“: einmal automatisch mit den Befunden neu bauen, beim zweiten Mal nur melden', async () => {
+    const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
+    registerMockStructured(QA_TOOL_NAME, () => ({
+      issues: [{ field: 'about', problem: 'Erfundene Gründungsjahr-Angabe', severity: 'hoch' }],
+    }));
+    try {
+      const first = await buildDemo(other.id, { actor: 'job:test' });
+      await qaDemo(first, 'job:test', { lighthouse: false });
+      expect((await getDb().query.demos.findFirst({ where: eq(demos.id, first) }))?.status).toBe('qa_failed');
+      const boss = await getBoss();
+      const jobs = (
+        await boss
+          .getDb()
+          .executeSql(`SELECT data FROM pgboss.job WHERE name = 'build-demo' AND singleton_key = $1`, [`demo-rebuild:${first}`])
+      ).rows as { data: { leadId: string; qaFeedback: string[] } }[];
+      expect(jobs).toHaveLength(1);
+      expect(jobs[0]!.data.leadId).toBe(other.id);
+      expect(jobs[0]!.data.qaFeedback).toEqual(['about: Erfundene Gründungsjahr-Angabe']);
+      expect(
+        await getDb()
+          .select()
+          .from(alerts)
+          .where(eq(alerts.code, `demo_qa_failed:${first}`)),
+      ).toHaveLength(0);
+
+      // Neubau (wie der Job): Befunde gehen in den ersten Versuch, Demo trägt qaRetry
+      const second = await buildDemo(other.id, { actor: 'job:test', qaFeedback: jobs[0]!.data.qaFeedback });
+      const meta = (await getDb().query.demos.findFirst({ where: eq(demos.id, second) }))?.contentJson?._meta as {
+        qaRetry?: number;
+      };
+      expect(meta.qaRetry).toBe(1);
+      await qaDemo(second, 'job:test', { lighthouse: false });
+      const again = (
+        await boss
+          .getDb()
+          .executeSql(`SELECT 1 FROM pgboss.job WHERE name = 'build-demo' AND singleton_key = $1`, [`demo-rebuild:${second}`])
+      ).rows;
+      expect(again).toHaveLength(0);
+      expect(
+        await getDb()
+          .select()
+          .from(alerts)
+          .where(eq(alerts.code, `demo_qa_failed:${second}`)),
+      ).toHaveLength(1);
+    } finally {
+      registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));
+    }
+  }, 90_000);
 });

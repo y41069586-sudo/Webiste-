@@ -11,6 +11,7 @@ defineJob(
         actor: `job:build-demo:${data.triggeredBy ?? 'system'}`,
         reviewNote: data.reviewNote,
         templateId: data.templateId,
+        qaFeedback: data.qaFeedback,
       });
       return { demoId };
     } catch (err) {

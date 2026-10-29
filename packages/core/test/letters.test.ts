@@ -237,3 +237,158 @@ describe('Alle Briefvarianten passen im ungünstigsten Fall auf eine Seite', () 
     }
   }, 120_000);
 });
+
+describe('V4-Einladung passt für jede Branche auf eine Seite (fester Text, lange Angaben)', () => {
+  afterAll(closeBrowser);
+  it('alle Branchen × Varianten A/B/C × Folgebriefe, nach dem Einpassen ohne Befund', async () => {
+    const { composeLetter } = await import('../src/letters/compose');
+    const { v4LetterVariant } = await import('../src/letters/conversion-v4');
+    const { INDUSTRIES } = await import('../src/types');
+    const { htmlToPdf } = await import('../src/render');
+    const { fitLetterLayout, qrDataUri } = await import('../src/render/letter');
+    const { DEFAULT_CONFIG } = await import('../src/config/settings');
+    const { privacyNoticeText, objectionNoticeText } = await import('../src/letters/notices');
+    const { OPERATOR_TEST_CONFIG } = await import('./helpers');
+    const { previewInvitationCopy } = await import('../src/letters/personalization');
+    const { invitationContextHash, LETTER_TEXT_LIMITS: L } = await import('../src/letters/writer');
+    // Text bis kurz vor die Grenze verlängern (ganze Wörter)
+    const filler = (start: string, max: number) => {
+      let t = start;
+      while (t.length < max - 40) t += ' und ausführlich beschriebene Leistungen rund um den Betrieb';
+      return `${t.slice(0, max - 1).replace(/\s+\S*$/, '')}.`;
+    };
+    const cfg = {
+      ...DEFAULT_CONFIG,
+      ...OPERATOR_TEST_CONFIG,
+      sender: {
+        ...DEFAULT_CONFIG.sender,
+        ...OPERATOR_TEST_CONFIG.sender,
+        name: 'Vorname Langername-Beispiel',
+        email: 'kontakt@beispiel-webdesign.world',
+        phone: '+49 1521 0000000',
+        photoUrl: '',
+      },
+      offers: { ...DEFAULT_CONFIG.offers, activeVersion: 'v4' as const },
+    } as typeof DEFAULT_CONFIG;
+    const svg = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1080"><rect width="1800" height="1080" fill="#ccc"/></svg>',
+    );
+    const qr = await qrDataUri('https://go.example-websites.de/q/ABCDEFGHJKLMNPQRSTUVWXYZ');
+    const failures: string[] = [];
+    for (const b of cfg.targeting.branches) {
+      const industry = (INDUSTRIES as readonly string[]).includes(b.group)
+        ? (b.group as (typeof INDUSTRIES)[number])
+        : 'dienstleistung';
+      const cases = [
+        ...(['A', 'B', 'C'] as const).map((arm) => ({ arm, sequence: 1 as const, mode: 'fest' as const })),
+        ...(['A', 'B'] as const).map((arm) => ({ arm, sequence: 1 as const, mode: 'fakten' as const })),
+        { arm: 'A' as const, sequence: 1 as const, mode: 'ki' as const },
+        { arm: 'B' as const, sequence: 1 as const, mode: 'ki-beobachtung' as const },
+        { arm: 'A' as const, sequence: 2 as const, mode: 'fest' as const },
+        { arm: 'A' as const, sequence: 3 as const, mode: 'fest' as const },
+      ];
+      // Längstes zulässiges Faktenpaket: Beobachtung, Websuche, drei belegte Angaben (je ≤ 140 Zeichen)
+      const checkedAt = new Date().toISOString();
+      const longFacts = [
+        {
+          text: 'Ihr Eintrag nennt seit kurzem neue Öffnungszeiten am Samstagvormittag',
+          source: 'osm',
+          verified: true,
+          kind: 'public_observation' as const,
+          checkedAt,
+        },
+        {
+          text: 'not_found',
+          source: 'suche',
+          verified: true,
+          kind: 'website_search' as const,
+          checkedAt,
+          checks: ['name_city_search' as const, 'directory_links' as const, 'social_links' as const],
+        },
+        {
+          text: 'Beratung und Ausführung für Privatkunden und Hausverwaltungen im gesamten Dortmunder Süden und Umgebung',
+          source: 'osm',
+          verified: true,
+        },
+        { text: 'Notdienst nach Absprache auch am Wochenende', source: 'osm', verified: true },
+        {
+          text: 'Kostenlose Erstberatung vor Ort für Eigentümer, Mieter und kleine Gewerbebetriebe nach Terminabsprache',
+          source: 'osm',
+          verified: true,
+        },
+      ];
+      for (const { arm, sequence, mode } of cases) {
+        const facts = mode !== 'fest';
+        const recipient = {
+          businessName: `${b.label} Beispiel am Westfalenpark Dortmund-Hörde`,
+          street: 'Hörder Semerteichstraße',
+          houseNumber: '183a',
+          postalCode: '44263',
+          city: 'Dortmund',
+        };
+        const context = {
+          businessName: recipient.businessName,
+          city: recipient.city,
+          branchLabel: b.label,
+          details: facts ? longFacts : [],
+        };
+        // KI-Fassung genau an den Längengrenzen des Schreibers (LETTER_TEXT_LIMITS)
+        const base = previewInvitationCopy(context, sequence, arm === 'B' ? 'B' : 'A');
+        const invitationCopy =
+          mode === 'ki' || mode === 'ki-beobachtung'
+            ? {
+                copy: {
+                  ...base,
+                  subject: filler('Ihre Website-Idee für den Betrieb am Westfalenpark', 118),
+                  opening:
+                    mode === 'ki'
+                      ? filler('ich habe für Ihren Betrieb eine eigene Website gebaut', L.body / 2)
+                      : `${filler('mir ist aufgefallen, dass Ihr Eintrag neue Öffnungszeiten am Samstag nennt', L.observation)} ${filler('deshalb habe ich für Ihren Betrieb eine eigene Website gebaut', (L.total - L.observation) / 2 - 1)}`,
+                  intro: [
+                    filler(
+                      'Wer in Dortmund nach Ihnen sucht, sieht dort Ihr Angebot',
+                      mode === 'ki' ? L.body / 2 : (L.total - L.observation) / 2 - 1,
+                    ),
+                    ...(base.research ? [base.research] : []),
+                  ],
+                },
+                contextHash: invitationContextHash(context, sequence),
+                demoHash: 'test',
+                engine: 'llm' as const,
+                attempts: 1,
+                reviewReasons: [],
+              }
+            : undefined;
+        const data = composeLetter({
+          variant: v4LetterVariant(industry, arm, sequence),
+          ...(invitationCopy ? { invitationCopy } : {}),
+          cfg,
+          sequence,
+          recipient,
+          branchLabel: b.label,
+          personalization: context,
+          domain: null,
+          rating: null,
+          compositeDataUri: `data:image/svg+xml;base64,${svg.toString('base64')}`,
+          qrDataUri: qr,
+          shortUrl: 'go.example-websites.de/k7m2xq',
+          expiresLabel: '23. November 2026',
+          dateLine: 'Dortmund, 23. Oktober 2026',
+          privacyNotice: privacyNoticeText(cfg, 'osm', 'https://app.example-websites.de/datenschutz'),
+          objectionNotice: objectionNoticeText('widerspruch@example-websites.de'),
+          priceLabel: '597 €',
+        });
+        const { html, domIssues } = await fitLetterLayout(data, cfg);
+        const label = `${b.key} ${arm}${sequence} ${mode}`;
+        if (domIssues.length) failures.push(`${label}: ${JSON.stringify(domIssues)}`);
+        const check = await validateLetterPdf(await htmlToPdf(html), {
+          recipientLines: data.recipientLines,
+          position: 'left',
+          expectedPages: 1,
+        });
+        if (check.issues.length) failures.push(`${label} PDF: ${JSON.stringify(check.issues)}`);
+      }
+    }
+    expect(failures).toEqual([]);
+  }, 600_000);
+});

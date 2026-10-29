@@ -50,7 +50,15 @@ export interface QueuePayloads {
   };
   /** KI-Prüfung eines gefundenen Betriebs (Websuche) */
   'research-lead': { leadId: string; triggeredBy?: string };
-  'build-demo': { leadId: string; regenerate?: boolean; triggeredBy?: string; reviewNote?: string; templateId?: string };
+  'build-demo': {
+    leadId: string;
+    regenerate?: boolean;
+    triggeredBy?: string;
+    reviewNote?: string;
+    templateId?: string;
+    /** Befunde der KI-Prüfung des vorigen Entwurfs (einmaliger automatischer Neubau) */
+    qaFeedback?: string[];
+  };
   'qa-demo': { demoId: string };
   'publish-demo': { demoId: string };
   /** Kostenlose Anpassung vor dem Kauf: Demo unter demselben Link neu erzeugen */

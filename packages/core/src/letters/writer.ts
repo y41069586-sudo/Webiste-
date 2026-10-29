@@ -6,6 +6,11 @@ import { previewInvitationCopy, type VerifiedLetterContext } from './personaliza
 import { DEFAULT_BLOCKLIST } from './truth-check';
 
 export const LETTER_WRITER_TOOL = 'schreibe_persoenliche_vorschau_einladung';
+/**
+ * Längenbudget der KI-Fassung, gemessen am ungünstigsten Brief (langer Name, Recherchehinweis, lange Absenderdaten):
+ * so passt jede gültige Fassung nach dem Einpassen auf die erste Seite (Test „V4-Einladung passt für jede Branche“).
+ */
+export const LETTER_TEXT_LIMITS = { observation: 150, body: 420, total: 440 } as const;
 export const LETTER_REVIEW_TOOL = 'pruefe_brief_fakten_und_demo';
 const DraftSchema = z
   .object({
@@ -15,7 +20,7 @@ const DraftSchema = z
     qrCaption: z.string().min(15).max(85),
     factIds: z.array(z.string()).max(3),
     /** Persönlicher Einstieg „Mir ist aufgefallen …“ – nur wenn eine belegte Beobachtung geliefert wurde */
-    observation: z.string().max(220).optional(),
+    observation: z.string().max(LETTER_TEXT_LIMITS.observation).optional(),
   })
   .strict();
 export type InvitationDraft = z.infer<typeof DraftSchema>;
@@ -52,7 +57,8 @@ Ein Farbangebot im Salon verlangt eine andere Argumentation als Bartpflege. Phot
 als allgemeine Elektroinstallation. Verwende solche Schwerpunkte NUR, wenn sie in den Fakten stehen.
 Nicht jede Einleitung beginnt mit "wir haben". Nutzen und Entwurf können in unterschiedlicher Reihenfolge
 stehen. Kein abgehacktes "Leistung – eine Website könnte ...", keine austauschbaren Qualitätsfloskeln.
-Kurze Sätze, respektvolles Sie, insgesamt höchstens 460 Zeichen für opening + benefit.
+Kurze Sätze, respektvolles Sie, insgesamt höchstens ${LETTER_TEXT_LIMITS.body} Zeichen für opening + benefit
+(mit observation zusammen höchstens ${LETTER_TEXT_LIMITS.total} Zeichen).
 Aufbau mit Wirkung, aber ehrlich: (1) Einstieg = Vorleistung und Eigentum: Es wurde bereits eine eigene Website
 für diesen Betrieb gebaut, mit seinem Namen, seiner Adresse und seinen Kontaktdaten. (2) Nutzen = Blick der
 Kundschaft vor Ort ("Wer in {Stadt} … sucht, …") mit genau einer konkreten Handlung (anrufen, anfragen,
@@ -103,7 +109,10 @@ export function invitationDraftIssues(
   const text = [d.subject, noticed, d.opening, d.benefit, d.qrCaption].join(' ');
   const body = [d.opening, d.benefit].join(' ');
   const issues: string[] = [];
-  if (body.length > 460) issues.push('Einstieg und Nutzen zusammen kürzer als 460 Zeichen schreiben.');
+  if (body.length > LETTER_TEXT_LIMITS.body)
+    issues.push(`Einstieg und Nutzen zusammen kürzer als ${LETTER_TEXT_LIMITS.body} Zeichen schreiben.`);
+  else if (noticed.length + 1 + body.length > LETTER_TEXT_LIMITS.total)
+    issues.push(`Beobachtung, Einstieg und Nutzen zusammen kürzer als ${LETTER_TEXT_LIMITS.total} Zeichen schreiben.`);
   if (!`${d.subject} ${d.opening}`.includes(context.businessName)) issues.push('Wörtlicher Firmenname fehlt.');
   if (/[<>{}*\r\n]|https?:|www\./i.test(text)) issues.push('Keine Links, Markup oder Platzhalter verwenden.');
   if (/€|\beuro\b|\beur\b|\btarif|\bpreis|Care\+|\d+\s*[,.]-|\bab\s+\d/i.test(text))
@@ -217,7 +226,7 @@ export async function writePreviewInvitation(
         inputSchema: WRITER_SCHEMA,
         purpose: 'letter_personal_copy',
         leadId: input.leadId,
-        maxTokens: 1100,
+        maxTokens: 3000,
         effort: 'medium',
       });
       reasons = invitationDraftIssues(draft, input.context, facts, base.observation);
@@ -251,7 +260,7 @@ passed nur bei keinen Befunden, sonst kurze konkrete Reparaturhinweise in issues
         inputSchema: REVIEW_SCHEMA,
         purpose: 'letter_copy_review',
         leadId: input.leadId,
-        maxTokens: 650,
+        maxTokens: 2500,
         effort: 'medium',
       });
       const parsed = z
