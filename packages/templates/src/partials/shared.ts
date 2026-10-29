@@ -317,6 +317,21 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
         : ''
     }
     ${demo.offerVersion === 'v4' ? '' : trust}
+    <div id="wunsch" class="mt-6 rounded-xl border-2 border-[#111827] bg-white p-5 text-[#111827]">
+      <p class="text-xs font-semibold uppercase tracking-wide text-[#047857]">Kostenlos und unverbindlich</p>
+      <h3 class="mt-1 text-lg font-semibold">Etwas soll anders sein? Ich passe den Entwurf vorher an.</h3>
+      <p class="mt-1 text-sm text-[#374151]">Andere Farben, Texte, Leistungen oder Bilder – schreiben Sie mir Ihren Wunsch. Ich ändere den Entwurf kostenlos, bevor Sie sich entscheiden, und Sie sehen den neuen Stand unter demselben Link.</p>
+      <form method="post" action="${esc(demo.questionUrl)}" accept-charset="utf-8" class="mt-4 grid gap-3 sm:grid-cols-2">
+        <input type="hidden" name="kind" value="wish">
+        <div><label for="w-name" class="mb-1 block text-sm font-medium">Name</label><input id="w-name" name="name" type="text" autocomplete="name" required maxlength="120" class="block w-full rounded-md border border-[#9ca3af] px-3 py-2"></div>
+        <div><label for="w-email" class="mb-1 block text-sm font-medium">E-Mail für den neuen Stand</label><input id="w-email" name="email" type="email" autocomplete="email" required maxlength="200" class="block w-full rounded-md border border-[#9ca3af] px-3 py-2"></div>
+        <div class="sm:col-span-2"><label for="w-msg" class="mb-1 block text-sm font-medium">Ihr Wunsch</label><textarea id="w-msg" name="message" rows="3" required maxlength="4000" placeholder="z. B. „Bitte unsere Leistung Fassadenanstrich ergänzen und die Farbe dunkler.“" class="block w-full rounded-md border border-[#9ca3af] px-3 py-2"></textarea></div>
+        <div class="hidden" aria-hidden="true"><label for="w-website">Website</label><input id="w-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+        <input type="hidden" name="ts" value="${Date.now()}">
+        <div class="flex items-start gap-2 text-sm sm:col-span-2"><input id="w-consent" name="consent" type="checkbox" required class="mt-1 h-4 w-4"><label for="w-consent">Ich bin einverstanden, dass meine Angaben zur Bearbeitung meines Wunsches verarbeitet werden. Hinweise in der <a class="underline" href="${esc(demo.sender.privacyUrl)}">Datenschutzerklärung</a>.</label></div>
+        <div class="sm:col-span-2"><button type="submit" class="inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-5 py-2 font-semibold text-white hover:bg-[#1f2937]">Wunsch kostenlos senden</button></div>
+      </form>
+    </div>
     <div class="mt-6 rounded-xl border border-[#d1d5db] bg-white p-5"><p class="font-semibold">Noch eine Frage vor dem Kauf?</p><p class="mt-1 text-sm text-[#374151]">Schreiben Sie mir – Sie bekommen eine persönliche Antwort, kein Callcenter und kein Verkaufsdruck.</p><div class="mt-3 flex flex-wrap gap-2 text-sm">${demo.whatsappUrl ? `<a href="${esc(demo.whatsappUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center rounded-md border border-[#111827] px-4 font-semibold">Frage per WhatsApp</a>` : ''}${demo.sender.email ? `<a href="mailto:${esc(demo.sender.email)}" class="inline-flex min-h-11 items-center rounded-md border border-[#111827] px-4 font-semibold">Frage per E-Mail</a>` : ''}<a href="#frage" class="inline-flex min-h-11 items-center rounded-md border border-[#111827] px-4 font-semibold">Frageformular</a></div></div>
     <form method="post" action="${esc(demo.optOutUrl)}" class="sw-demo-optout"><button type="submit" class="min-h-11 underline">Kein Interesse – Entwurf und Werbung abbestellen</button></form>
   </div>

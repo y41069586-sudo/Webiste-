@@ -1,6 +1,7 @@
 import { PgBoss, type SendOptions } from 'pg-boss';
 import { queueRuntimeConfig } from './queue-config';
 import { logger } from './logger';
+import type { DemoRevisionPatch } from './demos/revision-types';
 
 /** Alle Queues mit Standardoptionen (Retries mit Backoff, Dead-Letter). */
 export const QUEUES = {
@@ -8,6 +9,7 @@ export const QUEUES = {
   buildDemo: 'build-demo',
   qaDemo: 'qa-demo',
   publishDemo: 'publish-demo',
+  reviseDemo: 'revise-demo',
   generateLetter: 'generate-letter',
   sendLetter: 'send-letter',
   sendApprovedLetters: 'send-approved-letters',
@@ -48,6 +50,8 @@ export interface QueuePayloads {
   'build-demo': { leadId: string; regenerate?: boolean; triggeredBy?: string; reviewNote?: string; templateId?: string };
   'qa-demo': { demoId: string };
   'publish-demo': { demoId: string };
+  /** Kostenlose Anpassung vor dem Kauf: Demo unter demselben Link neu erzeugen */
+  'revise-demo': { demoId: string; patch: DemoRevisionPatch; actor: string; wishMessageId?: string | null };
   'generate-letter': { leadId: string; sequence: 1 | 2 | 3; triggeredBy?: string; test?: boolean; regenerate?: boolean };
   'send-letter': { letterId: string };
   'send-approved-letters': { triggeredBy: string; limit?: number };

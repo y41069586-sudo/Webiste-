@@ -123,7 +123,7 @@ export function personalizedLetterCopy(context: VerifiedLetterContext, variant =
 /** New campaign copy is a source-bound invitation, not a priced offer. */
 export const PREVIEW_LETTER_VERSION = 'personal-preview-2';
 export const PREVIEW_ORDER_NOTICE =
-  '**Ohne Verkaufsgespräch:** Ich rufe Sie nicht an. Ansehen kostet nichts, und ohne Bestellung entstehen keine Kosten. Gefällt Ihnen der Entwurf, passe ich ihn mit Ihnen an – online geht er erst nach Ihrer Freigabe. Die Umsetzung ist kostenpflichtig; Festpreis und Vertragsbedingungen sehen Sie vor jeder Bestellung in der Vorschau. Unabhängiger, nicht beauftragter Entwurf.';
+  '**Ohne Verkaufsgespräch:** Ich rufe Sie nicht an. Ansehen kostet nichts; passt etwas nicht, ändere ich den Entwurf vorher ohne Kosten. Online geht er erst nach Ihrer Freigabe. Die Umsetzung ist kostenpflichtig – Festpreis und Vertragsbedingungen stehen vor jeder Bestellung in der Vorschau. Unabhängiger, nicht beauftragter Entwurf.';
 
 const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; benefit: string; caption: string }[] = [
   {

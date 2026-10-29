@@ -143,3 +143,5 @@ export * from './assistant/ai';
 export * from './assistant/engine';
 export * from './assistant/knowledge';
 export * from './assistant/data';
+export * from './demos/revision-types';
+export * from './demos/design-options';

@@ -18,12 +18,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
       consent: form.get('consent') === 'on',
       honeypot: String(form.get('website') ?? ''),
       ts: Number(form.get('ts') ?? 0),
+      kind: form.get('kind') === 'wish' ? 'wish' : 'question',
     },
     requestMetaFrom(req.headers),
   );
   if (res.ok || res.reason === 'spam') {
     // Spam bekommt dieselbe Antwort (kein Hinweis für Bots)
-    return new Response(null, { status: 303, headers: { location: demoUrl(`/d/${slug}/danke`) } });
+    return new Response(null, {
+      status: 303,
+      headers: { location: demoUrl(`/d/${slug}/danke${form.get('kind') === 'wish' ? '?wunsch=1' : ''}`) },
+    });
   }
   const msg =
     res.reason === 'rate_limited'

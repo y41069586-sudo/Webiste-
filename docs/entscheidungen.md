@@ -706,3 +706,21 @@ Auf Wunsch des Betreibers ist die Garantie aus:
   nur mit Zustimmung, Stripe plus Rechnung, fester Ansprechpartner.
 - Neu ist ein Kasten „Noch eine Frage vor dem Kauf?“ mit Knöpfen.
 - Ohne Absenderangaben steht nie mehr „TODO“ auf der Seite.
+
+## 29.10.2026 – Kostenlose Änderung vor dem Kauf
+
+So läuft ein Wunsch ab:
+1. **Wunsch:** Auf jeder Demo steht im Angebotsbereich ein Kasten „Etwas soll anders sein? Ich passe den Entwurf
+   vorher an.“ mit Formular (Name, E-Mail, Wunsch, Einwilligung). Er läuft über dieselbe Strecke wie Fragen
+   (`handleDemoQuestion` mit `kind: 'wish'`), inklusive Spam- und Ratenschutz.
+2. **Support:** Der Wunsch kommt als „Änderungswunsch vor dem Kauf: …“ an, eingeordnet als Änderungswunsch und mit
+   Bearbeitungshinweis. Ein Knopf „Demo jetzt anpassen“ führt zum Editor.
+3. **Editor** (`/admin/demos/[id]#anpassen`):
+   - Bearbeitbar sind Überschrift, Unterzeile, Leistungen, Über uns, Knopf-Text sowie Gestaltung und Farben.
+   - Der Worker-Job `revise-demo` erzeugt die Demo unter demselben Link neu.
+   - Es gelten dieselben Inhaltsregeln wie beim Erstellen (`validateDemoContent`). Bei einem Verstoß wird nichts
+     gespeichert, und die Gründe werden angezeigt.
+   - Leistungen, die der Betrieb selbst genannt hat, lassen sich per Häkchen als bestätigt übernehmen.
+   - Das funktioniert ohne KI-Schlüssel.
+4. **Brief:** Er nennt die Anpassung jetzt („passt etwas nicht, ändere ich den Entwurf vorher ohne Kosten“). Das Wort
+   „kostenlos“ bleibt laut Wahrheits-Check „kostenlos ansehen“ vorbehalten. Der Brief bleibt einseitig.

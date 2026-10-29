@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { asc, eq, or } from 'drizzle-orm';
+import { asc, desc, eq, or } from 'drizzle-orm';
 import { getDb, schema } from '@wbm/core';
 import { Badge, Card, Notice, PageHeader, StatusBadge, btn, input, label } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
@@ -39,6 +39,18 @@ export default async function SupportMessagePage({
     ? await db.query.customers.findFirst({ where: eq(schema.customers.id, m.customerId) })
     : undefined;
   const lead = m.leadId ? await db.query.leads.findFirst({ where: eq(schema.leads.id, m.leadId) }) : undefined;
+  // Kostenloser Änderungswunsch vor dem Kauf: direkt zur Demo-Anpassung
+  const wishDemo =
+    m.leadId && m.subject?.startsWith('Änderungswunsch vor dem Kauf')
+      ? (
+          await db
+            .select({ id: schema.demos.id })
+            .from(schema.demos)
+            .where(eq(schema.demos.leadId, m.leadId))
+            .orderBy(desc(schema.demos.createdAt))
+            .limit(1)
+        )[0]
+      : undefined;
   const editable = ['drafted', 'escalated', 'classified', 'new'].includes(m.status);
   return (
     <>
@@ -54,9 +66,16 @@ export default async function SupportMessagePage({
           </span>
         }
         actions={
-          <Link href="/admin/support" className={btn.secondary}>
-            Zurück
-          </Link>
+          <>
+            {wishDemo ? (
+              <Link href={`/admin/demos/${wishDemo.id}#anpassen`} className={btn.primary}>
+                Demo jetzt anpassen
+              </Link>
+            ) : null}
+            <Link href="/admin/support" className={btn.secondary}>
+              Zurück
+            </Link>
+          </>
         }
       />
       {hinweis ? (

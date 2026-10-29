@@ -1,5 +1,5 @@
 import { getConfig, publishDemo } from '@wbm/core';
-import { buildDemo, qaDemo } from '@wbm/core/render';
+import { buildDemo, qaDemo, reviseDemo } from '@wbm/core/render';
 import { defineJob, NonRetryableError } from '../runtime';
 
 defineJob(
@@ -34,4 +34,14 @@ defineJob(
 defineJob('publish-demo', async (data) => {
   await publishDemo(data.demoId, 'job:publish-demo');
   return { ok: true };
+});
+
+defineJob('revise-demo', async (data) => {
+  const status = await reviseDemo({
+    demoId: data.demoId,
+    patch: data.patch,
+    actor: data.actor,
+    wishMessageId: data.wishMessageId,
+  });
+  return status;
 });

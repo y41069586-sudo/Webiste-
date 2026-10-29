@@ -146,6 +146,8 @@ export interface QuestionInput {
   consent: boolean;
   honeypot: string;
   ts: number;
+  /** 'wish' = kostenloser Änderungswunsch vor dem Kauf (eigene Kennzeichnung im Support) */
+  kind?: 'question' | 'wish';
 }
 
 export type QuestionResult = { ok: true } | { ok: false; reason: 'invalid' | 'spam' | 'rate_limited' };
@@ -180,7 +182,10 @@ export async function handleDemoQuestion(slug: string, input: QuestionInput, req
       direction: 'in',
       channel: 'form',
       fromEmail: input.email.trim().toLowerCase().slice(0, 200),
-      subject: `Frage zum Entwurf von ${found.lead.businessName}`.slice(0, 200),
+      subject: (input.kind === 'wish'
+        ? `Änderungswunsch vor dem Kauf: ${found.lead.businessName}`
+        : `Frage zum Entwurf von ${found.lead.businessName}`
+      ).slice(0, 200),
       body: [
         `Name: ${input.name.trim().slice(0, 120)}`,
         input.phone ? `Telefon: ${input.phone.trim().slice(0, 40)}` : '',
@@ -190,9 +195,22 @@ export async function handleDemoQuestion(slug: string, input: QuestionInput, req
         .filter((l, i) => l || i > 1)
         .join('\n'),
       status: 'new',
+      // Vorab-Wunsch: gleich als Änderungswunsch einordnen und zur Bearbeitung markieren (Demo anpassen, dann antworten)
+      ...(input.kind === 'wish'
+        ? {
+            classification: 'aenderungswunsch' as const,
+            escalationReason:
+              'Kostenloser Änderungswunsch vor dem Kauf – Demo anpassen (Akquise → Demos → Texte anpassen), dann antworten.',
+          }
+        : {}),
     })
     .returning({ id: supportMessages.id });
-  await recordEvent(db, { leadId, type: 'question_sent', req: { ...req, isBot: false } });
+  await recordEvent(db, {
+    leadId,
+    type: 'question_sent',
+    meta: input.kind === 'wish' ? { kind: 'wish' } : {},
+    req: { ...req, isBot: false },
+  });
   await audit(db, {
     entity: 'support_message',
     entityId: msg!.id,

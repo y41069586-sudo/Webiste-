@@ -203,6 +203,7 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
       cfg.offers.activeVersion === 'v4'
         ? [
             'Sie kennen das Ergebnis vor dem Kauf – Ihre Website steht bereits.',
+            'Kostenlose Anpassung vor dem Kauf – ein kurzer Wunsch genügt.',
             `Online erst nach Ihrer Freigabe – ${cfg.onboarding.includedChangeRounds} Änderungsrunden sind im Preis enthalten.`,
             'Die Domain wird auf Ihren Betrieb registriert – bei Kündigung nehmen Sie sie mit.',
             'Monatlich kündbar, keine Mindestlaufzeit, keine versteckten Kosten.',

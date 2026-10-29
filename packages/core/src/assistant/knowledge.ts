@@ -241,6 +241,14 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     links: [{ href: '/admin/jobs', label: 'Jobs' }],
   },
   {
+    id: 'wunsch',
+    title: 'Kostenlose Änderung vor dem Kauf (Wunsch zur Demo)',
+    keys: 'wunsch änderungswunsch änderung vor dem kauf anpassen demo ändern kostenlos kunde will anders farbe text leistung',
+    text: () =>
+      'Auf jeder Demo steht „Etwas soll anders sein? Ich passe den Entwurf vorher an.“ Der Wunsch landet als „Änderungswunsch vor dem Kauf“ im Support. Dort tippst du auf „Demo jetzt anpassen“, änderst Überschrift, Texte, Leistungen oder Farben und speicherst. Der Server erzeugt die Demo in Sekunden unter demselben Link neu. Danach antwortest du im Support, dass der neue Stand online ist. Es gelten dieselben Inhaltsregeln wie beim Erstellen.',
+    links: [{ href: '/admin/support', label: 'Support' }],
+  },
+  {
     id: 'warnungen',
     title: 'Was bedeuten Warnungen?',
     keys: 'warnung warnungen alert alerts meldung fehler problem rot gesundheit health',
