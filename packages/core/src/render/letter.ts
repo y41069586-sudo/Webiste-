@@ -166,7 +166,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const sw = effectiveSwitches(cfg);
   const lead = await db.query.leads.findFirst({ where: eq(leads.id, leadId) });
   if (!lead || lead.anonymizedAt) throw new Error('Lead nicht gefunden oder gelöscht');
-  await assertLetterLeadEligible(db, lead, cfg);
+  await assertLetterLeadEligible(db, lead, cfg, { testLetter: opts.test === true });
   const seqDb = opts.test ? 0 : sequence;
   const existing = await db.query.letters.findFirst({ where: and(eq(letters.leadId, leadId), eq(letters.sequence, seqDb)) });
   if (existing) {
@@ -241,7 +241,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const url = trackUrl(`/q/${lead.trackToken}`);
   const code = await ensureShortCode(lead);
   const stated = statedExpiry(opts.test ? 1 : sequence, cfg, demo.expiresAt);
-  if (!opts.test) await extendDemoUntil(db, leadId, stated);
+  // Auch beim Testbrief: das genannte „online bis …“ muss stimmen (verlängert nur, kürzt nie)
+  await extendDemoUntil(db, leadId, stated);
   const binding = await letterDemoBinding({ ...lead, shortCode: code }, demo, cfg);
   const includePage2 = cfg.letter.includeScreenshotPage && demo.screenshotDesktopKey && demo.screenshotMobileKey;
   const screenshotPage = includePage2
@@ -373,7 +374,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
         fresh.shortCode !== code
       )
         throw new Error('Empfänger oder QR-Zuordnung während der Erstellung geändert.');
-      await assertLetterLeadEligible(tx, fresh, currentCfg);
+      await assertLetterLeadEligible(tx, fresh, currentCfg, { testLetter: opts.test === true });
       const current = await currentDemoForLead(tx, leadId);
       if (current?.id !== demo.id) throw new Error('Demo während der Briefgenerierung ersetzt.');
       const latestBinding = await letterDemoBinding(fresh, current, currentCfg);

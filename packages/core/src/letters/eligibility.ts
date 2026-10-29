@@ -8,7 +8,12 @@ import { isSuppressed } from '../services/suppression';
 import { assertAcquisitionEligible } from '../services/lead-research';
 
 /** Re-run locally before rendering, approving and sending; no source refresh/API calls. */
-export async function assertLetterLeadEligible(db: DbOrTx, lead: typeof leads.$inferSelect, cfg: AppConfig): Promise<void> {
+export async function assertLetterLeadEligible(
+  db: DbOrTx,
+  lead: typeof leads.$inferSelect,
+  cfg: AppConfig,
+  opts: { testLetter?: boolean } = {},
+): Promise<void> {
   if (lead.anonymizedAt || ['suppressed', 'rejected', 'expired'].includes(lead.status))
     throw new Error('Betrieb gesperrt oder nicht mehr geeignet.');
   if (
@@ -28,9 +33,9 @@ export async function assertLetterLeadEligible(db: DbOrTx, lead: typeof leads.$i
   if (lead.source === 'mock' && !effectiveSwitches(cfg).dryRun && process.env.NODE_ENV !== 'test')
     throw new Error('Fiktive Testdaten sind nicht für echten Versand zulässig.');
   if (lead.hasWebsite && !lead.socialOnly) throw new Error('Eigene Website vorhanden; Eignung erneut prüfen.');
-  // Testbetriebe (Testlauf) heißen absichtlich gleich und gehen nie echt raus (Sperre oben) – keine Dublettenprüfung
+  // Testbrief an die eigene Adresse: der Betrieb ist nur Vorlage, eine Dublette kann keinen zweiten Brief bekommen
   const sameArea =
-    lead.source === 'mock'
+    opts.testLetter === true
       ? []
       : await db
           .select()
