@@ -11,6 +11,11 @@ export const ASSISTANT_ACTION_TYPES = [
   'mindestgrenze_setzen',
   'mindestgrenze_anwenden',
   'seite_oeffnen',
+  'lead_aussortieren',
+  'lead_zurueckholen',
+  'warnungen_erledigen',
+  'zielstadt_hinzufuegen',
+  'zielstadt_entfernen',
 ] as const;
 export type AssistantActionType = (typeof ASSISTANT_ACTION_TYPES)[number];
 
@@ -28,12 +33,23 @@ export const assistantActionSchema = z.object({
     .max(120)
     .regex(/^(\/admin(\/[a-z0-9-]*)*(\?[a-z0-9=&-]*)?)?$/)
     .default(''),
+  /** Lead aussortieren/zurückholen: ID des Leads */
+  leadId: z.string().uuid().nullable().default(null),
+  /** Anzeigename für die Bestätigung (z. B. Betriebsname) */
+  name: z.string().max(160).default(''),
 });
 export type AssistantAction = z.infer<typeof assistantActionSchema>;
+
+export interface AssistantLink {
+  href: string;
+  label: string;
+}
 
 export interface AssistantReply {
   antwort: string;
   aktionen: AssistantAction[];
+  /** Passende Seiten zum Weiterklicken */
+  links?: AssistantLink[];
   /** 'ki' = Claude, 'befehle' = eingebauter Befehlsmodus ohne KI */
   modus: 'ki' | 'befehle';
 }
@@ -79,13 +95,15 @@ export const ASSISTANT_REPLY_SCHEMA = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['typ', 'staedte', 'branchen', 'punkte', 'ziel'],
+        required: ['typ', 'staedte', 'branchen', 'punkte', 'ziel', 'leadId', 'name'],
         properties: {
           typ: { type: 'string', enum: [...ASSISTANT_ACTION_TYPES] },
           staedte: { type: 'array', items: { type: 'string' } },
           branchen: { type: 'array', items: { type: 'string' }, description: 'Branchen-Schlüssel aus dem Stand' },
           punkte: { type: ['integer', 'null'] },
           ziel: { type: 'string', description: 'Nur für seite_oeffnen: href aus dem Stand, sonst leer' },
+          leadId: { type: ['string', 'null'], description: 'Nur für lead_aussortieren/lead_zurueckholen: Lead-ID aus den Daten' },
+          name: { type: 'string', description: 'Betriebsname zur Anzeige, sonst leer' },
         },
       },
     },
@@ -115,5 +133,15 @@ export function describeAction(
       return `Offene Leads unter ${snap.mindestPunkte} Punkten aussortieren`;
     case 'seite_oeffnen':
       return `Öffnen: ${snap.seiten.find((p) => p.href === a.ziel)?.label ?? a.ziel}`;
+    case 'lead_aussortieren':
+      return `Lead aussortieren: ${a.name || 'ausgewählter Betrieb'}`;
+    case 'lead_zurueckholen':
+      return `Lead zurückholen (wieder zur Prüfung): ${a.name || 'ausgewählter Betrieb'}`;
+    case 'warnungen_erledigen':
+      return 'Alle offenen Warnungen als erledigt markieren';
+    case 'zielstadt_hinzufuegen':
+      return `Zielstadt hinzufügen: ${a.staedte.join(', ')}`;
+    case 'zielstadt_entfernen':
+      return `Zielstadt entfernen: ${a.staedte.join(', ')}`;
   }
 }

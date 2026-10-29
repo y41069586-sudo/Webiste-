@@ -140,3 +140,6 @@ export * from './services/worker-bootstrap';
 export * from './assistant/actions';
 export * from './assistant/commands';
 export * from './assistant/ai';
+export * from './assistant/engine';
+export * from './assistant/knowledge';
+export * from './assistant/data';

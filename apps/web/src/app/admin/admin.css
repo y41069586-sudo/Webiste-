@@ -2129,6 +2129,31 @@ html[data-admin-nav='open'] .admin-overlay {
   font-size: 12px;
   color: var(--warn);
 }
+.assistant-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.assistant-links button {
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.18s var(--ease),
+    transform 0.18s var(--ease);
+}
+.assistant-links button:hover {
+  background: #e2defc;
+}
+.assistant-links button:active {
+  transform: scale(0.97);
+}
 .assistant-action {
   display: flex;
   flex-wrap: wrap;

@@ -650,3 +650,17 @@ Gefunden und behoben:
   - Ohne KI arbeitet er im **Befehlsmodus** über Schlüsselwörter. Mit `assistant.useAi` und Anthropic-Schlüssel nutzt
     er Claude (`MODEL_BULK`, eine strukturierte Antwort je Frage, im Budget-Ledger als `admin_assistant` gebucht).
     Standard ist aus, bis der Betreiber die Nutzung des Schlüssels freigibt.
+- **Assistent ohne KI-Schlüssel, Zugriff auf alle Bereiche** (`packages/core/src/assistant/`):
+  - `engine.ts` erkennt Absichten über Schlüsselwörter. Kleine Tippfehler, vertauschte Buchstaben und
+    Wortendungen stören nicht. Dazu erkennt er Städte, Branchen, Zustände, Punkte, Zeiträume und Betriebsnamen sowie
+    Rückfragen („und in Bochum?“).
+  - `data.ts` liest alle Bereiche: Leads, Demos, Briefe, Bestellungen, Websites, Support, Budget, Ereignisse, Jobs,
+    Warnungen und Protokoll. Er gibt nur Zählungen, Zustände und Betriebsnamen aus, keine E-Mail-Adressen oder
+    Nachrichteninhalte.
+  - `knowledge.ts` enthält rund 45 Wissenseinträge mit Werten, die live aus der Konfiguration kommen. Gesucht wird per
+    BM25.
+  - Neue Aktionen, jeweils nach Klick und mit Prüfung auf dem Server: Lead aussortieren (Grund `manual`) oder
+    zurückholen, Warnungen erledigen, Zielstadt hinzufügen oder entfernen (mindestens eine bleibt).
+  - Fragen nach dem Stand („Wie viele Briefe wurden verschickt?“) werden beantwortet. Aufträge zu Versand, Zahlung,
+    Domain, Modus oder Löschen lehnt er ab.
+  - Im KI-Modus bekommt Claude dieselben Daten und Wissenseinträge als Grundlage.

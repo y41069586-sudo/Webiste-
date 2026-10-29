@@ -18,6 +18,7 @@ export const REJECTION_REASONS = [
   'duplicate',
   'excluded_industry',
   'score_too_low',
+  'manual',
 ] as const;
 export type RejectionReason = (typeof REJECTION_REASONS)[number];
 
@@ -35,6 +36,7 @@ export const REJECTION_LABELS: Record<RejectionReason, string> = {
   duplicate: 'Dublette eines anderen Leads',
   excluded_industry: 'Ausgeschlossene Branche (Gesundheit/Recht)',
   score_too_low: 'Vorauswahl-Punkte unter der Mindestgrenze',
+  manual: 'Von dir aussortiert',
 };
 
 export interface WebsiteClass {

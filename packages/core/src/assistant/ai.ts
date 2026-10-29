@@ -1,4 +1,6 @@
+import { getConfig } from '../config/service';
 import { llmStructured } from '../services/llm';
+import { searchKnowledge } from './knowledge';
 import {
   assistantActionSchema,
   ASSISTANT_REPLY_SCHEMA,
@@ -17,6 +19,9 @@ Du darfst nur diese Aktionen VORSCHLAGEN (der Betreiber bestätigt jede per Klic
 - mindestgrenze_setzen: punkte
 - mindestgrenze_anwenden: offene Leads unter der aktuellen Grenze aussortieren (umkehrbar, nichts wird gelöscht)
 - seite_oeffnen: ziel = href aus seiten
+- lead_aussortieren / lead_zurueckholen: leadId und name eines Leads (nur aus den Daten)
+- warnungen_erledigen
+- zielstadt_hinzufuegen / zielstadt_entfernen: staedte
 Felder, die eine Aktion nicht braucht, setzt du leer ([] / null / "").
 
 Nicht erlaubt (erkläre stattdessen, wo der Betreiber es selbst erledigt): Briefe versenden oder freigeben, Zahlungen, Erstattungen, Domains, Live-/Testmodus, Not-Aus, Löschen, rechtliche Freigaben oder Bewertungen. Keine Rechtsberatung, keine Versprechen.
@@ -24,7 +29,17 @@ Nicht erlaubt (erkläre stattdessen, wo der Betreiber es selbst erledigt): Brief
 Die „Punkte“ eines Leads sind die automatische Vorauswahl (0–100): Kampagnenbranche, Telefon, Öffnungszeiten, aktueller Eintrag, online aktiv ohne eigene Seite, keine eigene Domain, junger Betrieb. Sie sind keine Kaufwahrscheinlichkeit.`;
 
 /** Eine Antwort von Claude (strukturiert, im Budget-Ledger gebucht). Ungültige Aktionen werden verworfen. */
-export async function askAssistantAi(snapshot: AssistantSnapshot, history: AssistantTurn[]): Promise<AssistantReply> {
+export async function askAssistantAi(
+  snapshot: AssistantSnapshot,
+  history: AssistantTurn[],
+  /** Antwort des Befehlsmodus (Daten aus der Datenbank) als Grundlage */
+  offline = '',
+): Promise<AssistantReply> {
+  const cfg = await getConfig();
+  const lastUser = [...history].reverse().find((h) => h.role === 'user')?.text ?? '';
+  const wissen = searchKnowledge(lastUser, cfg, 3)
+    .map((k) => `- ${k.entry.title}: ${k.entry.text(cfg)}`)
+    .join('\n');
   const convo = history
     .slice(-10)
     .map((h) => `${h.role === 'user' ? 'Betreiber' : 'Assistent'}: ${h.text.slice(0, 1500)}`)
@@ -33,7 +48,7 @@ export async function askAssistantAi(snapshot: AssistantSnapshot, history: Assis
     tier: 'bulk',
     purpose: 'admin_assistant',
     system: SYSTEM,
-    prompt: `Stand der Verwaltung:\n${JSON.stringify(snapshot)}\n\nGespräch:\n${convo}\n\nAntworte auf die letzte Nachricht des Betreibers.`,
+    prompt: `Stand der Verwaltung:\n${JSON.stringify(snapshot)}\n\nProjektwissen:\n${wissen || '–'}\n\nDaten aus der Datenbank (Befehlsmodus):\n${offline || '–'}\n\nGespräch:\n${convo}\n\nAntworte auf die letzte Nachricht des Betreibers.`,
     toolName: 'antworten',
     toolDescription: 'Antwort an den Betreiber mit optional vorgeschlagenen Aktionen',
     inputSchema: ASSISTANT_REPLY_SCHEMA as unknown as Record<string, unknown>,

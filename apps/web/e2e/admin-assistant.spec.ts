@@ -39,5 +39,19 @@ test('Assistent startet eine Lead-Suche, die Suche zeigt ihren Fortschritt live'
   await expect(live.locator('.search-live-log li').first()).toBeVisible();
   await expect(live.locator('.search-live-percent')).toHaveText('100%');
   if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'suche-fertig.png'), fullPage: true });
+
+  // Ohne KI-Schlüssel: Datenfragen und Projektwissen
+  await page.getByRole('button', { name: 'Assistent' }).click();
+  await panel.getByRole('textbox').fill('Wie viele Leads in Dortmund?');
+  await panel.getByRole('textbox').press('Enter');
+  await expect(panel.locator('.assistant-msg.is-bot').last()).toContainText('Leads (in Dortmund)');
+  await expect(panel.locator('.assistant-links').last()).toContainText('Leads');
+  await panel.getByRole('textbox').fill('Was kostet die Website für Kunden?');
+  await panel.getByRole('textbox').press('Enter');
+  await expect(panel.locator('.assistant-msg.is-bot').last()).toContainText('€ einmalig');
+  await panel.getByRole('textbox').fill('Zeig die besten Leads');
+  await panel.getByRole('textbox').press('Enter');
+  await expect(panel.locator('.assistant-msg.is-bot').last()).toContainText('Punkte');
+  if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'assistent-daten.png') });
   expect(errors).toEqual([]);
 });

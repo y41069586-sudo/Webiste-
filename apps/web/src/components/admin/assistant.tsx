@@ -13,14 +13,19 @@ type Msg =
       modus?: AssistantAnswer['modus'];
       hinweis?: string;
       aktionen: (AssistantAnswer['aktionen'][number] & { state?: 'running' | 'done' | 'failed'; result?: string })[];
+      links?: AssistantAnswer['links'];
     };
 
 const STORE = 'sw-assistant-v1';
 const SUGGESTIONS = [
-  'Was läuft gerade?',
-  'Starte die Suche in Dortmund ab 70 Punkten',
+  'Gib mir einen Überblick',
   'Was sind die nächsten Schritte?',
-  'Wie viele Leads haben wir?',
+  'Zeig die besten Leads',
+  'Was läuft gerade?',
+  'Läuft der Server?',
+  'Gibt es neue Anfragen?',
+  'Was kostet die Website für Kunden?',
+  'Wie funktioniert der Versand?',
 ];
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -83,7 +88,15 @@ export function AdminAssistant({ aiOn }: { aiOn: boolean }) {
         const res = await askAssistant(next.map((m) => ({ role: m.role, text: m.text })));
         setMsgs((m) => [
           ...m,
-          { id: uid(), role: 'assistant', text: res.antwort, modus: res.modus, hinweis: res.hinweis, aktionen: res.aktionen },
+          {
+            id: uid(),
+            role: 'assistant',
+            text: res.antwort,
+            modus: res.modus,
+            hinweis: res.hinweis,
+            aktionen: res.aktionen,
+            links: res.links,
+          },
         ]);
       } catch {
         setMsgs((m) => [
@@ -153,7 +166,9 @@ export function AdminAssistant({ aiOn }: { aiOn: boolean }) {
               <div>
                 <p className="assistant-title">Assistent</p>
                 <p className="assistant-sub">
-                  {aiOn ? 'KI-Modus · Aktionen nur nach deinem Klick' : 'Befehlsmodus ohne KI · Aktionen nur nach deinem Klick'}
+                  {aiOn
+                    ? 'KI-Modus · Aktionen nur nach deinem Klick'
+                    : 'Ohne KI-Schlüssel · sieht alle Bereiche · Aktionen nur nach Klick'}
                 </p>
               </div>
               <div className="assistant-head-actions">
@@ -191,13 +206,14 @@ export function AdminAssistant({ aiOn }: { aiOn: boolean }) {
                 <div className="assistant-empty">
                   <p className="assistant-empty-title">Hi! Was soll ich für dich tun?</p>
                   <p>
-                    Ich kenne den Stand deiner Verwaltung, starte und stoppe Lead-Suchen, stelle die Mindest-Punkte ein und bringe
-                    dich zur richtigen Seite. Briefe, Zahlungen und Freigaben bleiben bei dir.
+                    Ich sehe alle Bereiche – Leads, Demos, Briefe, Bestellungen, Kunden, Support, Budget, Kennzahlen, Server,
+                    Warnungen und Protokoll – und kenne das Projekt: Preise, Abläufe, Regeln, wo was eingestellt wird. Ich starte
+                    Suchen, sortiere Leads aus oder hole sie zurück, ändere Zielstädte und die Mindest-Punkte – immer erst nach
+                    deinem Klick. Briefversand, Zahlungen und Freigaben bleiben bei dir.
                   </p>
                   {!aiOn ? (
                     <p className="assistant-empty-note">
-                      Freie Fragen versteht der KI-Modus besser. Einschalten unter System → Einstellungen → Support (nutzt den
-                      Anthropic-Schlüssel).
+                      Ich arbeite ohne KI-Schlüssel. Schreib einfach normal – kurze, klare Fragen verstehe ich am besten.
                     </p>
                   ) : null}
                 </div>
@@ -211,6 +227,15 @@ export function AdminAssistant({ aiOn }: { aiOn: boolean }) {
                   <div key={m.id} className="assistant-msg is-bot">
                     <p className="whitespace-pre-line">{m.text}</p>
                     {m.hinweis ? <p className="assistant-hint">{m.hinweis}</p> : null}
+                    {m.links?.length ? (
+                      <div className="assistant-links">
+                        {m.links.map((l) => (
+                          <button key={l.href} type="button" onClick={() => router.push(l.href)}>
+                            {l.label} →
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
                     {m.aktionen.map((a, i) => (
                       <div key={i} className={`assistant-action ${a.state ? `is-${a.state}` : ''}`}>
                         <span className="assistant-action-label">{a.label}</span>
