@@ -94,7 +94,7 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     return { state: 'skipped', reason: 'Lead gesperrt' };
   }
   try {
-    await assertLetterLeadEligible(db, lead, cfg);
+    await assertLetterLeadEligible(db, lead, cfg, { testLetter: letter.isTest });
     await assertLetterBinding(db, letter, lead, cfg);
   } catch (error) {
     await db
@@ -373,7 +373,7 @@ export async function submitProviderTestJob(
   }
   const lead = await db.query.leads.findFirst({ where: eq(leads.id, letter.leadId) });
   if (!lead) throw new SendBlockedError('Betrieb nicht vorhanden.');
-  await assertLetterLeadEligible(db, lead, cfg);
+  await assertLetterLeadEligible(db, lead, cfg, { testLetter: letter.isTest });
   await assertLetterBinding(db, letter, lead, cfg);
   const pdf = await getProviders().storage.get(letter.pdfStorageKey);
   if (!pdf) throw new Error('Brief-PDF fehlt');

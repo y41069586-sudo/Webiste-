@@ -162,7 +162,7 @@ export async function approveLetter(letterId: string, actor: string, scores?: Pa
     const lead = await tx.query.leads.findFirst({ where: eq(leads.id, letter.leadId) });
     if (!lead) return false;
     try {
-      await assertLetterLeadEligible(tx, lead, cfg);
+      await assertLetterLeadEligible(tx, lead, cfg, { testLetter: letter.isTest });
       await assertLetterBinding(tx, letter, lead, cfg);
     } catch {
       return false;
