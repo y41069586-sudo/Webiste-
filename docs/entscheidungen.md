@@ -796,3 +796,31 @@ Der Betreiber wünscht sich alles „ultra leicht“, ohne Technikbegriffe.
   - Betriebe suchen, Alle Betriebe, Verschickte Post, Weg zum Kauf, Kosten.
   - Brief-Versionen, Automatische Auswahl, Lern-Vorschläge, Erlaubte Aussagen, Verlauf.
   - Seitenüberschriften und Adressen bleiben gleich.
+
+## 29.10.2026 – Alle Arbeitsseiten vereinfacht
+
+Für alle Arbeitsseiten gilt dasselbe Muster: eine Karte, wenige große Knöpfe, Technik eingeklappt, Alltagssprache.
+
+- **Demo prüfen:**
+  - Links stehen die Vorschauen am Computer und am Handy, am Handy nur die Handy-Vorschau.
+  - Rechts stehen zwei Haken („angesehen – ordentlich“, „Name/Adresse/Bilder/Texte passen“) und eine Note
+    (Sehr gut / Gut / Nicht gut genug, ohne Vorauswahl).
+  - Die Haken decken die bisherigen fünf Prüfpunkte ab. Die Note gilt für alle fünf Qualitätsbereiche (92 / 82 / 50).
+    „Nicht gut genug“ liegt unter dem Mindestniveau und sperrt die Freigabe wie bisher.
+  - „Gefällt mir nicht“ führt zu „Neu bauen lassen“ oder „Betrieb aussortieren“. Ändern, Technik-Prüfung und Inhalt
+    sind eingeklappt.
+  - Aus dem Ablauf heraus geht es danach zur nächsten Demo.
+- **Brief freigeben:**
+  - Der Brief steht groß da, dazu ein Haken („gelesen – passt“) und dieselbe Note.
+  - Briefe mit einer nicht belegten Aussage bleiben gesperrt, und die Seite rät zu „Neu schreiben lassen“.
+  - Danach geht es über `/admin/ablauf/naechster-brief` automatisch zum nächsten Brief.
+  - Die Briefliste zeigt nur Betrieb, Art, Stand und Datum. Briefdienst, Guthaben und Testbrief sind eingeklappt, die
+    Sammel-Freigabe ist entfernt (Einzelprüfung ist Pflicht).
+- **Betriebe suchen:**
+  - Zu sehen sind nur „Wo?“ und „Suche starten“. Branchen und Mindestpunkte sind eingeklappt.
+  - Nach der Suche steht eine kompakte Karte da: „16 passende Betriebe gefunden – Jetzt prüfen“.
+- **Nachrichten** (früher Support): Die Liste zeigt Von, Worum, Wann. In der Nachricht stehen ein Antwortfeld und
+  „Antwort senden“, alles andere liegt unter „Andere Möglichkeiten“.
+- **Heute:** Die Kacheln „Wartet auf dich“ führen in den Nacheinander-Modus. Die Wörter sind vereinfacht.
+- **Regeln:** Unverändert bleiben `approveDemo`, `approveLetter`, Wahrheits-Check, Mindestniveau und die
+  Einzelprüfung der ersten 30 Demos.

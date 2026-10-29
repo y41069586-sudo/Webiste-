@@ -1,15 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { and, desc, eq } from 'drizzle-orm';
-import {
-  getDb,
-  getProviders,
-  schema,
-  LETTER_QUALITY_DIMENSIONS,
-  type LetterQualityAssessment,
-  type TruthCheckResult,
-} from '@wbm/core';
-import { Badge, Card, PageHeader, StatusBadge, btn, input } from '@/components/ui';
+import { getDb, getProviders, schema, type LetterQualityAssessment, type TruthCheckResult } from '@wbm/core';
+import { Badge, Card, Notice, btn, input } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
 import { approveLetterAction, lxpTestJobAction, rejectLetterAction } from '../actions';
@@ -22,11 +15,12 @@ export default async function LetterDetail({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ hinweis?: string }>;
+  searchParams: Promise<{ hinweis?: string; flow?: string }>;
 }) {
   await requireAdmin();
   const { id } = await params;
-  const { hinweis } = await searchParams;
+  const { hinweis, flow } = await searchParams;
+  const inFlow = flow === '1';
   const mail = getProviders().mail;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const db = getDb();
@@ -40,169 +34,197 @@ export default async function LetterDetail({
     .where(and(eq(schema.auditLog.entity, 'letter'), eq(schema.auditLog.entityId, id)))
     .orderBy(desc(schema.auditLog.id));
   const truth = letter.truthCheckJson as unknown as TruthCheckResult | null;
+  const statusText: Record<string, string> = {
+    generated: 'Wartet auf dich',
+    approved: 'Freigegeben – geht bald raus',
+    sent: 'Verschickt',
+    delivered: 'Zugestellt',
+    rejected: 'Verworfen',
+    failed: 'Fehler beim Versand',
+  };
+  const canDecide = letter.status === 'generated' && truth?.passed;
   return (
     <>
-      <PageHeader
-        title={`Brief an ${lead?.businessName ?? '–'}`}
-        subtitle={
-          <span className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={letter.status} /> {letter.isTest ? <Badge color="purple">Testbrief</Badge> : null}{' '}
-            {letter.dryRun ? <Badge color="yellow">DRY_RUN</Badge> : null}
-            Seiten: {letter.pageCount} · Kosten: {eur(letter.costCents ?? letter.estimatedCostCents)}
-          </span>
-        }
-        actions={
-          lead ? (
-            <Link className={btn.secondary} href={`/admin/leads/${lead.id}`}>
-              Lead
-            </Link>
-          ) : null
-        }
-      />
-      <div className="grid gap-6 xl:grid-cols-3">
-        <Card title="PDF" className="xl:col-span-2">
+      <div className="dcheck-head">
+        <div>
+          <p className="dcheck-name">Brief an {lead?.businessName ?? '–'}</p>
+          <p className="dcheck-sub">
+            {statusText[letter.status] ?? letter.status}
+            {letter.dryRun ? ' · Testmodus (wird nicht gedruckt)' : ''}
+            {letter.isTest ? ' · Testbrief' : ''}
+          </p>
+        </div>
+        {letter.pdfStorageKey ? (
+          <Link className={btn.secondary} href={`/admin/files/${letter.pdfStorageKey}`} target="_blank">
+            Groß öffnen ↗
+          </Link>
+        ) : null}
+      </div>
+      {hinweis ? (
+        <div className="mb-4">
+          <Notice kind="warn">{hinweis}</Notice>
+        </div>
+      ) : null}
+      {letter.status === 'generated' && !truth?.passed ? (
+        <div className="mb-4">
+          <Notice kind="warn">
+            Dieser Brief enthält eine Aussage, die nicht belegt ist, und kann so nicht raus. Lass ihn unten neu schreiben.
+          </Notice>
+        </div>
+      ) : null}
+      <div className="dcheck">
+        <div className="dcheck-letter">
           {letter.pdfStorageKey ? (
-            <iframe
-              title="Brief-PDF"
-              src={`/admin/files/${letter.pdfStorageKey}`}
-              className="h-[900px] w-full rounded-lg border border-slate-200"
-            />
+            <iframe title="Brief" src={`/admin/files/${letter.pdfStorageKey}`} />
           ) : (
-            <p className="text-sm text-slate-600">Kein PDF vorhanden.</p>
+            <p className="text-sm text-slate-600">Noch kein Brief-PDF vorhanden.</p>
           )}
-        </Card>
-        <div className="space-y-6">
-          {quality ? (
-            <Card title="Briefqualität">
-              <p className="text-sm">
-                {quality.total === null ? 'Einzelbewertungen ausstehend' : `${quality.total}/100`} ·{' '}
-                {quality.passed ? 'Mindestkriterien bestanden' : 'noch nicht freigegeben'}
-              </p>
-            </Card>
-          ) : null}
-          {letter.status === 'generated' && truth?.passed ? (
-            <Card title="Entscheidung">
-              <form action={approveLetterAction} className="space-y-3">
-                {quality ? (
-                  <fieldset className="space-y-3">
-                    <legend className="text-sm font-semibold">Brief tatsächlich prüfen (0–100)</legend>
-                    {Object.entries(LETTER_QUALITY_DIMENSIONS).map(([key, definition]) => (
-                      <label key={key} className="block text-sm">
-                        {definition.label} ({definition.weight} %)
-                        <input
-                          type="number"
-                          name={`quality_${key}`}
-                          min={0}
-                          max={100}
-                          required
-                          className={input}
-                          placeholder="Nach PDF-Sichtprüfung bewerten"
-                        />
-                      </label>
-                    ))}
-                    <p className="text-xs text-slate-600">
-                      Mindestgesamtwert {quality.minimum}; kein Bereich unter 60. Der QR-Code wurde bereits aus dem fertigen PDF
-                      geprüft. Technische Tests ersetzen keine Sichtprüfung.
-                    </p>
-                  </fieldset>
-                ) : null}
+        </div>
+        <div className="dcheck-side">
+          {canDecide ? (
+            <div className="check-card">
+              <form action={approveLetterAction}>
                 <input type="hidden" name="id" value={letter.id} />
-                <SubmitButton className={btn.primary} type="submit">
+                <input type="hidden" name="simple" value="1" />
+                {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
+                <div className="check-ticks">
+                  <p className="check-q">Stimmt das?</p>
+                  <label className="check-tick">
+                    <input type="checkbox" name="read" required />
+                    <span>Brief gelesen – Name, Anschrift, Bild und Text passen</span>
+                  </label>
+                </div>
+                {quality ? (
+                  <div className="check-ticks dcheck-rating">
+                    <p className="check-q">Wie gut ist der Brief?</p>
+                    <div className="dcheck-choices">
+                      {(
+                        [
+                          ['sehr_gut', 'Sehr gut'],
+                          ['gut', 'Gut'],
+                          ['schwach', 'Nicht gut genug'],
+                        ] as const
+                      ).map(([value, label]) => (
+                        <label key={value} className="check-tick dcheck-choice">
+                          <input type="radio" name="rating" value={value} required />
+                          <span>{label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                <SubmitButton className="ui-btn ui-btn-primary check-go" type="submit">
                   Freigeben
                 </SubmitButton>
+                <p className="check-note">
+                  {letter.dryRun ? 'Testmodus: Es wird nichts gedruckt oder verschickt.' : 'Danach geht der Brief in die Post.'}
+                </p>
               </form>
-              <hr className="my-4" />
-              <form action={rejectLetterAction} className="space-y-2">
+            </div>
+          ) : null}
+          {letter.status === 'generated' ? (
+            <details className="dcheck-reject check-card" open={!truth?.passed}>
+              <summary>Passt nicht</summary>
+              <form action={rejectLetterAction} className="mt-3 grid gap-2">
                 <input type="hidden" name="id" value={letter.id} />
-                <textarea name="note" required placeholder="Grund" rows={2} className={input} />
+                {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
+                <input name="note" placeholder="Was stört? (optional)" maxLength={300} className={input} />
                 <div className="flex flex-wrap gap-2">
-                  <SubmitButton className={btn.secondary} name="regenerate" value="1" type="submit">
-                    Verwerfen &amp; neu erzeugen
+                  <SubmitButton className={btn.primary} name="regenerate" value="1" type="submit">
+                    Neu schreiben lassen
                   </SubmitButton>
-                  <SubmitButton className={btn.danger} name="regenerate" value="0" type="submit">
+                  <SubmitButton className={btn.secondary} name="regenerate" value="0" type="submit">
                     Verwerfen
                   </SubmitButton>
                 </div>
               </form>
-            </Card>
+            </details>
           ) : null}
-          {hinweis ? (
-            <Card title="Hinweis">
-              <p className="text-sm">{hinweis}</p>
-            </Card>
-          ) : null}
-          {(mail.name === 'easynova' || mail.name === 'letterxpress') &&
-          mail.mode === 'test' &&
-          truth?.passed &&
-          letter.pdfStorageKey ? (
-            <Card title={mail.name === 'easynova' ? 'easyNova-Testmodus' : 'LetterXpress-Testmodus'}>
-              <p className="mb-3 text-sm text-slate-600">
-                {mail.name === 'easynova'
-                  ? 'Liefert dieses PDF als Testsendung ein: alle Prüfungen von easyNova, kein Druck, keine Zustellung, keine Kosten.'
-                  : 'Überträgt dieses PDF in die Postbox – kein Druck, keine Kosten, nach 7 Tagen gelöscht.'}
-              </p>
-              <form action={lxpTestJobAction}>
-                <input type="hidden" name="id" value={letter.id} />
-                <SubmitButton className={btn.secondary} type="submit">
-                  {mail.name === 'easynova' ? 'Testsendung an easyNova' : 'Testauftrag an LetterXpress'}
-                </SubmitButton>
-              </form>
-            </Card>
-          ) : null}
-          <Card title="Wahrheits-Check">
-            {!truth ? (
-              <p className="text-sm text-red-800">Nicht geprüft – Brief kann nicht freigegeben werden.</p>
-            ) : (
-              <div className="space-y-2 text-sm">
-                <p>
-                  {truth.passed ? <Badge color="green">bestanden</Badge> : <Badge color="red">blockiert</Badge>}{' '}
-                  <span className="text-xs text-slate-500">{dt(truth.checkedAt)}</span>
-                </p>
-                <p className="text-xs text-slate-600">
-                  Claims: {truth.claims.length ? truth.claims.join(', ') : 'keine (Brief ohne Statistik)'} · Quellenseite:{' '}
-                  {truth.sourcesPage ?? '–'} · LLM:{' '}
-                  {truth.llm?.skipped ?? truth.llm?.error ?? (truth.llm?.unbackedEffectClaim ? 'Fund' : 'ok')}
-                </p>
-                {truth.violations.length ? (
-                  <ul className="list-disc space-y-1 pl-5 text-xs text-red-800">
-                    {truth.violations.map((v, i) => (
-                      <li key={i}>
-                        <span className="font-mono">{v.rule}</span>: {v.detail}
-                      </li>
-                    ))}
-                  </ul>
+          {letter.statusReason ? <Notice kind="warn">{letter.statusReason}</Notice> : null}
+          <details className="admin-details dcheck-more">
+            <summary>Technische Details</summary>
+            <div className="mt-3 space-y-4">
+              <p className="text-xs text-slate-500">
+                Seiten: {letter.pageCount} · Kosten: {eur(letter.costCents ?? letter.estimatedCostCents)}
+                {quality ? ` · Qualität ${quality.total === null ? 'offen' : `${quality.total}/100`}` : ''}
+                {lead ? (
+                  <>
+                    {' · '}
+                    <Link className="underline" href={`/admin/leads/${lead.id}`}>
+                      Betrieb
+                    </Link>
+                  </>
                 ) : null}
-              </div>
-            )}
-          </Card>
-          {letter.statusReason ? (
-            <Card title="Hinweis">
-              <p className="text-sm break-words text-red-800">{letter.statusReason}</p>
-            </Card>
-          ) : null}
-          <Card title="Daten">
-            <dl className="space-y-1 text-sm">
-              <div>
-                Anbieter: {letter.provider ?? '–'}{' '}
-                {letter.providerLetterId ? <code className="text-xs">{letter.providerLetterId}</code> : null}
-              </div>
-              <div>Erstellt: {dt(letter.createdAt)}</div>
-              <div>
-                Freigegeben: {dt(letter.approvedAt)} {letter.approvedBy ? `(${letter.approvedBy})` : ''}
-              </div>
-              <div>Versendet: {dt(letter.sentAt)}</div>
-              <div>Zugestellt: {dt(letter.deliveredAt)}</div>
-            </dl>
-          </Card>
-          <Card title="Verlauf">
-            <ul className="space-y-1 text-xs">
-              {log.map((l) => (
-                <li key={l.id}>
-                  {dt(l.createdAt)} · <span className="font-mono">{l.action}</span> · {l.actor}
-                </li>
-              ))}
-            </ul>
-          </Card>
+              </p>
+              {(mail.name === 'easynova' || mail.name === 'letterxpress') &&
+              mail.mode === 'test' &&
+              truth?.passed &&
+              letter.pdfStorageKey ? (
+                <Card title={mail.name === 'easynova' ? 'easyNova-Testmodus' : 'LetterXpress-Testmodus'}>
+                  <p className="mb-3 text-sm text-slate-600">
+                    {mail.name === 'easynova'
+                      ? 'Liefert dieses PDF als Testsendung ein: alle Prüfungen von easyNova, kein Druck, keine Zustellung, keine Kosten.'
+                      : 'Überträgt dieses PDF in die Postbox – kein Druck, keine Kosten, nach 7 Tagen gelöscht.'}
+                  </p>
+                  <form action={lxpTestJobAction}>
+                    <input type="hidden" name="id" value={letter.id} />
+                    <SubmitButton className={btn.secondary} type="submit">
+                      {mail.name === 'easynova' ? 'Testsendung an easyNova' : 'Testauftrag an LetterXpress'}
+                    </SubmitButton>
+                  </form>
+                </Card>
+              ) : null}
+              <Card title="Wahrheits-Check">
+                {!truth ? (
+                  <p className="text-sm text-red-800">Nicht geprüft – Brief kann nicht freigegeben werden.</p>
+                ) : (
+                  <div className="space-y-2 text-sm">
+                    <p>
+                      {truth.passed ? <Badge color="green">bestanden</Badge> : <Badge color="red">blockiert</Badge>}{' '}
+                      <span className="text-xs text-slate-500">{dt(truth.checkedAt)}</span>
+                    </p>
+                    <p className="text-xs text-slate-600">
+                      Claims: {truth.claims.length ? truth.claims.join(', ') : 'keine (Brief ohne Statistik)'} · Quellenseite:{' '}
+                      {truth.sourcesPage ?? '–'} · LLM:{' '}
+                      {truth.llm?.skipped ?? truth.llm?.error ?? (truth.llm?.unbackedEffectClaim ? 'Fund' : 'ok')}
+                    </p>
+                    {truth.violations.length ? (
+                      <ul className="list-disc space-y-1 pl-5 text-xs text-red-800">
+                        {truth.violations.map((v, i) => (
+                          <li key={i}>
+                            <span className="font-mono">{v.rule}</span>: {v.detail}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                )}
+              </Card>
+              <Card title="Daten">
+                <dl className="space-y-1 text-sm">
+                  <div>
+                    Anbieter: {letter.provider ?? '–'}{' '}
+                    {letter.providerLetterId ? <code className="text-xs">{letter.providerLetterId}</code> : null}
+                  </div>
+                  <div>Erstellt: {dt(letter.createdAt)}</div>
+                  <div>
+                    Freigegeben: {dt(letter.approvedAt)} {letter.approvedBy ? `(${letter.approvedBy})` : ''}
+                  </div>
+                  <div>Versendet: {dt(letter.sentAt)}</div>
+                  <div>Zugestellt: {dt(letter.deliveredAt)}</div>
+                </dl>
+              </Card>
+              <Card title="Verlauf">
+                <ul className="space-y-1 text-xs">
+                  {log.map((l) => (
+                    <li key={l.id}>
+                      {dt(l.createdAt)} · <span className="font-mono">{l.action}</span> · {l.actor}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </div>
+          </details>
         </div>
       </div>
     </>

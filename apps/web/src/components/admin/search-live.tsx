@@ -9,7 +9,7 @@ type Progress = NonNullable<LeadSearchStatus['progress']>;
 
 const STEPS: { key: Progress['phase'][]; label: string }[] = [
   { key: ['start'], label: 'Start' },
-  { key: ['karte_laden', 'karte_auswerten'], label: 'Karte' },
+  { key: ['karte_laden', 'karte_auswerten'], label: 'Vorbereiten' },
   { key: ['suchen'], label: 'Suchen' },
   { key: ['pruefen'], label: 'Prüfen' },
   { key: ['fertig', 'gestoppt', 'fehler'], label: 'Fertig' },
@@ -100,6 +100,53 @@ export function SearchLive({ initial, stop }: { initial: LeadSearchStatus; stop:
   const percent = waitingForWorker ? 0 : (p?.percent ?? 0);
   const eta = live && p ? remaining(p, now) : null;
   const tone = p?.phase === 'fehler' ? 'is-error' : p?.phase === 'gestoppt' ? 'is-stopped' : live ? 'is-live' : 'is-done';
+
+  // Fertig: nur das Ergebnis und der nächste Schritt – Einzelheiten zum Aufklappen
+  if (!running && p) {
+    const taken = p.counts.qualified + p.counts.needsReview;
+    return (
+      <section className={`search-live search-live-compact ${tone}`} aria-live="polite">
+        <div className="search-live-head">
+          <div>
+            <p className="search-live-kicker">
+              {p.phase === 'fertig' ? 'Suche fertig' : p.phase === 'gestoppt' ? 'Suche gestoppt' : 'Suche abgebrochen'} ·{' '}
+              {p.cities.join(', ')}
+            </p>
+            <h2 className="search-live-title">
+              {p.phase === 'fehler'
+                ? 'Das hat nicht geklappt – starte die Suche einfach noch einmal.'
+                : taken === 1
+                  ? '1 passender Betrieb gefunden'
+                  : `${taken} passende Betriebe gefunden`}
+            </h2>
+          </div>
+          {taken > 0 ? (
+            <a href="/admin/ablauf/pruefen" className="ui-btn ui-btn-primary">
+              Jetzt prüfen →
+            </a>
+          ) : null}
+        </div>
+        {p.log.length ? (
+          <details className="admin-details mt-3">
+            <summary>Einzelheiten</summary>
+            <p className="mt-2 text-sm text-slate-600">
+              {p.counts.found} Treffer · {taken} übernommen · {p.counts.belowMin} mit zu wenig Punkten · {p.counts.rejected}{' '}
+              aussortiert (z. B. hat schon eine Website)
+            </p>
+            <ul className="search-live-log mt-2">
+              {p.log.map((e) => (
+                <li key={`${e.at}-${e.name}`}>
+                  <span className={`search-live-tag ${OUTCOME[e.outcome].tone}`}>{OUTCOME[e.outcome].label}</span>
+                  <span className="search-live-name">{e.name}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+        {p.error ? <p className="search-live-warn">Fehler: {p.error}</p> : null}
+      </section>
+    );
+  }
 
   return (
     <section className={`search-live ${tone}`} aria-live="polite">
@@ -204,7 +251,7 @@ export function SearchLive({ initial, stop }: { initial: LeadSearchStatus; stop:
           </div>
           <div className="is-low">
             <strong>{p.counts.belowMin}</strong>
-            <span>unter {p.minScore} Punkten</span>
+            <span>zu wenig Punkte</span>
           </div>
           <div>
             <strong>{p.counts.rejected}</strong>

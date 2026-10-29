@@ -19,23 +19,35 @@ import {
 import { redirect } from 'next/navigation';
 import { actorOf, requireAdmin } from '@/lib/auth';
 
+/** Gesamteindruck des Betreibers → Bewertung je Bereich (Mindestniveau 80, kein Bereich unter 60) */
+const RATING_SCORES: Record<string, number> = { sehr_gut: 92, gut: 82, schwach: 50 };
+
 export async function approveLetterAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
+  // Einfache Prüfung: ein Haken (gelesen, passt) und eine Gesamtnote für alle Bereiche
+  const simple = form.get('simple') === '1';
+  const flow = form.get('flow') === '1';
+  const rating = simple && form.get('read') === 'on' ? (RATING_SCORES[String(form.get('rating') ?? '')] ?? NaN) : NaN;
   const ok = await approveLetter(
     String(form.get('id')),
     actorOf(s),
     Object.fromEntries(
       Object.keys(LETTER_QUALITY_DIMENSIONS).map((key) => [
         key,
-        form.has(`quality_${key}`) ? Number(form.get(`quality_${key}`)) : NaN,
+        simple ? rating : form.has(`quality_${key}`) ? Number(form.get(`quality_${key}`)) : NaN,
       ]),
     ) as LetterQualityScores,
   );
   if (!ok)
     redirect(
-      `/admin/letters/${encodeURIComponent(String(form.get('id')))}?hinweis=${encodeURIComponent('Freigabe nicht möglich. Wahrheitsprüfung und vollständige Qualitätsbewertung müssen bestanden sein.')}`,
+      `/admin/letters/${encodeURIComponent(String(form.get('id')))}?${flow ? 'flow=1&' : ''}hinweis=${encodeURIComponent(
+        simple
+          ? 'Noch nicht freigegeben: Haken setzen und „Sehr gut“ oder „Gut“ wählen. Passt der Brief nicht, lass ihn neu schreiben.'
+          : 'Freigabe nicht möglich. Wahrheitsprüfung und vollständige Qualitätsbewertung müssen bestanden sein.',
+      )}`,
     );
   revalidatePath('/admin/letters');
+  if (flow) redirect('/admin/ablauf/naechster-brief');
 }
 
 export async function bulkApproveLettersAction(form: FormData): Promise<void> {
@@ -53,6 +65,7 @@ export async function rejectLetterAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
   await rejectLetter(String(form.get('id')), actorOf(s), String(form.get('note') || 'verworfen'), form.get('regenerate') === '1');
   revalidatePath('/admin/letters');
+  if (form.get('flow') === '1') redirect('/admin/ablauf/naechster-brief');
 }
 
 /** Testbrief an die in den Einstellungen hinterlegte eigene Adresse (nutzt die neueste veröffentlichte Demo). */

@@ -44,10 +44,10 @@ export const SECTIONS: NavSection[] = [
   {
     id: 'kunden',
     label: 'Kunden',
-    hint: 'Aufträge, Websites, Support',
+    hint: 'Aufträge, Websites, Nachrichten',
     icon: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 19c.8-3 3.2-5 6-5s5.2 2 6 5M16 5a3 3 0 0 1 0 6M18 14c1.6.7 2.6 2.3 3 5',
     pages: [
-      { href: '/admin/support', label: 'Support', count: 'support' },
+      { href: '/admin/support', label: 'Nachrichten', count: 'support' },
       { href: '/admin/orders', label: 'Bestellungen' },
       { href: '/admin/customers', label: 'Kunden & Websites' },
     ],

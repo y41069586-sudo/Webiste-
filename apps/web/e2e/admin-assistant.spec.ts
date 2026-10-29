@@ -12,7 +12,7 @@ test('Assistent startet eine Lead-Suche, die Suche zeigt ihren Fortschritt live'
   await loginAsAdmin(page);
   await page.setViewportSize({ width: 1180, height: 820 });
   await page.goto('/admin/suche');
-  await expect(page.getByRole('heading', { name: 'Lead-Suche' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Betriebe suchen' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Assistent' }).click();
   const panel = page.getByRole('dialog', { name: 'Assistent' });
@@ -35,9 +35,10 @@ test('Assistent startet eine Lead-Suche, die Suche zeigt ihren Fortschritt live'
   const live = page.locator('.search-live');
   await expect(live).toBeVisible();
   // Mock-Suche ist schnell: am Ende steht der Abschluss mit Protokoll
-  await expect(live).toContainText('Letzte Suche abgeschlossen', { timeout: 120_000 });
+  await expect(live).toContainText('Suche fertig', { timeout: 120_000 });
+  await expect(live).toContainText(/passende[rs]? Betrieb/);
+  await live.getByText('Einzelheiten').click();
   await expect(live.locator('.search-live-log li').first()).toBeVisible();
-  await expect(live.locator('.search-live-percent')).toHaveText('100%');
   if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'suche-fertig.png'), fullPage: true });
 
   // Ohne KI-Schlüssel: Datenfragen und Projektwissen

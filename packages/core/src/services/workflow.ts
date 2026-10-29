@@ -95,9 +95,9 @@ export async function workflowStatus(): Promise<{ steps: WorkflowStep[]; nextSte
       title: 'Brief freigeben',
       mode: sw.autoSend ? 'auto' : 'du',
       count: v('letter_generated'),
-      hint: sw.autoSend ? 'Passiert von selbst.' : 'Brief ansehen und freigeben.',
-      href: '/admin/letters',
-      action: 'Briefe freigeben',
+      hint: sw.autoSend ? 'Passiert von selbst.' : 'Brief lesen und freigeben. Danach kommt automatisch der nächste.',
+      href: '/admin/ablauf/naechster-brief',
+      action: 'Briefe prüfen',
     },
     {
       key: 'versand',

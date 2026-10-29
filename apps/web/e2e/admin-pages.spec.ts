@@ -10,7 +10,7 @@ test('alle Admin-Seiten laden ohne Fehler', async ({ page }) => {
   const pages: [string, string][] = [
     ['/admin', 'Guten|Gute Nacht'],
     ['/admin/kpis', 'Kennzahlen'],
-    ['/admin/leads', 'Leads'],
+    ['/admin/leads', 'Alle Betriebe'],
     ['/admin/demos', 'Demos'],
     ['/admin/letters', 'Briefe'],
     ['/admin/claims', 'Claims'],
@@ -21,7 +21,7 @@ test('alle Admin-Seiten laden ohne Fehler', async ({ page }) => {
     ['/admin/objections', 'Einwände'],
     ['/admin/orders', 'Bestellungen'],
     ['/admin/customers', 'Kunden & Seiten'],
-    ['/admin/support', 'Support'],
+    ['/admin/support', 'Nachrichten'],
     ['/admin/budget', 'Budget'],
     ['/admin/reports', 'Wochenberichte'],
     ['/admin/jobs', 'Hintergrund'],
@@ -60,28 +60,28 @@ test('Claims: Freigabe nur mit Bestätigung, gesperrte Quellen ohne Button', asy
   await expect(card.getByText('wartet auf Freigabe')).toBeVisible();
 });
 
-test('Qualitätsfreigabe: keine voreingestellten Noten, schwaches Design blockiert, Einzelprüfung gibt frei', async ({ page }) => {
+test('Qualitätsfreigabe: keine voreingestellte Note, schwache Demo blockiert, Einzelprüfung gibt frei', async ({ page }) => {
   test.setTimeout(180_000);
   const demo = seedPendingDemo();
   await loginAsAdmin(page);
   await page.goto(`/admin/demos/${demo.demoId}`);
-  const form = page
-    .locator('form')
-    .filter({ has: page.getByRole('button', { name: 'Freigeben & veröffentlichen', exact: true }) });
-  const fillReview = async (design: string) => {
-    for (const key of ['facts', 'desktop', 'mobile', 'images', 'text']) await form.locator(`input[name="${key}"]`).check();
-    // Explicitly simulated human ratings for an isolated fictional fixture, never actual business metrics.
-    for (const key of ['design', 'industry', 'personalization', 'images', 'mobile'])
-      await form.locator(`input[name="quality_${key}"]`).fill(key === 'design' ? design : '90');
+  const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Freigeben – geht online', exact: true }) });
+  // Keine Note ist vorausgewählt
+  for (const name of ['Sehr gut', 'Gut', 'Nicht gut genug'])
+    await expect(form.getByRole('radio', { name, exact: true })).not.toBeChecked();
+  const fillReview = async (rating: string) => {
+    await form.getByRole('checkbox', { name: /Am Computer und am Handy/ }).check();
+    await form.getByRole('checkbox', { name: /Name, Adresse, Bilder/ }).check();
+    // Explicitly simulated human rating for an isolated fictional fixture.
+    await form.getByText(rating, { exact: true }).click();
   };
-  await expect(form.locator('input[name="quality_design"]')).toHaveValue('');
-  await fillReview('0');
-  await form.getByRole('button', { name: 'Freigeben & veröffentlichen', exact: true }).click();
-  await expect(page.getByText('Qualitätsbewertung unvollständig oder unter Mindestniveau.', { exact: false })).toBeVisible();
+  await fillReview('Nicht gut genug');
+  await form.getByRole('button', { name: 'Freigeben – geht online', exact: true }).click();
+  await expect(page.getByText('Noch nicht freigegeben', { exact: false })).toBeVisible();
   await expect(form).toBeVisible();
-  await fillReview('90');
-  await form.getByRole('button', { name: 'Freigeben & veröffentlichen', exact: true }).click();
-  await expect(page.getByText(/^(Freigegeben|Online)$/).first()).toBeVisible();
+  await fillReview('Sehr gut');
+  await form.getByRole('button', { name: 'Freigeben – geht online', exact: true }).click();
+  await expect(page.getByText(/^(Freigegeben|Online)/).first()).toBeVisible();
   await expect(form).toHaveCount(0);
-  await expect(page.getByText('Qualitätsbewertung unvollständig oder unter Mindestniveau.', { exact: false })).toHaveCount(0);
+  await expect(page.getByText('Noch nicht freigegeben', { exact: false })).toHaveCount(0);
 });

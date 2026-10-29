@@ -37,9 +37,9 @@ const STAGES: [string, string][] = [
 const SALES_ONLY = new Set(['tax.operatorConfirmed', 'sender.bankIban', 'legal.termsMarkdown']);
 
 const INBOX_KIND: Record<string, { label: string; tone: string; href: (id: string) => string }> = {
-  demo: { label: 'Demo prüfen', tone: 'is-demo', href: (id) => `/admin/demos/${id}` },
-  letter: { label: 'Brief freigeben', tone: 'is-letter', href: (id) => `/admin/letters/${id}` },
-  support: { label: 'Anfrage', tone: 'is-support', href: (id) => `/admin/support/${id}` },
+  demo: { label: 'Demo prüfen', tone: 'is-demo', href: (id) => `/admin/demos/${id}?flow=1` },
+  letter: { label: 'Brief freigeben', tone: 'is-letter', href: (id) => `/admin/letters/${id}?flow=1` },
+  support: { label: 'Nachricht', tone: 'is-support', href: (id) => `/admin/support/${id}` },
 };
 
 type InboxRow = { kind: string; id: string; title: string; created_at: Date };
@@ -114,8 +114,8 @@ export default async function TodayPage() {
       label: 'Testadresse für deinen Testbrief',
       href: '/admin/settings?bereich=letter',
     },
-    { done: workerOk, label: 'Worker-Server läuft', href: '/admin/settings?bereich=server' },
-    { done: total > 0, label: 'Erste Lead-Suche', href: '/admin/suche' },
+    { done: workerOk, label: 'Dein Server läuft', href: '/admin/settings?bereich=server' },
+    { done: total > 0, label: 'Erste Betriebe suchen', href: '/admin/suche' },
     { done: reviewed, label: 'Erste Demos prüfen & freigeben', href: '/admin/demos' },
     {
       done: testJobs >= LXP_REQUIRED_TEST_JOBS,
@@ -157,7 +157,7 @@ export default async function TodayPage() {
             Ablauf: nächster Schritt
           </Link>
           <Link href="/admin/suche" className={btn.secondary}>
-            Lead-Suche
+            Betriebe suchen
           </Link>
         </div>
       </section>
@@ -165,7 +165,7 @@ export default async function TodayPage() {
       <div className="admin-kpis">
         {(
           [
-            ['Leads', total, '/admin/leads'],
+            ['Betriebe', total, '/admin/leads'],
             ['Demos online', counts['demo_published'] ?? 0, '/admin/leads?status=demo_published'],
             ['Briefe verschickt', (counts['letter_sent'] ?? 0) + (counts['letter_delivered'] ?? 0), '/admin/letters'],
             ['Kunden', (counts['paid'] ?? 0) + (counts['onboarding'] ?? 0) + (counts['live'] ?? 0), '/admin/customers'],
@@ -180,7 +180,7 @@ export default async function TodayPage() {
 
       {health.problems.length ? (
         <Notice kind={health.status === 'down' ? 'error' : 'warn'}>
-          <strong>Systemzustand:</strong> {health.problems.join(' · ')}
+          <strong>Achtung:</strong> {health.problems.join(' · ')}
         </Notice>
       ) : null}
 

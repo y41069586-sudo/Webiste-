@@ -13,16 +13,16 @@ import {
 import { Badge, Card, Notice, PageHeader, StatusBadge, Table, Td, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
-import { bulkApproveLettersAction, createTestLetterAction, sendApprovedNowAction } from './actions';
+import { createTestLetterAction, sendApprovedNowAction } from './actions';
 import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Briefe' };
 
 const TABS: { key: string; label: string; statuses: LetterStatus[]; test?: boolean }[] = [
-  { key: 'review', label: 'Zur Freigabe', statuses: ['generated'] },
+  { key: 'review', label: 'Warten auf dich', statuses: ['generated'] },
   { key: 'approved', label: 'Freigegeben', statuses: ['approved'] },
-  { key: 'sent', label: 'Versendet', statuses: ['queued', 'sent', 'delivered'] },
-  { key: 'failed', label: 'Fehler', statuses: ['failed', 'cancelled'] },
+  { key: 'sent', label: 'Verschickt', statuses: ['queued', 'sent', 'delivered'] },
+  { key: 'failed', label: 'Probleme', statuses: ['failed', 'cancelled'] },
 ];
 
 export default async function LettersPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
@@ -37,11 +37,9 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
       .select({
         letter: schema.letters,
         lead: { id: schema.leads.id, name: schema.leads.businessName, segment: schema.leads.segmentKey },
-        variant: schema.variants.name,
       })
       .from(schema.letters)
       .innerJoin(schema.leads, eq(schema.leads.id, schema.letters.leadId))
-      .leftJoin(schema.variants, eq(schema.variants.id, schema.letters.variantId))
       .where(inArray(schema.letters.status, tab.statuses))
       .orderBy(desc(schema.letters.createdAt))
       .limit(200),
@@ -54,76 +52,46 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
     observedTransit(),
   ]);
   const countFor = (t: (typeof TABS)[number]) => counts.filter((c) => t.statuses.includes(c.status)).reduce((s, c) => s + c.n, 0);
-  const pendingCost = rows
-    .filter((r) => r.letter.status === 'generated')
-    .reduce((s, r) => s + (r.letter.estimatedCostCents ?? 0), 0);
+  const waiting = counts.filter((c) => c.status === 'generated').reduce((sum, c) => sum + c.n, 0);
+  const approved = counts.filter((c) => c.status === 'approved').reduce((sum, c) => sum + c.n, 0);
   return (
     <>
       <PageHeader
         title="Briefe"
-        subtitle={`Wochenbudget: ${eur(budget.spentCents)} von ${eur(budget.limitCents)} verbraucht · Rest ${eur(budget.remainingCents)}`}
+        subtitle={
+          waiting
+            ? `${waiting === 1 ? 'Ein Brief wartet' : `${waiting} Briefe warten`} auf dich.`
+            : 'Gerade wartet kein Brief auf dich. Neue Briefe entstehen von selbst.'
+        }
         actions={
           <>
-            <form action={createTestLetterAction}>
-              <SubmitButton type="submit" className={btn.secondary}>
-                Testbrief an mich erzeugen
-              </SubmitButton>
-            </form>
-            <form action={sendApprovedNowAction}>
-              <SubmitButton type="submit" className={btn.primary} disabled={sw.killSwitch}>
-                Freigegebene jetzt versenden{sw.dryRun ? ' (DRY_RUN)' : ''}
-              </SubmitButton>
-            </form>
+            {waiting ? (
+              <Link href="/admin/ablauf/naechster-brief" className={btn.primary}>
+                Briefe prüfen →
+              </Link>
+            ) : null}
+            {approved ? (
+              <form action={sendApprovedNowAction}>
+                <SubmitButton type="submit" className={waiting ? btn.secondary : btn.primary} disabled={sw.killSwitch}>
+                  {approved === 1 ? 'Freigegebenen Brief abschicken' : `${approved} freigegebene abschicken`}
+                </SubmitButton>
+              </form>
+            ) : null}
           </>
         }
       />
       {sw.dryRun ? (
         <div className="mb-4">
-          <Notice kind="warn">DRY_RUN ist aktiv: Freigegebene Briefe werden nicht versendet, es entstehen nur PDFs.</Notice>
+          <Notice kind="warn">Testmodus: Es wird nichts gedruckt oder verschickt – du siehst nur die fertigen Briefe.</Notice>
         </div>
       ) : null}
       {!sw.realLettersUnlocked ? (
         <div className="mb-4">
           <Notice>
-            Echte Briefe an Leads sind gesperrt, bis der Testbrief an dich korrekt angekommen ist (Einstellungen → Schalter).
+            Echte Briefe an Betriebe gehen erst raus, wenn dein eigener Testbrief gut angekommen ist (unten „Testbrief an mich“).
           </Notice>
         </div>
       ) : null}
-      <section aria-label="Briefdienst" className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <p className="text-xs text-slate-500">Briefdienst</p>
-          <p className="mt-1 font-semibold">
-            {mail.provider}
-            {mail.mode ? (
-              <Badge color={mail.mode === 'live' ? 'red' : 'yellow'}>{mail.mode === 'live' ? 'Live' : 'Testmodus'}</Badge>
-            ) : null}
-          </p>
-          {mail.provider === 'easynova' || mail.provider === 'letterxpress' ? (
-            <p className="mt-1 text-xs text-slate-600">
-              Testaufträge: {mail.lxpTestJobs} von {mail.requiredTestJobs}
-            </p>
-          ) : null}
-        </Card>
-        <Card>
-          <p className="text-xs text-slate-500">Guthaben</p>
-          <p className="mt-1 font-semibold">{mail.balanceCents !== null ? eur(mail.balanceCents) : '–'}</p>
-          {mail.balanceError ? <p className="mt-1 text-xs text-red-700">{mail.balanceError}</p> : null}
-        </Card>
-        <Card>
-          <p className="text-xs text-slate-500">Offene Aufträge</p>
-          <p className="mt-1 font-semibold">{mail.openJobs}</p>
-        </Card>
-        <Card>
-          <p className="text-xs text-slate-500">Kosten pro Brief (60 Tage)</p>
-          <p className="mt-1 font-semibold">{mail.avgCostCents !== null ? eur(mail.avgCostCents) : '–'}</p>
-          <p className="mt-1 text-xs text-slate-600">
-            Laufzeit beobachtet:{' '}
-            {transit.medianBusinessDays !== null
-              ? `${transit.medianBusinessDays} Werktage (n = ${transit.samples})`
-              : 'noch keine Daten'}
-          </p>
-        </Card>
-      </section>
       <nav className="mb-4 flex flex-wrap gap-2" aria-label="Filter">
         {TABS.map((t) => (
           <Link key={t.key} href={`/admin/letters?tab=${t.key}`} className={t.key === tab.key ? btn.primary : btn.secondary}>
@@ -132,49 +100,68 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
         ))}
       </nav>
       <Card>
-        <form action={bulkApproveLettersAction}>
-          {tab.key === 'review' && rows.length ? (
-            <div className="mb-3 flex flex-wrap items-center gap-3">
-              <SubmitButton className={btn.primary} type="submit">
-                Markierte freigeben
-              </SubmitButton>
-              <span className="text-sm text-slate-600">Geschätzte Kosten aller offenen Briefe: {eur(pendingCost)}</span>
-            </div>
-          ) : null}
-          <Table
-            head={['', 'Betrieb', 'Brief', 'Variante', 'Seiten', 'Kosten', 'Status', 'Erstellt']}
-            empty="Keine Briefe in dieser Ansicht"
-          >
-            {rows.map(({ letter, lead, variant }) => (
-              <tr key={letter.id}>
-                <Td>
-                  {letter.status === 'generated' ? (
-                    <input type="checkbox" name="ids" value={letter.id} aria-label={`${lead.name} auswählen`} />
-                  ) : null}
-                </Td>
-                <Td>
-                  <Link className="font-medium text-brand-700 hover:underline" href={`/admin/letters/${letter.id}`}>
-                    {lead.name}
-                  </Link>
-                  <div className="text-xs text-slate-500">{lead.segment}</div>
-                </Td>
-                <Td>{letter.isTest ? <Badge color="purple">Test</Badge> : letter.sequence === 2 ? 'Follow-up' : 'Erstbrief'}</Td>
-                <Td className="text-xs">{variant ?? '–'}</Td>
-                <Td>{letter.pageCount}</Td>
-                <Td>{eur(letter.costCents ?? letter.estimatedCostCents)}</Td>
-                <Td>
-                  <StatusBadge status={letter.status} />
-                  {letter.dryRun ? <Badge color="yellow">DRY</Badge> : null}
-                  {letter.statusReason ? (
-                    <div className="max-w-xs text-xs text-red-700">{letter.statusReason.slice(0, 160)}</div>
-                  ) : null}
-                </Td>
-                <Td className="text-xs whitespace-nowrap">{dt(letter.createdAt)}</Td>
-              </tr>
-            ))}
-          </Table>
-        </form>
+        <Table head={['Betrieb', 'Art', 'Stand', 'Datum']} empty="Keine Briefe in dieser Ansicht">
+          {rows.map(({ letter, lead }) => (
+            <tr key={letter.id}>
+              <Td>
+                <Link className="font-medium text-brand-700 hover:underline" href={`/admin/letters/${letter.id}`}>
+                  {lead.name}
+                </Link>
+              </Td>
+              <Td>{letter.isTest ? 'Testbrief' : (letter.sequence ?? 1) > 1 ? 'Erinnerung' : 'Erster Brief'}</Td>
+              <Td>
+                <StatusBadge status={letter.status} />
+                {letter.statusReason ? (
+                  <div className="max-w-xs text-xs text-red-700">{letter.statusReason.slice(0, 160)}</div>
+                ) : null}
+              </Td>
+              <Td className="text-xs whitespace-nowrap">{dt(letter.createdAt)}</Td>
+            </tr>
+          ))}
+        </Table>
       </Card>
+      <details className="admin-details mt-6">
+        <summary>Briefdienst, Guthaben und Testbrief</summary>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <p className="text-xs text-slate-500">Briefdienst</p>
+            <p className="mt-1 font-semibold">
+              {mail.provider}{' '}
+              {mail.mode ? (
+                <Badge color={mail.mode === 'live' ? 'red' : 'yellow'}>{mail.mode === 'live' ? 'Echt' : 'Testmodus'}</Badge>
+              ) : null}
+            </p>
+            {mail.provider === 'easynova' || mail.provider === 'letterxpress' ? (
+              <p className="mt-1 text-xs text-slate-600">
+                Testsendungen: {mail.lxpTestJobs} von {mail.requiredTestJobs}
+              </p>
+            ) : null}
+          </Card>
+          <Card>
+            <p className="text-xs text-slate-500">Guthaben</p>
+            <p className="mt-1 font-semibold">{mail.balanceCents !== null ? eur(mail.balanceCents) : '–'}</p>
+            {mail.balanceError ? <p className="mt-1 text-xs text-red-700">{mail.balanceError}</p> : null}
+          </Card>
+          <Card>
+            <p className="text-xs text-slate-500">Diese Woche ausgegeben</p>
+            <p className="mt-1 font-semibold">
+              {eur(budget.spentCents)} von {eur(budget.limitCents)}
+            </p>
+          </Card>
+          <Card>
+            <p className="text-xs text-slate-500">Kosten pro Brief</p>
+            <p className="mt-1 font-semibold">{mail.avgCostCents !== null ? eur(mail.avgCostCents) : '–'}</p>
+            <p className="mt-1 text-xs text-slate-600">
+              Unterwegs: {transit.medianBusinessDays !== null ? `ca. ${transit.medianBusinessDays} Werktage` : 'noch keine Daten'}
+            </p>
+          </Card>
+        </div>
+        <form action={createTestLetterAction} className="mt-4">
+          <SubmitButton type="submit" className={btn.secondary}>
+            Testbrief an mich
+          </SubmitButton>
+        </form>
+      </details>
     </>
   );
 }

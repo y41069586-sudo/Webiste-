@@ -15,7 +15,7 @@ import { requireAdmin } from '@/lib/auth';
 import { dt, num } from '@/lib/format';
 import { SubmitButton } from '@/components/admin/submit-button';
 
-export const metadata = { title: 'Leads' };
+export const metadata = { title: 'Alle Betriebe' };
 
 type SP = { status?: string; branch?: string; reason?: string; q?: string; sample?: string; page?: string };
 
@@ -66,7 +66,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader
-        title="Leads"
+        title="Alle Betriebe"
         subtitle={`${num(total)} Treffer${sp.sample ? ' · Stichprobe: 20 zufällige Einträge' : ''}`}
         actions={
           <>

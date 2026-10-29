@@ -1,16 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { and, desc, eq, like } from 'drizzle-orm';
-import {
-  demoDesignChoices,
-  demoRevisionKey,
-  getDb,
-  getSetting,
-  schema,
-  DEMO_QUALITY_DIMENSIONS,
-  type DemoRevisionStatus,
-} from '@wbm/core';
-import { Badge, Card, PageHeader, StatusBadge, Table, Td, btn, input, Notice } from '@/components/ui';
+import { demoDesignChoices, demoRevisionKey, getDb, getSetting, schema, type DemoRevisionStatus } from '@wbm/core';
+import { Badge, Card, Table, Td, btn, input, Notice } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
 import { approveDemoAction, rejectDemoAction, reviseDemoAction } from '../actions';
@@ -61,137 +53,121 @@ export default async function DemoDetail({
   ]);
   const designs = lead ? demoDesignChoices(lead.branchGroup) : [];
   const services = [...(content.services ?? []), ...Array.from({ length: 2 }, () => ({ title: '', text: '' }))].slice(0, 8);
+  const statusText: Record<string, string> = {
+    pending_review: 'Wartet auf dich',
+    qa_failed: 'Technik-Prüfung nicht bestanden',
+    approved: 'Freigegeben',
+    published: 'Online',
+    rejected: 'Abgelehnt',
+    building: 'Wird gebaut',
+    expired: 'Abgelaufen',
+  };
   return (
     <>
       {qualityMessage === 'required' && canDecide ? (
         <Notice kind="warn">
-          Qualitätsbewertung unvollständig oder unter Mindestniveau. Bitte Entwurf überarbeiten, erneut prüfen und alle Bereiche
-          tatsächlich bewerten.
+          Noch nicht freigegeben: Bitte beide Haken setzen und „Sehr gut“ oder „Gut“ wählen. Ist die Demo nicht gut genug, lass
+          sie unten neu bauen.
         </Notice>
       ) : null}
-      <PageHeader
-        title={`Demo: ${lead?.businessName ?? '–'}`}
-        subtitle={
-          <span className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={demo.status} /> {demo.templateId} / {demo.palette} · Inhalt:{' '}
-            {meta?.source === 'fallback' ? 'Standardtexte' : 'KI'} · erstellt {dt(demo.createdAt)}
-          </span>
-        }
-        actions={
-          <>
-            <Link className={btn.secondary} href={`/admin/demos/${demo.id}/html`} target="_blank">
-              Vorschau in neuem Tab
-            </Link>
-            {lead ? (
-              <Link className={btn.secondary} href={`/admin/leads/${lead.id}`}>
-                Lead
-              </Link>
-            ) : null}
-          </>
-        }
-      />
-      <div className="grid gap-6 xl:grid-cols-3">
-        <div className="space-y-6 xl:col-span-2">
-          <Card title="Vorschau (Desktop)">
-            <iframe
-              title="Demo-Vorschau"
-              src={`/admin/demos/${demo.id}/html`}
-              className="h-[720px] w-full rounded-lg border border-slate-200"
-              sandbox="allow-scripts"
-            />
-          </Card>
-          <div className="grid gap-6 md:grid-cols-2">
-            {demo.screenshotMobileKey ? (
-              <Card title="Mobil (Screenshot)">
-                <img
-                  src={`/admin/files/${demo.screenshotMobileKey}`}
-                  alt="Mobil-Screenshot"
-                  className="mx-auto max-h-[640px] rounded-lg border"
-                />
-              </Card>
-            ) : null}
-            {demo.compositeKey ? (
-              <Card title="Komposit für den Brief">
-                <img src={`/admin/files/${demo.compositeKey}`} alt="Komposit" className="w-full rounded-lg border" />
-              </Card>
-            ) : null}
+      <div className="dcheck-head">
+        <div>
+          <p className="dcheck-name">{lead?.businessName ?? 'Demo'}</p>
+          <p className="dcheck-sub">
+            {statusText[demo.status] ?? demo.status}
+            {lead ? ` · ${lead.city}` : ''}
+          </p>
+        </div>
+        <Link className={btn.secondary} href={`/admin/demos/${demo.id}/html`} target="_blank">
+          Groß öffnen ↗
+        </Link>
+      </div>
+      <div className="dcheck">
+        <div className="dcheck-views">
+          <div className="dcheck-desktop">
+            <p className="dcheck-label">Computer</p>
+            <iframe title="Demo am Computer" src={`/admin/demos/${demo.id}/html`} sandbox="allow-scripts" />
+          </div>
+          <div className="dcheck-phone">
+            <p className="dcheck-label">Handy</p>
+            <iframe title="Demo am Handy" src={`/admin/demos/${demo.id}/html`} sandbox="allow-scripts" />
           </div>
         </div>
-        <div className="space-y-6">
+        <div className="dcheck-side">
           {canDecide ? (
-            <Card title="Entscheidung">
-              <form action={approveDemoAction} className="space-y-3">
-                {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
-                <p className="text-sm text-slate-600">
-                  Technische QA ist keine visuelle Abnahme. Jede Freigabe bestätigt die tatsächliche Einzelprüfung.
-                </p>
-                {(['facts', 'desktop', 'mobile', 'images', 'text'] as const).map((key, index) => (
-                  <label key={key} className="flex gap-2 text-sm">
-                    <input type="checkbox" name={key} required />
-                    {
-                      [
-                        'Name, Anschrift, aktiver Betrieb, Branche und fehlende eigene Website verifiziert',
-                        'Desktop tatsächlich angesehen, keine sichtbaren Layoutfehler',
-                        'Handy tatsächlich angesehen und bedienbar',
-                        'Bilder passend, rechtmäßig und korrekt gekennzeichnet',
-                        'Texte glaubwürdig; Beispiele und offene Inhalte erkennbar',
-                      ][index]
-                    }
-                  </label>
-                ))}
-                {demo.qaResultJson?.quality ? (
-                  <fieldset className="grid gap-3 sm:grid-cols-2">
-                    <legend className="text-sm font-semibold">Tatsächliche Qualitätsbewertung (0–100)</legend>
-                    {Object.entries(DEMO_QUALITY_DIMENSIONS).map(([key, definition]) => (
-                      <label key={key} className="text-sm">
-                        {definition.label} ({definition.weight} %)
-                        <input
-                          type="number"
-                          name={`quality_${key}`}
-                          min={0}
-                          max={100}
-                          required
-                          className={input}
-                          placeholder="Nach Sichtprüfung bewerten"
-                        />
-                      </label>
-                    ))}
-                    <p className="text-xs text-slate-600 sm:col-span-2">
-                      Keine automatische Designnote. Mindestgesamtwert {demo.qaResultJson.quality.minimum}; kein Bereich unter 60.
-                      Niedrige Werte erfordern Überarbeitung.
-                    </p>
-                  </fieldset>
-                ) : null}
+            <div className="check-card">
+              <form action={approveDemoAction}>
                 <input type="hidden" name="id" value={demo.id} />
-                <textarea name="note" placeholder="Notiz (optional)" className={input} rows={2} />
-                <SubmitButton className={btn.primary} type="submit">
-                  Freigeben &amp; veröffentlichen
+                <input type="hidden" name="simple" value="1" />
+                {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
+                <div className="check-ticks">
+                  <p className="check-q">Stimmt das?</p>
+                  <label className="check-tick">
+                    <input type="checkbox" name="seen" required />
+                    <span>Am Computer und am Handy angesehen – sieht ordentlich aus</span>
+                  </label>
+                  <label className="check-tick">
+                    <input type="checkbox" name="correct" required />
+                    <span>Name, Adresse, Bilder und Texte passen zum Betrieb</span>
+                  </label>
+                </div>
+                {demo.qaResultJson?.quality ? (
+                  <div className="check-ticks dcheck-rating">
+                    <p className="check-q">Wie gut ist die Demo?</p>
+                    <div className="dcheck-choices">
+                      {(
+                        [
+                          ['sehr_gut', 'Sehr gut'],
+                          ['gut', 'Gut'],
+                          ['schwach', 'Nicht gut genug'],
+                        ] as const
+                      ).map(([value, label]) => (
+                        <label key={value} className="check-tick dcheck-choice">
+                          <input type="radio" name="rating" value={value} required />
+                          <span>{label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                <SubmitButton className="ui-btn ui-btn-primary check-go" type="submit">
+                  Freigeben – geht online
                 </SubmitButton>
                 {demo.status === 'qa_failed' ? (
-                  <p className="text-xs text-amber-700">
-                    QA nicht bestanden: Befunde beheben und erneut prüfen. Eine manuelle Freigabe umgeht diese Sperre nicht.
+                  <p className="check-note">
+                    Die automatische Technik-Prüfung hat etwas gefunden. Lass die Demo am besten neu bauen.
                   </p>
-                ) : null}
+                ) : (
+                  <p className="check-note">Danach schreibt das System den Brief von selbst.</p>
+                )}
               </form>
-              <hr className="my-4" />
-              <form action={rejectDemoAction} className="space-y-3">
-                {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
-                <input type="hidden" name="id" value={demo.id} />
-                <textarea name="note" placeholder="Grund (Pflicht)" required className={input} rows={2} />
-                <div className="flex flex-wrap gap-2">
-                  <SubmitButton className={btn.secondary} type="submit" name="regenerate" value="1">
-                    Ablehnen &amp; neu generieren
-                  </SubmitButton>
-                  <SubmitButton className={btn.danger} type="submit" name="regenerate" value="0">
-                    Ablehnen (Lead verwerfen)
-                  </SubmitButton>
-                </div>
-              </form>
-            </Card>
+              <details className="dcheck-reject">
+                <summary>Gefällt mir nicht</summary>
+                <form action={rejectDemoAction} className="mt-3 grid gap-2">
+                  {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
+                  <input type="hidden" name="id" value={demo.id} />
+                  <input name="note" placeholder="Was stört? (optional)" className={input} maxLength={300} />
+                  <div className="flex flex-wrap gap-2">
+                    <SubmitButton className={btn.primary} type="submit" name="regenerate" value="1">
+                      Neu bauen lassen
+                    </SubmitButton>
+                    <SubmitButton className={btn.secondary} type="submit" name="regenerate" value="0">
+                      Betrieb aussortieren
+                    </SubmitButton>
+                  </div>
+                </form>
+              </details>
+            </div>
+          ) : null}
+          {demo.status === 'published' ? (
+            <Notice kind="success">Online bis {dt(demo.expiresAt)}. Der Brief entsteht von selbst.</Notice>
           ) : null}
           {canRevise ? (
-            <Card title="Kostenlos anpassen (Wunsch vor dem Kauf)">
-              <div id="anpassen" className="space-y-4">
+            <details className="admin-details dcheck-more" id="anpassen" open={wishes.length > 0}>
+              <summary>
+                {wishes.length ? `Wunsch vom Betrieb (${wishes.length}) – Demo ändern` : 'Etwas an der Demo ändern'}
+              </summary>
+              <div className="mt-3 space-y-4">
                 {wishes.length ? (
                   <div className="space-y-2">
                     {wishes.map((w) => (
@@ -289,41 +265,52 @@ export default async function DemoDetail({
                   <SubmitButton className={btn.primary}>Änderung speichern</SubmitButton>
                 </form>
               </div>
-            </Card>
+            </details>
           ) : null}
-          <Card title={`QA ${demo.qaResultJson ? (demo.qaResultJson.passed ? '– bestanden' : '– nicht bestanden') : ''}`}>
-            {demo.qaResultJson?.quality ? (
-              <p className="mb-3 text-sm">
-                Gewichtete Bewertung:{' '}
-                {demo.qaResultJson.quality.total === null
-                  ? 'Sichtprüfung und Einzelbewertungen stehen aus'
-                  : `${demo.qaResultJson.quality.total}/100`}
-                . Technische Tests allein liefern keine Designnote.
+          <details className="admin-details dcheck-more">
+            <summary>Technische Details</summary>
+            <div className="mt-3 space-y-4">
+              <p className="text-xs text-slate-500">
+                Vorlage {demo.templateId} / {demo.palette} · Inhalt {meta?.source === 'fallback' ? 'Standardtexte' : 'KI'} ·
+                erstellt {dt(demo.createdAt)} · Adresse /d/{demo.slug}
+                {lead ? (
+                  <>
+                    {' · '}
+                    <Link className="underline" href={`/admin/leads/${lead.id}`}>
+                      Betrieb
+                    </Link>
+                  </>
+                ) : null}
               </p>
-            ) : null}
-            <Table head={['Prüfung', 'Ergebnis', 'Details']} empty="Noch nicht geprüft">
-              {(demo.qaResultJson?.checks ?? []).map((c) => (
-                <tr key={c.name}>
-                  <Td className="font-mono text-xs">{c.name}</Td>
-                  <Td>
-                    <Badge color={c.passed ? 'green' : 'red'}>{c.passed ? 'ok' : 'fehler'}</Badge>
-                  </Td>
-                  <Td className="text-xs break-words text-slate-600">{c.details ?? ''}</Td>
-                </tr>
-              ))}
-            </Table>
-          </Card>
-          <Card title="Inhalt (JSON)">
-            <pre className="max-h-96 overflow-auto text-xs whitespace-pre-wrap">{JSON.stringify(demo.contentJson, null, 2)}</pre>
-          </Card>
-          {demo.status === 'published' ? (
-            <Card title="Öffentlich">
-              <p className="text-sm">
-                Slug: <code>{demo.slug}</code>
-              </p>
-              <p className="text-sm">Läuft ab: {dt(demo.expiresAt)}</p>
-            </Card>
-          ) : null}
+              <Card title={`QA ${demo.qaResultJson ? (demo.qaResultJson.passed ? '– bestanden' : '– nicht bestanden') : ''}`}>
+                {demo.qaResultJson?.quality ? (
+                  <p className="mb-3 text-sm">
+                    Gewichtete Bewertung:{' '}
+                    {demo.qaResultJson.quality.total === null
+                      ? 'Sichtprüfung und Einzelbewertungen stehen aus'
+                      : `${demo.qaResultJson.quality.total}/100`}
+                    . Technische Tests allein liefern keine Designnote.
+                  </p>
+                ) : null}
+                <Table head={['Prüfung', 'Ergebnis', 'Details']} empty="Noch nicht geprüft">
+                  {(demo.qaResultJson?.checks ?? []).map((c) => (
+                    <tr key={c.name}>
+                      <Td className="font-mono text-xs">{c.name}</Td>
+                      <Td>
+                        <Badge color={c.passed ? 'green' : 'red'}>{c.passed ? 'ok' : 'fehler'}</Badge>
+                      </Td>
+                      <Td className="text-xs break-words text-slate-600">{c.details ?? ''}</Td>
+                    </tr>
+                  ))}
+                </Table>
+              </Card>
+              <Card title="Inhalt (JSON)">
+                <pre className="max-h-96 overflow-auto text-xs whitespace-pre-wrap">
+                  {JSON.stringify(demo.contentJson, null, 2)}
+                </pre>
+              </Card>
+            </div>
+          </details>
         </div>
       </div>
     </>

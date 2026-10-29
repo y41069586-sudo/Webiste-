@@ -2635,3 +2635,135 @@ html[data-admin-nav='open'] .admin-overlay {
   padding-top: 14px;
   border-top: 1px solid var(--border);
 }
+
+/* Demo prüfen: große Vorschau, rechts zwei Haken und eine Note */
+.dcheck-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.dcheck-name {
+  font-size: 24px;
+  font-weight: 750;
+}
+.dcheck-sub {
+  color: var(--text-2);
+}
+.dcheck {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1200px) {
+  .dcheck {
+    grid-template-columns: minmax(0, 1fr) 400px;
+    align-items: start;
+  }
+  .dcheck-side {
+    position: sticky;
+    top: 16px;
+  }
+}
+.dcheck-views {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 900px) {
+  .dcheck-views {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+.dcheck-label {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.dcheck-desktop iframe,
+.dcheck-phone iframe {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+.dcheck-desktop iframe {
+  height: 640px;
+}
+.dcheck-phone iframe {
+  max-width: 300px;
+  height: 620px;
+  border-radius: 28px;
+  border-width: 6px;
+  border-color: #1b2030;
+}
+.dcheck-side {
+  display: grid;
+  gap: 14px;
+}
+.dcheck-rating {
+  margin-top: 16px;
+}
+.dcheck-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.dcheck-choice {
+  justify-content: center;
+  text-align: center;
+  padding: 10px 8px;
+  font-weight: 600;
+}
+.dcheck-choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.dcheck-choice {
+  position: relative;
+}
+.dcheck-choice:has(input:focus-visible) {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.dcheck-reject {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.dcheck-reject summary {
+  cursor: pointer;
+  text-align: center;
+  color: var(--text-2);
+  font-weight: 600;
+}
+.dcheck-more summary {
+  font-weight: 650;
+}
+.dcheck-letter iframe {
+  display: block;
+  width: 100%;
+  height: 820px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+@media (max-width: 899px) {
+  /* Am Handy reicht die Handy-Vorschau; „Groß öffnen“ zeigt die Computer-Ansicht */
+  .dcheck-desktop {
+    display: none;
+  }
+  .dcheck-phone iframe {
+    margin: 0 auto;
+  }
+  .dcheck-letter iframe {
+    height: 560px;
+  }
+}

@@ -15,8 +15,17 @@ import {
 } from '@wbm/core';
 import { actorOf, requireAdmin } from '@/lib/auth';
 
+/** Gesamteindruck des Betreibers → Bewertung je Bereich (Mindestniveau 80, kein Bereich unter 60) */
+const RATING_SCORES: Record<string, number> = { sehr_gut: 92, gut: 82, schwach: 50 };
+
 export async function approveDemoAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
+  // Einfache Prüfung: zwei Haken und eine Gesamtnote statt fünf Haken und fünf Zahlen. Die Gesamtnote des
+  // Betreibers gilt für jeden Bereich; „Nicht gut genug“ liegt unter dem Mindestniveau und sperrt die Freigabe.
+  const simple = form.get('simple') === '1';
+  const rating = RATING_SCORES[String(form.get('rating') ?? '')] ?? NaN;
+  const seen = form.get('seen') === 'on';
+  const correct = form.get('correct') === 'on';
   try {
     await approveDemo(String(form.get('id')), actorOf(s), {
       manual: true,
@@ -25,14 +34,14 @@ export async function approveDemoAction(form: FormData): Promise<void> {
         qualityScores: Object.fromEntries(
           Object.keys(DEMO_QUALITY_DIMENSIONS).map((key) => [
             key,
-            form.has(`quality_${key}`) ? Number(form.get(`quality_${key}`)) : NaN,
+            simple ? rating : form.has(`quality_${key}`) ? Number(form.get(`quality_${key}`)) : NaN,
           ]),
         ) as ManualQualityScores,
-        facts: form.get('facts') === 'on',
-        desktop: form.get('desktop') === 'on',
-        mobile: form.get('mobile') === 'on',
-        images: form.get('images') === 'on',
-        text: form.get('text') === 'on',
+        facts: simple ? correct : form.get('facts') === 'on',
+        desktop: simple ? seen : form.get('desktop') === 'on',
+        mobile: simple ? seen : form.get('mobile') === 'on',
+        images: simple ? correct : form.get('images') === 'on',
+        text: simple ? correct : form.get('text') === 'on',
       },
     });
   } catch (error) {
