@@ -140,8 +140,10 @@ export interface OfferCard {
   unit: string;
   points: string[];
   href: string;
-  /** V4: laufender Monatsbetrag (z. B. „19 €“) – wird als Unterschied zwischen den Tarifen groß gezeigt */
+  /** V4: laufender Monatsbetrag (z. B. „19 €“) */
   monthly?: string;
+  /** V4: Gesamtkosten der ersten zwölf Monate ab Go-Live inkl. Einrichtung (z. B. „825 €“) – volle Kostentransparenz */
+  firstYear?: string;
 }
 
 export interface TrustInfo {
@@ -173,6 +175,8 @@ export interface DemoOptions {
   whatsappUrl?: string | null;
   /** Vertrauensblock „Wer hat diesen Entwurf gebaut?“ */
   trust?: TrustInfo | null;
+  /** Belegte Zusicherungen aus Vertrag und Einstellungen („Darauf können Sie sich verlassen“) – nie erfunden */
+  assurances?: string[];
 }
 
 export interface LiveOptions {

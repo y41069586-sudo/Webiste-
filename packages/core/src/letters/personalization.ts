@@ -123,7 +123,7 @@ export function personalizedLetterCopy(context: VerifiedLetterContext, variant =
 /** New campaign copy is a source-bound invitation, not a priced offer. */
 export const PREVIEW_LETTER_VERSION = 'personal-preview-2';
 export const PREVIEW_ORDER_NOTICE =
-  '**Kein Verkaufsgespräch:** Ich rufe Sie nicht an. Gefällt Ihnen der Entwurf, passe ich ihn mit Ihnen an; online geht er erst nach Ihrer Freigabe. Sonst ist nichts zu tun. Unabhängiger, nicht beauftragter Entwurf: ohne Bestellung keine Kosten, die Umsetzung ist kostenpflichtig – Preise und Vertragsbedingungen stehen vor jeder Bestellung in der Vorschau.';
+  '**Ohne Verkaufsgespräch:** Ich rufe Sie nicht an. Ansehen kostet nichts, und ohne Bestellung entstehen keine Kosten. Gefällt Ihnen der Entwurf, passe ich ihn mit Ihnen an – online geht er erst nach Ihrer Freigabe. Die Umsetzung ist kostenpflichtig; Festpreis und Vertragsbedingungen sehen Sie vor jeder Bestellung in der Vorschau. Unabhängiger, nicht beauftragter Entwurf.';
 
 const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; benefit: string; caption: string }[] = [
   {
@@ -400,8 +400,12 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
     ? variant === 'B'
       ? `Gerade bei Themen wie ${detail} ist ein klarer Überblick hilfreich.`
       : `${detail} – diese Angaben zu Ihrem Betrieb stehen im Mittelpunkt dieser Website-Idee.`
-    : (research ?? `Der Entwurf greift die Branche ${context.branchLabel} und Ihren Standort auf.`);
-  const headline = context.businessName.length < 58 ? `${context.businessName}: ${profile.title}` : profile.title;
+    : (research ?? '');
+  // Betreff menschlich statt technisch („… ist online“): eine Website-Idee, die man sich ansehen kann
+  const humanTitle = profile.title.replace(/^Ihre Website-Vorschau (?:für (.+?) )?ist online$/, (_m, topic?: string) =>
+    topic ? `Eine Website für ${topic} – zum Ansehen bereit` : 'Eine Website für Ihren Betrieb – zum Ansehen bereit',
+  );
+  const headline = context.businessName.length < 58 ? `${context.businessName}: ${humanTitle}` : humanTitle;
   // Lokaler Bezug im Nutzen-Satz („wer in Dortmund …“); ohne kurzen Ortsnamen neutral
   const benefit = profile.benefit.replace(' in {ort}', place).replace(/^(Eine|Wer|Neue|Der)\b/, (w) => w.toLowerCase());
   return {
@@ -419,7 +423,7 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
     intro: [
       detail
         ? `**${detail}** – ${benefit}${research ? ` ${research}` : ''}`
-        : `${personal} ${benefit.charAt(0).toUpperCase()}${benefit.slice(1)}`,
+        : `${personal} ${benefit.charAt(0).toUpperCase()}${benefit.slice(1)}`.trim(),
     ],
     scan: '**QR-Code mit der Handykamera scannen und kostenlos ansehen:** Ihre Website ist schon online, aber nur über Ihren persönlichen Link erreichbar. Ein Blick dauert keine Minute.',
     qrCaption: profile.caption,

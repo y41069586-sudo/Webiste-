@@ -676,3 +676,33 @@ Auf Wunsch des Betreibers ist die Garantie aus:
 - Die AGB-Entwürfe lassen den Garantie-Abschnitt weg, die folgenden Ziffern rücken auf.
 - Die Funktion selbst bleibt im Code und lässt sich in den Einstellungen wieder einschalten. Für ältere Bestellungen
   mit gespeicherter Frist bleibt die Erstattung im Admin möglich.
+
+## 29.10.2026 – Bewertungsrunde: Blocker, Brief, Demo, Angebot
+
+**Blocker:**
+- In der Produktion gab es keine Briefvorlagen, weil `seedDefaults` dort ohne Migrationslauf nie lief.
+- Die V4-Vorlagen waren pausiert, und die Altvorlagen blockiert der Wahrheits-Check.
+- Neu ist `ensureLetterVariants`, das bei jedem Worker-Start läuft und im Varianten-Labor per Knopf auslösbar ist:
+  - Ohne Vorlagen legt es die Standarddaten an.
+  - Unter V4 aktiviert es einmalig je Branche „V4 … A“, dazu „V4 allgemein A“ für Branchen ohne eigene Vorlage und
+    die V4-Folgebriefe. Die Altvorlagen pausiert es.
+  - Spätere Entscheidungen im Labor bleiben unberührt.
+
+**Brief:**
+- Betreff jetzt „Name: Eine Website für Ihr Café – zum Ansehen bereit“ statt „Ihre Website-Vorschau … ist online“.
+- Kein maschineller Satz mehr („Der Entwurf greift die Branche … auf“). Der Branchenbezug kommt aus dem Nutzen-Satz.
+- Der Hinweis „Ohne Verkaufsgespräch“ ist klarer formuliert. Alle Pflichtelemente bleiben: unabhängiger, nicht
+  beauftragter Entwurf, keine Kosten ohne Bestellung, kostenpflichtige Umsetzung, Bedingungen vor der Bestellung.
+- Die Pflichtangaben bleiben in 9 pt, weil der eingebaute Qualitätscheck das verlangt.
+
+**Demo:**
+- Die Hinweise erscheinen als ruhiges Etikett „Vorschlag“ statt mit Stift-Symbol, die Texte sind kürzer.
+- Die Kennzeichnung als Beispiel bleibt erhalten.
+
+**Angebot (V4):**
+- Einmalpreis und Monatsbetrag stehen gleich groß, dazu die Summe des ersten Jahres (825 € bzw. 1.785 €).
+- Neuer Block „Darauf können Sie sich verlassen“. Er enthält nur Zusagen aus Vertrag und Ablauf: Ergebnis vorher
+  sichtbar, online erst nach Freigabe, Änderungsrunden, Domain auf den Betrieb, monatlich kündbar, Zusatzleistungen
+  nur mit Zustimmung, Stripe plus Rechnung, fester Ansprechpartner.
+- Neu ist ein Kasten „Noch eine Frage vor dem Kauf?“ mit Knöpfen.
+- Ohne Absenderangaben steht nie mehr „TODO“ auf der Seite.

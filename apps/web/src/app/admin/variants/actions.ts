@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import {
   approveProposal,
+  ensureLetterVariants,
+  getConfig,
   enqueue,
   pauseVariant,
   QUEUES,
@@ -60,4 +62,12 @@ export async function runLearningAgentAction(): Promise<void> {
   await enqueue(QUEUES.learningAgent, { force: true, triggeredBy: actorOf(s) }, { singletonKey: `learning-${Date.now()}` });
   revalidatePath('/admin/learning');
   redirect('/admin/learning?gestartet=1');
+}
+
+/** Briefvorlagen anlegen bzw. die V4-Vorlagen erstmals aktivieren (gleiche Logik wie beim Worker-Start). */
+export async function setupLetterVariantsAction(): Promise<void> {
+  await requireAdmin();
+  await ensureLetterVariants(undefined, (await getConfig({ fresh: true })).offers.activeVersion);
+  revalidatePath('/admin/variants');
+  revalidatePath('/admin/letters');
 }

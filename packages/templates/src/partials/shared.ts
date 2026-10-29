@@ -166,13 +166,14 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
     `<a href="${esc(c.href)}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-4 py-2 font-semibold text-white hover:bg-[#1f2937] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111827]">${demo.offerVersion === 'v4' ? `Mit ${esc(c.title.replace('SeitenWerk ', ''))} übernehmen` : `${esc(c.title)} wählen`}</a>`;
   const points = (list: string[]) =>
     `<ul class="mt-3 flex-1 space-y-1.5 text-sm text-[#374151]">${list.map((p) => `<li class="flex gap-2"><span aria-hidden="true" class="text-[#047857]">✓</span><span>${esc(p)}</span></li>`).join('')}</ul>`;
-  // V4: Einrichtung ist bei beiden Tarifen gleich – groß steht der Monatsbetrag, der den Unterschied macht
+  // V4: Einmalpreis und Monatsbetrag gleich deutlich, dazu die Summe des ersten Jahres – nichts wirkt versteckt
   const card = (c: (typeof cards)[number]) =>
     c.monthly
       ? `<li class="flex flex-col rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] shadow-sm">
       <h3 class="text-base font-semibold">${esc(c.title)}</h3>
-      <p class="mt-2"><span class="text-3xl font-bold tracking-tight">${esc(c.monthly)}</span> <span class="text-sm text-[#4b5563]">pro Monat ab Go-Live</span></p>
-      <p class="mt-1 text-sm text-[#4b5563]">zzgl. ${esc(c.price)} ${esc(c.unit)} für die Einrichtung</p>
+      <p class="mt-3 flex flex-wrap items-baseline gap-x-2"><span class="text-3xl font-bold tracking-tight">${esc(c.price)}</span><span class="text-sm text-[#4b5563]">${esc(c.unit)} für die Einrichtung</span></p>
+      <p class="mt-1 flex flex-wrap items-baseline gap-x-2"><span class="text-3xl font-bold tracking-tight">+ ${esc(c.monthly)}</span><span class="text-sm text-[#4b5563]">pro Monat, erst ab Go-Live</span></p>
+      ${c.firstYear ? `<p class="mt-3 rounded-lg bg-[#f3f4f6] px-3 py-2 text-sm text-[#374151]">Erstes Jahr insgesamt: <strong class="text-[#111827]">${esc(c.firstYear)}</strong> – ohne versteckte Kosten.</p>` : ''}
       ${points(c.points.filter((p) => !p.startsWith('+ ')))}
       ${button(c)}
     </li>`
@@ -189,6 +190,10 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
     .map((w) => w.charAt(0).toUpperCase())
     .slice(0, 2)
     .join('');
+  // Ohne vollständige Absenderangaben nie „TODO“ zeigen (echte Briefe sind ohne sie ohnehin gesperrt)
+  const providerName =
+    demo.sender.name.trim() ||
+    (demo.sender.company.trim() && !/platzhalter/i.test(demo.sender.company) ? demo.sender.company : 'SeitenWerk');
   const trust = t
     ? `<div class="mt-6 flex flex-col gap-4 rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] sm:flex-row sm:items-start">
       ${
@@ -200,18 +205,24 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
       }
       <div>
         <h3 class="text-base font-semibold">Wer hat diesen Entwurf gebaut?</h3>
-        <p class="mt-1 font-medium">${esc(t.name) || 'Anbieterangaben noch nicht vollständig – Veröffentlichung gesperrt'}</p>
+        <p class="mt-1 font-medium">${esc(t.name) || esc(providerName)}</p>
         ${t.intro ? `<p class="mt-2 text-sm text-[#374151]">${esc(t.intro)}</p>` : ''}
-        <p class="mt-3 text-sm text-[#374151]">${t.email ? `<a class="underline" href="mailto:${esc(t.email)}">${esc(t.email)}</a>` : ''}${t.phone ? ` · <a class="underline" href="tel:${esc(t.phone.replace(/[^+\d]/g, ''))}">${esc(t.phone)}</a>` : ''} · <a class="underline" href="${esc(t.imprintUrl)}">Impressum</a></p>
+        <p class="mt-3 text-sm text-[#374151]">${[
+          t.email ? `<a class="underline" href="mailto:${esc(t.email)}">${esc(t.email)}</a>` : '',
+          t.phone ? `<a class="underline" href="tel:${esc(t.phone.replace(/[^+\d]/g, ''))}">${esc(t.phone)}</a>` : '',
+          `<a class="underline" href="${esc(t.imprintUrl)}">Impressum</a>`,
+        ]
+          .filter(Boolean)
+          .join(' · ')}</p>
       </div>
     </div>`
     : '';
   return `<section id="uebernehmen" aria-labelledby="uebernehmen-titel" class="border-t border-[#dce2ed] bg-[#f3f4f6] py-12 text-[#111827]">
   <div class="mx-auto max-w-4xl px-4">
-    <p class="text-sm font-medium text-[#4b5563]">${brandMarkHtml(24)} Angebot von ${esc(demo.sender.name) || 'TODO: vollständiger Anbietername'}, ${esc(demo.sender.company)} – nicht Teil der Website</p>
+    <p class="text-sm font-medium text-[#4b5563]">${brandMarkHtml(24)} Angebot von ${esc(providerName)}${demo.sender.name.trim() && demo.sender.company.trim() && !/platzhalter/i.test(demo.sender.company) ? `, ${esc(demo.sender.company)}` : ''} – nicht Teil der Website</p>
     <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${v4 ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${
       v4
-        ? `<p class="mt-3">Fertigstellung einmalig ${esc(demo.priceLabel)}, danach ${cards[0]?.monthly ? `ab ${esc(cards[0].monthly)} im Monat` : 'Ihr Monatstarif'}. Online geht die Website erst nach Ihrer Freigabe – die Monatsgebühr beginnt erst mit dem Go-Live.</p>`
+        ? `<p class="mt-3">Sie haben Ihre Website gerade gesehen – bevor Sie irgendetwas bezahlen. Übernehmen Sie sie zum Festpreis: einmalig ${esc(demo.priceLabel)}, danach ${cards[0]?.monthly ? `ab ${esc(cards[0].monthly)} im Monat` : 'Ihr Monatstarif'}. Die Monatsgebühr beginnt erst, wenn Ihre Website online ist.</p>`
         : ''
     }
     ${cards.length ? `<ul class="mt-6 grid gap-4 ${cards.length > 1 ? 'sm:grid-cols-2' : ''}">${cards.map(card).join('')}</ul>` : ''}
@@ -227,6 +238,16 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
                 `<li class="flex gap-3 rounded-xl border border-[#d1d5db] bg-white p-4"><span aria-hidden="true" class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#111827] text-xs font-bold text-white">${i + 1}</span><span><strong class="block">${title}</strong><span class="text-[#374151]">${text}</span></span></li>`,
             )
             .join('')}</ol>`
+        : ''
+    }
+    ${
+      v4 && demo.assurances?.length
+        ? `<div class="mt-6 rounded-xl border border-[#d1d5db] bg-white p-5"><h3 class="text-base font-semibold">Darauf können Sie sich verlassen</h3><ul class="mt-3 grid gap-2 text-sm text-[#374151] sm:grid-cols-2">${demo.assurances
+            .map(
+              (a) =>
+                `<li class="flex gap-2"><span aria-hidden="true" class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#ecfdf5] text-xs font-bold text-[#047857]">✓</span><span>${esc(a)}</span></li>`,
+            )
+            .join('')}</ul></div>`
         : ''
     }
     ${v4 ? trust : ''}
@@ -284,8 +305,8 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
               'Bis zu 60 Minuten kleine vereinbarte Inhaltsänderungen im Monat. Größere Umbauten erfordern ein gesondertes Angebot; ungenutzte Minuten werden nicht übertragen.',
             ],
             [
-              'Was passiert, wenn ich nicht zufrieden bin?',
-              'Bitte melden Sie sich bei uns. Gesetzliche Rechte bleiben erhalten; eine zusätzliche Garantie gilt nur im konkret vereinbarten und technisch abgesicherten Umfang.',
+              'Was, wenn mir etwas nicht gefällt?',
+              'Vor der Veröffentlichung passen wir die Website in den enthaltenen Änderungsrunden an – online geht nichts ohne Ihre Freigabe. Gesetzliche Rechte bleiben unberührt.',
             ],
           ]
             .map(
@@ -296,7 +317,7 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
         : ''
     }
     ${demo.offerVersion === 'v4' ? '' : trust}
-    <div class="mt-6 flex flex-wrap gap-4 text-sm">${demo.whatsappUrl ? `<a href="${esc(demo.whatsappUrl)}" target="_blank" rel="noopener noreferrer" class="underline">Frage per WhatsApp</a>` : ''}${demo.sender.email ? `<a href="mailto:${esc(demo.sender.email)}" class="underline">Frage per E-Mail</a>` : ''}<a href="#frage" class="underline">Frageformular zu diesem Entwurf</a></div>
+    <div class="mt-6 rounded-xl border border-[#d1d5db] bg-white p-5"><p class="font-semibold">Noch eine Frage vor dem Kauf?</p><p class="mt-1 text-sm text-[#374151]">Schreiben Sie mir – Sie bekommen eine persönliche Antwort, kein Callcenter und kein Verkaufsdruck.</p><div class="mt-3 flex flex-wrap gap-2 text-sm">${demo.whatsappUrl ? `<a href="${esc(demo.whatsappUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center rounded-md border border-[#111827] px-4 font-semibold">Frage per WhatsApp</a>` : ''}${demo.sender.email ? `<a href="mailto:${esc(demo.sender.email)}" class="inline-flex min-h-11 items-center rounded-md border border-[#111827] px-4 font-semibold">Frage per E-Mail</a>` : ''}<a href="#frage" class="inline-flex min-h-11 items-center rounded-md border border-[#111827] px-4 font-semibold">Frageformular</a></div></div>
     <form method="post" action="${esc(demo.optOutUrl)}" class="sw-demo-optout"><button type="submit" class="min-h-11 underline">Kein Interesse – Entwurf und Werbung abbestellen</button></form>
   </div>
 </section>`;
@@ -388,7 +409,7 @@ ${jsonLd}
   const someVerified = content.services.some((s) => facts.verifiedServices?.includes(s.title));
   const servicesNote = (cls = 'text-sm text-muted') =>
     isDemo
-      ? `<p class="${cls}">${servicesVerified ? 'Leistungsübersicht aus geprüften Betriebsangaben. Vor Veröffentlichung vom Betrieb zu bestätigen.' : `<span aria-hidden="true">✎ </span>${someVerified ? 'Erste Leistung aus Ihren Angaben, weitere als ' : ''}Beispiel-Leistungen – passen wir gemeinsam für Sie an.${priceHint}`}</p>`
+      ? `<p class="${cls}">${servicesVerified ? 'Leistungsübersicht aus geprüften Betriebsangaben. Vor Veröffentlichung vom Betrieb zu bestätigen.' : `<span class="mr-2 rounded-full border border-line px-2 py-0.5 text-xs font-semibold uppercase tracking-wide">Vorschlag</span>${someVerified ? 'Erste Leistung aus Ihren Angaben, weitere als ' : ''}Beispiel-Leistungen – passen wir gemeinsam für Sie an.${priceHint}`}</p>`
       : priceHint
         ? `<p class="${cls}">${priceHint.trim()}</p>`
         : '';
@@ -533,7 +554,9 @@ ${jsonLd}
   };
 
   const draft = mode === 'demo' || mode === 'screenshot';
-  const example = (text: string) => `<p class="mt-2 text-sm text-muted"><span aria-hidden="true">✎ </span>${text}</p>`;
+  // Ruhiger Hinweis statt Stift-Symbol: klar als Vorschlag gekennzeichnet, ohne den Entwurf zu überladen
+  const example = (text: string) =>
+    `<p class="mt-2 flex items-start gap-2 text-xs text-muted"><span class="shrink-0 rounded-full border border-line px-2 py-0.5 font-semibold uppercase tracking-wide">Vorschlag</span><span class="pt-0.5">${text}</span></p>`;
 
   /** Vorschau eines Anfrageformulars (im Entwurf nicht aktiv – Fragen gehen dort an den Ersteller) */
   const requestPreview = (o: IndustrySectionClasses) => {
@@ -587,7 +610,7 @@ ${jsonLd}
     <div>
       <h2 id="gebiet-titel" class="${o.titleClass}">Einzugsgebiet</h2>
       <p class="mt-3 text-lg">${esc(facts.city)}</p>
-      ${example('Erfasster Standort. Das tatsächliche Einzugsgebiet wird vor Veröffentlichung abgestimmt.')}
+      ${example('Einzugsgebiet wird vor dem Start mit Ihnen abgestimmt.')}
     </div>
     <details class="${o.cardClass}"><summary class="cursor-pointer font-semibold">Optional: Stellenbereich als Vorschau</summary>
       <h2 id="jobs-titel" class="mt-4 text-lg font-semibold">Wir stellen ein</h2>
@@ -688,7 +711,7 @@ ${jsonLd}
     return `<section id="ablauf" aria-labelledby="ablauf-titel" class="${o.sectionClass}">
   <div class="mx-auto max-w-6xl px-4">
     <h2 id="ablauf-titel" class="${o.titleClass}">${flow.title}</h2>
-    ${example('Beispielablauf – stimmen wir vor der Veröffentlichung mit Ihnen ab.')}
+    ${example('Ablauf wird vor dem Start mit Ihnen abgestimmt.')}
     <ol class="mt-8 grid gap-5 md:grid-cols-3">${flow.steps
       .map(
         ([title, text], i) =>
@@ -748,7 +771,7 @@ ${jsonLd}
     const area =
       draft && industry === 'handwerk'
         ? `<div id="einzugsgebiet" class="sw-hub-row mt-5 grid gap-5 md:grid-cols-2">
-      <div class="${o.cardClass}"><h3 id="gebiet-titel" class="text-lg font-semibold">Einzugsgebiet</h3><p class="mt-2 text-lg">${esc(facts.city)} und Umgebung</p>${example('Erfasster Standort. Das tatsächliche Einzugsgebiet wird vor Veröffentlichung abgestimmt.')}</div>
+      <div class="${o.cardClass}"><h3 id="gebiet-titel" class="text-lg font-semibold">Einzugsgebiet</h3><p class="mt-2 text-lg">${esc(facts.city)} und Umgebung</p>${example('Einzugsgebiet wird vor dem Start mit Ihnen abgestimmt.')}</div>
       <details class="${o.cardClass}"><summary class="cursor-pointer text-lg font-semibold">Optional: Stellenbereich als Vorschau</summary>
         <h4 id="jobs-titel" class="mt-4 font-semibold">Wir stellen ein</h4>
         <p class="mt-2">Hier stellen Sie offene Stellen und Ausbildungsplätze vor, zum Beispiel für Gesellinnen und Gesellen oder Auszubildende (m/w/d). Bewerbungen kommen direkt per Formular zu Ihnen.</p>

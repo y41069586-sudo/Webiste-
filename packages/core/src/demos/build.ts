@@ -162,6 +162,7 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
           title: tier === 'basis' ? 'SeitenWerk Basis' : 'SeitenWerk Care+',
           price: formatEuroShort(o.setupCents),
           monthly: formatEuroShort(o.monthlyCents),
+          firstYear: formatEuroShort(o.setupCents + 12 * o.monthlyCents),
           // Ohne geklärten Steuerstatus kein Steuerzusatz; die Bestellung ist dann ohnehin noch nicht freigeschaltet
           unit: tax ? `einmalig ${tax}` : 'einmalig',
           points: [
@@ -197,6 +198,19 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
           : null,
     // Über unsere Weiterleitung, damit der Klick gezählt wird (B6.1); Ziel bleibt der wa.me-Link
     whatsappUrl: whatsappUrl(cfg, slug) ? demoUrl(`/d/${slug}/whatsapp`) : null,
+    // Nur Zusagen, die Vertrag und Ablauf tatsächlich hergeben (AGB-Entwurf, Onboarding, Domain auf den Kunden)
+    assurances:
+      cfg.offers.activeVersion === 'v4'
+        ? [
+            'Sie kennen das Ergebnis vor dem Kauf – Ihre Website steht bereits.',
+            `Online erst nach Ihrer Freigabe – ${cfg.onboarding.includedChangeRounds} Änderungsrunden sind im Preis enthalten.`,
+            'Die Domain wird auf Ihren Betrieb registriert – bei Kündigung nehmen Sie sie mit.',
+            'Monatlich kündbar, keine Mindestlaufzeit, keine versteckten Kosten.',
+            'Zusatzleistungen nur mit Ihrer ausdrücklichen Zustimmung.',
+            'Sichere Bezahlung über Stripe und eine ordentliche Rechnung zu jeder Zahlung.',
+            `Ein fester Ansprechpartner${cfg.sender.city.trim() ? ` aus ${cfg.sender.city.trim()}` : ''} – Fragen vorab per ${whatsappUrl(cfg, slug) ? 'WhatsApp, ' : ''}E-Mail oder Formular.`,
+          ]
+        : undefined,
     trust: {
       name: cfg.sender.name,
       intro: cfg.sender.intro,

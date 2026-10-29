@@ -1,5 +1,18 @@
 import { createServer } from 'node:http';
-import { closeBrowser, closeDb, getBoss, getEnv, logger, pingDb, runMigrations, seedDefaults, stopBoss, QUEUES } from '@wbm/core';
+import {
+  closeBrowser,
+  closeDb,
+  ensureLetterVariants,
+  getBoss,
+  getConfig,
+  getEnv,
+  logger,
+  pingDb,
+  runMigrations,
+  seedDefaults,
+  stopBoss,
+  QUEUES,
+} from '@wbm/core';
 import { scheduleCrons, startWorkers } from './runtime';
 import './jobs';
 
@@ -10,6 +23,13 @@ async function main(): Promise<void> {
     await runMigrations();
     await seedDefaults();
     logger.info('Migrationen ausgeführt');
+  }
+  // Briefvorlagen auch ohne Migrationslauf startklar (Produktion: Datenbank wird separat migriert)
+  try {
+    const r = await ensureLetterVariants(undefined, (await getConfig({ fresh: true })).offers.activeVersion);
+    if (r.seeded || r.activated.length) logger.info(r, 'Briefvorlagen eingerichtet');
+  } catch (err) {
+    logger.error({ err: err instanceof Error ? err.message : String(err) }, 'Briefvorlagen konnten nicht eingerichtet werden');
   }
   const boss = await getBoss();
   await startWorkers(boss);

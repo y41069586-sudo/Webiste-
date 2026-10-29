@@ -22,6 +22,7 @@ import {
   rejectProposalAction,
   retireVariantAction,
   runLearningAgentAction,
+  setupLetterVariantsAction,
 } from './actions';
 import { SubmitButton } from '@/components/admin/submit-button';
 
@@ -122,6 +123,19 @@ export default async function VariantsPage({ searchParams }: { searchParams: Pro
       />
       <div className="mb-6 space-y-3">
         {sp.error ? <Notice kind="error">{sp.error}</Notice> : null}
+        {!all.some((v) => v.active && v.status === 'active') ? (
+          <Notice kind="warn">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span>
+                <strong>Keine aktive Briefvorlage.</strong> Ohne sie entsteht kein Brief. Richte die geprüften Standardvorlagen
+                ein – danach kannst du sie hier pausieren oder austauschen.
+              </span>
+              <form action={setupLetterVariantsAction}>
+                <SubmitButton className={btn.primary}>Briefvorlagen einrichten</SubmitButton>
+              </form>
+            </div>
+          </Notice>
+        ) : null}
         <Notice>
           AUTO_ACTIVATE_VARIANTS ist <strong>{autoActivate ? 'an' : 'aus'}</strong>.{' '}
           {autoActivate
