@@ -15,7 +15,7 @@ const TABS: { key: string; label: string; statuses: DemoStatus[] }[] = [
   { key: 'closed', label: 'Abgelehnt/abgelaufen', statuses: ['rejected', 'expired', 'deleted'] },
 ];
 
-export default async function DemosPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function DemosPage({ searchParams }: { searchParams: Promise<{ tab?: string; fertig?: string }> }) {
   await requireAdmin();
   const sp = await searchParams;
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0]!;
@@ -41,6 +41,17 @@ export default async function DemosPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader title="Demos" subtitle={`Manuell geprüft: ${reviewed.rows[0]?.value ?? 0} (Pflicht für die ersten 30)`} />
+      {sp.fertig ? (
+        <div className="mb-4">
+          <Notice kind="success">
+            Alle wartenden Demos sind geprüft. Die Briefe entstehen jetzt automatisch –{' '}
+            <Link className="underline" href="/admin/ablauf">
+              zurück zum Ablauf
+            </Link>
+            .
+          </Notice>
+        </div>
+      ) : null}
       <nav className="mb-4 flex flex-wrap gap-2" aria-label="Filter">
         {TABS.map((t) => (
           <Link key={t.key} href={`/admin/demos?tab=${t.key}`} className={t.key === tab.key ? btn.primary : btn.secondary}>

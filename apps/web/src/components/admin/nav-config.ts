@@ -33,6 +33,7 @@ export const SECTIONS: NavSection[] = [
     hint: 'Leads, Demos, Briefe',
     icon: 'M3 12h4l3-8 4 16 3-8h4',
     pages: [
+      { href: '/admin/ablauf', label: 'Ablauf' },
       { href: '/admin/suche', label: 'Lead-Suche' },
       { href: '/admin/leads', label: 'Leads' },
       { href: '/admin/demos', label: 'Demos prüfen', count: 'demos' },

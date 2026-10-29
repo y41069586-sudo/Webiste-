@@ -23,9 +23,11 @@ export default async function DemoDetail({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ quality?: string }>;
+  searchParams: Promise<{ quality?: string; flow?: string }>;
 }) {
-  const qualityMessage = (await searchParams).quality;
+  const sp = await searchParams;
+  const qualityMessage = sp.quality;
+  const inFlow = sp.flow === '1';
   await requireAdmin();
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
@@ -119,6 +121,7 @@ export default async function DemoDetail({
           {canDecide ? (
             <Card title="Entscheidung">
               <form action={approveDemoAction} className="space-y-3">
+                {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
                 <p className="text-sm text-slate-600">
                   Technische QA ist keine visuelle Abnahme. Jede Freigabe bestätigt die tatsächliche Einzelprüfung.
                 </p>
@@ -172,6 +175,7 @@ export default async function DemoDetail({
               </form>
               <hr className="my-4" />
               <form action={rejectDemoAction} className="space-y-3">
+                {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
                 <input type="hidden" name="id" value={demo.id} />
                 <textarea name="note" placeholder="Grund (Pflicht)" required className={input} rows={2} />
                 <div className="flex flex-wrap gap-2">

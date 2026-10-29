@@ -241,6 +241,17 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     links: [{ href: '/admin/jobs', label: 'Jobs' }],
   },
   {
+    id: 'ablauf',
+    title: 'Ablauf: alles Schritt für Schritt',
+    keys: 'ablauf schritte reihenfolge nacheinander nächster schritt was jetzt tun workflow übersicht schnellprüfung prüfen leads übernehmen automatisch',
+    text: () =>
+      'Unter Akquise → „Ablauf“ siehst du die acht Schritte vom gefundenen Betrieb bis zum Kauf: finden, prüfen, Demo bauen, Demo prüfen, Brief erstellen, Brief freigeben, Versand, Antworten. Grün läuft von selbst, Lila wartet auf dich, und oben steht immer dein nächster Schritt. Die Schnellprüfung zeigt einen Betrieb nach dem anderen (beste Vorauswahl zuerst) mit Such-Links; du setzt die Haken und speicherst. Ist alles belegt, baut der Server sofort die Demo. Danach führt „Nächste Demo prüfen“ von Demo zu Demo; nach jeder Freigabe kommt automatisch die nächste.',
+    links: [
+      { href: '/admin/ablauf', label: 'Ablauf' },
+      { href: '/admin/ablauf/pruefen', label: 'Schnellprüfung' },
+    ],
+  },
+  {
     id: 'wunsch',
     title: 'Kostenlose Änderung vor dem Kauf (Wunsch zur Demo)',
     keys: 'wunsch änderungswunsch änderung vor dem kauf anpassen demo ändern kostenlos kunde will anders farbe text leistung',

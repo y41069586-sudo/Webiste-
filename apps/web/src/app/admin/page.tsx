@@ -153,11 +153,11 @@ export default async function TodayPage() {
           </p>
         </div>
         <div className="admin-hero-actions">
-          <Link href="/admin/suche" className={btn.primary}>
-            Lead-Suche
+          <Link href="/admin/ablauf" className={btn.primary}>
+            Ablauf: nächster Schritt
           </Link>
-          <Link href="/admin/demos" className={btn.secondary}>
-            Demos prüfen
+          <Link href="/admin/suche" className={btn.secondary}>
+            Lead-Suche
           </Link>
         </div>
       </section>

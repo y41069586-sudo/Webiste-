@@ -37,10 +37,14 @@ export async function approveDemoAction(form: FormData): Promise<void> {
     });
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('Qualitätsbewertung'))
-      redirect(`/admin/demos/${encodeURIComponent(String(form.get('id')))}?quality=required`);
+      redirect(
+        `/admin/demos/${encodeURIComponent(String(form.get('id')))}?quality=required${form.get('flow') === '1' ? '&flow=1' : ''}`,
+      );
     throw error;
   }
   revalidatePath('/admin/demos');
+  // Aus dem Ablauf heraus direkt zur nächsten wartenden Demo
+  if (form.get('flow') === '1') redirect('/admin/ablauf/naechste-demo');
 }
 
 export async function bulkApproveDemos(form: FormData): Promise<void> {
@@ -53,6 +57,7 @@ export async function rejectDemoAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
   await rejectDemo(String(form.get('id')), actorOf(s), String(form.get('note') || 'abgelehnt'), form.get('regenerate') === '1');
   revalidatePath('/admin/demos');
+  if (form.get('flow') === '1') redirect('/admin/ablauf/naechste-demo');
 }
 
 /** Kostenlose Anpassung vor dem Kauf: Änderung speichern, der Server erzeugt die Demo unter demselben Link neu. */

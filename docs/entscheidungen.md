@@ -519,7 +519,6 @@ Deutschland; Beauty (Friseur, Kosmetik) zusätzlich.
 - Für „ganz Deutschland“ reicht die Schleife Stadt × Branche nicht (Fair-Use der Overpass-Instanz); dafür später
   Abfragen je Bundesland/Kreis statt je Stadt.
 
-
 Stand Produktion 28.10.2026 (von der Betreiberin im Supabase SQL Editor ausgeführt, danach rein lesend geprüft):
 Rechtstexte v4-2026-10-28 übernommen, 16 Städte mit `agsPrefix` „05“, Migrationen 0011–0020 eingespielt
 (21 Einträge in `drizzle.__drizzle_migrations`, Vorauswahl-Spalten vorhanden, Backend-Rolle liest alle Tabellen).
@@ -535,6 +534,7 @@ Elemente, zu breite Texte, zu große Überschriften, Überlappungen, feste Leist
 mit derselben Prüfung gegen den gebauten Stand geprüft.
 
 Gefunden und behoben:
+
 - Landingpage: Logo und „Entwurf anfragen“ in der Kopfzeile lagen bis 389 px übereinander; Rechtsseiten waren durch
   eine lange URL 392 px breit (seitliches Wackeln); Preiskarte bei 320 px zu breit; „Datenschutzerklärung“ ragte über
   den Rand. → kompakte Kopfzeile, Kurzlabel „Anfragen“ unter 390 px, Umbruch für lange Wörter/URLs, kleinere Preiszahl.
@@ -668,6 +668,7 @@ Gefunden und behoben:
 ## 29.10.2026 – Keine Zufriedenheitsgarantie mehr
 
 Auf Wunsch des Betreibers ist die Garantie aus:
+
 - Standard ist `guarantee.enabled=false`. Die gespeicherte Produktionseinstellung wurde ebenfalls umgestellt, mit
   Audit-Eintrag.
 - Brief, Demo, Preise-Seite, Startseite, E-Mails und Rechnungen zeigen nichts mehr dazu, weil alles an der
@@ -680,6 +681,7 @@ Auf Wunsch des Betreibers ist die Garantie aus:
 ## 29.10.2026 – Bewertungsrunde: Blocker, Brief, Demo, Angebot
 
 **Blocker:**
+
 - In der Produktion gab es keine Briefvorlagen, weil `seedDefaults` dort ohne Migrationslauf nie lief.
 - Die V4-Vorlagen waren pausiert, und die Altvorlagen blockiert der Wahrheits-Check.
 - Neu ist `ensureLetterVariants`, das bei jedem Worker-Start läuft und im Varianten-Labor per Knopf auslösbar ist:
@@ -689,6 +691,7 @@ Auf Wunsch des Betreibers ist die Garantie aus:
   - Spätere Entscheidungen im Labor bleiben unberührt.
 
 **Brief:**
+
 - Betreff jetzt „Name: Eine Website für Ihr Café – zum Ansehen bereit“ statt „Ihre Website-Vorschau … ist online“.
 - Kein maschineller Satz mehr („Der Entwurf greift die Branche … auf“). Der Branchenbezug kommt aus dem Nutzen-Satz.
 - Der Hinweis „Ohne Verkaufsgespräch“ ist klarer formuliert. Alle Pflichtelemente bleiben: unabhängiger, nicht
@@ -696,10 +699,12 @@ Auf Wunsch des Betreibers ist die Garantie aus:
 - Die Pflichtangaben bleiben in 9 pt, weil der eingebaute Qualitätscheck das verlangt.
 
 **Demo:**
+
 - Die Hinweise erscheinen als ruhiges Etikett „Vorschlag“ statt mit Stift-Symbol, die Texte sind kürzer.
 - Die Kennzeichnung als Beispiel bleibt erhalten.
 
 **Angebot (V4):**
+
 - Einmalpreis und Monatsbetrag stehen gleich groß, dazu die Summe des ersten Jahres (825 € bzw. 1.785 €).
 - Neuer Block „Darauf können Sie sich verlassen“. Er enthält nur Zusagen aus Vertrag und Ablauf: Ergebnis vorher
   sichtbar, online erst nach Freigabe, Änderungsrunden, Domain auf den Betrieb, monatlich kündbar, Zusatzleistungen
@@ -710,6 +715,7 @@ Auf Wunsch des Betreibers ist die Garantie aus:
 ## 29.10.2026 – Kostenlose Änderung vor dem Kauf
 
 So läuft ein Wunsch ab:
+
 1. **Wunsch:** Auf jeder Demo steht im Angebotsbereich ein Kasten „Etwas soll anders sein? Ich passe den Entwurf
    vorher an.“ mit Formular (Name, E-Mail, Wunsch, Einwilligung). Er läuft über dieselbe Strecke wie Fragen
    (`handleDemoQuestion` mit `kind: 'wish'`), inklusive Spam- und Ratenschutz.
@@ -724,3 +730,29 @@ So läuft ein Wunsch ab:
    - Das funktioniert ohne KI-Schlüssel.
 4. **Brief:** Er nennt die Anpassung jetzt („passt etwas nicht, ändere ich den Entwurf vorher ohne Kosten“). Das Wort
    „kostenlos“ bleibt laut Wahrheits-Check „kostenlos ansehen“ vorbehalten. Der Brief bleibt einseitig.
+
+## 29.10.2026 – Ablauf-Seite und Schnellprüfung
+
+Ziel: Alles läuft in einer festen Reihenfolge, und der Betreiber sieht immer seinen nächsten Schritt.
+
+- **Ablauf** (`/admin/ablauf`, erster Punkt unter Akquise, Knopf auf „Heute“) zeigt acht Schritte:
+  finden → prüfen → Demo bauen → Demo prüfen → Brief erstellen → Brief freigeben → Versand → Antworten & Käufe.
+  - Jeder Schritt zeigt, ob er automatisch läuft, auf den Betreiber wartet oder ob die Automatik aus ist.
+  - Dazu kommt die Anzahl der Betriebe in diesem Schritt.
+  - Oben steht der nächste Schritt, der auf den Betreiber wartet (`workflowStatus`).
+- **Schnellprüfung** (`/admin/ablauf/pruefen`):
+  - Sie zeigt einen Betrieb nach dem anderen. Noch nie geprüfte kommen zuerst, sortiert nach Vorauswahl.
+  - Dazu gibt es Such-Links (Name + Ort, Telefon, Profile, Verzeichnisse).
+  - Ein Formular mit Haken: vier Website-Suchwege, Anschrift, aktiv, eigenständig, Kundengruppe, bis zu drei
+    Leistungen, optional ein aktuelles Signal und eine HTTPS-Quelle.
+  - `quickResearch` übersetzt das in dieselbe Recherche wie das ausführliche Formular. `saveLeadResearch` prüft
+    unverändert, also bleiben dieselben Regeln, Belege und Sperren (u. a. keine Google-Maps-Belege, keine Telefonnummer
+    → nicht versandfähig).
+  - Ist alles belegt, wird der Betrieb „geeignet“, und ein Pipeline-Lauf startet sofort den Demo-Bau. Fehlt etwas,
+    bleibt der Betrieb mit Hinweis stehen.
+  - „Hat eine Website“ und „Passt nicht“ sortieren aus, „Überspringen“ merkt den Betrieb nur für diese Sitzung vor.
+- **Demo prüfen nacheinander:** `/admin/ablauf/naechste-demo` öffnet die älteste wartende Demo mit `?flow=1`. Nach
+  dem Freigeben oder Ablehnen geht es automatisch zur nächsten. Die Einzelprüfung jeder Demo (erste 30 Pflicht)
+  bleibt unverändert.
+- **Unverändert:** Briefe freigeben und Versand bleiben bei `AUTO_SEND=false` bzw. `DRY_RUN=true` eine bewusste
+  Freigabe durch den Betreiber.
