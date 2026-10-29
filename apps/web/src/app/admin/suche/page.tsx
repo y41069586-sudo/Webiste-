@@ -1,10 +1,12 @@
 import { sql } from 'drizzle-orm';
-import { getConfig, getDb, queueState, QUEUES } from '@wbm/core';
+import { getConfig, getDb, leadScorePool } from '@wbm/core';
 import { SubmitButton } from '@/components/admin/submit-button';
-import { Card, Notice, PageHeader, Stat, btn } from '@/components/ui';
+import { Card, Notice, PageHeader, Stat, btn, input } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, num } from '@/lib/format';
-import { cancelFindLeads, startFindLeads } from '../jobs/actions';
+import { SearchLive } from '@/components/admin/search-live';
+import { loadLeadSearchStatus } from '@/lib/lead-search';
+import { applyMinScore, startFindLeads, stopFindLeads } from '../jobs/actions';
 
 export const metadata = { title: 'Lead-Suche' };
 
@@ -25,6 +27,9 @@ type LastRun = {
     created?: number;
     updated?: number;
     qualified?: number;
+    needsReview?: number;
+    belowMin?: number;
+    minScore?: number;
     rejected?: number;
     queries?: number;
     errors?: string[];
@@ -33,9 +38,9 @@ type LastRun = {
 
 export default async function LeadSearchPage() {
   await requireAdmin();
-  const [cfg, search, last] = await Promise.all([
+  const [cfg, status, last] = await Promise.all([
     getConfig(),
-    queueState(QUEUES.findLeads).catch(() => ({ waiting: [] as string[], active: 0 })),
+    loadLeadSearchStatus(),
     getDb()
       .execute<LastRun>(
         sql`SELECT state, created_on, completed_on, output FROM pgboss.job
@@ -44,7 +49,9 @@ export default async function LeadSearchPage() {
       .then((r) => r.rows[0])
       .catch(() => undefined),
   ]);
-  const running = search.active > 0 || search.waiting.length > 0;
+  const running = status.active > 0 || status.waiting > 0;
+  const minScore = cfg.filters.minLeadScore;
+  const pool = await leadScorePool(minScore).catch(() => ({ above: 0, below: 0, best: 0 }));
   const branches = cfg.targeting.branches.filter((b) => b.active);
   const groups = [...new Set(branches.map((b) => b.group))];
   const out = last?.output ?? null;
@@ -55,24 +62,7 @@ export default async function LeadSearchPage() {
         subtitle="Betriebe ohne eigene Website finden. Die Suche läuft auf deinem Server und kostet mit OpenStreetMap nichts."
       />
 
-      {running ? (
-        <div className="mb-6">
-          <Notice kind="info">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span>
-                <strong>{search.active ? 'Suche läuft gerade.' : 'Suche wartet auf den Start.'}</strong>
-                {search.waiting.length ? ` ${search.waiting.length} weitere warten.` : ''} Neue Klicks starten keine zusätzliche
-                Suche.
-              </span>
-              {search.waiting.length ? (
-                <form action={cancelFindLeads}>
-                  <SubmitButton className={btn.secondary}>Wartende abbrechen</SubmitButton>
-                </form>
-              ) : null}
-            </div>
-          </Notice>
-        </div>
-      ) : null}
+      <SearchLive initial={status} stop={stopFindLeads} />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-4">
         <Stat
@@ -85,8 +75,16 @@ export default async function LeadSearchPage() {
           value={num(out?.found ?? 0)}
           hint={out ? `${num(out.created ?? 0)} neu · ${num(out.updated ?? 0)} aktualisiert` : undefined}
         />
-        <Stat label="Geeignet" value={num(out?.qualified ?? 0)} hint="ohne eigene Website, Anschrift vollständig" />
-        <Stat label="Aussortiert" value={num(out?.rejected ?? 0)} hint="Website vorhanden, Kette, geschlossen …" />
+        <Stat
+          label="Übernommen"
+          value={num((out?.qualified ?? 0) + (out?.needsReview ?? 0))}
+          hint={out?.minScore !== undefined ? `ab ${out.minScore} Punkten, ohne eigene Website` : 'ohne eigene Website'}
+        />
+        <Stat
+          label="Aussortiert"
+          value={num((out?.rejected ?? 0) + (out?.belowMin ?? 0))}
+          hint={out?.belowMin ? `${num(out.belowMin)} wegen zu wenig Punkten` : 'Website vorhanden, Kette, geschlossen …'}
+        />
       </div>
       {out?.errors?.length ? (
         <div className="mb-6">
@@ -95,6 +93,24 @@ export default async function LeadSearchPage() {
           </Notice>
         </div>
       ) : null}
+
+      <div className="mb-6">
+        <Card title={`Deine offenen Leads ab ${minScore} Punkten`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm text-slate-600">
+              <strong className="text-slate-900">{num(pool.above)}</strong> offene Betriebe erreichen mindestens {minScore}{' '}
+              Punkte, <strong className="text-slate-900">{num(pool.below)}</strong> liegen darunter (bester Wert: {pool.best}).
+              Die Punkte kommen aus der automatischen Vorauswahl: Kampagnenbranche, Telefon, Öffnungszeiten, aktueller Eintrag,
+              online aktiv ohne eigene Seite, keine eigene Domain, junger Betrieb.
+            </p>
+            {pool.below > 0 ? (
+              <form action={applyMinScore}>
+                <SubmitButton className={btn.secondary}>{num(pool.below)} darunter aussortieren</SubmitButton>
+              </form>
+            ) : null}
+          </div>
+        </Card>
+      </div>
 
       <Card title="Neue Suche">
         <form action={startFindLeads} className="space-y-6">
@@ -125,6 +141,25 @@ export default async function LeadSearchPage() {
               </div>
             </fieldset>
           ))}
+          <fieldset>
+            <legend className="ui-label">Nur Betriebe übernehmen ab</legend>
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                type="number"
+                name="minScore"
+                min={0}
+                max={100}
+                step={5}
+                defaultValue={minScore}
+                className={`${input} !w-24`}
+                aria-label="Mindest-Punkte"
+              />
+              <span className="text-sm text-slate-600">
+                von 100 Punkten. Darunter wird der Betrieb aussortiert (0 = alle übernehmen). Wird für die nächsten Suchen
+                gemerkt.
+              </span>
+            </div>
+          </fieldset>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5">
             <p className="text-sm text-slate-500">
               Quelle: <strong>{cfg.leadSource.mode}</strong>. Die erste Suche lädt die NRW-Karte (ca. 5–10 Minuten), danach geht

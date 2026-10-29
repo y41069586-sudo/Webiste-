@@ -5,8 +5,9 @@ import type { ReactNode } from 'react';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { sql } from 'drizzle-orm';
-import { effectiveSwitches, getConfig, getDb } from '@wbm/core';
+import { effectiveSwitches, getConfig, getDb, getEnv } from '@wbm/core';
 import { AdminNav, SectionTabs } from '@/components/admin-nav';
+import { AdminAssistant } from '@/components/admin/assistant';
 import { NavProgress } from '@/components/admin/nav-progress';
 import { NavToggle } from '@/components/admin/nav-toggle';
 import { PageTransition } from '@/components/admin/page-transition';
@@ -110,6 +111,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           <PageTransition>{children}</PageTransition>
         </main>
       </div>
+      <AdminAssistant aiOn={cfg.assistant.useAi && Boolean(getEnv().ANTHROPIC_API_KEY)} />
     </div>
   );
 }

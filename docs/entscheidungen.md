@@ -627,3 +627,26 @@ Gefunden und behoben:
 - Fehler aus dem Rundgang (alle Seiten auf 820/1180 px, neuer Test `admin-audit.spec.ts`): Demo-Vorschau im Admin
   blockierte Skripte und eingebettete Schriften (Sandbox ohne Skripte, CSP ohne `font-src`) → Skripte in eigener
   undurchsichtiger Herkunft erlaubt, Schriften erlaubt. Sonst keine Konsolen-/Seitenfehler und kein Überlaufen.
+
+## 29.10.2026 – Lead-Suche live, Mindest-Punkte, Assistent
+
+- **Live-Fortschritt:** Der Worker schreibt während der Suche höchstens etwa einmal pro Sekunde einen kleinen Stand nach
+  `settings` (`progress:find-leads`): Phase (Karte laden/auswerten, Suchen, Prüfen), Prozent, Zähler, die letzten zwölf
+  geprüften Betriebe und, beim Kartenladen, die Megabyte. Während osmium läuft, kommt alle 15 s ein Lebenszeichen.
+  `/admin/suche` fragt den Stand alle 1,5 s ab (`/api/admin/lead-search`, nur angemeldet) und meldet, wenn der Server
+  schweigt. **Stoppen** setzt `progress:find-leads:stop` auf die Lauf-ID. Die Suche hält nach dem aktuellen Betrieb an,
+  und Geprüftes bleibt gespeichert.
+- **Mindest-Punkte (`filters.minLeadScore`, Standard 70, 0 = aus):** Grundlage ist die automatische Vorauswahl
+  (`leads/prescreen.ts`, 0–100). Ein sonst geeigneter Betrieb darunter wird mit `score_too_low` aussortiert, nicht
+  gelöscht. Eine spätere Suche mit niedrigerer Grenze holt ihn zurück. Unterhalb der Grenze entfällt die
+  Website-Vorprüfung, weil sie die Punkte nur senken kann. Mock-Daten sind ausgenommen (Offline-Fixtures). Der Knopf
+  „darunter aussortieren“ wendet die Grenze auf vorhandene offene Leads an. Stand am 29.10.: Der beste vorhandene Wert
+  liegt bei 66. Mit 70 bleibt aus den bisherigen Funden also nichts übrig.
+- **Assistent** (rechts unten, ⌘K):
+  - Kennt den Stand der Verwaltung: Zahlen und Zustände, keine personenbezogenen Daten.
+  - Schlägt nur umkehrbare, kostenlose Aktionen vor: Suche starten oder stoppen, Grenze setzen oder anwenden, Seite
+    öffnen. Er führt sie erst nach einem Klick aus, und der Server prüft jede Aktion erneut gegen eine feste Liste.
+  - Ausgeschlossen sind Briefversand, Zahlungen, Domains, Modus, Not-Aus und Löschen.
+  - Ohne KI arbeitet er im **Befehlsmodus** über Schlüsselwörter. Mit `assistant.useAi` und Anthropic-Schlüssel nutzt
+    er Claude (`MODEL_BULK`, eine strukturierte Antwort je Frage, im Budget-Ledger als `admin_assistant` gebucht).
+    Standard ist aus, bis der Betreiber die Nutzung des Schlüssels freigibt.

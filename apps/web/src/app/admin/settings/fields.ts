@@ -151,6 +151,7 @@ export const SECTIONS: SectionDef[] = [
       { path: 'targeting.chainNames', label: 'Ketten/Franchise-Namen (eine pro Zeile)', type: 'lines' },
       { path: 'targeting.chainMinCities', label: 'Kette ab gleichem Namen in X Städten', type: 'number' },
       { path: 'targeting.maxPagesPerQuery', label: 'Max. Seiten pro Suchanfrage (1–3)', type: 'number' },
+      { path: 'filters.minLeadScore', label: 'Mindest-Punkte der Vorauswahl (0–100, 0 = aus)', type: 'number' },
       { path: 'filters.minRating', label: 'Mindest-Bewertung', type: 'number' },
       { path: 'filters.minRatingCount', label: 'Mindestanzahl Bewertungen', type: 'number' },
       { path: 'filters.recontactMonths', label: 'Kein erneuter Kontakt für (Monate)', type: 'number' },
@@ -244,6 +245,11 @@ export const SECTIONS: SectionDef[] = [
     id: 'support',
     title: 'Support & Optimizer',
     fields: [
+      {
+        path: 'assistant.useAi',
+        label: 'Assistent mit KI (Claude) – nutzt den Anthropic-Schlüssel, wenige Cent je Frage im Budget',
+        type: 'bool',
+      },
       {
         path: 'support.autoReplyClasses',
         label: 'Automatisch beantworten (nur mit AUTO_REPLY)',

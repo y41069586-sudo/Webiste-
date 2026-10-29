@@ -17,7 +17,7 @@ const query = (osmTags: LeadSearchQuery['branch']['osmTags'], agsPrefix = '05'):
   ({
     text: 'x Dortmund',
     city: 'Dortmund',
-    branch: { key: 'b', label: 'B', queries: ['x'], osmTags, googleTypes: [], weight: 1, active: true },
+    branch: { key: 'b', group: 'handwerk', label: 'B', queries: ['x'], osmTags, googleTypes: [], weight: 1, active: true },
     maxPages: 1,
     agsPrefix,
   }) as LeadSearchQuery;

@@ -7,7 +7,7 @@ import { DEFAULT_BRANCHES, type AppConfig, type BranchConfig } from '../config/s
 import { getDb, type DbOrTx } from '../db/client';
 import { leads, settings } from '../db/schema';
 import { businessHash, normalizeAddress, normalizeBusinessName, segmentKey, businessPhoneKey } from '../leads/normalize';
-import { classifyWebsite, qualify, type RatingSignal, type RejectionReason } from '../leads/qualify';
+import { classifyWebsite, qualify, REJECTION_LABELS, type RatingSignal, type RejectionReason } from '../leads/qualify';
 import { logger } from '../logger';
 import { classifyIndustry, exclusionFor } from '../playbooks';
 import { getProviders } from '../providers';
@@ -23,11 +23,16 @@ import { campaignBranches, campaignRank, assessAcquisition } from '../leads/acqu
 import { prescreen } from '../leads/prescreen';
 import { leadResearch } from './lead-research';
 import { probeOwnWebsite } from '../leads/website-probe';
+import { runWithProgress, type SearchProgressReporter } from './progress';
 
 export interface FindLeadsOptions {
   cities?: string[];
   branches?: string[];
   actor: string;
+  /** Mindest-Punkte der Vorauswahl; Standard filters.minLeadScore */
+  minScore?: number;
+  /** Live-Fortschritt für die Verwaltung */
+  progress?: SearchProgressReporter;
 }
 
 export interface FindLeadsSummary {
@@ -51,6 +56,11 @@ export interface FindLeadsSummary {
   websiteProbePossible: number;
   /** Automatische Vorauswahl der qualifizierten bzw. zu prüfenden Leads (leads/prescreen.ts) */
   prescreenTiers: { top: number; mittel: number; niedrig: number };
+  /** Geeignet, aber unter der Mindestgrenze der Vorauswahl aussortiert */
+  belowMin: number;
+  minScore: number;
+  /** In der Verwaltung gestoppt, bevor alle Treffer geprüft waren */
+  stopped?: boolean;
   errors: string[];
 }
 
@@ -196,6 +206,11 @@ const UPDATABLE_STATUSES = new Set(['discovered', 'qualified', 'rejected']);
 
 /** Lead-Suche über alle konfigurierten Städte × Branchen. Idempotent (Upsert über Quelle + ID). */
 export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummary> {
+  return opts.progress ? runWithProgress(opts.progress, () => findLeadsRun(opts)) : findLeadsRun(opts);
+}
+
+async function findLeadsRun(opts: FindLeadsOptions): Promise<FindLeadsSummary> {
+  const progress = opts.progress;
   const db = getDb();
   const cfg = await getConfig({ fresh: true });
   await assertNotHalted(cfg);
@@ -206,6 +221,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       ? campaignBranches(cfg.targeting.branches, cfg.targeting.acquisition, DEFAULT_BRANCHES)
       : cfg.targeting.branches.filter((b) => b.active);
   const branches = selection.filter((b) => !opts.branches?.length || opts.branches.includes(b.key));
+  const minScore = opts.minScore ?? cfg.filters.minLeadScore;
   const summary: FindLeadsSummary = {
     source: src.primary.kind,
     mode: src.mode,
@@ -224,8 +240,13 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
     websiteProbeHits: 0,
     websiteProbePossible: 0,
     prescreenTiers: { top: 0, mittel: 0, niedrig: 0 },
+    belowMin: 0,
+    minScore,
     errors: [],
   };
+  const totalQueries =
+    cities.length * branches.reduce((n, b) => n + (src.primary.kind === 'google_places' ? b.queries.length : 1), 0);
+  progress?.phase('suchen', 'Betriebe werden gesucht …', totalQueries);
 
   // 1) Suchen
   const candidates: Candidate[] = [];
@@ -253,6 +274,9 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
             res = await src.fallback.search({ text, city, branch, maxPages: cfg.targeting.maxPagesPerQuery, agsPrefix });
           }
           summary.queries++;
+          // Die erste Suche baut evtl. die Karte auf; danach zurück in die Suchphase
+          if (progress && progress.state.phase !== 'suchen') progress.phase('suchen', 'Betriebe werden gesucht …', totalQueries);
+          progress?.step(summary.queries, `Suche: ${branch.label} in ${city} (${summary.queries} von ${totalQueries})`);
           for (const w of res.warnings ?? []) if (!summary.errors.includes(w)) summary.errors.push(w);
           if (res.costCents > 0) {
             summary.costCents += res.costCents;
@@ -269,6 +293,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
             seen.add(key);
             candidates.push({ place, branch, city, query: text });
           }
+          if (progress) progress.state.counts.found = candidates.length;
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);
           summary.errors.push(`${text}: ${msg}`);
@@ -302,13 +327,37 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
   const runStart = new Date();
 
   // 2) Upsert + Qualifizierung
+  progress?.phase('pruefen', `${candidates.length} Treffer werden geprüft …`, candidates.length);
+  let checked = 0;
+  const tick = (
+    name: string,
+    outcome: 'geeignet' | 'pruefen' | 'unter_schwelle' | 'aussortiert' | 'uebersprungen',
+    detail?: string,
+    score?: number,
+  ) => {
+    checked++;
+    if (!progress) return;
+    const k = progress.state.counts;
+    k.checked = checked;
+    k.qualified = summary.qualified;
+    k.needsReview = summary.needsReview;
+    k.belowMin = summary.belowMin;
+    k.rejected = summary.rejected;
+    progress.log({ name, outcome, detail, score });
+    progress.step(checked, `Prüfe ${checked} von ${candidates.length}: ${name}`);
+  };
   for (const c of candidates) {
+    if (progress && (await progress.shouldStop())) {
+      summary.stopped = true;
+      break;
+    }
     const { place, branch, city } = c;
     const existing = await db.query.leads.findFirst({
       where: and(eq(leads.source, place.source), eq(leads.sourceId, place.sourceId)),
     });
     if (existing && (!UPDATABLE_STATUSES.has(existing.status) || existing.anonymizedAt)) {
       summary.skipped++;
+      tick(place.name, 'uebersprungen', 'schon in Bearbeitung');
       continue;
     }
     const identity = businessHash(place.name, place);
@@ -391,6 +440,8 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       place.source !== 'mock' &&
       prelim.qualified &&
       !classifyWebsite(placeForQualify.websiteUri, cfg.filters.socialDomains).hasWebsite &&
+      // Die Vorprüfung kann die Punkte nur senken: unter der Grenze lohnt sie sich nicht
+      !(minScore > 0 && early(c) < minScore) &&
       summary.websiteProbes < policy.websiteProbeMax
     ) {
       summary.websiteProbes++;
@@ -447,6 +498,9 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       socialOnly: result.website.socialOnly,
       probe: probeOutcome,
     });
+    // Mindestgrenze der Vorauswahl (nicht für Offline-Mock-Daten)
+    const belowMin = result.qualified && place.source !== 'mock' && minScore > 0 && pre.score < minScore;
+    const reasons: RejectionReason[] = belowMin ? [...result.reasons, 'score_too_low'] : result.reasons;
     // Google-Inhalte (Bewertung, Website, Name/Anschrift) werden NICHT gespeichert – nur place_id
     const persistRating = place.source === 'mock';
     const values = {
@@ -470,7 +524,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       socialOnly: result.website.socialOnly,
       businessStatus: place.businessStatus ?? null,
       primaryType: place.primaryType ?? null,
-      rejectionReasons: result.reasons,
+      rejectionReasons: reasons,
       score: result.score,
       scoreReasons: result.scoreReasons,
       prescreenScore: result.qualified ? pre.score : 0,
@@ -495,11 +549,12 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       values.scoreReasons = acquisition.reasons;
     }
     // Mock discovery remains an offline fixture path, never a production verification.
-    const target = !result.qualified
-      ? 'rejected'
-      : acquisition && place.source !== 'mock' && acquisition.state !== 'ready'
-        ? 'discovered'
-        : 'qualified';
+    const target =
+      !result.qualified || belowMin
+        ? 'rejected'
+        : acquisition && place.source !== 'mock' && acquisition.state !== 'ready'
+          ? 'discovered'
+          : 'qualified';
     await db.transaction(async (tx) => {
       let id: string;
       if (existing) {
@@ -528,7 +583,7 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
       if (current !== target) {
         await transitionLead(tx, id, target, {
           actor: opts.actor,
-          reason: result.reasons.join(',') || undefined,
+          reason: reasons.join(',') || undefined,
           soft: true,
         });
       }
@@ -536,10 +591,13 @@ export async function findLeads(opts: FindLeadsOptions): Promise<FindLeadsSummar
     if (target !== 'rejected') summary.prescreenTiers[pre.tier]++;
     if (target === 'qualified') summary.qualified++;
     else if (target === 'discovered') summary.needsReview++;
-    else {
-      summary.rejected++;
-      for (const r of result.reasons) summary.byReason[r] = (summary.byReason[r] ?? 0) + 1;
-    }
+    else if (belowMin) summary.belowMin++;
+    else summary.rejected++;
+    if (target === 'rejected') for (const r of reasons) summary.byReason[r] = (summary.byReason[r] ?? 0) + 1;
+    if (target === 'qualified') tick(place.name, 'geeignet', undefined, pre.score);
+    else if (target === 'discovered') tick(place.name, 'pruefen', 'zur Prüfung', pre.score);
+    else if (belowMin) tick(place.name, 'unter_schwelle', `${pre.score} von mind. ${minScore} Punkten`, pre.score);
+    else tick(place.name, 'aussortiert', reasons.map((r) => REJECTION_LABELS[r]).join(', '));
   }
 
   summary.costCents = Math.round(summary.costCents * 100) / 100;
@@ -592,4 +650,39 @@ export async function refreshLeadData(leadId: string, actor = 'system'): Promise
     context: { hasWebsite: website.hasWebsite, closed },
   });
   return { refreshed: true, hasWebsite: website.hasWebsite, closed };
+}
+
+/** Offene Leads (gefunden/qualifiziert) ober- und unterhalb der Mindestgrenze der Vorauswahl */
+export async function leadScorePool(minScore: number): Promise<{ above: number; below: number; best: number }> {
+  const r = await getDb().execute<{ above: number; below: number; best: number | null }>(sql`
+    SELECT count(*) FILTER (WHERE prescreen_score >= ${minScore})::int AS above,
+           count(*) FILTER (WHERE prescreen_score < ${minScore})::int AS below,
+           max(prescreen_score)::int AS best
+      FROM leads
+     WHERE status IN ('discovered', 'qualified') AND anonymized_at IS NULL AND source <> 'mock'`);
+  const row = r.rows[0];
+  return { above: row?.above ?? 0, below: row?.below ?? 0, best: row?.best ?? 0 };
+}
+
+/**
+ * Mindestgrenze nachträglich auf vorhandene offene Leads anwenden: unterhalb → „rejected“ mit score_too_low.
+ * Nichts wird gelöscht; eine spätere Suche mit niedrigerer Grenze holt die Betriebe zurück.
+ */
+export async function applyMinLeadScore(minScore: number, actor: string): Promise<number> {
+  if (minScore <= 0) return 0;
+  const db = getDb();
+  const rows = await db.execute<{ id: string; reasons: string[] }>(sql`
+    SELECT id, rejection_reasons AS reasons FROM leads
+     WHERE status IN ('discovered', 'qualified') AND anonymized_at IS NULL AND source <> 'mock'
+       AND prescreen_score < ${minScore}`);
+  let n = 0;
+  for (const row of rows.rows) {
+    await db.transaction(async (tx) => {
+      const reasons = [...new Set([...(row.reasons ?? []), 'score_too_low'])];
+      await tx.update(leads).set({ rejectionReasons: reasons, updatedAt: new Date() }).where(eq(leads.id, row.id));
+      if (await transitionLead(tx, row.id, 'rejected', { actor, reason: 'score_too_low', soft: true })) n++;
+    });
+  }
+  await audit(db, { entity: 'job', entityId: 'find-leads', action: 'apply_min_score', actor, context: { minScore, n } });
+  return n;
 }

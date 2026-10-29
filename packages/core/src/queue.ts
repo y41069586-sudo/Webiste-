@@ -37,7 +37,14 @@ export const QUEUES = {
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
 
 export interface QueuePayloads {
-  'find-leads': { cities?: string[]; branches?: string[]; /** fehlt beim wöchentlichen Cron-Lauf */ triggeredBy?: string };
+  'find-leads': {
+    cities?: string[];
+    branches?: string[];
+    /** Mindest-Punkte der Vorauswahl für diesen Lauf (sonst filters.minLeadScore) */
+    minScore?: number;
+    /** fehlt beim wöchentlichen Cron-Lauf */
+    triggeredBy?: string;
+  };
   'build-demo': { leadId: string; regenerate?: boolean; triggeredBy?: string; reviewNote?: string; templateId?: string };
   'qa-demo': { demoId: string };
   'publish-demo': { demoId: string };

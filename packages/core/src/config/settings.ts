@@ -195,6 +195,11 @@ export const appConfigSchema = z.object({
     /** Leads ohne Bewertungsdaten ablehnen (nur sinnvoll mit zulässiger Bewertungsquelle) */
     requireRatingSignal: z.boolean(),
     socialDomains: z.array(z.string()),
+    /**
+     * Mindestwert der automatischen Vorauswahl (leads/prescreen.ts, 0–100). Darunter wird ein sonst geeigneter
+     * Betrieb mit „score_too_low“ aussortiert; 0 schaltet die Grenze ab. Spätere Suchen bewerten neu.
+     */
+    minLeadScore: z.number().int().min(0).max(100).default(70),
   }),
   leadSource: z.object({
     /**
@@ -296,6 +301,8 @@ export const appConfigSchema = z.object({
       city: z.string(),
     }),
   }),
+  /** Assistent in der Verwaltung: ohne KI nur Befehlsmodus; mit KI über den Anthropic-Schlüssel (Kosten im Ledger) */
+  assistant: z.object({ useAi: z.boolean() }).default({ useAi: false }),
   switches: z.object({
     dryRun: z.boolean(),
     autoSend: z.boolean(),
@@ -628,6 +635,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     recontactMonths: 12,
     requireOperational: true,
     requireRatingSignal: false,
+    minLeadScore: 70,
     socialDomains: [
       'instagram.com',
       'facebook.com',
@@ -748,6 +756,7 @@ export const DEFAULT_CONFIG: AppConfig = {
       city: '',
     },
   },
+  assistant: { useAi: false },
   switches: {
     dryRun: true,
     autoSend: false,

@@ -2,11 +2,12 @@ import { execFile } from 'node:child_process';
 import { createReadStream, createWriteStream, promises as fs } from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
-import { Readable } from 'node:stream';
+import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 import { promisify } from 'node:util';
 import { logger } from '../../logger';
+import { activeProgress } from '../../services/progress';
 import type { LeadSearchQuery, LeadSearchResult, LeadSource, RawPlace } from '../types';
 import { osmElementToPlace, type OsmElement } from './overpass';
 
@@ -286,6 +287,18 @@ export class OsmExtractLeadSource implements LeadSource {
     const seq = path.join(this.o.dir, 'features.geojsonseq');
     const started = Date.now();
     await this.download(pbf);
+    const progress = activeProgress();
+    progress?.phase('karte_auswerten', 'NRW-Karte wird ausgewertet (einmalig, dauert einige Minuten) …');
+    // osmium meldet keinen Fortschritt: Lebenszeichen, damit die Verwaltung nicht „keine Rückmeldung“ zeigt
+    const beat = progress ? setInterval(() => void progress.flush(true), 15_000) : undefined;
+    try {
+      return await this.buildFrom(pbf, filtered, seq, tagPairs, started);
+    } finally {
+      clearInterval(beat);
+    }
+  }
+
+  private async buildFrom(pbf: string, filtered: string, seq: string, tagPairs: string[], started: number) {
     const osmium = this.o.osmiumBin ?? 'osmium';
     const opts = { maxBuffer: 16 * 1024 * 1024, timeout: 30 * 60_000 };
     await run(osmium, ['tags-filter', pbf, ...osmiumFilterExpressions(tagPairs), '-o', filtered, '--overwrite'], opts);
@@ -317,6 +330,8 @@ export class OsmExtractLeadSource implements LeadSource {
   private async download(file: string): Promise<void> {
     const stat = await fs.stat(file).catch(() => null);
     if (stat && Date.now() - stat.mtimeMs < (this.o.maxAgeDays ?? 7) * 86_400_000) return;
+    const progress = activeProgress();
+    progress?.phase('karte_laden', 'NRW-Karte wird geladen …');
     const res = await fetch(this.o.url, {
       headers: { 'user-agent': this.o.userAgent, ...(stat ? { 'if-modified-since': stat.mtime.toUTCString() } : {}) },
       signal: AbortSignal.timeout(30 * 60_000),
@@ -326,7 +341,16 @@ export class OsmExtractLeadSource implements LeadSource {
       return;
     }
     if (!res.ok || !res.body) throw new Error(`OSM-Auszug HTTP ${res.status}`);
-    await pipeline(Readable.fromWeb(res.body as unknown as WebReadableStream), createWriteStream(`${file}.part`));
+    const total = Number(res.headers.get('content-length')) || null;
+    let done = 0;
+    const count = new Transform({
+      transform(chunk: Buffer, _enc, cb) {
+        done += chunk.length;
+        progress?.bytes(done, total);
+        cb(null, chunk);
+      },
+    });
+    await pipeline(Readable.fromWeb(res.body as unknown as WebReadableStream), count, createWriteStream(`${file}.part`));
     await fs.rename(`${file}.part`, file);
   }
 
