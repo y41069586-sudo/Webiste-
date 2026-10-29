@@ -1,5 +1,6 @@
 import type { AppConfig } from '../config/settings';
 import { DEFAULT_CONFIG } from '../config/settings';
+import { getEnv } from '../config/env';
 
 export interface GoLiveBlocker {
   key: string;
@@ -27,6 +28,10 @@ export function goLiveBlockers(cfg: AppConfig): GoLiveBlocker[] {
   if (!s.whatsappNumber.trim()) out.push({ key: 'sender.whatsappNumber', label: 'WhatsApp-Nummer' });
   if (!s.intro.trim()) out.push({ key: 'sender.intro', label: 'Kurzvorstellung (2 Sätze)' });
   if (!s.bankIban.trim()) out.push({ key: 'sender.bankIban', label: 'Bankverbindung (Rechnungen, Forderungsbriefe)' });
+  // Widerspruchsadresse im Brief (Art. 21 DSGVO) – nie der Platzhalter aus der Vorgabe
+  const env = getEnv();
+  if (env.NODE_ENV === 'production' && /@example\.|^$/i.test(env.OPTOUT_EMAIL.trim()))
+    out.push({ key: 'env.OPTOUT_EMAIL', label: 'Widerspruchs-E-Mail (OPTOUT_EMAIL) für den Hinweis im Brief' });
   if (!cfg.legal.impressumMarkdown.trim()) out.push({ key: 'legal.impressumMarkdown', label: 'Impressum' });
   if (!cfg.legal.privacyMarkdown.trim()) out.push({ key: 'legal.privacyMarkdown', label: 'Datenschutzerklärung' });
   if (!cfg.legal.termsMarkdown.trim()) out.push({ key: 'legal.termsMarkdown', label: 'AGB (siehe docs/agb-anforderungen.md)' });
