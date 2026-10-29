@@ -62,7 +62,7 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     keys: 'lead suche leadsuche finden suchen betriebe osm openstreetmap karte geofabrik osmium overpass quelle wie funktioniert dauer',
     text: (c) =>
       `Die Suche läuft auf deinem Server: Er lädt höchstens einmal pro Woche die NRW-Karte von OpenStreetMap (Geofabrik), filtert sie nach den Branchen und ordnet jeden Betrieb seiner Stadt zu. Die erste Suche dauert dafür einige Minuten, danach geht es schnell. Kosten: keine. Zielstädte: ${c.targeting.cities.join(', ')}. Wöchentliche Suche montags früh: ${c.segments.weeklyLeadFinder ? 'an' : 'aus'}. Den Fortschritt siehst du live unter Akquise → Lead-Suche.`,
-    links: [{ href: '/admin/suche', label: 'Lead-Suche' }],
+    links: [{ href: '/admin/suche', label: 'Betriebe suchen' }],
   },
   {
     id: 'qualifizierung',
@@ -141,7 +141,7 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     text: () =>
       'Jeder Brief hat einen eigenen QR-Link (/q/…) und einen Kurz-Code. Ein Scan wird als Ereignis gespeichert und leitet zur Demo weiter – ohne vollständige IP und ohne Tracking-Cookies. Danach zählen Demo-Aufrufe, Kauf-Klicks, Checkout, Zahlung. Zahlen: Auswertung → Kennzahlen und Funnel.',
     links: [
-      { href: '/admin/funnel', label: 'Funnel' },
+      { href: '/admin/funnel', label: 'Weg zum Kauf' },
       { href: '/admin/kpis', label: 'Kennzahlen' },
     ],
   },
@@ -222,7 +222,7 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     keys: 'server worker contabo vps termius hintergrund neustart aktualisieren aktualisiere update updaten setup docker befehl',
     text: () =>
       'Die Verwaltung läuft bei Netlify, die Datenbank bei Supabase. Die Hintergrundarbeit (Lead-Suche, Versand, Status, Berichte) macht dein Worker-Server bei Contabo und meldet sich alle 5 Minuten. Aktualisieren in Termius mit: curl -fsSL https://raw.githubusercontent.com/y41069586-sudo/Webiste-/claude/website-brief-maschine-0d0s37/infra/vps/setup.sh | bash',
-    links: [{ href: '/admin/jobs', label: 'Jobs' }],
+    links: [{ href: '/admin/jobs', label: 'Hintergrund' }],
   },
   {
     id: 'server_neu',
@@ -234,11 +234,11 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
   },
   {
     id: 'jobs',
-    title: 'Was sind Jobs?',
+    title: 'Was läuft im Hintergrund (Jobs)?',
     keys: 'jobs job warteschlange queue hintergrund aufgaben fehlgeschlagen geplant cron',
     text: () =>
-      'Jobs sind Hintergrundaufgaben des Servers: Lead-Suche, Demo-Bau, Brief-Status, Funnel, Warn-Mails, Optimizer u. a. Unter System → Jobs siehst du, was läuft, was wartet und was fehlgeschlagen ist.',
-    links: [{ href: '/admin/jobs', label: 'Jobs' }],
+      'Das sind Aufgaben, die der Server von selbst erledigt: Betriebe suchen, Demos bauen, Briefe schreiben, Post-Status abfragen, Warnungen schicken, Wochenbericht. Du musst dort normalerweise nichts tun. Unter System → Hintergrund siehst du, ob alles in Ordnung ist. Willst du nicht warten, drückst du im Ablauf bei „Demo bauen“ auf „Jetzt anstoßen“.',
+    links: [{ href: '/admin/jobs', label: 'Hintergrund' }],
   },
   {
     id: 'ablauf',

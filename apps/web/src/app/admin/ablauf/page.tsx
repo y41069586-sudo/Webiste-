@@ -8,8 +8,8 @@ export const metadata = { title: 'Ablauf' };
 export const dynamic = 'force-dynamic';
 
 const MODE = {
-  auto: { label: 'Läuft automatisch', tone: 'is-auto' },
-  du: { label: 'Wartet auf dich', tone: 'is-you' },
+  auto: { label: 'Von selbst', tone: 'is-auto' },
+  du: { label: 'Du', tone: 'is-you' },
   aus: { label: 'Automatik aus', tone: 'is-off' },
 } as const;
 
@@ -21,7 +21,7 @@ export default async function WorkflowPage() {
     <>
       <PageHeader
         title="Ablauf"
-        subtitle="Vom gefundenen Betrieb bis zum Kauf – Schritt für Schritt. Grün läuft von selbst, Lila wartet auf dich."
+        subtitle="Grüne Schritte laufen von selbst. Du kümmerst dich nur um die lila Schritte – oben steht immer, was als Nächstes dran ist."
       />
       {next ? (
         <div className="flow-next">
@@ -59,9 +59,16 @@ export default async function WorkflowPage() {
             </div>
             <div className="flow-step-side">
               <span className="flow-step-count">{num(s.count)}</span>
-              <Link href={s.href} className={`ui-btn ${s.mode === 'du' && s.count > 0 ? 'ui-btn-primary' : 'ui-btn-secondary'}`}>
-                {s.action}
-              </Link>
+              {s.mode !== 'auto' || s.key === 'antworten' ? (
+                <Link
+                  href={s.href}
+                  className={`ui-btn ${s.mode === 'du' && s.count > 0 ? 'ui-btn-primary' : 'ui-btn-secondary'}`}
+                >
+                  {s.action}
+                </Link>
+              ) : (
+                <span className="flow-step-auto">✓ von selbst</span>
+              )}
             </div>
           </li>
         ))}

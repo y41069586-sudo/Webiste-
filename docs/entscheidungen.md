@@ -769,3 +769,30 @@ Ziel: Alles läuft in einer festen Reihenfolge, und der Betreiber sieht immer se
   Wochenbudget für KI (`budget.weeklyLlmBudgetCents`) bleibt die harte Grenze.
 - Der KI-Modus des Assistenten (`assistant.useAi`) ist eingeschaltet. Aktionen laufen weiter nur nach Klick und
   werden auf dem Server erneut geprüft.
+
+## 29.10.2026 – Verwaltung in Alltagssprache, Prüfen in drei Haken
+
+Der Betreiber wünscht sich alles „ultra leicht“, ohne Technikbegriffe.
+
+- **Betriebe prüfen** (`/admin/ablauf/pruefen`):
+  - Eine Karte zeigt Name, Adresse und Telefon.
+  - Ein Knopf „Bei Google suchen“, daneben kleine Links (Nummer, Instagram/Facebook, Branchenbuch).
+  - Drei Haken: keine eigene Website; Adresse stimmt, aktiv, keine Kette; gerade aktiv.
+  - Ein Feld „Was bietet der Betrieb an?“ und ein großer Knopf „Passt – weiter“.
+  - Die Haken werden auf dieselbe Recherche wie bisher abgebildet: alle vier Suchwege, Anschrift, aktiv,
+    eigenständig, Kundengruppe nach Branche, Signal „aktives Profil“.
+  - Der Klick auf „Passt – weiter“ ist die ausdrückliche Bestätigung „selbst nachgesehen“; darunter steht ein
+    Hinweis. Die Regeln in `saveLeadResearch` gelten unverändert.
+  - Fehlt ein Haken, wird nichts gespeichert, und die Seite sagt in Klartext, was fehlt.
+- **Ablauf:**
+  - Automatische Schritte zeigen nur noch „✓ von selbst“, ohne Knopf.
+  - Kein „Pipeline starten“ mehr. Der Server arbeitet ohnehin alle 5 Minuten, und nach jeder Prüfung startet er
+    sofort.
+- **Hintergrund** (früher „Jobs“):
+  - Die Seite ist aus dem Menü verschwunden und zeigt nur noch „Alles in Ordnung“ oder Fehler, mit verständlichen
+    Namen.
+  - Manuelle Start-Knöpfe und technische Ausgaben sind entfernt.
+- **Menü in Alltagssprache:**
+  - Betriebe suchen, Alle Betriebe, Verschickte Post, Weg zum Kauf, Kosten.
+  - Brief-Versionen, Automatische Auswahl, Lern-Vorschläge, Erlaubte Aussagen, Verlauf.
+  - Seitenüberschriften und Adressen bleiben gleich.

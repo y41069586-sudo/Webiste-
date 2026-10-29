@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { loginAsAdmin } from './helpers';
 
-test('Ablauf zeigt alle Schritte und führt zur Schnellprüfung', async ({ page, request }) => {
+test('Ablauf zeigt alle Schritte und führt zur Prüfung', async ({ page, request }) => {
   expect((await request.get('/admin/ablauf', { maxRedirects: 0 })).status()).toBe(307);
   await loginAsAdmin(page);
   await page.goto('/admin');
@@ -14,15 +14,22 @@ test('Ablauf zeigt alle Schritte und führt zur Schnellprüfung', async ({ page,
     'Demo prüfen',
     'Brief erstellen',
     'Brief freigeben',
-    'Versand',
+    'Abschicken',
   ])
     await expect(page.getByRole('heading', { name: step, exact: true })).toBeVisible();
   await expect(page.getByText(/Dein nächster Schritt|Alles erledigt/)).toBeVisible();
-  await page.getByRole('link', { name: 'Schnellprüfung starten' }).click();
-  await expect(page.getByRole('heading', { name: 'Schnellprüfung' })).toBeVisible();
+  await page
+    .getByRole('link', { name: /Jetzt prüfen/ })
+    .first()
+    .click();
   await expect(
-    page.getByRole('button', { name: /Passt – speichern/ }).or(page.getByText('Gerade wartet kein Betrieb')),
+    page.getByRole('button', { name: 'Passt – weiter' }).or(page.getByText('Gerade wartet kein Betrieb')),
   ).toBeVisible();
+  // Kein Technik-Vokabular auf den Ablauf-Seiten
+  for (const url of ['/admin/ablauf', '/admin/ablauf/pruefen', '/admin/jobs']) {
+    await page.goto(url);
+    await expect(page.locator('main')).not.toContainText(/Pipeline|Jobs|Worker|Queue/);
+  }
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const url of ['/admin/ablauf', '/admin/ablauf/pruefen']) {

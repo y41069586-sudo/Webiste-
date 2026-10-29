@@ -171,7 +171,7 @@ export function matchAction(text: string, s: AssistantSnapshot): AssistantReply 
       return reply(
         `Die Mindestgrenze liegt bei ${s.mindestPunkte} von 100 Punkten. ${s.leads.offenAbGrenze} offene Leads liegen darüber, ${s.leads.offenUnterGrenze} darunter (bester Wert ${s.leads.besterWert}).`,
         [],
-        [{ href: '/admin/suche', label: 'Lead-Suche' }],
+        [{ href: '/admin/suche', label: 'Betriebe suchen' }],
       );
   }
 

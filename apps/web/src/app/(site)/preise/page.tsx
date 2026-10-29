@@ -13,11 +13,9 @@ export default async function PricesPage() {
   if (cfg.offers.activeVersion === 'v4')
     return (
       <>
-        <PageIntro
-          eyebrow="Tarife"
-          title="Zwei Tarife. Klare Leistungen."
-        >
-          Einmalige Einrichtung plus gewählter Monatstarif ab bestätigtem Go-Live. Alle Beträge und Leistungen stehen im Vergleich.
+        <PageIntro eyebrow="Tarife" title="Zwei Tarife. Klare Leistungen.">
+          Einmalige Einrichtung plus gewählter Monatstarif ab bestätigtem Go-Live. Alle Beträge und Leistungen stehen im
+          Vergleich.
         </PageIntro>
         <div className="mx-auto max-w-6xl px-5 py-12">
           <V4PriceCards />

@@ -24,7 +24,7 @@ test('alle Admin-Seiten laden ohne Fehler', async ({ page }) => {
     ['/admin/support', 'Support'],
     ['/admin/budget', 'Budget'],
     ['/admin/reports', 'Wochenberichte'],
-    ['/admin/jobs', 'Jobs'],
+    ['/admin/jobs', 'Hintergrund'],
     ['/admin/settings', 'Einstellungen'],
     ['/admin/audit', 'Audit'],
     ['/admin/outbox', 'Postausgang'],

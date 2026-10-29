@@ -234,12 +234,12 @@ export default async function TodayPage() {
             )}
           </Card>
 
-          <Card title="Pipeline">
+          <Card title="Wo stehen deine Betriebe?">
             {total === 0 ? (
               <p className="text-sm text-slate-600">
-                Noch keine Leads.{' '}
+                Noch keine Betriebe.{' '}
                 <Link href="/admin/suche" className="font-semibold text-brand-700 underline">
-                  Erste Lead-Suche starten
+                  Erste Suche starten
                 </Link>
               </p>
             ) : (

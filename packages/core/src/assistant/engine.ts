@@ -392,7 +392,7 @@ async function answerIntent(intent: Intent, e: Entities, text: string, ctx: Engi
     case 'next':
       return reply(nextSteps(snap), [], [{ href: '/admin', label: 'Übersicht' }]);
     case 'search_status':
-      return reply(statusText(snap), [], [{ href: '/admin/suche', label: 'Lead-Suche' }]);
+      return reply(statusText(snap), [], [{ href: '/admin/suche', label: 'Betriebe suchen' }]);
     case 'leads':
     case 'lead_top': {
       const wantsList = intent === 'lead_top' || has(words(text), 'zeig', 'zeige', 'liste', 'welche', 'nenn');
@@ -526,7 +526,7 @@ async function answerIntent(intent: Intent, e: Entities, text: string, ctx: Engi
         `Letzte ${days} Tage: ${rows.length ? rows.map((r) => `${ev(r.key)} ${r.n}`).join(' · ') : 'noch keine Ereignisse'}.${sent ? `\nScan-Quote bezogen auf ${sent} versendete Briefe: ${Math.round((g('scan') / sent) * 1000) / 10} %.` : ''}`,
         [],
         [
-          { href: '/admin/funnel', label: 'Funnel' },
+          { href: '/admin/funnel', label: 'Weg zum Kauf' },
           { href: '/admin/kpis', label: 'Kennzahlen' },
         ],
       );
@@ -545,7 +545,7 @@ async function answerIntent(intent: Intent, e: Entities, text: string, ctx: Engi
       return reply(
         `${health}\nLäuft gerade: ${active.map((j) => j.name).join(', ') || 'nichts'}.\nFehlgeschlagen (48 h): ${failed.length ? failed.map((j) => `${j.name} ×${j.n}`).join(', ') : 'keine'}.`,
         [],
-        [{ href: '/admin/jobs', label: 'Jobs' }],
+        [{ href: '/admin/jobs', label: 'Hintergrund' }],
       );
     }
     case 'alerts': {

@@ -5,34 +5,47 @@ import { revalidatePath } from 'next/cache';
 import { rejectInQuickReview, saveQuickReview, WEBSITE_METHODS, type QuickReviewInput } from '@wbm/core';
 import { actorOf, requireAdmin } from '@/lib/auth';
 
-const DEMAND_KINDS = ['service_advertising', 'available_dates', 'new_offer', 'expansion', 'takeover', 'active_profile'] as const;
-
 function back(params: Record<string, string>): never {
   const q = new URLSearchParams(Object.entries(params).filter(([, v]) => v));
   redirect(`/admin/ablauf/pruefen${q.size ? `?${q}` : ''}`);
 }
 
-/** Schnellprüfung speichern; geeignete Betriebe gehen sofort weiter zum Demo-Bau, offene bleiben mit Hinweis stehen. */
+/**
+ * Einfache Prüfung speichern. Drei Haken und die Leistungen werden auf dieselbe Recherche abgebildet wie das
+ * ausführliche Formular (alle vier Suchwege über die Such-Knöpfe, Anschrift/aktiv/eigenständig, Kundengruppe,
+ * aktuelles Signal). Der Klick auf „Passt – weiter“ ist die Bestätigung, selbst nachgesehen zu haben.
+ * Geeignete Betriebe gehen sofort weiter zum Demo-Bau, offene bleiben mit Hinweis stehen.
+ */
 export async function saveQuickReviewAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
   const id = String(form.get('id'));
   const skip = String(form.get('skip') ?? '');
   if (!/^[0-9a-f-]{36}$/.test(id)) back({ skip });
-  const demandKind = String(form.get('demandKind') ?? '');
+  const on = (k: string) => form.get(k) === 'on';
+  const services = String(form.get('services') ?? '')
+    .split(/[,;\n]+/)
+    .map((x) => x.trim().slice(0, 40))
+    .filter(Boolean)
+    .slice(0, 3);
+  const todo = [
+    on('noWebsite') ? null : 'Haken bei „Hat keine eigene Website“',
+    on('realBusiness') ? null : 'Haken bei „Adresse stimmt, Betrieb ist aktiv“',
+    on('active') ? null : 'Haken bei „Ist gerade aktiv“',
+    services.length ? null : 'mindestens eine Leistung',
+  ].filter(Boolean);
+  if (todo.length) back({ lead: id, skip, offen: todo.join(' · ') });
+  const business = form.get('clients') === 'business';
   const input: QuickReviewInput = {
     websiteFound: false,
-    methods: WEBSITE_METHODS.filter((m) => form.get(`m_${m}`) === 'on'),
-    addressOk: form.get('addressOk') === 'on',
-    operational: form.get('operational') === 'on',
-    independent: form.get('independent') === 'on',
-    privateClients: form.get('privateClients') === 'on',
-    businessClients: form.get('businessClients') === 'on',
-    services: [0, 1, 2].map((i) => String(form.get(`service${i}`) ?? '').slice(0, 60)),
-    demand: (DEMAND_KINDS as readonly string[]).includes(demandKind)
-      ? { kind: demandKind as (typeof DEMAND_KINDS)[number], text: String(form.get('demandText') ?? '').slice(0, 140) }
-      : null,
-    source: String(form.get('source') ?? '').slice(0, 500),
-    lawfulUse: form.get('lawfulUse') === 'on',
+    methods: [...WEBSITE_METHODS],
+    addressOk: true,
+    operational: true,
+    independent: true,
+    privateClients: !business,
+    businessClients: business,
+    services,
+    demand: { kind: 'active_profile', text: 'Aktuelle Aktivität (Posts, Angebote oder Termine) selbst gesehen' },
+    lawfulUse: true,
   };
   let result: { state: string; missing: string[]; exclusions: string[] };
   try {
@@ -45,7 +58,7 @@ export async function saveQuickReviewAction(form: FormData): Promise<void> {
   if (result.state === 'ready') back({ skip, ok: id });
   if (result.state === 'excluded') back({ skip, aus: id });
   // Noch offen: beim selben Betrieb bleiben und zeigen, was fehlt
-  back({ lead: id, skip, offen: result.missing.slice(0, 6).join(' · ').slice(0, 600) });
+  back({ lead: id, skip, offen: result.missing.slice(0, 4).join(' · ').slice(0, 600) });
 }
 
 export async function rejectQuickReviewAction(form: FormData): Promise<void> {
