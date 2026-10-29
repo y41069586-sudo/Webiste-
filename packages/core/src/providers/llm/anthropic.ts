@@ -48,6 +48,7 @@ export class AnthropicLlm implements LlmProvider {
       output_tokens: number;
       cache_read_input_tokens?: number | null;
       cache_creation_input_tokens?: number | null;
+      server_tool_use?: { web_search_requests?: number | null } | null;
     },
   ): LlmUsage {
     return {
@@ -56,6 +57,7 @@ export class AnthropicLlm implements LlmProvider {
       outputTokens: u.output_tokens,
       cacheReadTokens: u.cache_read_input_tokens ?? 0,
       cacheWriteTokens: u.cache_creation_input_tokens ?? 0,
+      ...(u.server_tool_use?.web_search_requests ? { webSearchRequests: u.server_tool_use.web_search_requests } : {}),
     };
   }
 
@@ -123,21 +125,56 @@ export class AnthropicLlm implements LlmProvider {
   }
 
   async generateText(req: LlmTextRequest): Promise<LlmResult<string>> {
-    const res = await this.client.beta.messages.create({
-      model: req.model,
-      max_tokens: req.maxTokens ?? 4000,
-      system: [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }],
-      output_config: { effort: req.effort ?? 'medium' },
-      messages: [{ role: 'user', content: req.prompt }],
-      ...(this.useServerFallback ? { betas: [FALLBACK_BETA], fallbacks: 'default' as const } : {}),
-    });
-    if (res.stop_reason === 'refusal')
-      throw new LlmRefusalError(res.stop_details?.category ?? null, [this.usageOf(res.model, res.usage)]);
-    const text = res.content
+    const tools: Anthropic.Beta.BetaToolUnion[] | undefined = req.webSearch
+      ? [
+          {
+            type: 'web_search_20260209',
+            name: 'web_search',
+            max_uses: req.webSearch.maxUses,
+            user_location: { type: 'approximate', country: 'DE', ...(req.webSearch.city ? { city: req.webSearch.city } : {}) },
+            ...(req.webSearch.blockedDomains?.length ? { blocked_domains: req.webSearch.blockedDomains } : {}),
+          },
+        ]
+      : undefined;
+    const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: 'user', content: req.prompt }];
+    const usages: LlmUsage[] = [];
+    const content: Anthropic.Beta.BetaContentBlock[] = [];
+    // Lange Websuchen pausiert die API (pause_turn): Antwort unverändert zurückschicken, höchstens 4-mal
+    for (let turn = 0; turn < 5; turn++) {
+      const res = await this.client.beta.messages
+        .create({
+          model: req.model,
+          max_tokens: req.maxTokens ?? 4000,
+          system: [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }],
+          output_config: { effort: req.effort ?? 'medium' },
+          messages,
+          ...(tools ? { tools } : {}),
+          ...(this.useServerFallback ? { betas: [FALLBACK_BETA], fallbacks: 'default' as const } : {}),
+        })
+        .catch((cause: unknown) => {
+          if (usages.length)
+            throw new LlmUsageError('LLM-Aufruf nach berechneter Antwort fehlgeschlagen', [...usages], { cause });
+          throw cause;
+        });
+      usages.push(this.usageOf(res.model, res.usage));
+      if (res.stop_reason === 'refusal') throw new LlmRefusalError(res.stop_details?.category ?? null, [...usages]);
+      content.push(...res.content);
+      if (res.stop_reason !== 'pause_turn') break;
+      messages.push({ role: 'assistant', content: res.content });
+    }
+    const text = content
       .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text')
       .map((b) => b.text)
-      .join('\n')
+      .join('')
       .trim();
-    return { data: text, usage: this.usageOf(res.model, res.usage) };
+    const sources = new Set<string>();
+    for (const b of content) {
+      if (b.type === 'web_search_tool_result' && Array.isArray(b.content))
+        for (const r of b.content) if (r.type === 'web_search_result' && r.url.startsWith('https://')) sources.add(r.url);
+      if (b.type === 'text')
+        for (const c of b.citations ?? [])
+          if (c.type === 'web_search_result_location' && c.url.startsWith('https://')) sources.add(c.url);
+    }
+    return { data: text, usage: usages[usages.length - 1]!, usages, ...(req.webSearch ? { sources: [...sources] } : {}) };
   }
 }

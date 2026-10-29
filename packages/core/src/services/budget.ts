@@ -223,7 +223,9 @@ export function llmCostMicroCents(cfg: AppConfig, usage: LlmUsage): number {
     usage.inputTokens * price.inputPerMTokCents +
     usage.outputTokens * price.outputPerMTokCents +
     usage.cacheReadTokens * price.cacheReadPerMTokCents +
-    usage.cacheWriteTokens * price.cacheWritePerMTokCents;
+    usage.cacheWriteTokens * price.cacheWritePerMTokCents +
+    // Websuche: Preis je 1.000 Suchen in US-Cent → Mikro-Cent je Suche
+    (usage.webSearchRequests ?? 0) * (cfg.costs.webSearchPer1000UsdCents ?? 1000) * 1000;
   return Math.round(usdMicro * cfg.costs.usdToEur);
 }
 

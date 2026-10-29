@@ -29,6 +29,7 @@ async function book(usage: LlmUsage, purpose: string, leadId: string | undefined
       outputTokens: usage.outputTokens,
       cacheReadTokens: usage.cacheReadTokens,
       cacheWriteTokens: usage.cacheWriteTokens,
+      ...(usage.webSearchRequests ? { webSearchRequests: usage.webSearchRequests } : {}),
     },
   });
   logger.info(
@@ -88,6 +89,27 @@ export async function llmText(
   const { tier, idempotencyKey, ...rest } = req;
   return withUsageAccounting(
     () => getProviders().llm.generateText({ ...rest, model: modelFor(tier) }),
+    req.purpose,
+    req.leadId,
+    idempotencyKey,
+  );
+}
+
+/** Text mit Websuche: Bericht plus die tatsächlich gefundenen Quellen (Suchkosten im Ledger). */
+export async function llmResearchText(
+  req: Omit<LlmTextRequest, 'model'> & {
+    tier: ModelTier;
+    idempotencyKey?: string;
+    webSearch: NonNullable<LlmTextRequest['webSearch']>;
+  },
+): Promise<{ text: string; sources: string[] }> {
+  await assertBudgetAvailable('llm', 20);
+  const { tier, idempotencyKey, ...rest } = req;
+  return withUsageAccounting(
+    async () => {
+      const res = await getProviders().llm.generateText({ ...rest, model: modelFor(tier) });
+      return { ...res, data: { text: res.data, sources: res.sources ?? [] } };
+    },
     req.purpose,
     req.leadId,
     idempotencyKey,

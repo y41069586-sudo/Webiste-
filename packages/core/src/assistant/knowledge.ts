@@ -241,6 +241,17 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     links: [{ href: '/admin/jobs', label: 'Hintergrund' }],
   },
   {
+    id: 'jarvis',
+    title: 'Jarvis (Sprachsteuerung) und KI-Prüfung der Betriebe',
+    keys: 'jarvis stimme sprache sprechen mikrofon zuhören weckwort sers ki prüfung recherche automatisch internet websuche',
+    text: (c) =>
+      `Jarvis ist die Sprachsteuerung: unten rechts auf „Jarvis“ tippen oder bei „Immer zuhören“ einfach „Jarvis“ bzw. „Sers Jarvis“ sagen. Er antwortet mit Stimme, kennt dieselben Daten wie ich und macht Aktionen erst nach einem gesprochenen „Ja“. Die KI-Prüfung (${c.research.autoAi ? 'an' : 'aus'}) sucht für jeden gefundenen Betrieb selbst im Internet nach eigener Website, Anschrift, Aktivität und Leistungen – mit Quellen-Links, ohne Google Maps und ohne Handelsregister. Passt alles, baut der Server sofort die Demo; unklare Betriebe bleiben für die Prüfung von Hand stehen. Kosten etwa 25–30 Cent je Betrieb im KI-Budget.`,
+    links: [
+      { href: '/admin/ablauf', label: 'Ablauf' },
+      { href: '/admin/settings?bereich=support', label: 'Einstellungen' },
+    ],
+  },
+  {
     id: 'ablauf',
     title: 'Ablauf: alles Schritt für Schritt',
     keys: 'ablauf schritte reihenfolge nacheinander nächster schritt was jetzt tun workflow übersicht schnellprüfung prüfen leads übernehmen automatisch',

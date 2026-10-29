@@ -824,3 +824,47 @@ Für alle Arbeitsseiten gilt dasselbe Muster: eine Karte, wenige große Knöpfe,
 - **Heute:** Die Kacheln „Wartet auf dich“ führen in den Nacheinander-Modus. Die Wörter sind vereinfacht.
 - **Regeln:** Unverändert bleiben `approveDemo`, `approveLetter`, Wahrheits-Check, Mindestniveau und die
   Einzelprüfung der ersten 30 Demos.
+
+## 29.10.2026 – KI-Prüfung der Betriebe, Automatik, Jarvis
+
+- **KI-Prüfung** (`services/ai-research.ts`, Queue `research-lead`, Schalter `research.autoAi`). Der Betreiber hat
+  beobachtet, dass die regelbasierte Suche viele unpassende Betriebe übernimmt. Deshalb prüft jetzt Claude Opus 5.5 mit
+  Websuche (`web_search_20260209`) jeden gefundenen Betrieb mit Telefonnummer.
+  - **Suchwege:** Name + Ort, Telefonnummer, Verzeichnisse, Profile.
+  - **Ablauf:** erst ein Bericht mit Quellen, dann die strukturierte Auswertung.
+  - **Belege:**
+    - Übernommen wird nur, was eine Quelle hat, die die Websuche tatsächlich geliefert hat.
+    - Erfundene Links fallen weg.
+    - Gesperrt sind Google-Maps-Inhalte (docs/compliance-google.md) und Handelsregister-Auskünfte (Northdata u. a.,
+      docs/compliance-handelsregister.md); sie stehen in `blocked_domains` und werden zusätzlich gefiltert.
+  - **Ergebnis:**
+    - eigene Website → aussortiert
+    - ungeeignet (Kette, geschlossen …) → aussortiert
+    - alles belegt → über `saveLeadResearch` „geeignet“, der Demo-Bau startet sofort
+    - sonst bleibt der Betrieb für die Schnellprüfung stehen
+  - **Zulässige Nutzung:** Das Einschalten von `research.autoAi` gilt als Bestätigung des Betreibers für die Nutzung
+    öffentlich auffindbarer Geschäftsangaben.
+  - **Kosten:** Ein Echttest am 29.10.2026 brauchte 8 Suchen und fand 31 Quellen. Das kostet ca. 0,25–0,30 € je
+    Betrieb: Suchen 10 USD je 1.000 laut docs (`costs.webSearchPer1000UsdCents`), dazu die Tokens; alles im KI-Ledger.
+  - **Takt:** Höchstens `research.perTick` Betriebe je Pipeline-Takt. Ohne echten Schlüssel (Mock) passiert nichts.
+- **Automatik in Produktion** (auf Wunsch des Betreibers): Diese Schalter sind an:
+  - Demo-Freigabe
+  - Briefversand
+  - Folgebriefe
+  - Optimizer
+  - Auto-Antworten
+  - KI-Prüfung
+
+  Unverändert durch Code erzwungen:
+  - die ersten 30 Demos manuell
+  - `DRY_RUN=true` (Freigabe des echten Versands nur gesondert)
+  - `realLettersUnlocked` erst nach Testbrief
+  - Wahrheits-Check und Mindestniveau
+
+- **Jarvis** (`components/admin/jarvis.tsx`):
+  - Sprachsteuerung über die Web Speech API des Browsers, ohne neue Pakete.
+  - Weckwort „Jarvis“ / „Sers Jarvis“ bei „Immer zuhören“. Begrüßung „Sers {assistant.operatorName}“.
+  - Bevorzugt eine männliche deutsche Stimme; ohne solche Stimme etwas tiefer gesprochen. Die Stimme ist wählbar.
+  - Fragen gehen über `askAssistant(…, { voice: true })` an Haiku 5.5 (Stufe `assistant`) und kommen als kurze,
+    gesprochene Antworten zurück.
+  - Aktionen laufen nur nach gesprochenem oder getipptem „Ja“, über dieselben geprüften Server-Aktionen.

@@ -1,4 +1,4 @@
-import { findLeads, getConfig, SearchProgressReporter } from '@wbm/core';
+import { aiResearchLead, findLeads, getConfig, SearchProgressReporter } from '@wbm/core';
 import { defineJob } from '../runtime';
 
 defineJob('find-leads', async (data, ctx) => {
@@ -38,4 +38,11 @@ defineJob('find-leads', async (data, ctx) => {
     await progress.finish('fehler', 'Suche abgebrochen', err instanceof Error ? err.message : String(err));
     throw err;
   }
+});
+
+// KI-Prüfung eines gefundenen Betriebs (Websuche) – eingereiht vom Pipeline-Takt
+defineJob('research-lead', async (data, ctx) => {
+  const status = await aiResearchLead(data.leadId);
+  ctx.log.info({ state: status.state, sources: status.sources }, 'research-lead');
+  return status;
 });

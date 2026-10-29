@@ -8,6 +8,7 @@ import { sql } from 'drizzle-orm';
 import { effectiveSwitches, getConfig, getDb, getEnv } from '@wbm/core';
 import { AdminNav, SectionTabs } from '@/components/admin-nav';
 import { AdminAssistant } from '@/components/admin/assistant';
+import { Jarvis } from '@/components/admin/jarvis';
 import { NavProgress } from '@/components/admin/nav-progress';
 import { NavToggle } from '@/components/admin/nav-toggle';
 import { PageTransition } from '@/components/admin/page-transition';
@@ -112,6 +113,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         </main>
       </div>
       <AdminAssistant aiOn={cfg.assistant.useAi && Boolean(getEnv().ANTHROPIC_API_KEY)} />
+      <Jarvis
+        name={cfg.assistant.operatorName}
+        enabled={cfg.assistant.voice}
+        aiOn={cfg.assistant.useAi && Boolean(getEnv().ANTHROPIC_API_KEY)}
+      />
     </div>
   );
 }

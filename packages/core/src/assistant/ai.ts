@@ -9,6 +9,10 @@ import {
   type AssistantTurn,
 } from './actions';
 
+/** Jarvis liest die Antwort vor: kurz, gesprochen, ohne Formatierung */
+const VOICE_RULE =
+  '\n\nDu bist Jarvis und deine Antwort wird vorgelesen: höchstens drei kurze Sätze, locker und freundlich (Du-Form), keine Listen, keine Sternchen, keine Links oder Adressen. Zahlen als Ziffern. Schlägst du eine Aktion vor, sag kurz, was du tun würdest – der Betreiber bestätigt mit „Ja“.';
+
 const SYSTEM = `Du bist der Assistent in der Verwaltung von SeitenWerk, einem Ein-Personen-Unternehmen, das lokalen Betrieben ohne Website per Brief eine fertige Demo-Website zeigt. Du sprichst mit dem Betreiber (Du-Form, Deutsch, kurz und konkret).
 
 Du bekommst den aktuellen Stand der Verwaltung als JSON. Antworte nur mit Fakten aus diesem Stand; erfinde keine Zahlen. Wenn etwas nicht im Stand steht, sag das und nenne die Seite, auf der es zu finden ist.
@@ -34,6 +38,8 @@ export async function askAssistantAi(
   history: AssistantTurn[],
   /** Antwort des Befehlsmodus (Daten aus der Datenbank) als Grundlage */
   offline = '',
+  /** Jarvis: Antwort wird vorgelesen */
+  voice = false,
 ): Promise<AssistantReply> {
   const cfg = await getConfig();
   const lastUser = [...history].reverse().find((h) => h.role === 'user')?.text ?? '';
@@ -48,7 +54,7 @@ export async function askAssistantAi(
     tier: 'assistant',
     purpose: 'admin_assistant',
     system: SYSTEM,
-    prompt: `Stand der Verwaltung:\n${JSON.stringify(snapshot)}\n\nProjektwissen:\n${wissen || '–'}\n\nDaten aus der Datenbank (Befehlsmodus):\n${offline || '–'}\n\nGespräch:\n${convo}\n\nAntworte auf die letzte Nachricht des Betreibers.`,
+    prompt: `Stand der Verwaltung:\n${JSON.stringify(snapshot)}\n\nProjektwissen:\n${wissen || '–'}\n\nDaten aus der Datenbank (Befehlsmodus):\n${offline || '–'}\n\nGespräch:\n${convo}\n\nAntworte auf die letzte Nachricht des Betreibers.${voice ? VOICE_RULE : ''}`,
     toolName: 'antworten',
     toolDescription: 'Antwort an den Betreiber mit optional vorgeschlagenen Aktionen',
     inputSchema: ASSISTANT_REPLY_SCHEMA as unknown as Record<string, unknown>,

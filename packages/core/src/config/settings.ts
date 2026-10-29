@@ -230,6 +230,8 @@ export const appConfigSchema = z.object({
     usdToEur: z.number().positive(),
     /** Places Text Search (Enterprise-Felder) je 1000 Anfragen in US-Cent */
     placesTextSearchPer1000UsdCents: z.number().int().min(0),
+    /** Claude-Websuche (KI-Prüfung der Betriebe), Stand docs/integrations.md */
+    webSearchPer1000UsdCents: z.number().int().min(0).default(1000),
     /** LLM-Preise je Million Tokens in US-Cent */
     llm: z.record(
       z.string(),
@@ -302,7 +304,25 @@ export const appConfigSchema = z.object({
     }),
   }),
   /** Assistent in der Verwaltung: ohne KI nur Befehlsmodus; mit KI über den Anthropic-Schlüssel (Kosten im Ledger) */
-  assistant: z.object({ useAi: z.boolean() }).default({ useAi: false }),
+  assistant: z
+    .object({
+      useAi: z.boolean(),
+      /** Name für die Begrüßung durch Jarvis („Sers …“); leer = ohne Namen */
+      operatorName: z.string().max(40).default(''),
+      /** Jarvis antwortet mit Stimme */
+      voice: z.boolean().default(true),
+    })
+    .default({ useAi: false, operatorName: '', voice: true }),
+  /** KI-Prüfung gefundener Betriebe: Claude sucht selbst im Netz (statt Schnellprüfung von Hand) */
+  research: z
+    .object({
+      autoAi: z.boolean(),
+      /** Höchstens so viele Betriebe je Pipeline-Takt (alle 5 Minuten) */
+      perTick: z.number().int().min(1).max(20),
+      /** Höchstens so viele Websuchen je Betrieb */
+      maxSearches: z.number().int().min(1).max(15),
+    })
+    .default({ autoAi: false, perTick: 3, maxSearches: 8 }),
   switches: z.object({
     dryRun: z.boolean(),
     autoSend: z.boolean(),
@@ -685,6 +705,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     usdToEur: 0.9,
     // Places API (New) Text Search Enterprise (Stand siehe docs/integrations.md)
     placesTextSearchPer1000UsdCents: 3500,
+    webSearchPer1000UsdCents: 1000,
     llm: {
       // Preise in US-Cent je 1 Mio. Tokens (Stand 2026-10, siehe docs/integrations.md)
       'claude-opus-5-5': {
@@ -762,7 +783,8 @@ export const DEFAULT_CONFIG: AppConfig = {
       city: '',
     },
   },
-  assistant: { useAi: false },
+  assistant: { useAi: false, operatorName: '', voice: true },
+  research: { autoAi: false, perTick: 3, maxSearches: 8 },
   switches: {
     dryRun: true,
     autoSend: false,

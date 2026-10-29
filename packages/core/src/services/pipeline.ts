@@ -7,6 +7,7 @@ import { enqueue, QUEUES } from '../queue';
 import type { LeadStatus } from '../types';
 import { budgetStatus } from './budget';
 import { preferredCampaignTier } from '../leads/acquisition';
+import { enqueueAiResearch } from './ai-research';
 
 /** Leads, die bereits Budget „gebunden“ haben, aber noch keinen Brief verschickt haben. */
 const IN_FLIGHT: LeadStatus[] = ['demo_built', 'demo_approved', 'demo_published', 'letter_generated', 'letter_approved'];
@@ -18,6 +19,8 @@ export interface PipelineTickResult {
   demosEnqueued: number;
   lettersEnqueued: number;
   sendTriggered: boolean;
+  /** Betriebe, die die KI in diesem Takt prüft */
+  researchEnqueued: number;
   bySegment: Record<string, number>;
 }
 
@@ -92,9 +95,13 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
     demosEnqueued: 0,
     lettersEnqueued: 0,
     sendTriggered: false,
+    researchEnqueued: 0,
     bySegment: {},
   };
   if (sw.killSwitch) return { ...result, halted: true };
+
+  // 0) KI-Prüfung gefundener Betriebe (nur mit research.autoAi und echtem KI-Schlüssel)
+  result.researchEnqueued = await enqueueAiResearch().catch(() => 0);
 
   // 1) Kapazität
   const inFlightRows = await db

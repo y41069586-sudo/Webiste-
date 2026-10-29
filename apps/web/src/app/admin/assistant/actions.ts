@@ -36,7 +36,7 @@ export interface AssistantAnswer {
 }
 
 /** Eine Nachricht an den Assistenten. Mit KI nur, wenn eingeschaltet und ein Anthropic-Schlüssel vorhanden ist. */
-export async function askAssistant(history: AssistantTurn[]): Promise<AssistantAnswer> {
+export async function askAssistant(history: AssistantTurn[], opts: { voice?: boolean } = {}): Promise<AssistantAnswer> {
   await requireAdmin();
   const turns = history
     .filter((h) => (h.role === 'user' || h.role === 'assistant') && typeof h.text === 'string')
@@ -52,7 +52,7 @@ export async function askAssistant(history: AssistantTurn[]): Promise<AssistantA
   if (aiReady) {
     try {
       const offline = reply;
-      reply = await askAssistantAi(snap, turns, offline.antwort);
+      reply = await askAssistantAi(snap, turns, offline.antwort, opts.voice === true);
       if (!reply.links?.length) reply.links = offline.links;
     } catch (err) {
       logger.warn({ err: err instanceof Error ? err.name : 'unknown' }, 'assistent: KI nicht erreichbar, Befehlsmodus');

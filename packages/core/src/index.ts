@@ -146,3 +146,4 @@ export * from './assistant/data';
 export * from './demos/revision-types';
 export * from './demos/design-options';
 export * from './services/workflow';
+export * from './services/ai-research';

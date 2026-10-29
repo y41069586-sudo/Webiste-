@@ -272,6 +272,8 @@ export interface LlmUsage {
   outputTokens: number;
   cacheReadTokens: number;
   cacheWriteTokens: number;
+  /** Ausgeführte Websuchen (Server-Tool, eigener Preis je 1.000 Suchen) */
+  webSearchRequests?: number;
 }
 
 export interface LlmImage {
@@ -301,6 +303,8 @@ export interface LlmTextRequest {
   model: string;
   system: string;
   prompt: string;
+  /** Websuche erlauben (Recherche); Quellen kommen in `LlmResult.sources` zurück */
+  webSearch?: { maxUses: number; city?: string; blockedDomains?: string[] };
   maxTokens?: number;
   effort?: 'low' | 'medium' | 'high';
   purpose: string;
@@ -312,6 +316,8 @@ export interface LlmResult<T> {
   usage: LlmUsage;
   /** Every billed response, including failed tool-use attempts. Models may differ per attempt. */
   usages?: LlmUsage[];
+  /** Bei Websuche: tatsächlich gefundene bzw. zitierte Seiten (https) */
+  sources?: string[];
 }
 
 /** Known billed responses survive a later refusal/transport error; no prompt content is retained. */

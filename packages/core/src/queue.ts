@@ -6,6 +6,7 @@ import type { DemoRevisionPatch } from './demos/revision-types';
 /** Alle Queues mit Standardoptionen (Retries mit Backoff, Dead-Letter). */
 export const QUEUES = {
   findLeads: 'find-leads',
+  researchLead: 'research-lead',
   buildDemo: 'build-demo',
   qaDemo: 'qa-demo',
   publishDemo: 'publish-demo',
@@ -47,6 +48,8 @@ export interface QueuePayloads {
     /** fehlt beim wöchentlichen Cron-Lauf */
     triggeredBy?: string;
   };
+  /** KI-Prüfung eines gefundenen Betriebs (Websuche) */
+  'research-lead': { leadId: string; triggeredBy?: string };
   'build-demo': { leadId: string; regenerate?: boolean; triggeredBy?: string; reviewNote?: string; templateId?: string };
   'qa-demo': { demoId: string };
   'publish-demo': { demoId: string };

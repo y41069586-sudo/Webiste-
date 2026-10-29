@@ -250,6 +250,15 @@ export const SECTIONS: SectionDef[] = [
         label: 'Assistent mit KI (Claude) – nutzt den Anthropic-Schlüssel, wenige Cent je Frage im Budget',
         type: 'bool',
       },
+      { path: 'assistant.operatorName', label: 'Jarvis: dein Vorname für die Begrüßung („Sers …“)', type: 'text' },
+      { path: 'assistant.voice', label: 'Jarvis anzeigen (Sprachassistent mit Stimme)', type: 'bool' },
+      {
+        path: 'research.autoAi',
+        label: 'KI prüft gefundene Betriebe selbst im Internet (ca. 25–30 Cent je Betrieb, im KI-Budget)',
+        type: 'bool',
+      },
+      { path: 'research.perTick', label: 'KI-Prüfung: Betriebe je Durchlauf (alle 5 Minuten)', type: 'number' },
+      { path: 'research.maxSearches', label: 'KI-Prüfung: höchstens Websuchen je Betrieb', type: 'number' },
       {
         path: 'support.autoReplyClasses',
         label: 'Automatisch beantworten (nur mit AUTO_REPLY)',
