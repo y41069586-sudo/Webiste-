@@ -82,7 +82,10 @@ export async function testRunStatus(): Promise<TestRunStatus | null> {
       : demo.status === 'pending_review' || demo.status === 'approved'
         ? 'review'
         : demo.status === 'building'
-          ? 'building'
+          ? // Länger als 15 Minuten im Bau: Prüfung abgebrochen (z. B. Browser auf dem Server)
+            Date.now() - demo.createdAt.getTime() > 15 * 60_000
+            ? 'failed'
+            : 'building'
           : 'failed';
   return {
     leadId: lead.id,
@@ -94,6 +97,11 @@ export async function testRunStatus(): Promise<TestRunStatus | null> {
     qrUrl,
     qrImage: await QRCode.toDataURL(qrUrl, { errorCorrectionLevel: 'M', margin: 2, width: 480 }),
     letterId: letter?.id ?? null,
-    note: stage === 'failed' ? `Demo-Status: ${demo?.status}${demo?.reviewNote ? ` (${demo.reviewNote})` : ''}` : null,
+    note:
+      stage === 'failed'
+        ? demo?.status === 'building'
+          ? 'Die automatische Prüfung der Demo ist auf dem Server abgebrochen'
+          : `Demo-Status: ${demo?.status}${demo?.reviewNote ? ` (${demo.reviewNote})` : ''}`
+        : null,
   };
 }

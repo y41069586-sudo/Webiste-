@@ -15,7 +15,8 @@ export function getBrowser(): Promise<Browser> {
       .launch({
         headless: true,
         ...(executablePath ? { executablePath } : {}),
-        args: ['--disable-dev-shm-usage', '--font-render-hinting=none'],
+        // Absturzberichte nach /tmp: im schreibgeschützten Worker-Container sonst Start-Abbruch (crashpad)
+        args: ['--disable-dev-shm-usage', '--font-render-hinting=none', '--crash-dumps-dir=/tmp/chromium-crashes'],
       })
       .then((b) => {
         b.on('disconnected', () => {

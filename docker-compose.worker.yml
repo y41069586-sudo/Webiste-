@@ -36,6 +36,10 @@ services:
       LXP_MODE: test
       REGISTRAR_ENV: sandbox
       SITE_INDEXABLE: 'false'
+      # Chromium braucht beschreibbare Ordner (Absturz-Datenbank, Profil); das Dateisystem ist sonst schreibgeschützt
+      HOME: /tmp
+      XDG_CONFIG_HOME: /tmp/.chromium
+      XDG_CACHE_HOME: /tmp/.chromium
     read_only: true
     volumes:
       - osm-data:/data/osm
