@@ -28,20 +28,24 @@ export async function assertLetterLeadEligible(db: DbOrTx, lead: typeof leads.$i
   if (lead.source === 'mock' && !effectiveSwitches(cfg).dryRun && process.env.NODE_ENV !== 'test')
     throw new Error('Fiktive Testdaten sind nicht für echten Versand zulässig.');
   if (lead.hasWebsite && !lead.socialOnly) throw new Error('Eigene Website vorhanden; Eignung erneut prüfen.');
-  const sameArea = await db
-    .select()
-    .from(leads)
-    .where(
-      and(
-        ne(leads.id, lead.id),
-        isNull(leads.anonymizedAt),
-        or(
-          eq(leads.identityHash, businessHash(lead.businessName, lead)),
-          eq(leads.postalCode, lead.postalCode!),
-          eq(leads.city, lead.city),
-        ),
-      ),
-    );
+  // Testbetriebe (Testlauf) heißen absichtlich gleich und gehen nie echt raus (Sperre oben) – keine Dublettenprüfung
+  const sameArea =
+    lead.source === 'mock'
+      ? []
+      : await db
+          .select()
+          .from(leads)
+          .where(
+            and(
+              ne(leads.id, lead.id),
+              isNull(leads.anonymizedAt),
+              or(
+                eq(leads.identityHash, businessHash(lead.businessName, lead)),
+                eq(leads.postalCode, lead.postalCode!),
+                eq(leads.city, lead.city),
+              ),
+            ),
+          );
   if (
     sameArea.some(
       (other) =>
