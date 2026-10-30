@@ -1,0 +1,45 @@
+{
+  "deployId": "6ae4382fd4ef7bebeb43a347",
+  "siteId": "80e75e2d-3149-49b0-a522-76a172bbd60b",
+  "commit": "eebfdbad3cebc46a5b4ad3cae3a669c7284337f5",
+  "branch": "claude/website-brief-maschine-0d0s37",
+  "state": "ready",
+  "context": "production",
+  "publishedAt": "2026-10-30T06:25:44.978Z",
+  "pluginState": "success",
+  "secretScanMatches": 0,
+  "routes": {
+    "/login": 200,
+    "/preise": 200,
+    "/impressum": 200,
+    "/api/health": 200
+  },
+  "health": {
+    "status": "degraded",
+    "db": true,
+    "storage": true,
+    "queueReadable": true,
+    "workerHeartbeatAgeSec": 124,
+    "failedJobsLastHour": 0,
+    "deadLettersLastDay": 2,
+    "backlog": 0,
+    "backup": null,
+    "problems": [
+      "Noch kein geprüftes Backup"
+    ]
+  },
+  "runtimeChanges": {
+    "dryRunChanged": false,
+    "paymentProviderChanged": false,
+    "mailProviderModeChanged": false,
+    "realLettersUnlocked": false
+  },
+  "workerUpdate": {
+    "performedBy": "operator",
+    "required": true,
+    "refreshEnvironment": true,
+    "NEU": "1",
+    "LIVE": "0",
+    "setupFetchedAndBashSyntaxChecked": true
+  }
+}

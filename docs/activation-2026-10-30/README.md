@@ -69,8 +69,8 @@ Voraussetzung: neue App-Version veröffentlicht und neuer Einmal-Code im Admin e
 dem **bestehenden** Ubuntu-Server in Termius (nicht in dieser lokalen Arbeitsumgebung):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/y41069586-sudo/Webiste-/9cd0d83bff7956ce02287b291932d4fea3c76dda/infra/vps/setup.sh -o /tmp/seitenwerk-setup.sh
-NEU=1 bash /tmp/seitenwerk-setup.sh
+curl -fsSL https://raw.githubusercontent.com/y41069586-sudo/Webiste-/eebfdbad3cebc46a5b4ad3cae3a669c7284337f5/infra/vps/setup.sh -o /tmp/seitenwerk-setup.sh
+NEU=1 LIVE=0 bash /tmp/seitenwerk-setup.sh
 ```
 
 Das Skript lädt den vorhandenen Betriebsbranch; deshalb muss Schritt 1 vorher abgeschlossen sein.
@@ -93,3 +93,22 @@ Betriebsbranch übernommen und die tatsächliche Netlify-Veröffentlichung gepr�
 bleibt erhalten. Der Betreiber aktualisiert den vorhandenen VPS selbst; ein neues SSH-Onboarding
 ist nicht erforderlich. Nach neuer App-Version den Setup-Aufruf mit NEU=1 verwenden und einen
 neuen Einmal-Code ausschließlich direkt auf dem Server eingeben.
+
+## Veröffentlichung abgeschlossen
+
+- Betriebsbranch per Fast-Forward auf `eebfdba` gepusht; keine fremden Änderungen überschrieben.
+- Netlify-Deploy `6ae4382fd4ef7bebeb43a347`, production, ready, Commit exakt `eebfdba`;
+  veröffentlicht am 30.10.2026 um 06:25:44 UTC. Next.js-Plugin erfolgreich, Secretscan ohne Treffer.
+- Login, Preise, Impressum und Health tatsächlich HTTP200. DB, privater Speicher und Queue
+  erreichbar, Worker-Takt 124 Sekunden alt, keine fehlgeschlagenen Jobs in der letzten Stunde.
+  Health weiter degraded: geprüftes Backup fehlt. Zwei ältere Dead-Letter-Jobs separat offen.
+- Keine Provider-/DRY_RUN-/Empfängerschalter geändert, keine Migrationen oder echten Geschäftsvorgänge.
+- Server-Update führt der Betreiber aus. Der oben dokumentierte gepinnte Setup-Aufruf wurde
+  tatsächlich von GitHub geladen, mit lokalem Skript verglichen und per bash -n geprüft.
+  Erst neuen Worker-Einmal-Code im aktualisierten Admin erzeugen, dann NEU=1 LIVE=0 ausführen.
+- Nach Server-Update eigene PDF neu generieren; die alte Datei enthält noch den Platzhalter und
+  bleibt gesperrt. Danach die zwei easyNova-Testaufträge und Rückgabe-PDF-Prüfung fortsetzen.
+
+Nachweis: [deployment.json](deployment.json). Der Produktionsdeploy ist damit erfolgt; der
+Gesamtbetrieb bleibt im Testmodus. Diese nachträglichen Dokumentationsänderungen tragen
+Skip-Markierungen und lösen keinen weiteren Deploy aus.

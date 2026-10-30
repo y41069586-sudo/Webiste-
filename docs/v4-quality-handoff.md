@@ -1,5 +1,9 @@
 # SeitenWerk V4/V5 – verbindlicher Handoff
 
+**Veröffentlicht:** `eebfdba`, Netlify `6ae4382fd4ef7bebeb43a347` (30.10. 06:25 UTC);
+Login/Preise/Impressum/Health HTTP200. DRY_RUN bleibt true. Server-Update macht der Betreiber
+selbst mit NEU=1 LIVE=0 und neuem Einmal-Code. Danach eigene PDF neu erzeugen.
+
 Aktuellste Fortsetzung: [Aktivierungsprüfungen 30.10.2026](activation-2026-10-30/README.md).
 Live-Konto/Katalog/Webhook und 12,61 € Briefguthaben bestätigt. Alte eigene PDF wird wegen
 veralteter Bindung vor Testübertragung blockiert; Zähler 1/3. Produktiver Push wurde von der
