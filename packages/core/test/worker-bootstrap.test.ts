@@ -35,6 +35,28 @@ describe('Worker-Einrichtung per Einmal-Code', () => {
 });
 
 describe('Worker-Umgebung', () => {
+  it('übernimmt INWX nur über benannte Felder, ohne Registrar oder Livebetrieb zu aktivieren', () => {
+    const file = workerEnvFile({
+      DATABASE_URL: 'postgres://wbm:fixture@localhost:5432/wbm',
+      REGISTRAR_PROVIDER: 'mock',
+      REGISTRAR_ENV: 'sandbox',
+      REGISTRAR_USER: 'registrar_fixture_user',
+      REGISTRAR_PASSWORD: 'registrar fixture password',
+      REGISTRAR_TOTP_SECRET: 'JBSWY3DPEHPK3PXP',
+      INWX_UNRELATED_SECRET: 'not_exported_fixture',
+      AUTO_REGISTER_DOMAINS: 'true',
+      ALLOW_REAL_LETTERS: 'true',
+    });
+    expect(file).toContain('REGISTRAR_PROVIDER=mock');
+    expect(file).toContain('REGISTRAR_ENV=sandbox');
+    expect(file).toContain('REGISTRAR_USER=registrar_fixture_user');
+    expect(file).toContain("REGISTRAR_PASSWORD='registrar fixture password'");
+    expect(file).toContain('REGISTRAR_TOTP_SECRET=JBSWY3DPEHPK3PXP');
+    expect(file).not.toContain('INWX_UNRELATED_SECRET');
+    expect(file).not.toContain('AUTO_REGISTER_DOMAINS');
+    expect(file).not.toContain('ALLOW_REAL_LETTERS');
+  });
+
   it('exportiert den vorhandenen Hosting-Alias ausschließlich unter dem kanonischen Namen', () => {
     const env = { DATABASE_URL: 'postgres://wbm:fixture@localhost:5432/wbm', NELITFY_API_TOKEN: 'alias_fixture' };
     expect(workerEnvFile(env)).toContain('NETLIFY_API_TOKEN=alias_fixture');

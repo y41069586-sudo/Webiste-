@@ -569,3 +569,16 @@ App-Codebc97fb8 tatsächlich veröffentlicht: Netlify6ae4ad23bc965189a55852f8 re
 HostingMock mit gültigem Token/HTTP200, ausgehendeMailMock. Neuer Kunden-/Backup-CLI noch nicht
 auf VPS ausgeführt; die aktuelle Veröffentlichung ersetzt diese externen Nachweise nicht.
 Sicherer Nachweis customer-acceptance-deployment.json im bekannten Aktivierungsverzeichnis.
+
+## 30.10.2026 – INWX-Konto bestätigt, geschützter Worker-Import korrigiert
+
+Betreiber bestätigt vorhandenes INWX-Konto und hat Zugangsdaten im Chat genannt. Werte nicht
+wiederholen/ins öffentliche Git oder Test-Fixtures übernehmen. Geändertes Passwort privat als
+Functions-/Production-Secret REGISTRAR_PASSWORD, echten API-Login als REGISTRAR_USER hinterlegen.
+Letzter App-Metadatenabruf weiterhin nur REGISTRAR_PROVIDER. Keine Kontoanmeldung als bestanden behaupten.
+Bootstrap-Allowlist um USER/PASSWORD/ENV/TOTP_SECRET ergänzt, bisher fehlten diese tatsächlichen
+Felder im VPS-Export. Sieben Bootstrap-Tests grün; keine Erhöhung der Secret-/Versand-/Kaufrechte.
+registrar-preflight.ts nur explizite Sandbox-Leseprüfung, DRY_RUNtrue, --check plus Bestätigungsvariable,
+keine Registrierungen/DNS-Änderungen und keine kontobezogenen Rohfehler. Nach tatsächlich neu
+hinterlegten Secrets einmal NEU=1 LIVE=0 nötig; frühere eigene Monats-/Backup-Tests bleiben unabhängig.
+Anleitung/Nachweise: docs/activation-2026-10-30/inwx-setup.md. Kein externer INWX-Zugriff bisher.
