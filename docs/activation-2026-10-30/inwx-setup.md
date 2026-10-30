@@ -1,8 +1,10 @@
 # INWX-Zugang über vorhandene Konfiguration
 
-Stand 30.10.2026: Betreiber bestätigt vorhandenes INWX-Konto. Die Zugangsdaten werden hier nicht
-veröffentlicht. Letzter Netlify-Metadatenabruf zeigt nur REGISTRAR_PROVIDER, keine USER/PASSWORD-Felder.
-Eine erfolgreiche Kontoanmeldung oder Registrar-Anbindung ist damit noch nicht nachgewiesen.
+Stand 30.10.2026: Betreiber bestätigt vorhandenes INWX-Konto. REGISTRAR_USER und REGISTRAR_PASSWORD
+sind jetzt im Netlify-Projekt seitenwerkworld als Secrets mit Production-/Functions-Scope hinterlegt.
+Die neue Konfiguration wurde um 16:29:33 UTC mit unverändertem getestetem Anwendungscode veröffentlicht.
+Die Zugangsdaten werden hier nicht veröffentlicht. Worker-Übernahme und erfolgreiche INWX-Anmeldung
+sind weiterhin nicht nachgewiesen. [Aktueller Konfigurations-/Deploynachweis](inwx-secrets-configured.json).
 
 ## Konkrete Korrektur
 
@@ -65,8 +67,10 @@ Der erste Testversuch wurde wegen eines Nutzungslimits der automatischen Freigab
 ausgeführt. Nach Nutzerfortsetzung wurde derselbe Test erneut geprüft und normal ausgeführt;
 keine Umgehung der Freigabeprüfung.
 
-Code91f07e0 auf beide vorhandenen Zweige gepusht und tatsächlich veröffentlicht: Netlify-Deploy
-6ae4c16bedf5d21f461ab0f3 ready/production,30.10.16:11:15UTC. Öffentlicher Health-Endpunkt danach
-HTTP200. Letzte App-Metadaten weiterhin nur REGISTRAR_PROVIDER, kein neuer Secret-Eintrag und keine
-behauptete INWX-Anmeldung. [Sicherer Nachweis](inwx-deployment.json). Die folgende reine Nachweis-
-Sicherung überspringt CI/Netlify und startet keinen weiteren Deploy.
+Code91f07e0 wurde zunächst mit Deploy6ae4c16bedf5d21f461ab0f3 veröffentlicht; der Health-Endpunkt
+antwortete danach HTTP200. Nach Hinterlegung der beiden INWX-Secrets wurde derselbe Anwendungscode
+über den reinen Dokumentationscommit65788f3 erneut gebaut und veröffentlicht: Deploy
+6ae4c5b86f8e571363c4c90d ready/production,30.10.16:29:33UTC,keine gemeldeten Buildfehler oder
+Secret-Scanner-Treffer. Worker-Secrets noch per frischem Einmal-Code mit NEU=1 LIVE=0 übernehmen.
+Keine INWX-Anmeldung oder Domainregistrierung behauptet; Registrar bleibt mock und DRY_RUN=true.
+Die folgende reine Nachweissicherung überspringt CI/Netlify und startet keinen weiteren Deploy.
