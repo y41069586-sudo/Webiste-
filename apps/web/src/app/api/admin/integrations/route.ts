@@ -11,7 +11,7 @@ export async function GET() {
   const env = getEnv();
   const key = env.STRIPE_SECRET_KEY ?? '';
   const stripeMode = /^(sk|rk)_test_/.test(key) ? 'test' : /^(sk|rk)_live_/.test(key) ? 'live' : 'unknown';
-  const [stripeRead, storageRead, resendRead] = await Promise.all([
+  const [stripeRead, storageRead, resendRead, hostingRead] = await Promise.all([
     (async () => {
       if (stripeMode !== 'test') return { ok: false, reason: 'test_key_required' };
       try {
@@ -46,6 +46,22 @@ export async function GET() {
         return { ok: false, reason: 'unreachable' };
       }
     })(),
+    (async () => {
+      if (!env.NETLIFY_API_TOKEN) return { ok: false, reason: 'not_configured' };
+      const siteId = process.env.SITE_ID;
+      if (!siteId) return { ok: false, reason: 'site_id_missing' };
+      try {
+        const response = await fetch(`https://api.netlify.com/api/v1/sites/${encodeURIComponent(siteId)}`, {
+          headers: { authorization: `Bearer ${env.NETLIFY_API_TOKEN}` },
+          cache: 'no-store',
+          signal: AbortSignal.timeout(10000),
+        });
+        await response.body?.cancel();
+        return { ok: response.ok, status: response.status };
+      } catch {
+        return { ok: false, reason: 'unreachable' };
+      }
+    })(),
   ]);
   return Response.json(
     {
@@ -61,6 +77,11 @@ export async function GET() {
         webhookConfigured: Boolean(process.env.RESEND_WEBHOOK_SECRET),
         outgoingProvider: env.EMAIL_PROVIDER,
         read: resendRead,
+      },
+      hosting: {
+        provider: env.HOSTING_PROVIDER,
+        tokenConfigured: Boolean(env.NETLIFY_API_TOKEN),
+        read: hostingRead,
       },
     },
     { headers: { 'cache-control': 'private, no-store' } },

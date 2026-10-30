@@ -141,3 +141,12 @@ VPS-Version/Providerumgebung nach diesen Änderungen noch nicht aktualisiert nac
 nach Hosting-Secret und neuer App-Veröffentlichung regulären Einmal-Code mit NEU=1 LIVE=0 übernehmen.
 Die normale Admin-Sitzung wird abgemeldet; lokale temporäre Zugangskopien werden entfernt.
 Diese abschließende Dokumentationssicherung trägt Skip-Markierungen, kein weiterer App-Deploy.
+
+## Hosting-Secret: Laufzeitprüfung nach Betreiber-Screenshot
+
+Betreiber zeigt NETLIFY_API_TOKEN mit Schloss und vier gespeicherten Kontextwerten. Der verbundene
+Netlify-Metadatenabruf zeigt den Schlüssel weiterhin nicht; den Screenshot deshalb nicht erneut
+als fehlerhafte Eingabe behandeln. Bestehenden geschützten GET /api/admin/integrations um eine
+lesende Netlify-Laufzeitprüfung ergänzt: konfiguriert ja/nein, Provider und HTTP-Status eines GET
+auf das aktuelle Projekt. Kein Tokenwert, kein Upstream-Payload, keine Projekt-/DNS-Mutation und
+kein Umschalten des Hosting-Providers. Erst tatsächlicher Laufzeitabruf bestätigt die Verbindung.
