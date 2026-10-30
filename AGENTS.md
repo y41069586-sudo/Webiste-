@@ -458,3 +458,22 @@ Absender/Empfänger in Anbieterfenstern, DV-Fläche frei, Originaltext vollstän
 druckgeometrisch geeignet. Nur dieser Proof geprüft, keine globale Rechts-/Gestaltungsfreigabe.
 Prüfmarkierungen NICHT in Original-/Versand-PDF übernehmen. Kein echter Brief ausgelöst; Worker
 weiter mit LIVE=0/DRY_RUN=true, Kundenfreigabe false. Nachweis docs/activation-2026-10-30/provider-proof-125251.json.
+
+## 30.10.2026 – vier Betriebsabnahmen, Steuerstatus bewusst offen
+
+Neuester Auftrag: tatsächlicher Stripe-Sandbox-Zyklus Basis/Care+ mit Monatsstart, Mail/Onboarding/
+Kundenseiten-Hosting, Backup/isolierter Restore samt fehlender Recherche-Queue und ein echter
+qualifizierter Kontrollbetrieb. Keine §19-/USt-Bestätigung verlangen oder erfinden; Steuerstatus
+ausdrücklich offen. Live-Verkaufssperre bleibt. Seitenwerk.world ist vorhanden, Test nur auf eigener
+Subdomain; keine Root-Seite überschreiben/Domain kaufen. Aktueller Prüfstand:
+docs/activation-2026-10-30/acceptance-progress.md.
+
+Stripe-Sandbox verbunden, vorhandener Katalog/Webhook stimmen. PAYMENT_PROVIDER in Netlify nun
+stripe gespeichert; Code-Standard test. Neuer Deploy erforderlich. Mail/Hosting/Registrar weiter
+mock. Hosting-Token hinterlegt Betreiber als Functions-Secret; regulären Einmal-Code-Export nutzen.
+
+Backup-Wrapper lokal geprüft, nicht als Supabase-Abnahme ausgeben. App-Rolle hat keine Vollbackup-
+Rechte: separate private berechtigte Verbindung derselben DB, keine App-Hochstufung/RLS-Abschaltung.
+Queues erst nach echtem Backup/Restore im --queues-only-Modus ergänzen, ohne Migration/Seeds.
+VPS bedient Betreiber, nicht erneut nach SSH fragen. Neue Queue kann budgetierte Recherche
+aktivieren, aber niemals Briefe/Domainkäufe/Live-Zahlungen automatisch freigeben.

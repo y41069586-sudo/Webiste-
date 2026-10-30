@@ -48,6 +48,7 @@ describe('Worker-Umgebung', () => {
       ENCRYPTION_KEY: 'abc',
       S3_SECRET_ACCESS_KEY: "a b'c",
       NETLIFY_AUTH_TOKEN: 'geheim',
+      NETLIFY_API_TOKEN: 'hosting_token_fixture',
       EMAIL_API_KEY: '',
       EASYNOVA_USERNAME: 'betrieb@example.org',
       OPTOUT_EMAIL: 'widerspruch@betrieb.example.org',
@@ -64,6 +65,7 @@ describe('Worker-Umgebung', () => {
     expect(file).toContain('STRIPE_SECRET_KEY_LIVE=rk_live_fixture');
     expect(file).toContain('STRIPE_WEBHOOK_SECRET_LIVE=whsec_live_fixture');
     expect(file).not.toContain('NETLIFY_AUTH_TOKEN');
+    expect(file).toContain('NETLIFY_API_TOKEN=hosting_token_fixture');
     expect(file).not.toContain('EMAIL_API_KEY');
     expect(() => workerEnvFile({})).toThrow(/DATABASE_URL/);
   });
