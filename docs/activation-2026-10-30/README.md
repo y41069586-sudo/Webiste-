@@ -84,3 +84,12 @@ Erstattung, Domainbestellung, Drucksendung oder Kundenfreigabe. Keine Produktion
 Produktiver Code-Push und Deployment wegen Freigabeprüfung nicht ausgeführt. Steuerstatus wurde
 nicht selbst bestätigt. Bestehende Tests aus 29.10. nicht als heute erneut ausgeführt ausgeben;
 heute kamen die konkreten Konto-/Provider-/Admin-/PDF-/QR-/Mobilprüfungen hinzu.
+
+## Nachtrag: konkrete Veröffentlichungsfreigabe
+
+Der Betreiber hat anschließend ausdrücklich „Ja push und veröffentlich“ bestätigt. Die zuvor
+fehlende konkrete Zustimmung liegt damit vor. Der getestete Code wird auf den vorhandenen
+Betriebsbranch übernommen und die tatsächliche Netlify-Veröffentlichung geprüft. DRY_RUN=true
+bleibt erhalten. Der Betreiber aktualisiert den vorhandenen VPS selbst; ein neues SSH-Onboarding
+ist nicht erforderlich. Nach neuer App-Version den Setup-Aufruf mit NEU=1 verwenden und einen
+neuen Einmal-Code ausschließlich direkt auf dem Server eingeben.

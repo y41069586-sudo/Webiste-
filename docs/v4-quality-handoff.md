@@ -3,7 +3,8 @@
 Aktuellste Fortsetzung: [Aktivierungsprüfungen 30.10.2026](activation-2026-10-30/README.md).
 Live-Konto/Katalog/Webhook und 12,61 € Briefguthaben bestätigt. Alte eigene PDF wird wegen
 veralteter Bindung vor Testübertragung blockiert; Zähler 1/3. Produktiver Push wurde von der
-automatischen Freigabeprüfung abgelehnt; konkrete Zustimmung und Serverzugang fehlen weiterhin.
+automatischen Freigabeprüfung zunächst abgelehnt; konkrete Zustimmung liegt jetzt vor.
+Veröffentlichung wird geprüft; der Betreiber führt den anschließenden Server-Update selbst aus.
 
 ## 27.10.2026 – Claude-Übernahme auf `codex/conversion-v4` (lokaler Branch `claude/v4-restarbeiten`)
 

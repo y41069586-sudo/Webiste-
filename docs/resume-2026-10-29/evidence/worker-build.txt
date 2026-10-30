@@ -1,4 +1,3 @@
 
 > @wbm/worker@0.1.0 build /workspace/seitenwerk-resume/apps/worker
 > tsc --noEmit
-

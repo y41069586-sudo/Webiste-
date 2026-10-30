@@ -13,9 +13,9 @@
   Finished TypeScript in 11.3s ...
   Collecting page data using 2 workers ...
   Generating static pages using 2 workers (0/5) ...
-  Generating static pages using 2 workers (1/5) 
-  Generating static pages using 2 workers (2/5) 
-  Generating static pages using 2 workers (3/5) 
+  Generating static pages using 2 workers (1/5)
+  Generating static pages using 2 workers (2/5)
+  Generating static pages using 2 workers (3/5)
 ✓ Generating static pages using 2 workers (5/5) in 151ms
 Turbopack build encountered 7 warnings:
 ./packages/core/src/claims/library.ts:77:8
@@ -333,4 +333,3 @@ Route (app)
 
 ○  (Static)   prerendered as static content
 ƒ  (Dynamic)  server-rendered on demand
-

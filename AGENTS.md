@@ -428,3 +428,13 @@ ausgelöstem Netlify-Produktionsdeploy ab. Konkrete Zustimmung dafür wurde ange
 keine Umgehung per anderer API, Build-Hook oder indirekter Bereitstellung. Unabhängige sichere
 Arbeiten weiterführen. Steuerstatus noch unbestätigt, SSH-Zugang nicht eingerichtet. Eigene Druck-
 abnahme bleibt vor Empfängerfreigabe erforderlich. Originale private Zugangsdaten unverändert lassen.
+
+## 30.10.2026 – konkrete Freigabe für Produktionspush und Netlify-Deploy
+
+Neueste ausdrückliche Betreiberantwort: „Ja push und veröffentlich“. Die zuvor von der automatischen
+Prüfung verlangte konkrete Zustimmung liegt damit vor. Geprüften Patch auf den bestehenden Branch
+claude/website-brief-maschine-0d0s37 übernehmen und tatsächliche Veröffentlichung prüfen. DRY_RUN=true
+und die Empfänger-/Zahlungsfreigaben bleiben für diesen Deploy erhalten; Steuerstatus nicht erfinden.
+Der Betreiber führt VPS-Updates selbst in Termius aus. Keine erneute SSH-Verbindung verlangen.
+Nach erfolgreicher App-Veröffentlichung den vorhandenen Setup-Aufruf mit NEU=1 bereitstellen, damit
+OPTOUT_EMAIL und die getrennten Stripe-Einstellungen neu übernommen werden. Kein LIVE=1 beim Update.
