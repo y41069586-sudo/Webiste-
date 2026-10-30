@@ -184,3 +184,21 @@ neuen Sicherheitstests, sechs bestehenden Provider-Fake-Transporttests und einem
 Mail-Wiederholungs-/Doppelversandtest geprüft (12bestanden,4andere Failuretests nicht ausgewählt).
 Core-TypeScript und gezieltes ESLint bestanden. Keine Mail in diesen Tests versendet. Einzelheiten
 und begrenzter VPS-Aufruf: [email-acceptance.md](email-acceptance.md).
+
+## Eigene Bestätigungsmail tatsächlich zugestellt; Spam als neuer offener Befund
+
+Betreiber hat den CLI72be5ac auf dem VPS ausgeführt. Resend API-Annahme13:42:03UTC, tatsächlicher
+Eingang13:42:10UTC mit identischer Message-ID, Status delivered. PDF149144Bytes mit identischem
+Hash zum unveränderten Originalbeleg aus dem App-Audit; gültiges PDF/MIMEapplication/pdf, korrekte
+Testkennzeichnung und Einrichtung597€, kein unbestätigter §19-Hinweis. Care+ insgesamt99€/Monat
+und Monatsstart nach bestätigtem Go-Live im empfangenen Inhalt korrekt.
+
+Privaten Onboarding-Link aus empfangener Mail in390px tatsächlich geöffnet und Screenshot angesehen:
+HTTP200, kein Login/Überlauf/JS-Fehler, richtiges Käufer-Firmenfeld. Keine Formulareingabe abgeschickt.
+Kein zusätzlicher Monatsstart/Go-Live oder globaler Mail-Providerwechsel; historische Mock-Zeilen erhalten.
+
+**Nachricht liegt im Spam-Ordner.** Domain/DKIM/SPF bei Resend verified; kein behaupteter DMARC- oder
+externer Inbox-Nachweis. Rohmail ohne Authentication-Results-/Spam-Verdict-Header, Ursache unbekannt.
+Keine DNS-/Ordneränderung oder zweite Mail ausgelöst. Tatsächlicher Transport ist nachgewiesen,
+Kunden-Zustellbarkeit weiterhin offen. Nachweis [email-delivery.json](email-delivery.json).
+Nur Dokumentationsänderung; keine erneuten Code-Tests nötig und kein App-/Worker-Deploy.

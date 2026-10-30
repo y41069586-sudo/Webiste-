@@ -519,3 +519,15 @@ Absenderpostfach. --apply und EMAIL_ACCEPTANCE_CONFIRM=own-inbox erforderlich. P
 keine globale Provider-/Auto-Reply-Änderung. Separater idempotenter acceptance_invoice-Postausgang;
 historische Mock-Sent-Zustände/Bestell-/Onboardingfelder unverändert. Noch keine echte Zustellung.
 Tests und Betreiberbefehl: docs/activation-2026-10-30/email-acceptance.md. VPS bedient Betreiber selbst.
+
+## 30.10.2026 – Eigene App-Bestätigung tatsächlich empfangen, jedoch Spam
+
+CLI72be5ac vom Betreiber ausgeführt: Resend delivered, Empfang13:42:10UTC, Message-ID identisch.
+Original-Test-PDF aus empfangener Mail hashgleich, gültig/korrekt ohne unbestätigten §19-Hinweis.
+Privater Onboarding-Link tatsächlich390px/HTTP200/richtiger Käufer/kein Überlauf/kein Login geprüft.
+Nicht erneut nach dieser bereits empfangenen Testmail fragen. Kein neuer globaler Providerwechsel;
+normale Kundenmails weiter mock, kein Monatsstart/Go-Live. Empfangsnachweis email-delivery.json im
+bisherigen Aktivierungsverzeichnis. Historisches deliveryVerified=false im Sendeaudit nicht umschreiben.
+Spam-Einstufung bleibt offen: Resend Domain/DKIM/SPF verified, DMARC und externer Inbox-Test nicht
+unabhängig bestätigt; Ursache unbekannt. Kein automatisches Nicht-Spam-Markieren, DNS-Wechsel oder
+Neusenden. Backup/Restore/Queues und tatsächlicher Sandbox-Monatsstart weiter ausstehend.

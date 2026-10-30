@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-30",
+  "scriptCommit": "72be5ac9050e1537042ef3ec8df5c9cfd4418105",
+  "orderId": "c7e74a8b-1b06-4809-8680-951b014919e6",
+  "outbound": {
+    "id": "49a60bf2-cda9-43e3-bd48-439e43c3c3e2",
+    "kind": "acceptance_invoice",
+    "provider": "resend",
+    "sentAt": "2026-10-30T13:42:03.968Z",
+    "providerMessageId": "01a18d0b-ced7-7895-84b7-051729fae22e",
+    "providerStatus": "delivered"
+  },
+  "received": {
+    "id": "1309a682-06f0-41cd-b4e6-8be46b1b0253",
+    "receivedAt": "2026-10-30T13:42:10.501Z",
+    "matchesOutboundMessageId": true,
+    "folder": "spam",
+    "ownMailboxOnly": true
+  },
+  "attachment": {
+    "name": "TESTBELEG-RE-2026-0002.pdf",
+    "bytes": 149144,
+    "sha256": "1bd17c8e9e54ed18d8904c7b22416f0607a326dea00f9d4ba83df8227b14871e",
+    "matchesOriginalAuditHash": true,
+    "receivedMimeType": "application/pdf",
+    "pdfMagicValid": true,
+    "invoiceNumberMatches": true,
+    "fictionalCompanyLabel": true,
+    "setup597Visible": true,
+    "unconfirmedTax19Claim": false
+  },
+  "message": {
+    "sandboxNotice": true,
+    "carePlusMonthly99Total": true,
+    "billingOnlyAfterConfirmedGoLive": true,
+    "htmlAndPlainTextReceived": true
+  },
+  "onboarding": {
+    "width": 390,
+    "httpStatus": 200,
+    "privateOnboardingReached": true,
+    "loginRequired": false,
+    "horizontalOverflow": false,
+    "customerCompanyFieldMatches": true,
+    "javascriptErrors": 0,
+    "submitted": false
+  },
+  "senderDomain": {
+    "providerVerified": true,
+    "providerDkimVerified": true,
+    "providerSpfRecordsVerified": true,
+    "rawDkimSignatureDomainPresent": true,
+    "rawAuthenticationResultsPresent": false,
+    "dmarcIndependentlyVerified": false,
+    "openTracking": false,
+    "clickTracking": false
+  },
+  "globalEmailProviderChanged": false,
+  "orderStateChanged": false,
+  "monthlySubscriptionStarted": false,
+  "actualTransportAndOwnReceiptVerified": true,
+  "customerInboxPlacementAccepted": false,
+  "spamCauseKnown": false,
+  "next": "Investigate spam placement and validate delivery to an independently authorized own external mailbox; complete actual Sandbox monthly-start, backup/restore/queues and qualified lead acceptance. No automatic resend."
+}

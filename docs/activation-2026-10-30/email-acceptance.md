@@ -1,6 +1,7 @@
 # Begrenzte Bestätigungsmail an das eigene Postfach
 
-Stand 30.10.2026: vorbereitet und lokal geprüft, **noch keine tatsächliche Resend-App-Zustellung**.
+Stand 30.10.2026: **tatsächlich über die App gesendet und im eigenen Postfach empfangen**, jedoch
+im Spam-Ordner. Transport-/Inhaltsnachweis bestanden; Posteingangsplatzierung für Kunden offen.
 Die zwei bisherigen Sandbox-Bestätigungen haben provider=mock/status=sent. Diese historischen
 Zustände dürfen weder gelöscht noch als reale Zustellung ausgegeben werden.
 
@@ -60,4 +61,33 @@ Keine Domainregistrierung oder Veröffentlichung durch den Link auslösen.
 - Ein vorhandener Maildienst-Test: Fehler → erfolgreiche Wiederholung → Duplicate ohne Doppelversand.
 - Core-TypeScript und gezieltes ESLint. Kein neuer App-Build nötig: kein App-/Bundlecode geändert.
 
-Die positive tatsächliche CLI-Sendung und Zustellung bleiben bis zum VPS-Lauf offen.
+## Tatsächlicher VPS-Lauf und Prüfung
+
+Betreiber hat den begrenzten CLI auf dem vorhandenen Worker ausgeführt, ohne Neuaufbau oder globalen
+Providerwechsel. 13:42:03 UTC API-Annahme mit Resend-ID,13:42:10 UTC tatsächliche empfangene Nachricht
+mit identischer Message-ID. Resend-Status delivered und ein PDF-Anhang unabhängig bestätigt.
+[Maschinenlesbarer Nachweis](email-delivery.json).
+
+Original-PDF aus Anhang und empfangener Rohmail geladen:149144Bytes, SHA256 identisch zum Original
+im App-Audit. MIME-Typ der tatsächlichen empfangenen PDF ist application/pdf. Das API-Anhangslisting
+meldete application/octet-stream; daraus keine defekte Übertragung oder nötige Adapteränderung
+ableiten. PDF gültig/lesbar, RE-2026-0002/Testbetrieb/597€ korrekt, kein unbestätigter §19-Hinweis.
+Care+ insgesamt99€/Monat und Beginn nach bestätigtem Go-Live im empfangenen Text korrekt.
+
+Privaten Link aus genau dieser empfangenen Mail mit390px geöffnet:HTTP200, kein Login, Firmenfeld
+gehört zum Testkäufer, kein horizontaler Überlauf/JavaScriptfehler. Screenshot tatsächlich angesehen.
+Nur lesend, kein Formular abgesendet, keine Freigabe/Veröffentlichung und kein Monatsabo gestartet.
+
+**Offener Befund: Spam.** Die tatsächliche Nachricht liegt im Spam-Ordner. Resend bestätigt die
+vorhandene Domain sowie DKIM-/SPF-Einträge als verified, Open-/Click-Tracking aus. Rohmail enthält
+DKIM-Signaturen für die Absenderdomain und den Transportanbieter, aber keine Authentication-Results
+oder Spam-Verdict-Header. Vorhandene Signatur ist kein unabhängig geprüfter Signatur-Pass.
+Der lokale Resolver unterstützt TXT-Abfragen hier nicht (ENOTIMP); kein Nachweis eines defekten
+Kunden-DNS. DMARC daher nicht unabhängig bestätigt, Ursache der Spam-Einstufung unbekannt.
+Keine DNS-/Mailboxänderung, kein Markieren als Nicht-Spam und kein Wiederholungsversand.
+
+Eigener Absender=Empfänger ist ein begrenzter Kontrollfall, kein Test aller Kundenpostfächer. Vor
+Zustellbarkeitsabnahme zusätzlich an ein ausdrücklich autorisiertes eigenes externes Postfach prüfen.
+Normale Kundenmails bleiben beim globalen Mock-Provider, bis die Betriebsumstellung geprüft erfolgt.
+Historischen CLI-Audit deliveryVerified=false unverändert erhalten: Er beschreibt korrekt die
+API-Annahme zum Sendezeitpunkt; die spätere Empfangsprüfung steht getrennt in email-delivery.json.
