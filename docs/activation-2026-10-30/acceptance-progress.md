@@ -261,3 +261,16 @@ Keine Plattform als neue freigegebene automatische Primärquelle eingerichtet.
 Sicherheitsreadback: DRY_RUN=true, realLettersUnlocked=false, tax.operatorConfirmed=false,
 beide tatsächlichen Monatsstarts0, backup_status=null. Keine realen Zahlungen, Briefe, Domainkäufe
 oder Produktionsmigrationen. Kein vollständiger Go-Live behauptet.
+
+## Geprüfte App-Korrekturen veröffentlicht
+
+Codebc97fb8cbc09755e9e9099b6fb6a824742cb46a6 auf beide bestehenden Zweige gepusht. Tatsächlicher
+Netlify-Deploy6ae4ad23bc965189a55852f8 ready/production, veröffentlicht14:44:44UTC. Anschließend
+normale Admin-Anmeldung und geschützte Runtime-Diagnose:DRY_RUNtrue, Stripe/test/HTTP200/Webhook
+konfiguriert, S3 erreichbar, Resend-Inbox erreichbar, ausgehende Mail weiterMock, HostingMock mit
+Token/HTTP200. STRIPE_MODE nicht explizit gesetzt, sicherer Code-Standardtest. Kein kommerzieller
+Live-Start oder Providerwechsel daraus. [Nachweis](customer-acceptance-deployment.json).
+
+Neuer Kunden-Abnahmelauf/Backup noch auf bestehendem VPS auszuführen, daher tatsächliche Monats-
+starts weiterhin0 und fehlende Queues/Backup-Abnahme weiter offen. Diese dokumentierende Sicherung
+überspringt CI/Netlify, kein zweiter App-Deploy. Temporäre Admin-Zugangskopien nach Abmeldung entfernen.

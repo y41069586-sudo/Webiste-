@@ -563,3 +563,9 @@ nicht ins öffentliche Repository. Details external-email-delivery.json. Allgeme
 bleibt mock. Keine Registrar-Zugänge in App-Metadaten, Kontostatus INWX angefragt. Keine neuen Provider.
 Root-Firmenwebsite neu gelesen: aktuelle597/19/99, offensichtliche gesuchte Platzhalter/Altpreise nicht
 gefunden; §19-Erwähnung in AGB ausdrücklich keine Befreiungszusage. Keine Rechtsfreigabe daraus ableiten.
+
+App-Codebc97fb8 tatsächlich veröffentlicht: Netlify6ae4ad23bc965189a55852f8 ready/production,
+14:44:44UTC. Geschützte Laufzeit danach bestätigtDRY_RUNtrue, Stripe/test/HTTP200, S3/Resend lesbar,
+HostingMock mit gültigem Token/HTTP200, ausgehendeMailMock. Neuer Kunden-/Backup-CLI noch nicht
+auf VPS ausgeführt; die aktuelle Veröffentlichung ersetzt diese externen Nachweise nicht.
+Sicherer Nachweis customer-acceptance-deployment.json im bekannten Aktivierungsverzeichnis.
