@@ -66,3 +66,26 @@ PREPARE_MISSING_QUEUES=1 bash infra/backup/managed-acceptance.sh
 Noch kein Nachweis eines VPS-Laufs. Bei geänderten Quelldaten keine Abnahme; in ruhiger Pipeline
 wiederholen. Für Dauerbetrieb fehlen zusätzlich Aufbewahrung, externe geschützte Backup-Kopie
 und wiederkehrende Restore-Probe.
+
+## Tatsächliche Veröffentlichung und erster Hosted-Kauf
+
+- Commit 332e31ab691b14e92bfe9067c45897982941129c auf beiden vorhandenen Zweigen gepusht.
+  Netlify production 6ae4717e871b678339e4d7e7, ready, veröffentlicht 10:30:15 UTC.
+  Laufzeit: DRY_RUN=true, PAYMENT_PROVIDER=stripe, Testschlüssel lesend HTTP200, S3 erreichbar.
+- Basis über normale Demo → Tariflink → Stripe Hosted Checkout mit 4242-Testkarte bezahlt.
+  Nur fiktive Käuferdaten, eigenes Supportpostfach. Bestellung 4991f35d-0c23-465f-b4b1-0f320d5a5f91,
+  payment_mode=test, amount=59700, status=paid, Kunde angelegt. Signierter Webhook
+  evt_1UWD6TGn2A630LhHaO8D5AfZ tatsächlich verarbeitet. Kein Monatsabo vor Go-Live.
+- Erfolgsseite und persönliches Onboarding mobil tatsächlich geöffnet, kein horizontaler Überlauf.
+  Bestätigungs-/Rechnungsmail jedoch nur Mock-Postausgang; keine echte Zustellung behaupten.
+- Echter Test deckte noch gesetzten §19-Standardhinweis trotz unbestätigtem Steuerstatus auf.
+  Neue Rechnungen übernehmen diesen Hinweis jetzt ausschließlich bei bestätigtem Kleinunternehmer-
+  Status. Drei Rechnungs-PDF-/Snapshot-Tests bestanden, darunter Erhalt alter Rechnungsstände.
+  Der erste gespeicherte Testbeleg bleibt unverändert und ist kein gültiger Produktivrechnungsnachweis.
+- Veraltete Beschreibung des vorhandenen Sandbox-Einrichtungsprodukts korrigiert: Monatsbeginn
+  nach bestätigtem Go-Live und ausdrücklicher Tarifzustimmung. Nur Beschreibung im Sandbox-Produkt;
+  kein neuer Preis und keine Live-Katalogänderung.
+- Zweiter fiktiver Testlauf über vorhandenen Admin angelegt. Technische Demo-QA bestanden,
+  Lighthouse des tatsächlichen Worker-Laufs:99/100/100/100. Desktop1440/Mobil390 gerendert und
+  tatsächlich angesehen; alle Bilder nach Lazy-Load geladen, kein Überlauf. Keine externe Design-
+  oder Kundenabnahme und keine allgemeine Premium-Bewertung daraus ableiten.

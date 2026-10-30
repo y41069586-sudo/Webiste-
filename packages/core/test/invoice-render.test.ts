@@ -13,6 +13,7 @@ import { applyRefund, simulateMockPayment, startCheckout } from '../src/services
 import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
 import { resetDb } from './helpers';
+import { updateConfig } from '../src/config/service';
 
 async function paidOrder() {
   const db = getDb();
@@ -69,6 +70,7 @@ async function paidOrder() {
 describe('Rechnungs-PDF und Versand', () => {
   beforeEach(async () => {
     await resetDb();
+    await updateConfig({ tax: { operatorConfirmed: true } }, 'test:confirmed-tax-fixture');
   });
   afterAll(async () => {
     await closeBrowser();
@@ -124,5 +126,16 @@ describe('Rechnungs-PDF und Versand', () => {
     expect(text).toContain('Stornorechnung');
     expect(text).toContain(o.invoiceNumber!);
     expect(text).toContain('-590,00');
+  });
+
+  it('behauptet ohne bestätigten Steuerstatus keine §19-Regelung und verändert alte Rechnungsstände nicht', async () => {
+    const original = await paidOrder();
+    expect(original.invoiceJson?.taxNote).toContain('§ 19');
+    await updateConfig({ tax: { operatorConfirmed: false } }, 'test:unknown-tax');
+    const unconfirmed = await paidOrder();
+    expect(unconfirmed.invoiceJson?.taxNote).toBeNull();
+    expect((await getDb().query.orders.findFirst({ where: eq(orders.id, original.id) }))?.invoiceJson).toEqual(
+      original.invoiceJson,
+    );
   });
 });

@@ -164,7 +164,7 @@ export function buildInvoiceData(
     vatLabel: a.vatCents ? `Umsatzsteuer ${a.vatRatePercent} %` : null,
     vat: a.vatCents ? formatEuro(a.vatCents) : null,
     gross: formatEuro(a.grossCents),
-    taxNote: a.vatCents ? null : cfg.tax.kleinunternehmerNote,
+    taxNote: cfg.tax.operatorConfirmed && cfg.tax.kleinunternehmer && !a.vatCents ? cfg.tax.kleinunternehmerNote : null,
     paymentNote: `Der Rechnungsbetrag wurde am ${paid} per Online-Zahlung beglichen. Es ist kein Betrag mehr offen.`,
   };
 }
