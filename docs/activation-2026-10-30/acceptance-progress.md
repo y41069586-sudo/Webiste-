@@ -241,6 +241,12 @@ noch offen. Dieser zusätzliche Send ist nicht die App-Postausgangskette; deren 
 Transport ist separat bereits nachgewiesen. [Externer Nachweis](external-email-delivery.json).
 Adresse/privater Link nicht veröffentlicht, keine automatische zweite Sendung.
 
+Aktualisierung30.10.2026: Betreiber bestätigt ausdrücklich „Im Spam“ für diese frühere Gmail-
+Testbestätigung. Externer Empfang damit bestätigt, Platzierung im Hauptposteingang nicht bestanden.
+Kein weiterer Versand. Aktueller [Zustellnachweis](external-email-delivery.json) und
+[Diagnosestand](site-form-routing.md#ergänzung-gmail-spam-ausdrücklich-bestätigt). Allgemeiner
+Mail-Provider bleibt Mock; genaue Ursache ohne Gmail-Begründung/Authentifizierungsergebnisse offen.
+
 Firmenwebsite tatsächlich neu gelesen: sechs Haupt-/Rechtsseiten HTTP200, Verkaufsangaben597/19/99,
 kein590/49 und keine konkret gesuchten offensichtlichen Platzhalter. AGB-Erwähnung§19 ist ausdrücklich
 keine zugesicherte Steuerbefreiung. [Begrenzter Lesebefund](public-site-check.json); keine Rechtsfreigabe.

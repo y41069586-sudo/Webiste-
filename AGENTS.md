@@ -627,3 +627,15 @@ Externer Gmail-Empfang erneut nur zur Einordnung angefragt, keine neue Gmail-Mai
 Mail-Provider weiter Mock, DRY_RUNtrue, Stripe/test, Kundenseite preview ohne Monatsstart, Root-Hash
 unverändert. Tatsächlicher Nachweis: docs/activation-2026-10-30/site-form-delivery.json. Neues normales
 VPS-Codeupdate für später generierte Formular-/Dankeseitentexte noch offen; kein neuer Secret-Abruf.
+
+## 30.10.2026 – externe Gmail-Spam-Platzierung nun ausdrücklich bestätigt
+
+Betreiber antwortet „Im Spam“ auf die Frage zur schon gesendeten externen Gmail-Testbestätigung.
+Nicht erneut nach dieser Ordnerplatzierung fragen und keinen weiteren Test ungefragt senden.
+external-email-delivery.json und site-form-delivery.json entsprechend aktualisiert. Delivered ist
+kein Hauptposteingangsnachweis; regulärer Mailbetrieb bleibt Mock/nicht abgenommen. Gmail-Begründung
+angefragt; noch keine genaue Ursache nachgewiesen. Resend-/Google-Primärquellen erneut gelesen.
+Konkreter Kandidat: Onboarding-/Logo-Links auf netlify.app bei eigener Absenderdomain; laut Resend
+mögliches Spam-Signal, kein Ursachenbeweis. Keine URLs blind auf die statische Root-Seite umschreiben,
+keine neue DNS-/Providerkonfiguration oder Versandaktion ohne passende Beauftragung. Details im
+vorhandenen Bericht docs/activation-2026-10-30/site-form-routing.md. Diese Runde ändert nur Nachweise.

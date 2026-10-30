@@ -48,7 +48,7 @@
     "dkimSignaturesPresent": true,
     "authenticationResultsHeaderPresent": false,
     "spamCauseProven": false,
-    "externalGmailPlacement": "not yet confirmed by operator",
+    "externalGmailPlacement": "spam, explicitly confirmed by operator on 2026-10-30",
     "dnsChanged": false
   },
   "localChecks": {

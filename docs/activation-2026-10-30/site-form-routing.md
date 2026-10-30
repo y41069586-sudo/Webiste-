@@ -91,8 +91,9 @@ kein weiterer Versand und keine Ursache ohne Nachweis behauptet. Tatsächliche A
 Lesende Anbieter-/DNS-Prüfung: Domain/DKIM/SPF beim Anbieter verified. Öffentlicher DKIM-Schlüssel und
 DMARC p=none vorhanden; SPF wird über die vom Anbieter bestätigten CNAMEs delegiert. Keine DNS-Änderung
 vorgenommen. Empfangene Rohmail enthält DKIM-Signaturen, aber kein Authentication-Results; das allein
-belegt keinen unabhängigen Authentifizierungs-Pass und keine Ursache der Spam-Einstufung. Rückmeldung
-zur früheren externen Gmail-Testbestätigung weiterhin offen; keine weitere Gmail-Mail geschickt.
+belegt keinen unabhängigen Authentifizierungs-Pass und keine Ursache der Spam-Einstufung. Der Betreiber
+hat inzwischen ausdrücklich bestätigt, dass auch die frühere externe Gmail-Testbestätigung im
+Spamordner liegt. Keine weitere Gmail-Mail geschickt.
 
 Laufzeit nach dem Test erneut gelesen: DRY_RUNtrue, allgemeiner Mail-ProviderMock, Stripe/test.
 Kundenseite unverändert preview, liveAt/billingStartedAt weiterhin leer. Root-Homepage vor/nach
@@ -110,6 +111,33 @@ NEU=0 LIVE=0 bash /tmp/seitenwerk-setup.sh
 ```
 
 Dieses neue VPS-Update ist hier noch nicht nachgewiesen. Es aktiviert keinen allgemeinen Mailversand.
+
+## Ergänzung: Gmail-Spam ausdrücklich bestätigt
+
+Betreiberantwort „Im Spam“ zur früheren einzelnen externen Gmail-Testbestätigung tatsächlich
+eingegangen. Anbieterstatus delivered bleibt korrekt, belegt aber keine Platzierung im Hauptpostfach.
+Der E-Mail-Betrieb ist daher weiterhin nicht als zuverlässig für echte Kunden abgenommen. Der
+Originalversand wurde nur gelesen; keine neue Testmail, kein Markieren als „kein Spam“, keine
+DNS-/Provider-/Versandschalteränderung aus dieser Rückmeldung.
+
+Aktuelle Primärquellen erneut geprüft:
+
+- [Google: Richtlinien für E-Mail-Absender](https://support.google.com/a/answer/81126?hl=de).
+- [Resend: Deliverability Insights](https://resend.com/docs/dashboard/emails/deliverability-insights).
+- [Resend: Domain-/IP-Anlaufphase](https://resend.com/docs/knowledge-base/warming-up).
+
+Konkreter Verbesserungsansatz: Der bestehende Onboarding-Link der Bestätigung und das E-Mail-Logo
+verwenden die konfigurierte App unter seitenwerkworld.netlify.app, während die Absenderdomain
+seitenwerk.world ist. Resend nennt abweichende Linkdomains als mögliches Spam-Signal. Das ist ein
+nachvollziehbarer Prüfpunkt, **kein Beweis**, dass dies die aktuelle Spam-Ursache ist. URLs nicht
+blind auf die statische Root-Seite umschreiben: Das würde Onboarding, Vorschau und Formulare brechen.
+Ein eigener App-Host erfordert zuerst eine korrekt erreichbare HTTPS-/Routing-Konfiguration und
+anschließende Prüfung bestehender Links, QR-Ziele, Sitzungen und Checkout-Rückleitungen.
+
+Anforderungs- und Empfangsheader der eigenen Resend-Inbox ersetzen die unabhängigen Gmail-
+Authentication-Results nicht. Die konkrete Gmail-Begründung ist angefragt; genaue Spam-Ursache
+weiterhin unbekannt. Keine Inbox-Garantie, automatischen Absenderbewertungen oder Versandmengen
+aus den wenigen eigenen Testnachrichten ableiten.
 
 ## Verbleibende Grenzen
 
