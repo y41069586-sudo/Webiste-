@@ -134,6 +134,8 @@ export function getEnv(): Env {
   if (!cached) {
     // Leere Werte (z. B. `LLM_PROVIDER=` aus der .env-Vorlage) gelten als nicht gesetzt
     const raw = Object.fromEntries(Object.entries(process.env).filter(([, v]) => v !== undefined && v !== ''));
+    // Compatibility for the operator's existing secret; canonical spelling always takes precedence.
+    raw.NETLIFY_API_TOKEN ??= raw.NELITFY_API_TOKEN;
     const parsed = envSchema.safeParse(raw);
     if (!parsed.success) {
       const issues = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');

@@ -35,6 +35,13 @@ describe('Worker-Einrichtung per Einmal-Code', () => {
 });
 
 describe('Worker-Umgebung', () => {
+  it('exportiert den vorhandenen Hosting-Alias ausschließlich unter dem kanonischen Namen', () => {
+    const env = { DATABASE_URL: 'postgres://wbm:fixture@localhost:5432/wbm', NELITFY_API_TOKEN: 'alias_fixture' };
+    expect(workerEnvFile(env)).toContain('NETLIFY_API_TOKEN=alias_fixture');
+    expect(workerEnvFile(env)).not.toContain('NELITFY_API_TOKEN=');
+    expect(workerEnvFile({ ...env, NETLIFY_API_TOKEN: 'canonical_fixture' })).toContain('NETLIFY_API_TOKEN=canonical_fixture');
+    expect(workerEnvFile({ ...env, NETLIFY_API_TOKEN: 'canonical_fixture' })).not.toContain('alias_fixture');
+  });
   it('nutzt den Session-Pooler statt des Transaction-Poolers', () => {
     expect(sessionPoolerUrl('postgresql://u.p:pw@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?sslmode=verify-full')).toBe(
       'postgresql://u.p:pw@aws-0-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=verify-full',

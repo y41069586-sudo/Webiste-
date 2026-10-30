@@ -1,12 +1,27 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { effectiveSwitches, getConfig, updateConfig } from '../src/config/service';
 import { deepMerge } from '../src/config/settings';
-import { resetEnvCache } from '../src/config/env';
+import { getEnv, resetEnvCache } from '../src/config/env';
 import { resetDb } from './helpers';
 
 describe('Konfiguration', () => {
   beforeEach(resetDb);
-  afterEach(() => vi.unstubAllEnvs());
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    resetEnvCache();
+  });
+
+  it('liest den vorhandenen Hosting-Secret-Alias, bevorzugt aber die kanonische Variable', () => {
+    vi.stubEnv('NETLIFY_API_TOKEN', '');
+    vi.stubEnv('NELITFY_API_TOKEN', 'alias_fixture');
+    resetEnvCache();
+    expect(getEnv().NETLIFY_API_TOKEN).toBe('alias_fixture');
+    expect('NELITFY_API_TOKEN' in getEnv()).toBe(false);
+    expect(getEnv().HOSTING_PROVIDER).toBe('mock');
+    vi.stubEnv('NETLIFY_API_TOKEN', 'canonical_fixture');
+    resetEnvCache();
+    expect(getEnv().NETLIFY_API_TOKEN).toBe('canonical_fixture');
+  });
 
   it('Engagement bleibt ohne gesonderte Freigabe aus, auch bei gespeichertem true und warmem Cache', async () => {
     vi.stubEnv('ENGAGEMENT_TRACKING_APPROVED', 'true');

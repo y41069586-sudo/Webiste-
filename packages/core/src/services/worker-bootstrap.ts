@@ -123,7 +123,7 @@ export function workerEnvFile(env: Record<string, string | undefined>): string {
     'OVERPASS_URL=https://overpass-api.de/api/interpreter,https://maps.mail.ru/osm/tools/overpass/api/interpreter',
   ];
   for (const key of PASSTHROUGH) {
-    const value = env[key];
+    const value = key === 'NETLIFY_API_TOKEN' ? env[key] || env.NELITFY_API_TOKEN : env[key];
     if (value !== undefined && value !== '') lines.push(`${key}=${quote(value)}`);
   }
   return `${lines.join('\n')}\n`;

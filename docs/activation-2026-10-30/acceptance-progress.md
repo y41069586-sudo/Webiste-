@@ -150,3 +150,10 @@ als fehlerhafte Eingabe behandeln. Bestehenden geschützten GET /api/admin/integ
 lesende Netlify-Laufzeitprüfung ergänzt: konfiguriert ja/nein, Provider und HTTP-Status eines GET
 auf das aktuelle Projekt. Kein Tokenwert, kein Upstream-Payload, keine Projekt-/DNS-Mutation und
 kein Umschalten des Hosting-Providers. Erst tatsächlicher Laufzeitabruf bestätigt die Verbindung.
+
+Ursache danach eindeutig gefunden: der tatsächliche geschützte Schlüssel heißt NELITFY_API_TOKEN
+(vertauschte Buchstaben), nicht NETLIFY_API_TOKEN. Projekt seitenwerkworld ist richtig. Neue kompatible
+Env-Auswertung übernimmt genau diesen vorhandenen Alias, ohne ihn offenzulegen; ein korrekt
+gesetzter NETLIFY_API_TOKEN hat Vorrang. Regulärer Worker-Einmal-Code exportiert ausschließlich den
+kanonischen Namen. Kein geheimer Wert aus der Metadaten-API rekonstruiert oder ins Workspace übertragen.
+Das Vorhandensein des Tokens schaltet Hosting, DNS oder echte Geschäftsaktionen nicht automatisch frei.
