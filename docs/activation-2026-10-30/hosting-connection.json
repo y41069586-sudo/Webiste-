@@ -20,12 +20,13 @@
     "hostingProvider": "mock",
     "dryRun": true
   },
-  "externalHostingPublished": false,
-  "vpsCredentialRefreshVerified": false,
+  "externalHostingPublished": true,
+  "vpsCredentialRefreshVerified": true,
+  "publicationEvidence": "hosting-publication.json",
   "tests": {
     "configAndBootstrap": 12,
     "hostingAcceptanceSafety": 3,
     "existingHostingRegistrarFakeTransport": 6
   },
-  "next": "Operator refreshes existing VPS with NEU=1 LIVE=0 and runs the explicitly scoped hosting acceptance CLI."
+  "next": "Hosting test passed. Continue actual app email, confirmed customer Go-Live/Sandbox billing, backup/restore/queue and real lead acceptance."
 }

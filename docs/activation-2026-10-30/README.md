@@ -1,5 +1,8 @@
 # Aktivierungsauftrag – 30.10.2026
 
+**Aktuell nach dem erfolgreichen VPS-Hosting-Test:** [Go-Live-Status und nächste Abnahmen](go-live-status.md).
+Die folgenden älteren Prüfungen bleiben historische Momentaufnahmen.
+
 Fortsetzung von [29.10.](../resume-2026-10-29/README.md), geprüfter Quellstand `9cd0d83`.
 Der Betreiber beauftragte ausdrücklich die fünf offenen Aufgaben einschließlich Veröffentlichung,
 easyNova-Tests, bestehendem VPS und eigenem echten Probedruck. Das frühere Ja zu Stripe/easyNova

@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-30",
+  "workerSourceCommit": "03734a1082449657fdf1b2de4dcb0890364e95e8",
+  "auditAt": "2026-10-30T11:39:58.358727Z",
+  "url": "https://test.seitenwerk.world/",
+  "projectId": "5344f06a-a546-4b86-b181-796567f23123",
+  "deployment": {
+    "id": "6ae481fecaaca0f4edce195a",
+    "state": "ready",
+    "publishedAt": "2026-10-30T11:39:43.340Z"
+  },
+  "externalHttp": {
+    "status": 200,
+    "bytes": 102214,
+    "sha256": "d3a94eeef6b5b8d77af783b40366a416d133bbae3737a53625cf0b3f0ae15a3e",
+    "matchesStoredPreview": true,
+    "tlsVerificationDisabled": false
+  },
+  "browser": {
+    "widths": [1440, 390],
+    "horizontalOverflow": false,
+    "fontErrors": 0,
+    "javascriptErrors": 0,
+    "activeSubmit": 0,
+    "robots": "noindex, nofollow, noarchive"
+  },
+  "rootUnchanged": true,
+  "fictionalTestOnly": true,
+  "customerSiteStatus": "preview",
+  "customerLiveAt": null,
+  "actualMonthlyStarts": 0,
+  "domainPurchased": false,
+  "designAccepted": false,
+  "completeCustomerGoLiveAccepted": false,
+  "next": "Actual app email acceptance, normal confirmed-publication and Sandbox monthly-start acceptance, production backup/isolated restore and missing queues, suitable real lead proof. Tax remains unconfirmed."
+}

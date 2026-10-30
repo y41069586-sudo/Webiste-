@@ -163,3 +163,24 @@ Provider mock, DRY_RUN=true. Siehe hosting-connection.json. Begrenzter Probelauf
 VPS ist implementiert und lokal auf Schutzmechanismen geprüft; externe Ausführung bleibt ausstehend.
 Genaue Befehle und Grenzen: hosting-acceptance.md. Worker benötigt reguläre neue Zugangskonfiguration;
 keinen Bootstrap-Code außerhalb der vorgesehenen VPS-Einrichtung zum Secret-Auslesen verwenden.
+
+## VPS-Hosting-Probelauf tatsächlich bestanden; Kundenstart weiterhin offen
+
+Betreiber hat den bestehenden Worker auf03734a1 aktualisiert und den begrenzten Hosting-CLI ausgeführt.
+Audit 11:39:58 UTC: HTTPS-Inhalt stimmt exakt, Root-Website unverändert. Unabhängiger HTTP-/Netlify-
+Readback und Browser1440/390 bestätigen Veröffentlichung, gültiges TLS, eingebettete Fonts ohne
+Ladefehler, kein horizontaler Überlauf, noindex, keine JavaScriptfehler/aktiven Formular-Submits.
+[Maschinenlesbarer Nachweis](hosting-publication.json). Die ältere Meldung „VPS noch nicht ausgeführt“
+ist damit für diesen Hosting-Probelauf überholt, nicht für Backup/Restore/Queue-Ergänzung.
+
+Beide tatsächlichen Stripe-Sandbox-Bestellungen weiterhin paid, billingStartedAt/subscriptionId=null.
+Kundenseite weiter preview/liveAt=null. Rechnungsmails nach Datenbank-Readback nur mock/sent, kein
+Resend-Zustellnachweis; research-lead und revise-demo weiterhin nicht in pgboss.queue vorhanden.
+Steuerstatus unverändert unbestätigt und DRY_RUN=true. Kein Go-Live für echte Kunden erklärt.
+
+Gezielter nächster Schritt: vorhandene Care+-Bestellbestätigung mit Original-PDF/Onboarding-Link
+über bestehenden Resend-Adapter ausschließlich ans eigene Postfach. CLI vorbereitet und mit fünf
+neuen Sicherheitstests, sechs bestehenden Provider-Fake-Transporttests und einem vorhandenen
+Mail-Wiederholungs-/Doppelversandtest geprüft (12bestanden,4andere Failuretests nicht ausgewählt).
+Core-TypeScript und gezieltes ESLint bestanden. Keine Mail in diesen Tests versendet. Einzelheiten
+und begrenzter VPS-Aufruf: [email-acceptance.md](email-acceptance.md).

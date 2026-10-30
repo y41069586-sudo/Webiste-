@@ -504,3 +504,18 @@ Sandbox-Bestellung an eigenes Absenderpostfach; eigenes Testprojekt und feste te
 Keine privaten Links/aktiven Formulare veröffentlichen; Root-Projekte schützen, HTTPS-Inhalt prüfen.
 Keine App-Go-Live-/Abozustände fingieren. Noch nicht auf VPS ausgeführt; Betreiber bedient VPS selbst.
 Nachweis/Befehle: docs/activation-2026-10-30/hosting-acceptance.md und hosting-connection.json.
+
+## 30.10.2026 – VPS-Hosting-Probelauf tatsächlich bestanden
+
+Betreiber hat Worker aktualisiert und Test veröffentlicht. test.seitenwerk.world: HTTP200,
+gespeicherter HTML-Hash identisch, TLS gültig, Root-Website unverändert; Audit 11:39:58 UTC.
+Desktop1440/Mobil390 ohne Überlauf/Font-/JS-Fehler. Details hosting-publication.json im bisherigen
+Aktivierungsverzeichnis. Kein weiterer NEU=1-Aufruf für diesen bereits bestandenen Test nötig.
+App-Kundenseite bewusst weiter preview, beide Stripe-Testbestellungen ohne tatsächlichen Monatsstart.
+
+Begrenzter E-Mail-Abnahme-CLI email-acceptance.ts vorbereitet: nur fiktive, bezahlte Stripe-Sandbox-
+Bestellung, Original-Testbeleg ohne unbestätigte Steuerbehauptung, ausschließlich eigenes konfiguriertes
+Absenderpostfach. --apply und EMAIL_ACCEPTANCE_CONFIRM=own-inbox erforderlich. Prozesslokal Resend,
+keine globale Provider-/Auto-Reply-Änderung. Separater idempotenter acceptance_invoice-Postausgang;
+historische Mock-Sent-Zustände/Bestell-/Onboardingfelder unverändert. Noch keine echte Zustellung.
+Tests und Betreiberbefehl: docs/activation-2026-10-30/email-acceptance.md. VPS bedient Betreiber selbst.

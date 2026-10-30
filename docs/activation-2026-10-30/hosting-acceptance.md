@@ -11,7 +11,23 @@ Die tatsächliche private Basis-Kundenvorschau wurde geprüft: noindex, sichtbar
 kein privater Kundentoken im HTML, keine lokalen Bild-/CSS-Dateiverweise und kein aktiver Submit.
 Diese Prüfung erlaubt den Hosting-Probelauf, ersetzt aber keine Rechts-/Design-/Kundenabnahme.
 
-## Vorbereiteter Ablauf, noch nicht auf dem VPS ausgeführt
+## Tatsächlicher VPS-Lauf am 30.10.2026
+
+Der Betreiber hat den vorhandenen Worker aktualisiert und den begrenzten Probelauf ausgeführt.
+Audit um 11:39:58 UTC bestätigt HTTPS-Inhalt und unveränderte Root-Website. Zusätzlich unabhängig
+von hier extern gelesen: HTTP200,102214Bytes, identischer SHA256. Netlify-Deploy ready/published.
+Desktop1440 und Mobil390 im echten Browser geprüft: kein horizontaler Überlauf, keine Font- oder
+JavaScriptfehler, noindex und keine aktiven Formular-Submits. Keine privaten Links veröffentlicht.
+
+Nachweis: [hosting-publication.json](hosting-publication.json). Die tatsächlich veröffentlichte
+Seite ist **eine fiktive technische Testseite**, kein Kundenprojekt und keine Designabnahme:
+https://test.seitenwerk.world/.
+
+Die App-Kundenseite bleibt preview/liveAt=null, beide Testbestellungen ohne Monatsabo. Der allgemeine
+Hosting-Provider bleibt mock. Keine Domain gekauft und keine Live-Zahlung oder echte Sendung ausgelöst.
+Der folgende dokumentierte Aufruf wurde damit bereits ausgeführt; **nicht erneut verlangen**.
+
+## Verwendeter begrenzter Ablauf
 
 Der Betreiber aktualisiert den vorhandenen Worker selbst. Neuen Einmal-Code im Admin erzeugen,
 dann bekannten Setup-Aufruf mit NEU=1 LIVE=0 verwenden. Er exportiert den Hosting-Token unter dem
@@ -51,7 +67,8 @@ Keine automatische Aktivierung des allgemeinen Hosting-Providers oder Versandfre
 - 3/3 lokale CLI-Sicherheitstests mit fiktiven Daten und **ohne** Hosting-API-Aufrufe bestanden.
 - 12/12 Konfigurations-/Bootstrap-Tests und6/6 bestehende Hosting-/Registrar-Fake-Transporttests grün.
 - TypeScript und gezieltes ESLint bestanden. Alias-Fix zusätzlich per Web-Produktionsbuild geprüft
-  und tatsächlicher Netlify-Laufzeitbestätigung verifiziert. CLI nicht als extern bestanden ausgeben.
+  und tatsächlicher Netlify-Laufzeitbestätigung verifiziert. Der oben dokumentierte externe Lauf
+  ist hiervon getrennt tatsächlich bestanden; vollständiger App-Go-Live/Monatsstart bleibt offen.
 - Vor externem Einsatz gefundener TypeScript-Fehler (fetch Response.status ist eine Eigenschaft)
   korrigiert. Bestehende Netlify-CSP ließ eingebettete Fonts nicht zu; font-src self/data ergänzt,
   weil die echte Kundenvorschau WOFF-Fonts als Data-URLs enthält. Sonstige Restriktionen bleiben.
