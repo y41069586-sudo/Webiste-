@@ -1,0 +1,45 @@
+{
+  "deployId": "6ae476fdd4ef7bebeb529dce",
+  "commit": "a0aee999858bc33cf2d69eee62d708f73674d9c9",
+  "state": "ready",
+  "publishedAt": "2026-10-30T10:53:37.987Z",
+  "context": "production",
+  "secretScanMatches": 0,
+  "verifiedRuntime": {
+    "dryRun": true,
+    "paymentProvider": "stripe",
+    "stripeMode": "test",
+    "stripeReadStatus": 200,
+    "storageRead": true,
+    "emailProvider": "mock"
+  },
+  "verifiedSuccessPages": {
+    "basis": {
+      "testNotice": true,
+      "nonDeliveryNotice": true,
+      "onboardingLink": true,
+      "horizontalOverflow": false
+    },
+    "care_plus": {
+      "testNotice": true,
+      "nonDeliveryNotice": true,
+      "onboardingLink": true,
+      "horizontalOverflow": false
+    }
+  },
+  "taxConfirmed": false,
+  "realLettersUnlocked": false,
+  "productionQueueRepairExecuted": false,
+  "operatorVpsRefreshAfterThisCommitVerified": false,
+  "tests": {
+    "backupStorageQueueBootstrap": 10,
+    "stripeHostedLifecycle": 28,
+    "invoiceSnapshotsAndRendering": 3,
+    "checkoutAndFunnel": 23,
+    "localProductionBrowserE2E": 2
+  },
+  "actualSandboxPurchases": 2,
+  "actualMonthlyStarts": 0,
+  "actualEmailDeliveries": 0,
+  "realDomainTestVerified": false
+}

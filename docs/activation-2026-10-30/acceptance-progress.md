@@ -124,3 +124,20 @@ der folgende Netlify-Build prüft den endgültigen Veröffentlichungsstand.
 Unverändert offen: echte Resend-App-Zustellung, Hosting-Token/Testsubdomain, Registrar-Sandbox,
 positiver tatsächlicher Stripe-Monatsstart, VPS-Backup/Restore/Queue-Ergänzung und vollständiger
 geeigneter echter Recherche-/Demo-/Briefkontrollfall. Kein Go-Live aller vier Aufgaben behaupten.
+
+## Endstand dieser Fortsetzung
+
+Finaler App-Code a0aee999858bc33cf2d69eee62d708f73674d9c9 veröffentlicht: Netlify production
+6ae476fdd4ef7bebeb529dce, ready, 10:53:37 UTC. Secretscan ohne Treffer. Beide tatsächlichen
+Sandbox-Erfolgsseiten anschließend mit390px erneut gerendert: Testhinweis/Nichtzustellhinweis
+korrekt, persönlicher Onboardinglink vorhanden, kein Überlauf. Laufzeit Stripe/test und DRY_RUN=true.
+DB-Dry-Run ebenfalls true, Steuerbestätigung false, Empfängerversandfreigabe false. Fehlende Queues
+weiter nicht angelegt. Vorhandene Firmenwebsite/Root-Domain unverändert.
+
+Nachweis: [Finaler Deploy/Laufzeit](final-readiness-deployment.json). Insgesamt64 gezielte Core-Tests
+in den dokumentierten Läufen sowie2 lokale Produktions-Browser-E2E bestanden; kein aktueller
+ungekürzter Volltest aller Projekttests behauptet. Zwei echte Stripe-Sandbox-Zahlungen davon getrennt.
+VPS-Version/Providerumgebung nach diesen Änderungen noch nicht aktualisiert nachgewiesen;
+nach Hosting-Secret und neuer App-Veröffentlichung regulären Einmal-Code mit NEU=1 LIVE=0 übernehmen.
+Die normale Admin-Sitzung wird abgemeldet; lokale temporäre Zugangskopien werden entfernt.
+Diese abschließende Dokumentationssicherung trägt Skip-Markierungen, kein weiterer App-Deploy.
