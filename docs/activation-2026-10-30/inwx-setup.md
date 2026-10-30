@@ -64,3 +64,9 @@ Kein echter Konto- oder Sandbox-Registrierungsnachweis aus lokalen Tests ableite
 Der erste Testversuch wurde wegen eines Nutzungslimits der automatischen Freigabeprüfung nicht
 ausgeführt. Nach Nutzerfortsetzung wurde derselbe Test erneut geprüft und normal ausgeführt;
 keine Umgehung der Freigabeprüfung.
+
+Code91f07e0 auf beide vorhandenen Zweige gepusht und tatsächlich veröffentlicht: Netlify-Deploy
+6ae4c16bedf5d21f461ab0f3 ready/production,30.10.16:11:15UTC. Öffentlicher Health-Endpunkt danach
+HTTP200. Letzte App-Metadaten weiterhin nur REGISTRAR_PROVIDER, kein neuer Secret-Eintrag und keine
+behauptete INWX-Anmeldung. [Sicherer Nachweis](inwx-deployment.json). Die folgende reine Nachweis-
+Sicherung überspringt CI/Netlify und startet keinen weiteren Deploy.

@@ -582,3 +582,8 @@ registrar-preflight.ts nur explizite Sandbox-Leseprüfung, DRY_RUNtrue, --check 
 keine Registrierungen/DNS-Änderungen und keine kontobezogenen Rohfehler. Nach tatsächlich neu
 hinterlegten Secrets einmal NEU=1 LIVE=0 nötig; frühere eigene Monats-/Backup-Tests bleiben unabhängig.
 Anleitung/Nachweise: docs/activation-2026-10-30/inwx-setup.md. Kein externer INWX-Zugriff bisher.
+
+INWX-Importfix91f07e0 tatsächlich veröffentlicht: Netlify6ae4c16bedf5d21f461ab0f3 ready/production,
+16:11:15UTC, Health200.13gezielteTests/Core-Typecheck/Lint bestanden. Registrierung/Provider nicht
+aktiviert; frische private Secrets und tatsächlicher Sandbox-Lesetest bleiben offen. Nachweis
+docs/activation-2026-10-30/inwx-deployment.json, keine echten Zugangsdaten im Repository.

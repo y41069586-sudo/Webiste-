@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-30",
+  "commit": "91f07e0f4e4bfcf83c692e22bcb49f4f7b6a2bba",
+  "deployment": {
+    "id": "6ae4c16bedf5d21f461ab0f3",
+    "state": "ready",
+    "publishedAt": "2026-10-30T16:11:15.937Z",
+    "context": "production"
+  },
+  "tests": { "workerBootstrap": 7, "hostingRegistrarFakeTransport": 6, "coreTypecheck": true, "targetedLint": true },
+  "appHealthHttpStatus": 200,
+  "registrarFieldsVisibleInAppMetadata": ["REGISTRAR_PROVIDER"],
+  "actualInwxAuthenticationVerified": false,
+  "userAccountConfirmedByUser": true,
+  "credentialsPublished": false,
+  "credentialsWrittenFromChat": false,
+  "providerConfigurationChanged": false,
+  "domainPurchased": false,
+  "next": "Operator stores fresh registrar credentials privately as protected app secrets before the ordinary worker secret refresh and read-only Sandbox preflight."
+}
