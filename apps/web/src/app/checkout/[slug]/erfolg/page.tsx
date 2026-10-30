@@ -5,6 +5,7 @@ import {
   getConfig,
   DEFAULT_CONFIG,
   publicOperatorSettings,
+  getProviders,
   logger,
   type ReturnState,
 } from '@wbm/core';
@@ -30,20 +31,29 @@ export default async function SuccessPage({
     // Der Webhook übernimmt die Verbuchung; hier nur Hinweis anzeigen
     logger.warn({ ...errInfo(err) }, 'Erfolgsseite: Abgleich fehlgeschlagen');
   }
+  const mockEmail = res.state === 'paid' && getProviders().email.name === 'mock';
   return (
     <PublicShell company={cfg.sender.company}>
       <PublicCard>
         {res.state === 'paid' ? (
           <>
             <h1 className="mb-3 text-2xl font-semibold">Vielen Dank für Ihre Bestellung!</h1>
+            {res.paymentMode !== 'live' ? (
+              <p className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-950">
+                Testmodus: Dies ist eine Testbestellung. Es wurde kein echtes Geld bezahlt.
+              </p>
+            ) : null}
             <p className="text-slate-700">
-              Die Zahlung ist eingegangen{res.invoiceNumber ? ` (Rechnung ${res.invoiceNumber})` : ''}. Rechnung und
-              Bestellbestätigung kommen in den nächsten Minuten per E-Mail.
+              Die Zahlung ist eingegangen{res.invoiceNumber ? ` (Rechnung ${res.invoiceNumber})` : ''}.{' '}
+              {mockEmail
+                ? 'Der E-Mail-Versand ist noch nicht freigeschaltet. Rechnung und Bestätigung werden nur im Testpostausgang abgelegt; es wird keine E-Mail zugestellt.'
+                : 'Rechnung und Bestellbestätigung kommen in den nächsten Minuten per E-Mail.'}
             </p>
             <h2 className="mt-6 mb-2 text-lg font-semibold">Nächster Schritt: Ihre Angaben</h2>
             <p className="text-slate-700">
               Für Impressum, Leistungen, Öffnungszeiten und gegebenenfalls Logo und Fotos brauchen wir noch ein paar Angaben – Sie
-              können die Inhalte in Ruhe zusammentragen. Den persönlichen Link finden Sie auch in der E-Mail.
+              können die Inhalte in Ruhe zusammentragen.
+              {!mockEmail ? ' Den persönlichen Link finden Sie auch in der E-Mail.' : ''}
             </p>
             {res.customerToken ? (
               <a href={`/onboarding/${res.customerToken}`} className="btn-site btn-primary mt-5">

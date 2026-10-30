@@ -89,3 +89,38 @@ und wiederkehrende Restore-Probe.
   Lighthouse des tatsächlichen Worker-Laufs:99/100/100/100. Desktop1440/Mobil390 gerendert und
   tatsächlich angesehen; alle Bilder nach Lazy-Load geladen, kein Überlauf. Keine externe Design-
   oder Kundenabnahme und keine allgemeine Premium-Bewertung daraus ableiten.
+
+## Zweiter Hosted-Kauf und gefundene Test-/Echtbetrieb-Verwechslungen
+
+- Care+ ebenfalls über echte Stripe-Sandbox und 4242 bezahlt. Bestellung
+  c7e74a8b-1b06-4809-8680-951b014919e6, 59700 EUR, payment_mode=test, status=paid,
+  gespeicherter Monatstarif 9900 Cent. Signierter Webhook evt_1UWDHxGn2A630LhHBBib9rtt verarbeitet.
+  Die neue Rechnung hat taxNote=null; Betreiber-Steuerbestätigung unverändert false.
+- Beide abgeschlossenen Sessions zusätzlich direkt bei Stripe gelesen: paid, livemode=false,
+  jeweils 59700 EUR, Unternehmens-/AGB-Felder ja, setup_future_usage=off_session, Zahlungsmittel
+  dem jeweiligen Stripe-Kunden zugeordnet. Noch kein Abo, keine Monatszahlung. Positive reale
+  Sandbox-Abostartprüfung bleibt bis tatsächlicher Test-Veröffentlichung offen.
+- Basis-Onboarding tatsächlich mit fiktiven Angaben übermittelt und private Kundenvorschau gebaut.
+  Ein zu kurzer Prüf-Datenschutztext wurde korrekt zurückgewiesen; anschließend ausreichend langer,
+  ausdrücklich als fiktiv markierter Prüftext verwendet. Keine juristisch freigegebene Kundenseite.
+- Erfolgsseite kennzeichnet Testbestellungen anhand des gespeicherten Zahlungsmodus und verspricht
+  bei Mock-E-Mail keinen tatsächlichen Versand mehr. Interner Mock-Status „sent“ bleibt vom echten
+  Zustellnachweis getrennt. Kein Umbau des bestehenden Checkout-/Webhook-Flusses.
+- Betriebsfunnel schließt Mock-Leads/-Demos sowie Test-/Mock-Go-Lives und Test-Tarifwechsel aus.
+  Reale Zahlungen bleiben auf payment_mode=live/provider=stripe begrenzt. Vorher konnten Test-
+  Websites unabhängig vom Bestellmodus als Go-Live gezählt werden; dies ist gezielt behoben.
+- 23/23 Checkout-/Funnel-Tests bestanden. Ein alter §19-Test verwendete unbestätigte Standardwerte;
+  Fixture nun ausdrücklich bestätigt, statt den Wahrheitscheck zurückzunehmen. Keine Prod-Steueränderung.
+- Zwei Browser-E2E gegen Produktionsbuild bestanden: kompletter bestehender lokaler V4-Mockfluss
+  bis Onboarding, Mock-Veröffentlichung, Monatsstart, Wechsel/Kündigung sowie Firmenpreise.
+  Zusätzlich Test-/Nichtzustellhinweise geprüft. Dieser lokale Monatsstart ist **kein** tatsächlicher
+  Stripe-Abostart nach echtem Hosting. Gesamter Typecheck, gezieltes ESLint und Web-Build bestanden.
+
+Sicherer externer Nachweis: [Stripe-Testkäufe](stripe-sandbox-purchases.json). Vollständige Checkout-/
+Onboardingbilder und private Links ausschließlich unter ignoriertem data/activation-2026-10-30/.
+Nach zusätzlicher reiner Wortlautkorrektur der Nichtzustellmeldung kein erneuter lokaler Vollbuild;
+der folgende Netlify-Build prüft den endgültigen Veröffentlichungsstand.
+
+Unverändert offen: echte Resend-App-Zustellung, Hosting-Token/Testsubdomain, Registrar-Sandbox,
+positiver tatsächlicher Stripe-Monatsstart, VPS-Backup/Restore/Queue-Ergänzung und vollständiger
+geeigneter echter Recherche-/Demo-/Briefkontrollfall. Kein Go-Live aller vier Aufgaben behaupten.

@@ -29,6 +29,8 @@ test('V4: mobile Tarifkarten, echte Formularzustimmung und gesperrter Aboabschlu
   await expect(page.getByLabel(/AGB/)).not.toBeChecked();
   await payOnMockCheckout(page, { domain: 'v4-browser-fixture.de' });
   await expect(page.getByRole('heading', { name: 'Vielen Dank für Ihre Bestellung!' })).toBeVisible();
+  await expect(page.getByText('Testmodus: Dies ist eine Testbestellung. Es wurde kein echtes Geld bezahlt.')).toBeVisible();
+  await expect(page.getByText(/es wird keine E-Mail zugestellt/)).toBeVisible();
   const onboarding = await page.getByRole('link', { name: 'Jetzt Angaben eintragen' }).getAttribute('href');
   const token = onboarding!.split('/').at(-1)!;
   await page.goto(`/verlaengern/${token}`);

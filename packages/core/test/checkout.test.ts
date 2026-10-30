@@ -108,7 +108,8 @@ describe('Beträge und Rechnungsdaten', () => {
       billingAddressJson: { street: 'Kampstraße 5', postalCode: '44137', city: 'Dortmund', country: 'DE' },
       domainWish: 'beispiel.de',
     };
-    const inv = buildInvoiceData(DEFAULT_CONFIG, order, {
+    const cfg = { ...DEFAULT_CONFIG, tax: { ...DEFAULT_CONFIG.tax, operatorConfirmed: true } };
+    const inv = buildInvoiceData(cfg, order, {
       number: 'RE-2026-0001',
       paidAt: new Date('2026-10-20T10:00:00Z'),
       issuedAt: new Date('2026-10-20T10:00:00Z'),
@@ -246,7 +247,12 @@ describe('Checkout und Zahlung', () => {
 
     // Erfolgsseite
     const ret = await confirmCheckoutReturn(demo.slug, order.stripeSessionId!);
-    expect(ret).toEqual({ state: 'paid', customerToken: cust!.accessToken, invoiceNumber: `RE-${year}-0001` });
+    expect(ret).toEqual({
+      state: 'paid',
+      customerToken: cust!.accessToken,
+      invoiceNumber: `RE-${year}-0001`,
+      paymentMode: 'mock',
+    });
     expect(await confirmCheckoutReturn('falscherSlugAAAAAAAAAAAA', order.stripeSessionId!)).toEqual({ state: 'unknown' });
 
     // Replay desselben Events

@@ -477,3 +477,15 @@ Rechte: separate private berechtigte Verbindung derselben DB, keine App-Hochstuf
 Queues erst nach echtem Backup/Restore im --queues-only-Modus ergänzen, ohne Migration/Seeds.
 VPS bedient Betreiber, nicht erneut nach SSH fragen. Neue Queue kann budgetierte Recherche
 aktivieren, aber niemals Briefe/Domainkäufe/Live-Zahlungen automatisch freigeben.
+
+Tatsächliche Stripe-Hosted-Sandbox-Käufe Basis und Care+ jetzt durchgeführt, je597EUR; signierte
+Webhooks verarbeitet, Kunden/Mandatszustimmung und gespeicherte off_session-Zahlungsmittel vorhanden.
+Noch keine tatsächliche Monatsabbuchung und kein echter Hosting-Go-Live. Basis-Onboarding und
+private Vorschau tatsächlich erstellt. Resend-App-Mail noch mock, keine Zustellung behaupten.
+Neue Rechnungen ohne bestätigten Kleinunternehmerstatus enthalten keinen §19-Standardhinweis;
+gespeicherte alte Testrechnung unverändert lassen. Steuerstatus weiterhin unbestätigt.
+Erfolgsseite kennzeichnet Testzahlung/Mock-Nichtzustellung, Betriebsfunnel zählt Test-Go-Lives,
+Mock-Leads/-Demos und Test-Tarifwechsel nicht als echte Kampagnenergebnisse. Zwei tatsächliche
+Testkäufe sind kein Umsatz-/Conversionbeleg. Externen positiven Monatsstart nicht durch einen
+fingierten Go-Live-Eintrag erzwingen. Nachweise unter acceptance-progress.md/stripe-sandbox-purchases.json
+im bisherigen Aktivierungsverzeichnis; VPS-Backup und Queue-Ergänzung weiter nicht ausgeführt.

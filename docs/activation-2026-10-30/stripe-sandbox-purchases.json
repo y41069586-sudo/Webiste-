@@ -1,0 +1,63 @@
+{
+  "scope": "Actual Stripe Hosted Sandbox purchases, fictional customers, no real money",
+  "date": "2026-10-30",
+  "stripeAccount": "acct_1UToabGn2A630LhH",
+  "checks": [
+    {
+      "plan": "care_plus",
+      "orderId": "c7e74a8b-1b06-4809-8680-951b014919e6",
+      "livemode": false,
+      "amount": 59700,
+      "currency": "eur",
+      "paymentStatus": "paid",
+      "consentFields": [
+        {
+          "key": "unternehmer",
+          "value": "ja"
+        },
+        {
+          "key": "agb",
+          "value": "ja"
+        }
+      ],
+      "paymentSaved": true,
+      "methodAttached": true,
+      "subscriptionStarted": false
+    },
+    {
+      "plan": "basis",
+      "orderId": "4991f35d-0c23-465f-b4b1-0f320d5a5f91",
+      "livemode": false,
+      "amount": 59700,
+      "currency": "eur",
+      "paymentStatus": "paid",
+      "consentFields": [
+        {
+          "key": "unternehmer",
+          "value": "ja"
+        },
+        {
+          "key": "agb",
+          "value": "ja"
+        }
+      ],
+      "paymentSaved": true,
+      "methodAttached": true,
+      "subscriptionStarted": false
+    }
+  ],
+  "processedWebhookEvents": [
+    "evt_1UWD6TGn2A630LhHaO8D5AfZ",
+    "evt_1UWDHxGn2A630LhHBBib9rtt"
+  ],
+  "basisOnboardingSubmitted": true,
+  "basisPrivatePreviewBuilt": true,
+  "actualEmailDeliveryVerified": false,
+  "realHostingVerified": false,
+  "positiveMonthlyStartVerified": false,
+  "productionBackupRestoreVerified": false,
+  "productionQueueRepairExecuted": false,
+  "productionOrders": 0,
+  "dryRun": true,
+  "taxConfirmed": false
+}

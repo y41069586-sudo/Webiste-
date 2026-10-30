@@ -1085,7 +1085,7 @@ export async function processPaymentWebhook(
 }
 
 export type ReturnState =
-  | { state: 'paid'; customerToken: string | null; invoiceNumber: string | null }
+  | { state: 'paid'; customerToken: string | null; invoiceNumber: string | null; paymentMode: Order['paymentMode'] }
   | { state: 'processing' }
   | { state: 'open' }
   | { state: 'unknown' };
@@ -1101,7 +1101,12 @@ export async function confirmCheckoutReturn(slug: string, sessionId: string): Pr
   const done = async (): Promise<ReturnState> => {
     const o = await db.query.orders.findFirst({ where: eq(orders.id, order.id) });
     const c = await db.query.customers.findFirst({ where: eq(customers.orderId, order.id) });
-    return { state: 'paid', customerToken: c?.accessToken ?? null, invoiceNumber: o?.invoiceNumber ?? null };
+    return {
+      state: 'paid',
+      customerToken: c?.accessToken ?? null,
+      invoiceNumber: o?.invoiceNumber ?? null,
+      paymentMode: o?.paymentMode ?? 'unknown',
+    };
   };
   if (order.status === 'paid') return done();
   if (order.status === 'processing') return { state: 'processing' };
