@@ -74,3 +74,55 @@ antwortete danach HTTP200. Nach Hinterlegung der beiden INWX-Secrets wurde derse
 Secret-Scanner-Treffer. Worker-Secrets noch per frischem Einmal-Code mit NEU=1 LIVE=0 übernehmen.
 Keine INWX-Anmeldung oder Domainregistrierung behauptet; Registrar bleibt mock und DRY_RUN=true.
 Die folgende reine Nachweissicherung überspringt CI/Netlify und startet keinen weiteren Deploy.
+
+
+## Tatsächlicher VPS-Befund und normaler Kontotest
+
+Der Betreiber hat den neuen Worker samt Secrets gestartet. Sein Terminal-Screenshot zeigt einen
+erfolgreichen Worker-Gesundheitscheck mit DRY_RUN=true und anschließend beim INWX-Sandbox-Lauf:
+stage=blocked,code=2200,errorClass=InwxError. Die Zugangsfelder waren im Prozess vorhanden, sonst
+wäre bereits die Konfigurationsprüfung abgebrochen. Eine erfolgreiche Kontoanmeldung ist **nicht**
+nachgewiesen. Der Screenshot enthält keinen Nachweis einer Registrierung oder DNS-Änderung.
+
+INWX beschreibt OT&E ausdrücklich als Testsystem mit eigener Testdatenbank:
+[offizielle INWX-Clientdokumentation](https://github.com/inwx/python-client/blob/master/README.md).
+Ein erfolgreicher Login im normalen Kundenkonto darf daher nicht als erfolgreicher OT&E-Login
+gelten. Der aktuelle Fehler beweist umgekehrt weder einen Tippfehler im Passwort noch allein eine
+Verwechslung der Systeme. API-Loginname, Kontosystem und gegebenenfalls 2FA bleiben zu unterscheiden.
+
+Der bestehende registrar-preflight.ts bietet jetzt zusätzlich **--production-read-only**.
+Dafür ist REGISTRAR_CHECK_CONFIRM=production-read-only erforderlich. Die globale Konfiguration
+muss weiterhin DRY_RUN=true,REGISTRAR_ENV=sandbox und REGISTRAR_PROVIDER=mock enthalten.
+Nur die einzelne Adapterinstanz verwendet den normalen API-Endpunkt. Ein zusätzlicher Transportfilter
+erlaubt ausschließlich account.login, gegebenenfalls account.unlock und domain.check für example.org.
+Andere Methoden, Endpunkte oder Domains werden vor der Übertragung abgewiesen. Keine Registrierung,
+keine Kontaktanlage, keine DNS-Änderung, kein Providerwechsel und keine Live-Freigabe.
+
+Für diesen einzelnen aktualisierten CLI genügt ein schreibgeschützt eingebundenes Script. Der schon
+aktualisierte Worker und die darin vorhandenen Secrets können weiterverwendet werden; kein NEU=1,
+kein neuer Einmal-Code und kein allgemeiner Worker-Neuaufbau nötig:
+
+```bash
+bash <<'SH'
+set -e
+curl -fsSL https://raw.githubusercontent.com/y41069586-sudo/Webiste-/codex/resume-2026-10-29/packages/core/scripts/registrar-preflight.ts -o /tmp/seitenwerk-registrar-preflight.ts
+cd /opt/seitenwerk
+docker compose -f docker-compose.worker.yml run --rm -T --no-deps \
+  -v /tmp/seitenwerk-registrar-preflight.ts:/repo/packages/core/scripts/registrar-preflight.ts:ro \
+  -e REGISTRAR_CHECK_CONFIRM=production-read-only \
+  --entrypoint node worker --import tsx \
+  /repo/packages/core/scripts/registrar-preflight.ts --check --production-read-only
+SH
+```
+
+Erfolg erst bei stage=result,environment=production,authenticatedRead=true. Auch dieser Erfolg
+bestätigt nur Anmeldung und Verfügbarkeitsabfrage, keine Domainregistrierung oder vollständige
+Go-Live-Abnahme. Bei erneutem2200 den echten INWX-API-Loginnamen im eigenen Kundenkonto prüfen;
+Zugangsdaten nicht im Chat teilen. Für vollständige Sandbox-Registrierungsprüfungen bleibt ein
+funktionierender OT&E-Zugang gesondert nötig.
+
+17 neue Prüfungen des tatsächlichen CLI-Moduls mit simuliertem Transport und6bestehende
+INWX-/Hostingtests bestanden. Geprüft: keine Aufrufe ohne --check, passende doppelte Lesefreigabe,
+DRY_RUN/Mock-/Sandbox-Sperren, erfolgreiche Leseantwort auf beiden Systemen, abgewiesene Anmeldung,
+fehlgeschlagene Leseantwort, unvollständige Daten und 2FA. Keine echten Kontozugriffe durch die Tests.
+Der isolierte Lauf verwendet kein DB-Setup und keinen Datenbank-Reset.

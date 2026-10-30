@@ -277,6 +277,13 @@ Geprüft am 23.10.2026 (account.inwx.de/en/help/apidoc, Kapitel 1.2, 2.1, 2.6, 2
 
 - **Endpunkte:** Produktion `https://api.domrobot.com/jsonrpc/`, Test (OT&E) `https://api.ote.domrobot.com/jsonrpc/`
   (`REGISTRAR_ENV=sandbox|production`). Anfrage `{method, params}`, Antwort `{code, msg, resData}`.
+- **Kontotest, 30.10.2026:** INWX beschreibt OT&E als getrennte Testdatenbank
+  ([offizieller Client](https://github.com/inwx/python-client/blob/master/README.md)). Der tatsächliche
+  VPS-Sandbox-Lauf wurde mit2200 abgewiesen; gültiger OT&E-Zugang nicht nachgewiesen. Der vorhandene
+  `registrar-preflight.ts --check --production-read-only` kann das normale Konto streng lesend prüfen,
+  ohne die globale Sandbox-/Mock-/DRY_RUN-Konfiguration zu ändern. Separate Bestätigungsvariable,
+  feste Methoden-/Endpunkt-/Domain-Allowlist, keine Registrierung/DNS-Änderung. Anleitung und
+  Grenzen: `docs/activation-2026-10-30/inwx-setup.md`.
 - **Codes:** 1000 OK, 1001 OK/ausstehend, 1500 OK/Sitzungsende, 2302 Objekt existiert, 2303 existiert nicht,
   2400 Befehl fehlgeschlagen. Alles ≥ 2000 wird als Fehler behandelt.
 - **Anmeldung:** `account.login {user, pass}`; Sitzung über das zurückgegebene Cookie. Ist im Konto 2FA aktiv

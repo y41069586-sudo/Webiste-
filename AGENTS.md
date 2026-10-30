@@ -587,3 +587,16 @@ INWX-Importfix91f07e0 tatsächlich veröffentlicht: Netlify6ae4c16bedf5d21f461ab
 16:11:15UTC, Health200.13gezielteTests/Core-Typecheck/Lint bestanden. Registrierung/Provider nicht
 aktiviert; frische private Secrets und tatsächlicher Sandbox-Lesetest bleiben offen. Nachweis
 docs/activation-2026-10-30/inwx-deployment.json, keine echten Zugangsdaten im Repository.
+
+## 30.10.2026 – INWX-Sandboxfehler tatsächlich gesehen, normaler Lesetest ergänzt
+
+REGISTRAR_USER/PASSWORD sind inzwischen als Secrets hinterlegt und App-Deploy65788f3 veröffentlicht.
+Betreiber hat Worker samt Secrets aktualisiert; sein Terminal zeigt healthy/DRY_RUNtrue, anschließend
+Sandbox stage=blocked/code2200. Nicht als gültigen Login oder fehlende Secrets ausgeben. OT&E hat
+laut offizieller INWX-Clientdoku eine eigene Testdatenbank; Fehlerursache noch nicht abschließend belegt.
+Bestehender registrar-preflight kann mit --production-read-only plus separater Lesebestätigung das
+normale Konto prüfen; globale ENV muss sandbox/mock/DRY_RUNtrue bleiben. Transport-Allowlist sperrt
+alle Schreibmethoden und andere Domains/Endpunkte. Keine echte Kontoprüfung durch lokale Tests
+behaupten.17CLI-Prüfungen und6bestehendeHosting/INWX-Tests ohne DB-Reset bestanden; tatsächlicher
+normaler Konto-Lesetest auf VPS noch offen. Einmaliger schreibgeschützter CLI-Mount genügt, kein
+weiterer Secret-Import nötig. Anleitung: docs/activation-2026-10-30/inwx-setup.md.
