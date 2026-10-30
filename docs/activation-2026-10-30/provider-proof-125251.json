@@ -1,0 +1,67 @@
+{
+  "providerJob": "125251",
+  "sourcePdfSha256": "7824f24be8cdd89bdfca558f1c1c5e561f98619df37a7bf47b08e096c6ad64b1",
+  "returnedPdfSha256": "f3341c435b8b1b7ca3436f079244d0b414c4a245860f1268049f558d981b9ef8",
+  "pages": 1,
+  "format": "A4",
+  "renderedDpi": 160,
+  "providerOverlay": {
+    "senderBoxMm": [
+      19,
+      45,
+      108,
+      51
+    ],
+    "addressBoxMm": [
+      19,
+      68,
+      108,
+      90
+    ],
+    "frankingBoxMm": [
+      20,
+      52,
+      108,
+      68
+    ],
+    "sourceWordsIntersectingFrankingBox": 0,
+    "senderWordsInsideSenderBox": 7,
+    "recipientWordsInsideAddressBox": 10,
+    "originalTextPreserved": true,
+    "addedLabelsOnly": [
+      "Absender",
+      "DV-Freimachung",
+      "Adresse"
+    ]
+  },
+  "qr": {
+    "providerJob": "125251",
+    "embeddedQrDecoded": true,
+    "renderedPageQrDecoded": true,
+    "rasterDpi": 160,
+    "rasterWidth": 1323,
+    "rasterHeight": 1871,
+    "correspondsToOriginalPdf": true,
+    "sizeMm": [
+      41.01,
+      41.01
+    ],
+    "pixels": [
+      600,
+      600
+    ]
+  },
+  "correctOptoutEmailPresent": true,
+  "placeholderOptoutEmailPresent": false,
+  "result": "passed_for_own_physical_proof",
+  "scope": "Only the uploaded returned proof for provider job 125251 was inspected",
+  "physicalPrintingStarted": false,
+  "dryRun": true,
+  "realLettersUnlocked": false,
+  "limitations": [
+    "Physical paper/ink quality and delivery have not yet been tested",
+    "Acceptance of this proof is not a legal or premium design approval",
+    "Returned proofs for other provider jobs were not inspected",
+    "Use the original PDF without provider test overlays for physical printing"
+  ]
+}

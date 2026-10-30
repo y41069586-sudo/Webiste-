@@ -147,3 +147,29 @@ Druckansichten bleiben im ignorierten data-Verzeichnis; keine Betreiberanschrift
 Keine Codeänderung in diesem Schritt, kein erneutes Worker-Update oder Deployment erforderlich.
 Nächster Schritt: easyNova-Rückgabe-PDFs prüfen, danach eigener echter Probedruck. Für Live-Verkäufe
 bleiben Steuerbestätigung und vollständige Stripe-/E-Mail-/Backup-Abnahme gesondert offen.
+
+## Rückgabe-PDF 125251 tatsächlich abgenommen
+
+Der Betreiber hat die von easyNova zurückgegebene Datei für Testauftrag 125251 hochgeladen.
+Die Datei wurde lokal gesichert, gerendert und visuell geprüft; vollständiger Textvergleich
+mit der tatsächlich eingereichten Original-PDF. Alle Originalwörter erhalten; ausschließlich
+die Anbieter-Prüflabels „Absender“, „DV-Freimachung“ und „Adresse“ ergänzt.
+
+- A4, eine Seite. Absender innerhalb x19–108/y45–51 mm. Anschrift innerhalb x19–108/y68–90 mm.
+- Rote DV-Freimachungsfläche x20–108/y52–68 mm frei von Originaltext; Betreff beginnt darunter.
+- QR 41,01 × 41,01 mm, 600 × 600 Pixel. Dekodierung sowohl des eingebetteten QR-Bildes als auch
+  der vollständigen gerenderten Rückgabe-Seite bei 160 dpi erfolgreich; korrektes bisher geprüftes Demo-Ziel.
+- Richtige Widerspruchsadresse, Laptop-/Handy-Komposition unverändert, keine abgeschnittenen
+  Absätze oder überlagerten Pflichttexte erkennbar. Physische Lesbarkeit/Materialqualität erst am Papier prüfen.
+- Die roten/blauen Flächen sind Testmarkierungen. Sie werden nicht in die Versandvorlage übernommen.
+  In der Anwendung bleibt die unveränderte Original-PDF mit Hash 7824f24be8cdd89bdfca558f1c1c5e561f98619df37a7bf47b08e096c6ad64b1 gebunden.
+
+**Ergebnis: diese Rückgabe-PDF ist druckgeometrisch für den eigenen physischen Probedruck geeignet.**
+Nur Auftrag 125251 tatsächlich geprüft; keine pauschale Abnahme aller zurückgesendeten Proofs,
+keine juristische Freigabe oder Designnote daraus ableiten. Kundensendungen weiterhin gesperrt.
+Kein echter Druckauftrag ausgelöst; ENV/DB-Dry-Run unverändert. Der anschließende echte Probedruck
+braucht den vorgesehenen expliziten Betriebswechsel; der Worker wurde zuletzt mit LIVE=0 gestartet.
+
+Nachweis: [provider-proof-125251.json](provider-proof-125251.json). Betreiberanschrift und vollständige
+PDF/Druckansicht verbleiben ausschließlich im ignorierten data-Verzeichnis. Keine Codeänderung,
+kein Deployment und kein neues Worker-Update in diesem Prüfschritt.

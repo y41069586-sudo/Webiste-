@@ -449,3 +449,12 @@ eingeliefert: 125250 und 125251, Audit/Zähler jetzt 3/3. Nicht noch einmal zwei
 API-Annahme nicht als Druckfreigabe ausgeben. PDF-Proofs vom Betreiber anfordern und vor eigenem
 echtem Probedruck ansehen. Kein Kundenversand freigeben. DRY_RUN=true und realLettersUnlocked=false.
 Aktueller Nachweis docs/activation-2026-10-30/post-worker-update.json. Diese Runde ändert nur Dokumentation.
+
+## 30.10.2026 – easyNova-Rückgabe 125251 geprüft
+
+Betreiber hat die tatsächliche Rückgabe-PDF für Auftrag 125251 hochgeladen. Gerendert und geprüft:
+Absender/Empfänger in Anbieterfenstern, DV-Fläche frei, Originaltext vollständig erhalten,
+41,01mm-QR aus PDF und gerenderter Gesamtseite korrekt dekodiert. Für eigenen physischen Probedruck
+druckgeometrisch geeignet. Nur dieser Proof geprüft, keine globale Rechts-/Gestaltungsfreigabe.
+Prüfmarkierungen NICHT in Original-/Versand-PDF übernehmen. Kein echter Brief ausgelöst; Worker
+weiter mit LIVE=0/DRY_RUN=true, Kundenfreigabe false. Nachweis docs/activation-2026-10-30/provider-proof-125251.json.

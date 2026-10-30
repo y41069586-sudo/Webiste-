@@ -1,5 +1,9 @@
 # SeitenWerk V4/V5 – verbindlicher Handoff
 
+**Rückgabe-PDF 125251 geprüft:** Anbieterfenster und freie DV-Fläche bestätigt, QR auch aus
+Gesamtrender lesbar. Druckgeometrisch für eigenen Probedruck geeignet; noch kein echter Versand.
+Siehe [Proof-Nachweis](activation-2026-10-30/provider-proof-125251.json).
+
 **Neuester Stand nach Worker-Update:** eigene PDF korrigiert und gerendert; easyNova-Testaufträge
 125250/125251 tatsächlich angenommen, Zähler 3/3. Rückgabe-PDFs noch prüfen; weiterhin DRY_RUN=true,
 keine echten Briefe/Zahlungen. Details im [Nachweis](activation-2026-10-30/post-worker-update.json).
