@@ -112,3 +112,38 @@ neuen Einmal-Code ausschließlich direkt auf dem Server eingeben.
 Nachweis: [deployment.json](deployment.json). Der Produktionsdeploy ist damit erfolgt; der
 Gesamtbetrieb bleibt im Testmodus. Diese nachträglichen Dokumentationsänderungen tragen
 Skip-Markierungen und lösen keinen weiteren Deploy aus.
+
+## Worker-Update bestätigt, drei Provider-Testaufträge eingeliefert
+
+Nach Rückmeldung des Betreibers wurde der Update tatsächlich geprüft: neuer Bootstrap-Code
+um 06:57:03 UTC eingelöst, danach erfolgreiche Worker-Takte. Über die reguläre angemeldete
+Admin-Aktion „Testbrief an mich“ die eigene Test-PDF neu erzeugt. Auftrag
+`2d40d21e-a61a-47bf-8f87-78812f532ea1` abgeschlossen, null technische Probleme,
+neuer Brief `cd300821-c543-4876-b1ee-98c8fe2c8d33`.
+
+Die tatsächliche neue PDF wurde aus privatem S3 geladen und mit 160 dpi gerendert/angesehen:
+A4, eine Seite, Laptop/Handy, Preise weiterhin nicht im Einladungstext, kostenloses Ansehen und
+spätere kostenpflichtige Umsetzung unterscheidbar, Art.-14/21-Hinweise vorhanden.
+**Widerspruchsadresse jetzt support@seitenwerk.world; kein example-Platzhalter mehr.**
+QR aus der neuen PDF mit bestehendem Decoder erfolgreich geprüft; identisches bereits geprüftes
+Demo-Ziel. Neue Testempfängerbindung vorhanden. PDF-SHA256 und maschinelle Checks im Nachweis.
+
+Anschließend nacheinander zwei tatsächliche easyNova-Testaufträge über die bestehende Admin-Aktion
+eingeliefert: **125250** (Zähler 2), **125251** (Zähler 3). Getrennte tatsächliche Anbieterantworten
+und Auditdatensätze bestätigen die Einlieferung. Kein manuelles Hochsetzen des Zählers.
+**Stand jetzt 3/3 eingeliefert; die zurückgesendeten Prüf-PDFs sind noch nicht abgenommen.**
+Sie gehen an die bereits eingestellte, hier nicht verbundene Testadresse. Der Betreiber muss sie
+zur Druckflächen-/Anschriftenprüfung bereitstellen. Annahmestatus queued allein ist kein
+Nachweis fehlerfreier Verarbeitung oder eines erfolgreichen physischen Probedrucks.
+
+DRY_RUN=true, realLettersUnlocked=false, null Bestellungen; kein echter Brief, keine Live-Zahlung.
+Brief bleibt generated zur Kontrolle, keine Qualitätsnoten erfunden. Fiktive Demo ist ausschließlich
+Vorlage für den eigenen Testdruck; der Hinweis auf fehlende belegte Betriebsdetails bleibt erhalten.
+Neuerstellung erfolgte über den vorhandenen Testbrief-Pfad, nicht durch Löschen des bisherigen Briefs
+vor erfolgreicher Ersatzgenerierung. Weitere Branchen-/Kampagnenfreigaben wurden nicht erteilt.
+
+Nachweis: [post-worker-update.json](post-worker-update.json). Private Vorher-/Nachher-PDFs und
+Druckansichten bleiben im ignorierten data-Verzeichnis; keine Betreiberanschrift im Git.
+Keine Codeänderung in diesem Schritt, kein erneutes Worker-Update oder Deployment erforderlich.
+Nächster Schritt: easyNova-Rückgabe-PDFs prüfen, danach eigener echter Probedruck. Für Live-Verkäufe
+bleiben Steuerbestätigung und vollständige Stripe-/E-Mail-/Backup-Abnahme gesondert offen.

@@ -438,3 +438,14 @@ und die Empfänger-/Zahlungsfreigaben bleiben für diesen Deploy erhalten; Steue
 Der Betreiber führt VPS-Updates selbst in Termius aus. Keine erneute SSH-Verbindung verlangen.
 Nach erfolgreicher App-Veröffentlichung den vorhandenen Setup-Aufruf mit NEU=1 bereitstellen, damit
 OPTOUT_EMAIL und die getrennten Stripe-Einstellungen neu übernommen werden. Kein LIVE=1 beim Update.
+
+## 30.10.2026 – Worker aktualisiert, Provider-Testzähler tatsächlich 3
+
+Betreiber hat Worker-Update durchgeführt; neuer Einmal-Code und nachfolgende Worker-Takte geprüft.
+Eigener Testbrief über „Testbrief an mich“ neu erzeugt, reale PDF gerendert: richtige Widerspruchsadresse,
+QR dekodierbar, Testempfängerbindung vorhanden. Zwei weitere easyNova-Testaufträge tatsächlich
+eingeliefert: 125250 und 125251, Audit/Zähler jetzt 3/3. Nicht noch einmal zwei Aufträge verlangen.
+**Rückgabe-PDFs noch nicht geprüft**, weil die eingestellte Testadresse hier nicht verbunden ist;
+API-Annahme nicht als Druckfreigabe ausgeben. PDF-Proofs vom Betreiber anfordern und vor eigenem
+echtem Probedruck ansehen. Kein Kundenversand freigeben. DRY_RUN=true und realLettersUnlocked=false.
+Aktueller Nachweis docs/activation-2026-10-30/post-worker-update.json. Diese Runde ändert nur Dokumentation.

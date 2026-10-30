@@ -1,5 +1,9 @@
 # SeitenWerk V4/V5 – verbindlicher Handoff
 
+**Neuester Stand nach Worker-Update:** eigene PDF korrigiert und gerendert; easyNova-Testaufträge
+125250/125251 tatsächlich angenommen, Zähler 3/3. Rückgabe-PDFs noch prüfen; weiterhin DRY_RUN=true,
+keine echten Briefe/Zahlungen. Details im [Nachweis](activation-2026-10-30/post-worker-update.json).
+
 **Veröffentlicht:** `eebfdba`, Netlify `6ae4382fd4ef7bebeb43a347` (30.10. 06:25 UTC);
 Login/Preise/Impressum/Health HTTP200. DRY_RUN bleibt true. Server-Update macht der Betreiber
 selbst mit NEU=1 LIVE=0 und neuem Einmal-Code. Danach eigene PDF neu erzeugen.

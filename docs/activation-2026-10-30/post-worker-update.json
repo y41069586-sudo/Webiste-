@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-10-30T07:06:53.842298Z",
+  "workerBootstrapRedeemedAt": "2026-10-30T06:57:03.260Z",
+  "workerTickAfterUpdate": "2026-10-30T07:05:22.050413Z",
+  "generation": {
+    "requestedThrough": "existing authenticated Admin: Testbrief an mich",
+    "jobId": "2d40d21e-a61a-47bf-8f87-78812f532ea1",
+    "state": "completed",
+    "startedAt": "2026-10-30T07:02:04.506905Z",
+    "completedAt": "2026-10-30T07:02:24.797856Z",
+    "issues": 0,
+    "letterId": "cd300821-c543-4876-b1ee-98c8fe2c8d33",
+    "status": "generated",
+    "isTest": true,
+    "dryRun": true,
+    "truthPassed": true,
+    "testRecipientBound": true
+  },
+  "pdf": {
+    "authenticated": true,
+    "pdf_bytes": 420069,
+    "pdf_sha256": "7824f24be8cdd89bdfca558f1c1c5e561f98619df37a7bf47b08e096c6ad64b1",
+    "providerTestButtonAvailable": true,
+    "providerTestButtonEnabled": true,
+    "pages": 1,
+    "format": "A4",
+    "visualInspectionDpi": 160,
+    "correctOptoutEmail": "support@seitenwerk.world",
+    "checks": {
+      "hasCorrectOptoutEmail": true,
+      "hasPlaceholderOptout": false,
+      "hasOtherExampleEmail": false,
+      "hasPrivacyNotice": true,
+      "hasObjectionNotice": true,
+      "hasFreePreview": true,
+      "hasPaidImplementationNotice": true,
+      "hasTariffPrices": false
+    },
+    "qrDecoded": true,
+    "sameQrAsPreviouslyVerifiedDemo": true
+  },
+  "provider": {
+    "name": "easynova",
+    "mode": "test",
+    "acceptedJobs": [
+      {
+        "jobId": "125250",
+        "count": 2,
+        "status": "queued",
+        "acceptedAt": "2026-10-30T07:04:43.836521Z"
+      },
+      {
+        "jobId": "125251",
+        "count": 3,
+        "status": "queued",
+        "acceptedAt": "2026-10-30T07:05:54.875382Z"
+      }
+    ],
+    "totalTestJobCount": 3,
+    "returnedProofPdfsReviewed": false,
+    "returnedProofPdfsReason": "Configured test mailbox is not connected in this session",
+    "physicalPrintingTriggered": false
+  },
+  "guards": {
+    "dryRun": true,
+    "realLettersUnlocked": false,
+    "orders": 0
+  },
+  "limitations": [
+    "Fictitious demo used only for the owner proof letter",
+    "No automatic approval or invented personalization rating",
+    "No live postage, payment or domain purchase",
+    "The operator must provide returned provider PDFs for review before physical proof printing"
+  ]
+}
