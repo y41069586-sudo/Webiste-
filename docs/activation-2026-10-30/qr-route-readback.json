@@ -1,0 +1,13 @@
+{
+  "qrStatus": 302,
+  "demoStatus": 200,
+  "mobileWidth": 390,
+  "horizontalOverflow": false,
+  "companyMatches": true,
+  "hasSetupPrice": true,
+  "hasBasePrice": true,
+  "hasCarePrice": true,
+  "isUncommissionedDemo": true,
+  "probeUserAgent": "SeitenWerkControlScanner/1.0",
+  "isCustomerScan": false
+}

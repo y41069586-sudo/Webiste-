@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-10-30T06:15:36.728Z",
+  "account": {
+    "id": "acct_1UToaMKIPZjo7zRA",
+    "country": "DE",
+    "chargesEnabled": true,
+    "payoutsEnabled": true,
+    "detailsSubmitted": true,
+    "currentlyDue": [],
+    "pastDue": [],
+    "disabledReason": null
+  },
+  "prices": [
+    {
+      "id": "price_1UVwvwKIPZjo7zRAy5UBiKhH",
+      "active": true,
+      "amountCents": 9900,
+      "currency": "eur",
+      "livemode": true,
+      "type": "recurring",
+      "interval": "month"
+    },
+    {
+      "id": "price_1UVwvuKIPZjo7zRAMohkkSTh",
+      "active": true,
+      "amountCents": 1900,
+      "currency": "eur",
+      "livemode": true,
+      "type": "recurring",
+      "interval": "month"
+    },
+    {
+      "id": "price_1UVwvsKIPZjo7zRA07njiApb",
+      "active": true,
+      "amountCents": 59700,
+      "currency": "eur",
+      "livemode": true,
+      "type": "one_time",
+      "interval": null
+    }
+  ],
+  "webhooks": [
+    {
+      "id": "we_1UVVUzKIPZjo7zRAVrqbBgVZ",
+      "url": "https://seitenwerkworld.netlify.app/api/webhooks/stripe",
+      "status": "enabled",
+      "livemode": true,
+      "events": [
+        "checkout.session.completed",
+        "checkout.session.async_payment_succeeded",
+        "checkout.session.async_payment_failed",
+        "checkout.session.expired",
+        "charge.refunded",
+        "invoice.paid",
+        "invoice.payment_failed",
+        "customer.subscription.updated",
+        "customer.subscription.deleted"
+      ]
+    }
+  ],
+  "limitations": [
+    "Read-only account/catalog checks, no live payment",
+    "No signed delivery acceptance performed",
+    "Operator tax status is still unconfirmed"
+  ]
+}

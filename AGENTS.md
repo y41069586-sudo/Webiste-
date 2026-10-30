@@ -409,3 +409,22 @@ Eigener Probedruck: ausdrücklich markierte Testbriefe dürfen eine Mock-Demo ve
 Empfänger die konfigurierte eigene Testanschrift ist. Gewöhnliche Mock-Akquisepost bleibt im echten
 Betrieb gesperrt. Testanschrift und Testbrief-Kennzeichnung an PDF binden; Änderung verlangt neue
 Generierung. Drei Provider-Testaufträge, Opt-out und manuelle Empfängerfreigabe nicht umgehen.
+
+## 30.10.2026 – beauftragte Aktivierung und tatsächliche Betriebsprüfungen
+
+Aktueller Fortschritt: docs/activation-2026-10-30/README.md. Betreiber verlangt die fünf offenen
+Betriebsschritte. Live-Stripe-Connector ist jetzt verbunden: Konto zahlungs-/auszahlungsfähig,
+Live-Katalog und Webhook korrekt. easyNova-Guthaben tatsächlich 12,61 €. Regulärer Admin-Zugang
+funktioniert; eigene PDF aus S3 geladen, gerendert und QR bis zur mobilen Demo geprüft.
+
+Wichtiger Blocker: vorhandene Test-PDF enthält noch widerspruch@example.com. Tatsächlicher Versuch
+über die bestehende Provider-Testaktion wird vor Anbieterübertragung wegen veralteter PDF-Bindung
+abgewiesen; Zähler bleibt 1/3. Erst App/Worker mit OPTOUT_EMAIL-Export aktualisieren und PDF neu
+erzeugen, dann zwei weitere echte Testaufträge. Rückgabe-PDFs gehen an eine hier nicht verbundene
+Testadresse. Keinen Counter oder Prüfstatus künstlich bestätigen, keine echte Druckfreigabe daraus.
+
+Automatische Freigabeprüfung lehnte den konkreten Push auf Claudes Betriebsbranch samt dadurch
+ausgelöstem Netlify-Produktionsdeploy ab. Konkrete Zustimmung dafür wurde angefragt. Bis zur Antwort
+keine Umgehung per anderer API, Build-Hook oder indirekter Bereitstellung. Unabhängige sichere
+Arbeiten weiterführen. Steuerstatus noch unbestätigt, SSH-Zugang nicht eingerichtet. Eigene Druck-
+abnahme bleibt vor Empfängerfreigabe erforderlich. Originale private Zugangsdaten unverändert lassen.

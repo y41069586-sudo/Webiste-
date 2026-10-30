@@ -1,0 +1,25 @@
+{
+  "dryRun": true,
+  "stripe": {
+    "mode": "test",
+    "provider": "mock",
+    "webhookConfigured": true,
+    "read": {
+      "ok": true,
+      "status": 200
+    }
+  },
+  "storage": {
+    "driver": "s3",
+    "read": {
+      "ok": true
+    }
+  },
+  "resend": {
+    "webhookConfigured": true,
+    "outgoingProvider": "mock",
+    "read": {
+      "ok": true
+    }
+  }
+}

@@ -1,5 +1,7 @@
 # Website-Brief-Maschine
 
+**Aktivierungsstand 30.10.2026:** [Tatsächliche Live-/Provider-/PDF-Prüfungen und konkrete Betriebsblocker](docs/activation-2026-10-30/README.md).
+
 **Wiederaufnahme 29.10.2026:** [Aktueller Audit, Fortsetzung und Nachweise](docs/resume-2026-10-29/README.md).
 70 neue Claude-Commits gegenüber der Codex-Übergabe: App/Firmenwebsite aktualisiert,21Migrationen,
 Queue/Worker und echte Recherche angebunden, easyNova im Testmodus. Stripe-Live wird explizit
