@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-30",
+  "deployment": {
+    "id": "6ae47df5f1db83bd1c362ac7",
+    "commit": "0075ec5129d71fadd64867e0efab83b627e1d6d0",
+    "publishedAt": "2026-10-30T11:23:28.426Z",
+    "state": "ready"
+  },
+  "configuredSecretName": "NELITFY_API_TOKEN",
+  "canonicalName": "NETLIFY_API_TOKEN",
+  "canonicalTakesPrecedence": true,
+  "tokenExposed": false,
+  "runtime": {
+    "checkedAt": "2026-10-30T11:26:11.936Z",
+    "tokenConfigured": true,
+    "read": {
+      "ok": true,
+      "status": 200
+    },
+    "hostingProvider": "mock",
+    "dryRun": true
+  },
+  "externalHostingPublished": false,
+  "vpsCredentialRefreshVerified": false,
+  "tests": {
+    "configAndBootstrap": 12,
+    "hostingAcceptanceSafety": 3,
+    "existingHostingRegistrarFakeTransport": 6
+  },
+  "next": "Operator refreshes existing VPS with NEU=1 LIVE=0 and runs the explicitly scoped hosting acceptance CLI."
+}

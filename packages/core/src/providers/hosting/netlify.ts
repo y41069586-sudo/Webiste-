@@ -33,7 +33,7 @@ export function netlifyHeadersFile(formOrigin: string): string {
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'none'; form-action ${formOrigin}; base-uri 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; font-src 'self' data:; style-src 'unsafe-inline'; script-src 'none'; form-action ${formOrigin}; base-uri 'none'; frame-ancestors 'none'
 `;
 }
 

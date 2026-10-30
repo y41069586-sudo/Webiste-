@@ -157,3 +157,9 @@ Env-Auswertung übernimmt genau diesen vorhandenen Alias, ohne ihn offenzulegen;
 gesetzter NETLIFY_API_TOKEN hat Vorrang. Regulärer Worker-Einmal-Code exportiert ausschließlich den
 kanonischen Namen. Kein geheimer Wert aus der Metadaten-API rekonstruiert oder ins Workspace übertragen.
 Das Vorhandensein des Tokens schaltet Hosting, DNS oder echte Geschäftsaktionen nicht automatisch frei.
+
+Verbindungsprüfung nach Alias-Korrektur tatsächlich bestanden: Netlify HTTP200, Token vorhanden,
+Provider mock, DRY_RUN=true. Siehe hosting-connection.json. Begrenzter Probelauf auf dem vorhandenen
+VPS ist implementiert und lokal auf Schutzmechanismen geprüft; externe Ausführung bleibt ausstehend.
+Genaue Befehle und Grenzen: hosting-acceptance.md. Worker benötigt reguläre neue Zugangskonfiguration;
+keinen Bootstrap-Code außerhalb der vorgesehenen VPS-Einrichtung zum Secret-Auslesen verwenden.

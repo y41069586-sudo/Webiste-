@@ -489,3 +489,18 @@ Mock-Leads/-Demos und Test-Tarifwechsel nicht als echte Kampagnenergebnisse. Zwe
 Testkäufe sind kein Umsatz-/Conversionbeleg. Externen positiven Monatsstart nicht durch einen
 fingierten Go-Live-Eintrag erzwingen. Nachweise unter acceptance-progress.md/stripe-sandbox-purchases.json
 im bisherigen Aktivierungsverzeichnis; VPS-Backup und Queue-Ergänzung weiter nicht ausgeführt.
+
+## 30.10.2026 – Hosting-Zugang tatsächlich lesend bestätigt
+
+Betreiber hat Hosting-Secret im richtigen Projekt seitenwerkworld gespeichert. Tatsächlicher Name
+NELITFY_API_TOKEN (Buchstabendreher); Screenshot zunächst falsch gelesen. Kanonischer Name
+NETLIFY_API_TOKEN hat Vorrang, genau dieser vorhandene Alias wird zusätzlich akzeptiert und beim
+regulären Worker-Bootstrap ausschließlich kanonisch exportiert. Kein neuer Token nötig und kein
+Secret über Metadaten-/Bootstrap-Umwege auslesen. Interne authentifizierte Laufzeitprüfung HTTP200
+am30.10.11:26UTC bestätigt Zugriff. Hosting allgemein weiter mock, DRY_RUN=true.
+
+Vorbereiteter CLI-Probelauf hosting-acceptance.ts nur für gespeicherte fiktive, bezahlte Stripe-
+Sandbox-Bestellung an eigenes Absenderpostfach; eigenes Testprojekt und feste test.seitenwerk.world.
+Keine privaten Links/aktiven Formulare veröffentlichen; Root-Projekte schützen, HTTPS-Inhalt prüfen.
+Keine App-Go-Live-/Abozustände fingieren. Noch nicht auf VPS ausgeführt; Betreiber bedient VPS selbst.
+Nachweis/Befehle: docs/activation-2026-10-30/hosting-acceptance.md und hosting-connection.json.
