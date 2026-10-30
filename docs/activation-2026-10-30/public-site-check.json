@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-30",
+  "origin": "https://seitenwerk.world",
+  "pathsHttp200": ["/", "/preise", "/impressum", "/datenschutz", "/agb", "/kontakt"],
+  "homeAndPrices": {
+    "setup597": true,
+    "basis19": true,
+    "care99": true,
+    "old590FoundInVisibleText": false,
+    "old49FoundInVisibleText": false
+  },
+  "searchedPlaceholderStrings": ["Musterstraße", "hallo@example.com", "widerspruch@example.com"],
+  "searchedPlaceholdersFound": false,
+  "termsMentionParagraph19": true,
+  "termsPromiseParagraph19Exemption": false,
+  "termsExplainTaxMustBeConfirmedBeforeSales": true,
+  "changedByThisCheck": false,
+  "legalApprovalClaimed": false,
+  "completeBusinessFactsAuditClaimed": false
+}

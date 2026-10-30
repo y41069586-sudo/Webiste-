@@ -179,7 +179,7 @@ export type SaveOnboardingResult =
 export async function saveOnboarding(
   token: string,
   raw: Partial<Record<keyof OnboardingData, unknown>>,
-  opts: { submit: boolean },
+  opts: { submit: boolean; enqueueBuild?: boolean; actor?: string },
 ): Promise<SaveOnboardingResult> {
   const ctx = await getOnboardingContext(token);
   if (ctx.state === 'not_found') return { ok: false, error: 'Link ungültig.' };
@@ -231,11 +231,17 @@ export async function saveOnboarding(
       await tx
         .insert(events)
         .values({ leadId: ctx.customer.leadId, type: 'onboarding_submitted', metaJson: { siteId: ctx.site.id } });
-      await transitionLead(tx, ctx.customer.leadId, 'onboarding', { actor: 'public:onboarding', soft: true });
+      await transitionLead(tx, ctx.customer.leadId, 'onboarding', { actor: opts.actor ?? 'public:onboarding', soft: true });
     }
-    await audit(tx, { entity: 'site', entityId: ctx.site.id, action: 'onboarding_submitted', actor: 'public:onboarding' });
+    await audit(tx, {
+      entity: 'site',
+      entityId: ctx.site.id,
+      action: 'onboarding_submitted',
+      actor: opts.actor ?? 'public:onboarding',
+    });
   });
-  await enqueue(QUEUES.buildSite, { siteId: ctx.site.id }, { singletonKey: `build-${ctx.site.id}` });
+  if (opts.enqueueBuild !== false)
+    await enqueue(QUEUES.buildSite, { siteId: ctx.site.id }, { singletonKey: `build-${ctx.site.id}` });
   return { ok: true, submitted: true };
 }
 
@@ -353,7 +359,10 @@ export async function getPreviewContext(token: string): Promise<PreviewContext> 
   };
 }
 
-export async function approvePreview(token: string): Promise<{ ok: boolean; error?: string }> {
+export async function approvePreview(
+  token: string,
+  opts: { enqueueDeploy?: boolean; actor?: string } = {},
+): Promise<{ ok: boolean; error?: string }> {
   const ctx = await getPreviewContext(token);
   if (ctx.state !== 'preview') return { ok: false, error: 'Die Vorschau kann gerade nicht freigegeben werden.' };
   const db = getDb();
@@ -369,16 +378,17 @@ export async function approvePreview(token: string): Promise<{ ok: boolean; erro
       type: 'preview_approved',
       metaJson: { siteId: ctx.site.id, version: ctx.site.version },
     });
-    await transitionLead(db, ctx.customer.leadId, 'preview_approved', { actor: 'public:preview', soft: true });
+    await transitionLead(db, ctx.customer.leadId, 'preview_approved', { actor: opts.actor ?? 'public:preview', soft: true });
   }
   await audit(db, {
     entity: 'site',
     entityId: ctx.site.id,
     action: 'preview_approved',
-    actor: 'public:preview',
+    actor: opts.actor ?? 'public:preview',
     context: { version: ctx.site.version },
   });
-  await enqueue(QUEUES.deploySite, { siteId: ctx.site.id }, { singletonKey: `deploy-${ctx.site.id}` });
+  if (opts.enqueueDeploy !== false)
+    await enqueue(QUEUES.deploySite, { siteId: ctx.site.id }, { singletonKey: `deploy-${ctx.site.id}` });
   return { ok: true };
 }
 

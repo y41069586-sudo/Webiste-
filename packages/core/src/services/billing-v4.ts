@@ -35,6 +35,18 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
       if (effectiveSwitches(await getConfig({ db: tx, fresh: true })).dryRun)
         throw new Error('DRY_RUN sperrt den Start echter Monatsabos.');
     }
+    if (provider.name === 'stripe') {
+      if (provider.testMode && order.paymentMode !== 'test')
+        throw new Error('Echte Bestellungen dürfen kein Test-Monatsabo starten.');
+      if (
+        !site?.previewApprovedAt ||
+        !site.hostingProvider ||
+        site.hostingProvider === 'mock' ||
+        site.liveCheckJson?.ok !== true ||
+        !site.productionUrl?.startsWith('https://')
+      )
+        throw new Error('Stripe-Monatsstart erfordert Freigabe und tatsächlich bestätigtes HTTPS-Hosting.');
+    }
     if (!provider.startSavedSubscription) throw new Error('Anbieter unterstützt keinen Mandatsstart.');
     const sub = await provider.startSavedSubscription({
       orderId,

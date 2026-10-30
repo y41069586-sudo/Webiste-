@@ -8,6 +8,7 @@ import { getDb } from '../src/db/client';
 import { budgetLedger, changeRequests, customers, demos, leads, orders, outboundEmails, sites } from '../src/db/schema';
 import { getProviders, setProviders } from '../src/providers';
 import { MockRegistrar } from '../src/providers/mock/registrar';
+import type { PaymentProvider } from '../src/providers/types';
 import { stopBoss } from '../src/queue';
 import { closeBrowser } from '../src/render/browser';
 import { buildSite, deploySite, liveCheck, liveCheckDelayMinutes } from '../src/render/site';
@@ -15,6 +16,8 @@ import { onboardingErrors, WEEK_DAYS, type OnboardingData } from '../src/sites/o
 import { validateRevision } from '../src/sites/revision';
 import { simulateMockPayment, startCheckout } from '../src/services/orders';
 import { sendRenewalReminders } from '../src/services/renewals';
+import { v4Offer } from '../src/services/offers-v4';
+import { startBillingV4 } from '../src/services/billing-v4';
 import {
   approveDomainPurchase,
   approvePreview,
@@ -432,6 +435,146 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
       .where(eq(customers.id, customer.id));
     expect(await sendRenewalReminders()).toBe(1);
     expect(await sendRenewalReminders()).toBe(0);
+  });
+
+  it.each(['basis', 'care_plus'] as const)(
+    'Sandbox %s: vorhandene Domain anbinden, echte Prüfungen vor Monatsstart, kein Kauf',
+    async (tier) => {
+      const db = getDb();
+      const { customer } = await paidCustomer();
+      await updateConfig({ sender: { email: customer.email }, review: { qaLighthouse: false } }, 'test:sandbox');
+      await db
+        .update(orders)
+        .set({
+          provider: 'stripe',
+          paymentMode: 'test',
+          customerEmail: customer.email,
+          customerCompany: 'Fiktiver TESTBETRIEB',
+          offerSnapshot: v4Offer(tier, new Date().toISOString()),
+        })
+        .where(eq(orders.id, customer.orderId));
+      await db
+        .update(customers)
+        .set({ domain: 'owned-fixture.test', domainStatus: 'registered' })
+        .where(eq(customers.id, customer.id));
+      const context = await getOnboardingContext(customer.accessToken);
+      if (context.state !== 'form') throw new Error('Fixture');
+      expect(
+        await saveOnboarding(customer.accessToken, complete(context.data), {
+          submit: true,
+          enqueueBuild: false,
+          actor: 'test:sandbox',
+        }),
+      ).toMatchObject({ ok: true });
+      await buildSite(context.site.id);
+      const built = (await db.query.sites.findFirst({ where: eq(sites.id, context.site.id) }))!;
+      const qa = (built.contentJson as { _meta: { qa: { checks: { passed: boolean }[] } } })._meta.qa;
+      expect(qa.checks.filter((c) => !c.passed)).toEqual([]);
+      const original = getProviders();
+      const files = new Map<string, string>();
+      const attach = vi.fn(async () => ({ records: [] }));
+      const register = vi.spyOn(original.registrar, 'registerDomain');
+      const start = vi.fn<NonNullable<PaymentProvider['startSavedSubscription']>>(async (input) => ({
+        id: `sub_fixture_${input.tier}`,
+        status: 'active',
+        priceId: `price_fixture_${input.tier}`,
+        periodStart: new Date(),
+        periodEnd: addDays(new Date(), 30),
+      }));
+      setProviders({
+        hosting: {
+          name: 'netlify',
+          ensureProject: async () => ({ projectId: 'fixture_project', defaultUrl: 'https://owned-fixture.test/' }),
+          deploy: async (_id, list) => {
+            for (const f of list) files.set(f.path, String(f.content));
+            return { deploymentId: 'fixture_deploy', url: 'https://owned-fixture.test/' };
+          },
+          attachDomain: attach,
+          getDomainStatus: async (domain) => ({ domain, active: true, ssl: 'active' }),
+          deleteProject: async () => {},
+        },
+        payment: {
+          name: 'stripe',
+          testMode: true,
+          createCheckoutSession: original.payment.createCheckoutSession.bind(original.payment),
+          parseWebhook: original.payment.parseWebhook.bind(original.payment),
+          startSavedSubscription: start,
+        },
+      });
+      try {
+        await expect(startBillingV4(customer.orderId)).rejects.toThrow(/Go-Live/);
+        expect(await approvePreview(customer.accessToken, { enqueueDeploy: false, actor: 'test:sandbox' })).toMatchObject({
+          ok: true,
+        });
+        expect(await deploySite(context.site.id, 'test:sandbox', { enqueueLiveCheck: false })).toBe('deployed');
+        expect(attach).toHaveBeenCalledWith('fixture_project', 'owned-fixture.test');
+        expect(register).not.toHaveBeenCalled();
+        expect((await db.select().from(budgetLedger)).filter((c) => c.category === 'domain')).toHaveLength(0);
+        const originalHtml = files.get('index.html')!;
+        expect(originalHtml).toContain('Fiktiver Sandbox-Test');
+        expect(originalHtml).toContain('noindex');
+        expect(originalHtml).not.toContain(customer.accessToken);
+        expect(originalHtml).not.toContain(`/api/forms/${context.site.formKey}`);
+        expect(files.get('robots.txt')).toContain('Disallow: /');
+        expect(files.has('sitemap.xml')).toBe(false);
+        // Staging protection must survive a later change of the operator's sender mailbox.
+        await updateConfig({ sender: { email: 'changed@operator.test' } }, 'test:sandbox');
+        vi.stubGlobal('fetch', async (url: string | URL) => {
+          const key = new URL(String(url)).pathname.slice(1) || 'index.html',
+            data = files.get(key);
+          return new Response(data ?? 'not found', { status: data ? 200 : 404 });
+        });
+        files.set('index.html', originalHtml.replace('name="wbm-sandbox-test"', 'name="wrong-marker"'));
+        expect(await liveCheck(context.site.id, 0, { scheduleRetry: false })).toMatchObject({ ok: false });
+        expect(start).not.toHaveBeenCalled();
+        files.set('index.html', originalHtml.replace(/content="noindex[^"]*"/g, 'content="index, follow"'));
+        expect(await liveCheck(context.site.id, 0, { scheduleRetry: false })).toMatchObject({ ok: false });
+        expect(start).not.toHaveBeenCalled();
+        files.set('index.html', originalHtml);
+        expect(await liveCheck(context.site.id, 0, { scheduleRetry: false })).toMatchObject({
+          ok: true,
+          checks: { indexable: false, indexPolicy: true, sandboxNotice: true },
+        });
+        expect((await db.query.sites.findFirst({ where: eq(sites.id, context.site.id) }))?.hostingProvider).toBe('netlify');
+        expect((await db.query.customers.findFirst({ where: eq(customers.id, customer.id) }))?.domainExpiresAt).toBeNull();
+        expect(start).toHaveBeenCalledOnce();
+        expect(start.mock.calls[0]?.[0]).toMatchObject({ amountCents: tier === 'basis' ? 1900 : 9900 });
+        await Promise.all([startBillingV4(customer.orderId), startBillingV4(customer.orderId)]);
+        expect(start).toHaveBeenCalledOnce();
+      } finally {
+        vi.unstubAllGlobals();
+        register.mockRestore();
+        setProviders(original);
+      }
+    },
+  );
+
+  it('Stripe-Monatsstart blockiert einen Live-Status ohne tatsächlichen Hosting-Nachweis', async () => {
+    const { customer } = await paidCustomer(),
+      db = getDb(),
+      previous = getProviders().payment;
+    const site = await ensureSiteForCustomer(customer.id);
+    await db
+      .update(orders)
+      .set({ provider: 'stripe', paymentMode: 'test', offerSnapshot: v4Offer('basis', new Date().toISOString()) })
+      .where(eq(orders.id, customer.orderId));
+    await db.update(sites).set({ status: 'live', liveAt: new Date() }).where(eq(sites.id, site.id));
+    const start = vi.fn();
+    setProviders({
+      payment: {
+        name: 'stripe',
+        testMode: true,
+        createCheckoutSession: previous.createCheckoutSession.bind(previous),
+        parseWebhook: previous.parseWebhook.bind(previous),
+        startSavedSubscription: start,
+      },
+    });
+    try {
+      await expect(startBillingV4(customer.orderId)).rejects.toThrow(/bestätigtes HTTPS-Hosting/);
+      expect(start).not.toHaveBeenCalled();
+    } finally {
+      setProviders({ payment: previous });
+    }
   });
 
   it('echter Registrar: ohne Freigabe kein Domainkauf; DRY_RUN registriert nie', async () => {

@@ -6,17 +6,32 @@ umask 077
 repo=$(cd "$(dirname "$0")/../.." && pwd)
 cd "$repo"
 compose=(docker compose -f docker-compose.worker.yml)
+# Supabase's privileged connection stays on the operator's terminal/host, never in chat or Git.
+if [ "${ASK_BACKUP_URL:-0}" = 1 ] && [ -z "${BACKUP_DATABASE_URL:-}" ]; then
+  printf 'Berechtigte Supabase-Verbindung (postgres, Session-Port5432), Eingabe verdeckt: ' >/dev/tty
+  IFS= read -r -s BACKUP_DATABASE_URL </dev/tty
+  printf '\n' >/dev/tty
+  [ -n "$BACKUP_DATABASE_URL" ] || { echo 'Keine Verbindung eingegeben; keine Abnahme ausgeführt.' >&2; exit 1; }
+  export BACKUP_DATABASE_URL
+fi
 backup_root=${BACKUP_ROOT:-/opt/seitenwerk-backups}
 mkdir -p "$backup_root"
 target=$(mktemp -d "$backup_root/acceptance-XXXXXXXX")
 chmod 700 "$target"
 restore_container="seitenwerk-restore-test-$(basename "$target" | tr '[:upper:]' '[:lower:]')"
 restore_started=false
+worker_was_running=false
 cleanup() {
   if [ "$restore_started" = true ]; then docker rm -f -v "$restore_container" >/dev/null 2>&1 || true; fi
   rm -f "$target/source-pg.env" "$target/local-pg.env"
+  unset BACKUP_DATABASE_URL
+  if [ "$worker_was_running" = true ]; then "${compose[@]}" start worker >/dev/null; fi
 }
 trap cleanup EXIT
+if [ "${QUIESCE_WORKER:-0}" = 1 ] && [ -n "$("${compose[@]}" ps --status running -q worker)" ]; then
+  worker_was_running=true
+  "${compose[@]}" stop worker
+fi
 run_worker() {
   "${compose[@]}" run --rm -T --no-deps --user 0:0 -v "$target:/snapshot" \
     -v "$repo/packages/core/scripts:/repo/packages/core/scripts:ro" \
@@ -71,6 +86,8 @@ if [ "${PREPARE_MISSING_QUEUES:-}" = 1 ]; then
     -v "$repo/packages/core/scripts:/repo/packages/core/scripts:ro" \
     -e QUEUE_PREPARE_CONFIRM=prepare-existing-database --entrypoint node worker --import tsx \
     /repo/packages/core/scripts/prepare-queue.ts --apply --queues-only
+  # Only add a positive queue result after the actual command succeeded.
+  sed -i 's/"queuePreparationRequested":true/"queuePreparationRequested":true,"queuePreparationVerified":true/' "$target/result.json"
 fi
 cat "$target/result.json"
 echo "Private Sicherung: $target"

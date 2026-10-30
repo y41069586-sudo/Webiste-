@@ -531,3 +531,35 @@ bisherigen Aktivierungsverzeichnis. Historisches deliveryVerified=false im Sende
 Spam-Einstufung bleibt offen: Resend Domain/DKIM/SPF verified, DMARC und externer Inbox-Test nicht
 unabhängig bestätigt; Ursache unbekannt. Kein automatisches Nicht-Spam-Markieren, DNS-Wechsel oder
 Neusenden. Backup/Restore/Queues und tatsächlicher Sandbox-Monatsstart weiter ausstehend.
+
+## 30.10.2026 – verbleibende Kunden-/Backup-Abnahmen konkret vorbereitet
+
+Neuester Auftrag: verbleibende Go-Live-Punkte weiter abarbeiten. Bestehender Deploy bindet nun auch
+vorhandene Domains an; neue Domain weiter erst nach Verfügbarkeits-/Kauffreigabe. Keine Bestätigung
+über Standard-Hosting-URL bei noch offener gewünschter Domain. Stripe-Monatsstart zusätzlich nur bei
+Vorschaufreigabe, echtem Hosting, erfolgreichem gespeichertem Live-Check und HTTPS, Modus beidseitig
+abgleichen. Keine Fake-Go-Live-Writes, Mock-Registrar belegt keinen realen Domainablauf.
+Stripe-Sandbox-Publikationen anhand gespeichertem Zahlungsmodus dauerhaft Test/noindex/Formular aus,
+auch bei geänderter Betreiberadresse. Normale Live- und Legacy-/Mock-Abläufe erhalten.
+
+customer-acceptance.ts: nur zwei festgelegte eigene fiktive, bezahlte Stripe-Testbestellungen, zwei
+eigene feste Testhosts, echte Root-Zuordnung und HTTPS/Hash/Layout vor normalem Live-Check. Bestehende
+Services/Tabellen verwenden; queuefreie synchrone interne Optionen nicht aus öffentlichen Eingaben
+übernehmen. Monat1900/9900Cent und tatsächliche order_payments prüfen, wiederholter Start gleicheID,
+danach regulär Testverlängerung kündigen. Noch NICHT auf VPS gelaufen. Core geändert: regulärer
+Worker-Code-Neuaufbau nötig, kein neuer Secret-Abruf/NEU=1 nötig. customer-acceptance.md im bekannten
+Aktivierungsverzeichnis enthält Ablauf.38gezielteCore-Tests,2Produktions-Browser-E2E, Workspace-
+Typecheck/Lint/Build grün; lokale Tests sind kein externer Monatsnachweis.
+
+Backup-Script unterstützt ASK_BACKUP_URL=1/QUIESCE_WORKER=1, verdeckte private Terminaleingabe,
+Wiederanlauf via Trap, Queue-Erfolg erst nach echtem Restore/Queue-Aufruf. App-Rolle nicht aufwerten,
+RLS nicht abschalten. Backup-Verbindung weiterhin privat durch Betreiber nötig, noch kein produktiver
+Dump/Restore/backup_status. backup-next.md enthält genaue Schritte.
+
+Nutzer hat ausdrücklich eine eigene Gmail-Adresse für genau eine zusätzliche Testbestätigung genannt.
+Über Resend-Connector einmal mit Original-App-Inhalt/-PDF/-Privatlink gesendet; Provider delivered.
+Eigentliche Inbox-/Spam-Platzierung angefragt, noch unbekannt. Nicht erneut senden; private Adresse
+nicht ins öffentliche Repository. Details external-email-delivery.json. Allgemeiner Mail-Provider
+bleibt mock. Keine Registrar-Zugänge in App-Metadaten, Kontostatus INWX angefragt. Keine neuen Provider.
+Root-Firmenwebsite neu gelesen: aktuelle597/19/99, offensichtliche gesuchte Platzhalter/Altpreise nicht
+gefunden; §19-Erwähnung in AGB ausdrücklich keine Befreiungszusage. Keine Rechtsfreigabe daraus ableiten.

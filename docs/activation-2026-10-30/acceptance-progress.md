@@ -202,3 +202,62 @@ externer Inbox-Nachweis. Rohmail ohne Authentication-Results-/Spam-Verdict-Heade
 Keine DNS-/Ordneränderung oder zweite Mail ausgelöst. Tatsächlicher Transport ist nachgewiesen,
 Kunden-Zustellbarkeit weiterhin offen. Nachweis [email-delivery.json](email-delivery.json).
 Nur Dokumentationsänderung; keine erneuten Code-Tests nötig und kein App-/Worker-Deploy.
+
+## Fortsetzung: übrige Go-Live-Strecken konkret vorbereitet und Fehler behoben
+
+Betreiber beauftragt Weiterarbeit. Tatsächliche Ursache im bisherigen Deploy gefunden: vorhandene
+Domains werden nur bei neuer Registrierung angebunden. Gezielt korrigiert, ohne Domainkauf oder
+neuen Anbieter. Nicht bestätigte Domains dürfen keinen Live-Check über die Hosting-Standard-URL
+bestehen. Stripe benötigt zusätzlich Freigabe, erfolgreiches echtes HTTPS-Hosting und gespeicherten
+Live-Check; manueller Live-Status allein startet kein Abo. Mock-Registrar liefert für bereits eigene
+reale Domains keine angeblich belegten Ablaufdaten mehr.
+
+Stripe-Sandbox-Seiten bleiben am gespeicherten Zahlungsmodus dauerhaft als Test erkennbar/noindex/
+ohne aktive Formulare/Sitemap. Testschutz bleibt nach Änderung der Absenderadresse bestehen. Neuer
+begrenzter CLI verwendet vorhandene Onboarding-/Builder-/Freigabe-/Deploy-/Live-/Billing-/Kündigungs-
+Dienste für genau die beiden schon bezahlten Testkunden. Vor Live-Bestätigung tatsächlichen Inhalt,
+HTTPS, Layout und unveränderte Root-Website prüfen; erst der reguläre Live-Check setzt liveAt.
+Wiederholter Abostart muss gleiche ID ergeben, invoice.paid tatsächlich eintreffen. Nach bestätigter
+erster Test-Monatszahlung Verlängerung regulär zum Periodenende kündigen. Noch nicht extern ausgeführt.
+Details [customer-acceptance.md](customer-acceptance.md).
+
+Backup-Abnahme fragt berechtigte DB-Verbindung verdeckt nur im Operator-Terminal ab, kann Worker
+kurz anhalten und startet ihn via EXIT-Trap bei Erfolg/Fehler wieder. Queue-Ergänzung erst nach
+wirklich erfolgreichem DB-/S3-Restore; positiver Ergebniswert erst nach erfolgreichem Queue-Befehl.
+Keine Änderung von DB-Rollen/RLS. Tatsächlicher VPS-Lauf/backup_status weiterhin offen.
+Details [backup-next.md](backup-next.md).
+
+Prüfungen:32Core-Tests zu Onboarding/V4/Stripe bestanden plus6CLI-/Backup-/Queue-/Storage-Tests;
+betroffene Sandboxfälle nach letzter Schutzkorrektur erneut gezielt bestanden. Workspace-Typecheck,
+vollständiges ESLint, Produktionsbuild einschließlich Worker und2vorhandene V4-Produktions-Browser-
+E2E bestanden. Erste lokale Versuche fanden fehlende Test-Browserkonfiguration, eine unvollständige
+neue Fixture und einen Lint-Escape; Voraussetzungen/Fixture korrigiert, erneute Läufe grün.
+Unveränderte pnpm-/Dateitracing-/Standalone-Startwarnungen, kein Buildfehler. Keine echten Provider
+oder Supabase-Testresets in diesen Tests, keine Behauptung tatsächlicher Monatsstarts daraus.
+
+Zusätzlich ausdrücklich autorisierte einzelne eigene Gmail-Testmail über Resend-Connector mit
+Original-App-Text/-PDF/-Onboarding versendet. Provider delivered; Nutzerfeedback zur Ordnerplatzierung
+noch offen. Dieser zusätzliche Send ist nicht die App-Postausgangskette; deren tatsächlicher eigener
+Transport ist separat bereits nachgewiesen. [Externer Nachweis](external-email-delivery.json).
+Adresse/privater Link nicht veröffentlicht, keine automatische zweite Sendung.
+
+Firmenwebsite tatsächlich neu gelesen: sechs Haupt-/Rechtsseiten HTTP200, Verkaufsangaben597/19/99,
+kein590/49 und keine konkret gesuchten offensichtlichen Platzhalter. AGB-Erwähnung§19 ist ausdrücklich
+keine zugesicherte Steuerbefreiung. [Begrenzter Lesebefund](public-site-check.json); keine Rechtsfreigabe.
+Keine Änderung der statischen Root-Seite aus diesem Check.
+
+Konfiguration: keine Registrar-/Backup-Zugänge in App-Metadaten, lediglich Registrar-Schalter.
+Vorhandener INWX-Adapter weiterverwenden; Betreiber nach Kontostatus gefragt, keine neue Registrierung
+oder Providerwahl. Eigene Seitenwerk-Domain ersetzt keine neue Kundendomain-Registrierung.
+
+Recherche: realer Bestand weiterhin409rejected/7discovered, kein abgenommener qualifizierter Betrieb.
+Zwei aktuelle öffentliche Reinigungsanzeigen aus Essen/Witten tragen bereits eigene Websites:
+Kazemi Bau/kazemibau.de und CW Reinigungsservice/cwreinigungsservice.de, daher keine passende
+„ohne eigene Website“-Zielgruppe. Nur Leserecherche, keine Kontaktaufnahme oder Lead-Freigabe.
+Quellen: https://www.kleinanzeigen.de/s-anzeige/gebaeudereinigung-treppenhaus-buero-und-fenster-reinigung/3541131122-239-2054
+und https://www.kleinanzeigen.de/s-anzeige/cw-reinigungsservice-witten-sauberkeit-fuer-haus-buero-gewerbe/3541183157-239-1019.
+Keine Plattform als neue freigegebene automatische Primärquelle eingerichtet.
+
+Sicherheitsreadback: DRY_RUN=true, realLettersUnlocked=false, tax.operatorConfirmed=false,
+beide tatsächlichen Monatsstarts0, backup_status=null. Keine realen Zahlungen, Briefe, Domainkäufe
+oder Produktionsmigrationen. Kein vollständiger Go-Live behauptet.

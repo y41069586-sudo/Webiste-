@@ -49,6 +49,11 @@ type Ctx = {
   data: OnboardingData;
 };
 
+/** Persisted payment mode determines staging safety even if the operator changes contact details later. */
+function fictionalSandbox(ctx: Ctx): boolean {
+  return ctx.order.provider === 'stripe' && ctx.order.paymentMode === 'test';
+}
+
 async function loadCtx(siteId: string): Promise<Ctx> {
   const db = getDb();
   const site = await db.query.sites.findFirst({ where: eq(sites.id, siteId) });
@@ -239,9 +244,22 @@ function withMarker(html: string, m: string): string {
 /** Alle Dateien der Live-Website. */
 export function buildLiveFiles(ctx: Ctx, content: SiteContent, assets: PreparedAssets, version: number): SiteFile[] {
   const facts = factsFor(ctx, assets, 'live');
-  const input = renderInput(ctx, content, facts, 'live');
+  const sandbox = fictionalSandbox(ctx);
+  // The existing preview mode disables forms. Fictional public test sites must never masquerade as real businesses.
+  const input = renderInput(ctx, content, facts, sandbox ? 'preview' : 'live');
   const m = marker(ctx.site, version);
-  const html = (s: string) => withMarker(s, m);
+  const html = (s: string) =>
+    withMarker(
+      sandbox
+        ? s
+            .replace('</head>', '<meta name="wbm-sandbox-test" content="true"></head>')
+            .replace(
+              /(<body\b[^>]*>)/i,
+              '$1<p role="note" style="padding:12px 16px;margin:0;background:#eef4fb;color:#163452;font:16px/1.5 Arial,sans-serif">Fiktiver Sandbox-Test – keine echte Betriebswebsite.</p>',
+            )
+        : s,
+      m,
+    );
   const domain = ctx.customer.domain;
   const base = domain ? `https://${domain}/` : '';
   const files: SiteFile[] = [
@@ -279,11 +297,13 @@ export function buildLiveFiles(ctx: Ctx, content: SiteContent, assets: PreparedA
     },
     {
       path: 'robots.txt',
-      content: `User-agent: *\nAllow: /\n${base ? `Sitemap: ${base}sitemap.xml\n` : ''}`,
+      content: sandbox
+        ? 'User-agent: *\nDisallow: /\n'
+        : `User-agent: *\nAllow: /\n${base ? `Sitemap: ${base}sitemap.xml\n` : ''}`,
       contentType: 'text/plain; charset=utf-8',
     },
   ];
-  if (base) {
+  if (base && !sandbox) {
     const urls = ['', 'impressum.html', 'datenschutz.html'].map((p) => `<url><loc>${esc(base + p)}</loc></url>`).join('');
     files.push({
       path: 'sitemap.xml',
@@ -469,7 +489,11 @@ export async function buildSite(
 // ---------------------------------------------------------------------------
 export type DeployResult = 'deployed' | 'awaiting_domain_approval' | 'skipped' | 'domain_unavailable';
 
-export async function deploySite(siteId: string, actor = 'job:deploy-site'): Promise<DeployResult> {
+export async function deploySite(
+  siteId: string,
+  actor = 'job:deploy-site',
+  opts: { enqueueLiveCheck?: boolean } = {},
+): Promise<DeployResult> {
   const db = getDb();
   const ctx = await loadCtx(siteId);
   if (!['approved', 'deploying', 'live'].includes(ctx.site.status)) return 'skipped';
@@ -520,6 +544,8 @@ export async function deploySite(siteId: string, actor = 'job:deploy-site'): Pro
   const assets = await prepareAssets(ctx);
   const content = currentContent(ctx.site);
   const files = buildLiveFiles(ctx, content, assets, ctx.site.version);
+  if (fictionalSandbox(ctx) && files.some((f) => String(f.content).includes(ctx.customer.accessToken)))
+    throw new Error('Private Kundenlinks dürfen nicht veröffentlicht werden.');
   const dep = await hosting.deploy(project.projectId, files);
   const liveKey = `sites/${siteId}/live-v${ctx.site.version}.html`;
   await getProviders().storage.put(liveKey, files[0]!.content, 'text/html; charset=utf-8');
@@ -535,7 +561,10 @@ export async function deploySite(siteId: string, actor = 'job:deploy-site'): Pro
     })
     .where(eq(sites.id, siteId));
 
-  // 3) Domain an das Hosting binden und registrieren (auf den Kunden)
+  // Existing domains must also be attached on a new project or a hosting-provider change.
+  const domainPlan =
+    domain && ctx.customer.domainStatus === 'registered' ? await hosting.attachDomain(project.projectId, domain) : null;
+  // 3) Neue Domain registrieren (auf den Kunden); vorhandene Domains werden nicht erneut gekauft.
   if (registerNow && domain) {
     const avail = await registrar.checkAvailability([domain]);
     if (!avail[0]?.available) {
@@ -564,7 +593,7 @@ export async function deploySite(siteId: string, actor = 'job:deploy-site'): Pro
         return 'domain_unavailable';
       }
     }
-    const plan = await hosting.attachDomain(project.projectId, domain);
+    const plan = domainPlan ?? (await hosting.attachDomain(project.projectId, domain));
     const imp = ctx.data.impressum;
     await db
       .update(customers)
@@ -620,7 +649,8 @@ export async function deploySite(siteId: string, actor = 'job:deploy-site'): Pro
     actor,
     context: { provider: hosting.name, deploymentId: dep.deploymentId, version: ctx.site.version },
   });
-  await enqueue(QUEUES.liveCheck, { siteId, attempt: 0 }, { singletonKey: `live-${siteId}-${ctx.site.version}` });
+  if (opts.enqueueLiveCheck !== false)
+    await enqueue(QUEUES.liveCheck, { siteId, attempt: 0 }, { singletonKey: `live-${siteId}-${ctx.site.version}` });
   return 'deployed';
 }
 
@@ -636,7 +666,7 @@ export interface LiveCheckResult {
   checks: Record<string, boolean | string>;
 }
 
-async function probe(url: string, expectedMarker: string): Promise<LiveCheckResult> {
+async function probe(url: string, expectedMarker: string, sandbox = false): Promise<LiveCheckResult> {
   const checks: Record<string, boolean | string> = {};
   try {
     const res = await fetch(url, {
@@ -649,6 +679,8 @@ async function probe(url: string, expectedMarker: string): Promise<LiveCheckResu
     checks.marker = html.includes(`content="${expectedMarker}"`);
     checks.indexable =
       !/<meta name="robots" content="noindex/i.test(html) && !/noindex/i.test(res.headers.get('x-robots-tag') ?? '');
+    checks.indexPolicy = checks.indexable === !sandbox;
+    checks.sandboxNotice = /<meta name="wbm-sandbox-test" content="true">/.test(html) && html.includes('Fiktiver Sandbox-Test');
     checks.noBanner = !html.includes('Hinweis zum Entwurf') && !html.includes('aria-label="Vorschau"');
     const imp = await fetch(new URL('impressum.html', url), { signal: AbortSignal.timeout(20_000) });
     checks.impressum = imp.status === 200;
@@ -657,17 +689,26 @@ async function probe(url: string, expectedMarker: string): Promise<LiveCheckResu
   } catch (err) {
     checks.error = err instanceof Error ? err.message.slice(0, 200) : String(err);
   }
-  const ok = ['status', 'marker', 'indexable', 'noBanner', 'impressum', 'datenschutz'].every((k) => checks[k] === true);
+  const ok = ['status', 'marker', 'indexPolicy', sandbox ? 'sandboxNotice' : 'noBanner', 'impressum', 'datenschutz'].every(
+    (k) => checks[k] === true,
+  );
   return { ok, url, checks };
 }
 
 /** Live-Check der veröffentlichten Seite; bei Erfolg: live, Hosting-Zeitraum, Übergabe-Mail. */
-export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckResult | { skipped: string }> {
+export async function liveCheck(
+  siteId: string,
+  attempt = 0,
+  opts: { scheduleRetry?: boolean } = {},
+): Promise<LiveCheckResult | { skipped: string }> {
   const db = getDb();
   const ctx = await loadCtx(siteId);
   if (ctx.site.status !== 'deploying' && ctx.site.status !== 'live') return { skipped: `Status ${ctx.site.status}` };
   const { hosting } = getProviders();
+  const retry = (result: LiveCheckResult) => (opts.scheduleRetry === false ? result : scheduleNext(ctx, attempt, result));
   const domain = ctx.customer.domain;
+  if (domain && hosting.name !== 'mock' && ctx.customer.domainStatus !== 'registered')
+    return retry({ ok: false, url: `https://${domain}/`, checks: { domain: 'Domain noch nicht bestätigt' } });
   const useDomain = Boolean(domain && ctx.customer.domainStatus === 'registered' && hosting.name !== 'mock');
   let url: string;
   if (useDomain) {
@@ -676,21 +717,21 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
       .catch((err) => ({ active: false, details: errInfo(err).message }));
     url = `https://${domain}/`;
     if (!st.active)
-      return scheduleNext(ctx, attempt, {
+      return retry({
         ok: false,
         url,
         checks: { hosting: (st as { details?: string }).details ?? 'nicht aktiv' },
       });
   } else {
     url = ctx.site.hostingUrl ?? '';
-    if (!url) return scheduleNext(ctx, attempt, { ok: false, url: '', checks: { error: 'keine Standard-URL beim Hosting' } });
+    if (!url) return retry({ ok: false, url: '', checks: { error: 'keine Standard-URL beim Hosting' } });
   }
-  const result = await probe(url, marker(ctx.site, ctx.site.version));
+  const result = await probe(url, marker(ctx.site, ctx.site.version), fictionalSandbox(ctx));
   await db
     .update(sites)
     .set({ liveCheckJson: { ...result, attempt, at: new Date().toISOString() }, updatedAt: new Date() })
     .where(eq(sites.id, siteId));
-  if (!result.ok) return scheduleNext(ctx, attempt, result);
+  if (!result.ok) return retry(result);
 
   if (ctx.site.status === 'live') return result; // Re-Deploy einer bereits live geschalteten Seite
   const now = new Date();
@@ -699,7 +740,8 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
     ? null
     : (ctx.customer.hostingUntil ?? addMonths(now, ctx.cfg.pricing.hostingMonthsIncluded));
   let domainExpires: Date | undefined;
-  if (useDomain)
+  // A simulated registrar cannot attest the expiry of an already-owned real domain.
+  if (useDomain && getProviders().registrar.name !== 'mock')
     domainExpires = (
       await getProviders()
         .registrar.getDomainStatus(domain!)
@@ -736,7 +778,7 @@ export async function liveCheck(siteId: string, attempt = 0): Promise<LiveCheckR
       entityId: siteId,
       action: 'live',
       actor: 'job:live-check',
-      context: { url, simulated: !useDomain },
+      context: { url, simulated: !useDomain, sandboxTest: fictionalSandbox(ctx) },
     });
   });
   if (ctx.order.offerSnapshot?.billingMode === 'saved_mandate') {
