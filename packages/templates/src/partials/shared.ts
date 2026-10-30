@@ -115,13 +115,13 @@ export const REQUEST_FORMS: Record<IndustryKey, { title: string; wish: string | 
     title: 'Reservierungsanfrage',
     wish: 'Datum, Uhrzeit und Personenzahl',
     button: 'Reservierung anfragen',
-    intro: 'Fragen Sie Ihren Tisch an – wir bestätigen die Reservierung so bald wie möglich.',
+    intro: 'Fragen Sie einen Tisch an. Die Reservierung gilt erst nach unserer ausdrücklichen Bestätigung.',
   },
   beauty: {
     title: 'Terminanfrage',
     wish: 'Wunschtermin und Leistung',
     button: 'Termin anfragen',
-    intro: 'Fragen Sie Ihren Wunschtermin an – auch außerhalb der Öffnungszeiten. Wir melden uns mit einer Bestätigung.',
+    intro: 'Nennen Sie Ihre gewünschte Leistung und Ihren Wunschtermin. Vereinbart ist der Termin erst nach unserer Bestätigung.',
   },
   einzelhandel: {
     title: 'Vorab reservieren',
@@ -133,7 +133,7 @@ export const REQUEST_FORMS: Record<IndustryKey, { title: string; wish: string | 
     title: 'Probestunde anfragen',
     wish: 'Kurs und Wunschtermin',
     button: 'Probestunde anfragen',
-    intro: 'Fragen Sie eine Probestunde an – ganz ohne Anruf. Wir melden uns mit einem Termin.',
+    intro: 'Nennen Sie den gewünschten Kurs und Termin. Wir klären, ob eine Probestunde möglich ist, und melden uns zurück.',
   },
   handwerk: {
     title: 'Anfrage',

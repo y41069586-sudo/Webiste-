@@ -1,9 +1,34 @@
-import { getEnv, getProviders } from '@wbm/core';
+import { getEnv, getProviders, testSiteFormToOwnInbox } from '@wbm/core';
 import { Resend } from 'resend';
-import { adminOrNull } from '@/lib/auth';
+import { actorOf, adminOrNull } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+/** Explicit protected own-inbox acceptance; no arbitrary site, recipient, content or provider selection. */
+export async function POST(request: Request) {
+  const admin = await adminOrNull();
+  if (!admin) return new Response('unauthorized', { status: 401 });
+  if (request.headers.get('origin') !== new URL(getEnv().APP_URL).origin) return new Response('forbidden', { status: 403 });
+  const raw = await request.text();
+  if (raw.length > 200) return new Response('too large', { status: 413 });
+  let command: { check?: string; confirm?: string };
+  try {
+    command = JSON.parse(raw);
+  } catch {
+    return new Response('invalid command', { status: 400 });
+  }
+  if (command?.check !== 'site_form' || command.confirm !== 'own-inbox')
+    return new Response('explicit own-inbox confirmation required', { status: 400 });
+  try {
+    return Response.json(await testSiteFormToOwnInbox(actorOf(admin)), { headers: { 'cache-control': 'private, no-store' } });
+  } catch {
+    return Response.json(
+      { ok: false, reason: 'Own-inbox acceptance blocked or send failed; check the existing private audit/outbox.' },
+      { status: 503 },
+    );
+  }
+}
 
 /** Authenticated, read-only checks. Never returns credentials or upstream payloads. */
 export async function GET() {

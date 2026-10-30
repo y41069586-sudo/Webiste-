@@ -600,3 +600,19 @@ alle Schreibmethoden und andere Domains/Endpunkte. Keine echte Kontoprüfung dur
 behaupten.17CLI-Prüfungen und6bestehendeHosting/INWX-Tests ohne DB-Reset bestanden; tatsächlicher
 normaler Konto-Lesetest auf VPS noch offen. Einmaliger schreibgeschützter CLI-Mount genügt, kein
 weiterer Secret-Import nötig. Anleitung: docs/activation-2026-10-30/inwx-setup.md.
+
+## 30.10.2026 – Terminanfragen direkt an den Betrieb, eigene Zustellabnahme beauftragt
+
+Neueste Betreiberanweisung „Ja mach“ beauftragt die Formularweiterleitung und eine einzelne
+gekennzeichnete Testanfrage an das eigene Postfach. Kundenkontakte/automatische Antworten bleiben aus.
+Bestehende Empfängerzuordnung aus Onboarding beibehalten; Rohfelder getrennt prüfen, Anfrageart und
+Wunschtermin weiterleiten, Reply-To an Besucher. Keine automatische Terminbestätigung behaupten.
+Regulärer Mock-Mailversand jetzt503 statt falschem Erfolg; nur bezahlte Live-Kundenseiten, öffentliche
+Stripe-Sandbox-/Vorschauformulare gesperrt. Zeitlich begrenzter payload-/empfängergebundener
+Duplikatschutz statt dauerhaftem E-Mail+Nachricht-Hash. Kein allgemeines Exactly-once-Versprechen.
+Geschützte bestehende Integrationsroute erhält begrenzten eigenen Abnahme-POST: Admin+Origin+expliziter
+Befehl, nur feste fiktive bezahlte Stripe-Testbestellung, sämtliche Adressen eigenes Absenderpostfach.
+Resend nur für diesen einzelnen Aufruf übergeben; allgemeiner Mail-Provider bleibt Mock. Keine
+Seiten-/Go-Live-/Abozustände ändern. API-Annahme, Zustellung und tatsächlichen Empfang unterscheiden.
+Prüfungen und Grenzen: docs/activation-2026-10-30/site-form-routing.md. Normaler regulärer Admin-Login
+mit vorhandenem privaten Zugang tatsächlich erneut erfolgreich; Secrets nicht ins Repository.

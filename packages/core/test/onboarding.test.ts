@@ -404,6 +404,15 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     expect(kinds).toEqual(['live_handover', 'preview_ready', 'preview_ready']);
 
     // Kontaktformular der Live-Seite: Weiterleitung an den Kunden, Honeypot still verworfen
+    const previousEmailProvider = getProviders().email;
+    setProviders({
+      email: {
+        name: 'resend',
+        async send() {
+          return { messageId: 'test-form-forwarding' };
+        },
+      },
+    });
     const meta = { ua: 'x', ipHash: 'ip1', isBot: false };
     const ok = await handleSiteForm(
       s3.formKey,
@@ -427,6 +436,7 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     const forms = await db.select().from(outboundEmails).where(eq(outboundEmails.kind, 'site_form'));
     expect(forms).toHaveLength(1);
     expect(forms[0]!.toEmail).toBe('erika@example.org');
+    setProviders({ email: previousEmailProvider });
 
     // Erinnerung 30 Tage vor Ablauf (einmalig)
     await db

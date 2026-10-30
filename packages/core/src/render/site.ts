@@ -279,7 +279,7 @@ export function buildLiveFiles(ctx: Ctx, content: SiteContent, assets: PreparedA
       content: html(
         renderSubpage(input, {
           title: 'Vielen Dank für Ihre Nachricht',
-          bodyHtml: `<p>Wir haben Ihre Nachricht erhalten und melden uns so bald wie möglich bei Ihnen.</p><p><a href="./">Zurück zur Startseite</a></p>`,
+          bodyHtml: `<p>Ihre Anfrage wurde übermittelt. Der Betrieb meldet sich über die angegebenen Kontaktdaten bei Ihnen.</p><p>Ein gewünschter Termin oder eine Reservierung ist erst nach ausdrücklicher Bestätigung durch den Betrieb vereinbart.</p><p><a href="./">Zurück zur Startseite</a></p>`,
         }),
       ),
       contentType: 'text/html; charset=utf-8',

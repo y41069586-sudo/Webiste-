@@ -110,7 +110,7 @@ test.describe('Onboarding bis Go-Live', () => {
       liveUrl = (await page.getByRole('link', { name: /mock-hosting/ }).getAttribute('href'))!;
     }).toPass({ timeout: 120_000 });
 
-    // Live-Seite: indexierbar, ohne Banner, Impressum erreichbar, Formular leitet weiter
+    // Live-Seite: indexierbar, ohne Banner; der globale Mock-Mailer darf keine Zustellung vortäuschen.
     const res = await page.goto(liveUrl);
     expect(res?.status()).toBe(200);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index, follow');
@@ -127,6 +127,12 @@ test.describe('Onboarding bis Go-Live', () => {
     await page.getByLabel('Nachricht').fill('Bitte um Rückruf.');
     await page.getByLabel(/Ich bin einverstanden/).check();
     await page.locator('#frage button[type="submit"]').click();
-    await expect(page.getByRole('heading', { name: 'Vielen Dank für Ihre Nachricht' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Anfrage nicht gesendet' })).toBeVisible();
+    await expect(page.locator('main')).toContainText('Ihre Anfrage wurde nicht versendet');
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+    await page.screenshot({ path: test.info().outputPath('site-form-unavailable-390.png'), fullPage: true });
+    await page.goto(new URL('danke.html', liveUrl).toString());
+    await expect(page.locator('main')).toContainText('erst nach ausdrücklicher Bestätigung');
   });
 });

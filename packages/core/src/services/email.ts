@@ -6,7 +6,7 @@ import { outboundEmails } from '../db/schema';
 import { adminNotificationEmail, type EmailContent } from '../emails/templates';
 import { errInfo, logger } from '../logger';
 import { getProviders } from '../providers';
-import type { EmailAttachment } from '../providers/types';
+import type { EmailAttachment, EmailProvider } from '../providers/types';
 
 export interface TransactionalEmail extends EmailContent {
   kind: string;
@@ -37,10 +37,11 @@ const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
  */
 export async function sendTransactionalEmail(
   mail: TransactionalEmail,
+  options: { provider?: EmailProvider } = {},
 ): Promise<{ status: 'sent' | 'duplicate'; messageId: string | null }> {
   if (!EMAIL_RE.test(mail.to)) throw new Error(`Ungültige Empfängeradresse (${mail.kind})`);
   const db = getDb();
-  const { email } = getProviders();
+  const email = options.provider ?? getProviders().email;
   const inserted = await db
     .insert(outboundEmails)
     .values({
@@ -99,9 +100,21 @@ export async function sendTransactionalEmail(
     logger.info({ kind: mail.kind, emailId: rowId, provider: email.name }, 'E-Mail versendet');
     return { status: 'sent', messageId: res.messageId };
   } catch (err) {
-    const msg = err instanceof Error ? err.message.slice(0, 500) : String(err);
+    const formMail = mail.kind === 'site_form' || mail.kind === 'acceptance_site_form';
+    const msg = formMail
+      ? 'Formularweiterleitung fehlgeschlagen (Anbieterfehler).'
+      : err instanceof Error
+        ? err.message.slice(0, 500)
+        : String(err);
     await db.update(outboundEmails).set({ status: 'failed', error: msg }).where(eq(outboundEmails.id, rowId));
-    logger.warn({ kind: mail.kind, emailId: rowId, ...errInfo(err) }, 'E-Mail-Versand fehlgeschlagen');
+    logger.warn(
+      {
+        kind: mail.kind,
+        emailId: rowId,
+        ...(formMail ? { errorClass: err instanceof Error ? err.name : 'Error' } : errInfo(err)),
+      },
+      'E-Mail-Versand fehlgeschlagen',
+    );
     throw err;
   }
 }

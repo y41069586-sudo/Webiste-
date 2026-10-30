@@ -1,13 +1,15 @@
 import { and, asc, eq } from 'drizzle-orm';
 import type { SiteContent } from '@wbm/templates/types';
-import { appUrl } from '../config/env';
-import { getConfig } from '../config/service';
+import { appUrl, getEnv } from '../config/env';
+import { effectiveSwitches, getConfig } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
-import { changeRequests, customers, demos, events, leads, orders, sites } from '../db/schema';
+import { changeRequests, customers, demos, events, leads, orders, outboundEmails, sites } from '../db/schema';
 import { renderEmail } from '../emails/templates';
 import { formatPhoneDe } from '../leads/normalize';
-import { errInfo, logger } from '../logger';
+import { logger } from '../logger';
 import { getProviders } from '../providers';
+import { ResendEmail } from '../providers/email/resend';
+import type { EmailProvider } from '../providers/types';
 import { enqueue, QUEUES } from '../queue';
 import {
   normalizeOnboarding,
@@ -18,6 +20,7 @@ import {
 } from '../sites/onboarding-data';
 import { randomToken, sha256 } from '../util/crypto';
 import { audit } from './audit';
+import { assertNotHalted } from './budget';
 import { checkDomain } from './domains';
 import { setSiteMaintenance } from './maintenance';
 import { notifyAdmin, sendTransactionalEmail } from './email';
@@ -453,18 +456,78 @@ export interface SiteFormInput {
   message: string;
   consent: boolean;
   honeypot: string;
+  /** Optional branch-specific request fields; never a recipient supplied by the visitor. */
+  requestType?: string;
+  wish?: string;
 }
 
 export type SiteFormResult =
-  { ok: true; redirect: string } | { ok: false; reason: 'not_found' | 'invalid' | 'rate_limited'; back: string | null };
+  | { ok: true; redirect: string }
+  | { ok: false; reason: 'not_found' | 'invalid' | 'rate_limited' | 'unavailable'; back: string | null };
 
 const MAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
+const SITE_REQUEST_TITLES = new Set([
+  'Kontakt',
+  'Anfrage',
+  'Terminanfrage',
+  'Reservierungsanfrage',
+  'Probestunde anfragen',
+  'Vorab reservieren',
+]);
 
-export async function handleSiteForm(formKey: string, input: SiteFormInput, meta: RequestMeta): Promise<SiteFormResult> {
+/** The HTTP form and the protected acceptance check use the same field mapping. */
+export function siteFormInput(form: FormData): SiteFormInput {
+  const field = (name: string) => (typeof form.get(name) === 'string' ? String(form.get(name)) : '');
+  return {
+    name: field('name'),
+    email: field('email'),
+    phone: field('phone'),
+    message: field('message'),
+    consent: form.get('consent') === 'on',
+    honeypot: field('website'),
+    requestType: field('anliegen'),
+    wish: field('wunsch'),
+  };
+}
+
+/** Internal only; the public form handler never accepts this option from a request. */
+interface OwnInboxAcceptance {
+  provider: EmailProvider;
+}
+
+export async function handleSiteForm(
+  formKey: string,
+  input: SiteFormInput,
+  meta: RequestMeta,
+  acceptance?: OwnInboxAcceptance,
+): Promise<SiteFormResult> {
   if (!/^[A-Za-z0-9]{24}$/.test(formKey)) return { ok: false, reason: 'not_found', back: null };
   const db = getDb();
   const site = await db.query.sites.findFirst({ where: eq(sites.formKey, formKey) });
   if (!site || !site.formTargetEmail || site.status === 'suspended') return { ok: false, reason: 'not_found', back: null };
+  const customer = await db.query.customers.findFirst({ where: eq(customers.id, site.customerId) });
+  const order = customer ? await db.query.orders.findFirst({ where: eq(orders.id, customer.orderId) }) : null;
+  if (!customer || !order || order.status !== 'paid') return { ok: false, reason: 'not_found', back: null };
+  if (acceptance) {
+    const cfg = await getConfig();
+    const own = cfg.sender.email.trim().toLowerCase();
+    const lead = customer.leadId ? await db.query.leads.findFirst({ where: eq(leads.id, customer.leadId) }) : null;
+    if (
+      !effectiveSwitches(cfg).dryRun ||
+      acceptance.provider.name !== 'resend' ||
+      order.id !== '4991f35d-0c23-465f-b4b1-0f320d5a5f91' ||
+      order.provider !== 'stripe' ||
+      order.paymentMode !== 'test' ||
+      lead?.source !== 'mock' ||
+      !/test|fiktiv/i.test(order.customerCompany) ||
+      [site.formTargetEmail, customer.email, order.customerEmail, input.email].some(
+        (address) => address.trim().toLowerCase() !== own,
+      )
+    )
+      throw new Error('Formularabnahme ist ausschließlich für die eigene festgelegte fiktive Sandbox-Bestellung zulässig.');
+  } else if (site.status !== 'live' || (order.provider === 'stripe' && order.paymentMode === 'test')) {
+    return { ok: false, reason: 'not_found', back: null };
+  }
   const base = site.productionUrl ?? null;
   const thanks = base ? new URL('danke.html', base).toString() : appUrl('/');
   // Honeypot / Link-Spam: gleiche Antwort wie Erfolg, aber nichts senden
@@ -473,45 +536,139 @@ export async function handleSiteForm(formKey: string, input: SiteFormInput, meta
   if (
     !input.consent ||
     input.name.trim().length < 2 ||
+    input.name.trim().length > 120 ||
     !MAIL_RE.test(input.email.trim()) ||
+    input.email.trim().length > 254 ||
     input.message.trim().length < 5 ||
-    input.message.length > 4000
+    input.message.length > 4000 ||
+    (input.wish?.length ?? 0) > 300
   ) {
     return { ok: false, reason: 'invalid', back: base };
   }
+  const email = acceptance?.provider ?? getProviders().email;
+  if (email.name === 'mock') return { ok: false, reason: 'unavailable', back: base };
   const r1 = await rateLimit(db, `siteform:${site.id}:${meta.ipHash}`, 5, 3600);
   const r2 = await rateLimit(db, `siteform:${site.id}`, 100, 86400);
   if (!r1.allowed || !r2.allowed) return { ok: false, reason: 'rate_limited', back: base };
-  const customer = await db.query.customers.findFirst({ where: eq(customers.id, site.customerId) });
-  const name = input.name.trim().slice(0, 120);
+  const name = input.name.trim().replace(/[\r\n]/g, ' ');
+  const request = SITE_REQUEST_TITLES.has(input.requestType ?? '') ? input.requestType! : 'Kontaktanfrage';
+  const wish = input.wish?.trim().replace(/[\r\n]/g, ' ') ?? '';
   const text = [
-    `Neue Nachricht über das Kontaktformular Ihrer Website${customer?.domain ? ` ${customer.domain}` : ''}:`,
+    ...(acceptance ? ['GEKENNZEICHNETER TEST – fiktive Anfrage, kein echter Termin und keine Kundenkontaktaufnahme.', ''] : []),
+    `${request} über die Website von ${customer.company}${customer.domain ? ` (${customer.domain})` : ''}:`,
     '',
     `Name: ${name}`,
     `E-Mail: ${input.email.trim()}`,
     ...(input.phone.trim() ? [`Telefon: ${input.phone.trim().slice(0, 40)}`] : []),
+    ...(wish ? [`Wunsch: ${wish}`] : []),
     '',
     input.message.trim(),
     '',
+    'Dies ist eine Anfrage, keine bestätigte Buchung. Stimmen Sie einen gewünschten Termin direkt mit der anfragenden Person ab.',
+    '',
     '—',
-    'Antworten Sie direkt auf diese E-Mail, um der Person zu antworten. Die Nachricht wird von uns nicht gespeichert.',
+    'Antworten Sie direkt auf diese E-Mail, um der Person zu antworten. Der Nachrichtentext wird in SeitenWerk nicht dauerhaft gespeichert.',
   ].join('\n');
+  // A retry retains its key; the same legitimate request is allowed again in a later ten-minute window.
+  // Include recipient and all contact/request fields so distinct people or destinations do not collapse.
+  const fingerprint = sha256(
+    JSON.stringify([
+      site.formTargetEmail.toLowerCase(),
+      name,
+      input.email.trim().toLowerCase(),
+      input.phone.trim(),
+      request,
+      wish,
+      input.message.trim(),
+    ]),
+  );
+  const idempotencyKey = acceptance
+    ? `acceptance:site-form:${site.id}:resend:v1`
+    : `siteform:${site.id}:${fingerprint.slice(0, 32)}:${Math.floor(Date.now() / 600_000)}`;
   try {
-    await sendTransactionalEmail({
-      kind: 'site_form',
-      idempotencyKey: `siteform:${site.id}:${sha256(`${input.email}|${input.message}`).slice(0, 24)}`,
-      to: site.formTargetEmail,
-      replyTo: input.email.trim(),
-      subject: `Kontaktanfrage von ${name}`,
-      text,
-      html: '',
-      customerId: site.customerId,
-    });
+    await sendTransactionalEmail(
+      {
+        kind: acceptance ? 'acceptance_site_form' : 'site_form',
+        idempotencyKey,
+        to: site.formTargetEmail,
+        replyTo: input.email.trim(),
+        subject: `${acceptance ? '[TEST] ' : ''}${request} von ${name}`,
+        text,
+        html: '',
+        customerId: site.customerId,
+      },
+      { provider: email },
+    );
   } catch (err) {
-    logger.error({ siteId: site.id, ...errInfo(err) }, 'Kontaktformular: Weiterleitung fehlgeschlagen');
+    logger.error(
+      { siteId: site.id, errorClass: err instanceof Error ? err.name : 'Error' },
+      'Kontaktformular: Weiterleitung fehlgeschlagen',
+    );
     throw err;
   }
   return { ok: true, redirect: thanks };
+}
+
+/** One marked real email, only to the operator's own mailbox for the existing paid fictional fixture. */
+export async function testSiteFormToOwnInbox(actor: string) {
+  const env = getEnv();
+  const cfg = await getConfig({ fresh: true });
+  if (!effectiveSwitches(cfg).dryRun) throw new Error('Formularabnahme erfordert DRY_RUN=true.');
+  await assertNotHalted(cfg);
+  const own = cfg.sender.email.trim().toLowerCase();
+  const from = env.EMAIL_FROM.match(/(?:<|\s|^)([^<>\s]+@[^<>\s]+)(?:>|\s|$)/)?.[1]?.toLowerCase();
+  if (!MAIL_RE.test(own) || from !== own || !env.EMAIL_API_KEY)
+    throw new Error('Verifizierter eigener Absender und privater Resend-Zugang erforderlich.');
+  const db = getDb();
+  const customer = await db.query.customers.findFirst({ where: eq(customers.orderId, '4991f35d-0c23-465f-b4b1-0f320d5a5f91') });
+  const site = customer ? await db.query.sites.findFirst({ where: eq(sites.customerId, customer.id) }) : null;
+  if (!customer || !site) throw new Error('Vorhandene fiktive Testbestellung mit Kundenseite fehlt.');
+  const key = `acceptance:site-form:${site.id}:resend:v1`;
+  const previous = await db.query.outboundEmails.findFirst({ where: eq(outboundEmails.idempotencyKey, key) });
+  const form = new FormData();
+  form.set('name', 'Fiktiver Testkunde');
+  form.set('email', own);
+  form.set('anliegen', 'Terminanfrage');
+  form.set('wunsch', 'Dienstag, 10:00 Uhr – ausschließlich fiktiver Terminwunsch');
+  form.set(
+    'message',
+    'Dies ist eine gekennzeichnete Testanfrage. Bitte prüfen Sie Empfänger, Terminwunsch und Antwortfunktion. Es soll kein echter Termin vereinbart werden.',
+  );
+  form.set('consent', 'on');
+  const result = await handleSiteForm(
+    site.formKey,
+    siteFormInput(form),
+    { ua: 'SeitenWerk own-inbox acceptance', ipHash: sha256(`site-form-acceptance:${site.id}`), isBot: false },
+    {
+      provider: new ResendEmail(env.EMAIL_API_KEY, env.EMAIL_FROM),
+    },
+  );
+  if (!result.ok) throw new Error(`Formularabnahme abgewiesen: ${result.reason}`);
+  const mail = await db.query.outboundEmails.findFirst({ where: eq(outboundEmails.idempotencyKey, key) });
+  if (mail?.status !== 'sent' || mail.provider !== 'resend' || !mail.providerMessageId)
+    throw new Error('Keine tatsächliche Anbieterannahme der Testanfrage nachgewiesen.');
+  await audit(db, {
+    entity: 'site',
+    entityId: site.id,
+    action: 'site_form_acceptance',
+    actor,
+    context: {
+      provider: mail.provider,
+      messageId: mail.providerMessageId,
+      ownRecipient: true,
+      deliveryVerified: false,
+      globalProviderChanged: false,
+    },
+  });
+  return {
+    status: previous?.status === 'sent' ? 'duplicate' : 'sent',
+    messageId: mail.providerMessageId,
+    provider: 'resend',
+    ownRecipient: true,
+    deliveryVerified: false,
+    globalProviderChanged: false,
+    customerStateChanged: false,
+  };
 }
 
 /** Kunden, die das Onboarding nach einigen Tagen nicht abgeschickt haben, einmal erinnern. */
