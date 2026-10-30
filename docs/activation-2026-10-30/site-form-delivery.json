@@ -1,0 +1,80 @@
+{
+  "observedAt": "2026-10-30T19:01:54Z",
+  "deploy": {
+    "id": "6ae4e726d98c7677c65ed3ca",
+    "commit": "5ac57ef8238fa76ec00bb0a3c4534598956c1a93",
+    "state": "ready",
+    "publishedAt": "2026-10-30T18:52:37.571Z",
+    "context": "production",
+    "error": null
+  },
+  "test": {
+    "fixture": "existing paid fictional Stripe Sandbox customer site",
+    "transport": "actual app own-inbox acceptance using shared form parser, forwarding service, outbox and existing Resend adapter",
+    "providerMessageId": "01a18e28-c8b8-7661-8fa2-736a716e39b4",
+    "providerStatus": "delivered",
+    "receivedEmailId": "ba09923b-60f6-4076-8696-77b32f98ffa6",
+    "receivedAt": "2026-10-30T18:53:27.820Z",
+    "smtpMessageIdMatched": true,
+    "storedOwnRecipientMatched": true,
+    "replyToVerifiedInReceivedMessage": true,
+    "appointmentWishReceived": true,
+    "unconfirmedAppointmentNoticeReceived": true,
+    "repeatStatus": "duplicate",
+    "outboxRows": 1,
+    "folder": "spam",
+    "manualReplySent": false
+  },
+  "boundaries": {
+    "dryRun": true,
+    "generalEmailProvider": "mock",
+    "stripeMode": "test",
+    "customerSiteStatus": "preview",
+    "customerGoLiveChanged": false,
+    "monthlyBillingStarted": false,
+    "rootWebsiteUnchanged": true,
+    "realBusinessContacted": false,
+    "domainPurchased": false,
+    "lettersSent": false,
+    "mailboxClassificationChanged": false,
+    "workerCodeUpdateVerified": false,
+    "workerUpdateNeededForFutureGeneratedText": true
+  },
+  "deliverability": {
+    "providerDomainStatus": "verified",
+    "providerDkimAndSpfRecordsVerified": true,
+    "publicDmarcRecordPresent": true,
+    "dmarcPolicy": "none",
+    "dkimSignaturesPresent": true,
+    "authenticationResultsHeaderPresent": false,
+    "spamCauseProven": false,
+    "externalGmailPlacement": "not yet confirmed by operator",
+    "dnsChanged": false
+  },
+  "localChecks": {
+    "coreForms": 27,
+    "existingOnboarding": 9,
+    "paymentAndEmailAdapters": 6,
+    "templates": 112,
+    "productionBrowserE2E": 5,
+    "workspaceTypeScript": "passed",
+    "lint": "passed",
+    "productionBuildIncludingWorker": "passed",
+    "formViewports": [
+      360,
+      390,
+      430,
+      1440
+    ],
+    "minimumLabelFontPx": 14,
+    "horizontalOverflow": false
+  },
+  "limitations": [
+    "Own-inbox test is received but classified as spam; general customer forwarding stays blocked pending release.",
+    "Received headers do not provide Authentication-Results; DKIM signatures alone are not a cryptographic authentication-pass proof.",
+    "Reply-To header verified and separate recipient/visitor routing covered in isolated tests; no actual reply was sent.",
+    "The ordinary public endpoint remains closed for the fictional Sandbox customer; public HTTP gates covered in isolated production-build E2E.",
+    "No booking calendar or automatic appointment confirmation is implemented.",
+    "Duplicate suppression uses ten-minute windows; submissions across a window boundary can receive distinct keys."
+  ]
+}

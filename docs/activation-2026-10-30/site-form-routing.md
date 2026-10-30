@@ -77,6 +77,40 @@ Automatische Layoutmessung: data/exports/site-form-routing/layout-check.json.
 Produktionsdeploy und eigene Mailannahme/-zustellung werden nach dem tatsächlichen Lauf gesondert
 unter site-form-delivery.json dokumentiert; hier keine noch ausstehende Zustellung behaupten.
 
+## Tatsächliche Veröffentlichung und eigene Zustellung
+
+Code5ac57ef auf beide vorhandenen Zweige gepusht. App-Deploy6ae4e726d98c7677c65ed3ca tatsächlich
+ready/production,30.10.18:52:37UTC. Danach normal authentifizierter eigener Abnahme-POST erfolgreich.
+Zweiter Aufruf duplicate mit derselben Anbieter-ID; im tatsächlichen Postausgang genau eine Zeile.
+
+Resend delivered; tatsächlicher Empfang18:53:27UTC im eigenen Postfach. SMTP-Message-ID von gesendeter
+und empfangener Kopie identisch. Terminwunsch, klare Test-/Nichtbuchungskennzeichnung und Reply-To
+in der empfangenen Nachricht geprüft. **Empfangene Nachricht liegt im Spamordner.** Keine Umklassifizierung,
+kein weiterer Versand und keine Ursache ohne Nachweis behauptet. Tatsächliche Antwort nicht versendet.
+
+Lesende Anbieter-/DNS-Prüfung: Domain/DKIM/SPF beim Anbieter verified. Öffentlicher DKIM-Schlüssel und
+DMARC p=none vorhanden; SPF wird über die vom Anbieter bestätigten CNAMEs delegiert. Keine DNS-Änderung
+vorgenommen. Empfangene Rohmail enthält DKIM-Signaturen, aber kein Authentication-Results; das allein
+belegt keinen unabhängigen Authentifizierungs-Pass und keine Ursache der Spam-Einstufung. Rückmeldung
+zur früheren externen Gmail-Testbestätigung weiterhin offen; keine weitere Gmail-Mail geschickt.
+
+Laufzeit nach dem Test erneut gelesen: DRY_RUNtrue, allgemeiner Mail-ProviderMock, Stripe/test.
+Kundenseite unverändert preview, liveAt/billingStartedAt weiterhin leer. Root-Homepage vor/nach
+hashgleich. [Sanitisierter tatsächlicher Nachweis](site-form-delivery.json).
+
+## Worker für später erzeugte Seitentexte
+
+Die Weiterleitung läuft bereits in der aktualisierten App. Der Betreiber bedient den VPS selbst;
+die neuen Formular-/Dankeseitentexte benötigen beim nächsten Seitengenerieren auch dort den aktuellen
+Code. Ein normaler LIVE=0-Code-Neuaufbau genügt; keine neuen Secrets, kein NEU=1, kein Einmal-Code:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/y41069586-sudo/Webiste-/5ac57ef8238fa76ec00bb0a3c4534598956c1a93/infra/vps/setup.sh -o /tmp/seitenwerk-setup.sh
+NEU=0 LIVE=0 bash /tmp/seitenwerk-setup.sh
+```
+
+Dieses neue VPS-Update ist hier noch nicht nachgewiesen. Es aktiviert keinen allgemeinen Mailversand.
+
 ## Verbleibende Grenzen
 
 - Allgemeiner E-Mail-Provider bleibt bis zur passenden Betriebsfreigabe Mock. Die einzelne eigene

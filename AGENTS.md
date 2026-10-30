@@ -616,3 +616,14 @@ Resend nur für diesen einzelnen Aufruf übergeben; allgemeiner Mail-Provider bl
 Seiten-/Go-Live-/Abozustände ändern. API-Annahme, Zustellung und tatsächlichen Empfang unterscheiden.
 Prüfungen und Grenzen: docs/activation-2026-10-30/site-form-routing.md. Normaler regulärer Admin-Login
 mit vorhandenem privaten Zugang tatsächlich erneut erfolgreich; Secrets nicht ins Repository.
+
+Formularpatch5ac57ef tatsächlich gepusht/veröffentlicht: Netlify6ae4e726d98c7677c65ed3ca,
+ready/production18:52:37UTC. Eigener geschützter Abnahme-POST tatsächlich ausgeführt; genau eine
+acceptance_site_form-Mail, erneuter Aufruf duplicate, gleiche Anbieter-ID. Resend delivered und
+eigener Empfang18:53:27UTC, SMTP-ID/Inhalt/Reply-To identisch. Nachricht im Spamordner; Einstufung
+nicht verändern, keine weiteren Tests ungefragt schicken. Provider-DNS verified, DKIM-Schlüssel
+und DMARCp=none öffentlich bestätigt. Keine Authentication-Results im Rohbeleg; Spamursache offen.
+Externer Gmail-Empfang erneut nur zur Einordnung angefragt, keine neue Gmail-Mail. Regulärer
+Mail-Provider weiter Mock, DRY_RUNtrue, Stripe/test, Kundenseite preview ohne Monatsstart, Root-Hash
+unverändert. Tatsächlicher Nachweis: docs/activation-2026-10-30/site-form-delivery.json. Neues normales
+VPS-Codeupdate für später generierte Formular-/Dankeseitentexte noch offen; kein neuer Secret-Abruf.
