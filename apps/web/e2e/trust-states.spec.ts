@@ -28,8 +28,8 @@ test('ausstehende Zahlung: kein Erfolg und kein erneuter Kauf', async ({ page })
   await expect(page.getByRole('heading', { name: 'Zahlung wird geprüft' })).toBeVisible();
   await page.screenshot({ path: path.join(out, 'bestellung-processing-320.jpg'), fullPage: true, type: 'jpeg' });
   await page.goto(`/d/${demo.slug}/uebernehmen?plan=care_plus`);
-  await expect(page.getByRole('heading', { name: 'Bezahlseite nicht verfügbar' })).toBeVisible();
-  await expect(page.getByText('Für diesen Entwurf liegt bereits eine Bestellung vor.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Zahlung wird geprüft' })).toBeVisible();
+  await expect(page.getByText(/Bitte bestellen Sie nicht erneut/)).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 test('fehlgeschlagene Zahlung: keine Bestätigung, erneuter Versuch möglich', async ({ page }) => {

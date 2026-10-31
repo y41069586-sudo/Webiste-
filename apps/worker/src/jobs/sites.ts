@@ -1,10 +1,16 @@
-import { ensureSiteForCustomer, runDunning, sendOnboardingReminders, sendRenewalReminders } from '@wbm/core';
+import {
+  completePreparedOnboarding,
+  ensureSiteForCustomer,
+  runDunning,
+  sendOnboardingReminders,
+  sendRenewalReminders,
+} from '@wbm/core';
 import { buildSite, deploySite, liveCheck } from '@wbm/core/render';
 import { defineJob } from '../runtime';
 
 /** Nach Zahlung: Kundenseite aus der Demo anlegen (Onboarding-Link steckt in der Rechnungs-Mail). */
 defineJob('onboarding', async (data) => {
-  const site = await ensureSiteForCustomer(data.customerId);
+  const site = (await completePreparedOnboarding(data.customerId)) ?? (await ensureSiteForCustomer(data.customerId));
   return { siteId: site.id };
 });
 

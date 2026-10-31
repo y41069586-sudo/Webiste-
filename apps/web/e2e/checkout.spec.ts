@@ -1,61 +1,66 @@
 import { expect, test } from '@playwright/test';
-import { loginAsAdmin, payOnMockCheckout } from './helpers';
-import { seedPublishedDemo } from './seed';
+import { payOnMockCheckout, prepareWebsiteBeforePayment } from './helpers';
+import { seedPublishedDemo, setOfferVersion } from './seed';
 
-test.describe('Checkout über die Bezahlseite (Stripe, im Test simuliert)', () => {
-  test('Demo → Preiskarte → Bezahlseite → (Test-)Zahlung → Danke-Seite → Rechnung im Postausgang', async ({ page }) => {
-    const demo = seedPublishedDemo();
-    await page.goto(`/d/${demo.slug}`);
-    await page
-      .getByRole('complementary', { name: 'Website übernehmen' })
-      .getByRole('link', { name: 'Diese Website übernehmen' })
-      .click();
-    // Zwei gleichwertige Preiskarten auf der Demo, Mindestlaufzeit neben den 49 €
-    const offer = page.locator('#uebernehmen');
-    await expect(offer.getByRole('heading', { name: 'Diese Seite übernehmen' })).toBeVisible();
-    await expect(offer).toContainText('12 Monate Mindestlaufzeit');
-    await expect(offer).toContainText('Ab Monat 13 nur noch 19');
-    await offer.getByRole('link', { name: 'Einmalzahlung wählen' }).click();
-    // keine eigene Checkout-Seite: direkt zur Bezahlseite des Anbieters
-    await expect(page).toHaveURL(/\/checkout\/mock\/cs_mock_/);
-    await expect(page.getByText('simuliert Stripe Checkout')).toBeVisible();
-    await expect(page.getByLabel('Firmenname')).not.toHaveValue('');
-    await payOnMockCheckout(page, { domain: 'e2e-beispielbetrieb.de' });
-    await expect(page.getByRole('heading', { name: 'Vielen Dank für Ihre Bestellung!' })).toBeVisible();
-    await expect(page.getByText(/Rechnung RE-\d{4}-\d{4}/)).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Jetzt Angaben eintragen' })).toHaveAttribute(
-      'href',
-      /\/onboarding\/[A-Za-z0-9]{32}$/,
-    );
+test.beforeAll(async () => {
+  setOfferVersion('v4');
+  await new Promise((r) => setTimeout(r, 3100));
+});
+test.afterAll(async () => {
+  setOfferVersion('legacy');
+});
 
-    // Erneuter Aufruf: bereits bestellt, kein Onboarding-Link
-    await page.goto(`/checkout/${demo.slug}`);
-    await expect(page.getByRole('heading', { name: 'Bereits bestellt' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Angaben/ })).toHaveCount(0);
-
-    // Admin: Bestellung bezahlt (Angaben aus der Bezahlseite), Rechnung wird erzeugt und versendet
-    await loginAsAdmin(page);
-    await page.goto('/admin/orders');
-    await expect(page.getByRole('cell', { name: 'e2e-beispielbetrieb.de' })).toBeVisible();
-    await expect(async () => {
-      await page.goto('/admin/outbox');
-      await expect(page.getByRole('cell', { name: /Rechnung-RE-\d{4}-\d{4}\.pdf/ })).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 60_000 });
+test('Mobile Demo → private Einrichtung mit Logo → Zusammenfassung → Zahlung → übernommene Einrichtung', async ({ page }) => {
+  test.setTimeout(240_000);
+  const demo = seedPublishedDemo();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/d/${demo.slug}`);
+  await page.locator('.sw-demo-buy').click();
+  await expect(page).toHaveURL(new RegExp(`/einrichten/${demo.slug}$`));
+  await expect(page.getByRole('heading', { name: 'Machen Sie Ihre Website zu Ihrer.' })).toBeVisible();
+  await expect(page.getByText(/Erst danach prüfen Sie den Tarif/)).toBeVisible();
+  await page.locator('[name="texts.wishes"]').fill('Bitte die Überschrift im persönlichen Gespräch abstimmen.');
+  await page.getByLabel('Logo', { exact: true }).setInputFiles({
+    name: 'logo.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwcAgAAAFkAMErqCR/AAAAAElFTkSuQmCC', 'base64'),
   });
+  await expect(page.getByRole('status')).toContainText('Bilder gespeichert');
+  await expect(page.locator('[name="texts.wishes"]')).toHaveValue('Bitte die Überschrift im persönlichen Gespräch abstimmen.');
+  await page.getByRole('button', { name: 'Zwischenspeichern' }).click();
+  await expect(page.getByText(/Zwischengespeichert/)).toBeVisible();
+  await page.reload();
+  await expect(page.locator('[name="texts.wishes"]')).toHaveValue('Bitte die Überschrift im persönlichen Gespräch abstimmen.');
+  await expect(page.getByRole('img', { name: 'Ihr Logo' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await prepareWebsiteBeforePayment(page, { domain: 'e2e-vor-zahlung.de', plan: 'basis' });
+  await expect(page.getByLabel('Ihr Name')).toHaveCount(0); // No duplicate collection at Stripe.
+  await payOnMockCheckout(page);
+  await expect(page.getByRole('heading', { name: 'Vielen Dank für Ihre Bestellung!' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ihre Einrichtung wurde übernommen' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Zur Einrichtung und Vorschau' })).toHaveAttribute(
+    'href',
+    /\/onboarding\/[A-Za-z0-9]{32}$/,
+  );
+  await page.goto(`/checkout/${demo.slug}`);
+  await expect(page.getByRole('heading', { name: 'Bereits bestellt' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Vorschau/ })).toHaveCount(0);
+});
 
-  test('Monatlich: Mindestlaufzeit auf der Bezahlseite, Abo-Zahlung; Abbrechen führt zurück zu den Preiskarten', async ({
-    page,
-  }) => {
-    const demo = seedPublishedDemo();
-    // ohne gewählte Option: zurück zu den beiden Karten (keine Vorauswahl)
-    await page.goto(`/checkout/${demo.slug}`);
-    await expect(page).toHaveURL(new RegExp(`/d/${demo.slug}#uebernehmen$`));
-    await page.goto(`/d/${demo.slug}/uebernehmen?plan=monthly`);
-    await expect(page.getByText(/12 Monate Mindestlaufzeit/)).toBeVisible();
-    await page.getByRole('button', { name: 'Abbrechen' }).click();
-    await expect(page).toHaveURL(new RegExp(`/d/${demo.slug}\\?abgebrochen=1&plan=monthly#uebernehmen$`));
-    await page.goto(`/d/${demo.slug}/uebernehmen?plan=monthly`);
-    await payOnMockCheckout(page, { name: 'Moritz Monat', email: 'moritz@example.org' });
-    await expect(page.getByRole('heading', { name: 'Vielen Dank für Ihre Bestellung!' })).toBeVisible();
-  });
+test('Care+: Kosten vor Zahlung, keine Vorauswahl und gespeicherte Rückkehr nach Abbruch', async ({ page }) => {
+  test.setTimeout(240_000);
+  const demo = seedPublishedDemo();
+  await page.goto(`/d/${demo.slug}/uebernehmen?plan=care_plus`);
+  await prepareWebsiteBeforePayment(page, { domain: 'e2e-care-rueckkehr.de', plan: 'care_plus' });
+  await payOnMockCheckout(page, { outcome: 'Abbrechen' });
+  await expect(page).toHaveURL(new RegExp(`/einrichten/${demo.slug}/pruefen\\?abgebrochen=1$`));
+  await expect(page.getByRole('status')).toContainText('Ihre Einrichtung ist weiterhin gespeichert');
+  await expect(page.locator('[name="plan"]:checked')).toHaveCount(0);
+  await expect(page.getByText('597,00 € einmalig + insgesamt 19,00 €/Monat ab Go-Live', { exact: true })).toBeVisible();
+  await expect(page.getByText('597,00 € einmalig + insgesamt 99,00 €/Monat ab Go-Live', { exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Zurück und Angaben bearbeiten' }).click();
+  await expect(page.locator('[name="domain"]')).toHaveValue('e2e-care-rueckkehr.de');
+  await prepareWebsiteBeforePayment(page, { domain: 'e2e-care-rueckkehr.de', plan: 'care_plus' });
+  await payOnMockCheckout(page);
+  await expect(page.getByRole('heading', { name: 'Ihre Einrichtung wurde übernommen' })).toBeVisible();
 });

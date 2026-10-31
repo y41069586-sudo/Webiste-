@@ -231,8 +231,8 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
     ${
       v4
         ? `<ol class="mt-5 grid gap-3 text-sm sm:grid-cols-3">${[
-            ['Tarif wählen', 'Bedingungen in Ruhe prüfen und online bestellen.'],
-            ['Inhalte ergänzen', 'Ihre Angaben, Texte und Wünsche – wir stellen den Entwurf fertig.'],
+            ['Website einrichten', 'Angaben, Logo und Wünsche unverbindlich ergänzen.'],
+            ['Prüfen und bestellen', 'Einrichtung, Tarif und Kosten prüfen, danach sicher bezahlen.'],
             ['Prüfen und freigeben', 'Erst nach Ihrer Freigabe geht die Website online.'],
           ]
             .map(
@@ -259,7 +259,7 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
             v4
               ? `<ul class="mt-3 space-y-3"><li><strong>Wir stellen den Entwurf fertig.</strong> Mit Ihren bestätigten Angaben, Texten, berechtigten Bildern und den vereinbarten Anpassungen.</li><li><strong>Sie behalten die Freigabe.</strong> Sie prüfen Ihre Inhalte und die fertige Vorschau, bevor wir die Website veröffentlichen.</li><li><strong>Wir richten die Website technisch ein.</strong> Der gewählte Monatstarif übernimmt anschließend Hosting, SSL und den vereinbarten Betreuungsumfang.</li></ul><p class="mt-4">Die Monatsgebühr beginnt erst nach bestätigtem Go-Live. Care+ enthält Basis vollständig. Zusatzfunktionen, größere Umbauten und Domains außerhalb des vereinbarten Umfangs benötigen Ihre gesonderte Zustimmung.</p>`
               : ''
-          }<p class="mt-3">Sie übermitteln Ihre tatsächlichen Inhalte und Änderungswünsche. Wir stellen den Entwurf fertig, richten die vereinbarten technischen Leistungen ein und veröffentlichen erst nach Ihrer Freigabe.</p><ol class="mt-4 space-y-3"><li><strong>1. Online bestellen</strong><br>Tarif und Bedingungen prüfen.</li><li><strong>2. Inhalte ergänzen</strong><br>Firmenangaben, rechtliche Texte, eigene Bilder und Wünsche übermitteln.</li><li><strong>3. Prüfen und freigeben</strong><br>Website abstimmen. Erst nach bestätigtem Go-Live beginnt die Monatsgebühr.</li></ol><p class="mt-4">Zusatzseiten, größere Umbauten und Leistungen außerhalb des Tarifs benötigen ein gesondertes Angebot. Domainumfang, Kündigungsfrist und Übergabe sind in den verlinkten Vertragsbedingungen beschrieben.</p></details>`
+          }<p class="mt-3">Sie übermitteln Ihre tatsächlichen Inhalte und Änderungswünsche. Wir stellen den Entwurf fertig, richten die vereinbarten technischen Leistungen ein und veröffentlichen erst nach Ihrer Freigabe.</p><ol class="mt-4 space-y-3"><li><strong>1. Website einrichten</strong><br>Firmenangaben, rechtliche Texte, Bilder und Wünsche unverbindlich ergänzen.</li><li><strong>2. Prüfen und bestellen</strong><br>Einrichtung, Tarif und alle Kosten prüfen; anschließend bezahlen.</li><li><strong>3. Prüfen und freigeben</strong><br>Website abstimmen. Erst nach bestätigtem Go-Live beginnt die Monatsgebühr.</li></ol><p class="mt-4">Zusatzseiten, größere Umbauten und Leistungen außerhalb des Tarifs benötigen ein gesondertes Angebot. Domainumfang, Kündigungsfrist und Übergabe sind in den verlinkten Vertragsbedingungen beschrieben.</p></details>`
         : ''
     }
     ${demo.guaranteeNote ? `<p class="mt-4 text-sm text-[#374151]">${esc(demo.guaranteeNote)}</p>` : ''}
@@ -268,7 +268,7 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
         ? `<details class="mt-6 rounded-xl border border-[#d1d5db] bg-white p-5"><summary class="cursor-pointer text-lg font-semibold">Ihre Fragen zur Übernahme</summary>${[
             [
               'Was passiert nach dem Kauf?',
-              'Nach der Einmalzahlung ergänzen Sie Ihre Angaben. Wir stimmen die Anpassungen mit Ihnen ab; die Veröffentlichung erfolgt erst nach Ihrer Freigabe.',
+              'Ihre zuvor gespeicherten Angaben werden übernommen. Wir stimmen die Anpassungen mit Ihnen ab; die Veröffentlichung erfolgt erst nach Ihrer Freigabe.',
             ],
             [
               'Wann geht die Website online?',
@@ -407,8 +407,8 @@ ${jsonLd}
     banner =
       `<aside class="sw-demo-context" aria-label="Hinweis zum Entwurf"><strong>Unverbindlicher Website-Entwurf</strong> von ${esc(demo.sender.company)} für ${esc(facts.name)}. Dies ist nicht die offizielle Website des Betriebs.</aside>
 +<aside class="sw-demo-toolbar" aria-label="Website übernehmen"><div class="sw-demo-toolbar-inner">
-+  <span class="sw-provider-mark">${brandMarkHtml(24)}</span><p class="sw-demo-toolbar-title text-sm"><strong>Ihr Entwurf.</strong> In Ruhe ansehen, direkt übernehmen.</p>
-+  <div class="sw-demo-actions"><a href="${demo.offers?.length ? '#uebernehmen' : esc(demo.checkoutUrl)}" class="sw-demo-buy">Diese Website übernehmen</a><a href="#frage" class="sw-demo-ask">Fragen</a></div>
++  <span class="sw-provider-mark">${brandMarkHtml(24)}</span><p class="sw-demo-toolbar-title text-sm"><strong>Ihr Entwurf.</strong> Erst einrichten, dann kostenpflichtig bestellen.</p>
++  <div class="sw-demo-actions"><a href="${esc(demo.checkoutUrl)}" class="sw-demo-buy">Website übernehmen</a><a href="#uebernehmen" class="sw-demo-ask">Preise und Leistungen</a><a href="#frage" class="sw-demo-ask">Fragen</a></div>
 +</div></aside>`.replace(/^\+/gm, '');
   } else if (mode === 'preview') {
     banner = `<aside class="sticky top-0 z-50 bg-[#1e3a8a] px-4 py-2 text-center text-sm text-white" aria-label="Vorschau">Vorschau – diese Seite ist noch nicht veröffentlicht.</aside>`;

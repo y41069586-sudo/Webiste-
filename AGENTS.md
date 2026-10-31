@@ -245,7 +245,6 @@ Fortlaufender Umsetzungsstand: `docs/v4-quality-handoff.md`; früherer Prüfstan
   Demos und nachträglich fehlgeschlagene/offene Qualitätsprüfungen blockieren Versand erneut.
   Ein früheres approved darf diesen späteren Befund nicht umgehen.
 
-
 ## Verbindliches Redesign-Gate (26.10.2026)
 
 - Frühere technische Ultimate-Abnahme ist keine gestalterische Freigabe. Drei Maler-Konzepte zuerst,
@@ -261,7 +260,6 @@ Fortlaufender Umsetzungsstand: `docs/v4-quality-handoff.md`; früherer Prüfstan
 Kein Push ohne neue ausdrückliche Freigabe. Lokale allgemeine Funktionskorrekturen, Geräte-Mockups,
 Personalisierung und Abnahmegalerie sind beauftragt. Drei neue Maler-Stile weiterhin nicht auf andere
 Branchen übertragen. Vorhandene andere Templates dürfen mit fiktiven Profilen geprüft werden.
-
 
 ## Aktueller Einzelauftrag 1 – Demoqualität
 
@@ -975,3 +973,11 @@ Testbrief wird wiederverwendet, um keine stillen neuen KI-Aufrufe zu erzeugen. N
 keine Post/Domain/Zahlung/Daemonstart. Ausführung auf VPS noch offen. Danach tatsächliches
 Test-PDF und Qualität prüfen, eigenen Papierdruck gezielt vorbereiten. Allgemeine Post bleibt
 gesperrt; keinen physischen Versand oder kompletten bezahlten Go-Live behaupten.
+
+## Einrichtung vor Zahlung – Betreiberauftrag 31.10.2026
+
+- Neue öffentliche Übernahme: `/d/[slug]/uebernehmen` → private `/einrichten/[slug]` → Zusammenfassung/Tarif → explizite POST-Aktion → Stripe. GET darf keine Bezahl-Session erzeugen.
+- Vollständiges bestehendes Onboarding inklusive optionaler Logos/Fotos kommt vor die Zahlung; Preise und Folgekosten bleiben vorab zugänglich und werden vor Checkout transparent gezeigt. Keine Tarif-/Zustimmungsvorauswahl.
+- Private Entwürfe in bestehenden Settings, HttpOnly-Cookie, keine Tokens in URLs. Immutable Bestellkopie vor Provider-Aufruf; Übergabe erst nach bestätigter Zahlung. Bestehende bezahlte Kunden behalten ihren Onboarding-Zugang.
+- `completePreparedOnboarding` übernimmt Daten und reiht über den normalen Worker den Website-Bau ein. Keine doppelte KI-Generierung allein wegen wiederholter Übergabeaufrufe.
+- Details, Prüfnachweise und Image-Update ohne Workerstart: `docs/activation-2026-10-31/prepayment-setup.md`. Kein neuer Steuerstatus, Stripe-Live-Modus oder allgemeiner Worker-/Versandstart durch diese UI-Änderung.

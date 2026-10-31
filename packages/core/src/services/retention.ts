@@ -21,6 +21,7 @@ import { raiseAlert } from './budget';
 import { transitionLead } from './lead-state';
 import { cleanupRateLimits } from './rate-limit';
 import { anonymizeLead } from './suppression';
+import { cleanupCheckoutDrafts } from './checkout-drafts';
 import { purgeObjectionTexts } from './objections';
 
 /** Leads, die (noch) Kunden sind oder kaufen – deren Daten löscht der Job nie. */
@@ -253,7 +254,7 @@ export async function runRetention(now = new Date(), actor = 'job:retention'): P
     .where(and(isNotNull(alerts.acknowledgedAt), lt(alerts.createdAt, addDays(now, -90))))
     .returning({ id: alerts.id });
   await cleanupRateLimits(db);
-  r.housekeeping = wh.length + sess.length + al.length;
+  r.housekeeping = wh.length + sess.length + al.length + (await cleanupCheckoutDrafts(now));
 
   // 9) Hinweis auf abgelaufenes Hosting ohne Verlängerung (keine automatische Abschaltung)
   const ended = await db

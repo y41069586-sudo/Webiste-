@@ -5,7 +5,7 @@ import { appUrl, getEnv } from '../config/env';
 import { effectiveSwitches, getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
 import { getDb, type DbOrTx } from '../db/client';
-import { customers, demos, events, leads, orders, webhookEvents } from '../db/schema';
+import { customers, demos, events, leads, orders, settings, webhookEvents } from '../db/schema';
 import { paymentFailedEmail } from '../emails/templates';
 import { buildInvoiceData, nextInvoiceNumber, orderAmounts, planAmounts } from '../invoices/build';
 import { errInfo, logger } from '../logger';
@@ -13,11 +13,14 @@ import { getProviders } from '../providers';
 import { CHECKOUT_FIELDS, type CollectedCustomer, type PaymentEvent } from '../providers/types';
 import { enqueue, QUEUES } from '../queue';
 import { ORDER_PLANS, type Actor, type OrderPlan } from '../types';
+import { setupFingerprint, setupSnapshotKey, type CheckoutPreparation, type SetupSnapshot } from './checkout-drafts';
+import { onboardingErrors } from '../sites/onboarding-data';
 import { randomToken } from '../util/crypto';
 import { addMonths, formatEuro } from '../util/time';
 import { audit } from './audit';
 import { raiseAlert } from './budget';
 import { checkDomain } from './domains';
+import { completePreparedOnboarding } from './sites';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
@@ -161,7 +164,17 @@ export type StartCheckoutResult =
  * Bestellung anlegen und zum Zahlungsanbieter weiterleiten. Doppelklicks liefern dieselbe
  * Session; ältere offene Bestellungen desselben Leads werden beendet.
  */
-export async function startCheckout(slug: string, raw: CheckoutInput, meta: RequestMeta): Promise<StartCheckoutResult> {
+export async function startCheckout(
+  slug: string,
+  raw: CheckoutInput,
+  meta: RequestMeta,
+  preparation?: CheckoutPreparation,
+): Promise<StartCheckoutResult> {
+  if (
+    preparation &&
+    (onboardingErrors(preparation.data) || preparation.fingerprint !== setupFingerprint(preparation.data, preparation.assetKeys))
+  )
+    return { ok: false, error: 'Die Einrichtungsangaben sind unvollständig.' };
   const ctx = await getCheckoutContext(slug);
   if (ctx.state === 'ordered') return { ok: false, error: 'Für diesen Entwurf liegt bereits eine Bestellung vor.' };
   if (ctx.state === 'disabled') return { ok: false, error: ctx.reason };
@@ -219,38 +232,55 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
     ),
     orderBy: desc(orders.createdAt),
   });
-  if (reusable?.checkoutUrl) return { ok: true, url: reusable.checkoutUrl, orderId: reusable.id };
+  if (reusable?.checkoutUrl) {
+    const snapshot = await db.query.settings.findFirst({ where: eq(settings.key, setupSnapshotKey(reusable.id)) });
+    if ((snapshot?.value as SetupSnapshot | undefined)?.fingerprint === preparation?.fingerprint)
+      return { ok: true, url: reusable.checkoutUrl, orderId: reusable.id };
+  }
 
   await cancelOpenOrders(lead.id, 'neuer Checkout');
 
-  const [order] = await db
-    .insert(orders)
-    .values({
-      leadId: lead.id,
-      demoId: demo.id,
-      provider: getProviders().payment.name,
-      paymentMode: paymentModeAtCheckout(),
-      plan,
-      offerSnapshot: isV4Tier(plan) ? v4Offer(plan, new Date().toISOString(), cfg.offers.billingMode ?? 'saved_mandate') : null,
-      amountCents: amounts.grossCents,
-      netCents: amounts.netCents,
-      vatCents: amounts.vatCents,
-      vatRatePercent: amounts.vatRatePercent,
-      currency: 'eur',
-      status: 'pending',
-      customerCompany: input.company,
-      customerName: input.contactName,
-      customerEmail: input.email,
-      customerPhone: input.phone || null,
-      billingAddressJson: { street: input.street, postalCode: input.postalCode, city: input.city, country: 'DE' },
-      domainWish: domain,
-      b2bConfirmed: true,
-      termsAcceptedAt: new Date(),
-      termsVersion: cfg.legal.termsVersion,
-      subscriptionOptIn,
-    })
-    .returning();
-  if (!order) throw new Error('Bestellung konnte nicht angelegt werden');
+  const order = await db.transaction(async (tx) => {
+    const [created] = await tx
+      .insert(orders)
+      .values({
+        leadId: lead.id,
+        demoId: demo.id,
+        provider: getProviders().payment.name,
+        paymentMode: paymentModeAtCheckout(),
+        plan,
+        offerSnapshot: isV4Tier(plan) ? v4Offer(plan, new Date().toISOString(), cfg.offers.billingMode ?? 'saved_mandate') : null,
+        amountCents: amounts.grossCents,
+        netCents: amounts.netCents,
+        vatCents: amounts.vatCents,
+        vatRatePercent: amounts.vatRatePercent,
+        currency: 'eur',
+        status: 'pending',
+        customerCompany: input.company,
+        customerName: input.contactName,
+        customerEmail: input.email,
+        customerPhone: input.phone || null,
+        billingAddressJson: { street: input.street, postalCode: input.postalCode, city: input.city, country: 'DE' },
+        domainWish: domain,
+        b2bConfirmed: true,
+        termsAcceptedAt: new Date(),
+        termsVersion: cfg.legal.termsVersion,
+        subscriptionOptIn,
+      })
+      .returning();
+    if (!created) throw new Error('Bestellung konnte nicht angelegt werden');
+    if (preparation)
+      await tx.insert(settings).values({
+        key: setupSnapshotKey(created.id),
+        value: {
+          ...preparation,
+          leadId: lead.id,
+          demoId: demo.id,
+          expiresAt: new Date(Date.now() + 14 * 86400_000).toISOString(),
+        } satisfies SetupSnapshot,
+      });
+    return created;
+  });
 
   await db.transaction(async (tx) => {
     await recordEvent(tx, {
@@ -283,7 +313,7 @@ export async function startCheckout(slug: string, raw: CheckoutInput, meta: Requ
           : p.packageDescription,
       customerEmail: input.email,
       successUrl: appUrl(`/checkout/${slug}/erfolg?session_id={CHECKOUT_SESSION_ID}`),
-      cancelUrl: appUrl(`/checkout/${slug}?abgebrochen=1`),
+      cancelUrl: appUrl(preparation ? `/einrichten/${slug}/pruefen?abgebrochen=1` : `/checkout/${slug}?abgebrochen=1`),
       metadata: {
         kind: 'order',
         orderId: order.id,
@@ -717,6 +747,11 @@ export async function fulfillOrder(
 }
 
 async function afterPaid(orderId: string, customerId: string): Promise<void> {
+  try {
+    await completePreparedOnboarding(customerId, { enqueueBuild: false });
+  } catch (err) {
+    logger.error({ orderId, ...errInfo(err) }, 'Einrichtung nach Zahlung wird über den Folgejob erneut versucht');
+  }
   try {
     await enqueue(QUEUES.sendInvoice, { orderId }, { singletonKey: `invoice-${orderId}` });
     await enqueue(QUEUES.onboarding, { customerId }, { singletonKey: `onboarding-${customerId}` });
@@ -1234,8 +1269,14 @@ export async function simulateMockPayment(
   const info = await mockCheckoutInfo(sessionId);
   if (!info) throw new Error('Simulierte Zahlung nicht verfügbar');
   const { order, slug } = info;
-  if (outcome === 'cancel')
-    return info.hosted ? checkoutCancelUrl(slug, info.order.plan) : appUrl(`/checkout/${slug}?abgebrochen=1`);
+  if (outcome === 'cancel') {
+    const setup = await getDb().query.settings.findFirst({ where: eq(settings.key, setupSnapshotKey(info.order.id)) });
+    return setup
+      ? appUrl(`/einrichten/${slug}/pruefen?abgebrochen=1`)
+      : info.hosted
+        ? checkoutCancelUrl(slug, info.order.plan)
+        : appUrl(`/checkout/${slug}?abgebrochen=1`);
+  }
   const p = getProviders().payment as unknown as PaymentProviderWithSign;
   const fire = async (ev: Omit<PaymentEvent, 'eventId' | 'rawType'> & { rawType: string }) => {
     const raw = JSON.stringify({

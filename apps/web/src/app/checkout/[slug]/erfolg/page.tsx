@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import {
   confirmCheckoutReturn,
+  getOnboardingContext,
   errInfo,
   getConfig,
   DEFAULT_CONFIG,
@@ -31,6 +32,8 @@ export default async function SuccessPage({
     // Der Webhook übernimmt die Verbuchung; hier nur Hinweis anzeigen
     logger.warn({ ...errInfo(err) }, 'Erfolgsseite: Abgleich fehlgeschlagen');
   }
+  const onboarding = res.state === 'paid' && res.customerToken ? await getOnboardingContext(res.customerToken) : null;
+  const prepared = onboarding?.state === 'submitted';
   const mockEmail = res.state === 'paid' && getProviders().email.name === 'mock';
   return (
     <PublicShell company={cfg.sender.company}>
@@ -49,15 +52,18 @@ export default async function SuccessPage({
                 ? 'Der E-Mail-Versand ist noch nicht freigeschaltet. Rechnung und Bestätigung werden nur im Testpostausgang abgelegt; es wird keine E-Mail zugestellt.'
                 : 'Rechnung und Bestellbestätigung kommen in den nächsten Minuten per E-Mail.'}
             </p>
-            <h2 className="mt-6 mb-2 text-lg font-semibold">Nächster Schritt: Ihre Angaben</h2>
+            <h2 className="mt-6 mb-2 text-lg font-semibold">
+              {prepared ? 'Ihre Einrichtung wurde übernommen' : 'Nächster Schritt: Ihre Angaben'}
+            </h2>
             <p className="text-slate-700">
-              Für Impressum, Leistungen, Öffnungszeiten und gegebenenfalls Logo und Fotos brauchen wir noch ein paar Angaben – Sie
-              können die Inhalte in Ruhe zusammentragen.
+              {prepared
+                ? 'Ihre Angaben, Texte, Bilder und Wunschdomain sind gespeichert. Wir bereiten die Vorschau zur Freigabe vor. Es wird noch nichts veröffentlicht.'
+                : 'Für Impressum, Leistungen, Öffnungszeiten und gegebenenfalls Logo und Fotos brauchen wir noch ein paar Angaben – Sie können die Inhalte in Ruhe zusammentragen.'}
               {!mockEmail ? ' Den persönlichen Link finden Sie auch in der E-Mail.' : ''}
             </p>
             {res.customerToken ? (
               <a href={`/onboarding/${res.customerToken}`} className="btn-site btn-primary mt-5">
-                Jetzt Angaben eintragen
+                {prepared ? 'Zur Einrichtung und Vorschau' : 'Jetzt Angaben eintragen'}
               </a>
             ) : null}
           </>

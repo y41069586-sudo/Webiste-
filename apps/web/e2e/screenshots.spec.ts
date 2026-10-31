@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Browser } from '@playwright/test';
 import { payOnMockCheckout } from './helpers';
-import { seedPublishedDemo } from './seed';
+import { seedPublishedDemo, legacyHostedCheckout } from './seed';
 
 /**
  * Screenshots der Firmen-Website und der Kauf-Strecke (Desktop 1440 × 900, Handy 390 × 844), ganzseitig.
@@ -48,7 +48,7 @@ test.describe('Screenshots', () => {
     // Kauf-Strecke: Demo → Bezahlseite (Stripe, simuliert) → Danke → Angaben
     const demo = seedPublishedDemo();
     await shoot(browser, `/d/${demo.slug}`, 'kauf-1-entwurf');
-    await page.goto(`/d/${demo.slug}/uebernehmen?plan=one_time`);
+    await page.goto(legacyHostedCheckout(demo.slug));
     await expect(page.getByRole('heading', { name: 'Testzahlung' })).toBeVisible();
     await shoot(browser, page.url(), 'kauf-2-bezahlseite');
     await payOnMockCheckout(page);

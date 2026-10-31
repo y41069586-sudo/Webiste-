@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { seedPublishedDemo, setOfferVersion } from './seed';
-import { payOnMockCheckout } from './helpers';
+import { payOnMockCheckout, prepareWebsiteBeforePayment } from './helpers';
 
 test.beforeAll(async () => {
   setOfferVersion('v4');
@@ -23,28 +23,19 @@ test('V4: mobile Tarifkarten, echte Formularzustimmung und gesperrter Aboabschlu
   await expect(offers.getByRole('link', { name: 'Mit Care+ übernehmen' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await offers.getByRole('link', { name: 'Mit Care+ übernehmen' }).click();
-  await expect(page.getByRole('heading', { name: 'Testzahlung' })).toBeVisible();
+  await prepareWebsiteBeforePayment(page, { domain: 'v4-browser-fixture.de', plan: 'care_plus' });
   await expect(page.getByText(/597,00/).first()).toBeVisible();
-  await expect(page.getByText(/ich stimme dem gewählten Monatstarif/)).toContainText(/99,00/);
-  await expect(page.getByLabel(/AGB/)).not.toBeChecked();
+  await expect(page.getByText(/99,00/).first()).toBeVisible();
   await payOnMockCheckout(page, { domain: 'v4-browser-fixture.de' });
   await expect(page.getByRole('heading', { name: 'Vielen Dank für Ihre Bestellung!' })).toBeVisible();
   await expect(page.getByText('Testmodus: Dies ist eine Testbestellung. Es wurde kein echtes Geld bezahlt.')).toBeVisible();
   await expect(page.getByText(/es wird keine E-Mail zugestellt/)).toBeVisible();
-  const onboarding = await page.getByRole('link', { name: 'Jetzt Angaben eintragen' }).getAttribute('href');
+  const onboarding = await page.getByRole('link', { name: 'Zur Einrichtung und Vorschau' }).getAttribute('href');
   const token = onboarding!.split('/').at(-1)!;
   await page.goto(`/verlaengern/${token}`);
   await expect(page.getByRole('heading', { name: 'SeitenWerk Care+' })).toBeVisible();
   await expect(page.getByText(/Sie müssen kein zweites Abo abschließen/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Monatstarif ausdrücklich bestätigen' })).toHaveCount(0);
-  await page.goto(`/onboarding/${token}`);
-  await page.getByLabel('Rechtsform').selectOption('Einzelunternehmen');
-  await page.getByLabel('Telefon', { exact: true }).fill('030 00000000');
-  await page
-    .getByLabel('Ihre Datenschutzerklärung (Text einfügen)')
-    .fill('Fiktive Datenschutzerklärung für den isolierten Test. '.repeat(15));
-  await page.getByLabel(/Ich bestätige, dass die Angaben/).check();
-  await page.getByRole('button', { name: /Angaben absenden/ }).click();
   await expect(async () => {
     await page.goto(`/preview/${token}`);
     await expect(page.getByRole('heading', { name: 'Vorschau Ihrer Website' })).toBeVisible({ timeout: 2000 });

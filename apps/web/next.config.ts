@@ -54,7 +54,7 @@ const nextConfig: NextConfig = {
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
       },
       {
-        source: '/(onboarding|preview|verlaengern|checkout)/:path*',
+        source: '/(einrichten|onboarding|preview|verlaengern|checkout)/:path*',
         headers: [
           { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
           { key: 'Cache-Control', value: 'no-store' },

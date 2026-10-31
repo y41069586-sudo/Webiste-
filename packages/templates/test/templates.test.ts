@@ -41,7 +41,10 @@ describe('Templates', () => {
         expect(html).toContain('<html lang="de">');
         expect(html).toContain('<meta name="robots" content="noindex, nofollow, noarchive">');
         expect(html).toContain('Unverbindlicher Website-Entwurf');
-        expect(html).toContain('Diese Website übernehmen');
+        expect(html).toContain('Website übernehmen');
+        expect(html).toContain('Preise und Leistungen');
+        expect(html).toContain('Erst einrichten, dann kostenpflichtig bestellen.');
+        expect(html).toContain(`href="${demoInput(t.id, palette, t.group).demo!.checkoutUrl}" class="sw-demo-buy"`);
         expect(html).toContain('href="#uebernehmen"');
         expect(html).toContain('Frage per WhatsApp');
         expect(html).toContain('https://wa.me/491701234567?text=');

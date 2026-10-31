@@ -63,6 +63,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     : '';
   const page = html
     .toString('utf8')
+    // Upgrade only our purchase toolbar in already stored demos; business content stays untouched.
+    .replace(
+      /<a href="#uebernehmen" class="sw-demo-buy">[^<]*<\/a>/,
+      `<a href="/d/${slug}/uebernehmen" class="sw-demo-buy">Website übernehmen</a><a href="#uebernehmen" class="sw-demo-ask">Preise und Leistungen</a>`,
+    )
+    .replace('In Ruhe ansehen, direkt übernehmen.', 'Erst einrichten, dann kostenpflichtig bestellen.')
+    .replace('Nach der Einmalzahlung ergänzen Sie Ihre Angaben.', 'Ihre vor der Zahlung gespeicherten Angaben werden übernommen.')
     .replaceAll(EXPIRES_PLACEHOLDER, label)
     .replace('<h2 id="uebernehmen-titel"', `${notice}<h2 id="uebernehmen-titel"`)
     .replace('</body>', cfg.metrics.engagementBeacon ? `<script>${BEACON_SCRIPT}</script></body>` : '</body>');

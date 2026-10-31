@@ -1,16 +1,17 @@
 import { and, asc, eq } from 'drizzle-orm';
 import type { SiteContent } from '@wbm/templates/types';
+import { setupSnapshotKey, type SetupSnapshot } from './checkout-drafts';
 import { appUrl, getEnv } from '../config/env';
 import { effectiveSwitches, getConfig } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
-import { changeRequests, customers, demos, events, leads, orders, outboundEmails, sites } from '../db/schema';
+import { changeRequests, customers, demos, events, leads, orders, outboundEmails, sites, settings } from '../db/schema';
 import { renderEmail } from '../emails/templates';
 import { formatPhoneDe } from '../leads/normalize';
 import { logger } from '../logger';
 import { getProviders } from '../providers';
 import { ResendEmail } from '../providers/email/resend';
 import type { EmailProvider } from '../providers/types';
-import { enqueue, QUEUES } from '../queue';
+import { enqueue, getBoss, QUEUES } from '../queue';
 import {
   normalizeOnboarding,
   onboardingErrors,
@@ -47,8 +48,8 @@ export async function customerByToken(token: string): Promise<Customer | null> {
 
 /** Startwerte des Formulars aus Lead, Bestellung und Demo-Texten (nichts erfunden). */
 export function onboardingDefaults(input: {
-  customer: Customer;
-  order: typeof orders.$inferSelect;
+  customer: Pick<Customer, 'company' | 'contactName' | 'phone' | 'email' | 'domain'>;
+  order: Pick<typeof orders.$inferSelect, 'billingAddressJson' | 'domainWish'>;
   lead: typeof leads.$inferSelect | null;
   content: SiteContent | null;
 }): OnboardingData {
@@ -107,6 +108,15 @@ export async function ensureSiteForCustomer(customerId: string, db: DbOrTx = get
   const demo = order.demoId ? await db.query.demos.findFirst({ where: eq(demos.id, order.demoId) }) : undefined;
   const lead = customer.leadId ? ((await db.query.leads.findFirst({ where: eq(leads.id, customer.leadId) })) ?? null) : null;
   const content = storedSiteContent(demo?.contentJson);
+  const snapshotRow =
+    order.status === 'paid'
+      ? await db.query.settings.findFirst({ where: eq(settings.key, setupSnapshotKey(order.id)) })
+      : undefined;
+  const prepared = snapshotRow?.value as SetupSnapshot | undefined;
+  const setup =
+    prepared && prepared.leadId === order.leadId && prepared.demoId === order.demoId && !onboardingErrors(prepared.data)
+      ? prepared
+      : null;
   const [site] = await db
     .insert(sites)
     .values({
@@ -120,8 +130,12 @@ export async function ensureSiteForCustomer(customerId: string, db: DbOrTx = get
           : {}),
       } as unknown as Record<string, unknown>,
       formKey: randomToken(24),
-      formTargetEmail: customer.email,
-      onboardingJson: onboardingDefaults({ customer, order, lead, content }) as unknown as Record<string, unknown>,
+      formTargetEmail: setup?.data.formTargetEmail ?? customer.email,
+      assetKeys: setup?.assetKeys ?? {},
+      onboardingJson: (setup?.data ?? onboardingDefaults({ customer, order, lead, content })) as unknown as Record<
+        string,
+        unknown
+      >,
       status: 'onboarding',
     })
     .onConflictDoNothing({ target: sites.customerId })
@@ -129,6 +143,42 @@ export async function ensureSiteForCustomer(customerId: string, db: DbOrTx = get
   const s = site ?? (await db.query.sites.findFirst({ where: eq(sites.customerId, customerId) }))!;
   await db.update(customers).set({ siteId: s.id, updatedAt: new Date() }).where(eq(customers.id, customerId));
   return s;
+}
+
+/** Paid preparation flows straight into preview generation. Never publishes or buys a domain. */
+export async function completePreparedOnboarding(
+  customerId: string,
+  opts: { enqueueBuild?: boolean } = {},
+): Promise<Site | null> {
+  const db = getDb();
+  const customer = await db.query.customers.findFirst({ where: eq(customers.id, customerId) });
+  if (!customer) return null;
+  const order = await db.query.orders.findFirst({ where: eq(orders.id, customer.orderId) });
+  if (order?.status !== 'paid') return null;
+  const snapshot = await db.query.settings.findFirst({ where: eq(settings.key, setupSnapshotKey(order.id)) });
+  if (!snapshot) return null; // Legacy purchases still use their existing onboarding.
+  const site = await ensureSiteForCustomer(customerId);
+  if (site.status === 'onboarding') {
+    const result = await saveOnboarding(customer.accessToken, site.onboardingJson as unknown as OnboardingData, {
+      submit: true,
+      actor: 'payment:prepared-onboarding',
+      enqueueBuild: opts.enqueueBuild,
+    });
+    if (!result.ok) throw new Error('Gespeicherte Einrichtung konnte nicht übernommen werden.');
+  } else if (site.status === 'generating' && opts.enqueueBuild !== false) {
+    // A standard queue's singletonKey alone does not deduplicate created/active jobs.
+    // Retry a missing enqueue, without scheduling another paid model call while a build is already pending.
+    const pending = await (
+      await getBoss()
+    )
+      .getDb()
+      .executeSql(
+        `SELECT id FROM pgboss.job WHERE name = $1 AND data->>'siteId' = $2 AND state IN ('created', 'retry', 'active') LIMIT 1`,
+        [QUEUES.buildSite, site.id],
+      );
+    if (!pending.rows.length) await enqueue(QUEUES.buildSite, { siteId: site.id }, { singletonKey: `build-${site.id}` });
+  }
+  return (await db.query.sites.findFirst({ where: eq(sites.id, site.id) }))!;
 }
 
 export interface UploadInfo {

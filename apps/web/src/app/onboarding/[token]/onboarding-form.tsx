@@ -33,6 +33,8 @@ interface Props {
   token: string;
   initial: OnboardingData;
   photos: { id: string }[];
+  externalPending?: boolean;
+  setupAction?: (prev: OnboardingState, form: FormData) => Promise<OnboardingState>;
 }
 
 function Section({ id, title, intro, children }: { id: string; title: string; intro?: ReactNode; children: ReactNode }) {
@@ -97,8 +99,11 @@ function F(props: {
   );
 }
 
-export function OnboardingForm({ token, initial, photos }: Props) {
-  const [state, action, pending] = useActionState<OnboardingState, FormData>(onboardingAction.bind(null, token), {});
+export function OnboardingForm({ token, initial, photos, setupAction, externalPending }: Props) {
+  const [state, action, pending] = useActionState<OnboardingState, FormData>(
+    setupAction ?? onboardingAction.bind(null, token),
+    {},
+  );
   const v = state.values ?? initial;
   const e = state.fieldErrors ?? {};
   const [mode, setMode] = useState(v.hours.mode);
@@ -148,7 +153,7 @@ export function OnboardingForm({ token, initial, photos }: Props) {
   };
 
   return (
-    <form action={action} onSubmit={onSubmit} className="space-y-6" noValidate>
+    <form id={setupAction ? 'prepayment-form' : undefined} action={action} onSubmit={onSubmit} className="space-y-6" noValidate>
       <div ref={msgRef} tabIndex={-1} aria-live="polite">
         {state.error ? (
           <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
@@ -592,7 +597,7 @@ export function OnboardingForm({ token, initial, photos }: Props) {
             type="submit"
             name="intent"
             value="save"
-            disabled={pending}
+            disabled={pending || externalPending}
             className="rounded-[8px] border border-slate-300 bg-white px-4 py-3 font-medium shadow-sm hover:bg-slate-50 disabled:opacity-60"
           >
             Zwischenspeichern
@@ -601,10 +606,16 @@ export function OnboardingForm({ token, initial, photos }: Props) {
             type="submit"
             name="intent"
             value="submit"
-            disabled={pending}
+            disabled={pending || externalPending}
             className="btn-site btn-primary flex-1 disabled:opacity-60"
           >
-            {pending ? 'Einen Moment …' : 'Angaben absenden – Vorschau erstellen'}
+            {externalPending
+              ? 'Bitte Bild-Upload abwarten …'
+              : pending
+                ? 'Einen Moment …'
+                : setupAction
+                  ? 'Angaben übernehmen und weiter'
+                  : 'Angaben absenden – Vorschau erstellen'}
           </button>
         </div>
       </section>

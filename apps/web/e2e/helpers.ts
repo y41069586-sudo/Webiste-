@@ -85,15 +85,48 @@ export async function loginAsAdmin(page: Page): Promise<void> {
 /** Simulierte Stripe-Bezahlseite ausfüllen (Angaben erfasst der Anbieter) und bezahlen. */
 export async function payOnMockCheckout(
   page: import('@playwright/test').Page,
-  o: { name?: string; email?: string; domain?: string; outcome?: string } = {},
+  o: { name?: string; email?: string; domain?: string; outcome?: string; plan?: string } = {},
 ): Promise<void> {
   const { expect } = await import('@playwright/test');
+  if (/\/einrichten\//.test(new URL(page.url()).pathname)) await prepareWebsiteBeforePayment(page, o);
   await expect(page.getByRole('heading', { name: 'Testzahlung' })).toBeVisible();
-  await page.waitForLoadState('networkidle');
-  await page.getByLabel('Ihr Name').fill(o.name ?? 'Erika Beispiel');
-  await page.getByLabel('E-Mail').fill(o.email ?? 'erika@example.org');
-  await page.getByLabel('Wunschdomain').fill(o.domain ?? `e2e-${Date.now()}.de`);
-  await page.getByLabel(/als Unternehmer/).check();
-  await page.getByLabel(/AGB/).check();
+  if (await page.getByLabel('Ihr Name', { exact: true }).count()) {
+    await page.getByLabel('Ihr Name').fill(o.name ?? 'Erika Beispiel');
+    await page.getByLabel('E-Mail').fill(o.email ?? 'erika@example.org');
+    await page.getByLabel('Wunschdomain').fill(o.domain ?? `e2e-${Date.now()}.de`);
+    await page.getByLabel(/als Unternehmer/).check();
+    await page.getByLabel(/AGB/).check();
+  }
   await page.getByRole('button', { name: o.outcome ?? 'Erfolgreich bezahlen (Karte)' }).click();
+}
+
+/** Full public setup before the simulated payment; no repeated data collection at Stripe. */
+export async function prepareWebsiteBeforePayment(
+  page: Page,
+  o: { name?: string; email?: string; domain?: string; plan?: string } = {},
+): Promise<void> {
+  const { expect } = await import('@playwright/test');
+  if (!new URL(page.url()).pathname.endsWith('/pruefen')) {
+    await expect(page.getByRole('heading', { name: 'Machen Sie Ihre Website zu Ihrer.' })).toBeVisible();
+    const fill = (name: string, value: string) => page.locator(`[name="${name}"]`).fill(value);
+    await fill('impressum.owner', o.name ?? 'Erika Beispiel');
+    await fill('impressum.email', o.email ?? 'erika@example.org');
+    await fill('impressum.phone', '0231 123456');
+    await page.locator('[name="impressum.legalForm"]').selectOption('Einzelunternehmen');
+    await fill('privacyText', 'Fiktive Datenschutzerklärung ausschließlich für diesen isolierten Test. '.repeat(12));
+    await fill('formTargetEmail', o.email ?? 'anfragen@example.org');
+    await fill('domain', o.domain ?? `e2e-${Date.now()}.de`);
+    await page.locator('[name="confirmed"]').check();
+    await page.getByRole('button', { name: 'Angaben übernehmen und weiter', exact: true }).click();
+  }
+  await expect(page.getByRole('heading', { name: 'Alles vorbereitet. Prüfen Sie Ihre Angaben.' })).toBeVisible();
+  const options = page.locator('[name="plan"]');
+  const chosen = options.first();
+  if (o.plan) await page.locator(`[name="plan"][value="${o.plan}"]`).check();
+  else await chosen.check();
+  await page.locator('[name="b2b"]').check();
+  await page.locator('[name="terms"]').check();
+  await page.locator('[name="subscription"]').check();
+  await page.getByRole('button', { name: 'Angaben übernehmen und weiter zur Zahlung' }).click();
+  await expect(page.getByRole('heading', { name: 'Testzahlung' })).toBeVisible();
 }

@@ -47,3 +47,15 @@ function seedDemo(pendingReview: boolean, profile?: { name: string; branch: stri
   const json = out.slice(out.indexOf('{'));
   return JSON.parse(json) as SeededDemo;
 }
+
+/** Existing paid customers keep their original post-payment form. This fixture never adds a public checkout bypass. */
+export function legacyHostedCheckout(slug: string): string {
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+  const out = execFileSync('pnpm', ['--silent', '--filter', '@wbm/core', 'exec', 'tsx', 'scripts/e2e-legacy-checkout.ts', slug], {
+    cwd: root,
+    env: { ...process.env, ...e2eEnv, LOG_LEVEL: 'silent' },
+    encoding: 'utf8',
+    timeout: 30_000,
+  });
+  return JSON.parse(out.slice(out.indexOf('{'))).url;
+}

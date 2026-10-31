@@ -3,7 +3,7 @@ import { renderInvoiceHtml, type InvoiceData } from '@wbm/templates';
 import { appUrl } from '../config/env';
 import { getConfig } from '../config/service';
 import { getDb } from '../db/client';
-import { customers, orderPayments, orders } from '../db/schema';
+import { customers, orderPayments, orders, sites } from '../db/schema';
 import { orderConfirmationEmail, recurringInvoiceEmail, refundEmail } from '../emails/templates';
 import { buildCancellationData, nextInvoiceNumber, orderAmounts } from '../invoices/build';
 import { getProviders } from '../providers';
@@ -43,7 +43,9 @@ export async function sendOrderInvoice(orderId: string): Promise<'sent' | 'alrea
   const customer = await db.query.customers.findFirst({ where: eq(customers.orderId, orderId) });
   if (!customer) throw new Error('Kunde zur Bestellung fehlt');
   const { pdf, number } = await ensureInvoicePdf(orderId);
+  const site = await db.query.sites.findFirst({ where: eq(sites.customerId, customer.id) });
   const mail = orderConfirmationEmail(cfg, {
+    prepared: Boolean(site?.onboardingSubmittedAt),
     name: order.customerName,
     company: order.customerCompany,
     invoiceNumber: number,

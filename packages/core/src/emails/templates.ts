@@ -86,6 +86,7 @@ export function orderConfirmationEmail(
     invoiceNumber: string;
     amount: string;
     onboardingUrl: string;
+    prepared?: boolean;
     domain: string | null;
     /** Option B: Ende der Mindestlaufzeit (formatiert) */
     monthlyMinTermEnds?: string | null;
@@ -114,11 +115,20 @@ export function orderConfirmationEmail(
     blocks: [
       `vielen Dank für Ihre Bestellung – die Zahlung über ${d.amount} ist eingegangen. Die Rechnung ${d.invoiceNumber} finden Sie im Anhang.`,
       ...terms,
-      'Damit Ihre Website online gehen kann, brauchen wir noch ein paar Angaben von Ihnen: Impressum, gegebenenfalls Logo und Fotos, Ihre Leistungen und Öffnungszeiten. Das dauert etwa 10 Minuten.',
-      { button: { href: d.onboardingUrl, label: 'Angaben für die Website eintragen' } },
+      d.prepared
+        ? 'Ihre vor der Zahlung gespeicherte Einrichtung wurde übernommen: Betriebsdaten, Texte, Bilder, Anfrage-Empfänger und Wunschdomain. Wir bereiten die Vorschau vor; veröffentlicht wird erst nach Ihrer Freigabe.'
+        : 'Damit Ihre Website online gehen kann, brauchen wir noch ein paar Angaben von Ihnen: Impressum, gegebenenfalls Logo und Fotos, Ihre Leistungen und Öffnungszeiten. Das dauert etwa 10 Minuten.',
+      {
+        button: {
+          href: d.onboardingUrl,
+          label: d.prepared ? 'Einrichtung und Vorschau ansehen' : 'Angaben für die Website eintragen',
+        },
+      },
       {
         list: [
-          'Sie tragen Ihre Angaben ein (der Link bleibt gültig, Sie können jederzeit weitermachen).',
+          d.prepared
+            ? 'Ihre gespeicherten Angaben bilden die Grundlage für die Fertigstellung.'
+            : 'Sie tragen Ihre Angaben ein (der Link bleibt gültig, Sie können jederzeit weitermachen).',
           'Wir passen die Website an und schicken Ihnen eine Vorschau.',
           `Sie geben die Vorschau frei oder wünschen Änderungen (bis zu ${cfg.onboarding.includedChangeRounds} Runden inklusive).`,
           d.domain

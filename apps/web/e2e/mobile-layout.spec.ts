@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import { payOnMockCheckout } from './helpers';
-import { seedPublishedDemo } from './seed';
+import { seedPublishedDemo, legacyHostedCheckout } from './seed';
 
 /**
  * Handy-Layout: Firmen-Website, Kauf-Strecke und Demos aller Branchengruppen auf kleinen bis großen Handys.
@@ -180,7 +180,7 @@ test.describe('Handy-Layout', () => {
       await check(browser, `/d/${demo.slug}`, `demo-${d.branch}`);
     }
     const demo = seedPublishedDemo();
-    await page.goto(`/d/${demo.slug}/uebernehmen?plan=one_time`);
+    await page.goto(legacyHostedCheckout(demo.slug));
     await expect(page.getByRole('heading', { name: 'Testzahlung' })).toBeVisible();
     await check(browser, page.url(), 'kauf-bezahlseite');
     await payOnMockCheckout(page);

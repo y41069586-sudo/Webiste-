@@ -24,7 +24,7 @@ export default async function CheckoutPage({
     redirect(
       plan === 'one_time' || plan === 'monthly' || plan === 'basis' || plan === 'care_plus'
         ? appUrl(`/d/${slug}/uebernehmen?plan=${plan}`)
-        : appUrl(`/d/${slug}#uebernehmen`),
+        : appUrl(`/d/${slug}/uebernehmen`),
     );
   }
   const cfg = publicOperatorSettings(await getConfig(), DEFAULT_CONFIG.sender);

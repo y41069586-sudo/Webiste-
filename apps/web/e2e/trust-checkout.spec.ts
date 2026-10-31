@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { seedPublishedDemo, setOfferVersion } from './seed';
-import { payOnMockCheckout } from './helpers';
+import { payOnMockCheckout, prepareWebsiteBeforePayment } from './helpers';
 import { measureTrustPages } from './trust-performance';
 
 const out = path.resolve(process.env.QUALITY_EXPORT_DIR ?? '../../data/exports/task3-checkout/after');
@@ -58,7 +58,7 @@ for (const [index, [name, branch, city]] of profiles.entries()) {
         await page.screenshot({ path: path.join(out, `${id}-demo-${width}.jpg`), fullPage: true, type: 'jpeg', quality: 82 });
     }
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.locator('.sw-demo-buy').click();
+    await page.getByRole('link', { name: 'Preise und Leistungen', exact: true }).click();
     await expect(page).toHaveURL(/#uebernehmen$/);
     const offer = page.locator('#uebernehmen');
     await expect(offer).toContainText('Was Sie beauftragen');
@@ -74,16 +74,21 @@ for (const [index, [name, branch, city]] of profiles.entries()) {
       style: '.sw-demo-toolbar { visibility:hidden }',
     });
     await offer.getByRole('link', { name: `Mit ${plan} übernehmen`, exact: true }).click();
+    await prepareWebsiteBeforePayment(page, {
+      email: `task3-${id}@example.test`,
+      domain: `task3-test-${id}.de`,
+      plan: plan === 'Basis' ? 'basis' : 'care_plus',
+    });
     await expect(page.getByRole('heading', { name: 'Testzahlung' })).toBeVisible();
     await expect(page.getByText('Testmodus – simuliert Stripe Checkout, keine echte Zahlung')).toBeVisible();
     await page.screenshot({ path: path.join(out, `${id}-checkout-390.jpg`), fullPage: true, type: 'jpeg', quality: 85 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     if (index === 0) {
       await payOnMockCheckout(page, { outcome: 'Abbrechen' });
-      await expect(page).toHaveURL(new RegExp(`/d/${demo.slug}\\?abgebrochen=1&plan=basis#uebernehmen`));
-      await expect(page.getByRole('status')).toContainText('Zuletzt gewählter Tarif: Basis');
+      await expect(page).toHaveURL(new RegExp(`/einrichten/${demo.slug}/pruefen\\?abgebrochen=1`));
+      await expect(page.getByRole('status')).toContainText('Ihre Einrichtung ist weiterhin gespeichert');
       await page.screenshot({ path: path.join(out, '01-abbruch.jpg'), fullPage: false, type: 'jpeg' });
-      await page.getByRole('link', { name: 'Mit Basis übernehmen', exact: true }).click();
+      await prepareWebsiteBeforePayment(page, { plan: 'basis' });
     }
     if (index === 0) {
       const measured = await measureTrustPages(
@@ -110,8 +115,10 @@ for (const [index, [name, branch, city]] of profiles.entries()) {
     const success = page.url();
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Vielen Dank für Ihre Bestellung!' })).toBeVisible();
-    await page.getByRole('link', { name: 'Jetzt Angaben eintragen' }).click();
-    await expect(page.getByLabel('Rechtsform')).toBeVisible();
+    await page.getByRole('link', { name: 'Zur Einrichtung und Vorschau' }).click();
+    await expect(
+      page.getByRole('heading', { name: /Ihre Angaben liegen uns vor|Vielen Dank – Ihre Angaben sind da/ }),
+    ).toBeVisible();
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: path.join(out, `${id}-onboarding.jpg`), fullPage: true, type: 'jpeg', quality: 82 });
     expect(errors).toEqual([]);

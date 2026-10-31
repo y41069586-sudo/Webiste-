@@ -1,7 +1,7 @@
 import { deflateSync } from 'node:zlib';
 import { expect, test, type Page } from '@playwright/test';
 import { payOnMockCheckout } from './helpers';
-import { seedPublishedDemo } from './seed';
+import { seedPublishedDemo, legacyHostedCheckout } from './seed';
 
 /** Kleines gültiges PNG für den Logo-Upload. */
 function png(w = 60, h = 20): Buffer {
@@ -39,7 +39,7 @@ function png(w = 60, h = 20): Buffer {
 
 async function buyDemo(page: Page): Promise<string> {
   const demo = seedPublishedDemo();
-  await page.goto(`/d/${demo.slug}/uebernehmen?plan=one_time`);
+  await page.goto(legacyHostedCheckout(demo.slug));
   await payOnMockCheckout(page);
   const link = page.getByRole('link', { name: 'Jetzt Angaben eintragen' });
   await expect(link).toBeVisible();
