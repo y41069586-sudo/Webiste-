@@ -2,6 +2,20 @@
 
 ## Aktueller Abschlussstand nach INWX-Freigabe und VPS-Bestätigung
 
+**Technischer Nachtest bestanden, 31.10.2026 um 14:31 UTC:** Kontroll-Demo jetzt pending_review,
+alle technischen Checks bestanden. Kalibrierter Lighthouse100/100/100/100; Standardwert86 bleibt
+im Bericht, gleicher Netzwerkrahmen. LCP/FCP1,12s, TBT0, CLS0. Keine erneute KI-Generierung.
+Damit ist die technische Leistungsprüfung abgeschlossen; visuelle/inhaltsbezogene Freigabe bleibt
+eine eigene Prüfung. Keine automatische9,5-Bewertung oder Versandfreigabe.
+
+Interner redaktioneller Brief-Prüfentwurf mit tatsächlicher Website-Komposition und bestätigtem
+Einzugs-/Übergabeangebot erzeugt: einseitig A4, keine erkannten DOM-/PDF-Layoutfehler,
+Wahrheitsprüfung und QR-Decodierung bestanden. Datei privat unter
+data/activation-2026-10-31/Kontrollbrief-Entwurf.pdf. Diese Fassung ist ausdrücklich keine
+abgenommene automatische KI-Brieferzeugung; QR benötigt Admin-Anmeldung und Empfänger ist
+der Kontrollbetrieb. Für einen echten Probebrief an den Betreiber die normale Testbrief-Funktion
+mit eigener geprüfter Empfängeranschrift verwenden. Kein Brief versandt, keine Demo veröffentlicht.
+
 **Isolierter Messbericht vom VPS:** 14,7 KB gzip-HTML, FCP/LCP 1,88 Sekunden, CLS 0, aber
 708,5 ms blockierte Rechenzeit und CPU-Benchmark nur 126. Der Standardlauf bleibt mit 81 Punkten
 gespeichert. Die feste zusätzliche 4x-Verlangsamung ist laut [Lighthouse-Dokumentation](https://github.com/GoogleChrome/lighthouse/blob/main/docs/throttling.md#cpu-throttling)

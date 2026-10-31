@@ -920,3 +920,29 @@ kein Folge-Rebuildjob, keine Freigabe, kein Versand und kein Workerstart. Neuer 
 wird regulär in demos.qa_result_json gespeichert; nach Betreiberlauf diesen lesen (alter
 control-performance:-Bericht bleibt als historischer Diagnosenachweis erhalten).
 VPS-Anwendung der Kalibrierung noch offen; keinen Erfolg oder 9,5-Punkte-Qualität vorwegnehmen.
+
+## 31.10.2026 – technische Kontroll-Demo bestanden, interner Brief-Prüfentwurf erstellt
+
+Betreiber meldet --recheck fertig. Direkt in DB bestätigt: Demo pending_review, alle Checks
+passed, kalibrierter Lighthouse 100/100/100/100; Standard-4x-Performance 86 weiterhin im Bericht.
+Benchmark im Standardlauf456, Kalibrierfaktor1.216, LCP/FCP1122ms, TBT0, CLS0; Netzprofil erhalten.
+Kein neuer KI-Aufruf. Gestaltung/Bild-/Textfreigabe bleibt ausdrücklich unvollständig; keine
+9,5-Gesamtnote aus technischen Messwerten ableiten und keine Freigabezähler vorweg erhöhen.
+
+Aktuelle Desktop-/Mobil-/Kompositbilder und HTML authentifiziert aus der App geladen und visuell
+angesehen. Interner redaktioneller Brief-Prüfentwurf unter data/activation-2026-10-31/
+Kontrollbrief-Entwurf.pdf erstellt, anhand bestätigtem Einzugs-/Wohnungsübergabeangebot sowie
+Malerarbeiten/kleinen Reparaturen, vorhandenen tatsächlichen Absenderdaten und konkreter
+Kleinanzeigen-Quelle. Gleiche Briefkomposition/Layout-/Wahrheits-/PDF-/QR-Prüfer verwendet.
+LetterPreviewInput unterstützt dafür jetzt belegten Personalisierungskontext und Desktopbild.
+Einseitig A4, keine DOM-/PDF-Layoutfehler, QR im PDF korrekt decodiert, Wahrheitscheck bestanden.
+
+WICHTIG: redaktioneller Prüfentwurf, KEIN Nachweis eines automatisch geschriebenen KI-Briefs
+oder kanonisch freigegebenen Versand-PDFs. PDF deutlich intern markiert; QR führt zur geschützten
+Admin-Vorschau und erfordert Anmeldung. Keine öffentliche Erreichbarkeit behaupten, kein
+Empfängerversand und keine Freigabe in DB gesetzt. Für echten eigenen Papier-Probebrief muss die
+normale Testbrief-Funktion an die bestätigte eigene Empfängeranschrift rendern; aktuelles PDF
+adressiert den Kontrollbetrieb und darf nicht unbesehen versandt werden. Unbekannte Steuerfelder
+weiter leer. Private Quellen/Personendaten/PDFs/Screenshots nicht ins öffentliche Git schreiben.
+Typecheck/ESLint und tatsächliche PDF-/QR-/Wahrheitsprüfung bestanden. Aktuelle Abnahme/Belege
+in docs/activation-2026-10-30/go-live-status.md, keine weitere Leistungs-Testschleife verlangen.

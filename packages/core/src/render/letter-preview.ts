@@ -19,6 +19,8 @@ import { qrDataUri } from './letter';
 export interface LetterPreviewInput {
   source?: LeadSourceKind;
   sourceReference?: string;
+  personalization?: ComposeInput['personalization'];
+  desktopScreenshotDataUri?: string | null;
   cfg: AppConfig;
   industry: Industry | null;
   /** Slot-Variante oder Altformat */
@@ -63,6 +65,8 @@ export async function renderLetterPreview(i: LetterPreviewInput): Promise<Letter
     claimTexts: slotRender?.claimSpans.map((s) => s.text),
     cfg: i.cfg,
     recipient: i.recipient,
+    personalization: i.personalization,
+    desktopScreenshotDataUri: i.desktopScreenshotDataUri ?? undefined,
     domain: i.domain,
     rating: null,
     compositeDataUri: i.compositeDataUri ?? null,
