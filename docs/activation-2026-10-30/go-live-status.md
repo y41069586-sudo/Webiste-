@@ -50,5 +50,12 @@ verdeckt, kein verwendbarer privater CLI-Buildtoken. Im bestehenden Projekt kann
 Deploys → Trigger deploy → Deploy site ausführen. Noch keinen erfolgreichen Deploy dieses Commits
 behaupten; bisher veröffentlichter Provider-/Kostenstand bleibt `2345428`.
 
+Aktueller Nachtrag: Kontrollstrecken-Commit `4b39524` ist inzwischen nachweislich veröffentlicht
+(Netlify `6ae5e39538428cc0f08fa842`, ready, 12:49:21 UTC); vorherige Pending-Aussage überholt.
+Betreiber hat danach INWX-Produktion für bezahlte Kundenaufträge ausdrücklich freigegeben.
+Production-Variablen in Netlify gespeichert, zusätzliche Zahlungssperre im Code implementiert,
+VPS-Abgleich und folgender App-Deploy gesondert nachzuweisen. Keine Domain gekauft.
+[Freigabe, Umsetzung und Grenzen](inwx-production-approval-2026-10-31.md).
+
 Keine echte Kundenbestellung, Briefe an Betriebe oder Domainkäufe aus dieser Statusprüfung.
 DRY_RUN=true und bestehende Empfängerversand-/Live-Checkout-Sperren unverändert.

@@ -153,7 +153,7 @@ set -e
 cd /opt/seitenwerk
 git fetch origin claude/website-brief-maschine-0d0s37
 git merge --ff-only origin/claude/website-brief-maschine-0d0s37
-python3 infra/vps/prepare-providers.py /opt/seitenwerk/.env.worker --apply
+python3 infra/vps/prepare-providers.py /opt/seitenwerk/.env.worker --apply --inwx-production
 bash infra/backup/install-managed.sh
 docker compose -f docker-compose.worker.yml run --rm -T --no-deps \
   -e CONTROL_ACCEPTANCE_CONFIRM=single-demo-no-send \
@@ -168,3 +168,10 @@ danach genau eine echte KI-Demo mit QA innerhalb des bestehenden internen Budget
 Worker wird nicht gestartet, keine Empfängerbriefe, Domainkäufe oder Live-Zahlungen. Fehler bricht
 die Folge ab. `awaiting_manual_review` bedeutet anschließend Prüfung, keine Versandfreigabe.
 Eine erfolgreiche Erstinstallation ersetzt keine Prüfung nach Eingang des physischen Probebriefs.
+
+Aktualisierung nach ausdrücklichem Betreiber-Ja: INWX-Produktion ist für bezahlte Live-Aufträge
+freigegeben und in Netlify gespeichert. Der obige private Dateiabgleich nutzt deshalb jetzt das
+ausdrückliche Flag --inwx-production; weiterhin DRY_RUN und Stripe-Test, kein Domainkauf.
+Kontrollstrecken-Commit 4b39524 ist inzwischen tatsächlich veröffentlicht, vorherige Pending-Aussage
+überholt. Neue INWX-Kaufsperre und VPS-Anwendung separat abnehmen.
+[Aktuelle Freigabe und Grenzen](inwx-production-approval-2026-10-31.md).

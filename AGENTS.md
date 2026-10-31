@@ -812,3 +812,28 @@ anfordern. Betreiber kann im bestehenden Projekt Deploys → Trigger deploy → 
 Keine neue Freigabe für diesen bereits autorisierten Code-Deploy nötig. Git-Push allein hatte keinen
 neuen Build ausgelöst. 49 unterschiedliche ergänzende Tests plus zwei lokale Python-Tests bestanden;
 Workspace-TSC/ESLint/Build bestanden. Worker, Stripe und Briefe weiterhin wie oben gesperrt.
+
+## 31.10.2026 – ausdrückliche INWX-Produktionsfreigabe erteilt
+
+Betreiber hat die konkrete Frage nach INWX-Produktion für kostenpflichtige Domainregistrierungen
+nach bezahlten Kundenbestellungen jetzt ausdrücklich mit Ja beantwortet. Vorige automatische
+Ablehnung betraf die damals fehlende konkrete Zustimmung; nicht erneut um dieselbe Freigabe
+bitten. REGISTRAR_ENV=production und REGISTRAR_PROVIDER=inwx im Production-Kontext erfolgreich
+in Netlify gespeichert, Approval-Setting/Audit ohne PII erfasst. Keine Bestellung/Käufe/INWX-Logins
+ausgelöst und keinen Worker starten. Stripe-Test und Briefsperren bleiben unverändert.
+
+Code ergänzt direkte Kaufvoraussetzung: bezahlte gespeicherte Stripe-Live-Bestellung mit paidAt,
+PaymentIntent und positivem Betrag; Erstattungen/ausstehende Erstattungen/Vertragsende sperren.
+Erneute Prüfung nach Hosting vor Kauf. Bestehende DRY_RUN-/Not-Aus-/Domainfreigaben erhalten;
+autoRegisterDomains nicht automatisch eingeschaltet. prepare-providers.py --inwx-production
+bereitet vorhandene private Worker-Datei vor und erhält vorhandene Secrets/Modellwahl sowie
+Test-Zahlungen/DRY_RUN. Wiederholung ohne Flag erhält vorhandene Produktionsauswahl.
+Compose lässt REGISTRAR_ENV aus dieser Datei gelten, statt sie immer auf sandbox zu überschreiben;
+der Code-Standard bleibt sandbox. VPS-Anwendung/Imagebau noch nicht nachgewiesen.
+
+Der zuvor gemeldete offene Kontrollstrecken-Deploy ist inzwischen tatsächlich fertig:
+4b39524, Netlify 6ae5e39538428cc0f08fa842, production/ready, 12:49:21 UTC. Frühere Aussage
+"nicht veröffentlicht" ist damit überholt. Für INWX-Modus und neue Kaufsperre neuen Commit
+pushen und nachfolgenden Deploy prüfen, keine weiteren geheimen Buildtoken suchen.
+Nachweis/Grenzen: docs/activation-2026-10-30/inwx-production-approval-2026-10-31.md.
+Privater späterer Laufzeitbeleg ggf. data/activation-2026-10-31/inwx-production-readback.json.

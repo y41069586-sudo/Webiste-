@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Update only non-secret provider selectors. Never starts Docker or changes a paid mode."""
+"""Update non-secret selectors; explicit INWX production preparation never starts the worker."""
+import argparse
 import json
 import os
 from pathlib import Path
@@ -9,7 +10,7 @@ import sys
 import tempfile
 
 
-def prepare(path: Path, apply: bool = False):
+def prepare(path: Path, apply: bool = False, inwx_production: bool = False):
     if not path.is_absolute() or path.is_symlink() or not path.is_file():
         raise ValueError('Vorhandene private Worker-Datei erforderlich.')
     original = path.read_bytes()
@@ -22,8 +23,12 @@ def prepare(path: Path, apply: bool = False):
             values[name] = ''.join(shlex.split(value))
     if not values.get('EMAIL_API_KEY') or not (values.get('NETLIFY_API_TOKEN') or values.get('NELITFY_API_TOKEN')):
         raise ValueError('Vorhandene Mail-/Hosting-Zugangsdaten fehlen; nichts geändert.')
+    registrar_ready = inwx_production or (values.get('REGISTRAR_PROVIDER') == 'inwx' and values.get('REGISTRAR_ENV') == 'production')
+    if registrar_ready and (not values.get('REGISTRAR_USER') or not values.get('REGISTRAR_PASSWORD')):
+        raise ValueError('Vorhandene private INWX-Zugangsdaten fehlen; nichts geändert.')
     desired = {'EMAIL_PROVIDER': 'resend', 'HOSTING_PROVIDER': 'netlify',
-               'REGISTRAR_PROVIDER': 'mock', 'REGISTRAR_ENV': 'sandbox',
+               'REGISTRAR_PROVIDER': 'inwx' if registrar_ready else 'mock',
+               'REGISTRAR_ENV': 'production' if registrar_ready else 'sandbox',
                'STRIPE_MODE': 'test', 'DRY_RUN': 'true'}
     updated = original
     changed = []
@@ -47,14 +52,18 @@ def prepare(path: Path, apply: bool = False):
             tmp = f.name
         os.replace(tmp, path)
     return {'applied': apply, 'changedKeys': changed, 'workerRestarted': False,
-            'stripeMode': 'test', 'registrarProvider': 'mock', 'dryRun': True}
+            'stripeMode': 'test', 'registrarProvider': desired['REGISTRAR_PROVIDER'],
+            'registrarEnvironment': desired['REGISTRAR_ENV'], 'dryRun': True}
 
 
 if __name__ == '__main__':
     try:
-        if len(sys.argv) not in (2, 3) or (len(sys.argv) == 3 and sys.argv[2] != '--apply'):
-            raise ValueError('Aufruf: prepare-providers.py /absoluter/pfad/.env.worker [--apply]')
-        print(json.dumps(prepare(Path(sys.argv[1]), len(sys.argv) == 3)))
+        parser = argparse.ArgumentParser()
+        parser.add_argument('path', type=Path)
+        parser.add_argument('--apply', action='store_true')
+        parser.add_argument('--inwx-production', action='store_true', help='Nur nach ausdrücklicher Betreiberfreigabe.')
+        args = parser.parse_args()
+        print(json.dumps(prepare(args.path, args.apply, args.inwx_production)))
     except Exception:
         print(json.dumps({'stage': 'blocked', 'reason': 'Private Datei oder vorhandene Mail-/Hosting-Zugänge prüfen. Nichts gestartet; keine Zugangsdaten ausgegeben.'}))
         sys.exit(1)

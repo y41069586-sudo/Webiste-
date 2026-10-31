@@ -489,6 +489,23 @@ export async function buildSite(
 // ---------------------------------------------------------------------------
 export type DeployResult = 'deployed' | 'awaiting_domain_approval' | 'skipped' | 'domain_unavailable';
 
+/** Real registrar writes require a paid live order; a preview approval or mock/test payment is insufficient. */
+function assertPaidLiveDomainOrder(order: typeof orders.$inferSelect | undefined) {
+  if (
+    !order ||
+    order.provider !== 'stripe' ||
+    order.paymentMode !== 'live' ||
+    order.status !== 'paid' ||
+    !order.paidAt ||
+    !order.stripePaymentIntent?.startsWith('pi_') ||
+    order.amountCents <= 0 ||
+    order.refundedCents > 0 ||
+    order.pendingRefundCents > 0 ||
+    order.endedAt
+  )
+    throw new Error('Echter Domainkauf benötigt eine bezahlte Live-Bestellung ohne Erstattung oder Vertragsende.');
+}
+
 export async function deploySite(
   siteId: string,
   actor = 'job:deploy-site',
@@ -532,6 +549,7 @@ export async function deploySite(
       registerNow = true;
     }
   }
+  if (registerNow && !simulated) assertPaidLiveDomainOrder(ctx.order);
   if (registerNow) await assertNotHalted(ctx.cfg);
 
   await db.update(sites).set({ status: 'deploying', statusReason: null, updatedAt: new Date() }).where(eq(sites.id, siteId));
@@ -595,6 +613,11 @@ export async function deploySite(
     }
     const plan = domainPlan ?? (await hosting.attachDomain(project.projectId, domain));
     const imp = ctx.data.impressum;
+    // Hosting/availability requests may take time. Re-read payment and stop switches before the paid operation.
+    if (!simulated) {
+      assertPaidLiveDomainOrder(await db.query.orders.findFirst({ where: eq(orders.id, ctx.order.id) }));
+      await assertNotHalted();
+    }
     await db
       .update(customers)
       .set({ domainStatus: 'registering', updatedAt: new Date() })

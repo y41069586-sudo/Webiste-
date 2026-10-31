@@ -34,7 +34,8 @@ services:
       AUTO_ACTIVATE_VARIANTS: 'false'
       ALLOW_REAL_LETTERS: 'false'
       LXP_MODE: test
-      REGISTRAR_ENV: sandbox
+      # REGISTRAR_ENV comes from the existing private .env.worker; default is sandbox.
+      # Production is prepared only after explicit operator approval. DRY_RUN still blocks purchases.
       SITE_INDEXABLE: 'false'
       # Chromium braucht beschreibbare Ordner (Absturz-Datenbank, Profil); das Dateisystem ist sonst schreibgeschützt
       HOME: /tmp

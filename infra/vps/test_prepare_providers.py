@@ -26,6 +26,30 @@ class ProviderConfigTest(unittest.TestCase):
             self.assertEqual(p.stat().st_mode & 0o777, 0o600)
             self.assertEqual(module.prepare(p, True)['changedKeys'], [])
 
+    def test_explicit_inwx_production_preserves_pause_and_survives_later_preparation(self):
+        with tempfile.TemporaryDirectory() as root:
+            p = Path(root)/'.env.worker'
+            credentials = b'EMAIL_API_KEY=fixture\nNETLIFY_API_TOKEN=fixture\nREGISTRAR_USER=fixture\nREGISTRAR_PASSWORD=fixture\n'
+            p.write_bytes(credentials+b'REGISTRAR_PROVIDER=mock\nREGISTRAR_ENV=sandbox\n')
+            result = module.prepare(p, True, True)
+            self.assertEqual(result['registrarEnvironment'], 'production')
+            self.assertEqual(result['registrarProvider'], 'inwx')
+            self.assertTrue(result['dryRun'])
+            self.assertFalse(result['workerRestarted'])
+            self.assertTrue(p.read_bytes().startswith(credentials))
+            self.assertIn(b'STRIPE_MODE=test\n', p.read_bytes())
+            self.assertIn(b'DRY_RUN=true\n', p.read_bytes())
+            self.assertEqual(module.prepare(p, True)['changedKeys'], [])
+
+    def test_production_refuses_missing_existing_registrar_credentials(self):
+        with tempfile.TemporaryDirectory() as root:
+            p = Path(root)/'.env.worker'
+            original = b'EMAIL_API_KEY=fixture\nNETLIFY_API_TOKEN=fixture\nREGISTRAR_USER=fixture\n'
+            p.write_bytes(original)
+            with self.assertRaises(ValueError):
+                module.prepare(p, True, True)
+            self.assertEqual(p.read_bytes(), original)
+
     def test_refuses_duplicate_missing_credentials_and_symlink(self):
         with tempfile.TemporaryDirectory() as root:
             p = Path(root)/'.env.worker'

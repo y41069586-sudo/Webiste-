@@ -594,6 +594,10 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     const register = vi.spyOn(fakeRegistrar, 'registerDomain');
     setProviders({ registrar: fakeRegistrar });
     try {
+      await db
+        .update(orders)
+        .set({ provider: 'stripe', paymentMode: 'live', paidAt: new Date(), stripePaymentIntent: 'pi_live_fixture' })
+        .where(eq(orders.id, customer.orderId));
       const site = await ensureSiteForCustomer(customer.id);
       await db
         .update(sites)
@@ -622,7 +626,75 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     }
   });
 
+  it.each([
+    { status: 'pending' as const },
+    { status: 'refunded' as const },
+    { paymentMode: 'test' as const },
+    { paymentMode: 'unknown' as const },
+    { paymentMode: 'mock' as const },
+    { provider: 'mock' },
+    { paidAt: null },
+    { stripePaymentIntent: null },
+    { refundedCents: 1 },
+    { pendingRefundCents: 1 },
+    { endedAt: new Date() },
+  ])('blocks a real registrar before hosting or domain writes for an ineligible order: %j', async (patch) => {
+    const { customer } = await paidCustomer(),
+      db = getDb();
+    await db
+      .update(orders)
+      .set({ provider: 'stripe', paymentMode: 'live', paidAt: new Date(), stripePaymentIntent: 'pi_live_fixture', ...patch })
+      .where(eq(orders.id, customer.orderId));
+    await updateConfig({ switches: { autoRegisterDomains: true } }, 'test');
+    const site = await ensureSiteForCustomer(customer.id);
+    await db.update(sites).set({ status: 'approved' }).where(eq(sites.id, site.id));
+    const original = getProviders(),
+      fakeRegistrar = Object.assign(new MockRegistrar(), { name: 'inwx' });
+    const register = vi.spyOn(fakeRegistrar, 'registerDomain'),
+      hosting = vi.spyOn(original.hosting, 'ensureProject');
+    setProviders({ registrar: fakeRegistrar });
+    try {
+      await expect(deploySite(site.id)).rejects.toThrow('bezahlte Live-Bestellung');
+      expect(register).not.toHaveBeenCalled();
+      expect(hosting).not.toHaveBeenCalled();
+    } finally {
+      register.mockRestore();
+      hosting.mockRestore();
+      setProviders(original);
+    }
+  });
+
   it('Live-Check: Abstände wachsen bis 60 Minuten', () => {
     expect([0, 1, 2, 3, 4, 5, 6].map(liveCheckDelayMinutes)).toEqual([2, 4, 8, 16, 32, 60, 60]);
+  });
+
+  it('rechecks payment after slow hosting work before a real registrar purchase', async () => {
+    const { customer } = await paidCustomer(),
+      db = getDb();
+    await db
+      .update(orders)
+      .set({ provider: 'stripe', paymentMode: 'live', paidAt: new Date(), stripePaymentIntent: 'pi_live_fixture' })
+      .where(eq(orders.id, customer.orderId));
+    await updateConfig({ switches: { autoRegisterDomains: true } }, 'test');
+    const site = await ensureSiteForCustomer(customer.id);
+    await db.update(sites).set({ status: 'approved' }).where(eq(sites.id, site.id));
+    const original = getProviders(),
+      fakeRegistrar = Object.assign(new MockRegistrar(), { name: 'inwx' });
+    const register = vi.spyOn(fakeRegistrar, 'registerDomain');
+    const originalDeploy = original.hosting.deploy.bind(original.hosting);
+    const hosting = vi.spyOn(original.hosting, 'deploy').mockImplementation(async (project, files) => {
+      await db.update(orders).set({ pendingRefundCents: 1 }).where(eq(orders.id, customer.orderId));
+      return originalDeploy(project, files);
+    });
+    setProviders({ registrar: fakeRegistrar });
+    try {
+      await expect(deploySite(site.id)).rejects.toThrow('bezahlte Live-Bestellung');
+      expect(hosting).toHaveBeenCalledOnce();
+      expect(register).not.toHaveBeenCalled();
+    } finally {
+      hosting.mockRestore();
+      register.mockRestore();
+      setProviders(original);
+    }
   });
 });

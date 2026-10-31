@@ -108,6 +108,11 @@ export async function GET() {
         tokenConfigured: Boolean(env.NETLIFY_API_TOKEN),
         read: hostingRead,
       },
+      registrar: {
+        provider: env.REGISTRAR_PROVIDER,
+        environment: env.REGISTRAR_ENV,
+        credentialsConfigured: Boolean(env.REGISTRAR_USER && env.REGISTRAR_PASSWORD),
+      },
     },
     { headers: { 'cache-control': 'private, no-store' } },
   );
