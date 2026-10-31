@@ -727,3 +727,8 @@ Vorbereitete atomare Ein-Zeilen-Korrektur lokal mit fiktiven Werten geprüft; ke
 kein Image-/Secret-Neuimport. Weder Username noch Passwort ins öffentliche Repository schreiben.
 Worker wegen KI-Kosten weiter pausiert lassen. OT&E/Registrierungsablauf nicht aus bloßem
 Kontotest als bestanden ausgeben. Belege docs/activation-2026-10-30/registrar-acceptance-2026-10-31.json.
+
+App-Secret nun tatsächlich veröffentlicht: Netlify6ae5bd059370fb3d8a019480,production/ready,
+Commitd6ce806,10:04:46.770UTC. Nur private Worker-Dateizeile noch auszuführen. Geändertes env_file
+erfordert beim später ausdrücklich beauftragten Wiederanlauf Compose-Recreate; start eines alten
+Containers lädt neue Werte nicht. Jetzt keinen Worker starten/recreaten, Kostenpause bleibt bestehen.

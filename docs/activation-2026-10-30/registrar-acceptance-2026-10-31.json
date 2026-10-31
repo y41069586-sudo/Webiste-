@@ -19,9 +19,20 @@
     "updateSucceeded": true,
     "context": "production",
     "isSecretVerified": true,
-    "scopesVerified": ["builds", "functions", "runtime"],
+    "scopesVerified": [
+      "builds",
+      "functions",
+      "runtime"
+    ],
     "updatedAt": "2026-10-31T09:59:18Z",
-    "runtimeActivation": "pending_app_deploy"
+    "runtimeActivation": "deployed",
+    "deployment": {
+      "id": "6ae5bd059370fb3d8a019480",
+      "state": "ready",
+      "context": "production",
+      "commit": "d6ce80650770b3ff17bd47a094063803cad5f274",
+      "publishedAt": "2026-10-31T10:04:46.770Z"
+    }
   },
   "workerPersistentEnvUpdated": false,
   "workerPersistentEnvUpdateCommandLocallyChecked": true,
