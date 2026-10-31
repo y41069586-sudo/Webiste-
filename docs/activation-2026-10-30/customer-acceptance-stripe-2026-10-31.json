@@ -1,0 +1,60 @@
+{
+  "checkedAt": "2026-10-31T08:13:01.084Z",
+  "stripeAccount": "Website sandbox",
+  "stripeContext": "acct_1UToabGn2A630LhH",
+  "readOnlyProviderReadback": true,
+  "subscriptions": [
+    {
+      "tier": "basis",
+      "orderId": "4991f35d-0c23-465f-b4b1-0f320d5a5f91",
+      "subscriptionId": "sub_1UWXJNGn2A630LhHM2us2yNT",
+      "livemode": false,
+      "status": "active",
+      "cancelAtPeriodEnd": true,
+      "startedAt": "2026-10-31T08:06:49.000Z",
+      "items": [
+        {
+          "price": "price_1UULX3Gn2A630LhHDA6Or60k",
+          "unitAmount": 1900,
+          "currency": "eur",
+          "interval": "month",
+          "quantity": 1
+        }
+      ],
+      "invoice": {
+        "id": "in_1UWXJNGn2A630LhHzg8Haws0",
+        "status": "paid",
+        "amountPaid": 1900,
+        "amountDue": 1900,
+        "currency": "eur",
+        "livemode": false
+      }
+    },
+    {
+      "tier": "care_plus",
+      "orderId": "c7e74a8b-1b06-4809-8680-951b014919e6",
+      "subscriptionId": "sub_1UWXKUGn2A630LhHrNICfa1P",
+      "livemode": false,
+      "status": "active",
+      "cancelAtPeriodEnd": true,
+      "startedAt": "2026-10-31T08:07:58.000Z",
+      "items": [
+        {
+          "price": "price_1UULX8Gn2A630LhH0F3MgcLP",
+          "unitAmount": 9900,
+          "currency": "eur",
+          "interval": "month",
+          "quantity": 1
+        }
+      ],
+      "invoice": {
+        "id": "in_1UWXKUGn2A630LhHD8Cnx6j4",
+        "status": "paid",
+        "amountPaid": 9900,
+        "amountDue": 9900,
+        "currency": "eur",
+        "livemode": false
+      }
+    }
+  ]
+}

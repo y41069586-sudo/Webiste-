@@ -1,0 +1,78 @@
+{
+  "checkedAt": "2026-10-31T08:12:23Z",
+  "testSites": [
+    {
+      "tier": "basis",
+      "httpsUrl": "https://basis-test.seitenwerk.world/",
+      "httpsStatus": 200,
+      "sameStoredHtml": true,
+      "sha256": "c2b085fac3899c1000b9b4a8c84dc945bdd4936b7ed051ea55b8fb8955c51271",
+      "screenshots": [
+        {
+          "key": "sites/87a24f6c-14e1-400f-8664-fad1810591be/acceptance-mobile-390.png",
+          "bytes": 249560,
+          "sha256": "ff69c21533ab18e3dfc4bdf40ad92f7f58138cf34746b25b1d8c72978b41c061"
+        },
+        {
+          "key": "sites/87a24f6c-14e1-400f-8664-fad1810591be/acceptance-desktop-1440.png",
+          "bytes": 283511,
+          "sha256": "9b4e9cce48fcc0b835143a27c82f667b044020ac3da31d3d8761f6ec27b2f028"
+        }
+      ]
+    },
+    {
+      "tier": "care_plus",
+      "httpsUrl": "https://care-test.seitenwerk.world/",
+      "httpsStatus": 200,
+      "sameStoredHtml": true,
+      "sha256": "6399419fbe18c2d9f6adf457f7592bf2940e7aab8c16c74268fc2ec8fe95ba8d",
+      "screenshots": [
+        {
+          "key": "sites/6f28d9fd-1224-4265-8b83-7fa35225a7ff/acceptance-mobile-390.png",
+          "bytes": 331773,
+          "sha256": "51b06fd6d85b6908457afccac4a2a7055d97688afe9342efbdc7662949091793"
+        },
+        {
+          "key": "sites/6f28d9fd-1224-4265-8b83-7fa35225a7ff/acceptance-desktop-1440.png",
+          "bytes": 358946,
+          "sha256": "476172f0e68d6032b584bbe7f3935ae9b703d6e2f9fe04f5d8a0cddd2d6ce32e"
+        }
+      ]
+    }
+  ],
+  "rootUnchanged": true,
+  "tlsVerificationDisabled": false,
+  "runtime": {
+    "dryRun": true,
+    "stripe": {
+      "mode": "test",
+      "provider": "stripe",
+      "webhookConfigured": true,
+      "read": {
+        "ok": true,
+        "status": 200
+      }
+    },
+    "storage": {
+      "driver": "s3",
+      "read": {
+        "ok": true
+      }
+    },
+    "resend": {
+      "webhookConfigured": true,
+      "outgoingProvider": "mock",
+      "read": {
+        "ok": true
+      }
+    },
+    "hosting": {
+      "provider": "mock",
+      "tokenConfigured": true,
+      "read": {
+        "ok": true,
+        "status": 200
+      }
+    }
+  }
+}

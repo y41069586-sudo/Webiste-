@@ -62,7 +62,15 @@ allein gilt nicht als Zahlungsnachweis. Nach nachgewiesener erster Testzahlung w
 über die bestehende Kündigungsfunktion zum Periodenende beendet; kein endlos laufendes Testabo.
 Bei ausstehender Zahlung Exit2 und klarer offener Befund, niemals neuen Checkout/Abo erzwingen.
 
-## Operator-Aufruf nach einem regulären Code-Update
+## Tatsächlicher Abschluss31.10.2026
+
+Beide begrenzten VPS-Abnahmeläufe nach Codekorrektur erfolgreich. Stripe unabhängig gelesen:
+Basis1900Cent und Care+9900Cent, jeweils EUR/paid/livemode=false, cancel_at_period_end=true.
+Beide Test-Go-Live-Zeitstempel vor Monatsstart, HTTPS und Speicherinhalt identisch.
+[Vollständiger aktueller Nachweis](customer-acceptance-result-2026-10-31.md).
+Die folgenden Befehle dokumentieren die Reproduktion; ein erneuter Lauf ist derzeit nicht nötig.
+
+## Dokumentierter Operator-Aufruf nach einem regulären Code-Update
 
 Aktualisierung31.10.2026: Der neu gebaute Worker kam bis zur Veröffentlichung, die strenge
 Inhaltsprüfung scheiterte jedoch an Netlifys Pretty-URLs-Umschreibung. Zusätzlich verwendete

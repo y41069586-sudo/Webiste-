@@ -654,3 +654,16 @@ Go-Live-/Abozeitstempel fingieren. Aktueller Befund und Nachweise:
 docs/activation-2026-10-30/hosting-publication-fix-2026-10-31.md. Betreiber hat Spamdiagnose vorerst
 beendet; dazu nicht erneut nachfragen oder weitere Mails schicken. Vorhandene Update-/Push-/
 Veröffentlichungsfreigabe gilt für getesteten Code, keine allgemeine Versand-/Verkaufsfreigabe.
+
+## 31.10.2026 – beide tatsächlichen Sandbox-Kundenabnahmen jetzt bestanden
+
+Betreiber hat korrigiertes Worker-Image gebaut und CLI für Basis/Care+ erfolgreich ausgeführt.
+Unabhängiger DB-/Stripe-/HTTPS-/Speicherabgleich: beide live, Monatsbeginn danach,1900/9900Cent
+EUR tatsächlich paid in Stripe und App-Ledger; kein zusätzliches Care+-Basisentgelt. Beide
+cancel_at_period_end=true, wiederholter Start laut Audit gleiche ID. Vier tatsächliche VPS-PNGs
+gelesen; HTML nun bytegleich, Root unverändert, keine Domain gekauft. DRY_RUNtrue, Stripe/test,
+allgemeine Mail-/Hostingprovider weiter mock. Mock-Übergabemails kein Zustellnachweis.
+Nicht erneut Worker-/Kundenabnahme verlangen. Nächster Schritt Backup/Restore plus fehlende
+research-lead/revise-demo (beide weiterhin fehlen), mit berechtigter privater Verbindung auf VPS.
+Keine globale Freigabe fingieren, Steuerstatus offen. Nachweise:
+docs/activation-2026-10-30/customer-acceptance-result-2026-10-31.md.
