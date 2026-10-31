@@ -732,3 +732,16 @@ App-Secret nun tatsächlich veröffentlicht: Netlify6ae5bd059370fb3d8a019480,pro
 Commitd6ce806,10:04:46.770UTC. Nur private Worker-Dateizeile noch auszuführen. Geändertes env_file
 erfordert beim später ausdrücklich beauftragten Wiederanlauf Compose-Recreate; start eines alten
 Containers lädt neue Werte nicht. Jetzt keinen Worker starten/recreaten, Kostenpause bleibt bestehen.
+
+## 31.10.2026 – dauerhafte INWX-Dateizeile und gewünschter KI-Wochenrahmen
+
+Betreiber-Screenshot11:11 bestätigt atomare dauerhafte .env.worker-Korrektur. Keine weiteren
+INWX-Login-/Dateitests verlangen; App-Secret schon veröffentlicht, Worker bleibt pausiert.
+Betreiber hat danach ausdrücklich einen niedrigeren KI-Wochenrahmen genannt. Bestehendes
+budget.weeklyLlmBudgetCents in privater App-Konfiguration atomar korrigiert und auditiert,
+alle anderen JSON-Konfigurationswerte unverändert. Betrag nicht ins öffentliche Repository;
+aktuellen Wert bei Bedarf im bestehenden privaten Setting lesen. Kein automatischer Wiederanlauf.
+Lokale Kostenprüfung: LLM-Vorprüfung nutzt nur feste5/10/20Cent-Schätzungen ohne Reservierung;
+Nachbuchung tatsächlicher API-Nutzungswerte ist kein garantierter harter Anbieter-Kostendeckel.
+Kein Anthropic-Ausgabenlimit eingerichtet. Weiter kostenfrei/lokal prüfen, keine bezahlten
+KI-Tests oder Modelwechsel aus Budgetantwort ableiten. Details Kosten-/Pausendokument.

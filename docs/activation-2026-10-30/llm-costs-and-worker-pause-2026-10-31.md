@@ -21,5 +21,28 @@ bis die Fortsetzung mit geklärtem Kostenrahmen beauftragt ist.
 
 Andere manuelle KI-Aufrufe der Web-App oder andere Programme mit demselben Schlüssel sind
 dadurch nicht gesperrt. Bereits gestartete Anfragen können später gebucht werden. Keinen
-accountweiten Anthropic-Kostenstopp behaupten. INWX-Lesetest scheitert bei account.login2200,
-keine erfolgreiche Domainabfrage oder Registrierung. Details: [INWX](inwx-setup.md).
+accountweiten Anthropic-Kostenstopp behaupten. INWX-Lesetest war zunächst bei account.login2200
+gescheitert, ist inzwischen mit korrigiertem Benutzernamen tatsächlich bestanden; dauerhafte
+Worker-Zeile laut Screenshot11:11 ebenfalls gespeichert. Details: [INWX](inwx-setup.md).
+
+## Neues Budget nach ausdrücklicher Betreiberangabe
+
+Der Betreiber hat einen niedrigeren KI-Wochenrahmen vorgegeben. Nur das bestehende Feld
+budget.weeklyLlmBudgetCents in der privaten App-Konfiguration wurde atomar angepasst und im
+vorhandenen Audit protokolliert. SQL-Rückmeldung bestätigt alle übrigen Konfigurationswerte
+unverändert. Der konkrete Betrag bleibt in der privaten Konfiguration, nicht im öffentlichen Git.
+Keine Modelle gewechselt, keine neuen Dienste eingerichtet und den Worker nicht gestartet.
+
+## Ergebnis der lokalen Kostenprüfung
+
+Der vorhandene LLM-Service prüft vor Aufrufen nur feste Schätzungen (Text5Cent, strukturiert10Cent,
+Recherche20Cent) gegen das interne Wochenbudget. Er nutzt dafür assertBudgetAvailable ohne
+Reservierung. Die Token-/Suchkosten werden erst nach der Antwort gebucht. Das ist kein garantierter
+Deckel der tatsächlichen Anbieterrechnung; laufende oder parallele Aufrufe können die Schätzung
+übersteigen. Aktueller Stand bleibt deshalb pausiert; kein zusätzlicher realer API-Aufruf zur Prüfung.
+
+Anthropic dokumentiert gesonderte monatliche [Workspace-Ausgabenlimits](https://platform.claude.com/docs/en/manage-claude/workspaces).
+Ein solches Anbieterlimit wurde hier weder gelesen noch gesetzt. Monatliche Anbieterwährung und
+interner Euro-Wochenrahmen nicht als identisch behandeln. Keine harte Kostenbegrenzung behaupten,
+solange sie nicht tatsächlich umgesetzt und überprüft ist. Die vorhandene feste Go-Live-Restliste
+bleibt bestehen; Kostenfreigabe ist kein automatischer Auftrag zum Wiederanlauf.

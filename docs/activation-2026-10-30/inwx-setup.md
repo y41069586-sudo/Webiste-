@@ -15,18 +15,20 @@ Production-Kontext gespeichert. Secret-Flag und vorhandene Builds-/Functions-/Ru
 danach erneut geprüft. Benutzername und Passwort bleiben aus dem öffentlichen Repository entfernt.
 App-Deploy tatsächlich abgeschlossen:6ae5bd059370fb3d8a019480,production/ready,
 Commitd6ce806,31.10.2026 um10:04:46.770UTC. Neue Secret-Konfiguration damit veröffentlicht.
-Die dauerhafte Worker-Datei .env.worker ist dadurch noch nicht geändert; der erfolgreiche
-Test verwendete ein einmaliges -e. Kein eigenständiger App-Registrar-Authentifizierungstest behauptet.
+Der erfolgreiche Test verwendete zunächst ein einmaliges -e. Der anschließende Betreiber-
+Screenshot11:11 bestätigt nun den erfolgreichen dauerhaften Eintrag in .env.worker.
+Kein eigenständiger App-Registrar-Authentifizierungstest behauptet.
 
 Für die private dauerhafte Worker-Korrektur ist ein atomarer Austausch genau dieser einzelnen
 Zeile vorbereitet: übrige Bytes unverändert, Modus0600, fehlender/doppelter Eintrag blockiert,
 kein Neustart. Lokaler Test ausschließlich mit fiktiven Zugangsdaten bestanden. Kein neuer
 Image-Neuaufbau und kein Einmal-Code-/Secret-Import erforderlich. Tatsächliche VPS-Ausführung
-steht noch aus. [Strukturierter Beleg](registrar-acceptance-2026-10-31.json).
+laut Screenshot11:11 erfolgreich abgeschlossen. [Strukturierter Beleg](registrar-acceptance-2026-10-31.json).
 
 Bei später beauftragtem Wiederanlauf die geänderte Datei durch kontrolliertes Compose-Recreate
 laden; bloßes start eines alten Containers übernimmt geänderte env_file-Werte nicht. Jetzt
-ausdrücklich weder Recreate noch Start: Die Recherche bleibt wegen ungeklärtem Kostenrahmen pausiert.
+ausdrücklich weder Recreate noch Start: Die Recherche bleibt bis zur beauftragten Fortsetzung
+und ausreichenden Kostenbegrenzung pausiert.
 
 INWX-Kontozugang abgehakt. Keine erneute manuelle Loginbestätigung oder identischen API-Test
 verlangen. OT&E-Anmeldung, Registrierungsablauf und globale Registrar-Freigabe sind damit nicht

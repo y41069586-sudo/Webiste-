@@ -34,8 +34,10 @@
       "publishedAt": "2026-10-31T10:04:46.770Z"
     }
   },
-  "workerPersistentEnvUpdated": false,
+  "workerPersistentEnvUpdated": true,
   "workerPersistentEnvUpdateCommandLocallyChecked": true,
   "workerRestartedByAssistant": false,
-  "registrationOrSandboxWorkflowVerified": false
+  "registrationOrSandboxWorkflowVerified": false,
+  "workerPersistentEnvEvidence": "Operator terminal screenshot at 11:11 local time; atomic update helper completed successfully",
+  "runningWorkerEnvironmentReloaded": false
 }
