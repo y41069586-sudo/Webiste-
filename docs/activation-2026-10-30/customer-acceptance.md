@@ -64,6 +64,13 @@ Bei ausstehender Zahlung Exit2 und klarer offener Befund, niemals neuen Checkout
 
 ## Operator-Aufruf nach einem regulären Code-Update
 
+Aktualisierung31.10.2026: Der neu gebaute Worker kam bis zur Veröffentlichung, die strenge
+Inhaltsprüfung scheiterte jedoch an Netlifys Pretty-URLs-Umschreibung. Zusätzlich verwendete
+die Zertifikatsprüfung den Bereitstellungs- statt des Leseendpunkts. Befund und Korrektur:
+[Veröffentlichungsprüfung31.10.2026](hosting-publication-fix-2026-10-31.md). Der Hashvergleich
+bleibt unverändert streng. Nach dieser Core-Korrektur das Worker-Image erneut aktualisieren;
+vorhandene Secrets behalten. Externe Monatsstarts weiterhin erst nach tatsächlichem Nachweis.
+
 Der bisherige VPS-Stand03734a1 enthält diese Core-Korrekturen noch nicht. Anders als beim einzelnen
 E-Mail-CLI ist **diesmal ein regulärer Worker-Code-Neuaufbau erforderlich**. Kein NEU=1 und kein neuer
 Einmal-Code nötig, solange vorhandene Hosting-/Stripe-Secrets unverändert sind. LIVE=0 beibehalten.

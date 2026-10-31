@@ -8,7 +8,9 @@ import type { DnsPlan, HostingDomainStatus, HostingProvider, SiteFile } from '..
  * Basis https://api.netlify.com/api/v1/, Bearer-Token. Deploy per Datei-Digest (SHA1 je Pfad),
  * danach nur die angeforderten Dateien hochladen (PUT /deploys/{id}/files/{pfad}).
  * Eigene Domain: PATCH /sites/{id} {custom_domain}; externes DNS: Apex A 75.2.60.5, www CNAME {site}.netlify.app;
- * SSL: POST /sites/{id}/ssl. Limit: 3 Deploys pro Minute, 100 pro Tag.
+ * SSL-Status: GET /sites/{id}/ssl; POST nur zur erstmaligen Bereitstellung (API erneut geprüft 31.10.2026).
+ * Pretty URLs vor Upload deaktivieren: Der veröffentlichte HTML-Stand muss dem gespeicherten entsprechen.
+ * Limit: 3 Deploys pro Minute, 100 pro Tag.
  */
 const API = 'https://api.netlify.com/api/v1';
 export const NETLIFY_APEX_IP = '75.2.60.5';
@@ -25,6 +27,12 @@ interface NetlifySite {
   url?: string;
   custom_domain?: string | null;
   ssl?: boolean;
+}
+
+interface NetlifyCertificate {
+  state?: string;
+  domains?: string[];
+  expires_at?: string;
 }
 
 export function netlifyHeadersFile(formOrigin: string): string {
@@ -79,6 +87,9 @@ export class NetlifyHosting implements HostingProvider {
   }
 
   async deploy(projectId: string, files: SiteFile[]): Promise<{ deploymentId: string; url: string }> {
+    // Netlify's Pretty URLs rewrites HTML anchors after upload, breaking the exact publication proof.
+    // Apply before creating the deploy, including projects created by earlier worker versions.
+    await this.api('PATCH', `/sites/${projectId}`, { processing_settings: { html: { pretty_urls: false } } });
     const all = [...files, { path: '_headers', content: netlifyHeadersFile(this.cfg.formOrigin), contentType: 'text/plain' }].map(
       (f) => {
         const content = Buffer.isBuffer(f.content) ? f.content : Buffer.from(f.content, 'utf8');
@@ -131,12 +142,34 @@ export class NetlifyHosting implements HostingProvider {
   async getDomainStatus(projectId: string, domain: string): Promise<HostingDomainStatus> {
     const site = await this.api<NetlifySite>('GET', `/sites/${projectId}`);
     if (site.custom_domain !== domain) return { domain, active: false, ssl: 'unknown', details: 'Domain nicht am Projekt' };
+    let certificate: NetlifyCertificate;
     try {
-      await this.api('POST', `/sites/${projectId}/ssl`);
-    } catch {
-      // DNS zeigt noch nicht auf Netlify – nächster Versuch im Live-Check
-      return { domain, active: false, ssl: 'pending', details: 'SSL noch nicht ausgestellt' };
+      certificate = await this.api<NetlifyCertificate>('GET', `/sites/${projectId}/ssl`);
+    } catch (err) {
+      // Existing Let's Encrypt certificates must be read, not re-created: POST then returns 422.
+      // Authentication, rate-limit and upstream errors must not be disguised as pending DNS.
+      if (!(err instanceof HttpError) || err.status !== 404) throw err;
+      try {
+        await this.api('POST', `/sites/${projectId}/ssl`);
+      } catch (provisionError) {
+        if (!(provisionError instanceof HttpError) || provisionError.status !== 422) throw provisionError;
+        return { domain, active: false, ssl: 'pending', details: 'SSL-Bereitstellung noch offen (HTTP 422)' };
+      }
+      // A successful provisioning request alone does not prove an issued certificate.
+      return { domain, active: false, ssl: 'pending', details: 'SSL angefordert; Ausstellung noch nicht bestätigt' };
     }
+    const covered = certificate.domains?.some((name) => {
+      const candidate = name.toLowerCase(),
+        host = domain.toLowerCase();
+      return candidate === host || (candidate.startsWith('*.') && host.slice(host.indexOf('.') + 1) === candidate.slice(2));
+    });
+    if (
+      certificate.state !== 'issued' ||
+      !covered ||
+      !certificate.expires_at ||
+      !(Date.parse(certificate.expires_at) > Date.now())
+    )
+      return { domain, active: false, ssl: 'pending', details: 'Ausgestelltes, gültiges SSL für diese Domain fehlt' };
     return { domain, active: true, ssl: 'active' };
   }
 

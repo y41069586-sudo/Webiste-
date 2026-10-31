@@ -262,10 +262,116 @@ describe('Netlify', () => {
     expect(uploads.map((u) => u.url.split('/files')[1])).toEqual(['/index.html']);
     const digest = calls.find((c) => c.url.endsWith('/sites/site-1/deploys'))!.body as { files: Record<string, string> };
     expect(Object.keys(digest.files).sort()).toEqual(['/_headers', '/index.html', '/robots.txt']);
+    const settings = calls.findIndex((c) => c.method === 'PATCH' && c.url.endsWith('/sites/site-1'));
+    const deployment = calls.findIndex((c) => c.method === 'POST' && c.url.endsWith('/sites/site-1/deploys'));
+    expect(calls[settings]!.body).toEqual({ processing_settings: { html: { pretty_urls: false } } });
+    expect(settings).toBeLessThan(deployment);
     const plan = await n.attachDomain('site-1', 'frei-beispiel.de');
     expect(plan.records).toEqual([
       { type: 'A', name: '@', value: '75.2.60.5' },
       { type: 'CNAME', name: 'www', value: 'wbm-abc.netlify.app' },
     ]);
+  });
+
+  it('does not upload when disabling HTML rewriting fails', async () => {
+    const { fn, calls } = fake(() => ({ status: 403, json: { message: 'forbidden' } }));
+    const n = new NetlifyHosting({ apiToken: 'tok', formOrigin: 'https://app.example.de' }, fn);
+    await expect(n.deploy('site-1', [{ path: 'index.html', content: '<h1>Test</h1>' }])).rejects.toThrow(/HTTP 403/);
+    expect(calls.map((c) => c.method)).toEqual(['PATCH']);
+  });
+
+  it('reads an existing issued certificate without trying to replace it', async () => {
+    const { fn, calls } = fake((c) => {
+      if (c.method === 'POST') return { status: 422, json: { message: 'certificate parameter is required' } };
+      return {
+        json: c.url.endsWith('/ssl')
+          ? { state: 'issued', domains: ['basis-test.example.de'], expires_at: '2099-01-01T00:00:00Z' }
+          : { custom_domain: 'basis-test.example.de' },
+      };
+    });
+    const n = new NetlifyHosting({ apiToken: 'tok', formOrigin: 'https://app.example.de' }, fn);
+    await expect(n.getDomainStatus('site-1', 'basis-test.example.de')).resolves.toMatchObject({ active: true, ssl: 'active' });
+    expect(calls.map((c) => c.method)).toEqual(['GET', 'GET']);
+  });
+
+  it.each([
+    { state: 'pending', domains: ['basis-test.example.de'], expires_at: '2099-01-01T00:00:00Z' },
+    { state: 'issued', domains: ['other.example.de'], expires_at: '2099-01-01T00:00:00Z' },
+    { state: 'issued', domains: ['basis-test.example.de'], expires_at: '2000-01-01T00:00:00Z' },
+    { state: 'issued', domains: ['basis-test.example.de'], expires_at: 'invalid' },
+    { state: 'issued', domains: ['basis-test.example.de'] },
+    {},
+  ])('keeps incomplete, wrong-domain and expired certificates blocked: %j', async (certificate) => {
+    const { fn, calls } = fake((c) => ({
+      json: c.url.endsWith('/ssl') ? certificate : { custom_domain: 'basis-test.example.de' },
+    }));
+    const n = new NetlifyHosting({ apiToken: 'tok', formOrigin: 'https://app.example.de' }, fn);
+    await expect(n.getDomainStatus('site-1', 'basis-test.example.de')).resolves.toMatchObject({ active: false, ssl: 'pending' });
+    expect(calls.every((c) => c.method === 'GET')).toBe(true);
+  });
+
+  it('accepts a covering wildcard only for a direct subdomain', async () => {
+    const { fn } = fake((c) => ({
+      json: c.url.endsWith('/ssl')
+        ? { state: 'issued', domains: ['*.example.de'], expires_at: '2099-01-01T00:00:00Z' }
+        : { custom_domain: 'basis-test.example.de' },
+    }));
+    const n = new NetlifyHosting({ apiToken: 'tok', formOrigin: 'https://app.example.de' }, fn);
+    expect((await n.getDomainStatus('site-1', 'basis-test.example.de')).active).toBe(true);
+    const wrong = fake((c) => ({
+      json: c.url.endsWith('/ssl')
+        ? { state: 'issued', domains: ['*.example.de'], expires_at: '2099-01-01T00:00:00Z' }
+        : { custom_domain: 'deep.basis-test.example.de' },
+    }));
+    expect(
+      (
+        await new NetlifyHosting({ apiToken: 'tok', formOrigin: 'https://app.example.de' }, wrong.fn).getDomainStatus(
+          'site-1',
+          'deep.basis-test.example.de',
+        )
+      ).active,
+    ).toBe(false);
+  });
+
+  it('does not request SSL for a domain not attached to the project', async () => {
+    const { fn, calls } = fake(() => ({ json: { custom_domain: 'other.example.de' } }));
+    const n = new NetlifyHosting({ apiToken: 'tok', formOrigin: 'https://app.example.de' }, fn);
+    expect((await n.getDomainStatus('site-1', 'basis-test.example.de')).active).toBe(false);
+    expect(calls).toHaveLength(1);
+  });
+
+  it('requests missing SSL once, then waits for a confirmed issued certificate', async () => {
+    let requested = false;
+    const { fn, calls } = fake((c) => {
+      if (!c.url.endsWith('/ssl')) return { json: { custom_domain: 'basis-test.example.de' } };
+      if (c.method === 'POST') {
+        requested = true;
+        return { json: { state: 'new' } };
+      }
+      return requested
+        ? { json: { state: 'issued', domains: ['basis-test.example.de'], expires_at: '2099-01-01T00:00:00Z' } }
+        : { status: 404 };
+    });
+    const n = new NetlifyHosting({ apiToken: 'tok', formOrigin: 'https://app.example.de' }, fn);
+    expect((await n.getDomainStatus('site-1', 'basis-test.example.de')).active).toBe(false);
+    expect((await n.getDomainStatus('site-1', 'basis-test.example.de')).active).toBe(true);
+    expect(calls.filter((c) => c.method === 'POST')).toHaveLength(1);
+  });
+
+  it('keeps DNS provisioning failures pending without declaring SSL active', async () => {
+    const { fn } = fake((c) =>
+      !c.url.endsWith('/ssl') ? { json: { custom_domain: 'basis-test.example.de' } } : { status: c.method === 'GET' ? 404 : 422 },
+    );
+    const n = new NetlifyHosting({ apiToken: 'tok', formOrigin: 'https://app.example.de' }, fn);
+    await expect(n.getDomainStatus('site-1', 'basis-test.example.de')).resolves.toMatchObject({ active: false, ssl: 'pending' });
+  });
+
+  it.each([401, 403])('surfaces certificate API HTTP %i instead of calling it pending DNS', async (status) => {
+    const { fn, calls } = fake((c) =>
+      c.url.endsWith('/ssl') ? { status } : { json: { custom_domain: 'basis-test.example.de' } },
+    );
+    const n = new NetlifyHosting({ apiToken: 'tok', formOrigin: 'https://app.example.de' }, fn);
+    await expect(n.getDomainStatus('site-1', 'basis-test.example.de')).rejects.toThrow(`HTTP ${status}`);
+    expect(calls.every((c) => c.method === 'GET')).toBe(true);
   });
 });

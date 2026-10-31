@@ -161,15 +161,33 @@ async function run(orderId: string) {
     published = false;
   for (let attempt = 0; attempt < 12; attempt++) {
     const status = await getProviders().hosting.getDomainStatus(actualSite.hostingProjectId, target.domain);
+    let httpsStatus: number | null = null,
+      contentMatches = false,
+      httpsError: string | null = null;
     try {
       const response = await fetch(`https://${target.domain}/`, { redirect: 'manual', signal: AbortSignal.timeout(15000) });
+      httpsStatus = response.status;
       html = await response.text();
-      published = status.active && response.status === 200 && hash(html) === hash(actualHtml.toString('utf8'));
-    } catch {
+      contentMatches = hash(html) === hash(actualHtml.toString('utf8'));
+      published = status.active && response.status === 200 && contentMatches;
+    } catch (err) {
+      httpsError = err instanceof Error ? err.name : 'Error';
       /* DNS/TLS may still be pending. Never disable certificate verification. */
     }
     if (published) break;
-    console.log(JSON.stringify({ stage: 'dns_https_pending', tier: target.tier, attempt }));
+    console.log(
+      JSON.stringify({
+        stage: 'dns_https_pending',
+        tier: target.tier,
+        attempt,
+        hostingActive: status.active,
+        ssl: status.ssl,
+        hostingDetails: status.details ?? null,
+        httpsStatus,
+        contentMatches,
+        httpsError,
+      }),
+    );
     if (attempt < 11) await new Promise((resolve) => setTimeout(resolve, 10000));
   }
   if (!published) throw new Error('DNS/HTTPS oder Live-Prüfung noch offen; kein bestätigter Monatsstart.');

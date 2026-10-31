@@ -16,12 +16,17 @@ Momentaufnahmen in diesem Verzeichnis; bestandene Teilprüfungen sind keine Gesa
 | Firmenwebsite | Öffentliche Start-/Preis-/Kontakt-/Rechtsseiten HTTP200;597/19/99 aktuell, keine590/49in sichtbaren Verkaufsangaben und keine drei konkret gesuchten Platzhalter. AGB sichern keine§19-Befreiung zu | Keine juristische Freigabe daraus ableiten; Steuerstatus bleibt offen |
 | Kundendomains | Vorhandene eigene Domain und reales Testhosting bestätigt; INWX-Konto durch Betreiber bestätigt. Fehlende geschützte Worker-Übernahme der Registrar-Felder korrigiert | [Private Secret-Einrichtung und lesender Sandbox-Test](inwx-setup.md) noch nötig; bisher keine tatsächliche INWX-Anmeldung oder Domainregistrierung nachgewiesen |
 
-Nächste praktische Aktionen: Spam-Einstufung anhand der Gmail-Begründung und gegebenenfalls
-Authentifizierungsergebnisse untersuchen. Externer Testempfang ist inzwischen als Spam bestätigt;
-keinen weiteren Test ungefragt senden oder die bereits zugestellte Mail erneut verlangen.
-Normalen bestätigten Test-Go-Live mit tatsächlichem Sandbox-Monatsstart für beide Tarife abschließen;
+Aktualisierung31.10.2026: Der VPS-Neuaufbau wurde tatsächlich ausgeführt. Die Veröffentlichung
+scheitert weiterhin vor dem Monatsstart: Netlify verändert zwei Rechtslinks, wodurch die strenge
+Inhaltsprüfung korrekt blockiert. Adapter und Diagnose lokal korrigiert; externe Abnahme bleibt
+offen. [Konkreter Befund und Nachweise](hosting-publication-fix-2026-10-31.md).
+
+Nächste praktische Aktion: Aktualisierten Worker mit korrigiertem Hosting-Adapter verwenden und
+normalen bestätigten Test-Go-Live mit tatsächlichem Sandbox-Monatsstart für beide Tarife abschließen;
 keinen Go-Live-Zeitstempel fingieren, um Billing zu erzwingen. Backup/Restore/Queue und geeigneter
-Kontrollbetrieb bleiben getrennte Abnahmen. Ein öffentlicher Webseiten-Deploy ist kein Verkaufsstart.
+Kontrollbetrieb bleiben getrennte Abnahmen. Spam bei Gmail und eigenem Postfach bleibt offen;
+Betreiber hat weitere Diagnosefragen vorerst beendet. Keine erneute Testmail ungefragt senden.
+Ein öffentlicher Webseiten-Deploy ist kein Verkaufsstart.
 
 Keine echte Kundenbestellung, Briefe an Betriebe oder Domainkäufe aus dieser Statusprüfung.
 DRY_RUN=true und bestehende Empfängerversand-/Live-Checkout-Sperren unverändert.

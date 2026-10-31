@@ -324,7 +324,18 @@ Geprüft am 23.10.2026 (docs.netlify.com „Get started with the Netlify API“,
   `required` → `PUT /api/v1/deploys/{deploy}/files/{pfad}` (octet-stream) → Status abfragen bis `ready`.
   Sicherheits-Header über die Datei `_headers`. Limit: 3 Deploys/Minute, 100/Tag.
 - Eigene Domain: `PATCH /api/v1/sites/{id} {custom_domain, domain_aliases}`; DNS bei INWX: Apex `A 75.2.60.5`,
-  `www CNAME {site}.netlify.app`; SSL: `POST /api/v1/sites/{id}/ssl`.
+  `www CNAME {site}.netlify.app`.
+- Erneut geprüft am 31.10.2026 anhand der [offiziellen API-Spezifikation](https://open-api.netlify.com/)
+  und [API-Anleitung](https://docs.netlify.com/api-and-cli-guides/api-guides/get-started-with-api/):
+  Vor jedem Datei-Deploy `PATCH /sites/{id}` mit `processing_settings.html.pretty_urls=false`.
+  Pretty URLs hat auf der eigenen Basis-Testseite tatsächlich die zwei Rechtslinks umgeschrieben;
+  der ausgelieferte HTML-Hash entsprach dadurch nicht mehr dem gespeicherten Original. Keine
+  Normalisierung oder Abschwächung des exakten Inhaltsvergleichs.
+- SSL lesen über `GET /sites/{id}/ssl`. Nur bei404 einmalig `POST /sites/{id}/ssl` zur Bereitstellung;
+  bestehende Let's-Encrypt-Zertifikate nicht damit ersetzen (laut API422 ohne Zertifikatsparameter).
+  Die nächste Statusabfrage muss `state=issued`, abgedeckte Zieldomain und zukünftiges `expires_at`
+  bestätigen. Erst dann Hosting aktiv; zusätzlich bleiben tatsächliches HTTPS und Inhaltsprüfung nötig.
+  Andere API-Fehler, insbesondere401/403, nicht als DNS-Wartezustand verschlucken.
 - Umschalten mit `HOSTING_PROVIDER=netlify` und `NETLIFY_API_TOKEN`.
 
 ## Eingehende E-Mails (Support)

@@ -639,3 +639,18 @@ Konkreter Kandidat: Onboarding-/Logo-Links auf netlify.app bei eigener Absenderd
 mögliches Spam-Signal, kein Ursachenbeweis. Keine URLs blind auf die statische Root-Seite umschreiben,
 keine neue DNS-/Providerkonfiguration oder Versandaktion ohne passende Beauftragung. Details im
 vorhandenen Bericht docs/activation-2026-10-30/site-form-routing.md. Diese Runde ändert nur Nachweise.
+
+## 31.10.2026 – konkreter Fehler im Kunden-Veröffentlichungstest
+
+Betreiber hat Worker regulär aktualisiert; Screenshot zeigt12dns_https_pending bei Basis, kein
+Monatsstart. Tatsächlich HTTPS200 und ready-Deploy gelesen, aber gespeichertes und ausgeliefertes
+HTML unterscheiden sich: Netlify Pretty URLs schreibt genau zwei Rechtslinks um. Bestehender
+Netlify-Adapter deaktiviert pretty_urls vor Deploy; vollständigen SHA256-Vergleich nicht abschwächen.
+SSL-Status über GET statt wiederholtem POST lesen; nur404 löst erstmalige Bereitstellung aus.
+issued, Domainabdeckung und zukünftiges expires_at erforderlich; API-Fehler nicht als DNS verschlucken.
+CLI zeigt getrennte Hosting-/SSL-/HTTP-/Hashdiagnose ohne private Inhalte.49gezielte Core-Tests,
+Workspace-Typecheck/Lint/Build bestanden; externer Worker-Lauf mit Korrektur noch offen. Keine
+Go-Live-/Abozeitstempel fingieren. Aktueller Befund und Nachweise:
+docs/activation-2026-10-30/hosting-publication-fix-2026-10-31.md. Betreiber hat Spamdiagnose vorerst
+beendet; dazu nicht erneut nachfragen oder weitere Mails schicken. Vorhandene Update-/Push-/
+Veröffentlichungsfreigabe gilt für getesteten Code, keine allgemeine Versand-/Verkaufsfreigabe.
