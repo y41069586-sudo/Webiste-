@@ -667,3 +667,13 @@ Nicht erneut Worker-/Kundenabnahme verlangen. Nächster Schritt Backup/Restore p
 research-lead/revise-demo (beide weiterhin fehlen), mit berechtigter privater Verbindung auf VPS.
 Keine globale Freigabe fingieren, Steuerstatus offen. Nachweise:
 docs/activation-2026-10-30/customer-acceptance-result-2026-10-31.md.
+
+## 31.10.2026 – Backup-Eingabe ungültig, keine Produktionssicherung abgenommen
+
+Betreiber-Screenshot: ERR_INVALID_URL vor Dump/Restore, Worker durch EXIT-Trap wieder gestartet.
+Backup-CLI prüft nun vollständige PostgreSQL-URI und unterdrückt rohe Fehler/Passwörter. Shell
+prüft Form und vollständige Verbindungs-/Berechtigungsprüfung vor Worker-Stopp.13 lokale Tests,
+Core-Typecheck/Lint/Bash-Syntax bestanden; kein tatsächlicher Produktionsrestore oder Queue-Erfolg.
+Für diese Script-Korrektur nur Git-Update auf VPS nötig: vorhandener readonly Script-Mount, kein
+neuer Image-/Secret-Aufbau. Private vollständige Supabase-URI via Connect → Session pooler → URI,
+Datenbankpasswort statt Platzhalter; nicht im Chat anfordern. Details docs/activation-2026-10-30/backup-next.md.

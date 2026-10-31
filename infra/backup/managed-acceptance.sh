@@ -8,11 +8,21 @@ cd "$repo"
 compose=(docker compose -f docker-compose.worker.yml)
 # Supabase's privileged connection stays on the operator's terminal/host, never in chat or Git.
 if [ "${ASK_BACKUP_URL:-0}" = 1 ] && [ -z "${BACKUP_DATABASE_URL:-}" ]; then
-  printf 'Berechtigte Supabase-Verbindung (postgres, Session-Port5432), Eingabe verdeckt: ' >/dev/tty
+  printf 'Vollständige Supabase-Verbindungs-URL (postgresql://…, Session-Port5432), Eingabe verdeckt: ' >/dev/tty
   IFS= read -r -s BACKUP_DATABASE_URL </dev/tty
   printf '\n' >/dev/tty
   [ -n "$BACKUP_DATABASE_URL" ] || { echo 'Keine Verbindung eingegeben; keine Abnahme ausgeführt.' >&2; exit 1; }
   export BACKUP_DATABASE_URL
+fi
+if [ -n "${BACKUP_DATABASE_URL:-}" ]; then
+  case "$BACKUP_DATABASE_URL" in
+    postgres://*|postgresql://*) ;;
+    *) echo 'Keine gültige PostgreSQL-Verbindungs-URL. In Supabase unter Connect → Session pooler die vollständige URI kopieren und das Datenbankpasswort privat einsetzen. Worker bleibt unverändert.' >&2; exit 1 ;;
+  esac
+  if [[ "$BACKUP_DATABASE_URL" =~ [[:space:]] ]]; then
+    echo 'Die Verbindungs-URL enthält Leerzeichen oder Steuerzeichen. Vollständige URI ohne Zeilenumbruch eingeben; Sonderzeichen im Passwort müssen URL-kodiert sein. Worker bleibt unverändert.' >&2
+    exit 1
+  fi
 fi
 backup_root=${BACKUP_ROOT:-/opt/seitenwerk-backups}
 mkdir -p "$backup_root"
@@ -28,10 +38,6 @@ cleanup() {
   if [ "$worker_was_running" = true ]; then "${compose[@]}" start worker >/dev/null; fi
 }
 trap cleanup EXIT
-if [ "${QUIESCE_WORKER:-0}" = 1 ] && [ -n "$("${compose[@]}" ps --status running -q worker)" ]; then
-  worker_was_running=true
-  "${compose[@]}" stop worker
-fi
 run_worker() {
   "${compose[@]}" run --rm -T --no-deps --user 0:0 -v "$target:/snapshot" \
     -v "$repo/packages/core/scripts:/repo/packages/core/scripts:ro" \
@@ -43,6 +49,11 @@ if [ -n "${SOURCE_PG_ENV:-}" ]; then
   cp "$SOURCE_PG_ENV" "$target/source-pg.env"
 else
   run_worker /repo/packages/core/scripts/backup-connection.ts /snapshot
+fi
+# Validate URL, project identity, verified TLS and full-backup privileges before interrupting the worker.
+if [ "${QUIESCE_WORKER:-0}" = 1 ] && [ -n "$("${compose[@]}" ps --status running -q worker)" ]; then
+  worker_was_running=true
+  "${compose[@]}" stop worker
 fi
 image=${BACKUP_POSTGRES_IMAGE:-postgres:17-alpine}
 source_network=()
