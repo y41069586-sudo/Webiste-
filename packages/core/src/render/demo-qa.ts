@@ -23,6 +23,8 @@ import { renderComposite, takeScreenshots } from './screenshots';
 type Check = QaResult['checks'][number];
 
 export interface DemoQaOptions {
+  /** Reuse only an existing successful AI check bound to exactly the same stored HTML. */
+  reuseUnchangedAi?: boolean;
   /** Controlled single runs must not leave a later paid rebuild in the daemon queue. */
   enqueueRebuild?: boolean;
   /** Lighthouse ausführen (langsam, ~8 s) */
@@ -82,7 +84,17 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
     checks.push({ name: 'inhaltsquelle', passed: true, details: 'Geprüfte Standardtexte (KI-Ausgabe verworfen)' });
 
   // 2) KI-Prüfung (MODEL_BULK)
-  if (opts.llm !== false) {
+  if (opts.reuseUnchangedAi) {
+    const prior = demo.qaResultJson?.checks.find((c) => c.name === 'ki-pruefung');
+    if (
+      !prior?.passed ||
+      demo.qaResultJson?.renderedAssets?.htmlHash !== sha256(html) ||
+      demo.qaResultJson.renderedAssets.businessFactsHash !== recipientFingerprint(lead) ||
+      recordedResearch !== researchContentHash(research)
+    )
+      throw Error('Vorhandene KI-Prüfung passt nicht unverändert zum HTML; keine kostenfreie Wiederverwendung.');
+    checks.push({ ...prior });
+  } else if (opts.llm !== false) {
     try {
       const res = await llmStructured<{ issues: QaIssue[] }>({
         tier: 'bulk',

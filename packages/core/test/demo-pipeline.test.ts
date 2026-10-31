@@ -177,4 +177,26 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
       registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));
     }
   }, 60_000);
+
+  it('reuses successful AI only for unchanged HTML and rejects a modified snapshot', async () => {
+    const lead = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
+    const id = await buildDemo(lead.id, { actor: 'test:reuse', enqueueQa: false, reviewNote: 'Controlled review' });
+    expect((await qaDemo(id, 'test:reuse', { lighthouse: false, enqueueRebuild: false })).passed).toBe(true);
+    registerMockStructured(QA_TOOL_NAME, () => {
+      throw Error('AI must not be called again');
+    });
+    const demo = (await getDb().query.demos.findFirst({ where: eq(demos.id, id) }))!;
+    const storage = getProviders().storage,
+      html = (await storage.get(demo.htmlStorageKey!))!;
+    try {
+      expect((await qaDemo(id, 'test:reuse', { lighthouse: false, reuseUnchangedAi: true, enqueueRebuild: false })).passed).toBe(
+        true,
+      );
+      await storage.put(demo.htmlStorageKey!, Buffer.concat([html, Buffer.from('<!-- changed -->')]), 'text/html');
+      await expect(qaDemo(id, 'test:reuse', { reuseUnchangedAi: true })).rejects.toThrow('passt nicht unverändert');
+    } finally {
+      await storage.put(demo.htmlStorageKey!, html, 'text/html');
+      registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));
+    }
+  }, 60_000);
 });

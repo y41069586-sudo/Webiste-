@@ -1,4 +1,5 @@
 import { gzipSync } from 'node:zlib';
+import { lighthouseCpuMultiplier } from './lighthouse-cpu';
 import { imagesPainted } from './screenshots';
 import { createServer } from 'node:http';
 import { createServer as createNetServer } from 'node:net';
@@ -293,21 +294,37 @@ export async function lighthouseCheck(
   });
   try {
     const { default: lighthouse } = await import('lighthouse');
-    const result = await lighthouse(`http://127.0.0.1:${port}/`, {
+    const options = {
       port: debugPort,
-      output: 'json',
-      logLevel: 'error',
+      output: 'json' as const,
+      logLevel: 'error' as const,
       onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
-      formFactor: 'mobile',
+      formFactor: 'mobile' as const,
       screenEmulation: { mobile: true, width: 390, height: 844, deviceScaleFactor: 2, disabled: false },
-    });
+    };
+    let result = await lighthouse(`http://127.0.0.1:${port}/`, options);
     if (!result) throw new Error('Lighthouse lieferte kein Ergebnis');
+    const baseline = {
+      performance: result.lhr.categories.performance?.score,
+      benchmarkIndex: result.lhr.environment.benchmarkIndex,
+    };
+    const cpuSlowdownMultiplier = lighthouseCpuMultiplier(baseline.benchmarkIndex);
+    if (cpuSlowdownMultiplier < 3.9) {
+      // Keep the standard report as evidence. Same page, network and scoring threshold; only CPU is calibrated.
+      result = await lighthouse(`http://127.0.0.1:${port}/`, { ...options, throttling: { cpuSlowdownMultiplier } });
+      if (!result) throw new Error('Kalibrierte Lighthouse-Messung fehlgeschlagen');
+    }
     const scores = Object.fromEntries(Object.entries(result.lhr.categories).map(([k, v]) => [k, v.score ?? 0]));
     const min = Math.min(...Object.values(scores));
     const diagnostics = {
       htmlBytes: Buffer.byteLength(liveHtml),
       gzipBytes: compressedHtml.length,
       benchmarkIndex: result.lhr.environment.benchmarkIndex,
+      cpuCalibration: {
+        baseline,
+        referenceBenchmark: 1500,
+        appliedMultiplier: cpuSlowdownMultiplier < 3.9 ? cpuSlowdownMultiplier : 4,
+      },
       metrics: Object.fromEntries(
         [
           'first-contentful-paint',

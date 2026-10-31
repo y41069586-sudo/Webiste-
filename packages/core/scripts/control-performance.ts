@@ -9,6 +9,9 @@ import { getDb, closeDb } from '../src/db/client';
 import { demos, leads } from '../src/db/schema';
 import { leadToFacts, storedContent } from '../src/demos/build';
 import { lighthouseCheck } from '../src/render/qa';
+import { qaDemo } from '../src/render/demo-qa';
+import { closeBrowser } from '../src/render/browser';
+import { stopBoss } from '../src/queue';
 import { sha256 } from '../src/util/crypto';
 try {
   const id = process.argv.find((a) => a.startsWith('--demo='))?.slice(7);
@@ -18,43 +21,62 @@ try {
   const lead = demo ? await getDb().query.leads.findFirst({ where: eq(leads.id, demo.leadId) }) : null;
   const content = storedContent(demo?.contentJson);
   if (!demo || !lead || !content || !demo.reviewNote || lead.source !== 'public_profile') throw Error('Kontrolldemo fehlt.');
-  const html = renderSite({
-    templateId: demo.templateId,
-    palette: demo.palette,
-    mode: 'live',
-    content,
-    facts: leadToFacts(lead, await getConfig()),
-    live: {
-      formAction: '/api/forms/qa',
-      imprintPath: 'impressum.html',
-      privacyPath: 'datenschutz.html',
-      canonicalUrl: 'http://127.0.0.1/',
-    },
-  });
-  const result = await lighthouseCheck(html);
-  const report = {
-    at: new Date().toISOString(),
-    htmlHash: sha256(html),
-    result,
-    environment: {
-      availableParallelism: availableParallelism(),
-      loadAverage: loadavg(),
-      cpuMax: await readFile('/sys/fs/cgroup/cpu.max', 'utf8').catch(() => null),
-    },
-  };
-  await setSetting(`control-performance:${id}`, report, 'operator:free-performance-diagnostic');
-  console.log(
-    JSON.stringify({
-      stage: 'performance_diagnostic',
-      ...report,
-      aiCalled: false,
-      workerStarted: false,
-      demoApprovalChanged: false,
-    }),
-  );
+  if (process.argv.includes('--recheck')) {
+    const qa = await qaDemo(id, 'operator:unchanged-control-recheck', {
+      lighthouse: true,
+      enqueueRebuild: false,
+      reuseUnchangedAi: true,
+    });
+    console.log(
+      JSON.stringify({
+        stage: 'awaiting_manual_review',
+        technicalPassed: qa.passed,
+        failed: qa.checks.filter((c) => !c.passed),
+        aiCalled: false,
+        workerStarted: false,
+      }),
+    );
+  } else {
+    const html = renderSite({
+      templateId: demo.templateId,
+      palette: demo.palette,
+      mode: 'live',
+      content,
+      facts: leadToFacts(lead, await getConfig()),
+      live: {
+        formAction: '/api/forms/qa',
+        imprintPath: 'impressum.html',
+        privacyPath: 'datenschutz.html',
+        canonicalUrl: 'http://127.0.0.1/',
+      },
+    });
+    const result = await lighthouseCheck(html);
+    const report = {
+      at: new Date().toISOString(),
+      htmlHash: sha256(html),
+      result,
+      environment: {
+        availableParallelism: availableParallelism(),
+        loadAverage: loadavg(),
+        cpuMax: await readFile('/sys/fs/cgroup/cpu.max', 'utf8').catch(() => null),
+      },
+    };
+    await setSetting(`control-performance:${id}`, report, 'operator:free-performance-diagnostic');
+    console.log(
+      JSON.stringify({
+        stage: 'performance_diagnostic',
+        ...report,
+        aiCalled: false,
+        workerStarted: false,
+        demoApprovalChanged: false,
+      }),
+    );
+  }
 } catch (e) {
   console.error(JSON.stringify({ stage: 'blocked', reason: e instanceof Error ? e.message : 'Diagnose fehlgeschlagen' }));
   process.exitCode = 1;
 } finally {
+  await closeBrowser();
+  await stopBoss();
   await closeDb();
 }

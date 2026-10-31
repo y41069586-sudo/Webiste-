@@ -898,3 +898,25 @@ weder Demo-/QA-Freigabe noch Inhalte. Keine KI, Briefe, Veröffentlichung oder W
 Für diese reine Diagnose reichen Git-Abgleich und readonly Mounts von core/src und core/scripts;
 kein erneuter Imagebau erforderlich. Danach DB-Bericht lesen und tatsächlichen Engpass bestimmen,
 statt aus dem lokalen Ergebnis auf einen Erfolg oder aus dem VPS-Score auf die Ursache zu schließen.
+
+## 31.10.2026 – VPS-Diagnose belegt schwache Test-CPU, dokumentierte Kalibrierung
+
+Isolierter VPS-Bericht: HTML 67848 Bytes, gzip 14715, FCP/LCP 1879 ms, TBT 708,5 ms, CLS 0,
+Speed Index 2435 ms, Benchmark 126, cpu.max 150000/100000, verfügbare Parallelität 1. Performance
+81, übrige Kategorien 100. Kein unbelegter Schluss auf zu große Bilder oder langsamen Download.
+Google dokumentiert Benchmark 125–800 bereits als Mid-Tier-Mobile und Standard-4x für einen
+High-End-Desktop 1500–2000: https://github.com/GoogleChrome/lighthouse/blob/main/docs/throttling.md#cpu-throttling
+
+Neue Messpolitik: Standard-4x-Lauf bleibt erhalten; auf schwachen Hosts zusätzliche Kalibrierung
+mit max(1,min(4,benchmark/1500*4)). 1500 ist unsere dokumentierte Referenz aus dem Desktopbereich,
+keine von Google vorgeschriebene Formel. Keine simulierte Beschleunigung unter1x; auf schnellen
+Hosts weiter4x. Netzwerkprofil und 90-Punkte-Grenze bleiben gleich. Bericht enthält Originalscore,
+Benchmark und angewendeten Faktor, kalibrierte und Standardwerte nicht gleichsetzen.
+
+control-performance.ts --recheck führt nun normale vollständige QA aus und nutzt die vorige
+erfolgreiche KI-Prüfung nur bei exakt gleichem gespeichertem HTML-SHA256. Geändertes HTML oder
+fehlende/negative KI-Prüfung blockiert statt Kosten oder erfundener Prüfung. Kein KI-Aufruf,
+kein Folge-Rebuildjob, keine Freigabe, kein Versand und kein Workerstart. Neuer Gesamtstatus
+wird regulär in demos.qa_result_json gespeichert; nach Betreiberlauf diesen lesen (alter
+control-performance:-Bericht bleibt als historischer Diagnosenachweis erhalten).
+VPS-Anwendung der Kalibrierung noch offen; keinen Erfolg oder 9,5-Punkte-Qualität vorwegnehmen.

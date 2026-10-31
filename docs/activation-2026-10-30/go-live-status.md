@@ -2,6 +2,18 @@
 
 ## Aktueller Abschlussstand nach INWX-Freigabe und VPS-Bestätigung
 
+**Isolierter Messbericht vom VPS:** 14,7 KB gzip-HTML, FCP/LCP 1,88 Sekunden, CLS 0, aber
+708,5 ms blockierte Rechenzeit und CPU-Benchmark nur 126. Der Standardlauf bleibt mit 81 Punkten
+gespeichert. Die feste zusätzliche 4x-Verlangsamung ist laut [Lighthouse-Dokumentation](https://github.com/GoogleChrome/lighthouse/blob/main/docs/throttling.md#cpu-throttling)
+für einen wesentlich schnelleren Desktop gedacht. Neue Kalibrierung anhand der Testhardware,
+unveränderte Netzbedingungen und 90er-Grenze; Originalscore und verwendeter Faktor bleiben im
+Bericht. Die gewählte Referenz 1500 ist eine dokumentierte Projekteinstellung, keine verbindliche
+Google-Formel. Noch kein erfolgreicher kalibrierter VPS-Lauf belegt.
+
+Die nächste Gesamtprüfung ruft keine neue KI auf: erfolgreiche bestehende KI-Prüfung nur bei
+exakt unverändertem HTML-Hash übernehmen, alle technischen Prüfungen erneut ausführen. Jede
+HTML-Abweichung sperrt diese Wiederverwendung. Keine Design-/Versandfreigabe aus Kalibrierung.
+
 **Nach Reparaturaufruf:** Textkorrektur wurde übernommen und KI-/Struktur-/Layout-/Barrierefreiheits-
 prüfungen bestanden. Lighthouse meldet auf dem VPS weiterhin einen Fehler: Performance 75,
 übrige Kategorien 100. Demo bleibt gesperrt. Lokale 100 Punkte bestätigen diesen VPS-Lauf nicht.
