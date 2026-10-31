@@ -1,6 +1,32 @@
 # INWX-Zugang über vorhandene Konfiguration
 
-## Aktueller Befund31.10.2026
+## Aktueller Erfolg31.10.2026 um10:57
+
+Betreiber hat den bestehenden normalen Kontotest mit einmaliger Überschreibung des tatsächlichen
+Benutzernamens ausgeführt. Ergebnis: stage=result,provider=inwx,environment=production,
+configuredEnvironment=sandbox,authenticatedRead=true,globalProviderChanged=false,
+domainPurchased=false,dnsChanged=false. Derselbe im Worker hinterlegte Passwortwert konnte
+weiterverwendet werden. Der bislang verwendete Benutzername war der korrigierte Konfigurationspunkt.
+Ein ausgefülltes Browserformular allein war noch kein Nachweis; der tatsächliche API-Lesetest
+bestätigt nun die Anmeldung und fest begrenzte Verfügbarkeitsabfrage.
+
+Der bestätigte Benutzername wurde im bestehenden Netlify-Projekt als REGISTRAR_USER im
+Production-Kontext gespeichert. Secret-Flag und vorhandene Builds-/Functions-/Runtime-Scopes
+danach erneut geprüft. Benutzername und Passwort bleiben aus dem öffentlichen Repository entfernt.
+Die Änderung braucht einen App-Deploy zur Laufzeitaktivierung. Die dauerhafte Worker-Datei
+.env.worker ist dadurch noch nicht geändert; der erfolgreiche Test verwendete ein einmaliges -e.
+
+Für die private dauerhafte Worker-Korrektur ist ein atomarer Austausch genau dieser einzelnen
+Zeile vorbereitet: übrige Bytes unverändert, Modus0600, fehlender/doppelter Eintrag blockiert,
+kein Neustart. Lokaler Test ausschließlich mit fiktiven Zugangsdaten bestanden. Kein neuer
+Image-Neuaufbau und kein Einmal-Code-/Secret-Import erforderlich. Tatsächliche VPS-Ausführung
+steht noch aus. [Strukturierter Beleg](registrar-acceptance-2026-10-31.json).
+
+INWX-Kontozugang abgehakt. Keine erneute manuelle Loginbestätigung oder identischen API-Test
+verlangen. OT&E-Anmeldung, Registrierungsablauf und globale Registrar-Freigabe sind damit nicht
+bestätigt; keine Domain kaufen, DNS ändern oder Worker-Recherche wieder starten.
+
+## Vorheriger Befund31.10.2026 um10:46
 
 Betreiber hat den normalen begrenzten Kontotest ausgeführt. Screenshot10:46 bestätigt
 environment=production,stage=blocked,code=2200,method=account.login,errorClass=InwxError.

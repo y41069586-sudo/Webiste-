@@ -14,7 +14,7 @@ Momentaufnahmen in diesem Verzeichnis; bestandene Teilprüfungen sind keine Gesa
 | Recherche | Vorhandener Lead-Finder und Quellen-/Bedarfs-/Website-/Widerspruchsregeln; research-lead/revise-demo nach erfolgreichem Restore ergänzt und jetzt unabhängig in pg-boss gelesen | Ein tatsächlich geeigneter Kontrollbetrieb mit Recherche-/Demo-/Briefnachweis fehlt; vorhandene Queues allein beweisen keinen vollständigen Recherchebetrieb |
 | Steuer/Live-Vertrag | tax.operatorConfirmed=false bleibt korrekt offen | Verbindliche Steuer-/Rechnungsregelung und dokumentierte Live-Vertragsfreigabe; keine §19-Regelung erfinden |
 | Firmenwebsite | Öffentliche Start-/Preis-/Kontakt-/Rechtsseiten HTTP200;597/19/99 aktuell, keine590/49in sichtbaren Verkaufsangaben und keine drei konkret gesuchten Platzhalter. AGB sichern keine§19-Befreiung zu | Keine juristische Freigabe daraus ableiten; Steuerstatus bleibt offen |
-| Kundendomains | Vorhandene eigene Domain und reales Testhosting bestätigt. Normaler INWX-Lesetest tatsächlich ausgeführt, scheitert bei account.login2200 | [INWX-Anmeldung klären](inwx-setup.md): tatsächlicher Benutzername/aktuelle private Konfiguration. Keine erfolgreiche API-Anmeldung, Domainabfrage oder Registrierung nachgewiesen |
+| Kundendomains | Eigene Domain und Testhosting bestätigt. INWX-Anmeldung plus begrenzte Verfügbarkeitsabfrage nun tatsächlich erfolgreich nach Benutzernamekorrektur; kein Kauf/DNS-/Providerwechsel. Korrigierter Benutzername als Netlify-Secret gespeichert | [Dauerhafte Worker-Zeile korrigieren](inwx-setup.md), App-Deploy zur Secret-Aktivierung. OT&E-/Registrierungsablauf und allgemeine Registrarfreigabe weiter offen |
 
 Aktualisierung31.10.2026: Der VPS-Neuaufbau mit der Hosting-Korrektur wurde tatsächlich ausgeführt.
 Beide Kunden-Abnahmeläufe bestanden und unabhängig gegen Datenbank, Stripe und HTTPS geprüft.
@@ -24,10 +24,9 @@ Pretty-URLs-/Zertifikatsprobleme blockieren diese beiden Testseiten nicht mehr.
 Aktualisierung nach Betreiberlauf10:29: Datenbank-/Storage-Wiederherstellung und Queue-Ergänzung
 bestanden. Keine erneute einmalige Backupabnahme nötig. [Konkrete Nachweise und Grenzen](backup-acceptance-result-2026-10-31.md).
 
-Aktualisierung10:46: Worker nach gemeldeten tatsächlichen KI-Kosten gestoppt. Normaler INWX-
-Kontotest scheitert bei account.login2200; keine Wiederholung ohne neue Erkenntnis.
-Nächste praktische Aktion: Manuelle INWX-Anmeldung mit tatsächlichem Benutzernamen klären,
-danach private Worker-Konfiguration abgleichen. Worker bis geklärtem Kostenrahmen pausiert lassen.
+Aktualisierung10:57: INWX-Kontotest mit korrigiertem Benutzernamen bestanden; Anmeldung nicht
+erneut prüfen. Netlify-Secret korrigiert, private Worker-Zeile noch dauerhaft zu speichern.
+Worker bis geklärtem Kostenrahmen pausiert lassen; nächster größerer Punkt bleibt Kosten-/Mailbetrieb.
 Geeigneter Kontrollbetrieb bleibt
 eine getrennte Abnahme. Spam bei Gmail und eigenem Postfach bleibt offen;
 Betreiber hat weitere Diagnosefragen vorerst beendet. Keine erneute Testmail ungefragt senden.

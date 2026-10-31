@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-31",
+  "evidence": "Operator-provided VPS terminal screenshot at 10:57 local time",
+  "actualReadOnlyTest": {
+    "stage": "result",
+    "provider": "inwx",
+    "environment": "production",
+    "configuredEnvironment": "sandbox",
+    "authenticatedRead": true,
+    "globalProviderChanged": false,
+    "domainPurchased": false,
+    "dnsChanged": false
+  },
+  "usernameOverrideUsed": true,
+  "usernameValueExcluded": true,
+  "passwordUnchangedByAssistant": true,
+  "netlifySetting": {
+    "key": "REGISTRAR_USER",
+    "updateSucceeded": true,
+    "context": "production",
+    "isSecretVerified": true,
+    "scopesVerified": ["builds", "functions", "runtime"],
+    "updatedAt": "2026-10-31T09:59:18Z",
+    "runtimeActivation": "pending_app_deploy"
+  },
+  "workerPersistentEnvUpdated": false,
+  "workerPersistentEnvUpdateCommandLocallyChecked": true,
+  "workerRestartedByAssistant": false,
+  "registrationOrSandboxWorkflowVerified": false
+}

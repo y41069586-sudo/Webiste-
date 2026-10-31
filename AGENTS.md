@@ -715,3 +715,15 @@ Adapter gegen offizielle Doku abgeglichen; kein Protokollfehler nachgewiesen. Ma
 Anmeldung mit tatsächlichem INWX-Benutzernamen angefragt; keine Secrets im Chat verlangen.
 Keine Wiederholungsversuche ohne neue Angaben, keine unbegründeten Code-/Providerwechsel.
 Nachweise: docs/activation-2026-10-30/inwx-setup.md und llm-costs-and-worker-pause-2026-10-31.md.
+
+## 31.10.2026 – INWX-Kontozugang jetzt tatsächlich bestätigt
+
+Betreiber-Screenshot10:57: einmaliger korrekter Benutzername als -e, vorhandenes Passwort
+unverändert; production/authenticatedRead=true, configuredEnvironment=sandbox, keine Käufe/
+DNS-/Provideränderungen. INWX-Kontoanmeldung und feste Leseabfrage abgehakt, nicht wiederholen.
+Korrigierter REGISTRAR_USER als Production-Secret in Netlify gespeichert; Flag/Scopes geprüft.
+App-Deploy zur Laufzeitaktivierung und dauerhafte private .env.worker-Zeile stehen noch aus.
+Vorbereitete atomare Ein-Zeilen-Korrektur lokal mit fiktiven Werten geprüft; kein Worker-Neustart,
+kein Image-/Secret-Neuimport. Weder Username noch Passwort ins öffentliche Repository schreiben.
+Worker wegen KI-Kosten weiter pausiert lassen. OT&E/Registrierungsablauf nicht aus bloßem
+Kontotest als bestanden ausgeben. Belege docs/activation-2026-10-30/registrar-acceptance-2026-10-31.json.
