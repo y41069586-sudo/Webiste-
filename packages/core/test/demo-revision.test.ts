@@ -95,4 +95,19 @@ describe('Kostenlose Änderung vor dem Kauf', () => {
     const still = (await getProviders().storage.get(after.htmlStorageKey!))!.toString('utf8');
     expect(still).not.toContain('Seit 1985');
   });
+  it('repairs a failed draft without reusing its old QA or publishing it', async () => {
+    await getDb().update(demos).set({ status: 'qa_failed' }).where(eq(demos.id, demoId));
+    const result = await reviseDemo({
+      demoId,
+      actor: 'test:repair',
+      patch: {
+        hero_subline: 'Beschreiben Sie Ihr Vorhaben für eine unverbindliche Anfrage.',
+        seo_description: 'Malerarbeiten in Dortmund: Leistungen ansehen und unverbindlich anfragen.',
+      },
+    });
+    expect(result.state).toBe('done');
+    const row = await getDb().query.demos.findFirst({ where: eq(demos.id, demoId) });
+    expect(row).toMatchObject({ status: 'building', qaResultJson: null, reviewRequired: true });
+    expect(row?.contentJson?.seo_description).toBe('Malerarbeiten in Dortmund: Leistungen ansehen und unverbindlich anfragen.');
+  });
 });

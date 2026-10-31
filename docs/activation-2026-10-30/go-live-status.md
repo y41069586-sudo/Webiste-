@@ -2,6 +2,16 @@
 
 ## Aktueller Abschlussstand nach INWX-Freigabe und VPS-Bestätigung
 
+**Neuster Nachweis, 31.10.2026 um 13:47 UTC:** Betreiber hat Backupinstaller und Kontrolllauf
+ausgeführt. Timer installiert, erster Sicherungslauf bestanden; eine neue externe verschlüsselte
+Kopie zusätzlich unabhängig im vorhandenen Bucket bestätigt. Backupinstallation damit erledigt.
+Echte Kontroll-Demo erzeugt, aber noch nicht freigegeben: allein Lighthouse-Performance 88 statt
+mindestens 90 blockiert. Alle anderen technischen Prüfungen bestanden. Zwei ungenaue Textstellen
+werden gezielt korrigiert. Testserver-Kompression an reale Auslieferung angeglichen; lokale
+Live-Gegenprüfung 100 in allen vier Kategorien. Neuer VPS-Prüflauf noch nötig, keine pauschale
+Design-/Conversionbewertung oder Brief-Freigabe daraus ableiten. Die älteren Pending-Zeilen
+zu fehlender Sicherung oder noch nicht gebauter Kontroll-Demo sind damit überholt.
+
 App-Commit `b0eb1ff` tatsächlich veröffentlicht: Netlify `6ae5e8f6146689d171f0bd1b`,
 production/ready, 31.10.2026 um 13:13:06 UTC. Authentifiziert bestätigt: INWX production,
 Zugangsdaten vorhanden, Resend und Netlify aktiv, Stripe test, DRY_RUN true. Betreiber bestätigt

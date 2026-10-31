@@ -855,3 +855,29 @@ nachgewiesen. Steuerbestätigung false; leere Nummern nicht erfinden, aber nicht
 Rechnungsfreigabe ausgeben. Keine neue Spamdiagnose oder ungefragte Testmails (Betreiber beendet).
 Reststatus oben in docs/activation-2026-10-30/go-live-status.md aktualisiert. Kein fester Starttermin
 ohne diese Ergebnisse; klare Trennung zwischen technischem Abschluss und Freigabe echter Verkäufe.
+
+## 31.10.2026 – erster geplanter Backup-Lauf bestanden, echter Demo-Kontrolllauf ausgeführt
+
+Betreiber-Screenshot 14:47 CET bestätigt installierten systemd-Timer und bestandenen ersten
+Lauf einschließlich externer Prüfung. Separat in storage.objects eine neue externe Sicherung
+vom 13:44:39 UTC bestätigt. Backupinstallation/erster Lauf sind erledigt; nicht erneut verlangen.
+Keine weitere Produktionswiederherstellung ausführen. Worker blieb unverändert pausiert.
+
+Kontroll-Demo tatsächlich mit Anthropic gebaut und KI-QA bezahlt/reserviert/abgerechnet. Ergebnis
+qa_failed: ausschließlich Lighthouse-Performance 88 unter 90; alle übrigen technischen Prüfungen
+inklusive Barrierefreiheit/SEO/Best-Practices bestanden. Zwei niedrige KI-Hinweise betreffen zu
+weit formulierte Leistungsumfänge. Keine Brief-/Designfreigabe und keine Qualitätsnoten erfinden.
+
+Lighthouse-Testserver lieferte bisher unkomprimiertes HTML im simulierten mobilen Netz aus.
+Jetzt gzip mit korrektem Content-Encoding/Vary und unkomprimiertem Fallback; gleiche Drosselung
+und unveränderte 90er-Grenze. Lokale Gegenprüfung der tatsächlichen Live-Variante 100/100/100/100.
+Die vollständige Demo mit Betreiberbanner ist ein anderer, schwererer Prüfgegenstand; aus dem
+Live-Ergebnis keine pauschale Demo-Conversion-/Designnote ableiten.
+
+Gezielte belegte Textkorrektur privat in control-repair:<demoId>, erwarteter alter HTML-Hash.
+repair-control-demo.ts nutzt normalen reviseDemo-Service und erneute volle QA, keinen neuen
+Entwurf, keine Folgejobs, Freigaben, Briefe oder Workerstart. Ein bereits angewendeter Auftrag
+wird nicht erneut angewendet, abgeschlossene QA nicht still wieder bezahlt. Neue Prüfung kann
+weiter am Budget scheitern; nicht aus früherem Ergebnis freigeben. qa_failed darf nun repariert
+werden; alte QA wird dabei gelöscht, Status building/reviewRequired=true statt Veröffentlichung.
+VPS braucht neuen Code und einmaligen gezielten Reparaturlauf; tatsächlicher Erfolg dort noch offen.

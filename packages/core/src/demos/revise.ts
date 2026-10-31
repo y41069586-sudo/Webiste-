@@ -38,7 +38,7 @@ export async function reviseDemo(input: {
     return status;
   };
   const demo = await db.query.demos.findFirst({ where: eq(demos.id, input.demoId) });
-  if (!demo || !['pending_review', 'approved', 'published'].includes(demo.status))
+  if (!demo || !['qa_failed', 'pending_review', 'approved', 'published'].includes(demo.status))
     return finish({ state: 'failed', at, error: 'Demo nicht änderbar (gelöscht, abgelaufen oder im Bau).' });
   const lead = await db.query.leads.findFirst({ where: eq(leads.id, demo.leadId) });
   if (!lead || lead.anonymizedAt) return finish({ state: 'failed', at, error: 'Betrieb nicht mehr vorhanden.' });
@@ -62,6 +62,7 @@ export async function reviseDemo(input: {
     hero_subline: p.hero_subline?.trim() || current.hero_subline,
     about: p.about?.trim() || current.about,
     cta_text: p.cta_text?.trim() || current.cta_text,
+    seo_description: p.seo_description?.trim() || current.seo_description,
     services: services.length ? services : current.services,
   });
   const research = await leadResearch(lead);
@@ -110,6 +111,7 @@ export async function reviseDemo(input: {
       palette,
       htmlStorageKey: demo.htmlStorageKey ?? demoHtmlKey(demo.id),
       contentJson: { ...next, _meta: { ...meta, revisions: revision, lastRevisionAt: at } } as unknown as Record<string, unknown>,
+      ...(demo.status === 'qa_failed' ? { status: 'building' as const, qaResultJson: null, reviewRequired: true } : {}),
       updatedAt: new Date(),
     })
     .where(eq(demos.id, demo.id));

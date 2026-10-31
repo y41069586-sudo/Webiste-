@@ -1,3 +1,4 @@
+import { gzipSync } from 'node:zlib';
 import { imagesPainted } from './screenshots';
 import { createServer } from 'node:http';
 import { createServer as createNetServer } from 'node:net';
@@ -258,6 +259,8 @@ export async function lighthouseCheck(
   minScore = 0.9,
   assets: { path: string; content: Buffer | string; contentType?: string }[] = [],
 ): Promise<Check> {
+  // Netlify serves HTML compressed. Model that delivery while retaining Lighthouse's mobile throttling.
+  const compressedHtml = gzipSync(liveHtml);
   const server = createServer((req, res) => {
     const asset = assets.find((a) => `/${a.path.replace(/^\//, '')}` === req.url);
     if (asset) {
@@ -270,8 +273,14 @@ export async function lighthouseCheck(
       res.end('User-agent: *\nAllow: /\n');
       return;
     }
-    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'max-age=600' });
-    res.end(liveHtml);
+    const gzip = /\bgzip\b/.test(req.headers['accept-encoding'] ?? '');
+    res.writeHead(200, {
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'max-age=600',
+      vary: 'Accept-Encoding',
+      ...(gzip ? { 'content-encoding': 'gzip' } : {}),
+    });
+    res.end(gzip ? compressedHtml : liveHtml);
   });
   await new Promise<void>((r) => server.listen(0, '127.0.0.1', () => r()));
   const port = (server.address() as { port: number }).port;

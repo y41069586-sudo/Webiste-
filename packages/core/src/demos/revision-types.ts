@@ -4,6 +4,7 @@ export interface DemoRevisionPatch {
   hero_subline?: string;
   about?: string;
   cta_text?: string;
+  seo_description?: string;
   services?: { title: string; text: string }[];
   /** Neue Leistungstitel hat der Betrieb selbst genannt (z. B. im Wunsch) – gelten dann als bestätigt */
   servicesConfirmedByBusiness?: boolean;
