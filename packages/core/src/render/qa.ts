@@ -307,11 +307,15 @@ export async function lighthouseCheck(
     const baseline = {
       performance: result.lhr.categories.performance?.score,
       benchmarkIndex: result.lhr.environment.benchmarkIndex,
+      throttling: result.lhr.configSettings.throttling,
     };
     const cpuSlowdownMultiplier = lighthouseCpuMultiplier(baseline.benchmarkIndex);
     if (cpuSlowdownMultiplier < 3.9) {
       // Keep the standard report as evidence. Same page, network and scoring threshold; only CPU is calibrated.
-      result = await lighthouse(`http://127.0.0.1:${port}/`, { ...options, throttling: { cpuSlowdownMultiplier } });
+      result = await lighthouse(`http://127.0.0.1:${port}/`, {
+        ...options,
+        throttling: { ...baseline.throttling, cpuSlowdownMultiplier },
+      });
       if (!result) throw new Error('Kalibrierte Lighthouse-Messung fehlgeschlagen');
     }
     const scores = Object.fromEntries(Object.entries(result.lhr.categories).map(([k, v]) => [k, v.score ?? 0]));
@@ -320,6 +324,7 @@ export async function lighthouseCheck(
       htmlBytes: Buffer.byteLength(liveHtml),
       gzipBytes: compressedHtml.length,
       benchmarkIndex: result.lhr.environment.benchmarkIndex,
+      throttling: result.lhr.configSettings.throttling,
       cpuCalibration: {
         baseline,
         referenceBenchmark: 1500,
