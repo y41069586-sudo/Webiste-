@@ -702,3 +702,16 @@ denselben einmaligen Restore-/Queue-Aufruf verlangen. Regelmäßiger Backupplan/
 externe Kopie bleiben offen. Nächster bestehender sicherer Schritt: INWX --production-read-only,
 keine Registrierung/DNS-Änderung/Providerumschaltung. Nachweise/Grenzen:
 docs/activation-2026-10-30/backup-acceptance-result-2026-10-31.md.
+
+## 31.10.2026 – Worker wegen KI-Kosten pausiert, normaler INWX-Login abgelehnt
+
+Lesender DB-Abgleich: research.autoAi=true/perTick3/maxSearches8, Wochenbudget3000Cent,
+killSwitchfalse. Nach Queue-Einrichtung2Pipeline-Recherchen mit Opus5.5,4Nutzungsbuchungen
+09:31–09:33UTC, internca0,65€ (keine verifizierte Anbieterrechnung). DRY_RUN verhindert
+keine KI-Kosten. Betreiber-Screenshot10:46 bestätigt Worker stop; keine neue up/start/Setup-
+Anweisung bis geklärter Fortsetzung/Kostenrahmen. Keine neuen kostenpflichtigen KI-Tests.
+Einzelner INWX-CLI mit --no-deps: production/account.login/2200, kein domain.check/Kauf.
+Adapter gegen offizielle Doku abgeglichen; kein Protokollfehler nachgewiesen. Manuelle
+Anmeldung mit tatsächlichem INWX-Benutzernamen angefragt; keine Secrets im Chat verlangen.
+Keine Wiederholungsversuche ohne neue Angaben, keine unbegründeten Code-/Providerwechsel.
+Nachweise: docs/activation-2026-10-30/inwx-setup.md und llm-costs-and-worker-pause-2026-10-31.md.

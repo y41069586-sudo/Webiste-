@@ -1,5 +1,28 @@
 # INWX-Zugang über vorhandene Konfiguration
 
+## Aktueller Befund31.10.2026
+
+Betreiber hat den normalen begrenzten Kontotest ausgeführt. Screenshot10:46 bestätigt
+environment=production,stage=blocked,code=2200,method=account.login,errorClass=InwxError.
+Der Worker wurde zuvor gestoppt und bleibt pausiert. Keine erfolgreiche Anmeldung oder
+domain.check-Abfrage, keine Registrierung, keine Änderung globaler Provider.
+
+INWX dokumentiert2200 als Authentication error. API-Anfrage und 2FA-Abfolge im bestehenden
+Adapter stimmen mit der [offiziellen API-Dokumentation](https://www.inwx.de/de/download/file/filename/docbook.pdf)
+und dem [INWX-Python-Client](https://github.com/inwx/python-client/blob/master/INWX/Domrobot.py)
+überein; aus diesem Befund ist kein Codefehler nachgewiesen. Fehler tritt vor account.unlock auf.
+Der tatsächliche Benutzername ist nicht automatisch die Kontakt-E-Mail: Bei INWX sind diese
+separate Registrierungsfelder; API-user bezeichnet den Benutzernamen.
+
+Nächste fehlende Information wurde ohne Abfrage eines Passworts angefragt: Funktioniert die
+manuelle Anmeldung unter https://account.inwx.de mit den tatsächlichen Zugangsdaten?
+Bei Erfolg als Nächstes veraltete Worker-Konfiguration gegen die privaten aktuellen Angaben
+prüfen; bei Fehlschlag zunächst Konto-/Benutzername-/Passwortklärung beim vorhandenen Anbieter.
+Keine identischen Fehlversuche wiederholen und keinen neuen Registrar wählen.
+
+Kosten-/Pausenbefund: [Worker und KI-Kosten](llm-costs-and-worker-pause-2026-10-31.md).
+Die folgenden Abschnitte sind die bisherige Einrichtung und Testhistorie.
+
 Stand 30.10.2026: Betreiber bestätigt vorhandenes INWX-Konto. REGISTRAR_USER und REGISTRAR_PASSWORD
 sind jetzt im Netlify-Projekt seitenwerkworld als Secrets mit Production-/Functions-Scope hinterlegt.
 Die neue Konfiguration wurde um 16:29:33 UTC mit unverändertem getestetem Anwendungscode veröffentlicht.

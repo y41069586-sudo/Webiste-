@@ -14,7 +14,7 @@ Momentaufnahmen in diesem Verzeichnis; bestandene Teilprüfungen sind keine Gesa
 | Recherche | Vorhandener Lead-Finder und Quellen-/Bedarfs-/Website-/Widerspruchsregeln; research-lead/revise-demo nach erfolgreichem Restore ergänzt und jetzt unabhängig in pg-boss gelesen | Ein tatsächlich geeigneter Kontrollbetrieb mit Recherche-/Demo-/Briefnachweis fehlt; vorhandene Queues allein beweisen keinen vollständigen Recherchebetrieb |
 | Steuer/Live-Vertrag | tax.operatorConfirmed=false bleibt korrekt offen | Verbindliche Steuer-/Rechnungsregelung und dokumentierte Live-Vertragsfreigabe; keine §19-Regelung erfinden |
 | Firmenwebsite | Öffentliche Start-/Preis-/Kontakt-/Rechtsseiten HTTP200;597/19/99 aktuell, keine590/49in sichtbaren Verkaufsangaben und keine drei konkret gesuchten Platzhalter. AGB sichern keine§19-Befreiung zu | Keine juristische Freigabe daraus ableiten; Steuerstatus bleibt offen |
-| Kundendomains | Vorhandene eigene Domain und reales Testhosting bestätigt; INWX-Konto durch Betreiber bestätigt. Fehlende geschützte Worker-Übernahme der Registrar-Felder korrigiert | [Private Secret-Einrichtung und lesender Sandbox-Test](inwx-setup.md) noch nötig; bisher keine tatsächliche INWX-Anmeldung oder Domainregistrierung nachgewiesen |
+| Kundendomains | Vorhandene eigene Domain und reales Testhosting bestätigt. Normaler INWX-Lesetest tatsächlich ausgeführt, scheitert bei account.login2200 | [INWX-Anmeldung klären](inwx-setup.md): tatsächlicher Benutzername/aktuelle private Konfiguration. Keine erfolgreiche API-Anmeldung, Domainabfrage oder Registrierung nachgewiesen |
 
 Aktualisierung31.10.2026: Der VPS-Neuaufbau mit der Hosting-Korrektur wurde tatsächlich ausgeführt.
 Beide Kunden-Abnahmeläufe bestanden und unabhängig gegen Datenbank, Stripe und HTTPS geprüft.
@@ -24,8 +24,11 @@ Pretty-URLs-/Zertifikatsprobleme blockieren diese beiden Testseiten nicht mehr.
 Aktualisierung nach Betreiberlauf10:29: Datenbank-/Storage-Wiederherstellung und Queue-Ergänzung
 bestanden. Keine erneute einmalige Backupabnahme nötig. [Konkrete Nachweise und Grenzen](backup-acceptance-result-2026-10-31.md).
 
-Nächste praktische Aktion: Vorhandenen begrenzten lesenden INWX-Kontotest ausführen, ohne
-Domainbestellung oder globalen Providerwechsel. Geeigneter Kontrollbetrieb bleibt
+Aktualisierung10:46: Worker nach gemeldeten tatsächlichen KI-Kosten gestoppt. Normaler INWX-
+Kontotest scheitert bei account.login2200; keine Wiederholung ohne neue Erkenntnis.
+Nächste praktische Aktion: Manuelle INWX-Anmeldung mit tatsächlichem Benutzernamen klären,
+danach private Worker-Konfiguration abgleichen. Worker bis geklärtem Kostenrahmen pausiert lassen.
+Geeigneter Kontrollbetrieb bleibt
 eine getrennte Abnahme. Spam bei Gmail und eigenem Postfach bleibt offen;
 Betreiber hat weitere Diagnosefragen vorerst beendet. Keine erneute Testmail ungefragt senden.
 Ein öffentlicher Webseiten-Deploy ist kein Verkaufsstart.
