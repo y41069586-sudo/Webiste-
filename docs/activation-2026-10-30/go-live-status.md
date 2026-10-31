@@ -1,5 +1,32 @@
 # Kundenstart: noch nicht abgenommen
 
+## Aktueller Abschlussstand nach INWX-Freigabe und VPS-Bestätigung
+
+App-Commit `b0eb1ff` tatsächlich veröffentlicht: Netlify `6ae5e8f6146689d171f0bd1b`,
+production/ready, 31.10.2026 um 13:13:06 UTC. Authentifiziert bestätigt: INWX production,
+Zugangsdaten vorhanden, Resend und Netlify aktiv, Stripe test, DRY_RUN true. Betreiber bestätigt
+anschließend den angeforderten VPS-Git-/Dateiabgleich und Imagebau. Diese Aufgabe ist anhand
+seiner Bestätigung erledigt; denselben Aufruf nicht nochmals verlangen. Worker bleibt pausiert.
+
+Erledigt bleiben die tatsächlichen Basis-/Care+-Sandboxkäufe mit Monatsstart nach Testveröffentlichung,
+beide Testseiten samt HTTPS-/Hashnachweis, einmaliger Datenbank-/Storage-Restore, fehlende Queues,
+implementierte Kostenreservierung, INWX-Kontozugang und Produktionsfreigabe.
+
+| Verbleibender Abschluss | Aktueller Nachweis | Nächster Schritt |
+|---|---|---|
+| Regelmäßige Sicherung | Code und lokaler Test vorhanden. Neue Leseprüfung: kein Objekt im externen Backuppräfix, kein gespeicherter Erfolgsstatus | Installer auf VPS ausführen bzw. tatsächliches Ergebnis prüfen; erster Restore-/Offsite-Lauf und Timer müssen bestehen |
+| Kontrollbetrieb bis Brief | Rechercheinput privat vorbereitet. Neue Leseprüfung: noch kein importierter Kontrolllead, keine dazugehörige Demo oder Brief | Einzelnen vorbereiteten Kontrolllauf ausführen, dann tatsächliche Mobil-/Desktop-/Faktenprüfung und Brief-PDF |
+| Papier-Probebrief | Drei easyNova-Testaufträge und Rückgabe-PDF geprüft | Echten eigenen Probebrief verschicken und nach Eingang Druck/QR prüfen; kein Empfängerversand |
+| Bezahlter Verkauf | Steuerbestätigung weiterhin false, unbekannte Nummern leer | Steuer-/Rechnungsbehandlung und Verkaufsfreigabe klären, anschließend kontrolliert Stripe/Versand freischalten |
+
+Keine Gesamtfreigabe aus einzelnen bestandenen Tests ableiten. Der früheste tatsächliche Start hängt
+vom Ausgang der beiden technischen Abnahmen, dem Papierbrief und der Verkaufsfreigabe ab.
+Die bekannten Spam-Einstufungen der eigenen Testmails bleiben ein dokumentiertes Restrisiko;
+weitere Diagnose wurde vom Betreiber beendet, keine erneute Testmail ungefragt senden.
+
+Die folgenden Abschnitte dokumentieren frühere Zwischenstände und einzelne Nachweise.
+Bei widersprüchlichem Pending-Status gilt die obige aktuelle Zusammenfassung.
+
 Stand 31.10.2026, nach Sandbox-Kundenablauf, einmaligem VPS-Restore und Veröffentlichung der regulären Mail-/Hosting-Provider. Dieser Status ersetzt die älteren
 Momentaufnahmen in diesem Verzeichnis; bestandene Teilprüfungen sind keine Gesamtfreigabe.
 

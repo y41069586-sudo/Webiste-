@@ -837,3 +837,21 @@ Der zuvor gemeldete offene Kontrollstrecken-Deploy ist inzwischen tatsächlich f
 pushen und nachfolgenden Deploy prüfen, keine weiteren geheimen Buildtoken suchen.
 Nachweis/Grenzen: docs/activation-2026-10-30/inwx-production-approval-2026-10-31.md.
 Privater späterer Laufzeitbeleg ggf. data/activation-2026-10-31/inwx-production-readback.json.
+
+## 31.10.2026 – INWX tatsächlich veröffentlicht, VPS-Abgleich vom Betreiber bestätigt
+
+Neuer App-Deploy b0eb1ff (Netlify 6ae5e8f6146689d171f0bd1b) production/ready, veröffentlicht
+13:13:06 UTC. Authentifizierter Laufzeitbeleg bestätigt inwx/production, Credentials vorhanden,
+Resend/Netlify aktiv, DRY_RUN true und Stripe test. Keine weiteren INWX-Logins oder Käufe nötig.
+Betreiber sagt jetzt zum zuletzt bereitgestellten Git-/Dateiabgleich und Imagebau ausdrücklich
+"Hab gemacht". Als Betreiberbestätigung akzeptieren, nicht erneut denselben Aufruf verlangen;
+kein unabhängiger Nachweis eines gestarteten Workers und weiterhin keinen starten.
+
+Neue reine Leseprüfung: public_profile-Leads/Demos/Briefe jeweils null, externer geplanter
+Backuppräfix im vorhandenen Bucket ohne Objekt, backup_status null. Vollständiger Kontrolllauf
+und erste regelmäßige externe Sicherung daher noch nicht belegt. Bestandener einmaliger
+Restore/66-Objekte/Queuevorbereitung bleiben erledigt. Physischer eigener Probebrief noch nicht
+nachgewiesen. Steuerbestätigung false; leere Nummern nicht erfinden, aber nicht als fertige
+Rechnungsfreigabe ausgeben. Keine neue Spamdiagnose oder ungefragte Testmails (Betreiber beendet).
+Reststatus oben in docs/activation-2026-10-30/go-live-status.md aktualisiert. Kein fester Starttermin
+ohne diese Ergebnisse; klare Trennung zwischen technischem Abschluss und Freigabe echter Verkäufe.
