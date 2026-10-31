@@ -802,3 +802,13 @@ Betreiber hat Backupinstallation zugesagt und den Terminal-Aufruf erhalten. Absc
 Erfolgs-/Fehlertext noch ausstehend. Nicht erneut den bestandenen einmaligen Restore verlangen
 und keinen Timer-/Offsite-Erfolg ohne Ergebnis setzen. Physischer eigener Probebrief und
 verbindliche Steuer-/Rechnungsbehandlung bleiben echte getrennte Restpunkte.
+
+Ergänzung zum Abschluss: Kontrollstrecken-Codecommit 4b39524 auf beiden bisherigen Branches
+gepusht, noch NICHT als App-Version veröffentlicht. Aktuell veröffentlichter App-Commit bleibt
+2345428 (Resend/Netlify/Kostenreservierung/Backupcode). Connector kann Deploys lesen, aber keinen
+Build anstoßen. Vorhandene öffentliche/privaten App-Dateien liefern keinen verwendbaren Buildtoken;
+Netlify-Secretwerte werden verdeckt zurückgegeben. Keine neue Geheimnissuche oder Token im Chat
+anfordern. Betreiber kann im bestehenden Projekt Deploys → Trigger deploy → Deploy site ausführen.
+Keine neue Freigabe für diesen bereits autorisierten Code-Deploy nötig. Git-Push allein hatte keinen
+neuen Build ausgelöst. 49 unterschiedliche ergänzende Tests plus zwei lokale Python-Tests bestanden;
+Workspace-TSC/ESLint/Build bestanden. Worker, Stripe und Briefe weiterhin wie oben gesperrt.

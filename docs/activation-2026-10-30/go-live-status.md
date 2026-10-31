@@ -44,5 +44,11 @@ INWX-Produktionsumschaltung wurde von der automatischen Freigabeprüfung wegen m
 Domain-/DNS-Kosten bei bisherigen Testgrenzen abgelehnt; Registrar weiterhin mock/sandbox.
 Nicht per VPS umgehen. [Umsetzung und Grenzen](remaining-work-implementation-2026-10-31.md).
 
+Ergänzender Kontrollstrecken-Code `4b39524` ist auf GitHub gesichert, aber noch nicht als App-Version
+veröffentlicht. Die Netlify-Verbindung hier bietet keinen Build-Aufruf; vorhandene Secretwerte sind
+verdeckt, kein verwendbarer privater CLI-Buildtoken. Im bestehenden Projekt kann der Betreiber
+Deploys → Trigger deploy → Deploy site ausführen. Noch keinen erfolgreichen Deploy dieses Commits
+behaupten; bisher veröffentlichter Provider-/Kostenstand bleibt `2345428`.
+
 Keine echte Kundenbestellung, Briefe an Betriebe oder Domainkäufe aus dieser Statusprüfung.
 DRY_RUN=true und bestehende Empfängerversand-/Live-Checkout-Sperren unverändert.

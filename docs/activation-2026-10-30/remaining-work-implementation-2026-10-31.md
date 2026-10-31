@@ -135,3 +135,36 @@ Quellen erneut31.10.2026 gelesen:
 -Ein erster versehentlich breiter Testaufruf ohne Chromium-Pfad wurde beendet; anschließend
   gezielte Prüfungen mit installiertem /usr/bin/chromium und separaten lokalen Testdatenbanken.
   Keine Produktions-Testresets oder echten Provideraufrufe durch diese Tests.
+
+## Nächster tatsächlicher Betreiberlauf
+
+Kontrollstrecken-Codecommit `4b39524` auf beiden bisherigen Branches gepusht. Der Netlify-Connector
+bietet keinen Build-Aufruf, vorhandene Secrets werden verdeckt zurückgegeben; privater lokaler
+CLI-Buildtoken nicht vorhanden. Kein neuer Build gestartet, keine Secretwerte veröffentlicht.
+Zuerst im bestehenden Netlify-Projekt `seitenwerkworld`: Deploys → Trigger deploy → Deploy site.
+Nach Veröffentlichung prüfen, dass der aktuelle Produktionsbranch und mindestens `4b39524`
+veröffentlicht sind. Vorhandene Provider-/Kostenkorrektur `2345428` ist schon aktiv.
+
+Nach Abschluss eines eventuell noch laufenden Backupinstallers im vorhandenen VPS:
+
+```bash
+bash <<'SH'
+set -e
+cd /opt/seitenwerk
+git fetch origin claude/website-brief-maschine-0d0s37
+git merge --ff-only origin/claude/website-brief-maschine-0d0s37
+python3 infra/vps/prepare-providers.py /opt/seitenwerk/.env.worker --apply
+bash infra/backup/install-managed.sh
+docker compose -f docker-compose.worker.yml run --rm -T --no-deps \
+  -e CONTROL_ACCEPTANCE_CONFIRM=single-demo-no-send \
+  --entrypoint node worker --import tsx \
+  /repo/packages/core/scripts/control-acceptance.ts --case=launch-control-2026-10-31
+SH
+```
+
+Der Installer braucht das Datenbankpasswort nur bei noch fehlender privater Backupdatei und
+fragt es unsichtbar im Terminal ab. Ein Image-Build, erster geprüfter täglicher Sicherungslauf,
+danach genau eine echte KI-Demo mit QA innerhalb des bestehenden internen Budgets. Dauerhafter
+Worker wird nicht gestartet, keine Empfängerbriefe, Domainkäufe oder Live-Zahlungen. Fehler bricht
+die Folge ab. `awaiting_manual_review` bedeutet anschließend Prüfung, keine Versandfreigabe.
+Eine erfolgreiche Erstinstallation ersetzt keine Prüfung nach Eingang des physischen Probebriefs.
