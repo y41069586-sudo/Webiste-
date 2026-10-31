@@ -280,7 +280,13 @@ export interface LlmImage {
   mediaType: 'image/jpeg' | 'image/png' | 'image/webp';
   data: string;
 }
+/** Admission for EACH physical generation, including continuations and tool retries. */
+export interface LlmBudgetGuard {
+  beforeRequest(input: { model: string; inputTokens: number; maxOutputTokens: number; maxSearches: number }): Promise<string>;
+  afterResponse(reservation: string, usage: LlmUsage): Promise<void>;
+}
 export interface LlmStructuredRequest {
+  budgetGuard?: LlmBudgetGuard;
   /** Bounded, source-authorized image blocks; never remote URLs or executable instructions. */
   images?: LlmImage[];
   model: string;
@@ -300,6 +306,7 @@ export interface LlmStructuredRequest {
 }
 
 export interface LlmTextRequest {
+  budgetGuard?: LlmBudgetGuard;
   model: string;
   system: string;
   prompt: string;

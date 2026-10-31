@@ -5,13 +5,46 @@ import { logger } from '../logger';
 import { getProviders } from '../providers';
 import type { LlmStructuredRequest, LlmTextRequest, LlmUsage } from '../providers/types';
 import { LlmUsageError } from '../providers/types';
-import { assertBudgetAvailable, llmCostMicroCents, recordCost } from './budget';
+import { randomUUID } from 'node:crypto';
+import {
+  assertBudgetAvailable,
+  assertLlmCostsReconciled,
+  llmCostMicroCents,
+  llmReservationCents,
+  recordCost,
+  reserveBudget,
+  settleLlmReservation,
+} from './budget';
+import type { LlmBudgetGuard } from '../providers/types';
 
 export type ModelTier = 'creative' | 'bulk' | 'assistant';
 
 export function modelFor(tier: ModelTier): string {
   const env = getEnv();
   return tier === 'creative' ? env.MODEL_CREATIVE : tier === 'assistant' ? env.MODEL_ASSISTANT : env.MODEL_BULK;
+}
+
+function budgetGuard(purpose: string, leadId?: string): LlmBudgetGuard | undefined {
+  if (getProviders().llm.name !== 'anthropic') return undefined;
+  return {
+    async beforeRequest(input) {
+      const cfg = await getConfig({ fresh: true });
+      const key = `llm-request:${randomUUID()}`;
+      await reserveBudget(getDb(), {
+        category: 'llm',
+        estimateCents: llmReservationCents(cfg, input),
+        idempotencyKey: key,
+        leadId,
+        ref: purpose,
+      });
+      return key;
+    },
+    async afterResponse(key, usage) {
+      await settleLlmReservation(getDb(), key, usage);
+      await assertLlmCostsReconciled();
+      logger.info({ purpose, leadId, model: usage.model }, 'llm call (reserved and settled)');
+    },
+  };
 }
 
 async function book(usage: LlmUsage, purpose: string, leadId: string | undefined, idempotencyKey?: string): Promise<void> {
@@ -57,15 +90,16 @@ async function withUsageAccounting<T>(
   purpose: string,
   leadId?: string,
   key?: string,
+  accountedByProvider = false,
 ): Promise<T> {
   let res;
   try {
     res = await run();
   } catch (error) {
-    if (error instanceof LlmUsageError) await bookAttempts(error.usages, purpose, leadId, key);
+    if (!accountedByProvider && error instanceof LlmUsageError) await bookAttempts(error.usages, purpose, leadId, key);
     throw error;
   }
-  await bookAttempts(res.usages ?? [res.usage], purpose, leadId, key);
+  if (!accountedByProvider) await bookAttempts(res.usages ?? [res.usage], purpose, leadId, key);
   return res.data;
 }
 
@@ -74,11 +108,13 @@ export async function llmStructured<T>(
 ): Promise<T> {
   await assertBudgetAvailable('llm', 10);
   const { tier, idempotencyKey, ...rest } = req;
+  const guard = budgetGuard(req.purpose, req.leadId);
   return withUsageAccounting(
-    () => getProviders().llm.generateStructured<T>({ ...rest, model: modelFor(tier) }),
+    () => getProviders().llm.generateStructured<T>({ ...rest, model: modelFor(tier), budgetGuard: guard }),
     req.purpose,
     req.leadId,
     idempotencyKey,
+    Boolean(guard),
   );
 }
 
@@ -87,11 +123,13 @@ export async function llmText(
 ): Promise<string> {
   await assertBudgetAvailable('llm', 5);
   const { tier, idempotencyKey, ...rest } = req;
+  const guard = budgetGuard(req.purpose, req.leadId);
   return withUsageAccounting(
-    () => getProviders().llm.generateText({ ...rest, model: modelFor(tier) }),
+    () => getProviders().llm.generateText({ ...rest, model: modelFor(tier), budgetGuard: guard }),
     req.purpose,
     req.leadId,
     idempotencyKey,
+    Boolean(guard),
   );
 }
 
@@ -105,13 +143,15 @@ export async function llmResearchText(
 ): Promise<{ text: string; sources: string[] }> {
   await assertBudgetAvailable('llm', 20);
   const { tier, idempotencyKey, ...rest } = req;
+  const guard = budgetGuard(req.purpose, req.leadId);
   return withUsageAccounting(
     async () => {
-      const res = await getProviders().llm.generateText({ ...rest, model: modelFor(tier) });
+      const res = await getProviders().llm.generateText({ ...rest, model: modelFor(tier), budgetGuard: guard });
       return { ...res, data: { text: res.data, sources: res.sources ?? [] } };
     },
     req.purpose,
     req.leadId,
     idempotencyKey,
+    Boolean(guard),
   );
 }

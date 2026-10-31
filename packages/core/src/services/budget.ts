@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, sql } from 'drizzle-orm';
+import { and, eq, gte, inArray, or, sql } from 'drizzle-orm';
 import { effectiveSwitches, getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
 import { getDb, type Db, type DbOrTx } from '../db/client';
@@ -129,7 +129,7 @@ export interface BudgetStatus {
 export async function budgetStatus(category: BudgetCategory, db: DbOrTx = getDb(), now = new Date()): Promise<BudgetStatus> {
   const cfg = await getConfig({ db });
   const weekStart = startOfIsoWeek(now);
-  const spent = await spentSince(db, weekStart, [category]);
+  const spent = category === 'llm' ? await reservedLlmSpend(db, weekStart) : await spentSince(db, weekStart, [category]);
   const limit = weeklyLimit(cfg, category);
   return {
     category,
@@ -154,9 +154,11 @@ export async function reserveBudget(
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`budget:${input.category}`}))`);
     const cfg = await getConfig({ fresh: true, db: tx });
     if (effectiveSwitches(cfg).killSwitch) throw new KillSwitchError();
+    if (input.category === 'llm') await assertLlmCostsReconciled(tx);
     const existing = await tx.query.budgetLedger.findFirst({ where: eq(budgetLedger.idempotencyKey, input.idempotencyKey) });
     const weekStart = startOfIsoWeek(now);
-    const spent = await spentSince(tx, weekStart, [input.category]);
+    const spent =
+      input.category === 'llm' ? await reservedLlmSpend(tx, weekStart) : await spentSince(tx, weekStart, [input.category]);
     const limit = weeklyLimit(cfg, input.category);
     if (!existing) {
       if (limit !== null && spent + input.estimateCents > limit) {
@@ -186,6 +188,101 @@ export async function reserveBudget(
       weekStart,
     };
   });
+}
+
+/** Unresolved requests remain charged across week boundaries; never expire an uncertain bill. */
+async function reservedLlmSpend(db: DbOrTx, since: Date): Promise<number> {
+  const r = await db
+    .select({
+      micro: sql<string>`coalesce(sum(${budgetLedger.amountCents}::bigint * 1000000 + ${budgetLedger.amountMicroCents}),0)`,
+    })
+    .from(budgetLedger)
+    .where(and(eq(budgetLedger.category, 'llm'), or(gte(budgetLedger.createdAt, since), eq(budgetLedger.estimated, true))));
+  return Math.ceil(Number(r[0]?.micro ?? 0) / 1e6);
+}
+
+export function llmReservationCents(
+  cfg: AppConfig,
+  input: { model: string; inputTokens: number; maxOutputTokens: number; maxSearches: number },
+): number {
+  const key = Object.keys(cfg.costs.llm)
+    .sort((a, b) => b.length - a.length)
+    .find((k) => input.model === k || input.model.startsWith(`${k}-`));
+  const p = key ? cfg.costs.llm[key] : undefined;
+  if (
+    !p ||
+    [p.inputPerMTokCents, p.outputPerMTokCents, p.cacheReadPerMTokCents, p.cacheWritePerMTokCents].some(
+      (n) => !Number.isFinite(n) || n < 0,
+    ) ||
+    p.inputPerMTokCents <= 0 ||
+    p.outputPerMTokCents <= 0 ||
+    [input.inputTokens, input.maxOutputTokens, input.maxSearches].some((n) => !Number.isSafeInteger(n) || n < 0)
+  )
+    throw new Error('LLM-Kosten nicht verlässlich konfiguriert; kein kostenpflichtiger Aufruf.');
+  // Count endpoint is an estimate: reserve extra input overhead and the full output, no cache discount.
+  // Web tools pass the model's entire advertised input limit rather than guessed search-result sizes.
+  const tokens = Math.ceil(input.inputTokens * 1.1) + 1024;
+  const micro =
+    (tokens * Math.max(p.inputPerMTokCents, p.cacheWritePerMTokCents, p.cacheReadPerMTokCents) +
+      input.maxOutputTokens * p.outputPerMTokCents +
+      input.maxSearches * cfg.costs.webSearchPer1000UsdCents * 1000) *
+    Math.max(1, cfg.costs.usdToEur) *
+    1.1;
+  return Math.max(1, Math.ceil(micro / 1e6));
+}
+
+/** Convert one reservation into one known bill. Keep uncertain/failed responses reserved. */
+export async function settleLlmReservation(db: Db, key: string, usage: LlmUsage): Promise<void> {
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('budget:llm'))`);
+    const row = await tx.query.budgetLedger.findFirst({ where: eq(budgetLedger.idempotencyKey, key) });
+    if (!row || row.category !== 'llm' || !row.estimated)
+      throw new Error('LLM-Kostenreservierung fehlt oder wurde bereits abgeschlossen.');
+    const cfg = await getConfig({ fresh: true, db: tx });
+    if ([usage.cacheReadTokens, usage.cacheWriteTokens].some((n) => !Number.isSafeInteger(n) || n < 0))
+      throw new Error('Ungültige LLM-Nutzungswerte; Reservierung bleibt bis zur Klärung bestehen.');
+    // Revalidate the actual response model too; never silently price a fallback as another model.
+    llmReservationCents(cfg, {
+      model: usage.model,
+      inputTokens: usage.inputTokens,
+      maxOutputTokens: usage.outputTokens,
+      maxSearches: usage.webSearchRequests ?? 0,
+    });
+    const micro = llmCostMicroCents(cfg, usage);
+    const reserved = row.amountCents * 1e6 + row.amountMicroCents;
+    const overrun = micro > reserved;
+    await tx
+      .update(budgetLedger)
+      .set({
+        amountCents: Math.floor(micro / 1e6),
+        amountMicroCents: micro % 1e6,
+        estimated: false,
+        meta: {
+          model: usage.model,
+          inputTokens: usage.inputTokens,
+          outputTokens: usage.outputTokens,
+          cacheReadTokens: usage.cacheReadTokens,
+          cacheWriteTokens: usage.cacheWriteTokens,
+          webSearchRequests: usage.webSearchRequests ?? 0,
+          reservedCents: reserved / 1e6,
+          ...(overrun ? { budgetOverrun: true } : {}),
+        },
+      })
+      .where(eq(budgetLedger.idempotencyKey, key));
+    if (overrun)
+      await raiseAlert(tx, {
+        level: 'error',
+        code: 'llm_budget_overrun',
+        message: 'LLM-Abrechnung überschreitet die Reservierung; KI bis zur Kostenprüfung gesperrt.',
+      });
+  });
+}
+
+export async function assertLlmCostsReconciled(db: DbOrTx = getDb()): Promise<void> {
+  const result = await db.execute(
+    sql`SELECT 1 FROM budget_ledger WHERE category='llm' AND meta->>'budgetOverrun'='true' LIMIT 1`,
+  );
+  if (result.rows.length) throw new Error('LLM-Kostenabweichung muss vor weiteren KI-Aufrufen geklärt werden.');
 }
 
 /** Prüft ohne zu reservieren (z. B. für Places/LLM, deren Kosten erst danach feststehen). */

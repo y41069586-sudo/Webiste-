@@ -1,0 +1,14 @@
+[Unit]
+Description=SeitenWerk verified managed backup and encrypted off-server copy
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/seitenwerk
+EnvironmentFile=/etc/seitenwerk-backup.env
+ExecStart=/bin/bash /opt/seitenwerk/infra/backup/managed-scheduled.sh
+UMask=0077
+TimeoutStartSec=45min
+Nice=10

@@ -16,7 +16,11 @@ stamp=$(date -u +%Y%m%d-%H%M%S)
 dump="$BACKUP_DIRECTORY/seitenwerk-$stamp.dump"
 [ ! -e "$dump" ] || { echo 'Sicherung existiert bereits.' >&2; exit 1; }
 trap 'rm -f "$dump.partial"' EXIT HUP INT TERM
-pg_dump --format=custom --no-owner --no-privileges --schema=public --schema=drizzle --schema=pgboss --file="$dump.partial"
+if [ -n "${BACKUP_SNAPSHOT:-}" ]; then
+  pg_dump --snapshot="$BACKUP_SNAPSHOT" --format=custom --no-owner --no-privileges --schema=public --schema=drizzle --schema=pgboss --file="$dump.partial"
+else
+  pg_dump --format=custom --no-owner --no-privileges --schema=public --schema=drizzle --schema=pgboss --file="$dump.partial"
+fi
 pg_restore --list "$dump.partial" >/dev/null
 mv "$dump.partial" "$dump"
 sha256sum "$dump" > "$dump.sha256"

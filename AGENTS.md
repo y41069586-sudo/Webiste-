@@ -745,3 +745,26 @@ Lokale Kostenprüfung: LLM-Vorprüfung nutzt nur feste5/10/20Cent-Schätzungen o
 Nachbuchung tatsächlicher API-Nutzungswerte ist kein garantierter harter Anbieter-Kostendeckel.
 Kein Anthropic-Ausgabenlimit eingerichtet. Weiter kostenfrei/lokal prüfen, keine bezahlten
 KI-Tests oder Modelwechsel aus Budgetantwort ableiten. Details Kosten-/Pausendokument.
+
+## 31.10.2026 – Restpunkte konkret beauftragt und Kosten-/Backupkorrektur umgesetzt
+
+Betreiber beauftragt jetzt ausdrücklich die verbleibenden fünf Betriebsaufgaben. Vorhandene
+Push-/Deployfreigabe für geprüften Code gilt. Keine unbekannten Steuerdaten/§19-/Registerangaben
+erfinden oder als erledigt bestätigen. Vorhandene Brief-/Verkaufsfreigaben getrennt erhalten.
+EMAIL_PROVIDER=resend/HOSTING_PROVIDER=netlify im Production-Kontext gesetzt; wirksam erst nach
+dem folgenden Deploy/Readback. REGISTRAR_ENV=production von automatischer Freigabeprüfung
+abgelehnt; REGISTRAR_PROVIDER wieder mock, keine Umgehung per VPS oder Bootstrap.
+
+KI-Code reserviert nun jeden physischen Anthropic-Aufruf atomar unter gemeinsamem Budgetlock;
+voller Ausgaberahmen, konservative Eingabe-/Suchreserve, keine versteckten SDK-Retries/Fallbacks.
+Bekannte Antworten einzeln abrechnen, unklare Ergebnisse weiter reservieren, auch nach Wochenwechsel.
+Unbekannter Preis/Kontext blockiert. Bei zu kleinem Budget KEIN stiller Modellwechsel. Kein
+kontoweites Anbieterlimit behaupten. Der bestehende private Wochenrahmen bleibt unverändert.
+
+Regelmäßiger Backupplan mit read-only MVCC-Snapshot, isoliertem Restore und verschlüsselter
+zurückgelesener externer Kopie im bestehenden privaten S3 ist implementiert. Quellobjektsicherung
+schließt backups/managed/ aus. Timerinstallation auf vorhandenem VPS durch Betreiber noch offen;
+er hat ausdrücklich zugesagt, den bereitgestellten Aufruf auszuführen. Installation baut das Image,
+startet den dauerhaften Worker aber NICHT. Kein NEU=1/Setup/SSH-Onboarding nötig.
+51gezielte Tests,Workspace-TSC/Lint/Build bestanden; Nachweise und technische Grenzen:
+docs/activation-2026-10-30/remaining-work-implementation-2026-10-31.md.

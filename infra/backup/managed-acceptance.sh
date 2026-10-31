@@ -30,8 +30,11 @@ target=$(mktemp -d "$backup_root/acceptance-XXXXXXXX")
 chmod 700 "$target"
 restore_container="seitenwerk-restore-test-$(basename "$target" | tr '[:upper:]' '[:lower:]')"
 restore_started=false
+snapshot_keeper="seitenwerk-snapshot-$(basename "$target" | tr '[:upper:]' '[:lower:]')"
+snapshot_started=false
 worker_was_running=false
 cleanup() {
+  if [ "$snapshot_started" = true ]; then docker rm -f "$snapshot_keeper" >/dev/null 2>&1 || true; fi
   if [ "$restore_started" = true ]; then docker rm -f -v "$restore_container" >/dev/null 2>&1 || true; fi
   rm -f "$target/source-pg.env" "$target/local-pg.env"
   unset BACKUP_DATABASE_URL
@@ -59,12 +62,32 @@ image=${BACKUP_POSTGRES_IMAGE:-postgres:17-alpine}
 source_network=()
 if [ "${LOCAL_BACKUP_ACCEPTANCE_TEST:-}" = true ] && [ -n "${SOURCE_DOCKER_NETWORK:-}" ]; then source_network=(--network "$SOURCE_DOCKER_NETWORK"); fi
 source_run() { docker run --rm --user "$(id -u):$(id -g)" "${source_network[@]}" --env-file "$target/source-pg.env" -v "$target:/snapshot" -v "$repo/infra/backup:/scripts:ro" "$image" "$@"; }
-source_run psql -XqAt -v ON_ERROR_STOP=1 -f /scripts/fingerprint.sql > "$target/source-before.jsonl"
+snapshot_args=()
+fingerprint_args=(-f /scripts/fingerprint.sql)
+if [ "${CONSISTENT_BACKUP_SNAPSHOT:-0}" = 1 ]; then
+  # A shared read-only MVCC snapshot permits normal app writes during the scheduled backup.
+  docker run -d --name "$snapshot_keeper" --user "$(id -u):$(id -g)" "${source_network[@]}" \
+    --env-file "$target/source-pg.env" -v "$target:/snapshot" -v "$repo/infra/backup:/scripts:ro" \
+    "$image" psql -XqAt -v ON_ERROR_STOP=1 -f /scripts/hold-snapshot.sql >/dev/null
+  snapshot_started=true
+  for attempt in $(seq 1 30); do [ -s "$target/source-snapshot.id" ] && break; sleep 1; done
+  [ -s "$target/source-snapshot.id" ] || { echo 'Konsistenter Lese-Snapshot fehlt.' >&2; exit 1; }
+  snapshot_id=$(tr -d '\r\n' < "$target/source-snapshot.id")
+  [[ "$snapshot_id" =~ ^[A-Fa-f0-9]+-[A-Fa-f0-9]+-[0-9]+$ ]] || exit 1
+  snapshot_args=(-e "BACKUP_SNAPSHOT=$snapshot_id")
+  fingerprint_args=(-v "snapshot=$snapshot_id" -f /scripts/fingerprint-snapshot.sql)
+fi
+source_run psql -XqAt -v ON_ERROR_STOP=1 "${fingerprint_args[@]}" > "$target/source-before.jsonl"
 # NO --enable-row-security: a role-limited/incomplete dump must fail, not pretend to be a full backup.
-source_run sh -c 'BACKUP_DIRECTORY=/snapshot sh /scripts/backup-managed.sh'
+if [ "${#snapshot_args[@]}" -gt 0 ]; then
+  docker run --rm --user "$(id -u):$(id -g)" "${source_network[@]}" --env-file "$target/source-pg.env" "${snapshot_args[@]}" \
+    -v "$target:/snapshot" -v "$repo/infra/backup:/scripts:ro" "$image" sh -c 'BACKUP_DIRECTORY=/snapshot sh /scripts/backup-managed.sh'
+else
+  source_run sh -c 'BACKUP_DIRECTORY=/snapshot sh /scripts/backup-managed.sh'
+fi
 dump=$(find "$target" -maxdepth 1 -name '*.dump' -print -quit)
 [ -n "$dump" ] || { echo 'Kein Datenbankdump erzeugt.' >&2; exit 1; }
-source_run psql -XqAt -v ON_ERROR_STOP=1 -f /scripts/fingerprint.sql > "$target/source-after.jsonl"
+source_run psql -XqAt -v ON_ERROR_STOP=1 "${fingerprint_args[@]}" > "$target/source-after.jsonl"
 cmp "$target/source-before.jsonl" "$target/source-after.jsonl" || { echo 'Quelldaten geändert: Backup bleibt erhalten, keine Abnahme. Bei ruhiger Pipeline wiederholen.' >&2; exit 1; }
 source_run psql -XqAt -v ON_ERROR_STOP=1 -c "select distinct format('CREATE ROLE %I NOLOGIN;',r) from pg_policies p,unnest(p.roles) r where schemaname in ('public','drizzle','pgboss') and r not in ('public','postgres') and r not like 'pg_%';" > "$target/restore-roles.sql"
 printf 'POSTGRES_PASSWORD=%s\n' "$(head -c 32 /dev/urandom | base64 | tr -d '\n')" > "$target/local-pg.env"

@@ -12,7 +12,10 @@ vi.mock('../src/services/budget', () => ({
   llmCostMicroCents: () => 1,
 }));
 vi.mock('../src/db/client', () => ({ getDb: () => ({}) }));
-vi.mock('../src/providers', () => ({ getProviders: () => ({ llm: new AnthropicLlm('fixture-key', false) }) }));
+// Compatibility accounting for providers that return accumulated usage (no physical-request hooks).
+vi.mock('../src/providers', () => ({
+  getProviders: () => ({ llm: Object.assign(new AnthropicLlm('fixture-key', false), { name: 'fixture' }) }),
+}));
 import { AnthropicLlm, LlmRefusalError } from '../src/providers/llm/anthropic';
 import { LlmUsageError } from '../src/providers/types';
 import { llmStructured, llmText } from '../src/services/llm';

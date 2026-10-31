@@ -119,3 +119,29 @@ it('still rejects a missing empty table', async () => {
     await restored.query('CREATE TABLE a_b (value text)');
   }
 });
+
+it('shared read-only snapshot stays consistent while the live source accepts new writes', async () => {
+  const url = new URL(base);
+  url.pathname = `/${sourceName}`;
+  const writer = new pg.Client({ connectionString: url.toString() }),
+    reader = new pg.Client({ connectionString: url.toString() });
+  await writer.connect();
+  await reader.connect();
+  try {
+    await source.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+    const id = (await source.query<{ id: string }>('SELECT pg_export_snapshot() AS id')).rows[0]!.id;
+    expect(id).toMatch(/^[A-Fa-f0-9]+-[A-Fa-f0-9]+-[0-9]+$/);
+    const before = await fingerprints(source);
+    await writer.query(`INSERT INTO claims VALUES ('during-backup','{"text":"concurrent write"}')`);
+    await reader.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+    await reader.query(`SET TRANSACTION SNAPSHOT '${id}'`);
+    expect(await fingerprints(reader)).toEqual(before);
+    expect(await fingerprints(writer)).not.toEqual(before);
+    await reader.query('ROLLBACK');
+  } finally {
+    await source.query('ROLLBACK');
+    await writer.query(`DELETE FROM claims WHERE id='during-backup'`);
+    await writer.end();
+    await reader.end();
+  }
+});

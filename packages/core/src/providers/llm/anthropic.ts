@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { logger } from '../../logger';
-import type { LlmProvider, LlmResult, LlmStructuredRequest, LlmTextRequest, LlmUsage } from '../types';
+import type { LlmBudgetGuard, LlmProvider, LlmResult, LlmStructuredRequest, LlmTextRequest, LlmUsage } from '../types';
 import { LlmUsageError } from '../types';
 
 export class LlmRefusalError extends LlmUsageError {
@@ -38,7 +38,40 @@ export class AnthropicLlm implements LlmProvider {
     apiKey: string,
     private readonly useServerFallback = true,
   ) {
-    this.client = new Anthropic({ apiKey, maxRetries: 3, timeout: 180_000 });
+    // Every physical request must be admitted individually; SDK retries can hide another bill.
+    this.client = new Anthropic({ apiKey, maxRetries: 0, timeout: 180_000 });
+  }
+
+  private async create(params: Anthropic.Beta.MessageCreateParamsNonStreaming, guard?: LlmBudgetGuard) {
+    if (!guard) return this.client.beta.messages.create(params, { maxRetries: 0 });
+    const counted = await this.client.beta.messages.countTokens({
+      model: params.model,
+      system: params.system,
+      messages: params.messages,
+      tools: params.tools,
+      tool_choice: params.tool_choice,
+    });
+    let inputTokens = counted.input_tokens;
+    const search = params.tools?.find((t) => t.type === 'web_search_20260209');
+    const maxSearches = search && 'max_uses' in search ? (search.max_uses ?? 0) : 0;
+    if (search) {
+      // Search results arrive inside the provider. Reserve its advertised maximum context, never a guessed size.
+      const model = await this.client.models.retrieve(params.model);
+      if (!model.max_input_tokens || !Number.isSafeInteger(model.max_input_tokens) || model.max_input_tokens < inputTokens)
+        throw new Error('Maximale Recherche-Eingabekosten unbekannt; kein kostenpflichtiger Aufruf.');
+      inputTokens = model.max_input_tokens;
+    }
+    const reservation = await guard.beforeRequest({
+      model: params.model,
+      inputTokens,
+      maxOutputTokens: params.max_tokens,
+      maxSearches,
+    });
+    // No fallback model at another price; no automatic retry of an uncertain network outcome.
+    const { fallbacks: _fallbacks, betas: _betas, ...bounded } = params;
+    const response = await this.client.beta.messages.create(bounded, { maxRetries: 0 });
+    await guard.afterResponse(reservation, this.usageOf(response.model, response.usage));
+    return response;
   }
 
   private usageOf(
@@ -70,8 +103,8 @@ export class AnthropicLlm implements LlmProvider {
         attempt === 0
           ? `\n\nGib dein Ergebnis ausschließlich über einen Aufruf des Tools "${req.toolName}" zurück.`
           : `\n\nWICHTIG: Rufe jetzt das Tool "${req.toolName}" auf. Keine andere Antwort ist zulässig.`;
-      const res = await this.client.beta.messages
-        .create({
+      const res = await this.create(
+        {
           model: req.model,
           max_tokens: maxTokens,
           system: [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }],
@@ -100,12 +133,12 @@ export class AnthropicLlm implements LlmProvider {
             },
           ],
           ...(this.useServerFallback ? { betas: [FALLBACK_BETA], fallbacks: 'default' as const } : {}),
-        })
-        .catch((cause: unknown) => {
-          if (usages.length)
-            throw new LlmUsageError('LLM-Aufruf nach berechneter Antwort fehlgeschlagen', [...usages], { cause });
-          throw cause;
-        });
+        },
+        req.budgetGuard,
+      ).catch((cause: unknown) => {
+        if (usages.length) throw new LlmUsageError('LLM-Aufruf nach berechneter Antwort fehlgeschlagen', [...usages], { cause });
+        throw cause;
+      });
 
       const usage = this.usageOf(res.model, res.usage);
       usages.push(usage);
@@ -147,8 +180,8 @@ export class AnthropicLlm implements LlmProvider {
     const content: Anthropic.Beta.BetaContentBlock[] = [];
     // Lange Websuchen pausiert die API (pause_turn): Antwort unverändert zurückschicken, höchstens 4-mal
     for (let turn = 0; turn < 5; turn++) {
-      const res = await this.client.beta.messages
-        .create({
+      const res = await this.create(
+        {
           model: req.model,
           max_tokens: req.maxTokens ?? 4000,
           system: [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }],
@@ -156,12 +189,12 @@ export class AnthropicLlm implements LlmProvider {
           messages,
           ...(tools ? { tools } : {}),
           ...(this.useServerFallback ? { betas: [FALLBACK_BETA], fallbacks: 'default' as const } : {}),
-        })
-        .catch((cause: unknown) => {
-          if (usages.length)
-            throw new LlmUsageError('LLM-Aufruf nach berechneter Antwort fehlgeschlagen', [...usages], { cause });
-          throw cause;
-        });
+        },
+        req.budgetGuard,
+      ).catch((cause: unknown) => {
+        if (usages.length) throw new LlmUsageError('LLM-Aufruf nach berechneter Antwort fehlgeschlagen', [...usages], { cause });
+        throw cause;
+      });
       usages.push(this.usageOf(res.model, res.usage));
       if (res.stop_reason === 'refusal') throw new LlmRefusalError(res.stop_details?.category ?? null, [...usages]);
       content.push(...res.content);
