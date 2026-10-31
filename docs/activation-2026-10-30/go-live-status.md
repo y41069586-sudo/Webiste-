@@ -2,6 +2,12 @@
 
 ## Aktueller Abschlussstand nach INWX-Freigabe und VPS-Bestätigung
 
+**Nach Reparaturaufruf:** Textkorrektur wurde übernommen und KI-/Struktur-/Layout-/Barrierefreiheits-
+prüfungen bestanden. Lighthouse meldet auf dem VPS weiterhin einen Fehler: Performance 75,
+übrige Kategorien 100. Demo bleibt gesperrt. Lokale 100 Punkte bestätigen diesen VPS-Lauf nicht.
+Nächster Schritt ist die isolierte Leistungsdiagnose ohne weiteren KI-Aufruf; kein erneuter
+Backup- oder Entwurfsaufbau nötig. Erst nach konkreten Messwerten den Engpass korrigieren.
+
 **Neuster Nachweis, 31.10.2026 um 13:47 UTC:** Betreiber hat Backupinstaller und Kontrolllauf
 ausgeführt. Timer installiert, erster Sicherungslauf bestanden; eine neue externe verschlüsselte
 Kopie zusätzlich unabhängig im vorhandenen Bucket bestätigt. Backupinstallation damit erledigt.

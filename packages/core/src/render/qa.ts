@@ -304,13 +304,35 @@ export async function lighthouseCheck(
     if (!result) throw new Error('Lighthouse lieferte kein Ergebnis');
     const scores = Object.fromEntries(Object.entries(result.lhr.categories).map(([k, v]) => [k, v.score ?? 0]));
     const min = Math.min(...Object.values(scores));
+    const diagnostics = {
+      htmlBytes: Buffer.byteLength(liveHtml),
+      gzipBytes: compressedHtml.length,
+      benchmarkIndex: result.lhr.environment.benchmarkIndex,
+      metrics: Object.fromEntries(
+        [
+          'first-contentful-paint',
+          'largest-contentful-paint',
+          'total-blocking-time',
+          'cumulative-layout-shift',
+          'speed-index',
+        ].map((id) => [id, result.lhr.audits[id]?.numericValue]),
+      ),
+      warnings: result.lhr.runWarnings,
+      opportunities: Object.values(result.lhr.audits)
+        .filter((a) => a.score !== null && a.score < 1 && a.details?.type === 'opportunity')
+        .slice(0, 6)
+        .map((a) => ({ id: a.id, value: a.displayValue })),
+    };
     return {
       name: 'lighthouse',
       passed: min >= minScore,
       score: Math.round(min * 100),
-      details: Object.entries(scores)
-        .map(([k, v]) => `${k}: ${Math.round(v * 100)}`)
-        .join(', '),
+      details:
+        Object.entries(scores)
+          .map(([k, v]) => `${k}: ${Math.round(v * 100)}`)
+          .join(', ') +
+        '; diagnostics: ' +
+        JSON.stringify(diagnostics),
     };
   } finally {
     await browser.close().catch(() => undefined);

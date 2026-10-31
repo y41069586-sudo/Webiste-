@@ -881,3 +881,20 @@ wird nicht erneut angewendet, abgeschlossene QA nicht still wieder bezahlt. Neue
 weiter am Budget scheitern; nicht aus früherem Ergebnis freigeben. qa_failed darf nun repariert
 werden; alte QA wird dabei gelöscht, Status building/reviewRequired=true statt Veröffentlichung.
 VPS braucht neuen Code und einmaligen gezielten Reparaturlauf; tatsächlicher Erfolg dort noch offen.
+
+## 31.10.2026 – Reparaturlauf ausgeführt, VPS-Leistung weiter nicht bestanden
+
+Betreiber meldet letzten Reparaturaufruf als erledigt. Direkt gelesen: revisions=1, Textkorrektur
+übernommen, KI- und alle übrigen Prüfungen bestanden; Lighthouse-Performance nun 75, übrige
+Kategorien 100. Demo bleibt qa_failed. Lokale 100er-Gegenprüfung ist ausdrücklich KEIN VPS-Nachweis.
+Keine Freigabe fingieren, keine Messgrenze senken, keinen weiteren kostenpflichtigen KI-Neubau
+verlangen. Kleinere neue KI-Hinweise zu Wiederholung/enger Formulierung sind dokumentiert,
+beweisen keine falsche Betriebsleistung und ersetzen keine spätere Textabnahme.
+
+Lighthouse-Ergebnis ergänzt jetzt tatsächliche FCP/LCP/TBT/CLS/Speed-Index, HTML-/gzip-Größe,
+Benchmarkkennwert und Laufwarnungen. control-performance.ts misst dieselbe Live-Variante isoliert
+auf dem vorhandenen VPS, speichert den Bericht privat in control-performance:<demoId> und ändert
+weder Demo-/QA-Freigabe noch Inhalte. Keine KI, Briefe, Veröffentlichung oder Workerstart.
+Für diese reine Diagnose reichen Git-Abgleich und readonly Mounts von core/src und core/scripts;
+kein erneuter Imagebau erforderlich. Danach DB-Bericht lesen und tatsächlichen Engpass bestimmen,
+statt aus dem lokalen Ergebnis auf einen Erfolg oder aus dem VPS-Score auf die Ursache zu schließen.
