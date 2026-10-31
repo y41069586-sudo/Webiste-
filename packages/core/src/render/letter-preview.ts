@@ -12,11 +12,13 @@ import { renderSlots, type LetterSlots } from '../letters/slots';
 import { checkLetterTruth, type ClaimForCheck, type TruthCheckInput, type TruthCheckResult } from '../letters/truth-check';
 import type { LetterVariantContent } from '../letters/variants';
 import { getPlaybook } from '../playbooks';
-import type { Industry } from '../types';
+import type { Industry, LeadSourceKind } from '../types';
 import { formatEuroShort } from '../util/time';
 import { qrDataUri } from './letter';
 
 export interface LetterPreviewInput {
+  source?: LeadSourceKind;
+  sourceReference?: string;
   cfg: AppConfig;
   industry: Industry | null;
   /** Slot-Variante oder Altformat */
@@ -68,7 +70,7 @@ export async function renderLetterPreview(i: LetterPreviewInput): Promise<Letter
     shortUrl: i.shortUrl,
     expiresLabel: i.expiresLabel,
     dateLine: i.dateLine,
-    privacyNotice: privacyNoticeText(i.cfg, 'osm', i.privacyUrl),
+    privacyNotice: privacyNoticeText(i.cfg, i.source ?? 'osm', i.privacyUrl, i.sourceReference),
     objectionNotice: objectionNoticeText(i.optOutEmail),
     priceLabel: formatEuroShort(i.cfg.pricing.packageCents),
     footnotes: slotRender?.footnotes,

@@ -203,7 +203,8 @@ export function assessAcquisition(lead: ResearchSubject, raw: unknown, policy = 
       if (!isFresh(s.observedAt, maxDays, now)) return false;
       // A current check of a historical ad, takeover, review or photograph is not current activity.
       // Business/listing start dates deliberately remain historical facts for the lifecycle check.
-      const datedSignal = DEMAND.has(s.kind) || s.kind === 'recent_reviews' || s.kind === 'work_photos';
+      const datedSignal =
+        DEMAND.has(s.kind) || s.kind === 'operational' || s.kind === 'recent_reviews' || s.kind === 'work_photos';
       return !datedSignal || !s.occurredOn || isFresh(`${s.occurredOn}T00:00:00Z`, maxDays, now);
     }) ?? [];
   const has = (kind: ResearchSignal['kind']) => signals.some((s) => s.kind === kind);
@@ -220,7 +221,7 @@ export function assessAcquisition(lead: ResearchSubject, raw: unknown, policy = 
   const growth = demand.some((s) => ['new_offer', 'expansion', 'takeover'].includes(s.kind));
   const focused =
     lead.branch === 'maler'
-      ? has('private_clients') && /renovier|sanier|innenanstrich|tapezier/i.test(serviceText)
+      ? has('private_clients') && /renovier|sanier|innenanstrich|tapezier|wohnungsübergabe|einzug|auszug/i.test(serviceText)
       : lead.branch === 'reinigung'
         ? has('business_clients') && /büro|buero|treppen|fenster|gewerbe|objekt/i.test(serviceText)
         : lead.branch === 'fliesenleger'

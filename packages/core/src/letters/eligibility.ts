@@ -6,6 +6,7 @@ import { effectiveSwitches } from '../config/service';
 import { businessHash, normalizeBusinessName, businessPhoneKey } from '../leads/normalize';
 import { isSuppressed } from '../services/suppression';
 import { assertAcquisitionEligible } from '../services/lead-research';
+import { dataSourceText } from './notices';
 
 /** Re-run locally before rendering, approving and sending; no source refresh/API calls. */
 export async function assertLetterLeadEligible(
@@ -26,8 +27,9 @@ export async function assertLetterLeadEligible(
   )
     throw new Error('Zustellanschrift unvollständig; manuelle Prüfung erforderlich.');
   if (await isSuppressed(db, { name: lead.businessName, ...lead })) throw new Error('Sperrlisteneintrag: kein weiterer Brief.');
-  if (!lead.sourceId?.trim() || !['osm', 'google_places', 'mock'].includes(lead.source))
+  if (!lead.sourceId?.trim() || !['osm', 'google_places', 'mock', 'public_profile'].includes(lead.source))
     throw new Error('Datenquelle nicht nachvollziehbar.');
+  if (lead.source === 'public_profile') dataSourceText(lead.source, lead.sourceId);
   if (lead.source === 'google_places' && !cfg.leadSource.googleTextSearchApproval.trim())
     throw new Error('Freigabe für Google als gespeicherte Primärquelle fehlt.');
   // Nur der separat markierte Probedruck wird an cfg.letter.testRecipient adressiert.

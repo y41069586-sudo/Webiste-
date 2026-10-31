@@ -8,8 +8,10 @@ Steuerstatus wird nicht als bestätigte Steuerbefreiung oder korrekte Verkaufsre
 
 In der vorhandenen Netlify-App wurden EMAIL_PROVIDER=resend und HOSTING_PROVIDER=netlify
 im Production-Kontext gesetzt. Zugangsdaten waren vorhanden und die bisherigen einzelnen
-Providerabnahmen bestanden. Änderung wird erst mit dem folgenden Deploy wirksam; nach
-Veröffentlichung authentifiziert zurücklesen. Keine Mail wurde aus dieser Konfigurationsänderung
+Providerabnahmen bestanden. Veröffentlicht mit Deploy `6ae5db4c1352178f03173752` am
+31.10.2026 um 12:14:09 UTC, Quellcommit `2345428f7a44458a165a417d3cc67df8970405dd`.
+Danach authentifizierter Laufzeitabgleich: Resend/Netlify aktiv, bestehende API-Zugänge lesbar,
+Stripe-Testmodus und DRY_RUN erhalten. Keine Mail wurde aus dieser Konfigurationsänderung
 verschickt. Vorherige Queue-Leseprüfung: keine created/retry/active-Jobs.
 
 Die automatische Freigabeprüfung hat REGISTRAR_ENV=production abgelehnt: dauerhafter
@@ -70,10 +72,36 @@ Installation/Timer und erste externe Kopie können hier ohne VPS-Zugang nicht au
 ## Kontrollbetrieb und rechtliche Angaben
 
 Öffentliche Kandidaten recherchiert; eigene Website, gelöschte Anzeige oder unbestätigte
-Identität/Anschrift werden nicht durch positive Annahmen ersetzt. Eine vollständige reale
-Recherche-/Demo-/Briefabnahme bleibt offen, bis ein Betrieb die bestehenden Mindestwerte erfüllt.
+Identität/Anschrift werden nicht durch positive Annahmen ersetzt. Ein Malerbetrieb erfüllt anhand
+aktueller Eigenwerbung, tatsächlich beworbener kurzfristiger Termine, geprüfter Anschrift und
+mehrerer Website-Prüfwege die lokale Eignungsprüfung. Recherche privat als Kontrollinput
+hinterlegt; keine ungeprüften positiven Lead-/Demo-/Briefstatus gesetzt. Name und Kontaktdaten
+gehören nicht ins öffentliche Repository. Eine vollständige reale Demo-/Briefabnahme bleibt offen.
 Keine Empfängeranschrift, Bildrechte oder Leistungen erfunden, kein Fremdbrief versandt.
 Der bereits geprüfte Rückgabe-PDF-Nachweis ersetzt keinen tatsächlich empfangenen Papierbrief.
+
+Der einzelne CLI `control-acceptance.ts` nutzt den normalen Import und die normale
+Recherchevalidierung, erzeugt die individuelle Demo und führt Browser-/KI-QA durch. Er fordert
+DRY_RUN und Stripe-Testmodus, startet keinen Daemon, erzeugt keine Folgejobs und erteilt keine
+Freigaben. Wiederholung bereits ausgeführter QA verwendet das vorhandene Ergebnis. Danach
+müssen Fakten, Bildkennzeichnung, Desktop und Mobilansicht tatsächlich geprüft werden, bevor
+eine Demo veröffentlicht oder ein Brief erzeugt wird. Generierungsaufrufe laufen ausschließlich
+durch die neue Kostenreservierung; bei zu kleinem Budget bleibt der Lauf klar blockiert.
+
+Frische Aktivität darf nicht aus dem heutigen Lesen einer alten Anzeige entstehen: KI-Fakten
+für Betrieb/Akquise brauchen jetzt ein tatsächliches Ereignis-/Veröffentlichungsdatum. Fehlende,
+ungültige oder zukünftige Daten werden verworfen; alte Daten bleiben als alt erkennbar. Ein
+neues Profil-Mitgliedsdatum wird weiterhin nicht zum Gründungsdatum. Wohnungsübergabe und
+Einzug können den belegten Privatkundenfokus eines Malers beschreiben, ohne zusätzliche
+Renovierungsleistungen zu erfinden.
+
+Ein geprüfter öffentlicher Profilimport hat eine eigene Quellenart und nennt im Art.-14-Hinweis
+die tatsächlich gespeicherte Kleinanzeigen-Anzeigen-ID. Ungeprüfte Plattformen werden nicht
+unter dieser Quellenart akzeptiert. Telefonnummern werden auch über Orts-/PLZ-Grenzen auf
+Dubletten geprüft; abweichende Identitäten oder Anschriften erfordern manuelle Zusammenführung.
+`infra/vps/prepare-providers.py` aktualisiert ausschließlich die Provider-Auswahl in der vorhandenen
+privaten Worker-Datei, bewahrt Geheimnisse/Modellwahl und hält Stripe-Test, DRY_RUN und Registrar-
+Sperre fest. Es startet Docker oder den Worker nicht.
 
 Leere Steuerfelder werden schon vom vorhandenen Rechnungslayout ausgeblendet. Keine neue
 §19-Erklärung, Handelsregistereintragung oder Unternehmensrechtsform erzeugen. Das erlaubt
@@ -92,6 +120,11 @@ Quellen erneut31.10.2026 gelesen:
 
 ## Prüfungen
 
+- Ergänzende Kontrollstrecke: 49 unterschiedliche gezielte Tests in sieben Dateien bestanden,
+  einschließlich echter Browser-/Lighthouse-Prüfung, bisherigem automatischem Rebuild und
+  dem neuen Einzelmodus ohne spätere QA-/Rebuild-Jobs. Zwei reine lokale Python-Tests prüfen
+  die atomare Providerdatei-Korrektur, erhaltene Geheimnisse und unveränderten Workerzustand.
+  Workspace-Typecheck, ESLint und App-/Worker-Build erneut bestanden.
 -51gezielte Tests in11Dateien bestanden: Budget/Parallelität/Retry/Abrechnung, verschlüsselte
   externe Kopie/Tamper/Retention, Storage, echtes lokales MVCC-Verhalten, Onboarding,
   Domainkauf-Sperre, Rechnungsneutralität, Stripe-Test-/Live-Trennung und Readiness.

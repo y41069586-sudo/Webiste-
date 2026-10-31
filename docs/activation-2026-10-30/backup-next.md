@@ -1,5 +1,14 @@
 # Supabase/S3-Abnahme auf dem bestehenden VPS
 
+**Aktueller nächster Schritt:** Der einmalige Restore ist bestanden. Für den regelmäßigen Plan
+nach Git-Update `bash infra/backup/install-managed.sh` auf dem vorhandenen VPS ausführen.
+Dieser neue Aufruf baut nur das Image, lässt den pausierten Automatisierungs-Worker unverändert
+und aktiviert den Timer erst nach bestandenem Restore und verschlüsselt zurückgelesener externer
+Kopie. [Umsetzung und Grenzen](remaining-work-implementation-2026-10-31.md).
+Der Betreiber hat den Aufruf bereits erhalten; abschließende Erfolgsmeldung noch ausstehend.
+Die alten Aufrufe mit QUIESCE_WORKER=1 weiter unten sind historische Dokumentation und sollen
+jetzt nicht wiederholt werden.
+
 **Aktueller Abschluss31.10.2026 um10:29:** Einmaliger Datenbank-Restore/Fingerprintvergleich,
 Wiederherstellung von66Speicherobjekten und anschließende Queue-Ergänzung erfolgreich.
 research-lead/revise-demo zusätzlich unabhängig in Supabase bestätigt. Worker wieder gestartet.

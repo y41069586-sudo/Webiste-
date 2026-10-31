@@ -150,4 +150,31 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
       registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));
     }
   }, 90_000);
+
+  it('keeps a controlled single run in manual review without queued QA or a later paid rebuild', async () => {
+    const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
+    registerMockStructured(QA_TOOL_NAME, () => ({
+      issues: [{ field: 'about', problem: 'Fiktiver Kontrollbefund', severity: 'hoch' }],
+    }));
+    try {
+      const demoId = await buildDemo(other.id, {
+        actor: 'operator:controlled-demo-no-send',
+        reviewNote: 'Kontrolllauf: tatsächliche manuelle Prüfung steht aus.',
+        enqueueQa: false,
+      });
+      await qaDemo(demoId, 'operator:controlled-demo-no-send', { lighthouse: false, enqueueRebuild: false });
+      const demo = await getDb().query.demos.findFirst({ where: eq(demos.id, demoId) });
+      expect(demo).toMatchObject({ status: 'qa_failed', reviewRequired: true, publishedAt: null });
+      const boss = await getBoss();
+      expect(
+        (
+          await boss
+            .getDb()
+            .executeSql('SELECT 1 FROM pgboss.job WHERE singleton_key IN ($1, $2)', [`qa:${demoId}`, `demo-rebuild:${demoId}`])
+        ).rows,
+      ).toHaveLength(0);
+    } finally {
+      registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));
+    }
+  }, 60_000);
 });

@@ -41,7 +41,7 @@ export const CLAIM_CHECK_RESULTS = ['ok', 'corrected', 'primary_missing', 'misma
 export type ClaimCheckResult = (typeof CLAIM_CHECK_RESULTS)[number];
 export type ClaimSourceType = 'external' | 'own_data';
 
-export type LeadSourceKind = 'google_places' | 'osm' | 'mock';
+export type LeadSourceKind = 'google_places' | 'osm' | 'mock' | 'public_profile';
 
 export const DEMO_STATUSES = [
   'building',

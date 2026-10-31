@@ -287,7 +287,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     shortUrl: shortUrl(trackUrl(`/${code}`)),
     expiresLabel: formatDateLongDe(stated),
     dateLine: `${cfg.sender.city}, ${formatDateLongDe(new Date())}`,
-    privacyNotice: privacyNoticeText(cfg, lead.source, appUrl('/datenschutz')),
+    privacyNotice: privacyNoticeText(cfg, lead.source, appUrl('/datenschutz'), lead.sourceId),
     objectionNotice: objectionNoticeText(getEnv().OPTOUT_EMAIL),
     priceLabel: formatEuroShort(cfg.pricing.packageCents),
     screenshotPage,

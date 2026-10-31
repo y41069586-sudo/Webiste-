@@ -23,6 +23,8 @@ import { renderComposite, takeScreenshots } from './screenshots';
 type Check = QaResult['checks'][number];
 
 export interface DemoQaOptions {
+  /** Controlled single runs must not leave a later paid rebuild in the daemon queue. */
+  enqueueRebuild?: boolean;
   /** Lighthouse ausführen (langsam, ~8 s) */
   lighthouse?: boolean;
   /** KI-Prüfung ausführen */
@@ -200,7 +202,7 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   });
   const failedNames = checks.filter((c) => !c.passed).map((c) => c.name);
   const contentOnly = failedNames.length > 0 && failedNames.every((n) => n === 'ki-pruefung' || n === 'inhaltsregeln');
-  if (!passed && decide && contentOnly && !meta?.qaRetry && rebuildFeedback.length) {
+  if (opts.enqueueRebuild !== false && !passed && decide && contentOnly && !meta?.qaRetry && rebuildFeedback.length) {
     // Nur Textbefunde: einmal automatisch neu schreiben lassen (mit den Befunden), statt liegen zu bleiben
     await enqueue(
       QUEUES.buildDemo,

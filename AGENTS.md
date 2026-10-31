@@ -768,3 +768,37 @@ er hat ausdrücklich zugesagt, den bereitgestellten Aufruf auszuführen. Install
 startet den dauerhaften Worker aber NICHT. Kein NEU=1/Setup/SSH-Onboarding nötig.
 51gezielte Tests,Workspace-TSC/Lint/Build bestanden; Nachweise und technische Grenzen:
 docs/activation-2026-10-30/remaining-work-implementation-2026-10-31.md.
+
+## 31.10.2026 – Provider veröffentlicht, kontrollierter Einzelbetrieb vorbereitet
+
+App-Deploy 6ae5db4c1352178f03173752 (2345428) tatsächlich production/ready, veröffentlicht
+12:14:09 UTC. Authentifizierter Laufzeitabgleich bestätigt Resend/Netlify und deren Lesezugriffe,
+Stripe test, DRY_RUN true und S3-Zugriff. Keine E-Mail durch die Umschaltung versandt. Im VPS
+Provider-Auswahl noch anhand bestehender privater Datei aktualisieren; prepare-providers.py
+erhält Secrets/Modellwahl, setzt nur Mail/Hosting und hält Stripe-Test/Registrar-Sperre fest.
+Keine Umgehung der abgelehnten INWX-Produktionsfreigabe. Worker weiterhin nicht starten.
+
+Realer Maler-Kontrollfall über aktuelle öffentliche Eigenanzeige und Profil-Impressum geprüft,
+Anzeigengebiet von Zustellanschrift unterschieden, Website nach Name/Ort/Telefon und Links
+gesucht. Keine eigene Website in diesen Prüfwegen gefunden ist kein absoluter Abwesenheitsbeweis.
+Gründungsdatum/Vollerwerb/Originalbranding/Bildrechte unbekannt, keine Boni oder Bilder erfinden.
+Privater Input liegt in settings control-case:launch-control-2026-10-31 und lokal unter data/;
+niemals Namen, Adresse, Telefonnummer oder Plattform-Account ins öffentliche Repository schreiben.
+Noch kein qualifizierter Lead, erzeugte Echt-KI-Demo, manuelle Freigabe oder echter Brief behaupten.
+Privaten Kontrollinput nach abgeschlossener Abnahme entfernen; normale Lead-Daten behalten die
+vorhandenen Lösch-/Widerspruchsregeln.
+
+control-acceptance.ts läuft ausschließlich einzeln mit Bestätigung single-demo-no-send,
+DRY_RUN/Stripe-Test/Anthropic. Nutzt normale Import-/Recherche-/Demo-/Browser-/KI-QA-Services,
+erzwingt Prüfhinweis, lässt keine QA-/Rebuild-Folgejobs zurück, erzeugt keine Freigabe und
+startet keinen Daemon. Vorhandenes QA-Ergebnis nicht still erneut kostenpflichtig prüfen.
+public_profile ist eine eigene Quellenart mit geprüftem HTTPS-Kleinanzeigen-Anzeigenbeleg im
+Art.-14-Hinweis; kein künstliches OSM-Label. Ortsübergreifender Telefonkonflikt oder abweichende
+Identität/Anschrift blockiert zur manuellen Zusammenführung. KI-Aktivität/Akquise braucht das
+tatsächliche Ereignisdatum; erneutes Lesen verlängert keine alte Anzeige. Wohnungsübergabe/
+Einzug kann belegten Privatkundenfokus beschreiben, ohne weitere Leistungen zu erfinden.
+
+Betreiber hat Backupinstallation zugesagt und den Terminal-Aufruf erhalten. Abschließender
+Erfolgs-/Fehlertext noch ausstehend. Nicht erneut den bestandenen einmaligen Restore verlangen
+und keinen Timer-/Offsite-Erfolg ohne Ergebnis setzen. Physischer eigener Probebrief und
+verbindliche Steuer-/Rechnungsbehandlung bleiben echte getrennte Restpunkte.

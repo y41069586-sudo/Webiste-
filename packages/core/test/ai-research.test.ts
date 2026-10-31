@@ -46,4 +46,23 @@ describe('KI-Prüfung: nur echte, erlaubte Quellen', () => {
     const r = researchFromAi({ ...base, ownWebsite: { found: true, url: 'https://betrieb.example' } }, src);
     expect(r?.website).toMatchObject({ result: 'found', foundUrl: 'https://betrieb.example' });
   });
+  it('does not renew old ads by assigning the date of the AI review', () => {
+    const r = researchFromAi(
+      {
+        ...base,
+        facts: [
+          { kind: 'service', text: 'Büroreinigung', source: src[0]! },
+          { kind: 'available_dates', text: 'Freie Termine', source: src[0]!, occurredOn: '2020-01-01' },
+          { kind: 'active_profile', text: 'Profil gelesen', source: src[0]! },
+          { kind: 'operational', text: 'Unbekanntes Datum', source: src[0]!, occurredOn: null },
+          { kind: 'new_offer', text: 'Zukünftige Anzeige', source: src[0]!, occurredOn: '2099-01-01' },
+          { kind: 'expansion', text: 'Ungültiges Datum', source: src[0]!, occurredOn: '2026-02-30' },
+        ],
+      },
+      src,
+      new Date('2026-10-31T12:00:00Z'),
+    );
+    expect(r?.signals.map((s) => s.kind)).toEqual(['service', 'available_dates']);
+    expect(r?.signals[1]!.occurredOn).toBe('2020-01-01'); // assessment sees its real age, not today's visit
+  });
 });

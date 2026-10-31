@@ -35,7 +35,7 @@ export interface AiResearchOutput {
   ownWebsite: { found: boolean; url: string | null };
   searched: { name_city: boolean; phone: boolean; directory_links: boolean; profile_links: boolean };
   notSuitable: { value: boolean; reason: string };
-  facts: { kind: string; text: string; source: string }[];
+  facts: { kind: string; text: string; source: string; occurredOn?: string | null }[];
   summary: string;
 }
 
@@ -82,11 +82,16 @@ export const AI_RESEARCH_SCHEMA = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['kind', 'text', 'source'],
+        required: ['kind', 'text', 'source', 'occurredOn'],
         properties: {
           kind: { type: 'string', enum: [...KINDS] },
           text: { type: 'string' },
           source: { type: 'string' },
+          occurredOn: {
+            type: ['string', 'null'],
+            description:
+              'Tatsächliches Veröffentlichungs-/Ereignisdatum YYYY-MM-DD. Kein Abrufdatum und kein geratenes Datum; sonst null.',
+          },
         },
       },
     },
@@ -101,10 +106,11 @@ Schreibe danach einen kurzen sachlichen Bericht auf Deutsch:
 - Stimmen Name und Anschrift? Ist der Betrieb aktiv (aktuelle Beiträge, Öffnungszeiten, neue Bewertungen)? Eigenständig oder Teil einer Kette/Franchise?
 - Für wen arbeitet er (Privat-/Gewerbekunden)? Welche Leistungen bietet er tatsächlich an (wörtlich aus den Quellen)?
 - Gibt es ein aktuelles Signal (wirbt gerade für Leistungen, freie Termine, neues Angebot, aktives Profil)?
+- Nenne das tatsächlich sichtbare Veröffentlichungs-/Ereignisdatum jeder Aktivitäts-/Akquisebeobachtung. Ein erneut gelesener alter Suchtreffer ist kein neues Ereignis. Fehlende Daten als unbekannt lassen.
 - Gründe gegen eine Ansprache (geschlossen, nur Subunternehmer, ausgelastet).
 Nenne zu jeder Aussage die Seite, auf der du sie gefunden hast. Verwende keine Inhalte von Google Maps und keine Handelsregister-Auskünfte.`;
 
-const EXTRACT_SYSTEM = `Du überträgst einen Rechercheberichts in ein festes Format. Übernimm nur Aussagen, die im Bericht stehen und eine Quelle aus der Quellenliste haben. Jede Angabe ist kurz (höchstens 140 Zeichen, Leistungen höchstens 40 Zeichen, wörtlich). Gib als source genau eine Adresse aus der Quellenliste an. „operational“ und aktuelle Signale (available_dates, service_advertising, new_offer, expansion, takeover, active_profile) nur, wenn im Bericht sichtbare Aktivität aus den letzten drei Monaten steht (z. B. neue Beiträge, aktuelle Angebote, neue Bewertungen) – ein leeres oder altes Profil zählt nicht. Leistungen nur, wenn der Betrieb sie selbst nennt. Rufe das Tool recherche_ergebnis auf.`;
+const EXTRACT_SYSTEM = `Du überträgst einen Rechercheberichts in ein festes Format. Übernimm nur Aussagen, die im Bericht stehen und eine Quelle aus der Quellenliste haben. Jede Angabe ist kurz (höchstens 140 Zeichen, Leistungen höchstens 40 Zeichen, wörtlich). Gib als source genau eine Adresse aus der Quellenliste an. „operational“ und aktuelle Signale (available_dates, service_advertising, new_offer, expansion, takeover, active_profile) nur, wenn im Bericht datierte sichtbare Aktivität aus den letzten drei Monaten steht (z. B. neue Beiträge, aktuelle Angebote, neue Bewertungen) – ein leeres oder altes Profil zählt nicht. Speichere das tatsächliche Datum in occurredOn, niemals das heutige Prüfdatum einsetzen. Ist kein Ereignisdatum belegt, occurredOn=null und keine aktuelle Aktivität bestätigen. Leistungen nur, wenn der Betrieb sie selbst nennt. Rufe das Tool recherche_ergebnis auf.`;
 
 /**
  * Nicht als Quelle: Google-Maps-Inhalte (docs/compliance-google.md) und Handelsregister-Auskünfte
@@ -152,6 +158,16 @@ export function researchFromAi(
   const signals: ResearchSignal[] = [];
   const seen = new Set<string>();
   for (const f of out.facts) {
+    const dated = f.kind === 'operational' || (DEMAND_KINDS as readonly string[]).includes(f.kind);
+    const event = f.occurredOn ? new Date(`${f.occurredOn}T00:00:00Z`) : null;
+    const validEvent = Boolean(
+      event &&
+      Number.isFinite(event.getTime()) &&
+      /^\d{4}-\d{2}-\d{2}$/.test(f.occurredOn!) &&
+      event.toISOString().slice(0, 10) === f.occurredOn &&
+      event <= now,
+    );
+    if ((dated && !validEvent) || (f.occurredOn && !validEvent)) continue;
     const text = f.text.replace(/[\r\n{}*<>]/g, ' ').trim();
     if (!KINDS.includes(f.kind as (typeof KINDS)[number]) || !isAllowedSource(f.source, allowed)) continue;
     if (text.length < 3 || (f.kind === 'service' && text.length > 40)) continue;
@@ -164,6 +180,7 @@ export function researchFromAi(
       source: f.source,
       observedAt: at,
       verified: true,
+      ...(validEvent ? { occurredOn: f.occurredOn! } : {}),
     });
   }
   const websiteSource =

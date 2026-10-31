@@ -24,3 +24,4 @@ apps/web/out/
 # Worker secrets stay local; only the empty example is versioned.
 .env.worker
 !.env.worker.example
+infra/vps/__pycache__/

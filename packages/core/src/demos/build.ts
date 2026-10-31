@@ -436,6 +436,8 @@ export async function buildDemo(
     templateId?: string;
     /** Befunde der KI-Prüfung des vorigen Entwurfs (automatischer Neubau, höchstens einmal) */
     qaFeedback?: string[];
+    /** Controlled CLI runs QA themselves; default keeps the existing queue automation. */
+    enqueueQa?: boolean;
   },
 ): Promise<string> {
   const db = getDb();
@@ -542,7 +544,7 @@ export async function buildDemo(
     if (createdId) await getProviders().storage.delete(demoHtmlKey(createdId));
     throw err;
   }
-  await enqueue(QUEUES.qaDemo, { demoId }, { singletonKey: `qa:${demoId}` });
+  if (opts.enqueueQa !== false) await enqueue(QUEUES.qaDemo, { demoId }, { singletonKey: `qa:${demoId}` });
   return demoId;
 }
 
