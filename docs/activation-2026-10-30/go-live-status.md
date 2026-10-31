@@ -2,6 +2,18 @@
 
 ## Aktueller Abschlussstand nach INWX-Freigabe und VPS-Bestätigung
 
+**Betreiberfreigabe übernommen:** Text/Gestaltung bestätigt, über normale Adminfreigabe als Gut
+abgenommen, anschließend Demo veröffentlicht. Direkter öffentlicher Abruf HTTP200 ohne Anmeldung
+und mit Kennzeichnung als unabhängiger Entwurf geprüft. Gestaltung/Text nicht erneut zur Freigabe
+vorlegen. Allgemeiner Versand und kostenpflichtiger Checkout sind damit weiterhin nicht aktiviert.
+
+Rechnungslayout-Freigabe separat gespeichert; fehlende optionale Angaben bleiben leer. Tatsächlich
+steht jedoch noch die unbestätigte Kleinunternehmer-Konfiguration im System. Die aktuelle Aussage
+"keine Gewerbeanmeldung/Steuernummer" bestätigt diese Steuerbehandlung nicht. Steuerbestätigung
+bleibt false; keine falsche §19-Zusage, keine ungefragte Änderung auf19% oder auf andere Preise.
+Normaler eigener Testbrief-PDF-Lauf ist vorbereitet, eigene Testadresse vollständig. Tatsächliche
+Ausführung, PDF-Abnahme und physischer eigener Probebrief noch offen.
+
 **Technischer Nachtest bestanden, 31.10.2026 um 14:31 UTC:** Kontroll-Demo jetzt pending_review,
 alle technischen Checks bestanden. Kalibrierter Lighthouse100/100/100/100; Standardwert86 bleibt
 im Bericht, gleicher Netzwerkrahmen. LCP/FCP1,12s, TBT0, CLS0. Keine erneute KI-Generierung.

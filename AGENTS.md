@@ -946,3 +946,32 @@ adressiert den Kontrollbetrieb und darf nicht unbesehen versandt werden. Unbekan
 weiter leer. Private Quellen/Personendaten/PDFs/Screenshots nicht ins öffentliche Git schreiben.
 Typecheck/ESLint und tatsächliche PDF-/QR-/Wahrheitsprüfung bestanden. Aktuelle Abnahme/Belege
 in docs/activation-2026-10-30/go-live-status.md, keine weitere Leistungs-Testschleife verlangen.
+
+## 31.10.2026 – Betreiber bestätigt Gestaltung/Text, fordert Start und Rechnungslayout-Freigabe
+
+Betreiber bestätigt jetzt ausdrücklich Gestaltung/Text/alles passt sowie Rechnungslayout und
+gewünschten Start, verlangt weiterhin fehlende Angaben leer zu lassen und sagt kein Gewerbe/
+keine Steuernummer vorhanden. Diese Freigabe privat als operator_launch_approval_2026_10_31
+mit Audit gespeichert. NICHT als §19-/Steuerstatusbestätigung interpretieren: tatsächlich noch
+tax.kleinunternehmer=true bei operatorConfirmed=false; eine bloße Aktivierung würde die bisher
+ausdrücklich NICHT bestätigte §19-Behandlung bestätigen. Weder §19 noch reguläre Umsatzsteuer
+erfinden, keine Preise ändern. Gesetzliche Rechnungspflichten erneut amtlich gelesen (§14UStG,
+§34aUStDV). Unbekannte optionale Felder bleiben leer; kostenpflichtiger Checkout weiter test.
+
+Demo-Freigabe über das normale vorhandene Admin-Formular tatsächlich übernommen (Gut wie UI82,
+keine9,5-Gesamtnote), direkt DB approved/quality.passed bestätigt. Danach auf ausdrücklichen
+Veröffentlichungswunsch freigeschaltete Demo per DB-Connector veröffentlicht: FOR-UPDATE und
+approved/alleQAchecks/qualitypassed/lead_demo_approved/nichtanonymisiert geprüft, Demo-/Lead-
+Publikationsstatus/Ablaufdatum und Audit geschrieben. Audit macht Connector-Verwendung explizit;
+nicht als Aufruf der lokalen publishDemo-Funktion ausgeben (lokaler DB-Zugang fehlgeschlagen).
+Öffentliche /d/-URL direkt HTTP200, keine Anmeldung, unabhängiger Entwurf gekennzeichnet und
+belegte Leistungen vorhanden. Abruf mit InternalBot-Kennung, keine echten Kundenscans behaupten.
+Demo damit veröffentlicht, Gestaltung/Textfreigabe nicht erneut anfordern.
+
+Eigene Testadresse im vorhandenen Setting vollständig bestätigt (keine neuen Adressdaten
+erfunden). prepare-own-control-letter.ts nutzt normale generateLetter(test:true)-Pipeline für
+genau diese veröffentlichte Kontroll-Demo, DRY_RUN und Stripe-Test. Vorhandener gebundener
+Testbrief wird wiederverwendet, um keine stillen neuen KI-Aufrufe zu erzeugen. Nur PDF-Erzeugung,
+keine Post/Domain/Zahlung/Daemonstart. Ausführung auf VPS noch offen. Danach tatsächliches
+Test-PDF und Qualität prüfen, eigenen Papierdruck gezielt vorbereiten. Allgemeine Post bleibt
+gesperrt; keinen physischen Versand oder kompletten bezahlten Go-Live behaupten.
