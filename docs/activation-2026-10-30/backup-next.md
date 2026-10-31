@@ -11,6 +11,13 @@ keine Ausgabe roher Parser-/Verbindungsfehler mit möglichen Passwörtern.13 lok
 (8 Verbindung/Eingabe/Worker-Schutz,4 Queue,1 Storage), Core-Typecheck, Lint und Bash-Syntax bestanden.
 Keine neue Gesamt-Backupabnahme und kein automatischer grüner backup_status.
 
+Neuer tatsächlicher Befund31.10.2026 um10:18: Zugang/Rechte nun erfolgreich geprüft, Dump und
+isolierter pg_restore ausgeführt; Inhaltsvergleich in Zeile12 abweichend, Worker wieder gestartet.
+Noch kein Storage-Restore oder Queue-Erfolg. Ein localeabhängiger Fehler im Fingerprintvergleich
+wurde nachgewiesen, lokal mit echtem Dump/Restore reproduziert und korrigiert.17 gezielte Tests
+bestanden. [Befund, Grenzen und Korrektur](backup-locale-fix-2026-10-31.md). Für diese Korrektur
+reicht Git-Update; SQL/Scripts werden direkt eingebunden, kein neuer Image-Neuaufbau.
+
 Die reguläre App-Rolle ist nicht für pg_dump mit abgeschalteter Row-Security berechtigt. Kein RLS
 abschalten und App-Rolle nicht hochstufen. Eine berechtigte Verbindung derselben vorhandenen Supabase-
 Datenbank ist erforderlich. Netlify-Metadaten enthalten keine konfigurierte BACKUP_DATABASE_URL.

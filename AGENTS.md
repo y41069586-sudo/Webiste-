@@ -677,3 +677,15 @@ Core-Typecheck/Lint/Bash-Syntax bestanden; kein tatsächlicher Produktionsrestor
 Für diese Script-Korrektur nur Git-Update auf VPS nötig: vorhandener readonly Script-Mount, kein
 neuer Image-/Secret-Aufbau. Private vollständige Supabase-URI via Connect → Session pooler → URI,
 Datenbankpasswort statt Platzhalter; nicht im Chat anfordern. Details docs/activation-2026-10-30/backup-next.md.
+
+## 31.10.2026 – Backup-Zugang funktioniert, Restorevergleich blockiert
+
+Neuer Screenshot10:18: Verbindung/Rechte erfolgreich, Dump erstellt, isolierter pg_restore ausgeführt,
+Vergleich source-before/restored in Zeile12 abweichend. Worker per EXIT wieder gestartet; Storage/
+fehlende Queues nicht erreicht. Quelle tatsächlichPG17.11/en_US.UTF-8; Zeile12 public.claims,
+dieselben17Zeilen liefern je nach Locale/Byte-Sortierung verschiedene Digests. SQL-Vergleich jetzt
+vollständige Zeilen und Tabellenreihenfolge COLLATE C. Lokaler tatsächlicher PG16-Dump/Restore
+reproduziert vorher falsche Abweichung/nachher Gleichheit; echte Änderungen weiterhin erkannt.
+17Tests, Core-Typecheck/Lint/Bash bestanden. Privaten VPS-Manifestinhalt noch nicht gelesen, daher
+kein behaupteter Erfolg des externen Dumps/Storage. Git-Update plus vorhandener Passwort-Lauf
+genügen; kein Worker-Neuaufbau. Belege/Grenzen docs/activation-2026-10-30/backup-locale-fix-2026-10-31.md.

@@ -82,7 +82,13 @@ if ! docker exec "$restore_container" pg_restore --exit-on-error --no-owner --no
   echo "Restore fehlgeschlagen; privates Protokoll: $target/restore.private.log" >&2; exit 1
 fi
 docker exec -i "$restore_container" psql -XqAt -v ON_ERROR_STOP=1 -U postgres -d seitenwerk_restore_test < infra/backup/fingerprint.sql > "$target/restored.jsonl"
-cmp "$target/source-before.jsonl" "$target/restored.jsonl" || { echo 'Restore-Inhalte weichen ab.' >&2; exit 1; }
+cmp "$target/source-before.jsonl" "$target/restored.jsonl" || {
+  # These manifests contain only table names, counts and digests, never row contents or credentials.
+  echo 'Abweichende Tabellen/Zeilenzahlen/Prüfsummen:' >&2
+  diff -u "$target/source-before.jsonl" "$target/restored.jsonl" >&2 || true
+  echo 'Restore-Inhalte weichen ab; Sicherung bleibt ungeprüft.' >&2
+  exit 1
+}
 if [ "${LOCAL_BACKUP_ACCEPTANCE_TEST:-}" != true ]; then
   run_worker /repo/packages/core/scripts/backup-storage.ts create /snapshot/storage
   run_worker /repo/packages/core/scripts/backup-storage.ts restore-local /snapshot/storage /snapshot/storage-restored
