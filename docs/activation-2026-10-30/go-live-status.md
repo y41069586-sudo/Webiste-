@@ -1,6 +1,6 @@
 # Kundenstart: noch nicht abgenommen
 
-Stand 31.10.2026, nach tatsächlich bestandenem Sandbox-Kundenablauf. Dieser Status ersetzt die älteren
+Stand 31.10.2026, nach Sandbox-Kundenablauf und erfolgreichem VPS-Backup-/Restorelauf. Dieser Status ersetzt die älteren
 Momentaufnahmen in diesem Verzeichnis; bestandene Teilprüfungen sind keine Gesamtfreigabe.
 
 | Bereich | Tatsächlicher Nachweis | Noch offen |
@@ -10,8 +10,8 @@ Momentaufnahmen in diesem Verzeichnis; bestandene Teilprüfungen sind keine Gesa
 | Hosting | Basis- und Care+-Testhost HTTPS200, ausgeliefertes HTML bytegleich zum Speicher/Audit, vier VPS-Screenshots gelesen; Root unverändert. Regulärer Live-Check setzte beide Test-Go-Live-Zeitstempel | Allgemeiner Hosting-/Registrar-Provider weiterhin mock; neue Kundendomains und allgemeiner Providerbetrieb nicht abgenommen |
 | Bestätigung/Rechnungsmail | [Echter Resend-App-Test](email-delivery.json) zugestellt, Original-PDF hashgleich, richtiger privater Onboarding-Link mobil geprüft. Zusätzlich ausdrücklich autorisierte einzelne Gmail-Testmail per Connector: Provider delivered; Betreiber bestätigt Empfang im Spamordner | Spam-Einstufung sowohl im eigenen Postfach als auch bei Gmail bestätigt; Ursache noch offen. Allgemeiner Provider weiterhin mock; keine gesamte E-Mail-Betriebsfreigabe |
 | Briefdienst | Drei easyNova-Testaufträge gezählt; Rückgabe-PDF125251 gerendert, QR/Geometrie geprüft | Eigener physischer Probebrief und Prüfung nach Posteingang; kein Empfängerversand freigegeben |
-| Backup/Restore | VPS-Zugang/Rechte und Dump tatsächlich erfolgreich; isolierter pg_restore ausgeführt. Vergleich blockiert in Zeile12. Localeabhängigen Vergleichsfehler nachgewiesen und mit tatsächlichem lokalem Dump/Restore korrigiert;17 Tests bestanden. Worker wieder gestartet | [Korrigierten Vergleich samt Storage-Lauf](backup-next.md) auf VPS erneut ausführen; noch kein Gesamt-Restore-Nachweis. Aufbewahrung/externe Kopie bleiben offen |
-| Recherche | Vorhandener Lead-Finder und Quellen-/Bedarfs-/Website-/Widerspruchsregeln | research-lead/revise-demo fehlen tatsächlich in pg-boss; erst nach Backup/Restore ergänzen. Ein tatsächlich geeigneter Kontrollbetrieb mit Recherche-/Demo-/Briefnachweis fehlt |
+| Backup/Restore | [Einmaliger VPS-Lauf bestanden](backup-acceptance-result-2026-10-31.md): Datenbank-Restore und Fingerprints,66Storageobjekte lokal wiederhergestellt, Quelldatenbank nicht zurückgesichert. Worker wieder gestartet. Queue-Ergänzung nach Erfolg | Regelmäßiger Backupplan, Aufbewahrung und geschützte externe Kopie weiter nicht nachgewiesen; private Archive hier nicht unabhängig erneut gelesen |
+| Recherche | Vorhandener Lead-Finder und Quellen-/Bedarfs-/Website-/Widerspruchsregeln; research-lead/revise-demo nach erfolgreichem Restore ergänzt und jetzt unabhängig in pg-boss gelesen | Ein tatsächlich geeigneter Kontrollbetrieb mit Recherche-/Demo-/Briefnachweis fehlt; vorhandene Queues allein beweisen keinen vollständigen Recherchebetrieb |
 | Steuer/Live-Vertrag | tax.operatorConfirmed=false bleibt korrekt offen | Verbindliche Steuer-/Rechnungsregelung und dokumentierte Live-Vertragsfreigabe; keine §19-Regelung erfinden |
 | Firmenwebsite | Öffentliche Start-/Preis-/Kontakt-/Rechtsseiten HTTP200;597/19/99 aktuell, keine590/49in sichtbaren Verkaufsangaben und keine drei konkret gesuchten Platzhalter. AGB sichern keine§19-Befreiung zu | Keine juristische Freigabe daraus ableiten; Steuerstatus bleibt offen |
 | Kundendomains | Vorhandene eigene Domain und reales Testhosting bestätigt; INWX-Konto durch Betreiber bestätigt. Fehlende geschützte Worker-Übernahme der Registrar-Felder korrigiert | [Private Secret-Einrichtung und lesender Sandbox-Test](inwx-setup.md) noch nötig; bisher keine tatsächliche INWX-Anmeldung oder Domainregistrierung nachgewiesen |
@@ -21,8 +21,11 @@ Beide Kunden-Abnahmeläufe bestanden und unabhängig gegen Datenbank, Stripe und
 [Ergebnis und Nachweise](customer-acceptance-result-2026-10-31.md). Die zuvor nachgewiesenen
 Pretty-URLs-/Zertifikatsprobleme blockieren diese beiden Testseiten nicht mehr.
 
-Nächste praktische Aktion: Backup/Restore auf dem VPS mit berechtigter privater Verbindung
-nachweisen und anschließend die fehlenden Queues ergänzen. Geeigneter Kontrollbetrieb bleibt
+Aktualisierung nach Betreiberlauf10:29: Datenbank-/Storage-Wiederherstellung und Queue-Ergänzung
+bestanden. Keine erneute einmalige Backupabnahme nötig. [Konkrete Nachweise und Grenzen](backup-acceptance-result-2026-10-31.md).
+
+Nächste praktische Aktion: Vorhandenen begrenzten lesenden INWX-Kontotest ausführen, ohne
+Domainbestellung oder globalen Providerwechsel. Geeigneter Kontrollbetrieb bleibt
 eine getrennte Abnahme. Spam bei Gmail und eigenem Postfach bleibt offen;
 Betreiber hat weitere Diagnosefragen vorerst beendet. Keine erneute Testmail ungefragt senden.
 Ein öffentlicher Webseiten-Deploy ist kein Verkaufsstart.

@@ -1,5 +1,12 @@
 # Supabase/S3-Abnahme auf dem bestehenden VPS
 
+**Aktueller Abschluss31.10.2026 um10:29:** Einmaliger Datenbank-Restore/Fingerprintvergleich,
+Wiederherstellung von66Speicherobjekten und anschließende Queue-Ergänzung erfolgreich.
+research-lead/revise-demo zusätzlich unabhängig in Supabase bestätigt. Worker wieder gestartet.
+[Ergebnis und verbleibende Betriebsaufgaben](backup-acceptance-result-2026-10-31.md).
+Die folgenden Abschnitte dokumentieren Einrichtung und frühere Fehlversuche; der einmalige
+Abnahmelauf ist abgeschlossen. Regelmäßiger Plan, Aufbewahrung und externe Kopie bleiben offen.
+
 Stand 30.10.2026: Script und lokale Schutz-/Restoretests vorhanden; tatsächlicher Produktionslauf
 weiter offen. Aktuell backup_status=null. **Nicht** aufgrund lokaler Tests als abgenommen kennzeichnen.
 

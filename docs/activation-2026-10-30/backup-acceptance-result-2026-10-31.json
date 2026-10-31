@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-31",
+  "workerSourceCommit": "020b84c",
+  "evidence": "Operator-provided VPS terminal screenshot, storage verification timestamp 2026-10-31T09:29:08.737Z",
+  "reportedResult": {
+    "databaseRestoreVerified": true,
+    "contentFingerprintsMatch": true,
+    "storageRestoreVerified": true,
+    "sourceRestored": false,
+    "queuePreparationRequested": true,
+    "queuePreparationVerified": true
+  },
+  "reportedStorage": {
+    "objects": 66,
+    "restoredLocally": true
+  },
+  "reportedQueuePreparation": {
+    "migrationsEnabled": false,
+    "schemaVersion": 46,
+    "queues": 31
+  },
+  "workerRestartReported": true,
+  "workerHealthAfterRestartIndependentlyChecked": false,
+  "privateBackupArtifactsReadByAssistant": false,
+  "independentDatabaseReadback": {
+    "requiredQueues": ["research-lead", "revise-demo"],
+    "dashboardBackupStatus": null
+  },
+  "recurringBackupScheduleVerified": false,
+  "offServerCopyVerified": false,
+  "retentionPolicyVerified": false,
+  "overallLiveRelease": false
+}

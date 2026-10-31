@@ -689,3 +689,16 @@ reproduziert vorher falsche Abweichung/nachher Gleichheit; echte Änderungen wei
 17Tests, Core-Typecheck/Lint/Bash bestanden. Privaten VPS-Manifestinhalt noch nicht gelesen, daher
 kein behaupteter Erfolg des externen Dumps/Storage. Git-Update plus vorhandener Passwort-Lauf
 genügen; kein Worker-Neuaufbau. Belege/Grenzen docs/activation-2026-10-30/backup-locale-fix-2026-10-31.md.
+
+## 31.10.2026 – tatsächliche einmalige Backup-/Restore-Abnahme jetzt bestanden
+
+Neuer Betreiber-Screenshot10:29 zeigt databaseRestoreVerified/contentFingerprintsMatch/
+storageRestoreVerified/queuePreparationVerified=true, sourceRestored=false.66Storageobjekte lokal
+wiederhergestellt; pg-boss31Queues/Schemaversion46 bei migrationsEnabled=false. Worker wieder
+gestartet, zusätzlicher Healthcheck nicht unabhängig belegt. research-lead/revise-demo danach
+lesend direkt in Supabase bestätigt. Private Archive hier nicht erneut gelesen. dashboard
+backup_status=null bleibt unverändert, keinen pauschalen grünen Status fingieren. Nicht erneut
+denselben einmaligen Restore-/Queue-Aufruf verlangen. Regelmäßiger Backupplan/Aufbewahrung/
+externe Kopie bleiben offen. Nächster bestehender sicherer Schritt: INWX --production-read-only,
+keine Registrierung/DNS-Änderung/Providerumschaltung. Nachweise/Grenzen:
+docs/activation-2026-10-30/backup-acceptance-result-2026-10-31.md.
