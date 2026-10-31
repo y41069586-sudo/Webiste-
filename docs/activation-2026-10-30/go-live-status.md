@@ -18,8 +18,9 @@ Momentaufnahmen in diesem Verzeichnis; bestandene Teilprüfungen sind keine Gesa
 
 Aktualisierung31.10.2026: Der VPS-Neuaufbau wurde tatsächlich ausgeführt. Die Veröffentlichung
 scheitert weiterhin vor dem Monatsstart: Netlify verändert zwei Rechtslinks, wodurch die strenge
-Inhaltsprüfung korrekt blockiert. Adapter und Diagnose lokal korrigiert; externe Abnahme bleibt
-offen. [Konkreter Befund und Nachweise](hosting-publication-fix-2026-10-31.md).
+Inhaltsprüfung korrekt blockiert. Adapter und Diagnose korrigiert, getestet, gepusht und in Netlify
+veröffentlicht; VPS-Image mit dieser Korrektur und externe Abnahme bleiben offen.
+[Konkreter Befund und Nachweise](hosting-publication-fix-2026-10-31.md).
 
 Nächste praktische Aktion: Aktualisierten Worker mit korrigiertem Hosting-Adapter verwenden und
 normalen bestätigten Test-Go-Live mit tatsächlichem Sandbox-Monatsstart für beide Tarife abschließen;

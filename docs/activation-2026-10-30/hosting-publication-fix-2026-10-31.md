@@ -55,11 +55,32 @@ Root-Vergleich und normalem Live-Check; kein manuelles Setzen eines Go-Live-Zeit
 
 ## Noch zu bestätigen
 
+Codeänderung `d15bf01746fda13c5f73e8b19d21629a795d69c6` auf beide bestehenden Arbeits-/Produktionsbranches
+gepusht und tatsächlich in Netlify veröffentlicht: Deploy `6ae59f5a3e3b2a865b8027a2`, production/ready,
+31.10.2026 um07:58:34UTC. Geschützter Laufzeitabgleich danach bestätigt DRY_RUN=true, Stripe/test,
+allgemeine Mail-/Hosting-Provider mock, Root-Homepage hashgleich. [Deploy-/Laufzeitbeleg](hosting-fix-deployment-2026-10-31.json).
+
 Die Änderungen betreffen Core-Code im Worker-Image. Der eben durchgeführte VPS-Neuaufbau lag
 vor dieser Fehlerkorrektur; ein aktualisiertes Image ist deshalb erforderlich. Vorhandene
 Secrets bleiben erhalten, kein NEU=1, LIVE=0. Danach denselben begrenzten bestehenden
 Sandbox-Abnahmelauf ausführen. Tatsächliche Veröffentlichung und beide Monatsstarts werden
 erst nach diesem Lauf sowie Datenbank-/Stripe-Readback als bestanden gewertet.
+
+Kurzes Update im vorhandenen VPS-Verzeichnis, ohne erneute System-/Secret-Einrichtung:
+
+```bash
+bash <<'SH'
+set -euo pipefail
+cd /opt/seitenwerk
+git fetch origin claude/website-brief-maschine-0d0s37
+git merge --ff-only origin/claude/website-brief-maschine-0d0s37
+docker compose -f docker-compose.worker.yml up -d --build --wait --wait-timeout 120 worker
+docker compose -f docker-compose.worker.yml run --rm -T --no-deps \
+  -e CUSTOMER_ACCEPTANCE_CONFIRM=stripe-sandbox-owned-domain \
+  --entrypoint node worker --import tsx \
+  /repo/packages/core/scripts/customer-acceptance.ts --apply
+SH
+```
 
 Keine Live-Zahlung, Domainbestellung, weitere Testmail oder Briefsendung ausgelöst. Keine
 allgemeine Provider-/Versand-/Vertragsfreigabe. Die offene Spam-Einstufung bleibt dokumentiert;

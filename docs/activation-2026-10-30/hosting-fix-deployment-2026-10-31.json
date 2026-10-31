@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-10-31T07:59:26Z",
+  "sourceCommit": "d15bf01746fda13c5f73e8b19d21629a795d69c6",
+  "appDeploy": {
+    "id": "6ae59f5a3e3b2a865b8027a2",
+    "state": "ready",
+    "context": "production",
+    "publishedAt": "2026-10-31T07:58:34.650Z"
+  },
+  "runtime": {
+    "dryRun": true,
+    "stripe": {
+      "mode": "test",
+      "provider": "stripe",
+      "webhookConfigured": true,
+      "read": {
+        "ok": true,
+        "status": 200
+      }
+    },
+    "storage": {
+      "driver": "s3",
+      "read": {
+        "ok": true
+      }
+    },
+    "resend": {
+      "webhookConfigured": true,
+      "outgoingProvider": "mock",
+      "read": {
+        "ok": true
+      }
+    },
+    "hosting": {
+      "provider": "mock",
+      "tokenConfigured": true,
+      "read": {
+        "ok": true,
+        "status": 200
+      }
+    }
+  },
+  "rootUnchanged": true,
+  "rootSha256": "a7341731234a03e07ab019efa33f04af8ef38f8d46a71fd32ef4e46c739bc1bd",
+  "tests": {
+    "core": 49,
+    "productionBrowserE2E": 2,
+    "typecheck": true,
+    "lint": true,
+    "productionBuildIncludingWorker": true
+  },
+  "workerUpdatedWithThisFix": false,
+  "actualMonthlyStartsVerified": 0
+}
