@@ -1,5 +1,15 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Betreiberentscheidung 03.11.2026 – günstigere KI-Modelle (ersetzt „alles Opus“ vom 29.10.)
+
+Ausdrücklich vom Betreiber: Opus 5.5 ist zu teuer für Aufgaben mit festen Regeln und Vorlagen. Standard jetzt:
+`MODEL_BULK=claude-haiku-5-5` (Recherche mit Websuche, Recherche-Auswertung, Demo-QA, Wahrheits-Check nach den
+festen Regeln, Support-Einordnung, Einwände, Brief-Gegenlesen, Design-Analyse) und
+`MODEL_CREATIVE=claude-sonnet-5-5` (Demo-Texte, persönlicher Brieftext, Überarbeitung, Support-Antwortentwurf,
+Lern-Agent). `MODEL_ASSISTANT` bleibt Haiku. Umschalten nur per ENV, keine Codeänderung nötig; ganz auf Haiku:
+`MODEL_CREATIVE=claude-haiku-5-5`. Kostenbuchung: Haiku-Preis inkl. teurem Tarif über 100K Prompt-Tokens (×5) in
+Code-Standard und DB-Config. Freigabe von Demo und Brief durch den Betreiber bleibt das Sicherheitsnetz.
+
 ## Betreiberentscheidung 03.11.2026 – KI-Prüfung „Mittel“, Automatik bis zur Demo
 
 Betreiber will, dass Betriebe automatisch geprüft werden; von Hand nur Demo- und Brieffreigabe.

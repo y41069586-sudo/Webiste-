@@ -222,9 +222,11 @@ export function llmReservationCents(
   // Count endpoint is an estimate: reserve extra input overhead and the full output, no cache discount.
   // Web tools pass the model's entire advertised input limit rather than guessed search-result sizes.
   const tokens = Math.ceil(input.inputTokens * 1.1) + 1024;
+  // Langer Prompt (z. B. Websuche mit vollem Eingabefenster) kann den teureren Tarif auslösen: immer mit ihm reservieren
+  const m = p.longContextAboveTokens && tokens > p.longContextAboveTokens ? (p.longContextMultiplier ?? 1) : 1;
   const micro =
-    (tokens * Math.max(p.inputPerMTokCents, p.cacheWritePerMTokCents, p.cacheReadPerMTokCents) +
-      input.maxOutputTokens * p.outputPerMTokCents +
+    (tokens * m * Math.max(p.inputPerMTokCents, p.cacheWritePerMTokCents, p.cacheReadPerMTokCents) +
+      input.maxOutputTokens * m * p.outputPerMTokCents +
       input.maxSearches * cfg.costs.webSearchPer1000UsdCents * 1000) *
     Math.max(1, cfg.costs.usdToEur) *
     1.1;
@@ -316,11 +318,15 @@ export function llmCostMicroCents(cfg: AppConfig, usage: LlmUsage): number {
     Object.entries(cfg.costs.llm).find(([k]) => model.startsWith(k))?.[1] ??
     cfg.costs.llm['claude-opus-5-5'];
   if (!price) return 0;
+  // Usage kann mehrere Server-Durchläufe (Websuche) summieren: über der Schwelle vorsichtig den teuren Tarif buchen
+  const prompt = usage.inputTokens + usage.cacheReadTokens + usage.cacheWriteTokens;
+  const m = price.longContextAboveTokens && prompt > price.longContextAboveTokens ? (price.longContextMultiplier ?? 1) : 1;
   const usdMicro =
-    usage.inputTokens * price.inputPerMTokCents +
-    usage.outputTokens * price.outputPerMTokCents +
-    usage.cacheReadTokens * price.cacheReadPerMTokCents +
-    usage.cacheWriteTokens * price.cacheWritePerMTokCents +
+    m *
+      (usage.inputTokens * price.inputPerMTokCents +
+        usage.outputTokens * price.outputPerMTokCents +
+        usage.cacheReadTokens * price.cacheReadPerMTokCents +
+        usage.cacheWriteTokens * price.cacheWritePerMTokCents) +
     // Websuche: Preis je 1.000 Suchen in US-Cent → Mikro-Cent je Suche
     (usage.webSearchRequests ?? 0) * (cfg.costs.webSearchPer1000UsdCents ?? 1000) * 1000;
   return Math.round(usdMicro * cfg.costs.usdToEur);

@@ -242,6 +242,9 @@ export const appConfigSchema = z.object({
         outputPerMTokCents: z.number(),
         cacheReadPerMTokCents: z.number(),
         cacheWritePerMTokCents: z.number(),
+        /** Teurerer Tarif ab dieser Prompt-Länge (Haiku 5.5: über 100K Tokens alle Sätze × 5) */
+        longContextAboveTokens: z.number().int().positive().optional(),
+        longContextMultiplier: z.number().min(1).optional(),
       }),
     ),
     domainPerYearCents: z.number().int().min(0),
@@ -724,6 +727,9 @@ export const DEFAULT_CONFIG: AppConfig = {
         outputPerMTokCents: 50,
         cacheReadPerMTokCents: 1,
         cacheWritePerMTokCents: 12.5,
+        // Prompts über 100K Tokens: 0,50 $ / 2,50 $ je MTok (Stand 2026-11)
+        longContextAboveTokens: 100_000,
+        longContextMultiplier: 5,
       },
       'claude-sonnet-5-5': {
         inputPerMTokCents: 200,

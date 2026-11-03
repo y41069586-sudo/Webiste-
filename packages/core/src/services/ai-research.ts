@@ -225,7 +225,7 @@ export async function aiResearchLead(leadId: string, actor = 'job:ai-research'):
     ].join('\n');
     const cfg = await getConfig();
     const { text, sources } = await llmResearchText({
-      tier: 'creative',
+      tier: 'bulk',
       purpose: 'lead_research',
       leadId,
       system: SEARCH_SYSTEM,
@@ -235,7 +235,7 @@ export async function aiResearchLead(leadId: string, actor = 'job:ai-research'):
       effort: 'medium',
     });
     const out = await llmStructured<AiResearchOutput>({
-      tier: 'creative',
+      tier: 'bulk',
       purpose: 'lead_research_extract',
       leadId,
       system: EXTRACT_SYSTEM,

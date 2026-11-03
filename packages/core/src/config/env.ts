@@ -31,8 +31,10 @@ const envSchema = z.object({
   /** Nur für die Stimme von Jarvis (OpenAI-Sprachausgabe) */
   OPENAI_API_KEY: optStr,
   LLM_PROVIDER: z.enum(['anthropic', 'mock']).optional(),
-  MODEL_CREATIVE: z.string().default('claude-opus-5-5'),
-  MODEL_BULK: z.string().default('claude-opus-5-5'),
+  /** Texte für Kunden (Demo, Brief, Überarbeitung, Support-Antwort): Qualität vor Preis, Sonnet = halber Opus-Preis */
+  MODEL_CREATIVE: z.string().default('claude-sonnet-5-5'),
+  /** Regelgebundene Prüfungen und Recherche (QA, Wahrheits-Check, Einordnung, Websuche): Haiku = 1/40 des Opus-Preises */
+  MODEL_BULK: z.string().default('claude-haiku-5-5'),
   /** Admin-Assistent (KI-Chat): schnell und günstig */
   MODEL_ASSISTANT: z.string().default('claude-haiku-5-5'),
 

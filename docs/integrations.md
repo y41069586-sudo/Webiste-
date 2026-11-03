@@ -47,7 +47,9 @@ regularOpeningHours, nextPageToken`
 
 - SDK `@anthropic-ai/sdk` (TypeScript), Endpoint `POST /v1/messages` (über `client.beta.messages` wegen
   serverseitiger Fallbacks)
-- **Modelle:** `MODEL_CREATIVE=claude-opus-5-5` (4 USD / 20 USD je 1 Mio. Input/Output-Tokens,
+- **Modelle (seit 03.11.2026):** `MODEL_CREATIVE=claude-sonnet-5-5` (2 USD / 10 USD) für Kundentexte,
+  `MODEL_BULK=claude-haiku-5-5` (0,10 / 0,50 USD, über 100K Prompt 0,50 / 2,50 USD) für Prüfungen und Recherche
+  inkl. Websuche (Haiku 5.5 laut Web-Search-Doku unterstützt). Historisch: `MODEL_CREATIVE=claude-opus-5-5` (4 USD / 20 USD je 1 Mio. Input/Output-Tokens,
   Cache-Read 0,20 USD); seit 29.10.2026 auch `MODEL_BULK=claude-opus-5-5` (Betreiberwunsch: Briefe, Prüfungen,
   Support alles mit Opus 5.5); `MODEL_ASSISTANT=claude-haiku-5-5` nur für den Admin-Chat (0,10 USD / 0,50 USD bis
   100k Tokens Prompt, Cache-Read/-Write mit den üblichen Faktoren 0,1× / 1,25× angesetzt). Am 29.10.2026 geprüft:

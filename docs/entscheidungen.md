@@ -974,3 +974,17 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
   Reservierung (~6,28 €) das 4-€-Wochenbudget überstieg und (2) danach Aktivität der letzten 3 Monate und ein
   aktuelles Werbesignal Pflicht waren. Behoben: Budget 30 €, Wiederholung nach 6 h, Werbesignal optional,
   Aktivität bis 12 Monate. Tests angepasst/ergänzt.
+
+## 03.11.2026 – Modellwechsel zur Kostensenkung (Haiku 5.5 / Sonnet 5.5)
+
+- Anlass: Betreiber: „Opus 5.5 ist zu teuer, auch bei kleinen Aufgaben.“ Echte Kosten der letzten 14 Tage (Opus):
+  Recherche mit Websuche ~27 Ct je Betrieb (+4 Ct Auswertung), Demo-Text ~5,5 Ct, Demo-QA ~2 Ct je Lauf,
+  Brieftext ~5 Ct + Gegenlesen ~4,4 Ct, Wahrheits-Check ~1 Ct. Die Websuche selbst kostet modellunabhängig
+  1 Ct je Suche (max. 8).
+- Entscheidung: regelgebundene Aufgaben und die Recherche (Tier `bulk`, Recherche von `creative` nach `bulk`
+  verschoben) auf Haiku 5.5 (0,10 $/0,50 $ je MTok, >100K Prompt 0,50 $/2,50 $), Kundentexte (Tier `creative`)
+  auf Sonnet 5.5 (2 $/10 $). Haiku 5.5 unterstützt laut offizieller Doku Websuche, strukturierte Ausgabe
+  und Tool-Use. Websuche-Reservierung sinkt von ~6,28 € auf ~0,87 € je Recherche.
+- Erwartung (Schätzung, nicht gemessen): Recherche ~10–12 Ct statt ~31 Ct, Demo+Brief zusammen ~7 Ct statt ~15 Ct.
+- Prüfen: erste echte Haiku-Recherchen und Sonnet-Demos/Briefe bei der Freigabe ansehen; bei schwächerer
+  Qualität einzeln per ENV zurück auf Opus (`MODEL_CREATIVE`/`MODEL_BULK`).

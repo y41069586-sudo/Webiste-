@@ -1,4 +1,8 @@
 import { beforeEach, expect, it, vi } from 'vitest';
+// Reservierungsbeträge unten sind für Opus-Preise gerechnet; Standardmodelle sind seit 03.11.2026 günstiger
+vi.hoisted(() => {
+  process.env.MODEL_CREATIVE = 'claude-opus-5-5';
+});
 const sdk = vi.hoisted(() => ({ create: vi.fn(), count: vi.fn(), model: vi.fn() }));
 vi.mock('@anthropic-ai/sdk', () => ({
   default: class {

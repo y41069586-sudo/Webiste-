@@ -6,6 +6,7 @@ import {
   KillSwitchError,
   budgetStatus,
   llmCostMicroCents,
+  llmReservationCents,
   recordCost,
   releaseReservation,
   reserveBudget,
@@ -82,5 +83,31 @@ describe('Budget-Guard', () => {
     });
     // 4 USD → 400 US-Cent × 0,9 = 360 Cent
     expect(micro / 1e6).toBeCloseTo(360, 5);
+  });
+
+  it('bucht Haiku 5.5 günstig und über 100K Prompt-Tokens zum teuren Tarif', () => {
+    const usage = (inputTokens: number) => ({
+      model: 'claude-haiku-5-5',
+      inputTokens,
+      outputTokens: 10_000,
+      cacheReadTokens: 0,
+      cacheWriteTokens: 0,
+    });
+    // 50K × 0,10 $ + 10K × 0,50 $ je MTok = 0,5 + 0,5 US-Cent → × 0,9
+    expect(llmCostMicroCents(DEFAULT_CONFIG, usage(50_000)) / 1e6).toBeCloseTo(0.9, 5);
+    // 200K × 0,50 $ + 10K × 2,50 $ = 10 + 2,5 US-Cent → × 0,9
+    expect(llmCostMicroCents(DEFAULT_CONFIG, usage(200_000)) / 1e6).toBeCloseTo(11.25, 5);
+  });
+
+  it('reserviert Haiku-Websuche mit dem teuren Tarif für das volle Eingabefenster', () => {
+    const cents = llmReservationCents(DEFAULT_CONFIG, {
+      model: 'claude-haiku-5-5',
+      inputTokens: 1_000_000,
+      maxOutputTokens: 6000,
+      maxSearches: 8,
+    });
+    // (1,1M+1024) × 62,5 + 6000 × 250 + 8 × 1000 × 1000 Mikro-Cent, × 0,9 (min. 1) × 1,1 → rund 87 Cent
+    expect(cents).toBeGreaterThan(80);
+    expect(cents).toBeLessThan(100);
   });
 });
