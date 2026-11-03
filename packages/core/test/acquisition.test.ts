@@ -319,3 +319,24 @@ it('passes without activity when address, phone and no-website are verified (Bet
   const strict = { ...ACQUISITION_POLICY, activityOptionalWhenContactVerified: false };
   expect(assessAcquisition(lead, evidence, strict, now).missing).toContain('Aktivität unbekannt');
 });
+
+it('KI entscheidet unsichere Fälle endgültig, harte Grenzen bleiben (Betreiberentscheidung 03.11.2026)', () => {
+  const { lead, evidence } = fixture();
+  const soft = { ...evidence, signals: evidence.signals.filter((s) => s.kind !== 'independent') };
+  expect(assessAcquisition(lead, soft, ACQUISITION_POLICY, now).state).toBe('review');
+  const take = { ...soft, aiDecision: { take: true, reason: 'Eher geeignet' } };
+  const r = assessAcquisition(lead, take, ACQUISITION_POLICY, now);
+  expect(r.state).toBe('ready');
+  expect(r.aiTakes).toBe(true);
+  // KI sagt nein → bleibt nicht geeignet
+  expect(
+    assessAcquisition(lead, { ...soft, aiDecision: { take: false, reason: 'Eher nicht' } }, ACQUISITION_POLICY, now).state,
+  ).toBe('review');
+  // harte Grenzen: ohne Telefonnummer oder mit gefundener Website nie
+  expect(assessAcquisition({ ...lead, phone: null }, take, ACQUISITION_POLICY, now).state).not.toBe('ready');
+  expect(
+    assessAcquisition(lead, { ...take, website: { ...take.website, result: 'found' as const } }, ACQUISITION_POLICY, now).state,
+  ).toBe('excluded');
+  // ausgeschaltet → wie bisher Prüfung
+  expect(assessAcquisition(lead, take, { ...ACQUISITION_POLICY, aiDecidesUnsure: false }, now).state).toBe('review');
+});

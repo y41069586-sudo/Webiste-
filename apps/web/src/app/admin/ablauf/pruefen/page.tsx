@@ -65,7 +65,7 @@ export default async function QuickReviewPage({
       {awaitingAi > 0 ? (
         <Notice kind="info">
           <strong>Die KI prüft gerade {awaitingAi === 1 ? '1 Betrieb' : `${num(awaitingAi)} Betriebe`}.</strong> Du musst nichts
-          tun – hier erscheinen nur Betriebe, bei denen die KI unsicher war.
+          tun – die KI entscheidet selbst: Passende bekommen eine Demo, die anderen werden aussortiert.
         </Notice>
       ) : null}
 

@@ -38,6 +38,20 @@ describe('KI-Prüfung: nur echte, erlaubte Quellen', () => {
     });
     expect(r?.lawfulUseConfirmed).toBe(true);
   });
+  it('übernimmt die endgültige KI-Entscheidung', () => {
+    const r = researchFromAi(
+      {
+        ...base,
+        facts: [{ kind: 'address', text: 'Anschrift bestätigt', source: src[0]! }],
+        decision: { take: true, reason: 'Eher geeignet' },
+      },
+      src,
+    );
+    expect(r?.aiDecision).toEqual({ take: true, reason: 'Eher geeignet' });
+    expect(
+      researchFromAi({ ...base, facts: [{ kind: 'address', text: 'Anschrift bestätigt', source: src[0]! }] }, src)?.aiDecision,
+    ).toBeUndefined();
+  });
   it('ohne verwertbare Quelle keine Recherche', () => {
     expect(researchFromAi(base, [])).toBeNull();
     expect(researchFromAi(base, ['https://www.northdata.de/x'])).toBeNull();

@@ -38,6 +38,12 @@ export const acquisitionPolicySchema = z
      * Brief gibt der Betreiber weiterhin einzeln frei.
      */
     activityOptionalWhenContactVerified: z.boolean().default(true),
+    /**
+     * Betreiberentscheidung 03.11.2026 (dritte Stufe): Die KI entscheidet jeden Betrieb endgültig. Fehlen nur weiche
+     * Belege, gilt ihre Tendenz (aiDecision.take). Harte Grenzen bleiben: Name, vollständige Anschrift, Telefonnummer,
+     * keine eigene Website, kein Ausschlussgrund. Demo und Brief gibt der Betreiber weiterhin einzeln frei.
+     */
+    aiDecidesUnsure: z.boolean().default(true),
     youngMinMonths: z.number().int().min(0).max(120).default(6),
     youngMaxMonths: z.number().int().min(1).max(120).default(36),
     /**
@@ -121,6 +127,8 @@ export const leadResearchSchema = z.object({
     foundUrl: z.url().optional(),
   }),
   signals: z.array(researchSignalSchema).max(20),
+  /** Endgültige KI-Entscheidung bei unvollständigen Belegen (Betreiberentscheidung 03.11.2026) */
+  aiDecision: z.object({ take: z.boolean(), reason: z.string().max(300) }).optional(),
 });
 export type LeadResearch = z.infer<typeof leadResearchSchema>;
 export type ResearchSignal = LeadResearch['signals'][number];
@@ -332,14 +340,24 @@ export function assessAcquisition(lead: ResearchSubject, raw: unknown, policy = 
     .map((r) => r.detail);
   if (has('fully_booked') && growth)
     missing.push('Auslastung und Wachstum zusammen manuell prüfen; keine freien Kapazitäten unterstellen');
-  const state = exclusions.length ? 'excluded' : missing.length ? 'review' : 'ready';
+  const hardOk =
+    Boolean(lead.businessName.trim()) &&
+    Boolean(lead.street?.trim() && lead.houseNumber?.trim() && /^\d{5}$/.test(lead.postalCode ?? '') && lead.city.trim()) &&
+    Boolean(lead.phone?.trim()) &&
+    evidence?.website.result !== 'found';
+  const aiTakes = Boolean(policy.aiDecidesUnsure && evidence?.aiDecision?.take && hardOk);
+  const state = exclusions.length ? 'excluded' : missing.length && !aiTakes ? 'review' : 'ready';
   const score = exclusions.length ? 0 : reasons.reduce((sum, r) => sum + r.points, 0);
   reasons.push({
     criterion: 'suitability',
     points: 0,
     verified: state === 'ready',
     detail:
-      state === 'ready' ? 'Recherchebasierte Eignung; weiterhin keine Versandfreigabe' : [...exclusions, ...missing].join(' · '),
+      state === 'ready'
+        ? missing.length
+          ? `KI-Entscheidung trotz offener Punkte (${missing.join(' · ')}): ${evidence?.aiDecision?.reason ?? ''}`.slice(0, 500)
+          : 'Recherchebasierte Eignung; weiterhin keine Versandfreigabe'
+        : [...exclusions, ...missing].join(' · '),
   });
-  return { score, state, rank, reasons, missing, exclusions, websiteVerified, youngFullTime, months, demand, services };
+  return { score, state, rank, reasons, missing, exclusions, websiteVerified, youngFullTime, months, demand, services, aiTakes };
 }

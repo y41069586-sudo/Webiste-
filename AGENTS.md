@@ -1,5 +1,13 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Betreiberentscheidung 03.11.2026 – KI entscheidet jeden Betrieb endgültig
+
+Routine: Betreiber sucht → KI prüft **alle** gefundenen Betriebe und entscheidet endgültig (gut → Demo wird
+automatisch gebaut; schlecht → aussortiert). Unsicherheit wird nicht an den Betreiber zurückgegeben: die KI wählt
+die wahrscheinlichere Seite (`aiDecision`, `acquisition.aiDecidesUnsure=true`). Harte Grenzen bleiben immer:
+Name, vollständige Anschrift, Telefonnummer, keine eigene Website, kein Ausschlussgrund. Ohne Telefonnummer
+automatisch aussortiert. Danach gibt der Betreiber **jede Demo** und **jeden Brief** selbst frei.
+
 ## Betreiberentscheidung 03.11.2026 – Aktivität optional bei belegtem Kontakt
 
 Findet die KI keine datierte Aktivität (Facebook/Instagram kaum lesbar), lässt sie den Betrieb trotzdem durch,

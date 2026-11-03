@@ -38,6 +38,8 @@ export interface AiResearchOutput {
   notSuitable: { value: boolean; reason: string };
   facts: { kind: string; text: string; source: string; occurredOn?: string | null }[];
   summary: string;
+  /** Endgültige Entscheidung: bei Unsicherheit die wahrscheinlichere Seite */
+  decision?: { take: boolean; reason: string };
 }
 
 const KINDS = [
@@ -58,7 +60,7 @@ const KINDS = [
 export const AI_RESEARCH_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['ownWebsite', 'searched', 'notSuitable', 'facts', 'summary'],
+  required: ['ownWebsite', 'searched', 'notSuitable', 'facts', 'summary', 'decision'],
   properties: {
     ownWebsite: {
       type: 'object',
@@ -97,6 +99,17 @@ export const AI_RESEARCH_SCHEMA = {
       },
     },
     summary: { type: 'string' },
+    decision: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['take', 'reason'],
+      description:
+        'Endgültige Entscheidung, ob wir diesem Betrieb eine Demo-Website bauen. take=true, wenn er eher geeignet ist (existiert an der Anschrift, keine eigene Website, passt zur Branche, nicht geschlossen). Bei Unsicherheit die wahrscheinlichere Seite wählen – nie offen lassen.',
+      properties: {
+        take: { type: 'boolean' },
+        reason: { type: 'string', description: 'Ein kurzer Satz, höchstens 200 Zeichen' },
+      },
+    },
   },
 } as const;
 
@@ -111,7 +124,7 @@ Schreibe danach einen kurzen sachlichen Bericht auf Deutsch:
 - Gründe gegen eine Ansprache (geschlossen, nur Subunternehmer, ausgelastet).
 Nenne zu jeder Aussage die Seite, auf der du sie gefunden hast. Verwende keine Inhalte von Google Maps und keine Handelsregister-Auskünfte.`;
 
-const EXTRACT_SYSTEM = `Du überträgst einen Rechercheberichts in ein festes Format. Übernimm nur Aussagen, die im Bericht stehen und eine Quelle aus der Quellenliste haben. Jede Angabe ist kurz (höchstens 140 Zeichen, Leistungen höchstens 40 Zeichen, wörtlich). Gib als source genau eine Adresse aus der Quellenliste an. „operational“ nur, wenn im Bericht datierte sichtbare Aktivität aus den letzten zwölf Monaten steht; aktuelle Signale (available_dates, service_advertising, new_offer, expansion, takeover, active_profile) nur bei datierter Beobachtung aus den letzten drei Monaten (z. B. neue Beiträge, aktuelle Angebote, neue Bewertungen) – ein leeres oder altes Profil zählt nicht. Speichere das tatsächliche Datum in occurredOn, niemals das heutige Prüfdatum einsetzen. Ist kein Ereignisdatum belegt, occurredOn=null und keine aktuelle Aktivität bestätigen. Leistungen nur, wenn der Betrieb sie selbst nennt. Rufe das Tool recherche_ergebnis auf.`;
+const EXTRACT_SYSTEM = `Du überträgst einen Rechercheberichts in ein festes Format. Übernimm nur Aussagen, die im Bericht stehen und eine Quelle aus der Quellenliste haben. Jede Angabe ist kurz (höchstens 140 Zeichen, Leistungen höchstens 40 Zeichen, wörtlich). Gib als source genau eine Adresse aus der Quellenliste an. „operational“ nur, wenn im Bericht datierte sichtbare Aktivität aus den letzten zwölf Monaten steht; aktuelle Signale (available_dates, service_advertising, new_offer, expansion, takeover, active_profile) nur bei datierter Beobachtung aus den letzten drei Monaten (z. B. neue Beiträge, aktuelle Angebote, neue Bewertungen) – ein leeres oder altes Profil zählt nicht. Speichere das tatsächliche Datum in occurredOn, niemals das heutige Prüfdatum einsetzen. Ist kein Ereignisdatum belegt, occurredOn=null und keine aktuelle Aktivität bestätigen. Leistungen nur, wenn der Betrieb sie selbst nennt. Triff zum Schluss in decision eine endgültige Entscheidung: take=true, wenn der Betrieb nach dem Bericht eher geeignet ist (existiert, keine eigene Website, passende Branche, nicht geschlossen), sonst take=false. Fehlen nur einzelne Belege (z. B. kein datierter Beitrag), entscheide nach der wahrscheinlicheren Seite. Rufe das Tool recherche_ergebnis auf.`;
 
 /**
  * Nicht als Quelle: Google-Maps-Inhalte (docs/compliance-google.md) und Handelsregister-Auskünfte
@@ -201,6 +214,9 @@ export function researchFromAi(
         : {}),
     },
     signals: signals.slice(0, 20),
+    ...(out.decision && typeof out.decision.take === 'boolean'
+      ? { aiDecision: { take: out.decision.take, reason: String(out.decision.reason ?? '').slice(0, 300) } }
+      : {}),
   };
 }
 
@@ -257,8 +273,23 @@ export async function aiResearchLead(leadId: string, actor = 'job:ai-research'):
       return await status({ state: 'excluded', note: out.notSuitable.reason.slice(0, 200), sources: found });
     }
     const research = researchFromAi(out, sources);
-    if (!research) return await status({ state: 'review', note: 'Keine belastbaren Quellen gefunden', sources: found });
+    const cfg2 = await getConfig({ fresh: true });
+    // Betreiberentscheidung 03.11.2026: KI entscheidet endgültig – nichts bleibt „unsicher“ beim Betreiber liegen
+    const decides = cfg2.targeting.acquisition.aiDecidesUnsure;
+    if (!research) {
+      if (!decides) return await status({ state: 'review', note: 'Keine belastbaren Quellen gefunden', sources: found });
+      await rejectInQuickReview(leadId, 'ai_unsure', actor);
+      return await status({ state: 'excluded', note: 'Keine belastbaren Quellen gefunden – aussortiert', sources: found });
+    }
     const assessment = await saveLeadResearch(leadId, research, actor);
+    if (assessment.state === 'review' && decides) {
+      await rejectInQuickReview(leadId, 'ai_unsure', actor);
+      return await status({
+        state: 'excluded',
+        note: `Aussortiert (KI): ${research.aiDecision?.reason || assessment.missing.join(' · ')}`.slice(0, 300),
+        sources: found,
+      });
+    }
     if (assessment.state === 'ready')
       await enqueue(QUEUES.pipelineTick, {}, { singletonKey: 'pipeline-tick-now' }).catch(() => null);
     return await status({

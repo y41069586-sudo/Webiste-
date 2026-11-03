@@ -62,7 +62,7 @@ export async function workflowStatus(): Promise<{ steps: WorkflowStep[]; nextSte
       mode: cfg.research.autoAi && forOperator === 0 ? 'auto' : 'du',
       count: cfg.research.autoAi ? forOperator : v('discovered'),
       hint: cfg.research.autoAi
-        ? `Die KI prüft von selbst${awaitingAi ? ` (${awaitingAi} in Arbeit, je 5 Minuten ca. ${cfg.research.perTick})` : ''}. Hier landen nur Betriebe, bei denen sie unsicher war.`
+        ? `Die KI prüft von selbst${awaitingAi ? ` (${awaitingAi} in Arbeit, je 5 Minuten ca. ${cfg.research.perTick})` : ''}. und entscheidet selbst: Passende bekommen eine Demo, die anderen werden aussortiert.`
         : 'Bei jedem Betrieb kurz im Internet nachsehen und drei Haken setzen.',
       href: '/admin/ablauf/pruefen',
       action: 'Jetzt prüfen',
