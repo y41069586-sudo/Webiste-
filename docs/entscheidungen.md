@@ -967,3 +967,10 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
    bleiben Test); Admin `dryRun=false`, `realLettersUnlocked=true`. Server: `NEU=1 LIVE=1` durch den Betreiber.
    Weiter wirksam: 30 manuelle Demo-Prüfungen, Briefe nur nach Freigabe, Budgets, Not-Aus, Sperrliste,
    `autoRegisterDomains=false` (Domains von Hand).
+
+## 03.11.2026 – KI-Prüfung der Betriebe gelockert (Stufe „Mittel“)
+
+- Befund nach Go-Live: alle KI-geprüften Betriebe landeten in der Prüfung von Hand, weil (1) die Kosten-
+  Reservierung (~6,28 €) das 4-€-Wochenbudget überstieg und (2) danach Aktivität der letzten 3 Monate und ein
+  aktuelles Werbesignal Pflicht waren. Behoben: Budget 30 €, Wiederholung nach 6 h, Werbesignal optional,
+  Aktivität bis 12 Monate. Tests angepasst/ergänzt.

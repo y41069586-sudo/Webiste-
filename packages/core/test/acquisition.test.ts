@@ -98,11 +98,19 @@ it('uses the explicitly ordered target sectors, keeping the same templates and i
     ),
   ).toEqual([]);
 });
-it('requires independent activity, a full website search, customer focus and an actual acquisition signal', () => {
+it('requires independent activity, a full website search and customer focus; an acquisition signal only adds points (03.11.2026)', () => {
   for (const branch of ['maler', 'reinigung', 'fliesenleger']) {
     const { lead, evidence } = fixture(branch);
     expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).state).toBe('ready');
-    for (const kind of ['operational', 'independent', 'address', 'service_advertising', 'service']) {
+    const noDemand = assessAcquisition(
+      lead,
+      { ...evidence, signals: evidence.signals.filter((s) => s.kind !== 'service_advertising') },
+      ACQUISITION_POLICY,
+      now,
+    );
+    expect(noDemand.state).toBe('ready');
+    expect(noDemand.reasons.find((r) => r.criterion === 'acquisition_need')?.points).toBe(0);
+    for (const kind of ['operational', 'independent', 'address', 'service']) {
       expect(
         assessAcquisition(
           lead,
@@ -140,11 +148,11 @@ it('ratings and work photos are quality evidence, not spare capacity or acquisit
   evidence.signals = evidence.signals.filter((s) => s.kind !== 'service_advertising');
   evidence.signals.push(signal('recent_reviews', 'Aktuelle Rückmeldungen'), signal('work_photos', 'Aktuelle Arbeitsbilder'));
   const a = assessAcquisition(lead, evidence, ACQUISITION_POLICY, now);
-  expect(a.state).toBe('review');
   expect(a.demand).toEqual([]);
+  expect(a.reasons.find((r) => r.criterion === 'acquisition_need')?.points).toBe(0);
   expect(a.reasons.find((r) => r.criterion === 'quality_images')?.points).toBe(3);
   evidence.signals.push(signal('active_profile', 'Aktive Leistungspräsentation im Profil'));
-  expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).state).toBe('ready');
+  expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).demand).toHaveLength(1);
 });
 it('closed, subcontract-only, owned websites and busy businesses without growth are excluded', () => {
   for (const kind of ['closed', 'subcontract_only', 'fully_booked'] as const) {
@@ -205,7 +213,7 @@ it('invalidates stale evidence, old intent, changed identity and incomplete addr
   expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).websiteVerified).toBe(false);
   const copy = fixture();
   copy.evidence.signals.find((s) => s.kind === 'service_advertising')!.observedAt = '2026-01-01T00:00:00Z';
-  expect(assessAcquisition(copy.lead, copy.evidence, ACQUISITION_POLICY, now).state).toBe('review');
+  expect(assessAcquisition(copy.lead, copy.evidence, ACQUISITION_POLICY, now).demand).toEqual([]);
   const missing = { ...copy.lead, postalCode: '' };
   copy.evidence.identityHash = researchIdentity(missing);
   expect(assessAcquisition(missing, copy.evidence, ACQUISITION_POLICY, now).state).toBe('review');
@@ -223,13 +231,12 @@ it('does not renew historical acquisition events just because their source was r
     evidence.signals = evidence.signals.filter((s) => s.kind !== 'service_advertising');
     evidence.signals.push({ ...signal(kind, 'Historischer Beleg erneut gelesen'), occurredOn: '2024-03-14' });
     const stale = assessAcquisition(lead, evidence, ACQUISITION_POLICY, now);
-    expect(stale.state, kind).toBe('review');
     expect(stale.demand, kind).toEqual([]);
     expect(stale.reasons.find((r) => r.criterion === 'lifecycle')?.points, kind).toBe(0);
     evidence.signals.at(-1)!.occurredOn = '2026-10-16';
-    expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).state, kind).toBe('ready');
+    expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).demand, kind).toHaveLength(1);
     evidence.signals.at(-1)!.occurredOn = '2026-10-27';
-    expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).state, kind).toBe('review');
+    expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).demand, kind).toEqual([]);
   }
 });
 it('does not turn old reviews or photographs into fresh quality evidence by rereading them', () => {
@@ -292,4 +299,12 @@ it('preserves unchanged demo content when only intent/date evidence is reviewed 
   expect(researchContentHash(next)).toBe(researchContentHash(evidence));
   next.signals = next.signals.map((s) => (s.kind === 'service' ? { ...s, text: 'Fassadensanierung' } : s));
   expect(researchContentHash(next)).not.toBe(researchContentHash(evidence));
+});
+it('counts dated activity up to twelve months back (Betreiberentscheidung 03.11.2026)', () => {
+  const { lead, evidence } = fixture();
+  const op = evidence.signals.find((s) => s.kind === 'operational')!;
+  op.occurredOn = '2026-02-20';
+  expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).state).toBe('ready');
+  op.occurredOn = '2025-08-01';
+  expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).state).toBe('review');
 });

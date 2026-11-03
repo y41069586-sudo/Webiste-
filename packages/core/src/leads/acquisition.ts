@@ -30,6 +30,8 @@ export const acquisitionPolicySchema = z
     tertiary: z.array(z.string()).default(['friseur', 'kosmetikstudio']),
     evidenceMaxDays: z.number().int().min(1).max(90).default(30),
     demandMaxDays: z.number().int().min(1).max(180).default(90),
+    /** Betreiberentscheidung 03.11.2026: datierte Aktivität (Beiträge, Bewertungen, Arbeitsbilder) zählt bis 12 Monate */
+    activityMaxDays: z.number().int().min(30).max(730).default(365),
     youngMinMonths: z.number().int().min(0).max(120).default(6),
     youngMaxMonths: z.number().int().min(1).max(120).default(36),
     /**
@@ -205,7 +207,8 @@ export function assessAcquisition(lead: ResearchSubject, raw: unknown, policy = 
       // Business/listing start dates deliberately remain historical facts for the lifecycle check.
       const datedSignal =
         DEMAND.has(s.kind) || s.kind === 'operational' || s.kind === 'recent_reviews' || s.kind === 'work_photos';
-      return !datedSignal || !s.occurredOn || isFresh(`${s.occurredOn}T00:00:00Z`, maxDays, now);
+      const eventMaxDays = DEMAND.has(s.kind) ? maxDays : policy.activityMaxDays;
+      return !datedSignal || !s.occurredOn || isFresh(`${s.occurredOn}T00:00:00Z`, eventMaxDays, now);
     }) ?? [];
   const has = (kind: ResearchSignal['kind']) => signals.some((s) => s.kind === kind);
   const services = signals.filter((s) => s.kind === 'service' || s.kind === 'specialty');
@@ -312,9 +315,9 @@ export function assessAcquisition(lead: ResearchSubject, raw: unknown, policy = 
   const missing = reasons
     .filter(
       (r) =>
-        ['identity', 'postal_address', 'operational', 'independent', 'website', 'acquisition_need', 'campaign_focus'].includes(
-          r.criterion,
-        ) && !r.verified,
+        // Akquisesignal zählt nur noch für die Punkte, ist keine Pflicht mehr (Betreiberentscheidung 03.11.2026)
+        ['identity', 'postal_address', 'operational', 'independent', 'website', 'campaign_focus'].includes(r.criterion) &&
+        !r.verified,
     )
     .map((r) => r.detail);
   if (has('fully_booked') && growth)

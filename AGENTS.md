@@ -1,5 +1,14 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Betreiberentscheidung 03.11.2026 – KI-Prüfung „Mittel“, Automatik bis zur Demo
+
+Betreiber will, dass Betriebe automatisch geprüft werden; von Hand nur Demo- und Brieffreigabe.
+Auswahl „Mittel“: aktuelles Akquise-/Werbesignal ist **keine Pflicht** mehr (zählt nur als Punkte);
+datierte Aktivität (Beiträge, Bewertungen, Arbeitsbilder) bleibt Pflicht, zählt aber bis **12 Monate**
+(`activityMaxDays`, Standard 365). Website-Suche, Anschrift, Eigenständigkeit, Kampagnenfokus bleiben Pflicht.
+Fehlgeschlagene KI-Prüfungen werden nach 6 h erneut versucht. KI-Wochenbudget 30 € (vorher 4 €; die
+Worst-Case-Reservierung von ~6,28 € je Prüfung blockierte sonst alles). Nicht ohne neue Entscheidung verschärfen.
+
 ## Betreiberentscheidung 03.11.2026 – Steuerhaken gesetzt
 
 Ausdrücklich vom Betreiber (Chat mit Claude): Steuerangaben bleiben leer (noch keine Gewerbeanmeldung,
