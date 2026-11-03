@@ -10,10 +10,12 @@
 > Sandbox-Käufe Basis/Care+ inkl. Monatsstart, Onboarding + Testhosting (Netlify), Resend als Mailprovider,
 > verschlüsseltes tägliches Backup mit Restore-Prüfung (VPS-Timer), KI-Kostenreservierung, INWX-Kontotest,
 > Einrichtung **vor** der Zahlung (`/einrichten/[slug]`, private Entwürfe), Kontrollbetrieb-Ablauf.
-> **Produktion 03.11.:** DRY_RUN=true (ENV und DB), `realLettersUnlocked=false`, Stripe Testmodus,
-> `tax.operatorConfirmed=true` (Betreiberentscheidung 03.11., Steuerangaben bewusst leer – siehe AGENTS.md), Worker pausiert (letzter Job 31.10.), 2 Testbriefe, 3 Sandbox-Bestellungen,
-> 0 echte Leads mit Demo. **Offen bis Start:** Codex-Commit `f097744` auf Netlify veröffentlichen, physischer eigener Probebrief + Prüfung, Kontrollbetrieb echte Demo/Brief abnehmen, Verkaufsfreigabe,
-> danach kontrolliert Stripe live + `LIVE=1`; Spam-Einstufung eigener Testmails ungelöst (Diagnose pausiert).
+> **Produktion seit 03.11.2026 LIVE:** Stripe live, easyNova live, DRY_RUN=false (ENV production + DB),
+> `realLettersUnlocked=true`, `tax.operatorConfirmed=true` (Steuerangaben bewusst leer, siehe AGENTS.md).
+> Daten am 03.11. komplett zurückgesetzt (Archiv `archive_20261103`), 30 manuelle Demo-Prüfungen neu.
+> Gates weiter aktiv: Briefe nur nach Freigabe, Budgets, Not-Aus, Sperrliste, Domains von Hand.
+> Offene Risiken: Spam-Einstufung eigener Mails, kein physischer Probebrief (Betreiberentscheidung).
+> Details: `docs/entscheidungen.md` (03.11.2026 – Go-Live).
 > Codex-Konvention: reine Doku-Commits mit `[skip ci] [skip netlify]`.
 
 > **Aktualisierung 25.10.2026:** Für Neukunden gilt jetzt Master V4: Basis 597 € + 19 €/Monat oder Care+ 597 € + insgesamt 99 €/Monat, Monatsstart erst nach bestätigtem Go-Live auf Basis der ausdrücklich erteilten Mandatszustimmung. Ältere manuelle V4-Snapshots behalten ihren Abo-Checkout. Legacy-Verträge bleiben unverändert. Neueste dauerhafte Anweisungen in [AGENTS.md](AGENTS.md), geprüfter aktueller Umsetzungsstand in [V5-Qualitätsprüfung](docs/v5-quality-pruefung.md) und [Handoff](docs/v4-quality-handoff.md). Frühere Neukundenpreise unten sind historisch. Kein persönliches Foto, VPS später. Nur sichere Entwicklung und ausdrücklich beauftragte Stripe-Sandbox; DRY_RUN=true, kein Live-Deployment.

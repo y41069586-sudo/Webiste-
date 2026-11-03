@@ -948,3 +948,22 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
 
 - Betreiber-OK im Chat. Netlify hatte den Codex-Commit nicht gebaut; Veröffentlichung über regulären Git-Push.
 - Lokal nachgeprüft: Typecheck, 29 Einrichtungs-/Bestelltests, 12/12 Browser-E2E gegen Produktionsbuild.
+
+## 03.11.2026 – Go-Live der App (Betreiberauftrag, Schritt für Schritt)
+
+1. Codex-Stand (Einrichtung vor Zahlung) veröffentlicht: Netlify `6ae9cfb68fe2f63fbf90c83a`, danach mit Live-Werten
+   `6ae9d4afb5c9cc37eb017c88`. Seiten HTTP200, Secretscan ohne Treffer.
+2. Kompletter Datenreset auf Betreiberwunsch (vom Betreiber im Supabase-SQL-Editor ausgeführt): Betriebe,
+   Demos, Briefe, Bestellungen, Kunden, Seiten, Nachrichten, E-Mails, Ereignisse, Meldungen, Recherche-/Test-
+   Einstellungen gelöscht; Kopie in Schema `archive_20261103` (RLS an). Erhalten: Konfiguration, Admin,
+   Vorlagen/Claims/Playbooks/Experimente, Sperrliste, Zähler (easyNova 3/3, Rechnungsnummern), Protokoll,
+   Kostenbuchungen. Offene Jobs (Rechnung/Onboarding/Demo des Kontrollbetriebs) abgebrochen.
+   Zähler `demos_reviewed` auf 0 → erneut 30 manuelle Demo-Prüfungen.
+3. easyNova: Login ok, Guthaben 12,61 €, 3/3 Testaufträge. Eigener physischer Probedruck auf Wunsch des
+   Betreibers ausgelassen. QR-Routen antworten (unbekannte Codes 404); voller Scanweg am ersten echten Brief prüfen.
+4. Backup: nächtliche Sicherungen 01.–03.11. im privaten Speicher; `backup_status` wurde nie geschrieben →
+   `record-backup-status.ts` + Aufruf in `managed-scheduled.sh`; heutiger Lauf als Nachweis eingetragen.
+5. Live: Netlify Production `STRIPE_MODE=live`, `EASYNOVA_MODE=live`, `DRY_RUN=false` (andere Kontexte
+   bleiben Test); Admin `dryRun=false`, `realLettersUnlocked=true`. Server: `NEU=1 LIVE=1` durch den Betreiber.
+   Weiter wirksam: 30 manuelle Demo-Prüfungen, Briefe nur nach Freigabe, Budgets, Not-Aus, Sperrliste,
+   `autoRegisterDomains=false` (Domains von Hand).
