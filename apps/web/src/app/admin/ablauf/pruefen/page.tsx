@@ -25,7 +25,7 @@ export default async function QuickReviewPage({
   const sp = await searchParams;
   const skip = (sp.skip ?? '').split(',').filter(Boolean);
   const db = getDb();
-  const { lead: nextLead, remaining } = await nextLeadForReview(skip);
+  const { lead: nextLead, remaining, awaitingAi } = await nextLeadForReview(skip);
   const lead =
     sp.lead && /^[0-9a-f-]{36}$/.test(sp.lead)
       ? ((await db.query.leads.findFirst({ where: eq(schema.leads.id, sp.lead) })) ?? nextLead)
@@ -62,11 +62,21 @@ export default async function QuickReviewPage({
         </Notice>
       ) : null}
       {sp.fehler ? <Notice kind="error">{sp.fehler}</Notice> : null}
+      {awaitingAi > 0 ? (
+        <Notice kind="info">
+          <strong>Die KI prüft gerade {awaitingAi === 1 ? '1 Betrieb' : `${num(awaitingAi)} Betriebe`}.</strong> Du musst nichts
+          tun – hier erscheinen nur Betriebe, bei denen die KI unsicher war.
+        </Notice>
+      ) : null}
 
       {!lead ? (
         <div className="check-card check-done">
-          <p className="check-name">Alles geprüft 🎉</p>
-          <p className="check-sub">Gerade wartet kein Betrieb.</p>
+          <p className="check-name">{awaitingAi > 0 ? 'Nichts für dich zu tun' : 'Alles geprüft 🎉'}</p>
+          <p className="check-sub">
+            {awaitingAi > 0
+              ? 'Die KI arbeitet. Geeignete Betriebe bekommen danach von selbst eine Demo.'
+              : 'Gerade wartet kein Betrieb.'}
+          </p>
           {skip.length ? (
             <Link className="ui-btn ui-btn-secondary" href="/admin/ablauf/pruefen">
               Übersprungene noch mal ansehen ({skip.length})

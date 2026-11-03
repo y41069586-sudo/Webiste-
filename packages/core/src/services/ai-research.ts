@@ -8,6 +8,7 @@ import { enqueue, QUEUES } from '../queue';
 import { audit } from './audit';
 import { saveLeadResearch } from './lead-research';
 import { llmResearchText, llmStructured } from './llm';
+import { transitionLead } from './lead-state';
 import { rejectInQuickReview } from './workflow';
 
 /**
@@ -307,6 +308,45 @@ export async function enqueueAiResearch(): Promise<number> {
   for (const r of rows)
     await enqueue(QUEUES.researchLead, { leadId: r.id, triggeredBy: 'pipeline' }, { singletonKey: `research:${r.id}` });
   return rows.length;
+}
+
+/**
+ * Mit KI-Prüfung: Betriebe ohne Telefonnummer prüft die KI nicht (keine Nummer für Demo und Kontakt). Statt sie dem
+ * Betreiber zum Aussortieren vorzulegen, werden sie automatisch aussortiert – mit Grund „no_phone“, im Protokoll und
+ * über „wiederherstellen“ rückgängig zu machen.
+ */
+export async function sortOutLeadsWithoutPhone(limit = 200): Promise<number> {
+  const cfg = await getConfig({ fresh: true });
+  if (!cfg.research.autoAi || effectiveSwitches(cfg).killSwitch) return 0;
+  const db = getDb();
+  const rows = await db
+    .select({ id: leads.id })
+    .from(leads)
+    .where(and(eq(leads.status, 'discovered'), isNull(leads.anonymizedAt), isNull(leads.phone)))
+    .limit(limit);
+  let n = 0;
+  for (const r of rows) {
+    const done = await db.transaction(async (tx) => {
+      const lead = await tx.query.leads.findFirst({ where: eq(leads.id, r.id) });
+      if (!lead || lead.status !== 'discovered' || lead.phone) return false;
+      await tx
+        .update(leads)
+        .set({ rejectionReasons: [...new Set([...lead.rejectionReasons, 'no_phone'])], updatedAt: new Date() })
+        .where(eq(leads.id, r.id));
+      await transitionLead(tx, r.id, 'rejected', { actor: 'system:auto-research', reason: 'no_phone' });
+      return true;
+    });
+    if (done) n++;
+  }
+  if (n)
+    await audit(db, {
+      entity: 'lead',
+      entityId: 'batch',
+      action: 'auto_reject_no_phone',
+      actor: 'system:auto-research',
+      context: { count: n },
+    });
+  return n;
 }
 
 /** Letzter KI-Prüfstand eines Betriebs (für Admin-Seiten). */

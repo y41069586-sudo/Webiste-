@@ -42,6 +42,8 @@ export async function workflowStatus(): Promise<{ steps: WorkflowStep[]; nextSte
       (SELECT count(*)::int FROM support_messages WHERE direction = 'in' AND status IN ('new', 'classified', 'drafted', 'escalated')) AS support`);
   const n = r.rows[0] ?? {};
   const v = (k: string) => Number(n[k] ?? 0);
+  const awaitingAi = await leadsAwaitingAi();
+  const forOperator = v('discovered') - awaitingAi;
   const steps: WorkflowStep[] = [
     {
       key: 'finden',
@@ -57,9 +59,11 @@ export async function workflowStatus(): Promise<{ steps: WorkflowStep[]; nextSte
     {
       key: 'pruefen',
       title: 'Betriebe prüfen',
-      mode: 'du',
-      count: v('discovered'),
-      hint: 'Bei jedem Betrieb kurz im Internet nachsehen und drei Haken setzen.',
+      mode: cfg.research.autoAi && forOperator === 0 ? 'auto' : 'du',
+      count: cfg.research.autoAi ? forOperator : v('discovered'),
+      hint: cfg.research.autoAi
+        ? `Die KI prüft von selbst${awaitingAi ? ` (${awaitingAi} in Arbeit, je 5 Minuten ca. ${cfg.research.perTick})` : ''}. Hier landen nur Betriebe, bei denen sie unsicher war.`
+        : 'Bei jedem Betrieb kurz im Internet nachsehen und drei Haken setzen.',
       href: '/admin/ablauf/pruefen',
       action: 'Jetzt prüfen',
     },
@@ -126,13 +130,37 @@ export async function workflowStatus(): Promise<{ steps: WorkflowStep[]; nextSte
  * Nächster zu prüfender Betrieb: noch nie geprüfte vor bereits begonnenen, darin höchste Vorauswahl zuerst;
  * übersprungene bleiben außen vor.
  */
+/**
+ * Mit KI-Prüfung (`research.autoAi`) wartet ein Betrieb nur dann auf den Betreiber, wenn die KI fertig ist und
+ * unsicher war („review“) – oder wenn die KI ihn nie prüft (keine Telefonnummer). Alles andere prüft die KI noch.
+ */
+const NEEDS_OPERATOR = sql`(${leads.phone} IS NULL OR EXISTS (SELECT 1 FROM settings s
+  WHERE s.key = 'ai-research:' || ${leads.id}::text AND s.value->>'state' = 'review'))`;
+
+/** Anzahl Betriebe, die gerade auf die KI-Prüfung warten oder in ihr stecken (inkl. Fehler vor dem Neuversuch). */
+export async function leadsAwaitingAi(): Promise<number> {
+  const cfg = await getConfig();
+  if (!cfg.research.autoAi) return 0;
+  const r = await getDb().execute<{ n: number }>(
+    sql`SELECT count(*)::int AS n FROM leads WHERE status = 'discovered' AND anonymized_at IS NULL AND NOT ${NEEDS_OPERATOR}`,
+  );
+  return r.rows[0]?.n ?? 0;
+}
+
 export async function nextLeadForReview(skip: string[] = []) {
   const ids = skip.filter((id) => /^[0-9a-f-]{36}$/.test(id)).slice(0, 200);
+  const cfg = await getConfig();
+  const onlyOperator = cfg.research.autoAi ? NEEDS_OPERATOR : undefined;
   const rows = await getDb()
     .select()
     .from(leads)
     .where(
-      and(eq(leads.status, 'discovered'), sql`${leads.anonymizedAt} IS NULL`, ids.length ? notInArray(leads.id, ids) : undefined),
+      and(
+        eq(leads.status, 'discovered'),
+        sql`${leads.anonymizedAt} IS NULL`,
+        ids.length ? notInArray(leads.id, ids) : undefined,
+        onlyOperator,
+      ),
     )
     .orderBy(
       sql`EXISTS (SELECT 1 FROM settings s WHERE s.key = 'lead-research:' || ${leads.id}::text)`,
@@ -141,9 +169,9 @@ export async function nextLeadForReview(skip: string[] = []) {
     )
     .limit(1);
   const remaining = await getDb().execute<{ n: number }>(
-    sql`SELECT count(*)::int AS n FROM leads WHERE status = 'discovered' AND anonymized_at IS NULL`,
+    sql`SELECT count(*)::int AS n FROM leads WHERE status = 'discovered' AND anonymized_at IS NULL ${onlyOperator ? sql`AND ${onlyOperator}` : sql``}`,
   );
-  return { lead: rows[0] ?? null, remaining: remaining.rows[0]?.n ?? 0 };
+  return { lead: rows[0] ?? null, remaining: remaining.rows[0]?.n ?? 0, awaitingAi: await leadsAwaitingAi() };
 }
 
 export interface QuickReviewInput {

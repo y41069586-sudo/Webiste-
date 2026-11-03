@@ -4,6 +4,7 @@ import { getDb } from '../src/db/client';
 import { leads } from '../src/db/schema';
 import { WEBSITE_METHODS } from '../src/leads/acquisition';
 import { stopBoss } from '../src/queue';
+import { sortOutLeadsWithoutPhone } from '../src/services/ai-research';
 import { findLeads } from '../src/services/lead-finder';
 import {
   nextLeadForReview,
@@ -13,6 +14,7 @@ import {
   workflowStatus,
   type QuickReviewInput,
 } from '../src/services/workflow';
+import { setSetting, updateConfig } from '../src/config/service';
 import { resetDb } from './helpers';
 
 const complete: QuickReviewInput = {
@@ -117,5 +119,37 @@ describe('Schnellprüfung (Datenbank)', () => {
     ]);
     expect(steps.find((s) => s.key === 'pruefen')?.count).toBe(1);
     expect(nextStep).toBe('pruefen');
+  });
+
+  it('mit KI-Prüfung: nur Betriebe, bei denen die KI unsicher war, warten auf den Betreiber', async () => {
+    await updateConfig({ research: { autoAi: true, perTick: 3, maxSearches: 8 } }, 'test');
+    // ids[1] ist noch offen (discovered); ohne KI-Ergebnis prüft die KI ihn noch selbst
+    let next = await nextLeadForReview();
+    expect(next.lead).toBeNull();
+    expect(next.remaining).toBe(0);
+    expect(next.awaitingAi).toBe(1);
+    let pruefen = (await workflowStatus()).steps.find((s) => s.key === 'pruefen');
+    expect(pruefen?.mode).toBe('auto');
+    expect(pruefen?.count).toBe(0);
+
+    await setSetting(`ai-research:${ids[1]}`, { state: 'review', at: new Date().toISOString() }, 'test');
+    next = await nextLeadForReview();
+    expect(next.lead?.id).toBe(ids[1]);
+    expect(next.awaitingAi).toBe(0);
+    pruefen = (await workflowStatus()).steps.find((s) => s.key === 'pruefen');
+    expect(pruefen?.mode).toBe('du');
+    expect(pruefen?.count).toBe(1);
+    await updateConfig({ research: { autoAi: false, perTick: 3, maxSearches: 8 } }, 'test');
+  });
+
+  it('mit KI-Prüfung: Betriebe ohne Telefonnummer werden automatisch aussortiert (nachvollziehbar)', async () => {
+    await getDb().update(leads).set({ phone: null }).where(eq(leads.id, ids[1]!));
+    expect(await sortOutLeadsWithoutPhone()).toBe(0); // KI-Prüfung aus → nichts automatisch
+    await updateConfig({ research: { autoAi: true, perTick: 3, maxSearches: 8 } }, 'test');
+    expect(await sortOutLeadsWithoutPhone()).toBe(1);
+    const lead = await getDb().query.leads.findFirst({ where: eq(leads.id, ids[1]!) });
+    expect(lead?.status).toBe('rejected');
+    expect(lead?.rejectionReasons).toContain('no_phone');
+    await updateConfig({ research: { autoAi: false, perTick: 3, maxSearches: 8 } }, 'test');
   });
 });

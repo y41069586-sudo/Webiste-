@@ -7,7 +7,7 @@ import { enqueue, QUEUES } from '../queue';
 import type { LeadStatus } from '../types';
 import { budgetStatus } from './budget';
 import { preferredCampaignTier } from '../leads/acquisition';
-import { enqueueAiResearch } from './ai-research';
+import { enqueueAiResearch, sortOutLeadsWithoutPhone } from './ai-research';
 
 /** Leads, die bereits Budget „gebunden“ haben, aber noch keinen Brief verschickt haben. */
 const IN_FLIGHT: LeadStatus[] = ['demo_built', 'demo_approved', 'demo_published', 'letter_generated', 'letter_approved'];
@@ -21,6 +21,8 @@ export interface PipelineTickResult {
   sendTriggered: boolean;
   /** Betriebe, die die KI in diesem Takt prüft */
   researchEnqueued: number;
+  /** Mit KI-Prüfung automatisch aussortiert: keine Telefonnummer */
+  sortedOutNoPhone?: number;
   bySegment: Record<string, number>;
 }
 
@@ -102,6 +104,7 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
 
   // 0) KI-Prüfung gefundener Betriebe (nur mit research.autoAi und echtem KI-Schlüssel)
   result.researchEnqueued = await enqueueAiResearch().catch(() => 0);
+  result.sortedOutNoPhone = await sortOutLeadsWithoutPhone().catch(() => 0);
 
   // 1) Kapazität
   const inFlightRows = await db
