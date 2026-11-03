@@ -936,3 +936,10 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
 - Testmodus: kein Druck, kein Versand, keine Kosten. `realLettersUnlocked` bleibt aus; live erst nach 3
   Testaufträgen, geprüfter Rückmail und ausdrücklichem OK.
 - Der Worker übernimmt die Werte beim nächsten Neuabruf der Umgebung (`setup.sh` mit `NEU=1`).
+
+## 03.11.2026 – Steuerhaken auf Betreiberwunsch gesetzt
+
+- Betreiber: noch keine Gewerbeanmeldung, Steuerangaben leer lassen und `tax.operatorConfirmed` trotzdem
+  setzen, ausdrücklich auch für echte Zahlungen. Umgesetzt in der Produktionskonfiguration mit Audit-Eintrag.
+- Rechnungen zeigen damit den §-19-Hinweis ohne Steuernummer. Hinweis gegeben, dass die Steuernummer eine
+  Pflichtangabe auf Rechnungen ist und nach der Gewerbeanmeldung nachgetragen werden sollte.

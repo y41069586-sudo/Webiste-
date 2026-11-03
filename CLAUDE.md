@@ -11,9 +11,8 @@
 > verschlüsseltes tägliches Backup mit Restore-Prüfung (VPS-Timer), KI-Kostenreservierung, INWX-Kontotest,
 > Einrichtung **vor** der Zahlung (`/einrichten/[slug]`, private Entwürfe), Kontrollbetrieb-Ablauf.
 > **Produktion 03.11.:** DRY_RUN=true (ENV und DB), `realLettersUnlocked=false`, Stripe Testmodus,
-> `tax.operatorConfirmed=false`, Worker pausiert (letzter Job 31.10.), 2 Testbriefe, 3 Sandbox-Bestellungen,
-> 0 echte Leads mit Demo. **Offen bis Start:** verbindliche Steuer-/Rechnungsregelung (nicht erfinden),
-> physischer eigener Probebrief + Prüfung, Kontrollbetrieb echte Demo/Brief abnehmen, Verkaufsfreigabe,
+> `tax.operatorConfirmed=true` (Betreiberentscheidung 03.11., Steuerangaben bewusst leer – siehe AGENTS.md), Worker pausiert (letzter Job 31.10.), 2 Testbriefe, 3 Sandbox-Bestellungen,
+> 0 echte Leads mit Demo. **Offen bis Start:** Codex-Commit `f097744` auf Netlify veröffentlichen, physischer eigener Probebrief + Prüfung, Kontrollbetrieb echte Demo/Brief abnehmen, Verkaufsfreigabe,
 > danach kontrolliert Stripe live + `LIVE=1`; Spam-Einstufung eigener Testmails ungelöst (Diagnose pausiert).
 > Codex-Konvention: reine Doku-Commits mit `[skip ci] [skip netlify]`.
 

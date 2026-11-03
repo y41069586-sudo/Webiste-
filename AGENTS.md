@@ -1,5 +1,14 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Betreiberentscheidung 03.11.2026 – Steuerhaken gesetzt
+
+Ausdrücklich vom Betreiber (Chat mit Claude): Steuerangaben bleiben leer (noch keine Gewerbeanmeldung,
+keine Steuernummer/USt-IdNr), `tax.operatorConfirmed` trotzdem **true** – ausdrücklich auch für echte
+Zahlungen. Konfiguration unverändert: `kleinunternehmer=true`, Hinweis „Gemäß § 19 UStG wird keine
+Umsatzsteuer berechnet.“. Hinweis auf fehlende Steuernummer als Rechnungspflichtangabe wurde gegeben.
+Nicht zurücksetzen und nicht erneut nachfragen; keine Steuernummer erfinden. Audit-Eintrag vorhanden.
+Die ältere Aussage unten („tax.operatorConfirmed ist wieder false“) ist damit überholt.
+
 ## Aktuellster Betreiberstatus 27.10.2026
 
 Neueste ausdrückliche Klarstellung: natürliche Person in der Gründungsphase, noch keine Gewerbeanmeldung
