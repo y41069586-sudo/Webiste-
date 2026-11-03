@@ -988,3 +988,12 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
 - Erwartung (Schätzung, nicht gemessen): Recherche ~10–12 Ct statt ~31 Ct, Demo+Brief zusammen ~7 Ct statt ~15 Ct.
 - Prüfen: erste echte Haiku-Recherchen und Sonnet-Demos/Briefe bei der Freigabe ansehen; bei schwächerer
   Qualität einzeln per ENV zurück auf Opus (`MODEL_CREATIVE`/`MODEL_BULK`).
+
+## 03.11.2026 – Zweiter Reset und Ablauf „Suche von Hand, Freigaben von Hand“
+
+- Betreiberwunsch: alle Daten erneut zurückgesetzt (85 Betriebe ins Archiv `archive_20261103b`, gleiche Liste
+  wie beim ersten Reset; Konfiguration, Admin, Vorlagen, Sperrliste, Zähler, Protokoll, Kostenbuchungen bleiben).
+- Ablauf ab jetzt: Suche startet nur der Betreiber (`segments.weeklyLeadFinder=false`), KI-Prüfung der Betriebe
+  und Demo-Erstellung automatisch (`research.autoAi=true`), **jede Demo** von Hand freigeben
+  (`switches.autoApproveDemos=false`), jeder Brief von Hand freigeben; freigegebene Briefe gehen automatisch
+  in die Post (`autoSend=true` versendet nur freigegebene Briefe).

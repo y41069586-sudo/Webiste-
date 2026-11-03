@@ -1,5 +1,12 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Betreiberentscheidung 03.11.2026 – Suche von Hand, Demo und Brief immer von Hand freigeben
+
+Suche startet nur der Betreiber (`segments.weeklyLeadFinder=false`). KI-Prüfung und Demo-Erstellung laufen
+automatisch. **Jede** Demo braucht die Freigabe des Betreibers (`switches.autoApproveDemos=false`, auch nach
+den ersten 30), jeder Brief ebenso; nur freigegebene Briefe gehen automatisch in die Post. Nicht ohne neue
+Entscheidung wieder einschalten.
+
 ## Betreiberentscheidung 03.11.2026 – günstigere KI-Modelle (ersetzt „alles Opus“ vom 29.10.)
 
 Ausdrücklich vom Betreiber: Opus 5.5 ist zu teuer für Aufgaben mit festen Regeln und Vorlagen. Standard jetzt:
