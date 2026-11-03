@@ -297,7 +297,9 @@ export async function enqueueAiResearch(): Promise<number> {
         eq(leads.status, 'discovered'),
         isNull(leads.anonymizedAt),
         isNotNull(leads.phone),
-        sql`NOT EXISTS (SELECT 1 FROM settings s WHERE s.key = 'ai-research:' || ${leads.id}::text)`,
+        // Fehlgeschlagene Prüfungen (Budget, Netz, Ausfall) nach 6 Stunden erneut versuchen statt für immer liegen lassen
+        sql`NOT EXISTS (SELECT 1 FROM settings s WHERE s.key = 'ai-research:' || ${leads.id}::text
+          AND NOT (s.value->>'state' = 'error' AND s.updated_at < now() - interval '6 hours'))`,
       ),
     )
     .orderBy(desc(leads.prescreenScore), desc(leads.createdAt))
