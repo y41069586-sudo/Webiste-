@@ -32,6 +32,12 @@ export const acquisitionPolicySchema = z
     demandMaxDays: z.number().int().min(1).max(180).default(90),
     /** Betreiberentscheidung 03.11.2026: datierte Aktivität (Beiträge, Bewertungen, Arbeitsbilder) zählt bis 12 Monate */
     activityMaxDays: z.number().int().min(30).max(730).default(365),
+    /**
+     * Betreiberentscheidung 03.11.2026 (zweite Lockerung): Aktivität ist keine Pflicht, wenn Zustellanschrift,
+     * Telefonnummer und „keine eigene Website“ belegt sind. Die KI kann Facebook/Instagram kaum lesen; Demo und
+     * Brief gibt der Betreiber weiterhin einzeln frei.
+     */
+    activityOptionalWhenContactVerified: z.boolean().default(true),
     youngMinMonths: z.number().int().min(0).max(120).default(6),
     youngMaxMonths: z.number().int().min(1).max(120).default(36),
     /**
@@ -312,12 +318,16 @@ export function assessAcquisition(lead: ResearchSubject, raw: unknown, policy = 
     ...(has('fully_booked') && !growth ? ['Ausgelastet ohne belegtes Wachstumssignal'] : []),
     ...(rank === null ? ['Branche außerhalb dieser Zielkampagne'] : []),
   ];
+  const contactVerified =
+    websiteVerified && Boolean(reasons.find((r) => r.criterion === 'postal_address')?.verified) && Boolean(lead.phone?.trim());
+  const activityOptional = policy.activityOptionalWhenContactVerified && contactVerified;
   const missing = reasons
     .filter(
       (r) =>
         // Akquisesignal zählt nur noch für die Punkte, ist keine Pflicht mehr (Betreiberentscheidung 03.11.2026)
         ['identity', 'postal_address', 'operational', 'independent', 'website', 'campaign_focus'].includes(r.criterion) &&
-        !r.verified,
+        !r.verified &&
+        !(r.criterion === 'operational' && activityOptional),
     )
     .map((r) => r.detail);
   if (has('fully_booked') && growth)

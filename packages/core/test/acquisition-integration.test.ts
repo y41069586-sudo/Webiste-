@@ -95,13 +95,13 @@ it('blocks an otherwise qualified real-source lead without explicit research at 
   await expect(assertLetterLeadEligible(getDb(), lead, await getConfig())).rejects.toThrow(/Akquiseprüfung/);
   await expect(buildDemo(lead.id, { actor: 'test' })).rejects.toThrow(/Akquiseprüfung/);
 });
-it('saves source-bound evidence and withdraws qualification when activity evidence is removed', async () => {
+it('saves source-bound evidence and withdraws qualification when independence evidence is removed', async () => {
   const lead = await subject();
   const original = evidence();
   expect((await saveLeadResearch(lead.id, original, 'test')).state).toBe('ready');
   await expect(assertLetterLeadEligible(getDb(), lead, await getConfig())).resolves.toBeUndefined();
-  const noActivity = { ...original, signals: original.signals.filter((s) => s.kind !== 'operational') };
-  expect((await saveLeadResearch(lead.id, noActivity, 'test')).state).toBe('review');
+  const notIndependent = { ...original, signals: original.signals.filter((s) => s.kind !== 'independent') };
+  expect((await saveLeadResearch(lead.id, notIndependent, 'test')).state).toBe('review');
   expect((await getDb().query.leads.findFirst({ where: eq(leads.id, lead.id) }))?.status).toBe('discovered');
   await expect(assertLetterLeadEligible(getDb(), lead, await getConfig())).rejects.toThrow(/Akquiseprüfung/);
 });

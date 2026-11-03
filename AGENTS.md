@@ -1,5 +1,12 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Betreiberentscheidung 03.11.2026 – Aktivität optional bei belegtem Kontakt
+
+Findet die KI keine datierte Aktivität (Facebook/Instagram kaum lesbar), lässt sie den Betrieb trotzdem durch,
+wenn Zustellanschrift, Telefonnummer und „keine eigene Website“ (vollständige Suche) belegt sind
+(`acquisition.activityOptionalWhenContactVerified=true`). Eigenständigkeit, Kampagnenfokus bleiben Pflicht.
+Demo und Brief gibt der Betreiber weiterhin einzeln frei.
+
 ## Betreiberentscheidung 03.11.2026 – Suche von Hand, Demo und Brief immer von Hand freigeben
 
 Suche startet nur der Betreiber (`segments.weeklyLeadFinder=false`). KI-Prüfung und Demo-Erstellung laufen

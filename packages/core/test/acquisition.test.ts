@@ -110,14 +110,11 @@ it('requires independent activity, a full website search and customer focus; an 
     );
     expect(noDemand.state).toBe('ready');
     expect(noDemand.reasons.find((r) => r.criterion === 'acquisition_need')?.points).toBe(0);
+    // Aktivität ist bei belegter Anschrift, Telefonnummer und „keine Website“ optional (03.11.2026) – streng geprüft weiter Pflicht
+    const strict = { ...ACQUISITION_POLICY, activityOptionalWhenContactVerified: false };
     for (const kind of ['operational', 'independent', 'address', 'service']) {
       expect(
-        assessAcquisition(
-          lead,
-          { ...evidence, signals: evidence.signals.filter((s) => s.kind !== kind) },
-          ACQUISITION_POLICY,
-          now,
-        ).state,
+        assessAcquisition(lead, { ...evidence, signals: evidence.signals.filter((s) => s.kind !== kind) }, strict, now).state,
       ).toBe('review');
     }
   }
@@ -306,5 +303,19 @@ it('counts dated activity up to twelve months back (Betreiberentscheidung 03.11.
   op.occurredOn = '2026-02-20';
   expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).state).toBe('ready');
   op.occurredOn = '2025-08-01';
-  expect(assessAcquisition(lead, evidence, ACQUISITION_POLICY, now).state).toBe('review');
+  const strict = { ...ACQUISITION_POLICY, activityOptionalWhenContactVerified: false };
+  expect(assessAcquisition(lead, evidence, strict, now).state).toBe('review');
+});
+
+it('passes without activity when address, phone and no-website are verified (Betreiberentscheidung 03.11.2026)', () => {
+  const { lead, evidence } = fixture();
+  evidence.signals = evidence.signals.filter((s) => s.kind !== 'operational');
+  const r = assessAcquisition(lead, evidence, ACQUISITION_POLICY, now);
+  expect(r.state).toBe('ready');
+  expect(r.reasons.find((x) => x.criterion === 'operational')?.verified).toBe(false);
+  // ohne Telefonnummer bleibt Aktivität Pflicht
+  expect(assessAcquisition({ ...lead, phone: null }, evidence, ACQUISITION_POLICY, now).state).toBe('review');
+  // strenge Einstellung: Aktivität wieder Pflicht
+  const strict = { ...ACQUISITION_POLICY, activityOptionalWhenContactVerified: false };
+  expect(assessAcquisition(lead, evidence, strict, now).missing).toContain('Aktivität unbekannt');
 });
