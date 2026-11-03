@@ -943,3 +943,8 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
   setzen, ausdrücklich auch für echte Zahlungen. Umgesetzt in der Produktionskonfiguration mit Audit-Eintrag.
 - Rechnungen zeigen damit den §-19-Hinweis ohne Steuernummer. Hinweis gegeben, dass die Steuernummer eine
   Pflichtangabe auf Rechnungen ist und nach der Gewerbeanmeldung nachgetragen werden sollte.
+
+## 03.11.2026 – Veröffentlichung von f097744 (Einrichtung vor Zahlung)
+
+- Betreiber-OK im Chat. Netlify hatte den Codex-Commit nicht gebaut; Veröffentlichung über regulären Git-Push.
+- Lokal nachgeprüft: Typecheck, 29 Einrichtungs-/Bestelltests, 12/12 Browser-E2E gegen Produktionsbuild.
