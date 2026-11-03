@@ -25,4 +25,10 @@ docker compose -f docker-compose.worker.yml run --rm -T --no-deps --user 0:0 \
 keep=${BACKUP_KEEP_DAYS:-14}
 [[ "$keep" =~ ^[0-9]+$ ]] && [ "$keep" -ge 7 ] || exit 1
 find "$root" -mindepth 1 -maxdepth 1 -type d -name 'scheduled-*' -mtime +"$keep" -exec rm -rf -- {} +
+# Erst jetzt (Restore + Offsite geprüft) den Erfolg für Health/Watchdog der App eintragen.
+docker compose -f docker-compose.worker.yml run --rm -T --no-deps \
+  -v "$snapshot/result.json:/snapshot/result.json:ro" -v "$run/offsite-receipt.json:/snapshot/offsite-receipt.json:ro" \
+  -v "$repo/packages/core/scripts:/repo/packages/core/scripts:ro" \
+  --entrypoint node worker --import tsx /repo/packages/core/scripts/record-backup-status.ts \
+  /snapshot/result.json /snapshot/offsite-receipt.json
 printf '{"scheduledBackupSucceeded":true,"workerRestarted":false,"llmCalled":false}\n'
