@@ -1,5 +1,22 @@
 # CLAUDE.md – „Website-Brief-Maschine“
 
+> **Stand 03.11.2026 (Claude nach Codex-Phase, Commit `f097744`):** Zwischen 29.10. und 31.10. hat Codex
+> 50 Commits auf diesem Branch gebaut. Vor jeder Arbeit lesen: `AGENTS.md` (dauerhafte Betreiberanweisungen,
+> Rang vor dieser Datei), `docs/activation-2026-10-30/go-live-status.md` (aktuellste Gesamtübersicht),
+> `docs/resume-2026-10-29/README.md`, `docs/activation-2026-10-31/prepayment-setup.md`.
+> **Bereits erledigt, nicht neu bauen:** expliziter Stripe-Live-Modus (`STRIPE_MODE`, getrennte Live-Keys,
+> Live-Katalog 597/19/99, `docker-compose.worker.live.yml` + `LIVE=1`), eigener Probedruck an gebundene
+> Testanschrift, OPTOUT_EMAIL im Worker-Export, 3/3 easyNova-Testaufträge mit geprüftem Rückgabe-PDF,
+> Sandbox-Käufe Basis/Care+ inkl. Monatsstart, Onboarding + Testhosting (Netlify), Resend als Mailprovider,
+> verschlüsseltes tägliches Backup mit Restore-Prüfung (VPS-Timer), KI-Kostenreservierung, INWX-Kontotest,
+> Einrichtung **vor** der Zahlung (`/einrichten/[slug]`, private Entwürfe), Kontrollbetrieb-Ablauf.
+> **Produktion 03.11.:** DRY_RUN=true (ENV und DB), `realLettersUnlocked=false`, Stripe Testmodus,
+> `tax.operatorConfirmed=false`, Worker pausiert (letzter Job 31.10.), 2 Testbriefe, 3 Sandbox-Bestellungen,
+> 0 echte Leads mit Demo. **Offen bis Start:** verbindliche Steuer-/Rechnungsregelung (nicht erfinden),
+> physischer eigener Probebrief + Prüfung, Kontrollbetrieb echte Demo/Brief abnehmen, Verkaufsfreigabe,
+> danach kontrolliert Stripe live + `LIVE=1`; Spam-Einstufung eigener Testmails ungelöst (Diagnose pausiert).
+> Codex-Konvention: reine Doku-Commits mit `[skip ci] [skip netlify]`.
+
 > **Aktualisierung 25.10.2026:** Für Neukunden gilt jetzt Master V4: Basis 597 € + 19 €/Monat oder Care+ 597 € + insgesamt 99 €/Monat, Monatsstart erst nach bestätigtem Go-Live auf Basis der ausdrücklich erteilten Mandatszustimmung. Ältere manuelle V4-Snapshots behalten ihren Abo-Checkout. Legacy-Verträge bleiben unverändert. Neueste dauerhafte Anweisungen in [AGENTS.md](AGENTS.md), geprüfter aktueller Umsetzungsstand in [V5-Qualitätsprüfung](docs/v5-quality-pruefung.md) und [Handoff](docs/v4-quality-handoff.md). Frühere Neukundenpreise unten sind historisch. Kein persönliches Foto, VPS später. Nur sichere Entwicklung und ausdrücklich beauftragte Stripe-Sandbox; DRY_RUN=true, kein Live-Deployment.
 
 > **Aktualisierung 27.10.2026:** Briefdienst ist **easyNova** (digiBrief-API V1, `MAIL_PROVIDER=easynova`,
