@@ -1078,3 +1078,13 @@ Befund aus dem ersten echten Lauf (64 Betriebe Maler/Elektro in Bochum, Dortmund
 - Geschützte Kauf-/Angebots-/Formular-Markups gegen 8b10675 verglichen. Keine DB-/Serveraktionen,
   keine Freigabe oder Überarbeitung von Elektro Reiche/Pintura Bau und keine echten KI-Aufrufe im Test.
 - Entwicklung auf separatem Branch; ein Push dieses Branches aktiviert den VPS-Worker nicht.
+
+## 04.11.2026 – Einzelentwurf Bochum: Korrekturen aus tatsächlicher Sichtprüfung
+
+- Betreiber beauftragt die Recherche eines Bochumer Elektrikers ohne auffindbare eigene Website und eine
+  separate Demo nach dem neuen Standard. Keine Änderung der produktiven Leads/Demos oder Kontaktaufnahme.
+- Beim gerenderten Elektro-Entwurf sichtbar: langer Firmenname in Seitenleiste durch 70%-Breitengrenze
+  ungünstig getrennt. Markenblock nutzt jetzt die volle Seitenleistenbreite. Doppelte Telefonzeile in den
+  Seitenleisten-Fakten entfällt, die direkte Rufnummer und Handlungslinks bleiben erhalten.
+- Kompakte Handwerk-Entwürfe zeigen keinen künstlich verlängernden vierteiligen Beispielablauf mehr.
+- Neuer Regressionstest für kompakte Elektro-Datenlage. Geschützte Kauf-/Formular-/Freigabelogik unberührt.

@@ -10,6 +10,8 @@ export function editorialCss(): string {
 .k main h3{letter-spacing:-.015em;line-height:1.25}
 .k-lead{line-height:1.65}
 .k-on::before{width:min(22px,100%);height:auto;aspect-ratio:1}
+.kit-elektro .k-panel .k-mark{max-width:100%;hyphens:none}
+.k-panel .k-facts>div:has(a[href^="tel:"]){display:none}
 .k-list{counter-reset:service}.k-list li{counter-increment:service;display:grid;grid-template-columns:30px minmax(0,1fr);column-gap:16px;padding:24px 0}
 .k-list li::before{content:counter(service,decimal-leading-zero);font:.78rem/1.6 var(--k-text);color:var(--k-muted);grid-row:span 2;padding-top:3px}
 .k-list p{grid-column:2;max-width:36em}

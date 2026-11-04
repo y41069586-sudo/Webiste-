@@ -26,6 +26,13 @@ describe('Editorial standard: evidence and complete renderer', () => {
     expect(html).not.toContain('class="k-frame"');
     expect(html).toContain('data-editorial="seitenwerk-editorial-1"');
   });
+  it('does not pad a thin electrical brief with an invented example workflow', () => {
+    const input = demoInput('kit-elektro', 'signal');
+    input.facts = { ...sampleFacts, branchLabel: 'Elektriker', verifiedServices: ['Elektroinstallation'] };
+    const html = renderSite(input);
+    expect(html).not.toContain('Beispielablauf');
+    expect(html).not.toContain('class="k-owner"');
+  });
   it('retains a truthful no-image version and the real form endpoint', () => {
     const html = renderSite({
       templateId: 'kit-maler',

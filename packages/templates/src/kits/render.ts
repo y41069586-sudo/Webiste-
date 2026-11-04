@@ -109,7 +109,7 @@ function blocks(ctx: RenderContext, kit: Kit) {
   const karte = `<div class="k-karte"><div class="k-karte-in"><p class="k-karte-title">${draft && !verified ? 'Beispiel-Speisekarte' : 'Karte'}</p>${services.map((s) => `<div class="k-karte-row"><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div>`).join('')}</div>${draft ? `<p class="k-note">${verified ? 'Preise und Allergene ergänzen wir aus Ihrer aktuellen Karte, als echte Seite statt PDF.' : 'Hier steht Ihre Speisekarte als echte Seite, nicht als PDF: Gerichte, Preise, Allergene und vegetarische Angebote. Wir übernehmen sie aus Ihrer aktuellen Karte.'}</p>` : ''}</div>`;
 
   const steps: [string, string][] | null =
-    kit.group !== 'handwerk' || !draft
+    kit.group !== 'handwerk' || !draft || compact
       ? null
       : kit.id === 'kit-reinigung'
         ? [
