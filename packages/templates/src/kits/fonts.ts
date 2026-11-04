@@ -7,7 +7,12 @@ import { fileURLToPath } from 'node:url';
  * assets/fonts/kits/LIZENZEN.txt). Eingebettet als data:-URI: Demos laden nichts von fremden Servern (DSGVO,
  * LG München I 3 O 17493/20) und funktionieren als einzelne HTML-Datei.
  */
-export type KitDisplayFont = 'archivo' | 'bodoni' | 'gloock';
+/**
+ * Archivo je Kit als zugeschnittene variable Schrift (nur die benötigten Stärken/Breiten, fontTools-Instancer):
+ * 24–42 KB statt 90 KB, damit die Live-Seite die Lighthouse-Grenze auch auf langsamen Rechnern hält.
+ */
+export type KitDisplayFont =
+  'archivo' | 'archivo-maler' | 'archivo-fliesen' | 'archivo-elektro' | 'archivo-reinigung' | 'bodoni' | 'gloock';
 export type KitTextFont = 'atkinson' | 'karla';
 
 const FILES: Record<
@@ -15,6 +20,13 @@ const FILES: Record<
   { family: string; faces: { file: string; weight: string; stretch?: string }[] }
 > = {
   archivo: { family: 'Kit Archivo', faces: [{ file: 'archivo.woff2', weight: '100 900', stretch: '62% 125%' }] },
+  'archivo-maler': { family: 'Kit Archivo', faces: [{ file: 'archivo-maler.woff2', weight: '800 900', stretch: '66% 85%' }] },
+  'archivo-fliesen': { family: 'Kit Archivo', faces: [{ file: 'archivo-fliesen.woff2', weight: '700', stretch: '100% 118%' }] },
+  'archivo-elektro': { family: 'Kit Archivo', faces: [{ file: 'archivo-elektro.woff2', weight: '800', stretch: '92% 100%' }] },
+  'archivo-reinigung': {
+    family: 'Kit Archivo',
+    faces: [{ file: 'archivo-reinigung.woff2', weight: '650', stretch: '84% 100%' }],
+  },
   bodoni: { family: 'Kit Bodoni', faces: [{ file: 'bodoni.woff2', weight: '400 900' }] },
   gloock: { family: 'Kit Gloock', faces: [{ file: 'gloock.woff2', weight: '400' }] },
   atkinson: {

@@ -1,12 +1,12 @@
-restaurant-voll: kit-gastro/abend (geöffnet bis in den späten Abend) · voll · 372 KB · KI-Muster: keine
-maler-voll: kit-maler/kalk (Abwechslung (keine Farbwelt passt besser)) · voll · 645 KB · KI-Muster: keine
-maler-duenn: kit-maler/schiefer (passt zum Gewerk „Maler und Lackierer“) · kompakt · 643 KB · KI-Muster: keine
-fliesen: kit-fliesen/travertin (Abwechslung (keine Farbwelt passt besser)) · voll · 422 KB · KI-Muster: keine
-boden-ohne-foto: kit-fliesen/stein (passt zum Gewerk „Bodenleger“) · kompakt · 251 KB · KI-Muster: keine
-elektro: kit-elektro/graphit (passt zum Gewerk „Elektriker“) · voll · 474 KB · KI-Muster: keine
-sanitaer: kit-elektro/marine (passt zum Gewerk „Sanitär und Heizung“) · kompakt · 500 KB · KI-Muster: keine
-reinigung: kit-reinigung/leinen (Abwechslung (keine Farbwelt passt besser)) · voll · 401 KB · KI-Muster: keine
-kosmetik: kit-beauty/puder (Abwechslung (keine Farbwelt passt besser)) · voll · 369 KB · KI-Muster: keine
-friseur: kit-beauty/eukalyptus (Abwechslung (keine Farbwelt passt besser)) · kompakt · 396 KB · KI-Muster: keine
-restaurant: kit-gastro/abend (geöffnet bis in den späten Abend) · kompakt · 371 KB · KI-Muster: keine
-cafe: kit-gastro/kreide (Tagesbetrieb laut Öffnungszeiten) · kompakt · 273 KB · KI-Muster: keine
+restaurant-voll: kit-gastro/kreide (Abwechslung (keine Farbwelt passt besser)) · voll · 342 KB · KI-Muster: keine
+maler-voll: kit-maler/kalk (Abwechslung (keine Farbwelt passt besser)) · voll · 552 KB · KI-Muster: keine
+maler-duenn: kit-maler/leinen (passt zum Gewerk „Maler und Lackierer“) · kompakt · 551 KB · KI-Muster: keine
+fliesen: kit-fliesen/travertin (Abwechslung (keine Farbwelt passt besser)) · voll · 309 KB · KI-Muster: keine
+boden-ohne-foto: kit-fliesen/stein (passt zum Gewerk „Bodenleger“) · kompakt · 137 KB · KI-Muster: keine
+elektro: kit-elektro/signal (passt zum Gewerk „Elektriker“) · voll · 358 KB · KI-Muster: keine
+sanitaer: kit-elektro/marine (passt zum Gewerk „Sanitär und Heizung“) · kompakt · 384 KB · KI-Muster: keine
+reinigung: kit-reinigung/leinen (Abwechslung (keine Farbwelt passt besser)) · voll · 286 KB · KI-Muster: keine
+kosmetik: kit-beauty/puder (Abwechslung (keine Farbwelt passt besser)) · voll · 339 KB · KI-Muster: keine
+friseur: kit-beauty/eukalyptus (Abwechslung (keine Farbwelt passt besser)) · kompakt · 367 KB · KI-Muster: keine
+restaurant: kit-gastro/terrakotta (Abwechslung (keine Farbwelt passt besser)) · kompakt · 342 KB · KI-Muster: keine
+cafe: kit-gastro/kreide (Tagesbetrieb laut Öffnungszeiten) · kompakt · 244 KB · KI-Muster: keine

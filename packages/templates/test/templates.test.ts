@@ -30,7 +30,7 @@ describe('Templates', () => {
       expect(ts.length).toBeGreaterThanOrEqual(3);
       expect(ts.map((t) => t.id)).toContain(`${g}-plakat`);
       // Gestaltungs-Kits (04.11.2026) haben bewusst zwei geprüfte Farbwelten, ältere Vorlagen drei Paletten
-      for (const t of ts) expect(t.palettes).toHaveLength(t.id.startsWith('kit-') ? 2 : 3);
+      for (const t of ts) expect(t.palettes.length).toBeGreaterThanOrEqual(t.id.startsWith('kit-') ? 2 : 3);
     }
   });
 
@@ -68,7 +68,9 @@ describe('Templates', () => {
         expect(html).not.toMatch(/maps\.google|googleapis|<script(?! type="application\/ld\+json")/);
         expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
         for (const s of sampleContent.services) expect(html).toContain(s.title);
-        expect(html.replace(/data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+/g, '')).not.toMatch(/undefined|\[object Object\]|NaN/);
+        expect(html.replace(/data:[a-z]+\/[a-z0-9+.-]+;base64,[A-Za-z0-9+/=]+/g, '')).not.toMatch(
+          /undefined|\[object Object\]|NaN/,
+        );
       });
     }
   }

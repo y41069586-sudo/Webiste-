@@ -3,6 +3,7 @@ import { documentShell, REQUEST_FORMS } from '../partials/shared';
 import type { RenderContext } from '../types';
 import { kitFontCss, kitFontFamily } from './fonts';
 import { designBrief, requestLabel } from './brief';
+import { purgeCss } from './purge';
 import type { Kit, KitColors } from './kits';
 
 /**
@@ -25,10 +26,12 @@ export function renderKit(ctx: RenderContext, kit: Kit): string {
   const footer = p.footer({ className: 'k-footer', linkClass: 'k-link' });
   const body = `${main}${footer}${b.bar}`;
   const colors: KitColors = kit.variants[ctx.palette] ?? Object.values(kit.variants)[0]!;
-  return documentShell(p, `k ${kit.id}`, body).replace(
+  const html = documentShell(p, `k ${kit.id}`, body).replace(
     '</head>',
     `<style>${kitFontCss([kit.display, kit.text])}${baseCss(kit, colors)}${LAYOUT_CSS[kit.id] ?? ''}</style></head>`,
   );
+  // Gemeinsames Tailwind-CSS (erster <style>-Block) auf die tatsächlich genutzten Klassen kürzen
+  return html.replace(/<style>([\s\S]*?)<\/style>/, (_m, css: string) => `<style>${purgeCss(css, html)}</style>`);
 }
 
 type Blocks = ReturnType<typeof blocks>;
@@ -327,7 +330,11 @@ function initials(name: string): string {
  */
 function h1Of(kit: Kit, text: string): string {
   const longest = Math.max(...text.split(/\s+/).map((w) => w.length), 4);
-  const perChar = kit.display === 'archivo' ? (0.6 * (kit.stretch ?? 100)) / 100 + 0.08 : kit.display === 'bodoni' ? 0.56 : 0.58;
+  const perChar = kit.display.startsWith('archivo')
+    ? (0.6 * (kit.stretch ?? 100)) / 100 + 0.08
+    : kit.display === 'bodoni'
+      ? 0.56
+      : 0.58;
   // Zweite Grenze: lange Namen aus vielen kurzen Wörtern höchstens auf etwa drei Zeilen
   const lines = ((text.length * perChar) / 3).toFixed(2);
   return `<h1 class="k-h1" style="--k-lw:${(longest * perChar).toFixed(2)};--k-tl:${lines}">${esc(text)}</h1>`;

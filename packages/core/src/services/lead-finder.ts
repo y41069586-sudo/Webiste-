@@ -498,8 +498,10 @@ async function findLeadsRun(opts: FindLeadsOptions): Promise<FindLeadsSummary> {
       socialOnly: result.website.socialOnly,
       probe: probeOutcome,
     });
-    // Mindestgrenze der Vorauswahl (nicht für Offline-Mock-Daten)
-    const belowMin = result.qualified && place.source !== 'mock' && minScore > 0 && pre.score < minScore;
+    // Mindestgrenze der Vorauswahl (nicht für Offline-Mock-Daten). Seit 04.11.2026 nur noch für Betriebe ohne
+    // Telefonnummer: Alle anderen prüft die KI (Betreiber: „er soll alle prüfen, die er gesucht hat“). Die Vorauswahl
+    // beruht nur auf Rohdaten der Quelle; Anschrift, Aktivität und Website-Suche belegt erst die KI-Prüfung.
+    const belowMin = result.qualified && place.source !== 'mock' && minScore > 0 && pre.score < minScore && !place.phone;
     const reasons: RejectionReason[] = belowMin ? [...result.reasons, 'score_too_low'] : result.reasons;
     // Google-Inhalte (Bewertung, Website, Name/Anschrift) werden NICHT gespeichert – nur place_id
     const persistRating = place.source === 'mock';
@@ -674,7 +676,7 @@ export async function applyMinLeadScore(minScore: number, actor: string): Promis
   const rows = await db.execute<{ id: string; reasons: string[] }>(sql`
     SELECT id, rejection_reasons AS reasons FROM leads
      WHERE status IN ('discovered', 'qualified') AND anonymized_at IS NULL AND source <> 'mock'
-       AND prescreen_score < ${minScore}`);
+       AND prescreen_score < ${minScore} AND phone IS NULL`);
   let n = 0;
   for (const row of rows.rows) {
     await db.transaction(async (tx) => {

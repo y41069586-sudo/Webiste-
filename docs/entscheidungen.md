@@ -1047,3 +1047,17 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
 - Referenz-Demos ohne KI-Kosten: `scripts/render-reference-demos.ts`, veröffentlicht unter `/muster-kits/`.
   Öffentliche Beispiele (`/beispiele/`) für Handwerk, Beauty, Gastro auf Kits umgestellt.
 - Produktion: 0 Demos und 0 Briefe zum Zeitpunkt der Änderung, nichts Bestehendes verändert; Schalter unverändert.
+
+## 04.11.2026 (abends) – Erster echter Lauf: drei Fehler behoben
+
+Befund aus dem ersten echten Lauf (64 Betriebe Maler/Elektro in Bochum, Dortmund, Essen; 2 Demos):
+- **„Alles schwarz“:** Elektriker bekamen fest die dunkle Farbwelt („graphit“ als Gewerkspassung), beim Maler wählte der
+  Zufall die dunkle. Neu: dunkle Farbwelten nur bei belegter dunkler Bildwelt des Betriebs, nie wegen Gewerk oder
+  Öffnungszeiten. Je Kit mindestens zwei helle Farbwelten (neu: Maler „leinen“, Elektro „signal“, Gastro „terrakotta“).
+- **Maler-Demo durch die QA gefallen (Lighthouse 81 < 90 auf dem Server):** Archivo je Kit zugeschnitten (90 → 24–42 KB),
+  ungenutztes Tailwind-CSS auf Kit-Seiten entfernt (49 → 14 KB). Live-Seite Maler 236 → 137 KB, Lighthouse lokal 90 → 100.
+  Pixelvergleich: Gastro/Beauty identisch, Archivo-Kits nur Kantenglättung.
+- **23 Betriebe „Vorauswahl zu niedrig“ ohne KI-Prüfung aussortiert:** Die Vorauswahl beruht nur auf Rohdaten; die Punkte
+  für Anschrift, Aktivität und Website-Suche gibt erst die KI. Neu: Die Mindestgrenze sortiert nur noch Betriebe ohne
+  Telefonnummer aus; alle anderen prüft die KI (Ablauf des Betreibers „er soll alle prüfen“). KI-Kosten bleiben durch das
+  Wochenbudget begrenzt. Eine erneute Suche bewertet die bereits aussortierten Betriebe neu.

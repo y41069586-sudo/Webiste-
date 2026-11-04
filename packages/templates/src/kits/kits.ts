@@ -46,7 +46,10 @@ export interface Kit {
   signature: KitSignature;
   /** Haupt-Handlung im ersten Bildschirm */
   primary: 'call' | 'appointment' | 'reserve';
-  /** Zwei vorab geprüfte Farbwelten; Auswahl deterministisch je Betrieb */
+  /**
+   * Vorab geprüfte Farbwelten; Auswahl deterministisch je Betrieb. Dunkle Farbwelten nur bei belegter dunkler Bildwelt des Betriebs,
+   * sonst immer hell (Betreiber 04.11.2026: „warum haben die Demos alles schwarz“).
+   */
   variants: Record<string, KitColors>;
   /** Welche Farbwelt zu welchem Gewerk passt (Auswahl nach Passung vor Abwechslung) */
   fits?: Record<string, RegExp>;
@@ -61,7 +64,7 @@ export const KITS: Kit[] = [
     group: 'handwerk',
     name: 'Farbfächer (Maler)',
     match: /maler|anstrich|lackier|tapezier/,
-    display: 'archivo',
+    display: 'archivo-maler',
     text: 'atkinson',
     stretch: 66,
     weight: 900,
@@ -70,7 +73,7 @@ export const KITS: Kit[] = [
     hero: 'type',
     signature: 'farbfaecher',
     primary: 'call',
-    fits: { kalk: /tapezier|innenraum|altbau|stuck/, schiefer: /lackier|fassade|beschicht|industrie/ },
+    fits: { kalk: /tapezier|innenraum|altbau|stuck/, leinen: /lackier|fassade|beschicht/ },
     audience: 'Eigentümer, Mieter und Hausverwaltungen mit Renovierung',
     question: 'Machen die genau das, was ich brauche, und wie schnell kommt jemand vorbei?',
     variants: {
@@ -81,6 +84,15 @@ export const KITS: Kit[] = [
         muted: '#535A60',
         line: '#C9C5BB',
         accent: '#0A6468',
+        onAccent: '#FFFFFF',
+      },
+      leinen: {
+        base: '#F3EFE6',
+        surface: '#E8E1D3',
+        ink: '#22201C',
+        muted: '#5B554B',
+        line: '#CFC6B5',
+        accent: '#8A3B24',
         onAccent: '#FFFFFF',
       },
       schiefer: {
@@ -99,7 +111,7 @@ export const KITS: Kit[] = [
     group: 'handwerk',
     name: 'Fugenraster (Fliesen, Bad)',
     match: /fliese|bad|naturstein|platten|estrich|boden/,
-    display: 'archivo',
+    display: 'archivo-fliesen',
     text: 'atkinson',
     stretch: 118,
     weight: 700,
@@ -137,7 +149,7 @@ export const KITS: Kit[] = [
     group: 'handwerk',
     name: 'Schaltlinie (Elektro, Sanitär, Heizung)',
     match: /elektr|sanit|heizung|install|klima|solar/,
-    display: 'archivo',
+    display: 'archivo-elektro',
     text: 'atkinson',
     stretch: 92,
     weight: 800,
@@ -146,7 +158,7 @@ export const KITS: Kit[] = [
     hero: 'dark',
     signature: 'schaltlinie',
     primary: 'call',
-    fits: { graphit: /elektr|solar|photovolt|smart|netzwerk/, marine: /sanit|heizung|klima|install|wasser|bad/ },
+    fits: { marine: /sanit|heizung|klima|install|wasser|bad/, signal: /elektr|solar|photovolt|smart|netzwerk/ },
     audience: 'Haushalte, Vermieter und kleine Betriebe mit einem konkreten Problem',
     question: 'Erreiche ich jemanden, und kommt der Betrieb zu mir?',
     variants: {
@@ -168,6 +180,15 @@ export const KITS: Kit[] = [
         accent: '#9A4F15',
         onAccent: '#FFFFFF',
       },
+      signal: {
+        base: '#F4F3EF',
+        surface: '#E7E6E0',
+        ink: '#17191C',
+        muted: '#4F555B',
+        line: '#C9C8C0',
+        accent: '#1C4F8F',
+        onAccent: '#FFFFFF',
+      },
     },
   },
   {
@@ -175,7 +196,7 @@ export const KITS: Kit[] = [
     group: 'handwerk',
     name: 'Turnus (Reinigung, Dienstleistung, Garten)',
     match: /.*/,
-    display: 'archivo',
+    display: 'archivo-reinigung',
     text: 'karla',
     stretch: 84,
     weight: 650,
@@ -280,6 +301,15 @@ export const KITS: Kit[] = [
         accent: '#4D5A2A',
         onAccent: '#FFFFFF',
       },
+      terrakotta: {
+        base: '#F5EFE8',
+        surface: '#EADFD3',
+        ink: '#231C17',
+        muted: '#5E5249',
+        line: '#D5C7B8',
+        accent: '#9C3D1F',
+        onAccent: '#FFFFFF',
+      },
     },
   },
 ];
@@ -320,9 +350,12 @@ export function kitVariantFor(kit: Kit, branchLabel: string, hints: KitVariantHi
   const all = Object.keys(kit.variants);
   const dark = all.filter((v) => luminance(kit.variants[v]!.base) < 0.3);
   const light = all.filter((v) => !dark.includes(v));
+  // Dunkel nur bei belegter dunkler Bildwelt des Betriebs (Betreiber 04.11.2026), nicht wegen Öffnungszeiten
+  const darkAllowed = Boolean(hints.dark);
   const score = (v: string): [number, string] => {
+    // Dunkel nur mit Grund; ohne Grund kommt eine dunkle Farbwelt nie in Frage
+    if (dark.includes(v) && !darkAllowed) return [-10, 'dunkel ohne Grund ausgeschlossen'];
     if (hints.dark && dark.includes(v)) return [4, 'dunkle Bildwelt des Betriebs belegt'];
-    if (kit.group === 'gastronomie' && hints.lateHours && dark.includes(v)) return [3, 'geöffnet bis in den späten Abend'];
     if (kit.group === 'gastronomie' && hints.dayOnly && light.includes(v)) return [3, 'Tagesbetrieb laut Öffnungszeiten'];
     if (kit.fits?.[v]?.test(b)) return [2, `passt zum Gewerk „${branchLabel}“`];
     return [0, 'Abwechslung (keine Farbwelt passt besser)'];

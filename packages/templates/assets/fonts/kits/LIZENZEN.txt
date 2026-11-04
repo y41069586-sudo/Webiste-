@@ -6,3 +6,4 @@ Bezogen über @fontsource (npm, jsDelivr), latin-Subset, Stand 04.11.2026.
 - karla.woff2          Karla (Jonny Pinhorn), variabel 200–800                            (@fontsource-variable/karla 5.1.1)
 - gloock.woff2         Gloock (Duarte Pinto)                                              (@fontsource/gloock 5.1.1)
 Lizenztext: https://openfontlicense.org/open-font-license-official-text/
+archivo-*.woff2: Instanzen von archivo.woff2 (gleiche Lizenz, OFL 1.1), mit fontTools varLib.instancer auf die je Kit benötigten Achsenbereiche zugeschnitten (04.11.2026).

@@ -29,7 +29,7 @@ export const EXAMPLES: {
     label: 'Restaurant',
     name: 'Trattoria Muster',
     templateId: 'kit-gastro',
-    palette: 'abend',
+    palette: 'terrakotta',
   },
   {
     id: 'handwerk',

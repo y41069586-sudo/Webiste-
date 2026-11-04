@@ -47,12 +47,16 @@ describe('Lead-Suche: Fortschritt, Stopp, Mindestgrenze', () => {
     expect(open.length).toBeGreaterThan(1);
     const [high, ...rest] = open;
     await db.update(leads).set({ prescreenScore: 80 }).where(eq(leads.id, high!.id));
-    for (const r of rest) await db.update(leads).set({ prescreenScore: 40 }).where(eq(leads.id, r.id));
+    for (const r of rest) await db.update(leads).set({ prescreenScore: 40, phone: null }).where(eq(leads.id, r.id));
+    // Mit Telefonnummer prüft die KI auch unterhalb der Grenze (04.11.2026); nur ohne Telefon wird aussortiert
+    const [keep, ...drop] = rest;
+    await db.update(leads).set({ phone: '0231 123456' }).where(eq(leads.id, keep!.id));
     expect(await leadScorePool(70)).toEqual({ above: 1, below: rest.length, best: 80 });
-    expect(await applyMinLeadScore(70, 'admin:test')).toBe(rest.length);
+    expect(await applyMinLeadScore(70, 'admin:test')).toBe(drop.length);
+    expect((await db.select().from(leads).where(eq(leads.id, keep!.id)))[0]?.status).toBe('qualified');
     const after = await db.select().from(leads).where(eq(leads.source, 'osm'));
     expect(after.find((r) => r.id === high!.id)?.status).toBe('qualified');
-    const low = after.filter((r) => r.id !== high!.id && rest.some((x) => x.id === r.id));
+    const low = after.filter((r) => drop.some((x) => x.id === r.id));
     expect(low.every((r) => r.status === 'rejected' && r.rejectionReasons.includes('score_too_low'))).toBe(true);
     expect(await applyMinLeadScore(0, 'admin:test')).toBe(0);
   });

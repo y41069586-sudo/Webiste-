@@ -136,15 +136,27 @@ describe('Kits: ehrliche Inhalte, Passung, Briefing (04.11.2026, Qualitätsauftr
   it('Farbwelt nach Passung vor Abwechslung', async () => {
     const { kitVariantFor, hoursHints } = await import('../src');
     const gastro = kitFor('gastronomie', 'Restaurant')!;
-    expect(kitVariantFor(gastro, 'Restaurant', hoursHints([{ value: '17:00–23:00 Uhr' }])).variant).toBe('abend');
+    expect(kitVariantFor(gastro, 'Restaurant', hoursHints([{ value: '17:00–23:00 Uhr' }])).variant).not.toBe('abend');
+    expect(kitVariantFor(gastro, 'Restaurant', { dark: true }).variant).toBe('abend');
     expect(kitVariantFor(gastro, 'Café', hoursHints([{ value: '8:00–18:00 Uhr' }])).variant).toBe('kreide');
     const elektro = kitFor('handwerk', 'Sanitär')!;
     expect(kitVariantFor(elektro, 'Sanitär und Heizung').variant).toBe('marine');
-    expect(kitVariantFor(elektro, 'Elektriker').variant).toBe('graphit');
+    expect(kitVariantFor(elektro, 'Elektriker').variant).toBe('signal');
+    // dunkel nur mit Grund
+    expect(kitVariantFor(elektro, 'Elektriker', { dark: true }).variant).toBe('graphit');
+    for (const k of KITS)
+      for (const seed of [0, 1, 2, 3]) {
+        const v = kitVariantFor(k, 'Betrieb', { seed: (x) => (x.length * 7 + seed) % 5 }).variant;
+        const n = parseInt(k.variants[v]!.base.slice(1), 16);
+        expect(
+          (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255,
+          `${k.id}/${v}`,
+        ).toBeGreaterThan(0.5);
+      }
     // ohne eindeutige Passung entscheidet die Nutzung (zwei Maler sehen verschieden aus)
     const maler = kitFor('handwerk', 'Malerbetrieb')!;
-    expect(kitVariantFor(maler, 'Malerbetrieb', { usage: { 'kit-maler/kalk': 3 } }).variant).toBe('schiefer');
-    expect(kitVariantFor(maler, 'Malerbetrieb', { usage: { 'kit-maler/schiefer': 3 } }).variant).toBe('kalk');
+    expect(kitVariantFor(maler, 'Malerbetrieb', { usage: { 'kit-maler/kalk': 3 } }).variant).toBe('leinen');
+    expect(kitVariantFor(maler, 'Malerbetrieb', { usage: { 'kit-maler/leinen': 3 } }).variant).toBe('kalk');
   });
 
   it('Gestaltungsbriefing trennt belegt, Vorschlag, fehlt; dünne Daten → kompakt', async () => {
