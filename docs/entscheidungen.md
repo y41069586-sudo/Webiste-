@@ -997,3 +997,10 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
   und Demo-Erstellung automatisch (`research.autoAi=true`), **jede Demo** von Hand freigeben
   (`switches.autoApproveDemos=false`), jeder Brief von Hand freigeben; freigegebene Briefe gehen automatisch
   in die Post (`autoSend=true` versendet nur freigegebene Briefe).
+
+## 04.11.2026 – WhatsApp-Nummer entfernt
+
+- Betreiberwunsch: Wer per WhatsApp schreibt, sähe das private Profilbild. `sender.whatsappNumber` geleert;
+  Demos zeigen dann keinen WhatsApp-Knopf (nur E-Mail und Formular), der Brief nennt die Telefonnummer ohne
+  „WhatsApp“. WhatsApp ist keine Pflichtangabe mehr für den Versand (`readiness.ts`). Wieder einschalten:
+  Nummer im Admin unter Einstellungen eintragen (am besten WhatsApp Business mit Logo).

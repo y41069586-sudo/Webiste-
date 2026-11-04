@@ -25,7 +25,7 @@ export function goLiveBlockers(cfg: AppConfig): GoLiveBlocker[] {
   if (placeholder(s.email, d.email)) out.push({ key: 'sender.email', label: 'Absender: E-Mail' });
   if (placeholder(s.phone, d.phone)) out.push({ key: 'sender.phone', label: 'Absender: Telefon' });
   if (placeholder(s.website, d.website)) out.push({ key: 'sender.website', label: 'Absender: Website' });
-  if (!s.whatsappNumber.trim()) out.push({ key: 'sender.whatsappNumber', label: 'WhatsApp-Nummer' });
+  // WhatsApp ist freiwillig (Betreiberentscheidung 04.11.2026: privates Profil nicht zeigen) – ohne Nummer kein Button
   if (!s.intro.trim()) out.push({ key: 'sender.intro', label: 'Kurzvorstellung (2 Sätze)' });
   if (!s.bankIban.trim()) out.push({ key: 'sender.bankIban', label: 'Bankverbindung (Rechnungen, Forderungsbriefe)' });
   // Widerspruchsadresse im Brief (Art. 21 DSGVO) – nie der Platzhalter aus der Vorgabe

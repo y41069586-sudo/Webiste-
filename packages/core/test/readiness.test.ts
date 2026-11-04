@@ -33,4 +33,9 @@ describe('Freigaben: Briefe getrennt vom Verkauf', () => {
     expect(letterBlockers(cfg).map((b) => b.key)).toEqual(['legal.privacyMarkdown']);
     expect(letterBlockers(DEFAULT_CONFIG).some((b) => b.key === 'sender.name')).toBe(true);
   });
+  it('WhatsApp ist freiwillig: ohne Nummer keine Sperre (04.11.2026)', () => {
+    const cfg = deepMerge(DEFAULT_CONFIG, { ...complete, sender: { ...complete.sender, whatsappNumber: '' } });
+    expect(letterBlockers(cfg)).toEqual([]);
+    expect(goLiveBlockers(cfg).some((b) => b.key === 'sender.whatsappNumber')).toBe(false);
+  });
 });
