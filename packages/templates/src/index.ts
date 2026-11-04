@@ -15,7 +15,8 @@ import { PLAKAT_TEMPLATES } from './sites/plakat';
 import type { BranchGroup, RenderInput, TemplateDef } from './types';
 import { KITS, getKit } from './kits/kits';
 import { renderKit } from './kits/render';
-export { KITS, kitFor, getKit } from './kits/kits';
+export { KITS, kitFor, getKit, kitVariantFor, hoursHints, type KitVariantHints } from './kits/kits';
+export { designBrief, requestLabel, type DesignBrief } from './kits/brief';
 export { slopFindings, slopFindingsForPage, type SlopFinding } from './kits/slop';
 
 /** Gestaltungs-Kits (04.11.2026): je Gewerk ein eigenes Konzept, Farbwelten als „Paletten“. */

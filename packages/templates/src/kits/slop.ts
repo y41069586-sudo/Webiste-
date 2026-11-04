@@ -63,6 +63,6 @@ export function slopFindings(kitCss: string, mainHtml: string): SlopFinding[] {
 export function slopFindingsForPage(html: string): SlopFinding[] {
   const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]!);
   const kitCss = (styles.at(-1) ?? '').replace(/@font-face\{[^}]*\}/g, '');
-  const main = html.match(/<main id="inhalt">([\s\S]*?)<\/main>/)?.[1] ?? html;
+  const main = html.match(/<main id="inhalt"[^>]*>([\s\S]*?)<\/main>/)?.[1] ?? html;
   return slopFindings(kitCss, main);
 }

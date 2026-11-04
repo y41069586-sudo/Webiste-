@@ -88,3 +88,84 @@ describe('Gestaltungs-Kits (04.11.2026)', () => {
     expect(new Set(shapes).size).toBe(KITS.length);
   });
 });
+
+describe('Kits: ehrliche Inhalte, Passung, Briefing (04.11.2026, Qualitätsauftrag)', () => {
+  const live = { formAction: '/api/forms/x', imprintPath: 'impressum.html', privacyPath: 'datenschutz.html' };
+
+  it('Entwurfsformular: gleiche Felder wie live, kein Foto-Upload, sichtbar nicht absendbar', () => {
+    for (const kit of KITS) {
+      const facts = { ...sampleFacts, group: kit.group };
+      const html = renderSite({
+        templateId: kit.id,
+        palette: Object.keys(kit.variants)[0]!,
+        mode: 'demo',
+        content: sampleContent,
+        facts,
+        demo,
+      });
+      expect(html, kit.id).not.toContain('type="file"');
+      expect(html, kit.id).not.toMatch(/Anfrage mit Fotos|gern mit Fotos/);
+      expect(html, kit.id).toContain('<fieldset disabled>');
+      expect(html, kit.id).toContain('im Entwurf nicht absendbar');
+      for (const name of ['name', 'email', 'phone', 'message']) expect(html, `${kit.id}:${name}`).toContain(`name="${name}"`);
+    }
+  });
+
+  it('Buttons nach Funktion: Tisch, Behandlung, Reinigungsangebot, Projekt', async () => {
+    const { requestLabel } = await import('../src');
+    expect(requestLabel(kitFor('gastronomie', 'Restaurant')!, 'Restaurant')).toBe('Tisch anfragen');
+    expect(requestLabel(kitFor('beauty', 'Kosmetikstudio')!, 'Kosmetikstudio')).toBe('Behandlung anfragen');
+    expect(requestLabel(kitFor('beauty', 'Friseur')!, 'Friseur')).toBe('Termin anfragen');
+    expect(requestLabel(kitFor('handwerk', 'Gebäudereinigung')!, 'Gebäudereinigung')).toBe('Reinigungsangebot anfragen');
+    expect(requestLabel(kitFor('handwerk', 'Malerbetrieb')!, 'Malerbetrieb')).toBe('Projekt anfragen');
+  });
+
+  it('ohne Angaben: kein „Über uns“, keine Fragen und live keine erfundenen Öffnungszeiten', () => {
+    const kit = kitFor('handwerk', 'Malerbetrieb')!;
+    const facts = { ...sampleFacts, group: kit.group, openingLines: [] };
+    const content = { ...sampleContent, about: '', faq: [] };
+    const html = renderSite({ templateId: kit.id, palette: 'kalk', mode: 'live', content, facts, live });
+    expect(html).not.toContain('id="ueber-uns"');
+    expect(html).not.toContain('id="fragen"');
+    expect(html).not.toContain('noch nicht bestätigt');
+    const draft = renderSite({ templateId: kit.id, palette: 'kalk', mode: 'demo', content, facts, demo });
+    expect(draft).toContain('Was für Ihre Seite noch fehlt');
+    expect(draft).toContain('Ihre Öffnungszeiten');
+  });
+
+  it('Farbwelt nach Passung vor Abwechslung', async () => {
+    const { kitVariantFor, hoursHints } = await import('../src');
+    const gastro = kitFor('gastronomie', 'Restaurant')!;
+    expect(kitVariantFor(gastro, 'Restaurant', hoursHints([{ value: '17:00–23:00 Uhr' }])).variant).toBe('abend');
+    expect(kitVariantFor(gastro, 'Café', hoursHints([{ value: '8:00–18:00 Uhr' }])).variant).toBe('kreide');
+    const elektro = kitFor('handwerk', 'Sanitär')!;
+    expect(kitVariantFor(elektro, 'Sanitär und Heizung').variant).toBe('marine');
+    expect(kitVariantFor(elektro, 'Elektriker').variant).toBe('graphit');
+    // ohne eindeutige Passung entscheidet die Nutzung (zwei Maler sehen verschieden aus)
+    const maler = kitFor('handwerk', 'Malerbetrieb')!;
+    expect(kitVariantFor(maler, 'Malerbetrieb', { usage: { 'kit-maler/kalk': 3 } }).variant).toBe('schiefer');
+    expect(kitVariantFor(maler, 'Malerbetrieb', { usage: { 'kit-maler/schiefer': 3 } }).variant).toBe('kalk');
+  });
+
+  it('Gestaltungsbriefing trennt belegt, Vorschlag, fehlt; dünne Daten → kompakt', async () => {
+    const { designBrief } = await import('../src');
+    const kit = kitFor('handwerk', 'Malerbetrieb')!;
+    const thin = designBrief(
+      { ...sampleFacts, group: 'handwerk', phone: null, openingLines: [] },
+      { services: [], about: '', faq: [] },
+      kit,
+      { variant: 'kalk', reason: 'x' },
+    );
+    expect(thin.density).toBe('kompakt');
+    expect(thin.missing).toContain('Ihre Telefonnummer');
+    expect(thin.action).toBe('Projekt anfragen');
+    const full = designBrief(
+      { ...sampleFacts, group: 'handwerk', verifiedServices: ['A', 'B', 'C'] },
+      { services: [], about: 'Belegt.', faq: [] },
+      kit,
+      { variant: 'kalk', reason: 'x' },
+    );
+    expect(full.density).toBe('voll');
+    expect(full.verified.join(' ')).toContain('Leistungen laut Quelle');
+  });
+});

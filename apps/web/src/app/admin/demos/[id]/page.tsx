@@ -27,7 +27,24 @@ export default async function DemoDetail({
   const demo = await db.query.demos.findFirst({ where: eq(schema.demos.id, id) });
   if (!demo) notFound();
   const lead = await db.query.leads.findFirst({ where: eq(schema.leads.id, demo.leadId) });
-  const meta = (demo.contentJson as { _meta?: { source?: string; attempts?: number } } | null)?._meta;
+  const meta = (
+    demo.contentJson as {
+      _meta?: {
+        source?: string;
+        attempts?: number;
+        designBrief?: {
+          action: string;
+          question: string;
+          verified: string[];
+          proposals: string[];
+          missing: string[];
+          density: string;
+          why: string;
+        };
+      };
+    } | null
+  )?._meta;
+  const brief = meta?.designBrief;
   const canDecide = ['pending_review', 'qa_failed'].includes(demo.status);
   const canRevise = ['pending_review', 'approved', 'published'].includes(demo.status);
   const content = (demo.contentJson ?? {}) as {
@@ -265,6 +282,41 @@ export default async function DemoDetail({
                   <SubmitButton className={btn.primary}>Änderung speichern</SubmitButton>
                 </form>
               </div>
+            </details>
+          ) : null}
+          {brief ? (
+            <details className="admin-details dcheck-more">
+              <summary>Gestaltungsbriefing (worauf die Seite beruht)</summary>
+              <div className="mt-3 grid gap-4 text-sm md:grid-cols-3">
+                <div>
+                  <p className="font-semibold">Belegt</p>
+                  <ul className="mt-1 list-disc pl-5">
+                    {brief.verified.map((v) => (
+                      <li key={v}>{v}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold">Gestaltungsvorschlag</p>
+                  <ul className="mt-1 list-disc pl-5">
+                    {brief.proposals.map((v) => (
+                      <li key={v}>{v}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-2 text-slate-500">Besucherfrage: {brief.question}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Fehlt (wird nicht erfunden)</p>
+                  <ul className="mt-1 list-disc pl-5">
+                    {brief.missing.map((v) => (
+                      <li key={v}>{v}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-slate-500">
+                Seitenumfang {brief.density}: {brief.why}
+              </p>
             </details>
           ) : null}
           <details className="admin-details dcheck-more">

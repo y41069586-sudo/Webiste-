@@ -48,6 +48,11 @@ export interface Kit {
   primary: 'call' | 'appointment' | 'reserve';
   /** Zwei vorab geprüfte Farbwelten; Auswahl deterministisch je Betrieb */
   variants: Record<string, KitColors>;
+  /** Welche Farbwelt zu welchem Gewerk passt (Auswahl nach Passung vor Abwechslung) */
+  fits?: Record<string, RegExp>;
+  /** Für die Planung vor dem Bau: wer die Seite besucht und was er zuerst wissen will */
+  audience: string;
+  question: string;
 }
 
 export const KITS: Kit[] = [
@@ -65,6 +70,9 @@ export const KITS: Kit[] = [
     hero: 'type',
     signature: 'farbfaecher',
     primary: 'call',
+    fits: { kalk: /tapezier|innenraum|altbau|stuck/, schiefer: /lackier|fassade|beschicht|industrie/ },
+    audience: 'Eigentümer, Mieter und Hausverwaltungen mit Renovierung',
+    question: 'Machen die genau das, was ich brauche, und wie schnell kommt jemand vorbei?',
     variants: {
       kalk: {
         base: '#ECEAE4',
@@ -100,6 +108,9 @@ export const KITS: Kit[] = [
     hero: 'type',
     signature: 'fugenraster',
     primary: 'call',
+    fits: { travertin: /naturstein|mosaik|marmor|terrazzo/, stein: /estrich|boden|beton/ },
+    audience: 'Bauherren und Eigentümer mit Bad- oder Bodenprojekt',
+    question: 'Hat der Betrieb so etwas schon gemacht, und wie läuft es ab?',
     variants: {
       travertin: {
         base: '#EAE5DC',
@@ -135,6 +146,9 @@ export const KITS: Kit[] = [
     hero: 'dark',
     signature: 'schaltlinie',
     primary: 'call',
+    fits: { graphit: /elektr|solar|photovolt|smart|netzwerk/, marine: /sanit|heizung|klima|install|wasser|bad/ },
+    audience: 'Haushalte, Vermieter und kleine Betriebe mit einem konkreten Problem',
+    question: 'Erreiche ich jemanden, und kommt der Betrieb zu mir?',
     variants: {
       graphit: {
         base: '#1A1D20',
@@ -170,6 +184,9 @@ export const KITS: Kit[] = [
     hero: 'type',
     signature: 'turnus',
     primary: 'call',
+    fits: { wasser: /fenster|glas/, leinen: /garten|landschaft|hausmeister|umzug|haushalt/ },
+    audience: 'Büros, Praxen, Hausverwaltungen und Haushalte',
+    question: 'Was genau wird erledigt, in welchem Rhythmus, und wie kommt das Angebot zustande?',
     variants: {
       leinen: {
         base: '#F3F2EE',
@@ -204,6 +221,9 @@ export const KITS: Kit[] = [
     hero: 'beauty',
     signature: 'preisliste',
     primary: 'appointment',
+    fits: { puder: /nagel|wimpern|make|braue|lash/, eukalyptus: /barber|massage|spa|fußpflege/ },
+    audience: 'Kundinnen und Kunden aus der Umgebung',
+    question: 'Welche Behandlungen gibt es, was kosten sie, und wie bekomme ich einen Termin?',
     variants: {
       puder: {
         base: '#F1ECE8',
@@ -238,6 +258,9 @@ export const KITS: Kit[] = [
     hero: 'gastro',
     signature: 'karte',
     primary: 'reserve',
+    fits: { abend: /\bbar\b|wein|cocktail|steak|tapas/, kreide: /café|cafe|kaffee|bäcker|frühstück|eiscafé|konditor/ },
+    audience: 'Gäste aus dem Viertel und Besucher, die spontan essen gehen',
+    question: 'Was gibt es, wann ist geöffnet, und bekomme ich einen Tisch?',
     variants: {
       abend: {
         base: '#191715',
@@ -268,6 +291,60 @@ export function kitFor(group: BranchGroup, branchLabel: string): Kit | null {
   return (
     candidates.find((k) => k.match.source !== '.*' && k.match.test(b)) ?? candidates.find((k) => k.match.source === '.*') ?? null
   );
+}
+
+export interface KitVariantHints {
+  /** belegte Bildwelt des Betriebs (z. B. dunkel und urban) */
+  dark?: boolean;
+  /** schließt laut Öffnungszeiten erst spät (ab 22 Uhr) */
+  lateHours?: boolean;
+  /** schließt laut Öffnungszeiten am Nachmittag (bis 18 Uhr) */
+  dayOnly?: boolean;
+  /** bisherige Nutzung `${kitId}/${variant}` */
+  usage?: Record<string, number>;
+  /** stabiler Zufallswert je Betrieb */
+  seed?: (variant: string) => number;
+}
+
+const luminance = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+};
+
+/**
+ * Farbwelt nach Passung, Abwechslung erst danach: belegte Bildwelt > Öffnungszeiten (Gastro) > Gewerk > seltener
+ * genutzt > stabiler Zufall. Liefert den Grund mit, damit das Gestaltungsbriefing ihn zeigen kann.
+ */
+export function kitVariantFor(kit: Kit, branchLabel: string, hints: KitVariantHints = {}): { variant: string; reason: string } {
+  const b = branchLabel.toLocaleLowerCase('de');
+  const all = Object.keys(kit.variants);
+  const dark = all.filter((v) => luminance(kit.variants[v]!.base) < 0.3);
+  const light = all.filter((v) => !dark.includes(v));
+  const score = (v: string): [number, string] => {
+    if (hints.dark && dark.includes(v)) return [4, 'dunkle Bildwelt des Betriebs belegt'];
+    if (kit.group === 'gastronomie' && hints.lateHours && dark.includes(v)) return [3, 'geöffnet bis in den späten Abend'];
+    if (kit.group === 'gastronomie' && hints.dayOnly && light.includes(v)) return [3, 'Tagesbetrieb laut Öffnungszeiten'];
+    if (kit.fits?.[v]?.test(b)) return [2, `passt zum Gewerk „${branchLabel}“`];
+    return [0, 'Abwechslung (keine Farbwelt passt besser)'];
+  };
+  const ranked = [...all].sort(
+    (x, y) =>
+      score(y)[0] - score(x)[0] ||
+      (hints.usage?.[`${kit.id}/${x}`] ?? 0) - (hints.usage?.[`${kit.id}/${y}`] ?? 0) ||
+      (hints.seed ? hints.seed(x) - hints.seed(y) : 0),
+  );
+  const variant = ranked[0]!;
+  return { variant, reason: score(variant)[1] };
+}
+
+/** Schließzeiten aus Öffnungszeilen („17:00–23:00“) lesen: spät (≥ 22 Uhr) oder nur tagsüber (≤ 18 Uhr). */
+export function hoursHints(openingLines: { value: string }[]): { lateHours: boolean; dayOnly: boolean } {
+  const ends = openingLines
+    .flatMap((l) => [...l.value.matchAll(/[–-]\s*(\d{1,2})(?::\d{2})?/g)].map((m) => Number(m[1])))
+    .filter((h) => h >= 0 && h <= 24);
+  if (!ends.length) return { lateHours: false, dayOnly: false };
+  const max = Math.max(...ends.map((h) => (h <= 4 ? h + 24 : h)));
+  return { lateHours: max >= 22, dayOnly: max <= 18 };
 }
 
 export function getKit(id: string): Kit | undefined {

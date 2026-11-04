@@ -317,9 +317,9 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
         icon: 'sparkle',
       },
       {
-        title: 'Termin anfragen',
-        text: 'Wunsch und mögliche Besuchszeiten übermitteln. Der Termin wird anschließend bestätigt.',
-        icon: 'calendar',
+        title: 'Rasur',
+        text: 'Klassische Nassrasur mit warmem Tuch, auf Wunsch zusammen mit dem Haarschnitt.',
+        icon: 'sparkle',
       },
     ],
   },
@@ -380,7 +380,7 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
         text: 'Farbideen und Pflege rund ums Haar. Den tatsächlichen Umfang bestätigt der Salon.',
         icon: 'drop',
       },
-      { title: 'Terminwünsche', text: 'Eine Anfrage senden; der Salon bestätigt den gewünschten Termin.', icon: 'calendar' },
+      { title: 'Föhnen & Styling', text: 'Nach dem Waschen in Form gebracht, glatt oder mit Volumen.', icon: 'sparkle' },
     ],
   },
   {
@@ -411,9 +411,9 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
         icon: 'calendar',
       },
       {
-        title: 'Individuelle Anfrage',
-        text: 'Objekt und Reinigungsbedarf für eine konkrete Rückmeldung beschreiben.',
-        icon: 'chat',
+        title: 'Grundreinigung',
+        text: 'Einmalig gründlich, zum Beispiel nach einem Umbau oder vor einem Einzug.',
+        icon: 'house',
       },
     ],
   },
@@ -422,19 +422,19 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
     headline: 'Ihr Anliegen rund um Haus und Technik',
     services: [
       {
-        title: 'Technische Leistungen',
-        text: 'Eine Übersicht zu möglichen Arbeiten an vorhandenen Installationen.',
+        title: 'Heizungswartung',
+        text: 'Regelmäßige Prüfung der Anlage, damit sie im Winter zuverlässig läuft.',
         icon: 'wrench',
       },
       {
-        title: 'Wartung & Reparatur',
-        text: 'Das Anliegen und die vorhandene Anlage beschreiben, um den möglichen Umfang zu klären.',
+        title: 'Badsanierung',
+        text: 'Leitungen, Armaturen und Sanitärobjekte erneuern, auf Wunsch mit Fliesenarbeiten.',
         icon: 'house',
       },
       {
-        title: 'Projekt anfragen',
-        text: 'Das Vorhaben und vorhandene Unterlagen für eine Rückmeldung übermitteln.',
-        icon: 'chat',
+        title: 'Reparaturen',
+        text: 'Tropfender Hahn, Druckverlust oder kalte Heizkörper: Anliegen beschreiben, Termin abstimmen.',
+        icon: 'wrench',
       },
     ],
   },
@@ -448,11 +448,15 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
         icon: 'house',
       },
       {
-        title: 'Renovierungsvorhaben',
-        text: 'Das Vorhaben und vorhandene Flächen für eine Anfrage beschreiben.',
+        title: 'Badsanierung',
+        text: 'Alte Fliesen entfernen, Untergrund vorbereiten, Wand und Boden neu verlegen.',
         icon: 'wrench',
       },
-      { title: 'Projekt anfragen', text: 'Fragen und Wünsche über den angegebenen Kontaktweg abstimmen.', icon: 'chat' },
+      {
+        title: 'Fugensanierung',
+        text: 'Brüchige oder verfärbte Fugen erneuern, ohne gleich alles neu zu fliesen.',
+        icon: 'house',
+      },
     ],
   },
   {
@@ -568,10 +572,6 @@ export function libraryContent(
       a: 'Beschreiben Sie Ihren Wunsch und nennen Sie mögliche Zeiten. Eine Anfrage ist noch keine verbindliche Zusage oder Buchung.',
     },
     {
-      q: 'Welche Angaben sind bereits bestätigt?',
-      a: 'Name, Anschrift und vorhandene Kontaktdaten stammen aus den erfassten Betriebsangaben. Die Angebotsbereiche zeigen eine mögliche Gestaltung und werden vor Veröffentlichung mit dem Betrieb abgestimmt.',
-    },
-    {
       q: 'Wo finde ich den Standort?',
       a: 'Die Anschrift und der Link zur Anfahrt stehen im Kontaktbereich. Aktuelle Öffnungszeiten werden angezeigt, soweit sie in den erfassten Angaben vorhanden sind.',
     },
@@ -590,7 +590,8 @@ export function libraryContent(
               ? 'Ideen zur Nagelgestaltung im Überblick. Für Ihren Terminwunsch finden Sie hier den Kontakt.'
               : focus[group],
     services,
-    about: `${vars.name} ist als ${vars.branche} in ${vars.stadt} zu finden. Anschrift und Kontakt finden Sie auf dieser Seite.\n\nDie dargestellten Angebotsbereiche zeigen, wie sich die Website aufbauen lässt. Vor der Veröffentlichung werden Leistungen, Texte und Bilder mit dem Betrieb abgestimmt.`,
+    // Ohne belegte Angaben kein „Über uns“-Text (nichts auffüllen); ältere Vorlagen setzen einen neutralen Satz ein
+    about: '',
     cta_text: group === 'beauty' ? 'Termin anfragen' : group === 'kurse' ? 'Kurs anfragen' : 'Anfrage stellen',
     seo_title: `${vars.name} – ${vars.branche} in ${vars.stadt}`.slice(0, 65),
     seo_description: `${vars.branche} in ${vars.stadt}. ${focus[group]}`.slice(0, 158),

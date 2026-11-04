@@ -1,7 +1,16 @@
 import { resolveBusinessDesign } from './business-design';
 import { leadResearch, researchLetterFacts, assertAcquisitionEligible } from '../services/lead-research';
 import { researchContentHash, type LeadResearch } from '../leads/acquisition';
-import { designTemplateRank, industryDirection, type ArtDirection, kitFor } from '@wbm/templates';
+import {
+  designBrief,
+  designTemplateRank,
+  getKit,
+  hoursHints,
+  industryDirection,
+  kitFor,
+  kitVariantFor,
+  type ArtDirection,
+} from '@wbm/templates';
 import { v4Offer, V4_TIERS } from '../services/offers-v4';
 import { eq, sql } from 'drizzle-orm';
 import {
@@ -260,26 +269,20 @@ export function chooseTemplate(
   previous: string[] = [],
   usage: Record<string, number> = {},
   direction?: ArtDirection,
-): { templateId: string; palette: string } {
-  // Gestaltungs-Kit des Gewerks hat Vorrang (04.11.2026); Farbwelt: am seltensten genutzte zuerst, je Lead stabil
+  hours?: { value: string }[],
+): { templateId: string; palette: string; reason?: string } {
+  // Gestaltungs-Kit des Gewerks hat Vorrang (04.11.2026). Farbwelt nach Passung (belegte Bildwelt, Öffnungszeiten,
+  // Gewerk), erst danach Abwechslung (seltener genutzt) und ein stabiler Zufall je Betrieb.
   const kit = kitFor(lead.branchGroup, lead.branch ?? '');
   if (kit) {
-    // Belegte Gestaltung des Betriebs (z. B. „dunkel und urban“) wählt die dunkle Farbwelt des Kits
-    const lum = (hex: string) => {
-      const n = parseInt(hex.slice(1), 16);
-      return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
-    };
-    const wantsDark =
-      direction?.source === 'business_evidence' && (direction.character === 'urban' || direction.imageMood === 'dark');
-    const all = Object.keys(kit.variants);
-    const dark = all.filter((v) => lum(kit.variants[v]!.base) < 0.3);
-    const variants = wantsDark && dark.length ? dark : all;
-    const palette = [...variants].sort(
-      (a, b) =>
-        (usage[`${kit.id}/${a}`] ?? 0) - (usage[`${kit.id}/${b}`] ?? 0) ||
-        seedFromId(`${lead.id}:${a}`) - seedFromId(`${lead.id}:${b}`),
-    )[0]!;
-    return { templateId: kit.id, palette };
+    const dark = direction?.source === 'business_evidence' && (direction.character === 'urban' || direction.imageMood === 'dark');
+    const { variant, reason } = kitVariantFor(kit, lead.branch ?? '', {
+      dark,
+      ...hoursHints(hours ?? []),
+      usage,
+      seed: (v) => seedFromId(`${lead.id}:${v}`),
+    });
+    return { templateId: kit.id, palette: variant, reason };
   }
   const resolvedDirection = direction ?? (lead.branch ? industryDirection(lead.branchGroup, lead.branch) : null);
   const rank = (id: string) => (resolvedDirection ? designTemplateRank(id, resolvedDirection) : 0);
@@ -488,6 +491,7 @@ export async function buildDemo(
     existing.map((d) => d.templateId),
     await templateUsage(),
     design.direction,
+    leadToFacts(lead, cfg).openingLines,
   );
   const fixed = opts.templateId ? templatesForGroup(lead.branchGroup).find((t) => t.id === opts.templateId) : undefined;
   const templateId = fixed?.id ?? rotated.templateId;
@@ -500,6 +504,11 @@ export async function buildDemo(
     exampleServices: verifiedServices?.length ? exampleServicesFor(lead, cfg, verifiedServices) : undefined,
     photos: design.photos,
   };
+  const kitDef = getKit(templateId);
+  // Gestaltungsbriefing: belegt / Vorschlag / fehlt – wird mit der Demo gespeichert (Freigabe sieht die Grundlage)
+  const brief = kitDef
+    ? designBrief(facts, generated.content, kitDef, { variant: palette, reason: rotated.reason ?? 'fest vorgegeben' })
+    : null;
   const slug = randomToken(24);
   const html = renderDemoHtml({
     templateId,
@@ -543,6 +552,7 @@ export async function buildDemo(
               designSourceRef: design.sourceRef,
               designRequiresReview: design.requiresReview,
               researchHash,
+              ...(brief ? { designBrief: brief } : {}),
               ...(opts.qaFeedback?.length ? { qaRetry: 1 } : {}),
             },
           } as unknown as Record<string, unknown>,

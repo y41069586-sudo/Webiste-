@@ -1024,3 +1024,26 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
 - KI-Regeln: Prompt-Regel 12, Floskel- und Satzmuster-Filter mit Neuversuch, Gedankenstrich-Grenze, KI-Muster-Prüfung in
   der Demo-QA (Kits: harte Sperre, ältere Vorlagen: Hinweis).
 - Offen: Einzelhandel/Kurse-Kits; Bildgrößen (Demos 360–590 KB, vor allem Fotos) später verkleinern.
+
+## 04.11.2026 – Qualitätsauftrag Unternehmenswebsites (Briefing, Passung, ehrliche Inhalte, Bilder)
+
+- Betreiberauftrag: Qualität der automatisch erstellten Seiten grundlegend verbessern, im bestehenden System, ohne
+  Briefe, Zahlungen, Kundenmails oder Domainkäufe. Vom Betreiber gezeigte Fremd-Demos („Kalk & Kante“, „Osteria Sera“)
+  nur als Messlatte, ausdrücklich nichts übernommen.
+- Gestaltungsbriefing vor jeder Demo (`templates/src/kits/brief.ts`): belegt / Vorschlag / fehlt, Besucherfrage,
+  Haupt-Handlung, Seitenumfang (dünne Datenlage → „kompakt“). Gespeichert in `demos.content_json._meta.designBrief`,
+  sichtbar in „Demo prüfen“. Im Entwurf ein Kasten „Was für Ihre Seite noch fehlt“ statt verstreuter Platzhalter.
+- Farbwelt nach Passung vor Abwechslung (`kitVariantFor`): belegte Bildwelt > Öffnungszeiten (Gastro spät → dunkel,
+  Tagesbetrieb → hell) > unterscheidende Gewerksbegriffe > seltener genutzt > stabiler Zufall.
+- Ehrliche Inhalte: „Über uns“ und FAQ optional (0–4 Fragen); Ersatztexte ohne nichtssagendes „Über uns“ und ohne
+  Meta-Frage; Schein-Leistungen („Projekt anfragen“, „Terminwünsche“) durch typische Beispielleistungen ersetzt;
+  ohne bestätigte Öffnungszeiten live keine Zeiten.
+- Handlungen nach Funktion: „Projekt anfragen“, „Reinigungsangebot anfragen“, „Behandlung/Termin anfragen“,
+  „Tisch anfragen“. Kein Foto-Upload-Versprechen (live gibt es keinen Upload). Entwurfsformular = dieselben Felder wie
+  das echte Formular, `fieldset disabled`, sichtbar „im Entwurf nicht absendbar“. Live-Formular unverändert.
+- Bilder: 28 Pexels-Fotos derselben Lizenz in 1600 px neu bezogen (EXIF-Lizenz übernommen, ≤ 200 KB); randlos nur ab
+  1400 px Bildbreite, sonst Satzbreite; ohne Foto eigene Hero-Variante ohne leere Fläche.
+- Überschriften: Größe nach dem längsten Wort (keine Trennungen wie „Kosmeti-k“).
+- Referenz-Demos ohne KI-Kosten: `scripts/render-reference-demos.ts`, veröffentlicht unter `/muster-kits/`.
+  Öffentliche Beispiele (`/beispiele/`) für Handwerk, Beauty, Gastro auf Kits umgestellt.
+- Produktion: 0 Demos und 0 Briefe zum Zeitpunkt der Änderung, nichts Bestehendes verändert; Schalter unverändert.

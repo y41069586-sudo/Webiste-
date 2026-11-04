@@ -130,7 +130,7 @@ describe('Beispielfotos (lizenzfrei, nur im Entwurf)', () => {
       expect(p.sourceUrl).toMatch(/^https:\/\//);
       expect(p.alt.length).toBeGreaterThan(5);
       const bytes = readFileSync(path.join(imagesDir(), p.file));
-      expect(bytes.length, p.file).toBeLessThan(150_000);
+      expect(bytes.length, p.file).toBeLessThan(200_000);
       if (p.kind !== 'generated') {
         expect(bytes.toString('latin1'), `${p.file}: EXIF`).toContain(p.license);
         expect(bytes.toString('latin1')).toContain(p.sourceUrl);

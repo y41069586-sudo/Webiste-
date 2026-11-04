@@ -6,7 +6,7 @@
  * damit sich die Beispiele in der Hero-Treppe unterscheiden, ohne grell zu wirken.
  * Aufruf: pnpm --filter @wbm/core exec tsx scripts/example-shots.ts
  */
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { renderSite, TEMPLATES, type BranchGroup } from '@wbm/templates';
@@ -28,8 +28,8 @@ export const EXAMPLES: {
     branch: 'restaurant',
     label: 'Restaurant',
     name: 'Trattoria Muster',
-    templateId: 'gastronomie-split',
-    palette: 'tomate',
+    templateId: 'kit-gastro',
+    palette: 'abend',
   },
   {
     id: 'handwerk',
@@ -37,8 +37,8 @@ export const EXAMPLES: {
     branch: 'maler',
     label: 'Malerbetrieb',
     name: 'Malerei Muster',
-    templateId: 'handwerk-klar',
-    palette: 'waldgruen',
+    templateId: 'kit-maler',
+    palette: 'kalk',
   },
   {
     id: 'beauty',
@@ -46,8 +46,8 @@ export const EXAMPLES: {
     branch: 'kosmetikstudio',
     label: 'Kosmetikstudio',
     name: 'Kosmetik Muster',
-    templateId: 'beauty-modern',
-    palette: 'rose',
+    templateId: 'kit-beauty',
+    palette: 'puder',
   },
   {
     id: 'einzelhandel',
@@ -98,9 +98,14 @@ async function main(): Promise<void> {
         city: 'Dortmund',
         phone: '0231 000000',
         phoneHref: 'tel:+49231000000',
-        openingLines: [{ label: 'Montag – Freitag', value: '09:00 – 18:00 Uhr' }],
+        openingLines:
+          ex.group === 'gastronomie'
+            ? [{ label: 'Di–So', value: '17:00–23:00 Uhr' }]
+            : [{ label: 'Mo–Fr', value: '9:00–18:00 Uhr' }],
       },
     });
+    // Seit 04.11.2026: die verlinkte Musterseite ist dasselbe Rendering wie das Vorschaubild (kein alter Stand)
+    writeFileSync(path.join(out, `${ex.id}.html`), html);
     const shot = await withPage({ width: 1024, height: 640, deviceScaleFactor: 2 }, async (page) => {
       await page.setContent(html, { waitUntil: 'load' });
       await imagesPainted(page);

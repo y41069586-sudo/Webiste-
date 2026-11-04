@@ -888,7 +888,13 @@ ${jsonLd}
     mapsHref,
     faqList,
     footer,
-    about: (cls = '') => paragraphs(content.about, cls),
+    // Ältere Vorlagen haben einen festen „Über uns“-Abschnitt: ohne belegte Angaben nur ein neutraler Satz
+    about: (cls = '') =>
+      paragraphs(
+        content.about.trim() ||
+          `${facts.name} ist als ${facts.branchLabel} in ${facts.city} zu finden. Anschrift und Kontakt stehen auf dieser Seite.`,
+        cls,
+      ),
     jsonLd,
     brand: () => {
       // Kundenlogo/-fotos gibt es nur nach dem Onboarding – Demos zeigen nie Material des Betriebs

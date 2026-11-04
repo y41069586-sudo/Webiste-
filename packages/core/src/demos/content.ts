@@ -36,7 +36,7 @@ export const DEMO_CONTENT_SCHEMA = {
     hero_subline: { type: 'string', description: 'Ein bis zwei Sätze, max. 180 Zeichen' },
     services: {
       type: 'array',
-      description: '4 bis 6 branchentypische Beispiel-Leistungen',
+      description: 'Bestätigte Leistungen exakt übernehmen; nur wenn keine bestätigt sind: 3 bis 5 typische Beispiel-Leistungen',
       items: {
         type: 'object',
         additionalProperties: false,
@@ -48,13 +48,18 @@ export const DEMO_CONTENT_SCHEMA = {
         },
       },
     },
-    about: { type: 'string', description: 'Neutraler Text, 2 kurze Absätze (getrennt durch Leerzeile), max. 600 Zeichen' },
+    about: {
+      type: 'string',
+      description:
+        'Nur mit belegten Angaben (Ort, bestätigte Leistungen, Details); höchstens 2 kurze Absätze, max. 600 Zeichen. Leer lassen (""), wenn nichts Belegtes zu sagen ist.',
+    },
     cta_text: { type: 'string', description: 'Button-Text, 2–4 Wörter' },
     seo_title: { type: 'string', description: 'max. 60 Zeichen, mit Branche und Stadt' },
     seo_description: { type: 'string', description: 'max. 155 Zeichen' },
     faq: {
       type: 'array',
-      description: '3 bis 4 branchentypische Fragen mit allgemeinen Antworten',
+      description:
+        '0 bis 4 Fragen, die Kunden dieses Gewerks vor einer Anfrage wirklich haben, mit allgemein richtigen Antworten ohne Zusagen. Lieber keine als austauschbare.',
       items: {
         type: 'object',
         additionalProperties: false,
@@ -75,7 +80,7 @@ HARTE REGELN (jeder Verstoß macht den Text unbrauchbar):
 2. Keine Zahlen und Ziffern im gesamten Text.
 3. Keine Bewertungen, Sterne, Kundenstimmen, Zitate oder Testimonials – auch keine allgemeinen wie „zufriedene Kunden“.
 4. Leistungen: nur allgemein übliche Leistungen dieser Branche, neutral beschrieben. Sie werden auf der Seite als Beispiele gekennzeichnet.
-5. „Über uns“: nur bekannte Orts-/Branchenangaben und Orientierung für den Besucher. Keine erfundene Haltung, Arbeitsweise, Beratung, Atmosphäre oder Qualitätsbehauptung über den Betrieb.
+5. „Über uns“: nur bekannte Orts-/Branchenangaben, bestätigte Leistungen und bestätigte Details. Keine erfundene Haltung, Arbeitsweise, Beratung, Atmosphäre oder Qualitätsbehauptung über den Betrieb. Ist nichts Belegtes zu sagen, lass das Feld leer – die Seite wird dann kürzer, nicht schlechter. FAQ: nur Fragen, die Kunden dieses Gewerks vor einer Anfrage wirklich stellen; lieber zwei gute oder keine als vier austauschbare.
 6. Keine Links, keine E-Mail-Adressen, keine Telefonnummern, keine Platzhalter, kein Lorem ipsum, keine eckigen oder geschweiften Klammern.
 7. Sprache: Deutsch, Sie-Form, freundlich-professionell, kurze und klare Sätze, keine Übertreibungen, keine Superlative („der beste“, „Nummer eins“).
 8. Der Firmenname und die Stadt dürfen vorkommen. Andere Fakten nur, wenn sie unten ausdrücklich genannt sind.
@@ -254,8 +259,8 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
   if (!Array.isArray(c.services) || c.services.length < minServices || c.services.length > 6) {
     v.push({ field: 'services', rule: 'Anzahl', detail: `${c.services?.length ?? 0} Leistungen (erlaubt ${minServices}–6)` });
   }
-  if (!Array.isArray(c.faq) || c.faq.length < 3 || c.faq.length > 4) {
-    v.push({ field: 'faq', rule: 'Anzahl', detail: `${c.faq?.length ?? 0} Fragen (erlaubt 3–4)` });
+  if (!Array.isArray(c.faq) || c.faq.length > 4) {
+    v.push({ field: 'faq', rule: 'Anzahl', detail: `${c.faq?.length ?? 0} Fragen (erlaubt 0–4)` });
   }
   if (v.length) return v;
   if (
@@ -266,7 +271,8 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
     v.push({ field: 'services', rule: 'Betriebsfakten', detail: 'Nur alle tatsächlich bestätigten Leistungstitel verwenden.' });
   len('hero_headline', c.hero_headline, LIMITS.hero_headline);
   len('hero_subline', c.hero_subline, LIMITS.hero_subline);
-  len('about', c.about, LIMITS.about);
+  // „Über uns“ ist optional: lieber leer als allgemeine Behauptungen (04.11.2026)
+  if (c.about.trim()) len('about', c.about, LIMITS.about);
   len('cta_text', c.cta_text, LIMITS.cta_text);
   len('seo_title', c.seo_title, LIMITS.seo_title);
   len('seo_description', c.seo_description, LIMITS.seo_description);
@@ -288,7 +294,7 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
   });
   for (const { field, value } of textFields(c)) {
     if (!value || !value.trim()) {
-      v.push({ field, rule: 'Leer', detail: 'Feld ist leer' });
+      if (field !== 'about') v.push({ field, rule: 'Leer', detail: 'Feld ist leer' });
       continue;
     }
     const stripped = stripFacts(value, f);
