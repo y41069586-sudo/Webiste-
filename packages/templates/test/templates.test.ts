@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contrastRatio, PALETTES, renderSite, TEMPLATES } from '../src';
+import { contrastRatio, PALETTES, renderSite, TEMPLATES, isAuthoredTemplate } from '../src';
 import { demoInput, sampleContent } from './fixtures';
 
 describe('Paletten (WCAG 2.1 AA)', () => {
@@ -26,7 +26,7 @@ describe('Paletten (WCAG 2.1 AA)', () => {
 describe('Templates', () => {
   it('mindestens 3 Templates je Branchengruppe (5.2) mit je 3 Paletten, darunter „Plakat“', () => {
     for (const g of ['handwerk', 'beauty', 'gastronomie', 'einzelhandel', 'kurse'] as const) {
-      const ts = TEMPLATES.filter((t) => t.group === g);
+      const ts = TEMPLATES.filter((t) => t.group === g && !isAuthoredTemplate(t.id));
       expect(ts.length).toBeGreaterThanOrEqual(3);
       expect(ts.map((t) => t.id)).toContain(`${g}-plakat`);
       // Gestaltungs-Kits (04.11.2026) haben bewusst zwei geprüfte Farbwelten, ältere Vorlagen drei Paletten
@@ -34,7 +34,7 @@ describe('Templates', () => {
     }
   });
 
-  for (const t of TEMPLATES) {
+  for (const t of TEMPLATES.filter((t) => !isAuthoredTemplate(t.id))) {
     for (const palette of t.palettes) {
       it(`${t.id} / ${palette}: Demo-Modus enthält Banner, noindex, Pflichtabschnitte`, () => {
         const html = renderSite(demoInput(t.id, palette, t.group));

@@ -20,7 +20,7 @@ describe('Editorial generation and bounded visual review', () => {
       },
       0,
     );
-    expect(prompt).toContain('seitenwerk-editorial-1');
+    expect(prompt).toContain('free-design-1');
     expect(prompt).toContain('Über uns: leer lassen');
     expect(prompt).not.toContain('3–4 FAQ');
     expect(prompt).not.toContain('zwei kurzen Absätzen');

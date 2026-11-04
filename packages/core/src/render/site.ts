@@ -1,6 +1,14 @@
 import { addDays as v4AddDays } from '../util/time';
 import { eq } from 'drizzle-orm';
-import { getTemplate, renderSite, renderSubpage, type BusinessFacts, type RenderInput, type SiteContent } from '@wbm/templates';
+import {
+  getTemplate,
+  authoredText,
+  renderSite,
+  renderSubpage,
+  type BusinessFacts,
+  type RenderInput,
+  type SiteContent,
+} from '@wbm/templates';
 import { appUrl } from '../config/env';
 import { effectiveSwitches, getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
@@ -27,7 +35,7 @@ import { hoursToOpeningHours, normalizeOnboarding, toImpressumData, type Onboard
 import {
   buildRevisionPrompt,
   mergeCustomerTexts,
-  REVISION_SCHEMA,
+  revisionSchema,
   REVISION_SYSTEM_PROMPT,
   REVISION_TOOL_NAME,
   validateRevision,
@@ -106,7 +114,8 @@ async function reviseContent(
     ctx.data.impressum.professionalTitle,
     ctx.data.impressum.chamber,
     changeRequest ?? '',
-    JSON.stringify(input.current),
+    JSON.stringify({ ...input.current, design: undefined }),
+    input.current.design ? authoredText(input.current.design.html) : '',
   ].join('\n');
   const known = [input.businessName, input.branchLabel, input.city, ctx.data.business.street];
   let feedback: string[] | undefined;
@@ -118,7 +127,7 @@ async function reviseContent(
         prompt: buildRevisionPrompt(input, feedback),
         toolName: REVISION_TOOL_NAME,
         toolDescription: 'Gibt die überarbeiteten Website-Texte zurück.',
-        inputSchema: REVISION_SCHEMA as unknown as Record<string, unknown>,
+        inputSchema: revisionSchema(input.current) as unknown as Record<string, unknown>,
         maxTokens: 8000,
         effort: 'medium',
         purpose: changeRequest ? 'site_change' : 'site_revision',
@@ -126,6 +135,8 @@ async function reviseContent(
       });
       const content = mergeCustomerTexts(out.content, {}); // normalisieren
       const violations = validateRevision(content, customerText, known);
+      if (input.current.design && !content.design)
+        violations.push({ field: 'design', rule: 'Individueller Entwurf', detail: 'Überarbeitetes HTML/CSS fehlt.' });
       if (!violations.length) return { content, notPossible: out.not_possible ?? [], summary: out.summary ?? '', source: 'llm' };
       feedback = violations.slice(0, 12).map((v) => `${v.field}: ${v.rule} – ${v.detail}`);
       logger.warn({ siteId: ctx.site.id, attempt, violations: violations.length }, 'site: Überarbeitung verletzt Regeln');
@@ -135,13 +146,17 @@ async function reviseContent(
     }
   }
   if (changeRequest) throw new RevisionFailedError('Änderungswunsch konnte nicht automatisch umgesetzt werden');
-  // Erstfassung: Angaben des Inhabers direkt übernehmen (seine eigenen Worte)
-  return {
-    content: mergeCustomerTexts(input.current, input.customer),
-    notPossible: [],
-    summary: 'Ihre Angaben wurden übernommen.',
-    source: 'fallback',
-  };
+  // Exact-copy fallback can preserve an authored layout only when every changed text is found.
+  try {
+    return {
+      content: mergeCustomerTexts(input.current, input.customer),
+      notPossible: [],
+      summary: 'Ihre Angaben wurden übernommen.',
+      source: 'fallback',
+    };
+  } catch {
+    throw new RevisionFailedError('Die individuellen Seiteninhalte benötigen eine manuelle Gestaltungskorrektur.');
+  }
 }
 
 export class RevisionFailedError extends Error {

@@ -5,7 +5,7 @@ import { researchContentHash } from '../leads/acquisition';
 import { sha256 } from '../util/crypto';
 import { assessDemoQuality, type ManualQualityScores } from '../quality/demo';
 import { eq } from 'drizzle-orm';
-import { getKit, renderSite, slopFindingsForPage } from '@wbm/templates';
+import { getKit, renderSite, slopFindingsForPage, isAuthoredTemplate, checkAuthoredDesign } from '@wbm/templates';
 import { getConfig } from '../config/service';
 import { getDb } from '../db/client';
 import { demos, leads, type QaResult } from '../db/schema';
@@ -86,7 +86,7 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
 
   // Capture once from the stored HTML. Reused for AI review, admin and the bound letter composite.
   const shots = await takeScreenshots(html, { hideDemoChrome: true });
-  const visual = getKit(demo.templateId) ? visualReviewInput(shots) : undefined;
+  const visual = getKit(demo.templateId) || isAuthoredTemplate(demo.templateId) ? visualReviewInput(shots) : undefined;
 
   let visualBlocking = false;
 
@@ -132,6 +132,11 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
     } catch (err) {
       checks.push({ name: 'ki-pruefung', passed: false, details: `Fehler: ${err instanceof Error ? err.message : String(err)}` });
     }
+  }
+
+  if (isAuthoredTemplate(demo.templateId)) {
+    const issues = content.design ? checkAuthoredDesign(content.design) : ['Individueller Entwurf fehlt'];
+    checks.push({ name: 'freie-gestaltung', passed: issues.length === 0, details: issues.join(' | ') });
   }
 
   // 3) HTML-Validierung

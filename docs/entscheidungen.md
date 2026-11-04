@@ -1088,3 +1088,26 @@ Befund aus dem ersten echten Lauf (64 Betriebe Maler/Elektro in Bochum, Dortmund
   Seitenleisten-Fakten entfällt, die direkte Rufnummer und Handlungslinks bleiben erhalten.
 - Kompakte Handwerk-Entwürfe zeigen keinen künstlich verlängernden vierteiligen Beispielablauf mehr.
 - Neuer Regressionstest für kompakte Elektro-Datenlage. Geschützte Kauf-/Formular-/Freigabelogik unberührt.
+
+
+## 04.11.2026 – individuelle Generierung statt erzwungener Branchenvorlage
+
+Ausdrücklicher neuer Auftrag: die KI soll selbst gestalten und nur Kriterien befolgen. Die
+frühere Kit-Pflicht wird für neue Demos ersetzt. Neuer Inhalt enthält einen individuellen
+HTML/CSS-Entwurf und eine kurze Konzeptbegründung. Typografie, Komposition, Abschnittsauswahl,
+Farben und Rhythmus sind Entscheidungen des Modells; kein automatischer Elektro-Seitenleisten-
+oder sonstiger Kit-Fallback. Alte gespeicherte Seiten behalten ihren Renderer.
+
+Parserprüfungen, CSS-Beschränkung auf den eigenen Bereich, lokale Ressourcen und der bestehende
+Kontakt-/Kaufbereich sichern die technische Integration. Fehler blockieren den Bau. Faktenprüfung
+bezieht sichtbaren Modelltext ein; Beispiele und Stockfotos bleiben kenntlich. Der bestehende
+budgetierte Aufruf trägt auch den Entwurf (Ausgabelimit 10.000 statt 6.000 Tokens); keine weiteren
+Design-Agenten oder unbeschränkten Iterationen. Modelle, Budgets und Produktionsschalter unverändert.
+Bei nicht eindeutig zuordenbaren Textänderungen erfolgt eine überprüfbare Blockierung statt eines
+angeblich geänderten HTML mit altem Text. Kundenseitige KI-Überarbeitung liefert das aktualisierte
+Design mit. Keine Änderung an Kaufpreisen, Kontakt-Endpunkten, Zahlung oder Versandfreigaben.
+
+Privater Beispielentwurf für Jörg Stoffeln separat unter dem bestehenden Sites-Projekt. Keine
+Betriebsbeauftragung, kein echter Lead, keine Produktionsdaten oder vorhandenen Demos geändert.
+Die Telefonnummer ist zwischen Verzeichnissen widersprüchlich, aktuelle Aktivität nicht bestätigt.
+Prüfnachweise und Grenzen: `docs/free-design-standard.md`.

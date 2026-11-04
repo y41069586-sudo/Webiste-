@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { templatesForGroup, type ServiceItem, type SiteContent } from '@wbm/templates';
+import { updateAuthoredCopy, isAuthoredTemplate, templatesForGroup, type ServiceItem, type SiteContent } from '@wbm/templates';
 import { getConfig } from '../config/service';
 import { setSetting } from '../config/service';
 import { getDb } from '../db/client';
@@ -10,6 +10,7 @@ import { leadResearch } from '../services/lead-research';
 import { resolveBusinessDesign } from './business-design';
 import {
   demoHtmlKey,
+  demoPhotoSlots,
   exampleServicesFor,
   leadContentFacts,
   leadToFacts,
@@ -56,7 +57,7 @@ export async function reviseDemo(input: {
           icon: current.services[i]?.icon ?? current.services[0]!.icon,
         }))
     : current.services;
-  const next: SiteContent = normalizeContent({
+  let next: SiteContent = normalizeContent({
     ...current,
     hero_headline: p.hero_headline?.trim() || current.hero_headline,
     hero_subline: p.hero_subline?.trim() || current.hero_subline,
@@ -65,6 +66,13 @@ export async function reviseDemo(input: {
     seo_description: p.seo_description?.trim() || current.seo_description,
     services: services.length ? services : current.services,
   });
+  if (current.design && p.templateId && p.templateId !== demo.templateId)
+    return finish({ state: 'blocked', at, violations: ['Individueller Entwurf wird nicht durch eine Branchenvorlage ersetzt.'] });
+  try {
+    next = updateAuthoredCopy(current, next);
+  } catch (err) {
+    return finish({ state: 'blocked', at, violations: [err instanceof Error ? err.message : String(err)] });
+  }
   const research = await leadResearch(lead);
   const baseFacts = leadContentFacts(lead, cfg, research);
   // Vom Betrieb selbst genannte Leistungen sind belegt (Quelle: sein Wunsch); sonst gelten nur die geprüften Titel
@@ -78,6 +86,8 @@ export async function reviseDemo(input: {
   const options = templatesForGroup(lead.branchGroup);
   const template =
     options.find((t) => t.id === (p.templateId || demo.templateId)) ?? options.find((t) => t.id === demo.templateId);
+  if (template && isAuthoredTemplate(template.id) && !next.design)
+    return finish({ state: 'blocked', at, violations: ['Ein individueller Entwurf muss zuerst erzeugt werden.'] });
   if (!template) return finish({ state: 'failed', at, error: 'Template passt nicht zur Branche.' });
   const palette = template.palettes.includes(p.palette ?? '')
     ? p.palette!
@@ -96,7 +106,9 @@ export async function reviseDemo(input: {
       ...leadToFacts(lead, cfg),
       verifiedServices,
       exampleServices: verifiedServices?.length ? exampleServicesFor(lead, cfg, verifiedServices) : undefined,
-      photos: design.photos,
+      photos: isAuthoredTemplate(template.id)
+        ? demoPhotoSlots(lead.id, { ...leadToFacts(lead, cfg), verifiedServices }, design.photos)
+        : design.photos,
     },
     slug: demo.slug,
     cfg,

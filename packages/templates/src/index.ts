@@ -1,3 +1,4 @@
+import { AUTHORED_TEMPLATES, isAuthoredTemplate } from './authored/render';
 export { brandMarkHtml, brandMarkDataUri } from './brand';
 import { renderMalerDesignReview } from './sites/maler-design-review';
 import { industryDirection, normalizeDirection } from './art-direction';
@@ -31,11 +32,15 @@ export const KIT_TEMPLATES: TemplateDef[] = KITS.map((kit) => ({
 }));
 
 export * from './types';
+export { updateAuthoredCopy } from './authored/update';
+export { AUTHORED_TEMPLATES, authoredTemplateId, isAuthoredTemplate } from './authored/render';
+export { FREE_DESIGN_CRITERIA, freeDesignBrief } from './authored/criteria';
+export { checkAuthoredDesign, authoredText, FREE_DESIGN_VERSION, type AuthoredDesign } from './authored/design';
 export * from './palettes';
 export { ICON_KEYS, ICONS_BY_GROUP, icon } from './icons';
 export { esc, boldMd } from './html';
 export { readSiteCss, siteCssPath } from './css';
-export { stockPhotoManifest, stockPhotos, imagesDir, type StockPhoto } from './photos';
+export { stockPhotoManifest, stockPhotos, stockPhotoDataUri, imagesDir, type StockPhoto } from './photos';
 
 export const TEMPLATES: TemplateDef[] = [
   handwerkSolid,
@@ -47,6 +52,7 @@ export const TEMPLATES: TemplateDef[] = [
   ...PHOTO_TEMPLATES,
   ...PLAKAT_TEMPLATES,
   ...KIT_TEMPLATES,
+  ...AUTHORED_TEMPLATES,
 ];
 
 export function getTemplate(id: string): TemplateDef {
@@ -65,6 +71,10 @@ export function renderSite(input: RenderInput): string {
   if (!tpl.palettes.includes(input.palette)) throw new Error(`Palette ${input.palette} passt nicht zu ${tpl.id}`);
   if (input.mode === 'demo' && !input.demo) throw new Error('Demo-Modus braucht demo-Optionen');
   if (input.mode === 'live' && !input.live) throw new Error('Live-Modus braucht live-Optionen');
+  if (isAuthoredTemplate(tpl.id)) {
+    const parts = buildParts({ ...input, artDirection: undefined, palette: 'anthrazit' });
+    return tpl.render({ ...input, artDirection: undefined, parts });
+  }
   if (input.mode === 'demo' || input.mode === 'screenshot')
     input = { ...input, content: { ...input.content, cta_text: 'So erreichen Sie uns' } };
   const kit = getKit(tpl.id);

@@ -9,6 +9,7 @@ import type { RenderInput } from './types';
 export function renderSubpage(input: RenderInput, page: { title: string; bodyHtml: string; homeHref?: string }): string {
   const parts = buildParts({
     ...input,
+    palette: input.palette === 'custom' ? 'anthrazit' : input.palette,
     content: {
       ...input.content,
       seo_title: `${page.title} – ${input.facts.name}`,

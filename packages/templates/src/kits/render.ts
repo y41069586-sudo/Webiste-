@@ -4,7 +4,7 @@ import type { RenderContext } from '../types';
 import { kitFontCss, kitFontFamily } from './fonts';
 import { designBrief, requestLabel } from './brief';
 import { purgeCss } from './purge';
-import type { Kit, KitColors } from './kits';
+import { kitFor, KITS, type Kit, type KitColors } from './kits';
 import { EDITORIAL_VERSION } from './editorial';
 import { editorialCss } from './editorial-css';
 
@@ -555,3 +555,19 @@ const LAYOUT_CSS: Record<string, string> = {
 }
 `,
 };
+
+/** Existing contact markup and styles, reused independently of any business-page composition. */
+export function protectedBusinessContact(ctx: RenderContext, d: import('../authored/design').AuthoredDesign) {
+  const base = kitFor(ctx.facts.group, ctx.facts.branchLabel) ?? KITS[0]!;
+  const kit = { ...base, display: d.displayFont, text: d.textFont };
+  const k: KitColors = {
+    base: d.colors.background,
+    surface: d.colors.background,
+    ink: d.colors.foreground,
+    muted: d.colors.foreground,
+    line: d.colors.foreground,
+    accent: d.colors.accent,
+    onAccent: d.colors.onAccent,
+  };
+  return { html: blocks(ctx, kit).kontakt, css: baseCss(kit, k) };
+}

@@ -1,21 +1,13 @@
 import { resolveBusinessDesign } from './business-design';
 import { leadResearch, researchLetterFacts, assertAcquisitionEligible } from '../services/lead-research';
 import { researchContentHash, type LeadResearch } from '../leads/acquisition';
-import {
-  designBrief,
-  designTemplateRank,
-  getKit,
-  hoursHints,
-  industryDirection,
-  kitFor,
-  kitVariantFor,
-  type ArtDirection,
-} from '@wbm/templates';
+import { authoredTemplateId, isAuthoredTemplate, freeDesignBrief, checkAuthoredDesign, type ArtDirection } from '@wbm/templates';
 import { v4Offer, V4_TIERS } from '../services/offers-v4';
 import { eq, sql } from 'drizzle-orm';
 import {
   renderSite,
-  templatesForGroup,
+  stockPhotos,
+  stockPhotoDataUri,
   type BusinessFacts,
   type DemoOptions,
   type SiteContent,
@@ -260,10 +252,7 @@ export async function senderPhotoDataUri(cfg: AppConfig): Promise<string | null>
   return result;
 }
 
-/**
- * Template + Palette: gleichmäßige Rotation (am seltensten genutzte Kombination zuerst,
- * bei Gleichstand deterministisch je Lead). Bei Neugenerierung ein anderes Template.
- */
+/** Compatibility metadata only: the model authors each new composition and color system. */
 export function chooseTemplate(
   lead: Pick<Lead, 'id' | 'branchGroup'> & Partial<Pick<Lead, 'branch'>>,
   previous: string[] = [],
@@ -271,50 +260,28 @@ export function chooseTemplate(
   direction?: ArtDirection,
   hours?: { value: string }[],
 ): { templateId: string; palette: string; reason?: string } {
-  // Gestaltungs-Kit des Gewerks hat Vorrang (04.11.2026). Farbwelt nach Passung (belegte Bildwelt, Öffnungszeiten,
-  // Gewerk), erst danach Abwechslung (seltener genutzt) und ein stabiler Zufall je Betrieb.
-  const kit = kitFor(lead.branchGroup, lead.branch ?? '');
-  if (kit) {
-    const dark = direction?.source === 'business_evidence' && (direction.character === 'urban' || direction.imageMood === 'dark');
-    const { variant, reason } = kitVariantFor(kit, lead.branch ?? '', {
-      dark,
-      ...hoursHints(hours ?? []),
-      usage,
-      seed: (v) => seedFromId(`${lead.id}:${v}`),
-    });
-    return { templateId: kit.id, palette: variant, reason };
-  }
-  const resolvedDirection = direction ?? (lead.branch ? industryDirection(lead.branchGroup, lead.branch) : null);
-  const rank = (id: string) => (resolvedDirection ? designTemplateRank(id, resolvedDirection) : 0);
-  const options = templatesForGroup(lead.branchGroup);
-  const fresh = options.filter((t) => !previous.includes(t.id));
-  const pool = fresh.length ? fresh : options;
-  const tplUse = (id: string) =>
-    Object.entries(usage)
-      .filter(([k]) => k.startsWith(`${id}/`))
-      .reduce((s, [, n]) => s + n, 0);
-  const tpl = [...pool].sort(
-    (a, b) =>
-      rank(a.id) - rank(b.id) ||
-      tplUse(a.id) - tplUse(b.id) ||
-      seedFromId(`${lead.id}:${a.id}`) - seedFromId(`${lead.id}:${b.id}`),
-  )[0]!;
-  const natural = /garten|landschaft|gärtner|gaertner/i.test(lead.branch ?? '');
-  const preference = (palette: string) => (natural && palette === 'waldgruen' ? -1 : 0);
-  const palette = [...tpl.palettes].sort(
-    (a, b) =>
-      (usage[`${tpl.id}/${a}`] ?? 0) - (usage[`${tpl.id}/${b}`] ?? 0) ||
-      preference(a) - preference(b) ||
-      tpl.palettes.indexOf(a) - tpl.palettes.indexOf(b),
-  )[0]!;
-  return { templateId: tpl.id, palette };
+  // New drafts are individually authored. Historical template IDs remain readable, never the new default.
+  void previous;
+  void usage;
+  void direction;
+  void hours;
+  return {
+    templateId: authoredTemplateId(lead.branchGroup),
+    palette: 'custom',
+    reason: 'KI entwirft HTML/CSS nach Kriterien; keine Branchenvorlage.',
+  };
 }
 
-async function templateUsage(): Promise<Record<string, number>> {
-  const rows = await getDb().execute<{ k: string; n: number }>(
-    sql`SELECT template_id || '/' || palette AS k, count(*)::int AS n FROM demos GROUP BY 1`,
-  );
-  return Object.fromEntries(rows.rows.map((r) => [r.k, Number(r.n)]));
+/** Stable, described image slots: layout/model decides whether and where to use them. */
+export function demoPhotoSlots(
+  leadId: string,
+  facts: BusinessFacts,
+  own: NonNullable<BusinessFacts['photos']> = [],
+): NonNullable<BusinessFacts['photos']> {
+  if (own.length) return own;
+  return stockPhotos(facts.group, seedFromId(leadId), [facts.branchLabel, ...(facts.verifiedServices ?? [])].join(' '))
+    .slice(0, 3)
+    .map((p) => ({ src: stockPhotoDataUri(p), alt: p.alt, origin: 'example' as const, rightsConfirmed: true }));
 }
 
 export interface GeneratedContent {
@@ -333,11 +300,13 @@ export async function generateDemoContent(
   cfg: AppConfig,
   direction?: ArtDirection,
   qaFeedback?: string[],
+  photos: NonNullable<BusinessFacts['photos']> = [],
 ): Promise<GeneratedContent> {
   const research = await leadResearch(lead);
   const facts = {
     ...leadContentFacts(lead, cfg, research),
     designCharacter: direction?.character,
+    imageBrief: photos.map((p, i) => ({ slot: i + 1, alt: p.alt, example: p.origin === 'example' })),
   };
   const seed = seedFromId(lead.id);
   // Befunde der KI-Prüfung eines früheren Entwurfs gleich im ersten Versuch mitgeben
@@ -350,9 +319,9 @@ export async function generateDemoContent(
         system: DEMO_SYSTEM_PROMPT,
         prompt: buildDemoPrompt(facts, seed + attempt, feedback),
         toolName: DEMO_TOOL_NAME,
-        toolDescription: 'Gibt die Texte für den Website-Entwurf zurück.',
+        toolDescription: 'Gibt individuelle Seitengestaltung (HTML/CSS) und geprüfte Texte zurück.',
         inputSchema: DEMO_CONTENT_SCHEMA as unknown as Record<string, unknown>,
-        maxTokens: 6000,
+        maxTokens: 10000,
         effort: 'medium',
         purpose: 'demo_content',
         leadId: lead.id,
@@ -372,6 +341,12 @@ export async function generateDemoContent(
         continue;
       }
       const violations = validateDemoContent(content, facts);
+      if (!content.design)
+        violations.push({
+          field: 'design',
+          rule: 'Individueller Entwurf fehlt',
+          detail: 'Eigenes HTML/CSS im design-Objekt liefern; kein Kit-Fallback.',
+        });
       if (violations.length === 0) return { content, source: 'llm', attempts: attempt, violations: [] };
       lastViolations = violations;
       feedback = violations.slice(0, 12).map((v) => `${v.field}: ${v.rule} – ${v.detail}`);
@@ -460,7 +435,7 @@ export async function buildDemo(
     actor: string;
     /** erzwingt die manuelle Prüfung (z. B. Überarbeitung für Brief 3) */
     reviewNote?: string;
-    /** festes Template (z. B. bestes der Branche laut Lernsystem) */
+    /** Historischer Aufruferparameter; neue Entwürfe verwenden ausschließlich freie Gestaltung. */
     templateId?: string;
     /** Befunde der KI-Prüfung des vorigen Entwurfs (automatischer Neubau, höchstens einmal) */
     qaFeedback?: string[];
@@ -486,29 +461,19 @@ export async function buildDemo(
   }
 
   const design = await resolveBusinessDesign(lead);
-  const rotated = chooseTemplate(
-    lead,
-    existing.map((d) => d.templateId),
-    await templateUsage(),
-    design.direction,
-    leadToFacts(lead, cfg).openingLines,
-  );
-  const fixed = opts.templateId ? templatesForGroup(lead.branchGroup).find((t) => t.id === opts.templateId) : undefined;
-  const templateId = fixed?.id ?? rotated.templateId;
-  const palette = fixed ? (fixed.palettes.includes(rotated.palette) ? rotated.palette : fixed.palettes[0]!) : rotated.palette;
-  const generated = await generateDemoContent(lead, cfg, design.direction, opts.qaFeedback);
+  const { templateId, palette } = chooseTemplate(lead);
   const verifiedServices = leadContentFacts(lead, cfg, research).verifiedServices;
+  const photoSlots = demoPhotoSlots(lead.id, { ...leadToFacts(lead, cfg), verifiedServices }, design.photos);
+  const generated = await generateDemoContent(lead, cfg, design.direction, opts.qaFeedback, photoSlots);
   const facts = {
     ...leadToFacts(lead, cfg),
     verifiedServices,
     exampleServices: verifiedServices?.length ? exampleServicesFor(lead, cfg, verifiedServices) : undefined,
-    photos: design.photos,
+    photos: photoSlots,
   };
-  const kitDef = getKit(templateId);
-  // Gestaltungsbriefing: belegt / Vorschlag / fehlt – wird mit der Demo gespeichert (Freigabe sieht die Grundlage)
-  const brief = kitDef
-    ? designBrief(facts, generated.content, kitDef, { variant: palette, reason: rotated.reason ?? 'fest vorgegeben' })
-    : null;
+  if (isAuthoredTemplate(templateId) && (!generated.content.design || checkAuthoredDesign(generated.content.design).length))
+    throw Error('Kein gültiger individueller Gestaltungsentwurf. Zur Prüfung liegen lassen; keine Standardvorlage als Ersatz.');
+  const brief = freeDesignBrief(facts, generated.content);
   const slug = randomToken(24);
   const html = renderDemoHtml({
     templateId,

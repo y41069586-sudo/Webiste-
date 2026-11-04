@@ -108,18 +108,18 @@ describe('Inhaltsregeln', () => {
   });
 });
 
-describe('Template-Rotation', () => {
-  it('nimmt das Gestaltungs-Kit der Branche und verteilt gleichmäßig über seine Farbwelten (04.11.2026)', async () => {
+describe('Freie Gestaltung', () => {
+  it('wählt ausschließlich den freien Renderer, ohne festgelegte Palette oder Branchenlayout', async () => {
     const { chooseTemplate } = await import('../src/demos/build');
     const usage: Record<string, number> = {};
     for (let i = 0; i < 8; i++) {
       const c = chooseTemplate({ id: `00000000-0000-0000-0000-00000000000${i}`, branchGroup: 'beauty' }, [], usage);
-      expect(c.templateId).toBe('kit-beauty');
+      expect(c.templateId).toBe('authored-beauty');
       usage[`${c.templateId}/${c.palette}`] = (usage[`${c.templateId}/${c.palette}`] ?? 0) + 1;
     }
-    expect(Object.values(usage)).toEqual([4, 4]);
-    // Gruppen ohne Kit rotieren weiter über die bisherigen Vorlagen
+    expect(Object.values(usage)).toEqual([8]);
+    // Auch andere Branchen erhalten keinen alten Layout-Fallback
     const shop = chooseTemplate({ id: '00000000-0000-0000-0000-000000000001', branchGroup: 'einzelhandel' });
-    expect(shop.templateId.startsWith('kit-')).toBe(false);
+    expect(shop).toMatchObject({ templateId: 'authored-einzelhandel', palette: 'custom' });
   });
 });

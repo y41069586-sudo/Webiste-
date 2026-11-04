@@ -63,6 +63,8 @@ export interface FaqItem {
 
 /** Vom Sprachmodell erzeugte (bzw. vom Kunden angepasste) Texte. */
 export interface SiteContent {
+  /** Individually authored, checked business HTML/CSS; old snapshots remain valid without it. */
+  design?: import('./authored/design').AuthoredDesign;
   hero_headline: string;
   hero_subline: string;
   services: ServiceItem[];

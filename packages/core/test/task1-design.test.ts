@@ -35,7 +35,7 @@ it('keeps unknown activities neutral and never fills them with painter services'
 it('instructs the model to describe confirmed activity and location without inferring a specialty from a name', () => {
   expect(buildDemoPrompt(facts, 0)).toContain('Firmenname: Fiktiver Testbetrieb');
 });
-it('selects the trade kit stably; specific trades get their own kit (04.11.2026)', async () => {
+it('uses the free renderer across trades without prescribing a composition', async () => {
   const { chooseTemplate } = await import('../src/demos/build');
   const ids = new Set<string>();
   for (let i = 0; i < 100; i++) {
@@ -44,14 +44,14 @@ it('selects the trade kit stably; specific trades get their own kit (04.11.2026)
     expect(chooseTemplate(lead)).toEqual(first);
     ids.add(first.templateId);
   }
-  expect([...ids]).toEqual(['kit-maler']);
+  expect([...ids]).toEqual(['authored-handwerk']);
   const pick = (branch: string, branchGroup: 'handwerk' | 'beauty' | 'gastronomie' = 'handwerk') =>
     chooseTemplate({ id: 'same-business', branchGroup, branch }).templateId;
-  expect(pick('fliesenleger')).toBe('kit-fliesen');
-  expect(pick('elektriker')).toBe('kit-elektro');
-  expect(pick('gebäudereinigung')).toBe('kit-reinigung');
-  expect(pick('nagelstudio', 'beauty')).toBe('kit-beauty');
-  expect(pick('restaurant', 'gastronomie')).toBe('kit-gastro');
+  expect(pick('fliesenleger')).toBe('authored-handwerk');
+  expect(pick('elektriker')).toBe('authored-handwerk');
+  expect(pick('gebäudereinigung')).toBe('authored-handwerk');
+  expect(pick('nagelstudio', 'beauty')).toBe('authored-beauty');
+  expect(pick('restaurant', 'gastronomie')).toBe('authored-gastronomie');
 });
 it('captures lazy images below the fold without waiting for a visitor to scroll', async () => {
   const { takeScreenshots } = await import('../src/render/screenshots');

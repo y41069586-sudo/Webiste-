@@ -1,6 +1,7 @@
+import { checkAuthoredDesign, authoredText, updateAuthoredCopy } from '@wbm/templates';
 import { ICON_KEYS } from '@wbm/templates/icons';
 import type { SiteContent } from '@wbm/templates/types';
-import { DEMO_CONTENT_SCHEMA, normalizeContent, type RuleViolation } from '../demos/content';
+import { DEMO_CONTENT_SCHEMA, DEMO_SYSTEM_PROMPT, normalizeContent, type RuleViolation } from '../demos/content';
 import { registerMockStructured } from '../providers/llm/mock';
 
 export const REVISION_TOOL_NAME = 'website_ueberarbeitung';
@@ -10,7 +11,7 @@ export const REVISION_SCHEMA = {
   additionalProperties: false,
   required: ['content', 'not_possible', 'summary'],
   properties: {
-    content: DEMO_CONTENT_SCHEMA,
+    content: { ...DEMO_CONTENT_SCHEMA, required: DEMO_CONTENT_SCHEMA.required.filter((k) => k !== 'design') },
     not_possible: {
       type: 'array',
       description:
@@ -20,6 +21,11 @@ export const REVISION_SCHEMA = {
     summary: { type: 'string', description: 'Ein bis drei Sätze: was wurde geändert (für den Kunden, Sie-Form).' },
   },
 } as const;
+
+export const revisionSchema = (current: SiteContent) =>
+  current.design
+    ? { ...REVISION_SCHEMA, properties: { ...REVISION_SCHEMA.properties, content: DEMO_CONTENT_SCHEMA } }
+    : REVISION_SCHEMA;
 
 export const REVISION_SYSTEM_PROMPT = `Du überarbeitest die Texte der Website eines lokalen Betriebs in Deutschland. Der Betrieb hat die Website gekauft und eigene Angaben gemacht. Grundlage sind die bisherigen Texte (Entwurf) und die Angaben bzw. Änderungswünsche des Inhabers.
 
@@ -31,7 +37,7 @@ REGELN:
 5. Die Leistungen sind jetzt echte Leistungen des Betriebs (kein „Beispiel“-Hinweis). Nutze die vom Inhaber genannten Leistungen; ergänze keine weiteren. Hat er weniger als 3 genannt, formuliere nur seine.
 6. Deutsch, Sie-Form, freundlich-sachlich, keine Superlative.
 7. Wünsche, die keine Textänderung sind (z. B. Online-Terminbuchung, Shop, weitere Unterseiten, Layout), setzt du nicht um, sondern listest sie unter not_possible.
-8. Halte die Längen ein: Überschrift max. 70 Zeichen, Untertitel max. 180, Leistungstitel max. 40, Leistungstext max. 160, Über uns max. 700 (2 Absätze), SEO-Titel max. 60, SEO-Beschreibung max. 155, 3–4 FAQ.
+8. Halte die Längen ein: Überschrift max. 70 Zeichen, Untertitel max. 180, Leistungstitel max. 40, Leistungstext max. 160, Über uns max. 700 (2 Absätze), SEO-Titel max. 60, SEO-Beschreibung max. 155. FAQ und Über-uns nur bei hilfreichen belegten Angaben; leere Liste bzw. leerer Text sind erlaubt.
 9. FAQ-Antworten bleiben allgemein und dürfen nichts behaupten, was nicht aus den Angaben folgt.`;
 
 export interface RevisionInput {
@@ -62,6 +68,12 @@ export function buildRevisionPrompt(r: RevisionInput, feedback?: string[]): stri
     'ANGABEN_DES_INHABERS_JSON:',
     JSON.stringify(r.customer),
   ];
+  if (r.current.design)
+    lines.push(
+      '',
+      'INDIVIDUELLER ENTWURF: Erhalte das Gestaltungskonzept, überarbeite aber auch design.html und design.css passend zu den geänderten Texten. Kein Rückfall in ein Kit; kein veralteter Text im HTML. Fakten ausschließlich über die vorhandenen Tokens einsetzen. Neue Leistungen sind nur aus den Angaben des Inhabers erlaubt.',
+      DEMO_SYSTEM_PROMPT.slice(DEMO_SYSTEM_PROMPT.indexOf('FREIE GESTALTUNG:'), DEMO_SYSTEM_PROMPT.indexOf('FORMAT:')),
+    );
   if (r.changeRequest) lines.push('', 'ÄNDERUNGSWUNSCH:', r.changeRequest);
   if (feedback?.length)
     lines.push('', 'Der letzte Versuch verletzte diese Regeln – bitte korrigieren:', ...feedback.map((f) => `- ${f}`));
@@ -105,14 +117,16 @@ const LIMITS: Record<string, [number, number]> = {
  */
 export function validateRevision(c: SiteContent, customerText: string, knownFacts: string[]): RuleViolation[] {
   const v: RuleViolation[] = [];
+  if (c.design) for (const detail of checkAuthoredDesign(c.design)) v.push({ field: 'design', rule: 'Freie Gestaltung', detail });
   const source = `${customerText}\n${knownFacts.join('\n')}`.toLowerCase();
   if (!Array.isArray(c.services) || c.services.length < 1 || c.services.length > 6)
     v.push({ field: 'services', rule: 'Anzahl', detail: `${c.services?.length ?? 0} Leistungen (1–6)` });
-  if (!Array.isArray(c.faq) || c.faq.length < 2 || c.faq.length > 5)
-    v.push({ field: 'faq', rule: 'Anzahl', detail: `${c.faq?.length ?? 0} Fragen (2–5)` });
+  if (!Array.isArray(c.faq) || c.faq.length > 5)
+    v.push({ field: 'faq', rule: 'Anzahl', detail: `${c.faq?.length ?? 0} Fragen (0–5)` });
   if (v.length) return v;
   for (const [field, [min, max]] of Object.entries(LIMITS)) {
     const n = String((c as unknown as Record<string, string>)[field] ?? '').trim().length;
+    if (field === 'about' && n === 0) continue;
     if (n < min || n > max) v.push({ field, rule: 'Länge', detail: `${n} Zeichen (erlaubt ${min}–${max})` });
   }
   c.services.forEach((s, i) => {
@@ -133,12 +147,14 @@ export function validateRevision(c: SiteContent, customerText: string, knownFact
       [`services[${i}].title`, s.title],
       [`services[${i}].text`, s.text],
     ]),
+    ...(c.design ? [['design', authoredText(c.design.html)] as [string, string]] : []),
     ...c.faq.flatMap((f, i): [string, string][] => [
       [`faq[${i}].q`, f.q],
       [`faq[${i}].a`, f.a],
     ]),
   ];
   for (const [field, value] of fields) {
+    if (field === 'about' && !value?.trim()) continue;
     if (!value?.trim()) {
       v.push({ field, rule: 'Leer', detail: 'Feld ist leer' });
       continue;
@@ -170,7 +186,7 @@ export interface RevisionOutput {
 export function mergeCustomerTexts(current: SiteContent, customer: RevisionInput['customer']): SiteContent {
   const services = customer.services?.filter((s) => s.title.trim() && s.text.trim()) ?? [];
   const icons = current.services.map((s) => s.icon);
-  return normalizeContent({
+  const next = normalizeContent({
     ...current,
     hero_headline: customer.headline?.trim() || current.hero_headline,
     hero_subline: customer.subline?.trim() || current.hero_subline,
@@ -183,6 +199,7 @@ export function mergeCustomerTexts(current: SiteContent, customer: RevisionInput
         }))
       : current.services,
   });
+  return updateAuthoredCopy(current, next);
 }
 
 registerMockStructured(REVISION_TOOL_NAME, (req) => {

@@ -1,5 +1,26 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Neueste Betreiberentscheidung 04.11.2026 – frei gestalten, keine Vorlagenpflicht
+
+Der Betreiber hat die feste Zuordnung von Branche zu Gestaltungskit ausdrücklich verworfen.
+**Neue Demo-Generierungen entwerfen HTML und CSS selbst** (`free-design-1`), anhand der
+Qualitäts- und Faktenkriterien in `packages/templates/src/authored/criteria.ts`. Keine feste
+Abschnittsfolge, kein vorgeschriebener Hero, keine vorgegebene Farbwelt oder Schriftpaarung.
+Keine pauschalen Verbote von Lila, Verläufen, Rundungen oder Karten; konkrete Gestaltung begründen.
+Die IDs `authored-<gruppe>` sind technische Renderadapter, keine Layoutvorlagen. Alte Kits und
+Vorlagen bleiben nur zur Wiedergabe vorhandener gespeicherter Seiten erhalten. Die älteren
+Kit-/Stilmandate unten sind für neue Generierungen ausdrücklich überholt.
+
+HTML/CSS des Modells werden vor dem Rendern geparst, begrenzt und auf den eigenen Bereich
+beschränkt. Technische Grenzen (keine Scripts, freien Ressourcen oder eigenen Formulare) sind
+keine Designvorgaben. Lokale Schrift-/Bilddateien dürfen frei kombiniert werden. Fakten bleiben
+quellengebunden, Stockfotos gekennzeichnet. Fehlerhafter/fehlender Entwurf blockiert; kein stiller
+Kit-Ersatz. Inhalt und tatsächliche Desktop-/Mobilansichten prüfen, keine Qualitätsnote erfinden.
+Kaufleiste, Preise, echtes Kontaktformular und sämtliche Zahlungs-/Versand-/Freigabe-Sperren
+bleiben geschützt. Vorhandene Demos nicht automatisch neu bauen oder freigeben.
+Implementation und Grenzen: `docs/free-design-standard.md`. Arbeit zunächst auf isoliertem
+Branch `codex/demo-art-direction`; ein Git-Push aktiviert noch keinen neuen Worker-Stand.
+
 ## Betreiberauftrag 04.11.2026 – Demoqualität wie Kalk & Kante / Sera
 
 Die Gestaltungsprinzipien sind in der bestehenden Pipeline umzusetzen, nicht nur als Sonderdemo.

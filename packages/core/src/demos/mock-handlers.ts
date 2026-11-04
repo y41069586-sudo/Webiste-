@@ -1,3 +1,4 @@
+import { esc } from '@wbm/templates';
 import type { BranchGroup } from '@wbm/templates/types';
 import { registerMockStructured } from '../providers/llm/mock';
 import { DEMO_TOOL_NAME, QA_TOOL_NAME, verifiedServiceFallback } from './content';
@@ -22,21 +23,34 @@ registerMockStructured(DEMO_TOOL_NAME, (req) => {
   const group = (line(req.prompt, 'Design-Gruppe') || 'handwerk') as BranchGroup;
   const content = libraryContent(key, group, { name, stadt, branche }, seedOf(name));
   const verified = line(req.prompt, 'Bestätigte Leistungen');
-  if (!verified) return content;
-  return verifiedServiceFallback(content, {
-    name,
-    branchKey: key,
-    branchLabel: branche,
-    group,
-    city: stadt,
-    postalCode: '',
-    street: '',
-    houseNumber: '',
-    phone: null,
-    hasOpeningHours: false,
-    socialOnly: false,
-    verifiedServices: JSON.parse(verified),
-  });
+  const result = !verified
+    ? content
+    : verifiedServiceFallback(content, {
+        name,
+        branchKey: key,
+        branchLabel: branche,
+        group,
+        city: stadt,
+        postalCode: '',
+        street: '',
+        houseNumber: '',
+        phone: null,
+        hasOpeningHours: false,
+        socialOnly: false,
+        verifiedServices: JSON.parse(verified),
+      });
+  // Explicit provider mock only; never a production design fallback.
+  return {
+    ...result,
+    design: {
+      concept: 'Fiktiver isolierter Testentwurf, kein Produktionsdesign.',
+      displayFont: 'archivo',
+      textFont: 'karla',
+      colors: { background: '#ffffff', foreground: '#202020', accent: '#eeeeee', onAccent: '#202020' },
+      html: `<div class="ad-page"><h1>${esc(result.hero_headline)}</h1><p>{{name}} · {{city}}</p>${!verified ? '<p>Beispiel-Leistungen</p>' : ''}<p>${esc(result.hero_subline)}</p>${result.services.map((s) => `<section><h2>${esc(s.title)}</h2><p>${esc(s.text)}</p></section>`).join('')}<a href="#anfrage">${esc(result.cta_text)}</a></div>`,
+      css: '.ad-page{padding:24px;max-width:1100px;margin:auto;font-family:var(--body)}h1{font-family:var(--display)}',
+    },
+  };
 });
 
 registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));
