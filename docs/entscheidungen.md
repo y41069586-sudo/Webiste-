@@ -1004,3 +1004,11 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
   Demos zeigen dann keinen WhatsApp-Knopf (nur E-Mail und Formular), der Brief nennt die Telefonnummer ohne
   „WhatsApp“. WhatsApp ist keine Pflichtangabe mehr für den Versand (`readiness.ts`). Wieder einschalten:
   Nummer im Admin unter Einstellungen eintragen (am besten WhatsApp Business mit Logo).
+
+## 04.11.2026 – Nächtliche Sicherung im Live-Betrieb repariert
+
+- Befund: Sicherung vom 04.11. (03:18) abgebrochen mit „DRY_RUN erlaubt ausschließlich Stripe-Testschlüssel“.
+  Die Hilfscontainer der Sicherung liefen nur mit `docker-compose.worker.yml` (DRY_RUN=true), der Worker aber
+  live; seit STRIPE_MODE=live lehnt der Provider-Start diese Kombination ab.
+- Lösung: `infra/backup/compose-files.sh` nimmt die Live-Datei dazu, wenn der laufende Worker DRY_RUN=false hat
+  (managed-acceptance.sh, managed-scheduled.sh). Hilfscontainer lesen nur, sie verschicken nichts.

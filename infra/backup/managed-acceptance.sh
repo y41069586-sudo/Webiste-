@@ -5,7 +5,10 @@ set -euo pipefail
 umask 077
 repo=$(cd "$(dirname "$0")/../.." && pwd)
 cd "$repo"
-compose=(docker compose -f docker-compose.worker.yml)
+# shellcheck source=compose-files.sh
+. "$repo/infra/backup/compose-files.sh"
+mapfile -t compose_args < <(compose_files)
+compose=(docker compose "${compose_args[@]}")
 # Supabase's privileged connection stays on the operator's terminal/host, never in chat or Git.
 if [ "${ASK_BACKUP_URL:-0}" = 1 ] && [ -z "${BACKUP_DATABASE_URL:-}" ]; then
   printf 'Vollständige Supabase-Verbindungs-URL (postgresql://…, Session-Port5432), Eingabe verdeckt: ' >/dev/tty
