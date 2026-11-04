@@ -1,0 +1,8 @@
+Schriften der Gestaltungs-Kits – alle unter SIL Open Font License 1.1 (kommerziell frei, Einbettung erlaubt).
+Bezogen über @fontsource (npm, jsDelivr), latin-Subset, Stand 04.11.2026.
+- archivo.woff2        Archivo (Omnibus-Type), variabel: Breite 62–125 %, Gewicht 100–900  (@fontsource-variable/archivo 5.1.1)
+- atkinson-400/700     Atkinson Hyperlegible (Braille Institute)                          (@fontsource/atkinson-hyperlegible 5.1.1)
+- bodoni.woff2         Bodoni Moda (indestructible type*), variabel                       (@fontsource-variable/bodoni-moda 5.1.1)
+- karla.woff2          Karla (Jonny Pinhorn), variabel 200–800                            (@fontsource-variable/karla 5.1.1)
+- gloock.woff2         Gloock (Duarte Pinto)                                              (@fontsource/gloock 5.1.1)
+Lizenztext: https://openfontlicense.org/open-font-license-official-text/

@@ -74,6 +74,8 @@ describe('Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Date
               optOutUrl: '/z',
               expiresLabel: 'am 21.11.2026',
               sender,
+              // wie im Betrieb: „Preise und Leistungen“ in der Leiste springt zum Angebot (#uebernehmen)
+              offers: [{ title: 'SeitenWerk Basis', price: '597 €', unit: 'einmalig', points: ['Website'], href: '/x' }],
             },
           });
           const checks = [await validateHtml(html), ...(await browserChecks({ html }))];
@@ -106,6 +108,7 @@ describe('Branchen-Abschnitte (B3): axe, HTML, Layout; Live ohne Platzhalter', (
               optOutUrl: '/z',
               expiresLabel: 'am 21.11.2026',
               sender,
+              offers: [{ title: 'SeitenWerk Basis', price: '597 €', unit: 'einmalig', points: ['Website'], href: '/x' }],
             }
           : undefined,
       live:

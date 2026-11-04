@@ -35,7 +35,7 @@ it('keeps unknown activities neutral and never fills them with painter services'
 it('instructs the model to describe confirmed activity and location without inferring a specialty from a name', () => {
   expect(buildDemoPrompt(facts, 0)).toContain('Firmenname: Fiktiver Testbetrieb');
 });
-it('selects a stable fitting composition before usage rotation', async () => {
+it('selects the trade kit stably; specific trades get their own kit (04.11.2026)', async () => {
   const { chooseTemplate } = await import('../src/demos/build');
   const ids = new Set<string>();
   for (let i = 0; i < 100; i++) {
@@ -44,14 +44,14 @@ it('selects a stable fitting composition before usage rotation', async () => {
     expect(chooseTemplate(lead)).toEqual(first);
     ids.add(first.templateId);
   }
-  expect([...ids]).toEqual(['handwerk-klar']);
-  const { industryDirection } = await import('@wbm/templates');
-  const lead = { id: 'same-business', branchGroup: 'handwerk' as const, branch: 'maler' };
-  expect(chooseTemplate(lead, [], {}, { ...industryDirection('handwerk', 'maler'), composition: 'business' }).templateId).toBe(
-    'handwerk-solid',
-  );
-  expect(chooseTemplate(lead, ['handwerk-klar']).templateId).not.toBe('handwerk-klar');
-  expect(chooseTemplate(lead, ['handwerk-klar', 'handwerk-solid', 'handwerk-werkstatt']).templateId).toBe('handwerk-plakat');
+  expect([...ids]).toEqual(['kit-maler']);
+  const pick = (branch: string, branchGroup: 'handwerk' | 'beauty' | 'gastronomie' = 'handwerk') =>
+    chooseTemplate({ id: 'same-business', branchGroup, branch }).templateId;
+  expect(pick('fliesenleger')).toBe('kit-fliesen');
+  expect(pick('elektriker')).toBe('kit-elektro');
+  expect(pick('gebäudereinigung')).toBe('kit-reinigung');
+  expect(pick('nagelstudio', 'beauty')).toBe('kit-beauty');
+  expect(pick('restaurant', 'gastronomie')).toBe('kit-gastro');
 });
 it('captures lazy images below the fold without waiting for a visitor to scroll', async () => {
   const { takeScreenshots } = await import('../src/render/screenshots');

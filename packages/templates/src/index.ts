@@ -3,6 +3,7 @@ import { renderMalerDesignReview } from './sites/maler-design-review';
 import { industryDirection, normalizeDirection } from './art-direction';
 export * from './art-direction';
 import { buildParts } from './partials/shared';
+import { esc } from './html';
 import { beautyElegant } from './sites/beauty-elegant';
 import { beautyModern } from './sites/beauty-modern';
 import { beautySoft } from './sites/beauty-soft';
@@ -12,6 +13,20 @@ import { handwerkWerkstatt } from './sites/handwerk-werkstatt';
 import { PHOTO_TEMPLATES } from './sites/photo-layouts';
 import { PLAKAT_TEMPLATES } from './sites/plakat';
 import type { BranchGroup, RenderInput, TemplateDef } from './types';
+import { KITS, getKit } from './kits/kits';
+import { renderKit } from './kits/render';
+export { KITS, kitFor, getKit } from './kits/kits';
+export { slopFindings, slopFindingsForPage, type SlopFinding } from './kits/slop';
+
+/** Gestaltungs-Kits (04.11.2026): je Gewerk ein eigenes Konzept, Farbwelten als „Paletten“. */
+export const KIT_TEMPLATES: TemplateDef[] = KITS.map((kit) => ({
+  id: kit.id,
+  group: kit.group,
+  name: kit.name,
+  description: `Gestaltungs-Kit ${kit.name}: eigenes Schriftpaar, Farbrollen und Signatur-Element`,
+  palettes: Object.keys(kit.variants),
+  render: (ctx) => renderKit(ctx, kit),
+}));
 
 export * from './types';
 export * from './palettes';
@@ -29,6 +44,7 @@ export const TEMPLATES: TemplateDef[] = [
   beautyModern,
   ...PHOTO_TEMPLATES,
   ...PLAKAT_TEMPLATES,
+  ...KIT_TEMPLATES,
 ];
 
 export function getTemplate(id: string): TemplateDef {
@@ -49,6 +65,18 @@ export function renderSite(input: RenderInput): string {
   if (input.mode === 'live' && !input.live) throw new Error('Live-Modus braucht live-Optionen');
   if (input.mode === 'demo' || input.mode === 'screenshot')
     input = { ...input, content: { ...input.content, cta_text: 'So erreichen Sie uns' } };
+  const kit = getKit(tpl.id);
+  if (kit) {
+    // Kits bringen Farben und Schriften selbst mit: keine Art-Direction-Schicht, neutrale Palette nur für Kopfdaten
+    const parts = buildParts({ ...input, artDirection: undefined, palette: 'anthrazit' });
+    const d = input.artDirection;
+    const meta = d
+      ? ` data-character="${esc(d.character)}" data-type="${esc(d.typography)}" data-composition="${esc(d.composition)}" data-design-source="${esc(d.source)}"`
+      : '';
+    return tpl
+      .render({ ...input, artDirection: undefined, parts })
+      .replace('<body ', `<body data-template="${tpl.id}" data-kit="${kit.id}" data-variant="${esc(input.palette)}"${meta} `);
+  }
   if (input.artDirection || input.mode === 'demo' || input.mode === 'screenshot')
     input = {
       ...input,

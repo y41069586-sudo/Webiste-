@@ -48,6 +48,21 @@ describe('Inhaltsregeln', () => {
   const bad = (patch: Record<string, unknown>) =>
     validateDemoContent({ ...base, ...patch } as typeof base, facts).map((v) => v.rule);
 
+  it('erkennt KI-Floskeln, KI-Satzmuster und gehäufte Gedankenstriche (04.11.2026)', () => {
+    expect(bad({ about: 'Malerei Test arbeitet ganzheitlich und maßgeschneidert für Ihr Zuhause in Dortmund.' })).toContain(
+      'KI-Floskel',
+    );
+    expect(bad({ hero_subline: 'Herzlich willkommen bei Ihrem Malerbetrieb für Wände und Decken in Dortmund.' })).toContain(
+      'KI-Floskel',
+    );
+    expect(bad({ about: 'Wir streichen nicht nur Wände, sondern auch Decken und Türen in Ihrem Zuhause.' })).toContain(
+      'KI-Satzmuster',
+    );
+    expect(bad({ about: 'Wir streichen – innen – außen – oben – unten, jeden Raum sauber und ordentlich.' })).toContain(
+      'KI-Stil',
+    );
+    expect(bad({})).toEqual([]);
+  });
   it('erkennt erfundene Fakten, Zahlen, Bewertungen, Preise, Platzhalter', () => {
     expect(
       bad({ about: 'Seit 1998 sind wir Ihr Familienbetrieb in Dortmund und freuen uns auf Ihren Besuch bei uns im Laden.' }),
@@ -94,14 +109,17 @@ describe('Inhaltsregeln', () => {
 });
 
 describe('Template-Rotation', () => {
-  it('verteilt gleichmäßig über Templates und Paletten', async () => {
+  it('nimmt das Gestaltungs-Kit der Branche und verteilt gleichmäßig über seine Farbwelten (04.11.2026)', async () => {
     const { chooseTemplate } = await import('../src/demos/build');
     const usage: Record<string, number> = {};
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < 8; i++) {
       const c = chooseTemplate({ id: `00000000-0000-0000-0000-00000000000${i}`, branchGroup: 'beauty' }, [], usage);
+      expect(c.templateId).toBe('kit-beauty');
       usage[`${c.templateId}/${c.palette}`] = (usage[`${c.templateId}/${c.palette}`] ?? 0) + 1;
     }
-    expect(Object.keys(usage)).toHaveLength(9);
-    expect(Object.values(usage).every((n) => n === 1)).toBe(true);
+    expect(Object.values(usage)).toEqual([4, 4]);
+    // Gruppen ohne Kit rotieren weiter über die bisherigen Vorlagen
+    const shop = chooseTemplate({ id: '00000000-0000-0000-0000-000000000001', branchGroup: 'einzelhandel' });
+    expect(shop.templateId.startsWith('kit-')).toBe(false);
   });
 });

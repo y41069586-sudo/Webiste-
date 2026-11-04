@@ -29,7 +29,8 @@ describe('Templates', () => {
       const ts = TEMPLATES.filter((t) => t.group === g);
       expect(ts.length).toBeGreaterThanOrEqual(3);
       expect(ts.map((t) => t.id)).toContain(`${g}-plakat`);
-      for (const t of ts) expect(t.palettes).toHaveLength(3);
+      // Gestaltungs-Kits (04.11.2026) haben bewusst zwei geprüfte Farbwelten, ältere Vorlagen drei Paletten
+      for (const t of ts) expect(t.palettes).toHaveLength(t.id.startsWith('kit-') ? 2 : 3);
     }
   });
 

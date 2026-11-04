@@ -7,8 +7,7 @@ repo=$(cd "$(dirname "$0")/../.." && pwd)
 cd "$repo"
 # shellcheck source=compose-files.sh
 . "$repo/infra/backup/compose-files.sh"
-mapfile -t compose_args < <(compose_files)
-compose=(docker compose "${compose_args[@]}")
+compose=(docker compose -f docker-compose.worker.yml)
 # Supabase's privileged connection stays on the operator's terminal/host, never in chat or Git.
 if [ "${ASK_BACKUP_URL:-0}" = 1 ] && [ -z "${BACKUP_DATABASE_URL:-}" ]; then
   printf 'Vollständige Supabase-Verbindungs-URL (postgresql://…, Session-Port5432), Eingabe verdeckt: ' >/dev/tty
@@ -27,6 +26,9 @@ if [ -n "${BACKUP_DATABASE_URL:-}" ]; then
     exit 1
   fi
 fi
+# Erst nach der Eingabeprüfung Docker fragen: läuft der Worker live, nutzen die Hilfscontainer dieselbe Live-Datei
+mapfile -t compose_args < <(compose_files)
+compose=(docker compose "${compose_args[@]}")
 backup_root=${BACKUP_ROOT:-/opt/seitenwerk-backups}
 mkdir -p "$backup_root"
 target=$(mktemp -d "$backup_root/acceptance-XXXXXXXX")

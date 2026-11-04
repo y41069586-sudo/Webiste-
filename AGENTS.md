@@ -1,5 +1,17 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Betreiberentscheidung 04.11.2026 – Gestaltungs-Kits statt Einheitslook
+
+Demos für Handwerk, Beauty und Gastronomie werden mit **Gestaltungs-Kits** gebaut (`packages/templates/src/kits/`):
+Maler „Farbfächer“, Fliesen „Fugenraster“, Elektro/Sanitär „Schaltlinie“, Reinigung/übriges Handwerk „Turnus“,
+Beauty „Preisliste“, Gastronomie „Karte“. Jedes Kit hat einen EIGENEN Seitenaufbau (nicht dieselbe Vorlage in
+anderen Farben), eigenes Schriftpaar (selbst gehostet, OFL), zwei geprüfte Farbwelten und genau ein
+Signatur-Element. `chooseTemplate` nimmt immer das Kit des Gewerks; Einzelhandel/Kurse nutzen vorerst die alten
+Vorlagen. Regeln (Bericht `reports/Demo Websites ohne KI Look.md`): keine Standard-/Modeschriften, kein Lila,
+keine Verläufe, keine Icon-Karten, Radius ≤ 6 px, eine Animation; Texte ohne KI-Floskeln (Prompt-Regel 12 +
+`validateDemoContent`), KI-Muster-Prüfung `slopFindingsForPage` blockiert Kit-Demos in der QA.
+Ein neues Kit nie als Farbvariante eines bestehenden bauen.
+
 ## Betreiberentscheidung 03.11.2026 – KI entscheidet jeden Betrieb endgültig
 
 Routine: Betreiber sucht → KI prüft **alle** gefundenen Betriebe und entscheidet endgültig (gut → Demo wird

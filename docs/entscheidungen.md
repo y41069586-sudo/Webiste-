@@ -1012,3 +1012,15 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
   live; seit STRIPE_MODE=live lehnt der Provider-Start diese Kombination ab.
 - Lösung: `infra/backup/compose-files.sh` nimmt die Live-Datei dazu, wenn der laufende Worker DRY_RUN=false hat
   (managed-acceptance.sh, managed-scheduled.sh). Hilfscontainer lesen nur, sie verschicken nichts.
+
+## 04.11.2026 – Gestaltungs-Kits und KI-Regeln im Demo-Generator
+
+- Anlass: Betreiber fand die Demos „langweilig und vibe coded“. Recherche-Bericht `reports/Demo Websites ohne KI Look.md`,
+  Prototyp `/muster-maler/`, dann Umsetzung im Generator.
+- 6 Kits mit eigenem Aufbau je Gewerk (siehe AGENTS.md), Schriften Archivo, Atkinson Hyperlegible, Bodoni Moda,
+  Karla, Gloock (OFL, `assets/fonts/kits/LIZENZEN.txt`), nur lizenzierte Fotos ohne KI-Bilder, „Symbolbild“ sichtbar.
+- Entwurfs-Platzhalter (Inhaberfoto, Projekte, Beispielablauf, Beispielplan, „Preis folgt“) nur im Entwurf; Test prüft,
+  dass die Live-Seite keine davon enthält.
+- KI-Regeln: Prompt-Regel 12, Floskel- und Satzmuster-Filter mit Neuversuch, Gedankenstrich-Grenze, KI-Muster-Prüfung in
+  der Demo-QA (Kits: harte Sperre, ältere Vorlagen: Hinweis).
+- Offen: Einzelhandel/Kurse-Kits; Bildgrößen (Demos 360–590 KB, vor allem Fotos) später verkleinern.

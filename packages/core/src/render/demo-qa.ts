@@ -4,7 +4,7 @@ import { researchContentHash } from '../leads/acquisition';
 import { sha256 } from '../util/crypto';
 import { assessDemoQuality, type ManualQualityScores } from '../quality/demo';
 import { eq } from 'drizzle-orm';
-import { renderSite } from '@wbm/templates';
+import { getKit, renderSite, slopFindingsForPage } from '@wbm/templates';
 import { getConfig } from '../config/service';
 import { getDb } from '../db/client';
 import { demos, leads, type QaResult } from '../db/schema';
@@ -122,6 +122,17 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
 
   // 3) HTML-Validierung
   checks.push(await validateHtml(html));
+
+  // 3b) KI-Muster (deterministisch über CSS/Markup): Kits müssen frei sein; bei älteren Vorlagen nur ein Hinweis
+  {
+    const findings = slopFindingsForPage(html);
+    const kit = Boolean(getKit(demo.templateId));
+    checks.push({
+      name: 'ki-muster',
+      passed: kit ? findings.length === 0 : true,
+      ...(findings.length ? { details: findings.map((x) => `${x.rule}: ${x.detail}`).join(' | ') } : {}),
+    });
+  }
 
   // 4) Browser: Konsole, axe, Layout
   checks.push(...(await browserChecks({ html, expectedFacts: { name: bizFacts.name, city: bizFacts.city } })));
