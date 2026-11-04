@@ -1,4 +1,4 @@
-maler-voll: kit-maler/kalk (Abwechslung (keine Farbwelt passt besser)) · voll · 644 KB · KI-Muster: keine
+maler-voll: kit-maler/kalk (Abwechslung (keine Farbwelt passt besser)) · voll · 645 KB · KI-Muster: keine
 maler-duenn: kit-maler/schiefer (passt zum Gewerk „Maler und Lackierer“) · kompakt · 643 KB · KI-Muster: keine
 fliesen: kit-fliesen/travertin (Abwechslung (keine Farbwelt passt besser)) · voll · 422 KB · KI-Muster: keine
 boden-ohne-foto: kit-fliesen/stein (passt zum Gewerk „Bodenleger“) · kompakt · 251 KB · KI-Muster: keine

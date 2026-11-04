@@ -327,7 +327,9 @@ function initials(name: string): string {
 function h1Of(kit: Kit, text: string): string {
   const longest = Math.max(...text.split(/\s+/).map((w) => w.length), 4);
   const perChar = kit.display === 'archivo' ? (0.6 * (kit.stretch ?? 100)) / 100 + 0.08 : kit.display === 'bodoni' ? 0.56 : 0.58;
-  return `<h1 class="k-h1" style="--k-lw:${(longest * perChar).toFixed(2)}">${esc(text)}</h1>`;
+  // Zweite Grenze: lange Namen aus vielen kurzen Wörtern höchstens auf etwa drei Zeilen
+  const lines = ((text.length * perChar) / 3).toFixed(2);
+  return `<h1 class="k-h1" style="--k-lw:${(longest * perChar).toFixed(2)};--k-tl:${lines}">${esc(text)}</h1>`;
 }
 
 /** Gemeinsame Grundregeln (Farbrollen, Schriftpaar, Formulare, FAQ) – Layout kommt je Kit dazu. */
@@ -345,7 +347,7 @@ body.k{margin:0;overflow-x:clip;background:${k.base};color:${k.ink};font:400 1.0
 .k main h1,.k main h2,.k-mark{font-family:${display};font-weight:${kit.weight};${stretch}line-height:${kit.leading};letter-spacing:-.01em;overflow-wrap:break-word;hyphens:auto}
 .k main h2{font-size:clamp(2rem,5.5vw,3.4rem)}
 .k main h3{font-family:${display};${kit.stretch ? `font-stretch:${Math.min(100, kit.stretch + 16)}%;` : ''}font-weight:${Math.min(800, kit.weight)};font-size:1.3rem;line-height:1.15}
-.k main .k-h1{font-size:clamp(1.4rem,calc(var(--k-avail,calc(100vw - 48px)) / var(--k-lw,6)),var(--k-h1max,6.4rem))}
+.k main .k-h1{font-size:clamp(1.4rem,min(calc(var(--k-avail,calc(100vw - 48px)) / var(--k-lw,6)),calc(var(--k-avail,calc(100vw - 48px)) / var(--k-tl,6))),var(--k-h1max,6.4rem))}
 .k .sw-demo-buy,.k .sw-demo-ask{white-space:nowrap}.k .sw-demo-toolbar,.k .sw-demo-context{font-size:15px}
 @media (max-width:599px){.k .sw-demo-ask:last-child{display:none}.k .sw-demo-toolbar,.k .sw-demo-context{font-size:14px}}
 .k-note{color:var(--k-muted);font-size:.9rem;margin-top:10px!important;max-width:44em}
