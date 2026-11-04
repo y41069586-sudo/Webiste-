@@ -33,6 +33,12 @@ interface Case {
   thin?: boolean;
   before?: string;
   live?: boolean;
+  /** vollständige, belegte Testangaben (Fall „alles vorhanden“) */
+  services?: { title: string; text: string }[];
+  headline?: string;
+  subline?: string;
+  about?: string;
+  faq?: { q: string; a: string }[];
 }
 
 const day = [
@@ -40,6 +46,40 @@ const day = [
   { label: 'Sa', value: 'nach Vereinbarung' },
 ];
 const CASES: Case[] = [
+  {
+    id: 'restaurant-voll',
+    live: true,
+    name: 'Trattoria Lucca',
+    branch: 'Restaurant',
+    key: 'restaurant',
+    group: 'gastronomie',
+    phone: '0231 445566',
+    hours: [
+      { label: 'Di–Do', value: '17:30–22:30 Uhr' },
+      { label: 'Fr–Sa', value: '17:30–23:30 Uhr' },
+      { label: 'So', value: '17:00–22:00 Uhr' },
+      { label: 'Mo', value: 'Ruhetag' },
+    ],
+    headline: 'Kurze Karte, frische Pasta',
+    subline: 'Italienische Küche am Hörder Bahnhof. Die Karte wechselt mit dem Markt, die Pasta kommt aus der eigenen Küche.',
+    services: [
+      { title: 'Antipasti', text: 'Vitello tonnato, gegrilltes Gemüse, Burrata mit Tomaten.' },
+      { title: 'Pasta fresca', text: 'Tagliatelle, Ravioli und Pappardelle, jeden Nachmittag selbst gemacht.' },
+      { title: 'Secondi', text: 'Fisch und Fleisch je nach Marktangebot, mit Beilage der Saison.' },
+      { title: 'Dolci', text: 'Tiramisu, Panna cotta und hausgemachtes Eis.' },
+      { title: 'Weine', text: 'Offene Weine aus Piemont und Apulien, dazu eine kleine Flaschenkarte.' },
+    ],
+    about:
+      'Eine kleine Küche mit kurzer Karte. Gekocht wird, was der Markt hergibt, deshalb wechseln Vorspeisen und Hauptgerichte regelmäßig.\n\nDie Pasta entsteht jeden Nachmittag vor dem Service in der eigenen Küche. Vegetarische Gerichte stehen immer auf der Karte.',
+    faq: [
+      {
+        q: 'Muss ich reservieren?',
+        a: 'Am Freitag und Samstag empfehlen wir eine Anfrage vorab. Unter der Woche gibt es meist auch spontan einen Tisch.',
+      },
+      { q: 'Gibt es vegetarische Gerichte?', a: 'Ja, mindestens eine Pasta und eine Vorspeise sind immer vegetarisch.' },
+      { q: 'Sind größere Gruppen möglich?', a: 'Ab acht Personen bitte vorher anfragen, dann stellen wir die Tische zusammen.' },
+    ],
+  },
   {
     id: 'maler-voll',
     name: 'Malerbetrieb Hennig',
@@ -175,23 +215,27 @@ for (const c of CASES) {
   const base = libraryContent(c.key, c.group, { name: c.name, stadt: 'Dortmund', branche: c.branch }, 1);
   const content: SiteContent = {
     ...base,
-    services: c.verified
-      ? c.verified.map((t, i) => ({
-          title: t,
-          text: base.services[i]?.text ?? 'Auf Anfrage.',
-          icon: base.services[i]?.icon ?? 'check',
-        }))
-      : c.thin
-        ? base.services.slice(0, 2)
-        : base.services,
-    about: c.thin ? '' : base.about,
-    faq: c.thin ? [] : base.faq.slice(0, 3),
+    ...(c.headline ? { hero_headline: c.headline } : {}),
+    ...(c.subline ? { hero_subline: c.subline } : {}),
+    services: c.services
+      ? c.services.map((x) => ({ ...x, icon: 'check' as const }))
+      : c.verified
+        ? c.verified.map((t, i) => ({
+            title: t,
+            text: base.services[i]?.text ?? 'Auf Anfrage.',
+            icon: base.services[i]?.icon ?? 'check',
+          }))
+        : c.thin
+          ? base.services.slice(0, 2)
+          : base.services,
+    about: c.about ?? (c.thin ? '' : base.about),
+    faq: c.faq ?? (c.thin ? [] : base.faq.slice(0, 3)),
   };
   const facts = {
     name: c.name,
     branchLabel: c.branch,
     group: c.group,
-    verifiedServices: c.verified,
+    verifiedServices: c.verified ?? c.services?.map((x) => x.title),
     street: 'Hörder Bahnhofstraße',
     houseNumber: '12',
     postalCode: '44263',

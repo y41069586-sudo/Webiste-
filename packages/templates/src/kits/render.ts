@@ -47,6 +47,7 @@ function blocks(ctx: RenderContext, kit: Kit) {
     raw.toLocaleLowerCase('de') === `${f.branchLabel} in ${f.city}`.toLocaleLowerCase('de');
   const headline = generic ? f.name : raw;
   const services = c.services.slice(0, 6);
+  const verified = (f.verifiedServices?.length ?? 0) > 0;
   // Planung vor dem Bau: dünne Datenlage → kurze Seite; Fehlendes steht gesammelt in einem Kasten statt verstreut
   const brief = designBrief(f, c, kit, { variant: ctx.palette, reason: '' });
   const compact = brief.density === 'kompakt';
@@ -80,7 +81,7 @@ function blocks(ctx: RenderContext, kit: Kit) {
     : draft
       ? '<div><dt>Öffnungszeiten</dt><dd>noch nicht bestätigt</dd></div>'
       : '';
-  const facts = `<dl class="k-facts">${f.openingLines[0] ? `<div><dt>Geöffnet</dt><dd>${esc(f.openingLines[0].label)} ${esc(f.openingLines[0].value)}</dd></div>` : ''}<div><dt>Adresse</dt><dd>${esc(f.street)}&nbsp;${esc(f.houseNumber)}<br>${esc(f.postalCode)} ${esc(f.city)}</dd></div>${call ? `<div><dt>Telefon</dt><dd><a href="${esc(call.href)}">${esc(call.label)}</a></dd></div>` : ''}</dl>`;
+  const facts = `<dl class="k-facts">${f.openingLines[0] ? `<div><dt>Geöffnet</dt><dd>${esc(f.openingLines[0].label)} ${esc(f.openingLines[0].value)}${f.openingLines.length > 1 ? '<br><a href="#oeffnungszeiten">alle Zeiten</a>' : ''}</dd></div>` : ''}<div><dt>Adresse</dt><dd>${esc(f.street)}&nbsp;${esc(f.houseNumber)}<br>${esc(f.postalCode)} ${esc(f.city)}</dd></div>${call ? `<div><dt>Telefon</dt><dd><a href="${esc(call.href)}">${esc(call.label)}</a></dd></div>` : ''}</dl>`;
   const owner = draft
     ? `<div class="k-owner"><div class="k-owner-slot" aria-hidden="true">${esc(initials(f.name))}</div><p><b>Hier steht Ihr Foto.</b> Kunden wollen sehen, wer kommt. Wir setzen es nach der Übernahme ein.</p></div>`
     : '';
@@ -94,7 +95,7 @@ function blocks(ctx: RenderContext, kit: Kit) {
   const list = `<ul class="k-list">${services.map((s) => `<li><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></li>`).join('')}</ul>`;
   const tiles = `<ul class="k-tiles">${services.map((s) => `<li><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></li>`).join('')}</ul>`;
   const prices = `<ul class="k-prices">${services.map((s) => `<li><div class="k-pname"><h3>${esc(s.title)}</h3><span class="k-dots" aria-hidden="true"></span><span class="k-pval">${draft ? 'Preis folgt' : 'auf Anfrage'}</span></div><p>${esc(s.text)}</p></li>`).join('')}</ul>${draft ? '<p class="k-note">Ihre Preisliste mit Dauer je Behandlung tragen wir nach der Übernahme ein. Online ist sie Pflicht (§ 12 PAngV).</p>' : ''}`;
-  const karte = `<div class="k-karte"><div class="k-karte-in"><p class="k-karte-title">${draft ? 'Beispiel-Speisekarte' : 'Karte'}</p>${services.map((s) => `<div class="k-karte-row"><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div>`).join('')}</div>${draft ? '<p class="k-note">Hier steht Ihre Speisekarte als echte Seite, nicht als PDF: Gerichte, Preise, Allergene und vegetarische Angebote. Wir übernehmen sie aus Ihrer aktuellen Karte.</p>' : ''}</div>`;
+  const karte = `<div class="k-karte"><div class="k-karte-in"><p class="k-karte-title">${draft && !verified ? 'Beispiel-Speisekarte' : 'Karte'}</p>${services.map((s) => `<div class="k-karte-row"><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div>`).join('')}</div>${draft ? `<p class="k-note">${verified ? 'Preise und Allergene ergänzen wir aus Ihrer aktuellen Karte, als echte Seite statt PDF.' : 'Hier steht Ihre Speisekarte als echte Seite, nicht als PDF: Gerichte, Preise, Allergene und vegetarische Angebote. Wir übernehmen sie aus Ihrer aktuellen Karte.'}</p>` : ''}</div>`;
 
   const steps: [string, string][] | null =
     kit.group !== 'handwerk' || !draft
@@ -143,7 +144,7 @@ function blocks(ctx: RenderContext, kit: Kit) {
   // „Über uns“ nur mit echten Angaben. Ohne Angaben: im Entwurf ein ehrlicher Hinweis, live kein Abschnitt.
   const hasAbout = !!c.about.trim();
   const aboutText = hasAbout
-    ? `${p.about('k-p')}${draft ? '<p class="k-note">Hier ergänzen wir Ihre belegten Angaben, zum Beispiel Meisterbrief, Ausbildung oder Gründungsjahr. Wir schreiben nur, was stimmt.</p>' : ''}`
+    ? `${p.about('k-p')}${draft ? `<p class="k-note">Hier ergänzen wir Ihre belegten Angaben, zum Beispiel ${kit.group === 'gastronomie' ? 'wer kocht und woher die Zutaten kommen' : kit.group === 'beauty' ? 'Ausbildung und Produkte, mit denen Sie arbeiten' : 'Meisterbrief, Ausbildung oder Gründungsjahr'}. Wir schreiben nur, was stimmt.</p>` : ''}`
     : '';
   const offen = draft
     ? `<section id="offen" class="k-sec" aria-labelledby="k-o"><div class="k-wrap"><div class="k-offen"><h2 id="k-o">Was für Ihre Seite noch fehlt</h2><ul>${brief.missing.map((m) => `<li>${esc(m)}</li>`).join('')}</ul><p class="k-note">Nichts davon erfinden wir. Sie geben uns die Angaben nach der Übernahme, wir tragen sie ein.</p></div></div></section>`

@@ -1,10 +1,11 @@
+restaurant-voll: kit-gastro/abend (geöffnet bis in den späten Abend) · voll · 372 KB · KI-Muster: keine
 maler-voll: kit-maler/kalk (Abwechslung (keine Farbwelt passt besser)) · voll · 645 KB · KI-Muster: keine
 maler-duenn: kit-maler/schiefer (passt zum Gewerk „Maler und Lackierer“) · kompakt · 643 KB · KI-Muster: keine
 fliesen: kit-fliesen/travertin (Abwechslung (keine Farbwelt passt besser)) · voll · 422 KB · KI-Muster: keine
 boden-ohne-foto: kit-fliesen/stein (passt zum Gewerk „Bodenleger“) · kompakt · 251 KB · KI-Muster: keine
 elektro: kit-elektro/graphit (passt zum Gewerk „Elektriker“) · voll · 474 KB · KI-Muster: keine
 sanitaer: kit-elektro/marine (passt zum Gewerk „Sanitär und Heizung“) · kompakt · 500 KB · KI-Muster: keine
-reinigung: kit-reinigung/leinen (Abwechslung (keine Farbwelt passt besser)) · voll · 400 KB · KI-Muster: keine
+reinigung: kit-reinigung/leinen (Abwechslung (keine Farbwelt passt besser)) · voll · 401 KB · KI-Muster: keine
 kosmetik: kit-beauty/puder (Abwechslung (keine Farbwelt passt besser)) · voll · 369 KB · KI-Muster: keine
 friseur: kit-beauty/eukalyptus (Abwechslung (keine Farbwelt passt besser)) · kompakt · 396 KB · KI-Muster: keine
 restaurant: kit-gastro/abend (geöffnet bis in den späten Abend) · kompakt · 371 KB · KI-Muster: keine
