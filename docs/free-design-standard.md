@@ -59,3 +59,20 @@ Die visuelle Pilotseite ist ein privater, unbeauftragter Vorschlag für Jörg St
 Sie verwendet dieselbe freie Renderstrecke, mit von diesem Assistenten erstelltem HTML/CSS anstelle
 eines kostenpflichtigen Provider-Aufrufs. Die Modellqualität im produktiven Sonnet-Aufruf ist dadurch
 noch nicht empirisch abgenommen. Jeder Entwurf braucht weiterhin die vorhandene manuelle Freigabe.
+
+
+## Veröffentlichung und Worker-Update
+
+Der Betreiber hat die Übernahme in `claude/website-brief-maschine-0d0s37` und die Veröffentlichung
+am 04.11.2026 ausdrücklich beauftragt. Der vorhandene Netlify-Connector bietet keinen Deploy-Start;
+in dieser Laufzeit ist kein Netlify-CLI/API-Token konfiguriert. Kein Produktionsdeploy ohne
+Erfolgsmeldung behaupten. Das gilt getrennt vom bereits veröffentlichten privaten Demo-Site.
+
+`infra/vps/update-worker.sh` aktualisiert einen bestehenden Worker mit einem vollständig gepinnten
+`RELEASE`-Commit, lässt private `.env.worker`-Werte unangetastet und übernimmt die Compose-Dateien
+des aktuellen Containers. Vorhandener DRY_RUN und laufender/pausierter Zustand bleiben erhalten.
+Kein Paket-/Firewall-Neuaufbau, keine Modusumschaltung, kein pauschales Entfernen anderer Container.
+Das neue Image muss vor dem Austausch `free-design-1` exportieren. Fehler beim Build oder der
+Imageprüfung lassen den bisherigen Container bestehen. Nach Start wird sein Healthcheck geprüft.
+Sechs isolierte Python-Tests für diese Zustands-/Fehlerfälle und Bash-Syntaxprüfung bestanden.
+Die Netlify-App muss den neuen Stand übernehmen, bevor neue freie Demos produktiv abgewickelt werden.
