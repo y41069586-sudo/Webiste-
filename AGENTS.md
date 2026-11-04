@@ -1,5 +1,20 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Betreiberauftrag 04.11.2026 – Demoqualität wie Kalk & Kante / Sera
+
+Die Gestaltungsprinzipien sind in der bestehenden Pipeline umzusetzen, nicht nur als Sonderdemo.
+Verbindlicher Standard: `packages/templates/src/kits/editorial.ts` (`seitenwerk-editorial-1`).
+Er steuert Textbriefing, gespeicherten DesignBrief und inhaltlich begründete Kompositionen. Keine
+Pflicht-FAQs oder erfundene Unternehmensgeschichte. Kurze Datenlage → kompakte Seite, keine
+leeren Porträt-/Projektflächen. Bestätigte Leistungen im Einstieg; Symbolbilder bleiben gekennzeichnet.
+Die KI-QA erhält beim normalen Kit-Prüflauf die tatsächlichen gespeicherten Desktop-/Mobil-Startansichten
+im bestehenden budgetierten Aufruf. Das ist keine vollständige visuelle Seitenabnahme und ersetzt
+keine Betreiberfreigabe. Hohe visuelle Befunde erzeugen keine automatische bezahlte Text-Neugenerierung.
+Kaufleiste, Angebotspreise, echter Kontaktformular-Renderer, Zahlungen und Versand-/Freigabe-Sperren
+sind für diesen Auftrag geschützt. Keine vorhandenen Demos neu bauen oder freigeben. Keine
+Produktionskonfiguration oder vorhandene KI-Modelle/Budgets ändern.
+Stand und Prüfnachweise: `docs/demo-editorial-standard.md`.
+
 ## Betreiberentscheidung 04.11.2026 – Gestaltungs-Kits statt Einheitslook
 
 Demos für Handwerk, Beauty und Gastronomie werden mit **Gestaltungs-Kits** gebaut (`packages/templates/src/kits/`):

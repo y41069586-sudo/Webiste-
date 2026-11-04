@@ -1,0 +1,485 @@
+{
+  "rows": [
+    {
+      "id": "maler-voll",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "maler-voll",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "maler-voll",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "maler-voll",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "maler-duenn",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "maler-duenn",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "maler-duenn",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "maler-duenn",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "fliesen",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "fliesen",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "fliesen",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "fliesen",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "boden-ohne-foto",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "boden-ohne-foto",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "boden-ohne-foto",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "boden-ohne-foto",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "elektro",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "elektro",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "elektro",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "elektro",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "sanitaer",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "sanitaer",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "sanitaer",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "sanitaer",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "reinigung",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "reinigung",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "reinigung",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "reinigung",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "kosmetik",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "kosmetik",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "kosmetik",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "kosmetik",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "friseur",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "friseur",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "friseur",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "friseur",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "restaurant",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "restaurant",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "restaurant",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "restaurant",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "restaurant-voll",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "restaurant-voll",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "restaurant-voll",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "restaurant-voll",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "cafe",
+      "width": 320,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "cafe",
+      "width": 390,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "cafe",
+      "width": 768,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    },
+    {
+      "id": "cafe",
+      "width": 1440,
+      "overflow": false,
+      "chromeOverflow": false,
+      "h1": true,
+      "images": true,
+      "emptyFrames": 0,
+      "headings": 1
+    }
+  ],
+  "failures": []
+}

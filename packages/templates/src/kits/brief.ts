@@ -1,5 +1,6 @@
 import type { BusinessFacts, SiteContent } from '../types';
 import type { Kit } from './kits';
+import { editorialPlan, type EditorialPlan } from './editorial';
 
 /**
  * Gestaltungsbriefing vor jeder Demo: trennt belegte Angaben, Gestaltungsvorschläge und fehlende Informationen.
@@ -8,6 +9,7 @@ import type { Kit } from './kits';
  */
 export interface DesignBrief {
   version: 1;
+  editorial: EditorialPlan;
   kit: string;
   variant: string;
   /** wer die Seite besucht und was er zuerst wissen will */
@@ -43,8 +45,7 @@ export function designBrief(
   else missing.push('Ihre Telefonnummer');
   if (facts.openingLines.length) verified.push('Öffnungszeiten');
   else missing.push('Ihre Öffnungszeiten');
-  if (content.about.trim()) verified.push('Angaben für „Über uns“');
-  else missing.push('Ein paar Sätze über Ihren Betrieb, zum Beispiel wer zu den Kunden kommt');
+  if (!content.about.trim()) missing.push('Ein paar Sätze über Ihren Betrieb, zum Beispiel wer zu den Kunden kommt');
   const ownPhotos = (facts.photos ?? []).filter((p) => p.origin !== 'example' && p.rightsConfirmed);
   if (ownPhotos.length) verified.push(`${ownPhotos.length} eigene Fotos mit geklärten Rechten`);
   else
@@ -58,17 +59,22 @@ export function designBrief(
   if (kit.group === 'gastronomie') missing.push('Ihre Speisekarte mit Preisen und Allergenen');
   if (kit.group === 'handwerk') missing.push('Nachweise wie Meisterbrief oder Innung, falls vorhanden');
 
+  const editorial = editorialPlan(facts.group, facts.branchLabel, facts.verifiedServices);
+  proposals.push(`Gestaltungsstandard: ${editorial.version}; Komposition: ${editorial.composition}`);
+  proposals.push(`Besucheraufgabe: ${editorial.visitorTask}`);
+  proposals.push(`Bildauftrag: ${editorial.imagePurpose}`);
   const action = facts.phone && kit.primary === 'call' ? 'Anrufen' : requestLabel(kit, facts.branchLabel);
   proposals.push(`Konzept „${kit.name}“, Farbwelt „${variant.variant}“: ${variant.reason}`);
   proposals.push(`Haupt-Handlung: ${action}`);
   if (content.faq.length) proposals.push(`${content.faq.length} Fragen, die vor einer Anfrage wirklich auftauchen`);
-  const thin = vs.length < 3 && !content.about.trim();
+  const thin = vs.length < 3 && ownPhotos.length === 0;
   const density = thin ? 'kompakt' : 'voll';
   const why = thin
     ? 'Wenig belegt: kurze Seite mit Name, Leistungen, Kontakt und Anfrage. Nichts wird aufgefüllt.'
     : 'Genug belegt für eine vollständige Seite; Reihenfolge nach dem, was Besucher zuerst wissen wollen.';
   return {
     version: 1,
+    editorial,
     kit: kit.id,
     variant: variant.variant,
     audience: kit.audience,

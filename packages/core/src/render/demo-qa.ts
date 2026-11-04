@@ -1,3 +1,4 @@
+import { visualReviewInput } from '../demos/visual-review';
 import { recipientFingerprint } from '../letters/binding';
 import { leadResearch } from '../services/lead-research';
 import { researchContentHash } from '../leads/acquisition';
@@ -83,7 +84,13 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   if (meta?.source === 'fallback')
     checks.push({ name: 'inhaltsquelle', passed: true, details: 'Geprüfte Standardtexte (KI-Ausgabe verworfen)' });
 
-  // 2) KI-Prüfung (MODEL_BULK)
+  // Capture once from the stored HTML. Reused for AI review, admin and the bound letter composite.
+  const shots = await takeScreenshots(html, { hideDemoChrome: true });
+  const visual = getKit(demo.templateId) ? visualReviewInput(shots) : undefined;
+
+  let visualBlocking = false;
+
+  // 2) KI-Prüfung (MODEL_BULK, derselbe Aufruf prüft bei Kits auch beide Startansichten)
   if (opts.reuseUnchangedAi) {
     const prior = demo.qaResultJson?.checks.find((c) => c.name === 'ki-pruefung');
     if (
@@ -99,7 +106,8 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
       const res = await llmStructured<{ issues: QaIssue[] }>({
         tier: 'bulk',
         system: QA_SYSTEM_PROMPT,
-        prompt: buildQaPrompt(facts, content),
+        prompt: buildQaPrompt(facts, content) + (visual ? `\n\n${visual.prompt}` : ''),
+        ...(visual ? { images: visual.images } : {}),
         toolName: QA_TOOL_NAME,
         toolDescription: 'Ergebnis der Qualitätsprüfung',
         inputSchema: QA_SCHEMA as unknown as Record<string, unknown>,
@@ -109,11 +117,17 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
         leadId: lead.id,
       });
       const high = res.issues.filter((i) => i.severity === 'hoch');
+      visualBlocking = high.some((i) => i.field.startsWith('visual.'));
       rebuildFeedback.push(...high.slice(0, 8).map((i) => `${i.field}: ${i.problem}`));
       checks.push({
         name: 'ki-pruefung',
         passed: high.length === 0,
-        ...(res.issues.length ? { details: res.issues.map((i) => `[${i.severity}] ${i.field}: ${i.problem}`).join(' | ') } : {}),
+        details: [
+          visual ? 'Startansichten Desktop/Mobil mitgeprüft; ganze Seite manuell prüfen.' : '',
+          ...res.issues.map((i) => `[${i.severity}] ${i.field}: ${i.problem}`),
+        ]
+          .filter(Boolean)
+          .join(' | '),
       });
     } catch (err) {
       checks.push({ name: 'ki-pruefung', passed: false, details: `Fehler: ${err instanceof Error ? err.message : String(err)}` });
@@ -161,7 +175,6 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
 
   // 6) Screenshots + Komposit (ohne Banner)
   // Use exactly the stored page served by the demo route; newer template code must not change its screenshot.
-  const shots = await takeScreenshots(html, { hideDemoChrome: true });
   const composite = await renderComposite(shots.desktop, shots.mobile, { businessName: bizFacts.name });
   const base = `demos/${demoId}`;
   await storage.put(`${base}/desktop.jpg`, shots.desktop, 'image/jpeg');
@@ -224,7 +237,8 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
     context: { failed: checks.filter((c) => !c.passed).map((c) => c.name) },
   });
   const failedNames = checks.filter((c) => !c.passed).map((c) => c.name);
-  const contentOnly = failedNames.length > 0 && failedNames.every((n) => n === 'ki-pruefung' || n === 'inhaltsregeln');
+  const contentOnly =
+    !visualBlocking && failedNames.length > 0 && failedNames.every((n) => n === 'ki-pruefung' || n === 'inhaltsregeln');
   if (opts.enqueueRebuild !== false && !passed && decide && contentOnly && !meta?.qaRetry && rebuildFeedback.length) {
     // Nur Textbefunde: einmal automatisch neu schreiben lassen (mit den Befunden), statt liegen zu bleiben
     await enqueue(

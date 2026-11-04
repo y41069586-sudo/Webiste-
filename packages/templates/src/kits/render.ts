@@ -5,6 +5,8 @@ import { kitFontCss, kitFontFamily } from './fonts';
 import { designBrief, requestLabel } from './brief';
 import { purgeCss } from './purge';
 import type { Kit, KitColors } from './kits';
+import { EDITORIAL_VERSION } from './editorial';
+import { editorialCss } from './editorial-css';
 
 /**
  * Rendert eine Seite nach Gestaltungs-Kit. Jedes Kit hat einen EIGENEN Seitenaufbau (Hero, Raster, Reihenfolge,
@@ -28,10 +30,12 @@ export function renderKit(ctx: RenderContext, kit: Kit): string {
   const colors: KitColors = kit.variants[ctx.palette] ?? Object.values(kit.variants)[0]!;
   const html = documentShell(p, `k ${kit.id}`, body).replace(
     '</head>',
-    `<style>${kitFontCss([kit.display, kit.text])}${baseCss(kit, colors)}${LAYOUT_CSS[kit.id] ?? ''}</style></head>`,
+    `<style>${kitFontCss([kit.display, kit.text])}${baseCss(kit, colors)}${LAYOUT_CSS[kit.id] ?? ''}${editorialCss()}</style></head>`,
   );
   // Gemeinsames Tailwind-CSS (erster <style>-Block) auf die tatsächlich genutzten Klassen kürzen
-  return html.replace(/<style>([\s\S]*?)<\/style>/, (_m, css: string) => `<style>${purgeCss(css, html)}</style>`);
+  return html
+    .replace('<body ', `<body data-editorial="${EDITORIAL_VERSION}" `)
+    .replace(/<style>([\s\S]*?)<\/style>/, (_m, css: string) => `<style>${purgeCss(css, html)}</style>`);
 }
 
 type Blocks = ReturnType<typeof blocks>;
@@ -46,7 +50,7 @@ function blocks(ctx: RenderContext, kit: Kit) {
   const raw = c.hero_headline.trim();
   const generic =
     !raw ||
-    raw.toLocaleLowerCase('de').includes(f.branchLabel.toLocaleLowerCase('de')) ||
+    raw.toLocaleLowerCase('de') === f.branchLabel.toLocaleLowerCase('de') ||
     raw.toLocaleLowerCase('de') === `${f.branchLabel} in ${f.city}`.toLocaleLowerCase('de');
   const headline = generic ? f.name : raw;
   const services = c.services.slice(0, 6);
@@ -85,13 +89,17 @@ function blocks(ctx: RenderContext, kit: Kit) {
       ? '<div><dt>Öffnungszeiten</dt><dd>noch nicht bestätigt</dd></div>'
       : '';
   const facts = `<dl class="k-facts">${f.openingLines[0] ? `<div><dt>Geöffnet</dt><dd>${esc(f.openingLines[0].label)} ${esc(f.openingLines[0].value)}${f.openingLines.length > 1 ? '<br><a href="#oeffnungszeiten">alle Zeiten</a>' : ''}</dd></div>` : ''}<div><dt>Adresse</dt><dd>${esc(f.street)}&nbsp;${esc(f.houseNumber)}<br>${esc(f.postalCode)} ${esc(f.city)}</dd></div>${call ? `<div><dt>Telefon</dt><dd><a href="${esc(call.href)}">${esc(call.label)}</a></dd></div>` : ''}</dl>`;
-  const owner = draft
-    ? `<div class="k-owner"><div class="k-owner-slot" aria-hidden="true">${esc(initials(f.name))}</div><p><b>Hier steht Ihr Foto.</b> Kunden wollen sehen, wer kommt. Wir setzen es nach der Übernahme ein.</p></div>`
-    : '';
+  // Missing personal photos belong in the optional setup checklist, not in the business hero.
+  const owner = '';
   const kicker = `<p class="k-kicker">${esc(f.branchLabel)} in ${esc(f.city)}</p>`;
   const h1Cls = 'k-h1';
   const h1 = h1Of(kit, headline);
-  const lead = c.hero_subline ? `<p class="k-lead">${esc(c.hero_subline)}</p>` : '';
+  const specialties = (f.verifiedServices ?? []).slice(0, 2);
+  const lead =
+    (c.hero_subline ? `<p class="k-lead">${esc(c.hero_subline)}</p>` : '') +
+    (specialties.length
+      ? `<ul class="k-specialties" aria-label="Bestätigte Leistungen">${specialties.map((title) => `<li>${esc(title)}</li>`).join('')}</ul>`
+      : '');
   const note = draft ? p.servicesNote('k-note') : '';
   const head = (id: string, title: string, extra = '') => `<div class="k-sec-head"><h2 id="${id}">${title}</h2>${extra}</div>`;
 
@@ -137,20 +145,15 @@ function blocks(ctx: RenderContext, kit: Kit) {
       .join('')}</tbody></table>`;
   })();
 
-  const frames = draft
-    ? `<div class="k-frames">${['Vorher / nachher', 'Projekt', 'Projekt', 'Detail'].map((t) => `<div class="k-frame">${t}</div>`).join('')}</div>`
-    : '';
-  const projekte =
-    draft && kit.group === 'handwerk' && !compact
-      ? `<section id="projekte" class="k-sec" aria-labelledby="k-p"><div class="k-wrap">${head('k-p', 'Ihre Projekte', '<p class="k-note">Vorher und nachher wirkt stärker als jeder Text. Dieser Platz ist für Fotos Ihrer eigenen Arbeiten vorgesehen.</p>')}${frames}</div></section>`
-      : '';
+  // Never render empty project frames as a substitute for real, authorized work photos.
+  const projekte = '';
   // „Über uns“ nur mit echten Angaben. Ohne Angaben: im Entwurf ein ehrlicher Hinweis, live kein Abschnitt.
   const hasAbout = !!c.about.trim();
   const aboutText = hasAbout
     ? `${p.about('k-p')}${draft ? `<p class="k-note">Hier ergänzen wir Ihre belegten Angaben, zum Beispiel ${kit.group === 'gastronomie' ? 'wer kocht und woher die Zutaten kommen' : kit.group === 'beauty' ? 'Ausbildung und Produkte, mit denen Sie arbeiten' : 'Meisterbrief, Ausbildung oder Gründungsjahr'}. Wir schreiben nur, was stimmt.</p>` : ''}`
     : '';
   const offen = draft
-    ? `<section id="offen" class="k-sec" aria-labelledby="k-o"><div class="k-wrap"><div class="k-offen"><h2 id="k-o">Was für Ihre Seite noch fehlt</h2><ul>${brief.missing.map((m) => `<li>${esc(m)}</li>`).join('')}</ul><p class="k-note">Nichts davon erfinden wir. Sie geben uns die Angaben nach der Übernahme, wir tragen sie ein.</p></div></div></section>`
+    ? `<section id="offen" class="k-sec" aria-labelledby="k-o"><div class="k-wrap"><details class="k-offen"><summary id="k-o">Was für Ihre Seite noch fehlt</summary><ul>${brief.missing.map((m) => `<li>${esc(m)}</li>`).join('')}</ul><p class="k-note">Nichts davon erfinden wir. Sie ergänzen diese Angaben bei der Einrichtung, wir übernehmen sie für Ihre Seite.</p></details></div></section>`
     : '';
   const faq = c.faq.length
     ? `<div class="k-faq">${p.faqList({ itemClass: 'k-q', summaryClass: 'k-qs', answerClass: 'k-qa' })}</div>`
@@ -191,7 +194,7 @@ function blocks(ctx: RenderContext, kit: Kit) {
   const kontakt = `<section id="anfrage" class="k-sec k-kontakt" aria-labelledby="k-k"><div class="k-wrap k-kontakt-in">${kontaktInfo}${form}</div></section>`;
 
   const header = (cls = '') =>
-    `<header class="k-head ${cls}"><div class="k-wrap k-head-in"><a class="k-mark" href="#inhalt">${esc(f.name)}<small>${esc(f.branchLabel)} · ${esc(f.city)}</small></a>${call ? `<a class="k-head-tel" href="${esc(call.href)}">${esc(call.label)}</a>` : ''}</div></header>`;
+    `<header class="k-head ${cls}"><div class="k-wrap k-head-in"><a class="k-mark" href="#inhalt">${esc(f.name)}<small>${esc(f.branchLabel)} · ${esc(f.city)}</small></a><nav class="k-business-nav" aria-label="Betriebsnavigation"><a href="${kit.group === 'gastronomie' ? '#speisekarte' : '#leistungen'}">${kit.group === 'gastronomie' ? 'Karte' : 'Leistungen'}</a><a href="#anfrage">Kontakt</a></nav>${call ? `<a class="k-head-tel" href="${esc(call.href)}">${esc(call.label)}</a>` : ''}</div></header>`;
   const bar =
     !p.isDemo && (call || kit.primary !== 'call')
       ? `<nav class="k-bar" aria-label="Schnellkontakt">${call ? `<a class="k-btn k-btn-primary" href="${esc(call.href)}">Anrufen</a>` : ''}<a class="k-btn ${call ? 'k-btn-ghost' : 'k-btn-primary'}" href="#anfrage">${kit.primary === 'reserve' ? 'Tisch anfragen' : kit.primary === 'appointment' ? 'Termin anfragen' : 'Anfrage'}</a></nav>`
@@ -230,6 +233,7 @@ function blocks(ctx: RenderContext, kit: Kit) {
     bar,
     offen,
     compact,
+    brief,
   };
 }
 
@@ -249,7 +253,11 @@ function layoutMaler(b: Blocks): string {
   ];
   const faecher = `<div class="k-wrap k-sig"><ul class="k-faecher" aria-label="Beispiel-Farbtöne">${swatches.map(([bg, n, t, col]) => `<li style="background:${bg}${col ? `;color:${col}` : ''}"><b>${n}</b>${t}</li>`).join('')}</ul><p class="k-note">Beispiel-Farbtöne.</p></div>`;
   const fig = b.img(0, 'k-hero-fig', '(min-width: 900px) 42vw, 100vw');
-  return `${b.header()}<main id="inhalt"><section class="k-hero" aria-label="Start"><div class="k-wrap k-hero-in${fig ? '' : ' k-solo'}"><div class="k-hero-text">${b.kicker}${b.h1}${b.lead}${b.ctas}${b.facts}${b.owner}</div>${fig}</div></section>${faecher}
+  const panorama = b.brief.editorial.composition === 'panorama' && Boolean(fig);
+  const hero = panorama
+    ? `<section class="k-hero k-panorama" aria-label="Start"><div class="k-wrap"><div class="k-editorial-title"><div>${b.kicker}${b.h1}</div><div class="k-editorial-aside">${b.lead}${b.ctas}</div></div>${fig}${b.facts}</div></section>`
+    : `<section class="k-hero" aria-label="Start"><div class="k-wrap k-hero-in${fig ? '' : ' k-solo'}"><div class="k-hero-text">${b.kicker}${b.h1}${b.lead}${b.ctas}${b.facts}</div>${fig}</div></section>`;
+  return `${b.header()}<main id="inhalt" data-composition="${panorama ? 'panorama' : 'werkstatt'}">${hero}${faecher}
 ${sec('leistungen', 'k-l', `${b.head('k-l', 'Was wir für Sie machen', b.note)}${b.list}`)}
 ${b.stepsHtml() ? sec('ablauf', 'k-a', `<div class="k-split"><div><h2 id="k-a">So läuft Ihr Auftrag</h2>${b.stepsHtml()}</div>${b.img(1, 'k-side-fig', '(min-width: 900px) 40vw, 100vw')}</div>`) : ''}
 ${b.projekte}${b.aboutText ? sec('ueber-uns', 'k-b', `<div class="k-split"><h2 id="k-b">Aus ${esc(b.f.city)}</h2><div>${b.aboutText}</div></div>`) : ''}
@@ -273,7 +281,7 @@ function layoutElektro(b: Blocks): string {
 <section class="k-hero" aria-label="Start">${b.img(0, 'k-hero-fig', '(min-width: 900px) 60vw, 100vw')}${b.kicker}${b.h1}${b.lead}${b.owner}</section>
 ${node('leistungen', 'Leistungen', `${b.note}${b.list}`)}
 ${b.stepsHtml() ? node('ablauf', 'Ablauf', b.stepsHtml('k-steps k-schalt')) : ''}
-${b.draft && !b.compact ? node('projekte', 'Ihre Projekte', `<p class="k-note">Platz für Fotos Ihrer eigenen Arbeiten.</p>${'<div class="k-frames">' + ['Verteiler', 'Installation', 'Projekt'].map((t) => `<div class="k-frame">${t}</div>`).join('') + '</div>'}`) : ''}
+
 ${b.aboutText ? node('ueber-uns', 'Der Betrieb', b.aboutText) : ''}
 ${b.faq ? node('fragen', 'Häufige Fragen', b.faq) : ''}
 </div></main>${b.offen}${b.kontakt}`;
@@ -282,14 +290,14 @@ ${b.faq ? node('fragen', 'Häufige Fragen', b.faq) : ''}
 /** Reinigung „Turnus“: hell und ruhig, der Wochenplan ist das Hauptmotiv, Foto als breites Band. */
 function layoutReinigung(b: Blocks): string {
   const side =
-    b.draft && b.turnus
+    b.draft && !b.compact && b.turnus
       ? `<div class="k-plan">${b.turnus}<p class="k-note">Beispiel für einen Reinigungsplan. Ihre echten Rhythmen tragen wir nach der Übernahme ein.</p></div>`
       : b.img(0, 'k-hero-fig', '(min-width: 900px) 45vw, 100vw');
   return `${b.header()}<main id="inhalt"><section class="k-hero" aria-label="Start"><div class="k-wrap k-hero-in${side ? '' : ' k-solo'}"><div class="k-hero-text">${b.kicker}${b.h1}${b.lead}${b.ctas}${b.facts}</div>${side}</div></section>
-${b.draft ? b.img(0, 'k-band', '100vw') : ''}
+${b.draft && !b.compact ? b.img(1, 'k-band', '100vw') : ''}
 ${sec('leistungen', 'k-l', `${b.head('k-l', 'Was regelmäßig sauber wird', b.note)}${b.list}`, 'k-sec-cols')}
 ${b.stepsHtml() ? sec('ablauf', 'k-a', `${b.head('k-a', 'So beginnt die Zusammenarbeit')}${b.stepsHtml('k-steps k-steps-row')}`) : ''}
-${b.aboutText ? sec('ueber-uns', 'k-b', `<div class="k-split"><div><h2 id="k-b">Ihr Ansprechpartner</h2>${b.owner}</div><div>${b.aboutText}</div></div>`) : ''}
+${b.aboutText ? sec('ueber-uns', 'k-b', `<div class="k-split"><div><h2 id="k-b">Der Betrieb</h2></div><div>${b.aboutText}</div></div>`) : ''}
 ${b.faq ? sec('fragen', 'k-f', `${b.head('k-f', 'Häufige Fragen')}${b.faq}`) : ''}${b.offen}${b.kontakt}</main>`;
 }
 
@@ -305,23 +313,13 @@ ${b.faq ? sec('fragen', 'k-f', `<div class="k-narrow"><h2 id="k-f" class="k-cent
 
 /** Gastro „Karte“: Foto randlos, Name groß darunter, Speisekarte wie eine gedruckte Karte. */
 function layoutGastro(b: Blocks): string {
-  return `${b.header('k-head-over')}<main id="inhalt"><section class="k-hero" aria-label="Start">${b.img(0, 'k-hero-fig', '100vw')}<div class="k-wrap k-hero-band"><div>${h1Of(b.kit, b.f.name)}${b.kicker}${b.headline !== b.f.name ? `<p class="k-claim">${esc(b.headline)}</p>` : ''}${b.lead}${b.ctas}</div>${b.facts}</div></section>
+  const fig = b.img(0, 'k-hero-fig', '(min-width: 900px) 65vw, 100vw');
+  return `${b.header('k-head-over')}<main id="inhalt"><section class="k-hero k-gastro-editorial${fig ? '' : ' k-solo'}" aria-label="Start"><div class="k-wrap">${b.kicker}${h1Of(b.kit, b.f.name)}<div class="k-gastro-mobile-actions">${b.ctas}</div><div class="k-gastro-invitation">${fig}<div class="k-gastro-copy">${b.headline !== b.f.name ? `<h2 class="k-invitation-title">${esc(b.headline)}</h2>` : ''}${b.lead}${b.ctas}</div></div>${b.facts}</div></section>
 <section id="speisekarte" class="k-sec" aria-labelledby="k-l"><div class="k-narrow"><h2 id="k-l" class="k-center">Auf der Karte</h2>${b.note}${b.karte}</div></section>
 ${b.img(1, 'k-band', '100vw')}
 ${b.offen}${b.kontakt}
 ${b.aboutText ? sec('ueber-uns', 'k-b', `<div class="k-split"><h2 id="k-b">Über uns</h2><div>${b.aboutText}</div></div>`) : ''}
 ${b.faq ? sec('fragen', 'k-f', `<div class="k-narrow"><h2 id="k-f" class="k-center">Gut zu wissen</h2>${b.faq}</div>`) : ''}</main>`;
-}
-
-function initials(name: string): string {
-  return (
-    name
-      .split(/\s+/)
-      .filter((w) => /^[A-Za-zÄÖÜäöü]/.test(w))
-      .slice(0, 2)
-      .map((w) => w[0]!.toUpperCase())
-      .join('') || '•'
-  );
 }
 
 /**

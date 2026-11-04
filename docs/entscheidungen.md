@@ -1061,3 +1061,20 @@ Befund aus dem ersten echten Lauf (64 Betriebe Maler/Elektro in Bochum, Dortmund
   für Anschrift, Aktivität und Website-Suche gibt erst die KI. Neu: Die Mindestgrenze sortiert nur noch Betriebe ohne
   Telefonnummer aus; alle anderen prüft die KI (Ablauf des Betreibers „er soll alle prüfen“). KI-Kosten bleiben durch das
   Wochenbudget begrenzt. Eine erneute Suche bewertet die bereits aussortierten Betriebe neu.
+
+## 04.11.2026 – Codex: Gestaltungsprinzipien in der echten Demo-Pipeline
+
+- Betreiberauftrag: neue Demos sollen nach den Prinzipien der eigenständigen Kalk-&-Kante-/Sera-Studien
+  entstehen. Bestehende Kits und günstige Modelle beibehalten, kein paralleles System.
+- Gemeinsamer versionierter Redaktions-/Gestaltungsplan für Prompt, Briefing und Renderer. Entfernt den
+  widersprüchlichen Prompt-Abschluss mit Pflicht-FAQs und zwei Über-uns-Absätzen. Generierter Über-uns-Text
+  zählt im Briefing nicht mehr als eigenständiger Beleg; Umfang nach belegten Leistungen/eigenen Bildern.
+- Neue inhaltlich begründete Maler-Panoramakomposition, gastronomischer Masthead/Bild-/Einladungsbereich,
+  spezifische Leistungen im Hero, strukturierte Leistungslisten und Betriebsnavigation. Fehlendes gebündelt
+  als aufklappbare Einrichtungsliste, keine leeren Porträt-/Referenzkästen.
+- Zusätzliches dokumentiertes, gekennzeichnetes Pexels-Raummotiv für belegte Innenraumleistungen.
+- Vorhandene Kit-KI-QA prüft beide tatsächlichen Startansichten im selben budgetierten Aufruf. Keine
+  zweite KI-Schleife oder pauschale Designnote. Visuelle Blocker bleiben zur manuellen Prüfung liegen.
+- Geschützte Kauf-/Angebots-/Formular-Markups gegen 8b10675 verglichen. Keine DB-/Serveraktionen,
+  keine Freigabe oder Überarbeitung von Elektro Reiche/Pintura Bau und keine echten KI-Aufrufe im Test.
+- Entwicklung auf separatem Branch; ein Push dieses Branches aktiviert den VPS-Worker nicht.

@@ -1,0 +1,62 @@
+[
+  {
+    "kit": "maler",
+    "mode": "demo",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "maler",
+    "mode": "live",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "fliesen",
+    "mode": "demo",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "fliesen",
+    "mode": "live",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "elektro",
+    "mode": "demo",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "elektro",
+    "mode": "live",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "reinigung",
+    "mode": "demo",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "reinigung",
+    "mode": "live",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "beauty",
+    "mode": "demo",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "beauty",
+    "mode": "live",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "gastro",
+    "mode": "demo",
+    "protectedMarkupIdentical": true
+  },
+  {
+    "kit": "gastro",
+    "mode": "live",
+    "protectedMarkupIdentical": true
+  }
+]

@@ -16,6 +16,7 @@ import type { BranchGroup, RenderInput, TemplateDef } from './types';
 import { KITS, getKit } from './kits/kits';
 import { renderKit } from './kits/render';
 export { KITS, kitFor, getKit, kitVariantFor, hoursHints, type KitVariantHints } from './kits/kits';
+export { editorialPlan, EDITORIAL_VERSION, type EditorialPlan } from './kits/editorial';
 export { designBrief, requestLabel, type DesignBrief } from './kits/brief';
 export { slopFindings, slopFindingsForPage, type SlopFinding } from './kits/slop';
 

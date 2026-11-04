@@ -1617,5 +1617,39 @@
     "moods": [
       "neutral"
     ]
+  },
+  {
+    "file": "handwerk/maler-wohnraum-pexels-1571460.jpg",
+    "group": "handwerk",
+    "alt": "Heller Wohnraum mit farbigen Akzenten als Rauminspiration, kein Projekt des Betriebs",
+    "title": "Interior design of a house",
+    "creator": "Viaceslav Kat",
+    "license": "Pexels License",
+    "licenseUrl": "https://www.pexels.com/license/",
+    "source": "Pexels",
+    "sourceUrl": "https://www.pexels.com/photo/interior-design-of-a-house-1571460/",
+    "openverseId": "",
+    "checkedAt": "2026-11-04",
+    "checkedVia": "Official photo page and Pexels license read. Image used as labeled illustration; no endorsement. JPEG comment records source/license without changing image pixels.",
+    "bytes": 174295,
+    "width": 1400,
+    "height": 900,
+    "keywords": [
+      "innenanstrich",
+      "innenraum",
+      "raumgestaltung",
+      "tapezier",
+      "wohnraum"
+    ],
+    "role": "interior",
+    "hero": true,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "moods": [
+      "warm",
+      "neutral"
+    ]
   }
 ]
