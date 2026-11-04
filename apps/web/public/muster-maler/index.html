@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Malerei Hennig · Maler in Dortmund-Hörde (Entwurf)</title>
+<link rel="preload" href="fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="img/hero-600.webp" as="image" imagesrcset="img/hero-600.webp 600w, img/hero-960.webp 960w" imagesizes="(min-width: 900px) 44vw, 100vw">
+<style>
+/* Gestaltungs-Kit „Farbfächer“ (Maler) – Schrift, Farbrollen, Radius, Bildbehandlung, ein Signatur-Element */
+@font-face{font-family:"Archivo";src:url(fonts/archivo-latin-wdth-normal.woff2) format("woff2");font-weight:100 900;font-stretch:62% 125%;font-display:swap}
+@font-face{font-family:"Atkinson";src:url(fonts/atkinson-hyperlegible-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Atkinson";src:url(fonts/atkinson-hyperlegible-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
+:root{
+  --kalk:#ECEAE4;      /* Grund */
+  --kalk-2:#E2DFD7;    /* Fläche abgesetzt */
+  --linie:#C9C5BB;     /* Haarlinie */
+  --graphit:#1B1E21;   /* Text, Überschrift */
+  --schiefer:#545B61;  /* Nebentext */
+  --petrol:#0A6468;    /* einziger Akzent: Handlung */
+  --petrol-dunkel:#084E51;
+  --radius:4px;
+  --display:"Archivo","Arial Narrow",sans-serif;
+  --text:"Atkinson",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--kalk);color:var(--graphit);font:400 1.0625rem/1.6 var(--text)}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--petrol);outline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--display);font-stretch:72%;font-weight:800;line-height:.95;letter-spacing:-.01em;margin:0}
+h2{font-size:clamp(2.1rem,6vw,3.6rem)}
+h3{font-size:1.35rem;font-stretch:85%;font-weight:700;line-height:1.15}
+p{margin:0}
+.muted{color:var(--schiefer)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:52px;padding:0 22px;border-radius:var(--radius);font:700 1.05rem/1 var(--text);text-decoration:none;border:2px solid var(--graphit)}
+.btn-primary{background:var(--petrol);border-color:var(--petrol);color:#fff}
+.btn-primary:hover{background:var(--petrol-dunkel);border-color:var(--petrol-dunkel)}
+.btn-ghost{background:transparent}
+.btn-ghost:hover{background:var(--graphit);color:var(--kalk)}
+.tag{display:inline-block;font:700 .8rem/1 var(--text);padding:5px 8px;border:1px solid var(--schiefer);border-radius:2px;color:var(--schiefer);vertical-align:middle}
+
+/* Entwurfsleiste */
+.demo{background:var(--graphit);color:#e9e7e1;font-size:.92rem}
+.demo .wrap{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding-top:9px;padding-bottom:9px}
+.demo a{color:#fff;font-weight:700}
+.demo .take{background:#fff;color:var(--graphit);padding:7px 12px;border-radius:var(--radius);text-decoration:none}
+
+/* Kopf */
+header .wrap{display:flex;align-items:center;justify-content:space-between;padding-top:18px;padding-bottom:18px;border-bottom:1px solid var(--linie)}
+.marke{font-family:var(--display);font-stretch:68%;font-weight:900;font-size:1.65rem;letter-spacing:.01em;text-decoration:none;line-height:1}
+.marke small{display:block;font:400 .78rem/1.3 var(--text);letter-spacing:0;color:var(--schiefer)}
+.kopf-tel{font-weight:700;text-decoration:none;white-space:nowrap}
+.kopf-tel span{color:var(--schiefer);font-weight:400}
+
+/* Startbereich */
+.hero{display:grid;gap:28px;padding:28px 0 0}
+.hero h1{font-size:clamp(3rem,13vw,7.4rem);font-stretch:66%;font-weight:900;line-height:.86;letter-spacing:-.015em}
+.hero h1 .ort{display:block;font-stretch:100%;font-weight:600;font-size:.34em;letter-spacing:0;line-height:1.1;margin-top:.45em;color:var(--schiefer)}
+.hero .lead{font-size:1.15rem;max-width:34em;margin-top:18px}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.fakten{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-top:24px;padding-top:18px;border-top:1px solid var(--linie);font-size:.95rem}
+.fakten b{display:block;font-size:.8rem;color:var(--schiefer);font-weight:700}
+.bild{position:relative;margin:0}
+.bild img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:var(--radius);filter:contrast(1.04)}
+.bild figcaption{position:absolute;left:10px;top:10px;background:rgba(27,30,33,.78);color:#fff;font-size:.75rem;padding:4px 7px;border-radius:2px}
+.inhaber{display:flex;gap:14px;align-items:center;margin-top:22px;padding:14px;border:1px dashed var(--schiefer);border-radius:var(--radius);max-width:420px}
+.inhaber .platz{flex:0 0 64px;height:64px;border-radius:50%;background:var(--kalk-2);display:grid;place-items:center;font:800 1.3rem/1 var(--display);color:var(--schiefer)}
+.inhaber p{font-size:.92rem;line-height:1.45}
+
+/* Signatur: Farbfächer */
+.faecher{margin:46px 0 0;padding:0;list-style:none;display:flex;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.faecher li{flex:1 0 120px;min-height:150px;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;font-size:.8rem;line-height:1.3;transform-origin:bottom left;border-right:1px solid rgba(0,0,0,.08)}
+.faecher li b{font:800 1rem/1.1 var(--display);font-stretch:85%}
+@media (prefers-reduced-motion:no-preference){
+  .faecher li{animation:auf .7s cubic-bezier(.2,.7,.2,1) both}
+  .faecher li:nth-child(2){animation-delay:.05s}.faecher li:nth-child(3){animation-delay:.1s}.faecher li:nth-child(4){animation-delay:.15s}.faecher li:nth-child(5){animation-delay:.2s}.faecher li:nth-child(6){animation-delay:.25s}.faecher li:nth-child(7){animation-delay:.3s}
+  @keyframes auf{from{transform:rotate(-7deg) translateY(16px);opacity:0}to{transform:none;opacity:1}}
+}
+.faecher-hinweis{font-size:.85rem;margin-top:10px}
+
+/* Abschnitte */
+section{padding:72px 0 0}
+.kopfzeile{display:grid;gap:12px;margin-bottom:28px}
+.kopfzeile p{max-width:38em}
+
+/* Leistungen als Preisliste */
+.liste{list-style:none;margin:0;padding:0;border-top:2px solid var(--graphit)}
+.liste li{display:grid;grid-template-columns:1fr auto;gap:4px 16px;padding:18px 0;border-bottom:1px solid var(--linie)}
+.liste .preis{font-weight:700;white-space:nowrap;text-align:right}
+.liste .preis small{display:block;font-weight:400;color:var(--schiefer);font-size:.78rem}
+.liste p{grid-column:1/-1;color:var(--schiefer);max-width:40em}
+
+/* Ablauf */
+.ablauf{display:grid;gap:28px}
+.schritte{list-style:none;margin:0;padding:0;counter-reset:s}
+.schritte li{counter-increment:s;display:grid;grid-template-columns:54px 1fr;gap:4px 14px;padding:16px 0;border-bottom:1px solid var(--linie)}
+.schritte li::before{content:counter(s);grid-row:span 2;font:900 2.6rem/1 var(--display);font-stretch:66%;color:var(--petrol)}
+.schritte p{color:var(--schiefer)}
+.ablauf img{border-radius:var(--radius);aspect-ratio:3/2;object-fit:cover;width:100%}
+.ablauf figure{margin:0;position:relative}
+.ablauf figcaption{font-size:.75rem;color:var(--schiefer);margin-top:6px}
+
+/* Projekte (vorgesehener Platz) */
+.projekte{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.rahmen{aspect-ratio:4/3;border:1px dashed var(--schiefer);border-radius:var(--radius);display:flex;align-items:flex-end;padding:10px;font-size:.82rem;color:var(--schiefer);background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(0,0,0,.025) 14px 15px)}
+
+
+/* Betrieb + Gebiet */
+.betrieb{display:grid;gap:28px}
+.gebiet{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:14px 0 0;padding:0}
+.gebiet li{border:1px solid var(--graphit);border-radius:2px;padding:6px 10px;font-size:.92rem}
+
+/* Fragen */
+.fragen details{border-bottom:1px solid var(--linie)}
+.fragen summary{cursor:pointer;list-style:none;padding:18px 36px 18px 0;font-weight:700;position:relative}
+.fragen summary::-webkit-details-marker{display:none}
+.fragen summary::after{content:"+";position:absolute;right:4px;top:12px;font:400 1.6rem/1 var(--display);color:var(--petrol)}
+.fragen details[open] summary::after{content:"–"}
+.fragen details p{padding:0 0 18px;color:var(--schiefer);max-width:44em}
+
+/* Anfrage */
+.anfrage{background:var(--graphit);color:#ECEAE4;margin-top:72px;padding:64px 0 72px}
+.anfrage h2{color:#fff}
+.anfrage .muted{color:#B9BDB9}
+.formular{display:grid;gap:16px;margin-top:26px}
+.formular label{display:grid;gap:6px;font-weight:700;font-size:.95rem}
+.formular small{font-weight:400;color:#B9BDB9}
+.formular input,.formular select,.formular textarea{font:400 1rem/1.4 var(--text);color:var(--graphit);background:#F6F5F1;border:1px solid #8E949A;border-radius:var(--radius);padding:12px;min-height:48px;width:100%}
+.formular textarea{min-height:110px}
+.formular .zwei{display:grid;gap:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{display:inline-flex;align-items:center;gap:8px;font-weight:400;border:1px solid #8E949A;border-radius:var(--radius);padding:10px 12px;min-height:44px;cursor:pointer}
+.chips input{width:auto;min-height:auto;accent-color:var(--petrol)}
+.einw{display:flex !important;grid-template-columns:none;gap:10px !important;align-items:flex-start;font-weight:400 !important}
+.einw input{width:20px;min-height:20px;margin-top:3px;accent-color:var(--petrol)}
+.anfrage .btn-primary{border-color:#fff}
+.direkt{margin-top:26px;padding-top:20px;border-top:1px solid #3A3F44;display:flex;flex-wrap:wrap;gap:10px 28px}
+.direkt a{font-weight:700;text-decoration:none}
+
+@media (max-width:599px){.kopf-tel{display:none}.demo .lang{display:none}.demo .wrap{flex-wrap:nowrap;font-size:.85rem}}
+footer{padding:30px 0 110px;font-size:.88rem;color:var(--schiefer)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:space-between}
+
+/* Mobil: feste Handlungsleiste */
+.leiste{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(236,234,228,.97);border-top:1px solid var(--linie);z-index:10}
+.leiste .btn{min-height:48px;padding:0 10px;font-size:1rem}
+
+@media (min-width:900px){
+  body{font-size:1.1rem}
+  .hero{grid-template-columns:1.15fr .85fr;gap:56px;align-items:start;padding-top:48px}
+  .bild{position:sticky;top:24px}
+  .fakten{grid-template-columns:repeat(3,1fr)}
+  .faecher li{min-height:190px}
+  section{padding-top:110px}
+  .kopfzeile{grid-template-columns:1fr 1fr;align-items:end;gap:40px;margin-bottom:40px}
+  .ablauf{grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+  .projekte{grid-template-columns:repeat(4,1fr)}
+  .betrieb{grid-template-columns:1fr 1fr;gap:56px}
+  .fragen{max-width:820px}
+  .anfrage .wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:64px}
+  .formular{margin-top:0}
+  .formular .zwei{grid-template-columns:1fr 1fr}
+  .leiste{display:none}
+  footer{padding-bottom:40px}
+}
+</style>
+</head>
+<body>
+
+<div class="demo" role="region" aria-label="Hinweis zum Entwurf">
+  <div class="wrap">
+    <span>Entwurf für Malerei Hennig<span class="lang"> · Musterbetrieb, alle Angaben erfunden</span> · online bis 4.12.</span>
+    <span><a class="take" href="#uebernehmen">Seite übernehmen</a> &nbsp; <a href="#kein-interesse">Kein Interesse</a></span>
+  </div>
+</div>
+
+<header>
+  <div class="wrap">
+    <a class="marke" href="#">MALEREI HENNIG<small>Maler und Lackierer · Dortmund-Hörde</small></a>
+    <a class="kopf-tel" href="tel:+49231471108"><span>Tel. </span>0231 47 11 08</a>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>Wände. Decken. Fassaden.<span class="ort">Malerbetrieb für Hörde, Aplerbeck und Berghofen</span></h1>
+      <p class="lead">Innenanstrich, Tapezieren, Lackarbeiten und Fassade. Sie bekommen nach der Besichtigung einen schriftlichen Kostenvoranschlag mit Festpreis pro Raum.</p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="tel:+49231471108">0231 47 11 08 anrufen</a>
+        <a class="btn btn-ghost" href="#anfrage">Anfrage mit Fotos</a>
+      </div>
+      <div class="fakten">
+        <div><b>Erreichbar</b>Mo–Fr 7–18 Uhr, Rückruf am selben Tag</div>
+        <div><b>Besichtigung</b>kostenlos, meist innerhalb einer Woche</div>
+        <div><b>Adresse</b>Hörder Bahnhofstraße 0, 44263 Dortmund</div>
+      </div>
+      <div class="inhaber">
+        <div class="platz" aria-hidden="true">MH</div>
+        <p><b>Hier steht Ihr Foto.</b> Kunden wollen sehen, wer zu ihnen nach Hause kommt. Wir setzen es nach der Übernahme ein.</p>
+      </div>
+    </div>
+    <figure class="bild">
+      <img src="img/hero-600.webp" srcset="img/hero-600.webp 600w, img/hero-960.webp 960w" sizes="(min-width: 900px) 44vw, 100vw" width="600" height="750" alt="Farbrolle trägt Anthrazit auf eine weiße Wand auf" fetchpriority="high">
+      <figcaption>Symbolbild</figcaption>
+    </figure>
+  </div>
+
+  <ul class="faecher" aria-label="Beispiel-Farbtöne" tabindex="0">
+    <li style="background:#F2F0EA"><b>Kalkweiß</b>ruhig, für Altbau</li>
+    <li style="background:#D9CFBF"><b>Leinen</b>warm, für Flure</li>
+    <li style="background:#9DA88F"><b>Salbei</b>Schlafzimmer</li>
+    <li style="background:#C8963E"><b>Ocker</b>Akzentwand</li>
+    <li style="background:#566C7C;color:#fff"><b>Taubenblau</b>Bad, Küche</li>
+    <li style="background:#9B4A36;color:#fff"><b>Ziegel</b>Fassadensockel</li>
+    <li style="background:#2E3236;color:#fff"><b>Graphit</b>Türen, Rahmen</li>
+  </ul>
+  <p class="faecher-hinweis muted">Farbberatung vor Ort mit Mustern an Ihrer Wand. Die Töne oben sind Beispiele.</p>
+
+  <section id="leistungen" aria-labelledby="l-h">
+    <div class="kopfzeile">
+      <h2 id="l-h">Was wir streichen, tapezieren und lackieren</h2>
+      <p class="muted">Preise sind Beispiele für einen ersten Eindruck. Verbindlich ist der schriftliche Kostenvoranschlag nach der Besichtigung. <span class="tag">Beispiel</span></p>
+    </div>
+    <ul class="liste">
+      <li><h3>Innenanstrich</h3><span class="preis">ab 12 €<small>pro m² Wandfläche</small></span><p>Wände und Decken, inklusive Abdecken, Abkleben und Spachteln kleiner Löcher.</p></li>
+      <li><h3>Tapezieren</h3><span class="preis">ab 18 €<small>pro m², Vlies</small></span><p>Alte Tapete runter, Untergrund vorbereiten, Vlies- oder Raufaser neu.</p></li>
+      <li><h3>Türen, Heizkörper, Fenster lackieren</h3><span class="preis">ab 85 €<small>pro Türblatt</small></span><p>Anschleifen, grundieren, lackieren. Auch Treppengeländer.</p></li>
+      <li><h3>Fassade</h3><span class="preis">nach Besichtigung<small>Gerüst nach Aufwand</small></span><p>Reinigen, Risse schließen, Anstrich mit Silikon- oder Silikatfarbe.</p></li>
+      <li><h3>Feuchte- und Schimmelflecken</h3><span class="preis">nach Besichtigung<small>Ursache zuerst</small></span><p>Wir prüfen die Ursache und sagen ehrlich, wann ein Anstrich allein nicht reicht.</p></li>
+    </ul>
+  </section>
+
+  <section id="ablauf" aria-labelledby="a-h">
+    <div class="ablauf">
+      <div>
+        <h2 id="a-h">So läuft Ihr Auftrag</h2>
+        <ol class="schritte" style="margin-top:24px">
+          <li><h3>Anfrage</h3><p>Anruf oder Formular, gern mit Fotos der Räume.</p></li>
+          <li><h3>Rückruf</h3><p>Am selben Werktag. Wir klären Umfang und Terminwunsch.</p></li>
+          <li><h3>Besichtigung</h3><p>Kostenlos vor Ort, mit Farbmustern an Ihrer Wand.</p></li>
+          <li><h3>Kostenvoranschlag</h3><p>Schriftlich, Festpreis pro Raum, keine Überraschungen auf der Rechnung.</p></li>
+        </ol>
+      </div>
+      <figure>
+        <img src="img/material-900.webp" width="900" height="599" loading="lazy" decoding="async" alt="Farbeimer, Pinsel und Abdeckplane auf einem Holzboden">
+        <figcaption>Symbolbild. Nach der Übernahme zeigen wir hier Ihre eigenen Baustellen.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="projekte" aria-labelledby="p-h">
+    <div class="kopfzeile">
+      <h2 id="p-h">Ihre Projekte</h2>
+      <p class="muted">Vorher und nachher wirkt stärker als jeder Text. Dieser Platz ist für Fotos Ihrer eigenen Arbeiten vorgesehen.</p>
+    </div>
+    <div class="projekte">
+      <div class="rahmen">Wohnzimmer, vorher / nachher</div>
+      <div class="rahmen">Treppenhaus</div>
+      <div class="rahmen">Fassade</div>
+      <div class="rahmen">Türen lackiert</div>
+    </div>
+  </section>
+
+  <section id="betrieb" aria-labelledby="b-h">
+    <div class="betrieb">
+      <div>
+        <h2 id="b-h">Ein Betrieb aus Hörde</h2>
+      </div>
+      <div>
+        <p>Malerei Hennig arbeitet in Dortmund und den Stadtteilen im Südosten. Kurze Wege heißen für Sie: schnelle Besichtigung und ein fester Ansprechpartner von der Anfrage bis zur Abnahme.</p>
+        <p class="muted" style="margin-top:14px">Hier ergänzen wir nach der Übernahme Ihre Angaben, zum Beispiel Meisterbrief, Innung oder Gründungsjahr. Wir schreiben nur, was belegt ist.</p>
+        <ul class="gebiet" aria-label="Einsatzgebiet">
+          <li>Hörde</li><li>Aplerbeck</li><li>Berghofen</li><li>Benninghofen</li><li>Wellinghofen</li><li>Innenstadt-Ost</li><li>Schwerte</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="fragen" aria-labelledby="f-h">
+    <div class="kopfzeile"><h2 id="f-h">Häufige Fragen</h2></div>
+    <div class="fragen">
+      <details><summary>Was kostet es, ein Zimmer streichen zu lassen?</summary><p>Das hängt von Fläche, Untergrund und Farbe ab. Ein Kinderzimmer mit 12 m² Grundfläche liegt grob bei 350 bis 550 €. Den genauen Preis bekommen Sie schriftlich nach der Besichtigung.</p></details>
+      <details><summary>Muss ich die Möbel selbst ausräumen?</summary><p>Nein. Wir rücken Möbel in die Raummitte und decken sie ab. Schränke mit Inhalt sollten vorher leer sein.</p></details>
+      <details><summary>Wie lange dauert ein Raum?</summary><p>Ein normal großes Zimmer schaffen wir meist an einem Tag. Mit Tapezieren rechnen Sie mit zwei Tagen.</p></details>
+      <details><summary>Riecht die Farbe danach?</summary><p>Wir nutzen für Innenräume emissionsarme Farben. Nach ein bis zwei Tagen Lüften ist fast nichts mehr zu riechen.</p></details>
+      <details><summary>Können Sie auch am Samstag kommen?</summary><p>Für kleinere Arbeiten nach Absprache ja. Sagen Sie es bei der Anfrage dazu.</p></details>
+      <details><summary>Übernehmen Sie Arbeiten für Vermieter und Hausverwaltungen?</summary><p>Ja, zum Beispiel Renovierung bei Mieterwechsel. Rechnungen gehen auf Wunsch direkt an die Verwaltung.</p></details>
+      <details><summary>Was passiert mit dem Schmutz und den Resten?</summary><p>Wir nehmen Abdeckmaterial, alte Tapeten und Farbreste mit und entsorgen sie.</p></details>
+      <details><summary>Muss ich zu Hause sein, während Sie arbeiten?</summary><p>Zur Übergabe und Abnahme ja. Dazwischen reicht ein Schlüssel, wenn Sie das möchten.</p></details>
+    </div>
+  </section>
+</div>
+
+<section class="anfrage" id="anfrage" aria-labelledby="k-h">
+  <div class="wrap">
+    <div>
+      <h2 id="k-h">Anfrage in zwei Minuten</h2>
+      <p class="muted" style="margin-top:14px">Je genauer, desto schneller der Preis. Fotos helfen uns, den Aufwand vor der Besichtigung einzuschätzen.</p>
+      <div class="direkt">
+        <a href="tel:+49231471108">0231 47 11 08</a>
+        <a href="mailto:info@malerei-hennig.example">info@malerei-hennig.example</a>
+      </div>
+    </div>
+    <form class="formular" action="#" method="post" onsubmit="return false">
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend style="font-weight:700;margin-bottom:8px">Was soll gemacht werden?</legend>
+        <div class="chips">
+          <label><input type="checkbox" name="art" value="innen"> Innenanstrich</label>
+          <label><input type="checkbox" name="art" value="tapete"> Tapezieren</label>
+          <label><input type="checkbox" name="art" value="lack"> Lackieren</label>
+          <label><input type="checkbox" name="art" value="fassade"> Fassade</label>
+          <label><input type="checkbox" name="art" value="sonstiges"> Etwas anderes</label>
+        </div>
+      </fieldset>
+      <div class="zwei">
+        <label>Wie viele Räume oder m²?<input name="umfang" placeholder="z. B. 2 Zimmer und Flur"></label>
+        <label>Wann soll es losgehen?<select name="zeitraum"><option>So bald wie möglich</option><option>In 2–4 Wochen</option><option>In 1–3 Monaten</option><option>Noch offen</option></select></label>
+      </div>
+      <label>Fotos der Räume <small>optional, bis zu 5 Bilder</small><input type="file" name="fotos" accept="image/*" multiple></label>
+      <label>Noch etwas, das wir wissen sollten? <small>optional</small><textarea name="nachricht" placeholder="z. B. Altbau, hohe Decken, Wasserfleck an der Decke"></textarea></label>
+      <div class="zwei">
+        <label>Ihr Name<input name="name" autocomplete="name" required></label>
+        <label>Telefon für den Rückruf<input name="tel" type="tel" autocomplete="tel" required></label>
+      </div>
+      <div class="zwei">
+        <label>Postleitzahl<input name="plz" inputmode="numeric" maxlength="5" autocomplete="postal-code" required></label>
+        <label>Wann passt ein Rückruf?<select name="rueckruf"><option>Egal</option><option>Vormittags</option><option>Mittags</option><option>Nach 16 Uhr</option></select></label>
+      </div>
+      <label class="einw"><input type="checkbox" required> <span>Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage gespeichert werden. Hinweise in der <a href="#datenschutz">Datenschutzerklärung</a>.</span></label>
+      <div><button class="btn btn-primary" type="submit">Anfrage senden</button></div>
+      <p class="muted" style="font-size:.85rem">Entwurf: Das Formular verschickt noch nichts.</p>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Malerei Hennig · Musterbetrieb · Entwurf von SeitenWerk</span>
+    <span><a href="#impressum">Impressum</a> · <a href="#datenschutz">Datenschutz</a></span>
+  </div>
+</footer>
+
+<nav class="leiste" aria-label="Schnellkontakt">
+  <a class="btn btn-primary" href="tel:+49231471108">Anrufen</a>
+  <a class="btn btn-ghost" href="#anfrage">Anfrage</a>
+</nav>
+</body>
+</html>

@@ -1,0 +1,4 @@
+Muster-Demo „Farbfächer“ (Maler) – Bild- und Schriftquellen
+- Bilder: Pexels (Pexels-Lizenz, kommerziell frei, keine Namensnennung nötig), Fotos 994164 und 7217935, beschnitten und komprimiert.
+- Schriften: Archivo (SIL Open Font License 1.1), Atkinson Hyperlegible (SIL Open Font License 1.1), selbst gehostet über @fontsource.
+- Betrieb, Name, Adresse, Telefonnummer und Preise sind erfunden (Musterbetrieb).
