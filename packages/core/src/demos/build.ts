@@ -39,12 +39,22 @@ import {
   DEMO_TOOL_NAME,
   normalizeContent,
   validateDemoContent,
-  verifiedServiceFallback,
   type ContentFacts,
   type RuleViolation,
 } from './content';
 import { libraryContent } from './library';
 import './mock-handlers';
+import {
+  STUDIO_SCHEMA,
+  STUDIO_SYSTEM,
+  STUDIO_TOOL,
+  STUDIO_VERSION,
+  parseStudioPlan,
+  studioPrompt,
+  studioImplementationBrief,
+  type StudioPlan,
+} from './studio';
+import { studioImages } from './studio-images';
 
 type Lead = typeof leads.$inferSelect;
 
@@ -289,11 +299,12 @@ export interface GeneratedContent {
   source: 'llm' | 'fallback';
   attempts: number;
   violations: RuleViolation[];
+  studioPlan?: StudioPlan;
 }
 
 /**
- * Inhalte per Claude (MODEL_CREATIVE) mit Regelprüfung. Bis zu zwei Versuche
- * (der zweite mit konkretem Feedback), danach geprüfte Fallback-Texte.
+ * Art direction first, then independent HTML/CSS implementation with the actual image material.
+ * Each model call uses the existing budget ledger. No template fallback after failed authorship.
  */
 export async function generateDemoContent(
   lead: Lead,
@@ -306,10 +317,27 @@ export async function generateDemoContent(
   const facts = {
     ...leadContentFacts(lead, cfg, research),
     requireFullPage: true,
-    designCharacter: direction?.character,
+    // A sector fallback is not the business identity and must not preselect the new design.
+    designCharacter: direction?.source === 'business_evidence' ? direction.character : undefined,
     imageBrief: photos.map((p, i) => ({ slot: i + 1, alt: p.alt, example: p.origin === 'example' })),
   };
   const seed = seedFromId(lead.id);
+  const images = await studioImages(photos);
+  const studioPlan = parseStudioPlan(
+    await llmStructured<unknown>({
+      tier: 'creative',
+      system: STUDIO_SYSTEM,
+      prompt: studioPrompt(facts),
+      images,
+      toolName: STUDIO_TOOL,
+      toolDescription: 'Zwei individuelle Gestaltungsrichtungen und die begründete Auswahl.',
+      inputSchema: STUDIO_SCHEMA,
+      maxTokens: 3000,
+      effort: 'high',
+      purpose: 'demo_art_direction',
+      leadId: lead.id,
+    }),
+  );
   // Befunde der KI-Prüfung eines früheren Entwurfs gleich im ersten Versuch mitgeben
   let feedback: string[] | undefined = qaFeedback?.length ? qaFeedback.slice(0, 12) : undefined;
   let lastViolations: RuleViolation[] = [];
@@ -318,12 +346,13 @@ export async function generateDemoContent(
       const raw = await llmStructured<SiteContent>({
         tier: 'creative',
         system: DEMO_SYSTEM_PROMPT,
-        prompt: buildDemoPrompt(facts, seed + attempt, feedback),
+        prompt: buildDemoPrompt(facts, seed + attempt, feedback) + '\n\n' + studioImplementationBrief(studioPlan),
+        images,
         toolName: DEMO_TOOL_NAME,
         toolDescription: 'Gibt individuelle Seitengestaltung (HTML/CSS) und geprüfte Texte zurück.',
         inputSchema: DEMO_CONTENT_SCHEMA as unknown as Record<string, unknown>,
         maxTokens: 10000,
-        effort: 'medium',
+        effort: 'high',
         purpose: 'demo_content',
         leadId: lead.id,
       });
@@ -348,31 +377,21 @@ export async function generateDemoContent(
           rule: 'Individueller Entwurf fehlt',
           detail: 'Eigenes HTML/CSS im design-Objekt liefern; kein Kit-Fallback.',
         });
-      if (violations.length === 0) return { content, source: 'llm', attempts: attempt, violations: [] };
+      if (violations.length === 0) return { content, source: 'llm', attempts: attempt, violations: [], studioPlan };
       lastViolations = violations;
       feedback = violations.slice(0, 12).map((v) => `${v.field}: ${v.rule} – ${v.detail}`);
       logger.warn({ leadId: lead.id, attempt, violations: violations.length }, 'demo: Inhaltsregeln verletzt');
     } catch (err) {
       if (err instanceof LlmRefusalError || err instanceof LlmNoToolCallError) {
-        logger.warn({ leadId: lead.id, err: err.message }, 'demo: KI-Antwort unbrauchbar, nutze Fallback');
+        logger.warn({ leadId: lead.id, err: err.message }, 'demo: KI-Antwort unbrauchbar, Entwurf blockiert');
         break;
       }
       throw err;
     }
   }
-  const branch = cfg.targeting.branches.find((b) => b.key === lead.branch);
-  const content = libraryContent(
-    lead.branch,
-    lead.branchGroup,
-    { name: lead.businessName, stadt: lead.city, branche: branch?.label ?? lead.branch },
-    seed,
+  throw new Error(
+    `Freier Studio-Entwurf fehlgeschlagen; keine Ersatzvorlage. ${lastViolations.map((v) => `${v.field}: ${v.rule}`).join(' | ')}`,
   );
-  return {
-    content: normalizeContent(verifiedServiceFallback(content, facts)),
-    source: 'fallback',
-    attempts: 2,
-    violations: lastViolations,
-  };
 }
 
 /** Ablauf-/Platzhalterkarten der Bibliothek sind keine Leistungen */
@@ -518,6 +537,7 @@ export async function buildDemo(
               designSourceRef: design.sourceRef,
               designRequiresReview: design.requiresReview,
               researchHash,
+              studio: { version: STUDIO_VERSION, plan: generated.studioPlan },
               ...(brief ? { designBrief: brief } : {}),
               ...(opts.qaFeedback?.length ? { qaRetry: 1 } : {}),
             },

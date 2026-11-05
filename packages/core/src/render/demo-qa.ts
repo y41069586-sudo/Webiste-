@@ -1,4 +1,5 @@
 import { visualReviewInput } from '../demos/visual-review';
+import { STUDIO_VERSION, STUDIO_REVIEW_SCHEMA, STUDIO_REVIEW_PROMPT, studioReviewResult } from '../demos/studio';
 import { recipientFingerprint } from '../letters/binding';
 import { leadResearch } from '../services/lead-research';
 import { researchContentHash } from '../leads/acquisition';
@@ -85,7 +86,8 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
     checks.push({ name: 'inhaltsquelle', passed: true, details: 'Geprüfte Standardtexte (KI-Ausgabe verworfen)' });
 
   // Capture once from the stored HTML. Reused for AI review, admin and the bound letter composite.
-  const shots = await takeScreenshots(html, { hideDemoChrome: true });
+  const studio = isAuthoredTemplate(demo.templateId);
+  const shots = await takeScreenshots(html, { hideDemoChrome: true, studioReview: studio });
   const visual = getKit(demo.templateId) || isAuthoredTemplate(demo.templateId) ? visualReviewInput(shots) : undefined;
 
   let visualBlocking = false;
@@ -101,37 +103,64 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
     )
       throw Error('Vorhandene KI-Prüfung passt nicht unverändert zum HTML; keine kostenfreie Wiederverwendung.');
     checks.push({ ...prior });
+    if (studio) {
+      const craft = demo.qaResultJson?.checks.find((c) => c.name === STUDIO_VERSION);
+      if (!craft?.passed) throw Error('Keine bestandene Studio-Sichtprüfung zum gespeicherten HTML vorhanden.');
+      checks.push({ ...craft });
+    }
   } else if (opts.llm !== false) {
     try {
       const res = await llmStructured<{ issues: QaIssue[] }>({
         tier: 'bulk',
         system: QA_SYSTEM_PROMPT,
-        prompt: buildQaPrompt(facts, content) + (visual ? `\n\n${visual.prompt}` : ''),
+        prompt:
+          buildQaPrompt(facts, content) + (visual ? `\n\n${visual.prompt}` : '') + (studio ? `\n\n${STUDIO_REVIEW_PROMPT}` : ''),
         ...(visual ? { images: visual.images } : {}),
         toolName: QA_TOOL_NAME,
         toolDescription: 'Ergebnis der Qualitätsprüfung',
-        inputSchema: QA_SCHEMA as unknown as Record<string, unknown>,
-        maxTokens: 3000,
-        effort: 'low',
+        inputSchema: (studio ? STUDIO_REVIEW_SCHEMA : QA_SCHEMA) as unknown as Record<string, unknown>,
+        maxTokens: studio ? 4500 : 3000,
+        effort: studio ? 'high' : 'low',
         purpose: 'demo_qa',
         leadId: lead.id,
       });
+      const craft = studio ? studioReviewResult(res) : undefined;
+      if (craft) checks.push({ name: STUDIO_VERSION, passed: craft.passed, details: craft.details });
       const high = res.issues.filter((i) => i.severity === 'hoch');
-      visualBlocking = high.some((i) => i.field.startsWith('visual.'));
+      visualBlocking = (craft ? !craft.passed : false) || high.some((i) => i.field.startsWith('visual.'));
       rebuildFeedback.push(...high.slice(0, 8).map((i) => `${i.field}: ${i.problem}`));
       checks.push({
         name: 'ki-pruefung',
         passed: high.length === 0,
         details: [
-          visual ? 'Startansichten Desktop/Mobil mitgeprüft; ganze Seite manuell prüfen.' : '',
+          studio
+            ? 'Desktop/Mobil: Gesamtübersicht und Anfang/Mitte/Ende geprüft; manuelle Abnahme bleibt erforderlich.'
+            : visual
+              ? 'Startansichten Desktop/Mobil mitgeprüft; ganze Seite manuell prüfen.'
+              : '',
           ...res.issues.map((i) => `[${i.severity}] ${i.field}: ${i.problem}`),
         ]
           .filter(Boolean)
           .join(' | '),
       });
     } catch (err) {
+      if (studio) {
+        visualBlocking = true;
+        if (!checks.some((c) => c.name === STUDIO_VERSION))
+          checks.push({
+            name: STUDIO_VERSION,
+            passed: false,
+            details: 'Gestaltungsprüfung fehlt oder ist ungültig; keine automatische Ersatzfreigabe.',
+          });
+      }
       checks.push({ name: 'ki-pruefung', passed: false, details: `Fehler: ${err instanceof Error ? err.message : String(err)}` });
     }
+  } else if (studio) {
+    checks.push({
+      name: STUDIO_VERSION,
+      passed: false,
+      details: 'KI-Gestaltungsprüfung übersprungen; nur technischer Test, keine abgenommene Gestaltung.',
+    });
   }
 
   if (isAuthoredTemplate(demo.templateId)) {
@@ -185,6 +214,15 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   await storage.put(`${base}/desktop.jpg`, shots.desktop, 'image/jpeg');
   await storage.put(`${base}/mobile.jpg`, shots.mobile, 'image/jpeg');
   await storage.put(`${base}/composite.jpg`, composite, 'image/jpeg');
+  if (shots.reviewBoards) {
+    await storage.put(`${base}/studio-desktop.jpg`, shots.reviewBoards.desktop, 'image/jpeg');
+    await storage.put(`${base}/studio-mobile.jpg`, shots.reviewBoards.mobile, 'image/jpeg');
+    checks.push({
+      name: 'studio-evidence',
+      passed: true,
+      details: `html=${sha256(html)}; desktop=${sha256(shots.reviewBoards.desktop)}; mobile=${sha256(shots.reviewBoards.mobile)}; assets=${base}/studio-{desktop,mobile}.jpg`,
+    });
+  }
 
   const passed = checks.every((c) => c.passed);
   const htmlHash = sha256(html);

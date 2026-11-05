@@ -4,6 +4,52 @@ import { withPage } from './browser';
 export interface Screenshots {
   desktop: Buffer;
   mobile: Buffer;
+  /** Full-page overview plus readable top/middle/end samples of the SAME stored HTML. */
+  reviewBoards?: { desktop: Buffer; mobile: Buffer };
+}
+
+async function reviewBoard(page: Page, mobile: boolean): Promise<Buffer> {
+  // The separate question to SeitenWerk is sales chrome, not the authored business design.
+  // Capture-only: the stored HTML and the operator/letter screenshots remain untouched.
+  await page.addStyleTag({ content: '.sw-demo-context,.sw-demo-toolbar,#uebernehmen,#frage{display:none!important}' });
+  const height = await page.evaluate(() => document.documentElement.scrollHeight);
+  if (height > 18000) throw new Error('Entwurf länger als 18000 px; Sichtprüfung begrenzen und Gestaltung manuell prüfen.');
+  const full = await page.screenshot({ type: 'jpeg', quality: 82, fullPage: true });
+  // Use the captured page as pixels, never render model HTML in the board document.
+  const data = await page.evaluate(
+    async ({ src, mobile }) => {
+      const img = new Image();
+      img.src = src;
+      await img.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = mobile ? 1400 : 1040;
+      canvas.height = mobile ? 930 : 1440;
+      const ctx = canvas.getContext('2d')!;
+      ctx.fillStyle = '#f2f2f2';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#111';
+      ctx.font = '18px sans-serif';
+      ctx.fillText('GESAMTSEITE', 12, 25);
+      const overviewScale = Math.min(200 / img.width, (canvas.height - 60) / img.height);
+      ctx.drawImage(img, 12, 45, img.width * overviewScale, img.height * overviewScale);
+      const sourceHeight = Math.min(img.height, img.width * (mobile ? 844 / 390 : 900 / 1440));
+      const offsets = [0, (img.height - sourceHeight) / 2, img.height - sourceHeight];
+      offsets.forEach((offset, index) => {
+        const width = mobile ? 380 : 800;
+        const x = mobile ? 230 + index * 390 : 230;
+        const y = mobile ? 45 : 45 + index * 460;
+        const targetHeight = mobile ? 822 : 430;
+        ctx.fillStyle = '#111';
+        ctx.fillText(['ANFANG', 'MITTE', 'ENDE'][index]!, x, y - 12);
+        // Preserve image proportions inside each detail frame.
+        const scale = Math.min(width / img.width, targetHeight / sourceHeight);
+        ctx.drawImage(img, 0, offset, img.width, sourceHeight, x, y, img.width * scale, sourceHeight * scale);
+      });
+      return canvas.toDataURL('image/jpeg', 0.82).split(',')[1]!;
+    },
+    { src: `data:image/jpeg;base64,${full.toString('base64')}`, mobile },
+  );
+  return Buffer.from(data, 'base64');
 }
 
 /** Wartet, bis alle Bilder dekodiert sind – sonst fehlen eingebettete Fotos im Screenshot. */
@@ -20,7 +66,11 @@ export async function imagesPainted(page: Page): Promise<void> {
 }
 
 /** Screenshots ohne Banner (Screenshot-Modus): Desktop 1440×900, Mobil 390×844 (2×). */
-export async function takeScreenshots(html: string, opts: { hideDemoChrome?: boolean } = {}): Promise<Screenshots> {
+export async function takeScreenshots(
+  html: string,
+  opts: { hideDemoChrome?: boolean; studioReview?: boolean } = {},
+): Promise<Screenshots> {
+  const boards: Partial<{ desktop: Buffer; mobile: Buffer }> = {};
   const desktop = await withPage({ width: 1440, height: 900, deviceScaleFactor: 2 }, async (page) => {
     await page.setContent(html, { waitUntil: 'load' });
     if (opts.hideDemoChrome)
@@ -28,7 +78,10 @@ export async function takeScreenshots(html: string, opts: { hideDemoChrome?: boo
         content: '.sw-demo-context,.sw-demo-toolbar,#uebernehmen{display:none!important}body{padding-bottom:0!important}',
       });
     await imagesPainted(page);
-    return page.screenshot({ type: 'jpeg', quality: 88, fullPage: false });
+    await page.evaluate(() => document.fonts.ready);
+    const shot = await page.screenshot({ type: 'jpeg', quality: 88, fullPage: false });
+    if (opts.studioReview) boards.desktop = await reviewBoard(page, false);
+    return shot;
   });
   const mobile = await withPage({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true }, async (page) => {
     await page.setContent(html, { waitUntil: 'load' });
@@ -37,9 +90,16 @@ export async function takeScreenshots(html: string, opts: { hideDemoChrome?: boo
         content: '.sw-demo-context,.sw-demo-toolbar,#uebernehmen{display:none!important}body{padding-bottom:0!important}',
       });
     await imagesPainted(page);
-    return page.screenshot({ type: 'jpeg', quality: 88, fullPage: false });
+    await page.evaluate(() => document.fonts.ready);
+    const shot = await page.screenshot({ type: 'jpeg', quality: 88, fullPage: false });
+    if (opts.studioReview) boards.mobile = await reviewBoard(page, true);
+    return shot;
   });
-  return { desktop, mobile };
+  return {
+    desktop,
+    mobile,
+    ...(boards.desktop && boards.mobile ? { reviewBoards: { desktop: boards.desktop, mobile: boards.mobile } } : {}),
+  };
 }
 
 /**

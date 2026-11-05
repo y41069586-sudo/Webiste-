@@ -1,5 +1,17 @@
 # Entscheidungen und Abweichungen
 
+## 05.11.2026 – Neuaufbau der kreativen Demo-Erzeugung als Gestaltungsstudio
+
+Betreiber verlangt individuell gestaltete Websites auf dem Niveau der Osteria-Sera-Studie,
+keine feste Vorlagenfamilie. Separates Art-Direction-Briefing mit zwei Richtungen und begründeter
+Wahl, tatsächliche Bildanhänge für Konzept/Umsetzung, freie HTML/CSS-Ausgabe und unabhängige
+Desktop-/Mobil-Sichtprüfung mit Übersicht und drei Detailausschnitten. Sechs konkrete
+Gestaltungsbefunde sind Pflicht; technische Fehlerfreiheit allein ist keine Designabnahme.
+Kein Fallback-Kit, keine zufällige Branchenstimme, kein Mock-Qualitätssiegel. Zusätzlicher
+Konzeptaufruf über vorhandenes Kosten-Ledger; Modelle/Budgets und operative Schalter unverändert.
+Strict-Schema-Fix c5bf351 erhalten. Einzelheiten, Tests und offene echte Modellabnahme:
+`docs/design-studio.md`. Kein Nachweis einer Produktionsaktivierung durch diesen Codeauftrag.
+
 Kurz begründete Umsetzungsentscheidungen. Offene Punkte, die eine Entscheidung des Betreibers brauchen,
 stehen am Ende.
 

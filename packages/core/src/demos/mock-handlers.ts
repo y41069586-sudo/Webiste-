@@ -3,6 +3,32 @@ import type { BranchGroup, SiteContent } from '@wbm/templates/types';
 import { registerMockStructured } from '../providers/llm/mock';
 import { DEMO_TOOL_NAME, QA_TOOL_NAME, verifiedServiceFallback } from './content';
 import { libraryContent } from './library';
+import { STUDIO_TOOL, STUDIO_REVIEW_DIMENSIONS } from './studio';
+
+registerMockStructured(STUDIO_TOOL, () => ({
+  visitorTask: 'Fiktiver Ablauf-Test: ein Anliegen verstehen und eine Anfrage vorbereiten.',
+  first: {
+    idea: 'Fiktives typografisches Konzept für isolierte Tests.',
+    composition: 'Eine große typografische Einstiegsfläche mit anschließendem lesbarem Inhaltsverlauf.',
+    typography: 'Fiktive Hierarchie mit einer lokalen Groteskschrift.',
+    imageDirection: 'Nur bereitgestellte Motive als gekennzeichnete Illustrationen verwenden.',
+    mobile: 'Inhalte und Aktion mit lesbaren Abständen für schmale Bildschirme anordnen.',
+  },
+  second: {
+    idea: 'Fiktives bildgeführtes Konzept für isolierte Tests.',
+    composition: 'Ein bildgeführter Einstieg mit einem schmalen Textband und wechselnden Flächenproportionen.',
+    typography: 'Fiktive Hierarchie mit einer lokalen Serifenschrift.',
+    imageDirection: 'Bereitgestellte Bilder als zusammenhängende illustrative Bildstrecke gestalten.',
+    mobile: 'Bildzuschnitte neu wählen und die Anfrage früh im mobilen Verlauf erreichbar machen.',
+  },
+  selected: 'first',
+  reason: 'Deterministische Testantwort; keine echte gestalterische Entscheidung eines Modells.',
+  pageJourney: Array.from({ length: 5 }, (_, i) => ({
+    purpose: `Fiktiver Inhaltszweck für Testbereich ${i}`,
+    treatment: 'Fiktive visuelle Behandlung zur Prüfung des Datenflusses, keine Produktionsvorlage.',
+  })),
+  restraint: 'Keine erfundenen Betriebsfakten und keine Behauptung einer echten Modellbewertung.',
+}));
 
 function line(prompt: string, key: string): string {
   return new RegExp(`^${key}:\\s*(.+)$`, 'm').exec(prompt)?.[1]?.trim() ?? '';
@@ -83,4 +109,12 @@ export function testAuthoredDesign(
     css: '.ad-page{padding:24px;max-width:1100px;margin:auto;font-family:var(--body)}h1{font-family:var(--display)}',
   };
 }
-registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));
+registerMockStructured(QA_TOOL_NAME, () => ({
+  issues: [],
+  craft: STUDIO_REVIEW_DIMENSIONS.map((dimension) => ({
+    dimension,
+    verdict: 'unverifiable',
+    evidence: 'Mock hat keine visuelle Modellprüfung durchgeführt.',
+    correction: 'Tatsächliche Bildprüfung und Betreiberabnahme erforderlich.',
+  })),
+}));

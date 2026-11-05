@@ -1,5 +1,19 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Neuester Betreiberauftrag 05.11.2026 – freies Gestaltungsstudio
+
+Osteria Sera ist Qualitätsmaßstab, keine kopierbare Vorlage. Neue Demos laufen über Art Direction
+(zwei konkrete Richtungen, begründete Wahl), freie HTML/CSS-Umsetzung mit den tatsächlich
+verfügbaren berechtigten Bildmotiven und unabhängige Studio-QA. Keine zufällige Branchentonalität,
+kein vorgegebener Hero/Kartenaufbau, kein Ersatzkit bei Fehlern. Pflichtinhalte bleiben vollständig,
+bestimmen aber keine visuelle Schablone. Sichtprüfung: Gesamtübersicht plus Anfang/Mitte/Ende
+auf Desktop/Mobil und sechs begründete Qualitätsdimensionen. Fehlende Evidenz/Überarbeitungsbedarf
+blockiert; Mock/übersprungene QA ist keine Designfreigabe. Manuelle Abnahme bleibt nötig.
+Alle Aufrufe über vorhandenes Budget-Ledger; keine Modell-/Budget-/Not-Aus-Umschaltung.
+Bestehende Demo-, Brief-, Zahlungs- und Formulargrenzen erhalten. c5bf351-Strict-Schema-Fix
+erhalten: keine minItems > 1 in Tool-Schemas. Details und offene echte Modellabnahme:
+`docs/design-studio.md`.
+
 ## Neuester Betreiberauftrag 05.11.2026 – vollständige freie Demos und kleinere Ausgabe
 
 Für neue freie Demos gilt zusätzlich `full-page-1`: Leistungen fachlich als Branchenwissen erklären,

@@ -24,6 +24,10 @@ export function authoredCompleteness(html: string, imageSlots: number): string[]
 }
 
 export const FREE_DESIGN_CRITERIA = [
+  'Arbeite wie ein Gestaltungsstudio: zuerst Besucheraufgabe und eigene visuelle Leitidee, dann Komposition, dann Detailarbeit. Eine Sammlung erfüllter Pflichtfelder ist noch keine gute Website.',
+  'Die gewählte Idee muss vom Einstieg bis zum Kontakt erkennbar sein: typografische Hierarchie, Bildausschnitte, wiederkehrende Details und bewusster Wechsel zwischen ruhigen und dichten Bereichen. Keine identische Kartenreihe für jeden Inhalt.',
+  'Pflichtinhalte sind semantische Anforderungen, keine Gestaltungsblöcke. Verknüpfe zusammengehörige Inhalte; variiere Proportionen nach ihrer Bedeutung. Mindesttextmenge mit hilfreichen Informationen erreichen, niemals mit Fülltext oder künstlicher Seitenlänge.',
+  'Gestalte Mobil zuerst als eigene Komposition: sinnvoller Bildausschnitt, lesbare Zeilenumbrüche, kurze Wege zur Anfrage. Nicht einfach alle Desktopflächen unverändert untereinander stellen.',
   'Entwirf für diesen Betrieb ein eigenständiges Konzept. Keine Branchenvorlage, kein Pflicht-Hero, keine festgelegte Abschnittsfolge und kein vorgegebenes Farbschema.',
   'Entscheide selbst über Typografie, Größenverhältnisse, Farbgewicht, Bildkomposition, Abstände und Seitenrhythmus. Begründe das Konzept kurz anhand der vorhandenen Fakten und der Besucheraufgabe.',
   'Der erste Bildschirm muss Name, tatsächliche Tätigkeit, Ort und eine passende Handlung verständlich machen. Große Schrift allein ist keine Gestaltung.',
