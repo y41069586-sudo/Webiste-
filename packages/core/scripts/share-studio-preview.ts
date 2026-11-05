@@ -13,7 +13,16 @@ const HEADERS = `/*
   X-Content-Type-Options: nosniff
   Content-Security-Policy: default-src 'none'; img-src 'self' data:; font-src 'self' data:; style-src 'unsafe-inline'; script-src 'none'; form-action 'none'; base-uri 'none'; frame-ancestors 'none'
 `;
-type Deploy = { id: string; site_id?: string; draft?: boolean; state?: string; required?: string[] };
+type Deploy = {
+  id: string;
+  site_id?: string;
+  draft?: boolean;
+  context?: string;
+  published_at?: string | null;
+  state?: string;
+  required?: string[];
+  manual_deploy?: boolean;
+};
 type Receipt = { siteId: string; sourceHash: string; deployId: string };
 
 async function netlifyApi<T>(
@@ -56,10 +65,13 @@ export async function shareStudioPreview(options: {
   token: string;
   request?: typeof fetch;
   wait?: (ms: number) => Promise<void>;
+  resumeDeployId?: string;
 }) {
   if (!options.token.trim()) throw Error('NETLIFY_API_TOKEN fehlt im Worker.');
   const request = options.request ?? fetch;
   const wait = options.wait ?? ((ms) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+  if (options.resumeDeployId && !/^[a-f0-9]{24}$/.test(options.resumeDeployId))
+    throw Error('Ungültige bestehende Vorschau-ID; nichts geändert.');
   const directory = options.directory;
   let html: Buffer;
   try {
@@ -92,20 +104,39 @@ export async function shareStudioPreview(options: {
   }
   if (receipt && (receipt.siteId !== SITE || receipt.sourceHash !== sourceHash || !/^[a-f0-9]{24}$/.test(receipt.deployId)))
     throw Error('Vorhandener Vorschau-Nachweis passt nicht zum HTML; kein neuer Upload.');
-  let deploy = receipt
-    ? await api<Deploy>('GET', `/sites/${SITE}/deploys/${receipt.deployId}`)
-    : await api<Deploy>('POST', `/sites/${SITE}/deploys`, {
-        draft: true,
-        files: Object.fromEntries(files.map((f) => [f.path, f.hash])),
-      });
+  if (receipt && options.resumeDeployId && receipt.deployId !== options.resumeDeployId)
+    throw Error('Explizite Vorschau-ID weicht vom gespeicherten Nachweis ab; nichts geändert.');
+  const existingId = receipt?.deployId ?? options.resumeDeployId;
+  const manifest = { draft: true, files: Object.fromEntries(files.map((f) => [f.path, f.hash])) };
+  let deploy = existingId
+    ? await api<Deploy>('GET', `/sites/${SITE}/deploys/${existingId}`)
+    : await api<Deploy>('POST', `/sites/${SITE}/deploys`, manifest);
   function assertDraft(value: Deploy) {
-    if (value.draft !== true || value.site_id !== SITE || !/^[a-f0-9]{24}$/.test(value.id))
+    // Live API omits `draft`; deploy-preview + explicit null publication is the positive evidence instead.
+    const confirmed = value.draft === true || (value.context === 'deploy-preview' && value.published_at === null);
+    if (
+      !confirmed ||
+      value.draft === false ||
+      value.site_id !== SITE ||
+      !/^[a-f0-9]{24}$/.test(value.id) ||
+      (existingId !== undefined && value.id !== existingId) ||
+      (value.context !== undefined && value.context !== 'deploy-preview') ||
+      (value.published_at !== undefined && value.published_at !== null) ||
+      value.id === site.published_deploy?.id
+    )
       throw Error('Antwort bestätigt keinen isolierten Draft; Dateiübertragung gestoppt.');
   }
   assertDraft(deploy);
+  if (!receipt && existingId && (deploy.state !== 'uploading' || deploy.manual_deploy !== true))
+    throw Error('Übernahme ohne Nachweis nur für einen noch unvollständigen manuellen Vorschau-Upload erlaubt.');
   await writeFile(path.join(directory, 'share.json'), JSON.stringify({ siteId: SITE, sourceHash, deployId: deploy.id }), {
     mode: 0o600,
   });
+  // GET omits outstanding file digests on the real API. Refresh the same unpublished manifest, never POST another deploy.
+  if (existingId && deploy.state === 'uploading') {
+    deploy = await api<Deploy>('PUT', `/sites/${SITE}/deploys/${existingId}`, manifest);
+    assertDraft(deploy);
+  }
   for (const hash of new Set(deploy.required ?? [])) {
     const file = files.find((f) => f.hash === hash);
     if (!file) throw Error('Netlify fordert unbekannte Dateien; Upload gestoppt.');
@@ -140,7 +171,11 @@ export async function shareStudioPreview(options: {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  shareStudioPreview({ directory: '/preview', token: process.env.NETLIFY_API_TOKEN || process.env.NELITFY_API_TOKEN || '' })
+  shareStudioPreview({
+    directory: '/preview',
+    token: process.env.NETLIFY_API_TOKEN || process.env.NELITFY_API_TOKEN || '',
+    resumeDeployId: process.env.STUDIO_PREVIEW_DEPLOY_ID || undefined,
+  })
     .then((result) => console.log(JSON.stringify(result)))
     .catch((error) => {
       console.error(error instanceof Error ? error.message : 'Vorschau fehlgeschlagen.');

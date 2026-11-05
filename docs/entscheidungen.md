@@ -1173,3 +1173,13 @@ Textanfang ausgeben, bestehende Preisregel erhalten. Den bezahlten fiktiven Kand
 ausdrücklichem Nichtfreigabe-Hinweis zur Ansicht wiederherstellen, ohne neue KI-Aufrufe, Datenbank,
 Kundenpublikation oder Gates zu ändern. Originalartefakte bleiben erhalten. Details/Prüfgrenzen
 in `docs/design-studio.md`.
+
+## 05.11.2026 – Netlify-Antwortkompatibilität und belegter Preiswort-Fehlalarm
+
+Fiktives HTML wiederhergestellt; Share stoppte wegen optionalem fehlendem `draft`-Antwortfeld.
+Echter authentifizierter Deploy-Beleg zeigt deploy-preview, published_at null, manual_deploy
+true. Diese positive Antwortform akzeptieren, Produktions-/Widerspruchsprüfung erhalten und
+denselben unvollständigen Deploy über dokumentiertes Manifest-Update fortsetzen. Kein neuer
+Modellaufruf und kein zweiter Deploy als Fehlerumgehung. Tatsächlichen Negationskontext des
+Preisworts eng ausnehmen; erfundene Preise/Rabatte/Gratisversprechen bleiben gesperrt.
+Technische und gestalterische Abnahme werden dadurch nicht nachträglich behauptet.

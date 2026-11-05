@@ -7,11 +7,22 @@ Zusätzlich geprüft anhand des offiziellen OpenAPI-Schemas
 `POST /sites/{site_id}/deploys` mit `deployFiles`-Body `{draft:true, files:{pfad:sha1}}`,
 anschließend nur angeforderte Dateien per `PUT /deploys/{id}/files/{pfad}` und Status per
 `GET /sites/{site_id}/deploys/{deploy_id}`. `draft` ist ein dokumentiertes boolesches Feld
-in `deployFiles` und `deploy`. Der neue Share-Helfer verlangt die positive Draft-Bestätigung
-vor dem Dateiupload und verwendet ausschließlich den Deploy-Permalink. Kein Publish-/Restore-
+in `deployFiles` und `deploy`. **Laufzeitkorrektur vom 05.11.2026:** Die tatsächliche API-Antwort
+lässt `draft` weg, bestätigt aber `context: deploy-preview`, `published_at: null` und die Site-ID.
+Diese Kombination ist ebenfalls positive Isolationsbestätigung; widersprüchliches `draft:false`,
+Produktionskontext, gesetztes Veröffentlichungsdatum oder die aktuell veröffentlichte Deploy-ID
+bleiben gesperrt. Der Helfer verwendet ausschließlich den Deploy-Permalink. Kein Publish-/Restore-
 Endpoint und keine Änderung des Site-Objekts. Nur HTML und Header, keine KI-/Kundendatenberichte.
 Die Vorschau hat die bestätigten Zugangseinstellungen des bestehenden Projekts: für jeden
 mit Link erreichbar. Details und Prüfgrenzen: `docs/design-studio.md`.
+
+Das Schema dokumentiert außerdem `PUT /sites/{site_id}/deploys/{deploy_id}` mit demselben
+`deployFiles`-Body. Bei Wiederaufnahme eines nachweislich unveröffentlichten Uploads wird das
+Manifest mit `draft:true` am **gleichen** Deploy erneuert; die dabei gelieferten `required`-Hashes
+bestimmen die Dateiübertragung. Ein GET des noch unvollständigen echten Uploads liefert dagegen
+eine leere `required`-Liste. Explizite Wiederaufnahme ohne Receipt nur für einen unvollständigen
+manuellen Upload; anschließend SHA-/Site-/Deploy-Bindung als privates Receipt sichern. Keine
+automatischen Mutations-Retries. Keine neuen Deploys anlegen, um eine Wiederaufnahme zu umgehen.
 
 Jede Anbindung steckt hinter einem Provider-Interface (`packages/core/src/providers/types.ts`) und hat
 eine Mock-Implementierung für Entwicklung, Tests und `DRY_RUN`. Prüfdatum aller Angaben: **22.10.2026**

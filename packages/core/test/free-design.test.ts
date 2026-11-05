@@ -64,6 +64,20 @@ describe('Freie Generierung und weitere Inhaltsbearbeitung', () => {
     c.design!.html += '<p>Garantiert am selben Tag.</p>';
     expect(validateDemoContent(c, facts).some((v) => v.field === 'design' && v.rule === 'Garantien/Versprechen')).toBe(true);
   });
+  it('allows the observed negative price disclaimer while still blocking price claims elsewhere', () => {
+    const c = content();
+    c.design!.html += '<p>Dies ist ein Beispiel für eine Anfrage, keine Zusage zu Terminen, Preisen oder Rückmeldung.</p>';
+    expect(validateDemoContent(c, facts).filter((v) => v.rule === 'Preise/Rabatte')).toEqual([]);
+    for (const text of [
+      'Unsere Preise sind günstig.',
+      'Der Preis ist hundert Euro.',
+      'Wir bieten Rabatt.',
+      'Die Anfrage ist kostenlos.',
+    ]) {
+      const bad = { ...c, design: { ...c.design!, html: c.design!.html + `<p>${text}</p>` } };
+      expect(validateDemoContent(bad, facts).some((v) => v.rule === 'Preise/Rabatte')).toBe(true);
+    }
+  });
   it('requires an example disclosure when no services have been verified', () => {
     const c = content();
     c.design!.html = c.design!.html.replace('<p>Beispiel-Leistungen</p>', '');

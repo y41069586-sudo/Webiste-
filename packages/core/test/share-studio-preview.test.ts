@@ -2,7 +2,10 @@ import { mkdtemp, writeFile, rm, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { createHash } from 'node:crypto';
 import { shareStudioPreview, checkStudioPreviewHosting } from '../scripts/share-studio-preview';
+// Sanitized fields from the actual 05.11.2026 API response. No draft field; GET required is empty even before upload.
+import actualShape from './fixtures/netlify-unpublished-manual-deploy.json';
 
 const SITE = '80e75e2d-3149-49b0-a522-76a172bbd60b';
 const ID = 'a'.repeat(24);
@@ -17,26 +20,56 @@ async function fixture() {
   );
   return directory;
 }
-function server(options: { draft?: boolean; failUpload?: boolean } = {}) {
+function server(
+  options: {
+    draft?: boolean;
+    failUpload?: boolean;
+    metadata?: Record<string, unknown>;
+    legacy?: boolean;
+    publishedId?: string;
+  } = {},
+) {
   const calls: { url: string; method: string; body: unknown }[] = [];
   let required: string[] = [];
   let uploadedHtml = '';
+  let uploadedFiles = 0;
+  const info = () => ({
+    ...actualShape,
+    ...(options.legacy ? { draft: true, context: undefined, published_at: undefined } : {}),
+    ...(options.draft !== undefined ? { draft: options.draft } : {}),
+    ...options.metadata,
+  });
   const request = (async (url: string, init: RequestInit = {}) => {
     const method = init.method ?? 'GET';
     const body = typeof init.body === 'string' ? JSON.parse(init.body) : init.body;
     calls.push({ url, method, body });
     if (url === `https://${ID}--seitenwerkworld.netlify.app/`) return new Response(uploadedHtml || '<h1>Elektro Kontur</h1>');
     if (url.endsWith(`/sites/${SITE}`))
-      return Response.json({ id: SITE, name: 'seitenwerkworld', published_deploy: { id: 'production-original' } });
+      return Response.json({
+        id: SITE,
+        name: 'seitenwerkworld',
+        published_deploy: { id: options.publishedId ?? 'production-original' },
+      });
     if (method === 'POST') {
       required = Object.values((body as { files: Record<string, string> }).files);
-      return Response.json({ id: ID, site_id: SITE, draft: options.draft ?? true, required });
+      return Response.json({ ...info(), required });
+    }
+    if (method === 'PUT' && url.endsWith(`/sites/${SITE}/deploys/${ID}`)) {
+      required = Object.values((body as { files: Record<string, string> }).files);
+      return Response.json({ ...info(), required });
     }
     if (method === 'PUT') {
       if (url.endsWith('/index.html')) uploadedHtml = Buffer.from(init.body as Uint8Array).toString();
+      if (!options.failUpload) {
+        uploadedFiles++;
+        const hash = createHash('sha1')
+          .update(Buffer.from(init.body as Uint8Array))
+          .digest('hex');
+        required = required.filter((value) => value !== hash);
+      }
       return options.failUpload ? new Response('', { status: 503 }) : new Response('{}');
     }
-    return Response.json({ id: ID, site_id: SITE, draft: options.draft ?? true, required: [], state: 'ready' });
+    return Response.json({ ...info(), required: [], state: uploadedFiles >= 2 ? 'ready' : 'uploading' });
   }) as typeof fetch;
   return { calls, request };
 }
@@ -69,6 +102,74 @@ describe('Share the existing fictional preview without production publication', 
     expect(fake.calls[0]!.method).toBe('GET');
     await expect(checkStudioPreviewHosting('', fake.request)).rejects.toThrow(/NETLIFY_API_TOKEN/);
     expect(fake.calls).toHaveLength(1);
+  });
+  it('also accepts a positively confirmed legacy draft:true response', async () => {
+    const directory = await fixture(),
+      fake = server({ legacy: true });
+    expect((await shareStudioPreview({ directory, token: 'test-only', request: fake.request })).previewVerified).toBe(true);
+  });
+  it('rejects missing isolation evidence, contradictions, another site or an already-published response before upload', async () => {
+    for (const metadata of [
+      { context: undefined },
+      { published_at: undefined },
+      { context: 'production' },
+      { published_at: '2026-11-05T21:24:39Z' },
+      { site_id: 'another-site' },
+    ]) {
+      const directory = await fixture(),
+        fake = server({ metadata });
+      await expect(shareStudioPreview({ directory, token: 'test-only', request: fake.request })).rejects.toThrow(
+        /isolierten Draft/,
+      );
+      expect(fake.calls.some((call) => call.method === 'PUT')).toBe(false);
+    }
+  });
+  it('resumes a specific incomplete manual preview, refreshing its manifest without creating another deploy', async () => {
+    const directory = await fixture(),
+      fake = server();
+    const result = await shareStudioPreview({ directory, token: 'test-only', request: fake.request, resumeDeployId: ID });
+    expect(result).toMatchObject({ previewVerified: true, htmlExact: true, productionUnchanged: true, newAiCalls: 0 });
+    expect(fake.calls.some((call) => call.method === 'POST')).toBe(false);
+    const update = fake.calls.find((call) => call.method === 'PUT' && call.url.endsWith(`/sites/${SITE}/deploys/${ID}`));
+    expect(update?.body).toMatchObject({ draft: true, files: expect.any(Object) });
+    expect(fake.calls.filter((call) => call.method === 'PUT' && call.url.includes('/files/'))).toHaveLength(2);
+  });
+  it('cannot adopt a ready deploy, a nonmanual deploy or the current production deploy without a source receipt', async () => {
+    for (const metadata of [{ manual_deploy: false }, { id: 'production-original' }]) {
+      const directory = await fixture(),
+        fake = server({ metadata });
+      await expect(
+        shareStudioPreview({ directory, token: 'test-only', request: fake.request, resumeDeployId: ID }),
+      ).rejects.toThrow();
+      expect(fake.calls.some((call) => call.method === 'PUT' || call.method === 'POST')).toBe(false);
+    }
+    const productionDirectory = await fixture(),
+      production = server({ publishedId: ID });
+    await expect(
+      shareStudioPreview({ directory: productionDirectory, token: 'test-only', request: production.request, resumeDeployId: ID }),
+    ).rejects.toThrow(/isolierten Draft/);
+    expect(production.calls.some((call) => call.method === 'PUT' || call.method === 'POST')).toBe(false);
+    const directory = await fixture(),
+      fake = server();
+    const request = (async (url: string, init?: RequestInit) =>
+      url.endsWith(`/deploys/${ID}`)
+        ? Response.json({ ...actualShape, state: 'ready' })
+        : fake.request(url, init)) as typeof fetch;
+    await expect(shareStudioPreview({ directory, token: 'test-only', request, resumeDeployId: ID })).rejects.toThrow(
+      /unvollständigen/,
+    );
+    expect(fake.calls.some((call) => call.method === 'PUT' || call.method === 'POST')).toBe(false);
+  });
+  it('refreshes outstanding hashes from an existing receipt after an interrupted upload; no duplicate POST', async () => {
+    const directory = await fixture(),
+      options = { failUpload: true },
+      fake = server(options);
+    await expect(shareStudioPreview({ directory, token: 'test-only', request: fake.request })).rejects.toThrow(/HTTP 503/);
+    options.failUpload = false;
+    fake.calls.length = 0;
+    expect((await shareStudioPreview({ directory, token: 'test-only', request: fake.request })).previewVerified).toBe(true);
+    expect(fake.calls.some((call) => call.method === 'POST')).toBe(false);
+    expect(fake.calls.some((call) => call.method === 'PUT' && call.url.endsWith(`/deploys/${ID}`))).toBe(true);
   });
   it('does not report a ready permalink serving the wrong page as a valid preview', async () => {
     const directory = await fixture(),

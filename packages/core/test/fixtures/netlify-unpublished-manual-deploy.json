@@ -1,0 +1,9 @@
+{
+  "id": "aaaaaaaaaaaaaaaaaaaaaaaa",
+  "site_id": "80e75e2d-3149-49b0-a522-76a172bbd60b",
+  "state": "uploading",
+  "required": [],
+  "published_at": null,
+  "context": "deploy-preview",
+  "manual_deploy": true
+}

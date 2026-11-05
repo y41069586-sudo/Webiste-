@@ -103,6 +103,13 @@ class StudioPreviewTest(unittest.TestCase):
         self.assertEqual(self.generations(calls),[]);self.assertEqual(len(self.shares(calls)),1)
         self.assertFalse(any('--preflight' in c for c in calls))
 
+    def test_existing_preview_id_is_passed_to_share_without_generation(self):
+        deploy='a'*24
+        result,calls,_,_=self.run_preview(rendered=True,STUDIO_PREVIEW_USE_CHECKOUT='true',STUDIO_PREVIEW_SHARE='true',STUDIO_PREVIEW_DEPLOY_ID=deploy)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertIn('STUDIO_PREVIEW_DEPLOY_ID='+deploy,self.shares(calls)[0])
+        self.assertEqual(self.generations(calls),[])
+
     def test_viewing_existing_html_never_builds_even_without_a_resume_flag(self):
         result,calls,_,_=self.run_preview(rendered=True,STUDIO_PREVIEW_SHARE='true')
         self.assertEqual(result.returncode,0,result.stderr)

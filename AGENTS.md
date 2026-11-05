@@ -34,6 +34,15 @@ als sichtbar nicht freigegebenen Prüfentwurf rendern/teilen: kein Modell-/DB-Au
 QA-/Freigabefiktion, Sandbox bleibt aktiv. Originalmarker/-fehler/-versuche erhalten. Preisprüfung
 nicht blind lockern; genaue Trefferstelle aus dem neuen Diagnosekontext prüfen.
 
+05.11., tatsächlicher Netlify-Befund: gültige manuelle Vorschau-Antwort lässt `draft` weg;
+positiv durch `context=deploy-preview` + `published_at=null` + richtige Site prüfen, Produktion
+und Widersprüche weiter ablehnen. `STUDIO_PREVIEW_DEPLOY_ID` darf nur einen bestätigten noch
+unvollständigen manuellen Upload übernehmen; vorhandenes Manifest am selben Deploy mit
+`draft:true` erneuern, keinen weiteren Deploy für Retry erstellen. Echter GET liefert dort
+keine ausstehenden Digests; Update-Antwort verwenden. Negierter Hinweis „keine Zusage zu
+Terminen, Preisen oder Rückmeldung“ ist nachgewiesener Preiswort-Fehlalarm; eng ausnehmen,
+Preis-/Gratisbehauptungen daneben weiter sperren. Kein neues Modell oder automatische Freigabe.
+
 ## Neuester Betreiberauftrag 05.11.2026 – vollständige freie Demos und kleinere Ausgabe
 
 Für neue freie Demos gilt zusätzlich `full-page-1`: Leistungen fachlich als Branchenwissen erklären,

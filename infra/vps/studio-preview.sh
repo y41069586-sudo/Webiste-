@@ -69,7 +69,8 @@ fi
 install -d -m 0700 -o 1000 -g 1000 "$OUTPUT"
 run=("${compose[@]}" run --rm -T --no-deps "${source_mounts[@]}" -v "$OUTPUT:/preview")
 share_preview() {
-  "${run[@]}" --entrypoint node worker --import tsx /repo/packages/core/scripts/share-studio-preview.ts
+  "${run[@]}" -e "STUDIO_PREVIEW_DEPLOY_ID=${STUDIO_PREVIEW_DEPLOY_ID:-}" \
+    --entrypoint node worker --import tsx /repo/packages/core/scripts/share-studio-preview.ts
 }
 if [[ "$existing_html" = true ]]; then
   echo 'Vorhandener Entwurf wird verwendet; keine neuen KI-Aufrufe.'

@@ -246,3 +246,37 @@ erhaltene Originaldateien, Modus 600, neueste/erste Antwort, fehlende Artefakte,
 Sandbox und Nichtüberschreiben. Shell-Tests decken zusätzlich Wiederherstellung/Share ohne
 Generierung oder Build ab, einschließlich Fehlern und fehlenden Artefakten. Echte VPS-Dateien
 sind hier nicht zugänglich; erst der Betreiberlauf liefert ihren Preview-Link und Trefferkontext.
+
+## 05.11.2026 – Echte Netlify-Antwort statt idealisiertem Draft-Fixture
+
+Betreiberlauf hat `index.html` aus Versuch zwei erfolgreich wiederhergestellt. Die beanstandete
+Textstelle ist jetzt belegt: „keine Zusage zu Terminen, Preisen oder Rückmeldung“. Das ist keine
+Preisbehauptung. Der Preisprüfer ignoriert nun ausschließlich die Preisnennung innerhalb dieser
+explizit negativen Zusageformulierung. Reale Preis-/Rabatt-/Gratisbehauptungen davor oder danach
+bleiben gesperrt. Keine allgemeine Negationsheuristik oder Abschaltung der Faktenprüfung.
+Der historische Fehlerbericht bleibt erhalten; keine nachträgliche QA-/Gestaltungsfreigabe.
+
+Der anschließende Upload stoppte zweimal bei der eigenen Draft-Prüfung vor Dateiübertragung.
+Die authentifizierte Netlify-Leseprüfung bestätigt zwei manuelle Deploy-Previews in `uploading`,
+mit richtiger Site-ID, `context: deploy-preview`, `published_at: null`, aber **ohne** `draft`-Feld.
+Die alten Tests hatten dieses optionale OpenAPI-Feld immer geliefert. Jetzt basiert das
+Haupt-Fixture auf ausschließlich bereinigten relevanten Feldern dieser echten Antwort, ohne
+Tokens/Personen-/Kontodaten. Das dokumentierte `draft:true` im Request bleibt zwingend;
+die Antwort darf auch den nachweislich unveröffentlichten Preview-Kontext bestätigen.
+Explizites false, falsche Site/ID/Kontext, Veröffentlichung oder aktueller Produktionsdeploy
+blockieren weiter. Netlify-Projekt und Produktionszuordnung werden nicht verändert.
+
+`STUDIO_PREVIEW_DEPLOY_ID` setzt die konkret vorhandene unvollständige Vorschau fort. Der
+Helfer prüft diese lesend, bindet sie an Site und HTML-SHA und erneuert ausschließlich ihr
+`draft:true`-Dateimanifest über das dokumentierte Update-Endpoint. Nur geforderte bekannte
+HTML-/Header-Dateien werden hochgeladen. Dasselbe gilt für unterbrochene Uploads mit Receipt:
+GET liefert am echten noch unvollständigen Deploy `required: []`; der Manifest-Update liefert
+die aktuell benötigten Hashes. Kein neuer POST/Deploy bei Wiederaufnahme, kein Retry unsicherer
+Mutationen. Ready-Deploys ohne passenden bestehenden Receipt werden nicht übernommen.
+Der verifizierte Permalink und die Kontrolle der Produktionszuordnung bleiben bestehen.
+
+Neue Tests decken die tatsächliche optionale Antwortform, den alten booleschen Draft-Beleg,
+fehlende/widersprüchliche Evidenz, konkrete Upload-Wiederaufnahme ohne POST, Wiederaufnahme
+nach Abbruch, Weitergabe der Deploy-ID sowie den negierten Preishinweis mit daneben weiterhin
+gesperrten Preis-/Gratisbehauptungen ab. Der tatsächliche Datei-Upload muss weiterhin auf dem
+VPS erfolgen; kein privater Worker-Token wird hier ausgelesen oder umgangen.
