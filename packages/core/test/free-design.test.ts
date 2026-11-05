@@ -49,6 +49,7 @@ describe('Freie Generierung und weitere Inhaltsbearbeitung', () => {
     });
     expect(out.usage.outputTokens).toBe(0);
     expect(checkAuthoredDesign(out.data.design!)).toEqual([]);
+    expect(out.data.services.map((s) => s.title).join(' ')).not.toContain('Heizungswartung');
     expect(validateDemoContent(out.data, facts)).toEqual([]);
   });
   it('requires real HTML/CSS in the generation schema, not a composition selector', () => {
@@ -109,5 +110,55 @@ describe('Freie Generierung und weitere Inhaltsbearbeitung', () => {
     expect(validateRevision(c, JSON.stringify(c), [facts.name, facts.city])).toEqual([]);
     c.design!.html += '<p>Ein garantiert kostenloser Notdienst.</p>';
     expect(validateRevision(c, '', []).some((v) => v.field === 'design')).toBe(true);
+  });
+});
+
+describe('Vollständige generierte Inhaltsstrecke', () => {
+  const full = async () =>
+    (
+      await new MockLlm().generateStructured<SiteContent>({
+        toolName: DEMO_TOOL_NAME,
+        toolDescription: 'Isolierter Vollseitentest',
+        prompt: buildDemoPrompt(facts, 0),
+        system: 'test',
+        inputSchema: DEMO_CONTENT_SCHEMA,
+        model: 'mock',
+        maxTokens: 10000,
+        purpose: 'demo_content',
+      })
+    ).data;
+  it('checks semantic coverage and three to four FAQs for new drafts', async () => {
+    const c = await full();
+    expect(validateDemoContent(c, { ...facts, requireFullPage: true, imageBrief: [] })).toEqual([]);
+    for (const key of ['services', 'process', 'preparation', 'area', 'gallery', 'faq', 'placeholders']) {
+      const bad = { ...c, design: { ...c.design!, html: c.design!.html.replace(`data-ad-section="${key}"`, '') } };
+      expect(validateDemoContent(bad, { ...facts, requireFullPage: true }).some((v) => v.rule === 'Vollständige Seite')).toBe(
+        true,
+      );
+    }
+    expect(validateDemoContent({ ...c, faq: c.faq.slice(0, 2) }, facts).some((v) => v.field === 'faq')).toBe(true);
+  });
+  it('accepts explicit proposal/placeholder tokens but still blocks unverified territory or guarantees', async () => {
+    const c = await full();
+    expect(validateDemoContent(c, facts)).toEqual([]);
+    for (const text of [
+      'Wir arbeiten im gesamten Ruhrgebiet und Umgebung.',
+      'Garantiert am selben Tag.',
+      'Unser Team aus zwanzig Meistern.',
+    ]) {
+      const bad = { ...c, design: { ...c.design!, html: c.design!.html + `<p>${text}</p>` } };
+      expect(
+        validateDemoContent(bad, facts).some((v) =>
+          ['Einzugsgebiet', 'Garantien/Versprechen', 'Personen/Team', 'Auszeichnungen/Zertifikate'].includes(v.rule),
+        ),
+      ).toBe(true);
+    }
+  });
+  it('keeps the full Archivo file available only to old saved content', async () => {
+    const c = await full();
+    c.design!.displayFont = 'archivo';
+    expect(validateDemoContent(c, facts).some((v) => v.detail.includes('zugeschnittenes Archivo-Profil'))).toBe(true);
+    delete c.design!.contentVersion;
+    expect(checkAuthoredDesign(c.design!)).toEqual([]);
   });
 });

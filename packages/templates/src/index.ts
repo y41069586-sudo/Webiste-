@@ -34,6 +34,7 @@ export const KIT_TEMPLATES: TemplateDef[] = KITS.map((kit) => ({
 export * from './types';
 export { updateAuthoredCopy } from './authored/update';
 export { AUTHORED_TEMPLATES, authoredTemplateId, isAuthoredTemplate } from './authored/render';
+export { FULL_PAGE_VERSION, AUTHORED_SECTION_KEYS, authoredSectionIssues } from './authored/sections';
 export { FREE_DESIGN_CRITERIA, freeDesignBrief } from './authored/criteria';
 export { checkAuthoredDesign, authoredText, FREE_DESIGN_VERSION, type AuthoredDesign } from './authored/design';
 export * from './palettes';

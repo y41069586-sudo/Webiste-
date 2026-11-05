@@ -1,0 +1,65 @@
+{
+  "results": [
+    {
+      "mode": "demo",
+      "width": 390,
+      "opened": true,
+      "overflow": false,
+      "contactBg": "rgb(32, 43, 50)",
+      "fieldBg": "rgb(32, 43, 50)",
+      "fieldColor": "rgb(247, 242, 231)",
+      "headingFont": "\"Kit Archivo\", serif",
+      "inputFont": "\"Kit Karla\", sans-serif",
+      "buy": "flex",
+      "placeholders": 4,
+      "disabled": true,
+      "axe": []
+    },
+    {
+      "mode": "demo",
+      "width": 1440,
+      "opened": true,
+      "overflow": false,
+      "contactBg": "rgb(32, 43, 50)",
+      "fieldBg": "rgb(32, 43, 50)",
+      "fieldColor": "rgb(247, 242, 231)",
+      "headingFont": "\"Kit Archivo\", serif",
+      "inputFont": "\"Kit Karla\", sans-serif",
+      "buy": "flex",
+      "placeholders": 4,
+      "disabled": true,
+      "axe": []
+    },
+    {
+      "mode": "live",
+      "width": 390,
+      "opened": true,
+      "overflow": false,
+      "contactBg": "rgb(32, 43, 50)",
+      "fieldBg": "rgb(32, 43, 50)",
+      "fieldColor": "rgb(247, 242, 231)",
+      "headingFont": "\"Kit Archivo\", serif",
+      "inputFont": "\"Kit Karla\", sans-serif",
+      "buy": null,
+      "placeholders": 0,
+      "disabled": false,
+      "axe": []
+    },
+    {
+      "mode": "live",
+      "width": 1440,
+      "opened": true,
+      "overflow": false,
+      "contactBg": "rgb(32, 43, 50)",
+      "fieldBg": "rgb(32, 43, 50)",
+      "fieldColor": "rgb(247, 242, 231)",
+      "headingFont": "\"Kit Archivo\", serif",
+      "inputFont": "\"Kit Karla\", sans-serif",
+      "buy": null,
+      "placeholders": 0,
+      "disabled": false,
+      "axe": []
+    }
+  ],
+  "errors": []
+}

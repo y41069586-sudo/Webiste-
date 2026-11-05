@@ -3,7 +3,7 @@ import { buildDemoPrompt } from '../src/demos/content';
 import { visualReviewInput } from '../src/demos/visual-review';
 
 describe('Editorial generation and bounded visual review', () => {
-  it('does not force FAQs or an invented history on thin evidence', () => {
+  it('requires useful process FAQs while keeping unverified history empty', () => {
     const prompt = buildDemoPrompt(
       {
         name: 'Fiktiver Betrieb',
@@ -22,7 +22,8 @@ describe('Editorial generation and bounded visual review', () => {
     );
     expect(prompt).toContain('free-design-1');
     expect(prompt).toContain('Über uns: leer lassen');
-    expect(prompt).not.toContain('3–4 FAQ');
+    expect(prompt).toContain('drei bis vier konkrete Fragen zum Ablauf');
+    expect(prompt).toContain('data-ad-section');
     expect(prompt).not.toContain('zwei kurzen Absätzen');
     expect(prompt).toContain('Keine Leistungen bestätigt');
   });

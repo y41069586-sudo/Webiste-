@@ -1,0 +1,6 @@
+{
+  "name": "lighthouse",
+  "passed": true,
+  "score": 100,
+  "details": "performance: 100, accessibility: 100, best-practices: 100, seo: 100; diagnostics: {\"htmlBytes\":102499,\"gzipBytes\":66413,\"benchmarkIndex\":506,\"throttling\":{\"rttMs\":150,\"throughputKbps\":1638.4,\"requestLatencyMs\":562.5,\"downloadThroughputKbps\":1474.5600000000002,\"uploadThroughputKbps\":675,\"cpuSlowdownMultiplier\":2.074666666666667},\"cpuCalibration\":{\"baseline\":{\"performance\":0.97,\"benchmarkIndex\":778,\"throttling\":{\"rttMs\":150,\"throughputKbps\":1638.4,\"requestLatencyMs\":562.5,\"downloadThroughputKbps\":1474.5600000000002,\"uploadThroughputKbps\":675,\"cpuSlowdownMultiplier\":4}},\"referenceBenchmark\":1500,\"appliedMultiplier\":2.074666666666667},\"metrics\":{\"first-contentful-paint\":998.41625,\"largest-contentful-paint\":1034.91625,\"total-blocking-time\":5,\"cumulative-layout-shift\":0,\"speed-index\":998.41625},\"warnings\":[],\"opportunities\":[{\"id\":\"unused-css-rules\",\"value\":\"Est savings of 48 KiB\"}]}"
+}

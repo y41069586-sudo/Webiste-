@@ -418,7 +418,7 @@ const SPECIALTIES: { match: RegExp; headline: string; services: { title: string;
     ],
   },
   {
-    match: /sanitär|sanitaer|heizung|installat/i,
+    match: /sanitär|sanitaer|heizung|\binstallat/i,
     headline: 'Ihr Anliegen rund um Haus und Technik',
     services: [
       {

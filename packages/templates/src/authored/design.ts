@@ -1,6 +1,7 @@
 import { parseFragment, serialize, type DefaultTreeAdapterTypes as T } from 'parse5';
 import postcss from 'postcss';
 import { contrastRatio } from '../palettes';
+import type { KitDisplayFont } from '../kits/fonts';
 import selectorParser from 'postcss-selector-parser';
 
 export const FREE_DESIGN_VERSION = 'free-design-1';
@@ -8,7 +9,8 @@ export interface AuthoredDesign {
   concept: string;
   html: string;
   css: string;
-  displayFont: 'archivo' | 'bodoni' | 'gloock';
+  displayFont: KitDisplayFont;
+  contentVersion?: 'full-page-1';
   colors: { background: string; foreground: string; accent: string; onAccent: string };
   textFont: 'karla' | 'atkinson';
 }
@@ -18,7 +20,7 @@ const TAGS = new Set(
   ),
 );
 const ATTRS = new Set(
-  'class id href src alt width height loading decoding aria-label aria-labelledby aria-describedby aria-hidden role open'.split(
+  'data-ad-section data-ad-placeholder class id href src alt width height loading decoding aria-label aria-labelledby aria-describedby aria-hidden role open'.split(
     ' ',
   ),
 );
@@ -34,6 +36,10 @@ const TOKENS = new Set([
   'image_3',
   'phone_url',
   'map_url',
+  'service_area',
+  'placeholder_photos',
+  'placeholder_team',
+  'placeholder_references',
 ]);
 const GLOBAL = new Set(['html', 'body']);
 
@@ -45,7 +51,12 @@ export function checkAuthoredDesign(d: AuthoredDesign): string[] {
   if (!d.concept.trim() || d.concept.length > 700) errors.push('Konzept fehlt oder ist zu lang.');
   if (d.html.length > 30000 || d.css.length > 20000 || !d.html.trim() || !d.css.trim())
     return ['HTML/CSS leer oder zu umfangreich.'];
-  if (!['archivo', 'bodoni', 'gloock'].includes(d.displayFont) || !['karla', 'atkinson'].includes(d.textFont))
+  if (
+    !['archivo', 'archivo-maler', 'archivo-fliesen', 'archivo-elektro', 'archivo-reinigung', 'bodoni', 'gloock'].includes(
+      d.displayFont,
+    ) ||
+    !['karla', 'atkinson'].includes(d.textFont)
+  )
     errors.push('Schriftdatei nicht aus der lokal verfügbaren Bibliothek.');
   if (
     !d.colors ||
@@ -59,6 +70,9 @@ export function checkAuthoredDesign(d: AuthoredDesign): string[] {
     contrastRatio(d.colors.onAccent, d.colors.accent) < 4.5
   )
     errors.push('Text- und Akzentfarben brauchen mindestens 4,5:1 Kontrast.');
+  if (d.contentVersion && d.contentVersion !== 'full-page-1') errors.push('Unbekannter Inhaltsstandard.');
+  if (d.contentVersion === 'full-page-1' && d.displayFont === 'archivo')
+    errors.push('Für neue Entwürfe ein zugeschnittenes Archivo-Profil statt der vollständigen Datei wählen.');
   const tree = parseFragment(d.html, { onParseError: (e) => errors.push(`HTML: ${e.code}`) });
   let h1 = 0;
   const ids = new Set<string>();
@@ -69,6 +83,13 @@ export function checkAuthoredDesign(d: AuthoredDesign): string[] {
     if (node.tagName === 'h1') h1++;
     for (const a of node.attrs) {
       if (!ATTRS.has(a.name)) errors.push(`Nicht erlaubtes Attribut: ${a.name}`);
+      if (
+        a.name === 'data-ad-section' &&
+        !['services', 'process', 'preparation', 'area', 'gallery', 'faq', 'placeholders'].includes(a.value)
+      )
+        errors.push('Unbekannter Inhaltsbereich.');
+      if (a.name === 'data-ad-placeholder' && !['photos', 'team', 'references'].includes(a.value))
+        errors.push('Unbekannter Entwurfsplatzhalter.');
       if (a.name === 'id') {
         if (!/^ad-[a-z0-9-]+$/.test(a.value) || ids.has(a.value)) errors.push('IDs müssen eindeutig sein und mit ad- beginnen.');
         ids.add(a.value);
@@ -168,10 +189,23 @@ export function authoredFragment(
   html: string,
   replacements: Record<string, string>,
   images: { src: string; alt: string; example: boolean }[],
+  draft = true,
 ): string {
   const tree = parseFragment(html);
   const visit = (parent: T.ParentNode) => {
     for (const node of [...parent.childNodes]) {
+      if (
+        !draft &&
+        'attrs' in node &&
+        node.attrs.some(
+          (a) =>
+            a.name === 'data-ad-placeholder' ||
+            (a.name === 'data-ad-section' && (a.value === 'placeholders' || (a.value === 'gallery' && images.length === 0))),
+        )
+      ) {
+        parent.childNodes = parent.childNodes.filter((n) => n !== node);
+        continue;
+      }
       if ('tagName' in node && node.tagName === 'img') {
         const src = node.attrs.find((a) => a.name === 'src');
         const match = src?.value.match(/^\{\{image_([123])\}\}$/);

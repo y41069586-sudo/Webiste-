@@ -1,0 +1,19 @@
+{
+  "contentPassed": true,
+  "sizes": {
+    "demo": 468565,
+    "live": 102499
+  },
+  "htmlChecks": [
+    {
+      "mode": "demo",
+      "name": "html-validierung",
+      "passed": true
+    },
+    {
+      "mode": "live",
+      "name": "html-validierung",
+      "passed": true
+    }
+  ]
+}

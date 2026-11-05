@@ -1,5 +1,23 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Neuester Betreiberauftrag 05.11.2026 – vollständige freie Demos und kleinere Ausgabe
+
+Für neue freie Demos gilt zusätzlich `full-page-1`: Leistungen fachlich als Branchenwissen erklären,
+Beispielablauf einer Anfrage kennzeichnen, konkrete Anfrage-Checkliste, Gebietsvorschlag Stadt und
+Umgebung, geschützter Öffnungszeiten-/Kontaktbereich, Bildstrecke, drei bis vier Ablauf-Fragen,
+markierte Entwurfsplatzhalter für eigene Fotos/Team/Referenzen. Das sind Mindestinhalte, keine
+feste Reihenfolge oder visuelle Vorlage. Der alte Kurzseiten-/FAQ-optional-Auftrag ist dafür überholt.
+Keine Betriebsfakten erfinden: Gebiet über service_area-Token im Entwurf ausdrücklich unbestätigt;
+Foto-/Team-/Referenz-Platzhalter entfernen sich vor Vorschau/Live automatisch. Neues Pflichtschema
+und Inhaltsprüfung erhalten; alte gespeicherte Entwürfe bleiben renderbar. Keine vorhandenen Demos
+automatisch neu bauen oder freigeben.
+
+Neue Archivo-Entwürfe wählen ein vorhandenes zugeschnittenes Schriftprofil nach Stärke/Breite,
+unabhängig von der Branche. Gemeinsames Utility- und Kontakt-CSS wird mit purgeCss gekürzt; frei
+verfasstes CSS bleibt unverändert. Kontaktbereich nur mit vertrauenswürdigem CSS an Schrift und
+Farbrollen anpassen. Markup, Formulare, Kaufpreise, Freigaben und Performance-Schwellen unverändert.
+Nachweise und Grenzen: `docs/authored-full-pages.md`.
+
 ## Neueste Betreiberentscheidung 04.11.2026 – frei gestalten, keine Vorlagenpflicht
 
 Der Betreiber hat die feste Zuordnung von Branche zu Gestaltungskit ausdrücklich verworfen.

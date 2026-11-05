@@ -1111,3 +1111,18 @@ Privater Beispielentwurf für Jörg Stoffeln separat unter dem bestehenden Sites
 Betriebsbeauftragung, kein echter Lead, keine Produktionsdaten oder vorhandenen Demos geändert.
 Die Telefonnummer ist zwischen Verzeichnissen widersprüchlich, aktuelle Aktivität nicht bestätigt.
 Prüfnachweise und Grenzen: `docs/free-design-standard.md`.
+
+
+## 05.11.2026 – Mindestinhalte auch bei frei gestalteten Seiten
+
+Betreiber wünscht ausführlichere Demos statt Hero/Leistungen/Adresse: fachliche Erklärung als
+allgemeines Branchenwissen, markierter Beispielablauf, Anfrage-Checkliste, Einsatzgebietsvorschlag,
+Öffnungszeiten/Kontakt, Symbolbildstrecke, drei bis vier Ablauf-Fragen sowie im Entwurf klar
+markierte Foto-/Team-/Referenz-Platzhalter. Weiterhin freie Komposition; keine neuen Branchenlayouts.
+`full-page-1` prüft Inhaltsabdeckung neuer Generierungen; ältere Datensätze bleiben kompatibel.
+Gebiet ohne Quellenbestätigung als Vorschlag; live nur die bekannte Stadt. Platzhalter werden vor
+Vorschau/Live entfernt. Keine Testimonials, Personen, Projekte oder Kapazitäten erfinden.
+`authored/render.ts` bereinigt gemeinsames CSS und nutzt für neue Archivo-Entwürfe die bestehenden
+zugeschnittenen Profile. Der geschützte Kontaktbereich erhält ausschließlich zusätzliche CSS-Regeln
+für Fonts und Farbrollen; Markup und Formularlogik bleiben unverändert. Keine Leistungs-/Lighthouse-
+Schwelle herabgesetzt. Prüfbericht: `docs/authored-full-pages.md`.

@@ -305,6 +305,7 @@ export async function generateDemoContent(
   const research = await leadResearch(lead);
   const facts = {
     ...leadContentFacts(lead, cfg, research),
+    requireFullPage: true,
     designCharacter: direction?.character,
     imageBrief: photos.map((p, i) => ({ slot: i + 1, alt: p.alt, example: p.origin === 'example' })),
   };

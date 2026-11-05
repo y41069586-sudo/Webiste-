@@ -1,4 +1,12 @@
-import { FREE_DESIGN_CRITERIA, FREE_DESIGN_VERSION, checkAuthoredDesign, authoredText } from '@wbm/templates';
+import {
+  FREE_DESIGN_CRITERIA,
+  FREE_DESIGN_VERSION,
+  FULL_PAGE_VERSION,
+  AUTHORED_SECTION_KEYS,
+  authoredSectionIssues,
+  checkAuthoredDesign,
+  authoredText,
+} from '@wbm/templates';
 import { ICON_KEYS, ICONS_BY_GROUP } from '@wbm/templates/icons';
 import type { SiteContent } from '@wbm/templates/types';
 import type { BranchGroup } from '../types';
@@ -21,6 +29,7 @@ export interface ContentFacts {
   /** Source-verified offerings only; never inferred from industry or demo sample text. */
   verifiedServices?: string[];
   verifiedDetails?: string[];
+  requireFullPage?: boolean;
   imageBrief?: { slot: number; alt: string; example: boolean }[];
 }
 
@@ -37,12 +46,16 @@ export const DEMO_CONTENT_SCHEMA = {
     design: {
       type: 'object',
       additionalProperties: false,
-      required: ['concept', 'html', 'css', 'displayFont', 'textFont', 'colors'],
+      required: ['concept', 'html', 'css', 'displayFont', 'textFont', 'colors', 'contentVersion'],
       properties: {
+        contentVersion: { type: 'string', enum: [FULL_PAGE_VERSION] },
         concept: { type: 'string', maxLength: 700 },
         html: { type: 'string', maxLength: 30000 },
         css: { type: 'string', maxLength: 20000 },
-        displayFont: { type: 'string', enum: ['archivo', 'bodoni', 'gloock'] },
+        displayFont: {
+          type: 'string',
+          enum: ['archivo-maler', 'archivo-fliesen', 'archivo-elektro', 'archivo-reinigung', 'bodoni', 'gloock'],
+        },
         textFont: { type: 'string', enum: ['karla', 'atkinson'] },
         colors: {
           type: 'object',
@@ -83,8 +96,10 @@ export const DEMO_CONTENT_SCHEMA = {
     seo_description: { type: 'string', description: 'max. 155 Zeichen' },
     faq: {
       type: 'array',
+      minItems: 3,
+      maxItems: 4,
       description:
-        '0 bis 4 Fragen, die Kunden dieses Gewerks vor einer Anfrage wirklich haben, mit allgemein richtigen Antworten ohne Zusagen. Lieber keine als austauschbare.',
+        'Drei bis vier konkrete Fragen zum Ablauf einer Anfrage, mit allgemein richtigen Antworten ohne betriebliche Zusagen.',
       items: {
         type: 'object',
         additionalProperties: false,
@@ -105,7 +120,7 @@ HARTE REGELN (jeder Verstoß macht den Text unbrauchbar):
 2. Keine Zahlen und Ziffern im gesamten Text.
 3. Keine Bewertungen, Sterne, Kundenstimmen, Zitate oder Testimonials – auch keine allgemeinen wie „zufriedene Kunden“.
 4. Leistungen: nur allgemein übliche Leistungen dieser Branche, neutral beschrieben. Sie werden auf der Seite als Beispiele gekennzeichnet.
-5. „Über uns“: nur bekannte Orts-/Branchenangaben, bestätigte Leistungen und bestätigte Details. Keine erfundene Haltung, Arbeitsweise, Beratung, Atmosphäre oder Qualitätsbehauptung über den Betrieb. Ist nichts Belegtes zu sagen, lass das Feld leer – die Seite wird dann kürzer, nicht schlechter. FAQ: nur Fragen, die Kunden dieses Gewerks vor einer Anfrage wirklich stellen; lieber zwei gute oder keine als vier austauschbare.
+5. „Über uns“: nur bekannte Orts-/Branchenangaben, bestätigte Leistungen und bestätigte Details. Keine erfundene Haltung, Arbeitsweise, Beratung, Atmosphäre oder Qualitätsbehauptung über den Betrieb. Ist nichts Belegtes zu sagen, lass Über-uns leer; die übrigen Pflichtinhalte bleiben vollständig. FAQ: drei bis vier konkrete Fragen zum Anfrageablauf, mit allgemein richtigen Antworten ohne Betriebszusagen. Fachliche Erklärungen sind als allgemeines Branchenwissen kenntlich zu machen.
 6. Keine Links, keine E-Mail-Adressen, keine Telefonnummern, keine Platzhalter, kein Lorem ipsum, keine eckigen oder geschweiften Klammern.
 7. Sprache: Deutsch, Sie-Form, freundlich-professionell, kurze und klare Sätze, keine Übertreibungen, keine Superlative („der beste“, „Nummer eins“).
 8. Der Firmenname und die Stadt dürfen vorkommen. Andere Fakten nur, wenn sie unten ausdrücklich genannt sind.
@@ -119,7 +134,8 @@ niemals aus Branchenfokus oder Akquisesignal ableiten. Bestätigtes Einsatzgebie
 12. KI-STIL VERMEIDEN: Der Text darf nicht nach KI klingen. Keine Floskeln wie „ganzheitlich“, „maßgeschneidert“, „nahtlos“, „mit Leidenschaft“, „Liebe zum Detail“, „alles aus einer Hand“, „Herzlich willkommen“, „Entdecken Sie“. Keine Konstruktion „nicht nur …, sondern auch …“, keine Dreierketten von Adjektiven, höchstens drei Gedankenstriche im ganzen Text. Schreibe so, wie ein Handwerker oder eine Inhaberin selbst spricht: konkrete Hauptwörter aus dem Gewerk (Wand, Fuge, Sicherungskasten, Treppenhaus, Maniküre, Mittagstisch) statt Werbewörter. Kurze Sätze. Jede Überschrift sagt etwas, das nur zu diesem Gewerk passt.
 
 FREIE GESTALTUNG: Liefere zusätzlich design.concept, design.html und design.css. Erstelle eine eigene vollständige Komposition, nicht eine Auswahl aus Kits. Verwende in HTML einen äußeren .ad-page-Bereich und eigene ad-IDs. Kein html/body/head/main, kein JavaScript, kein style-Attribut, kein Formular, keine eingebetteten Dienste. Das echte Formular und die SeitenWerk-Kaufleiste werden außerhalb ergänzt und sind geschützt. CTA href="#anfrage" führt zum vorhandenen Formular.
-HTML-Tags: section, article, header, footer, nav, div, span, p, h1 bis h4, ul/ol/li, dl/dt/dd, a, img, figure/figcaption, details/summary, strong/em/b/i/small, br/hr. Genau ein h1. Interne IDs beginnen mit ad-. CSS nur für eigene Klassen, flache Regeln und @media/@supports. Keine inhaltlichen CSS-content-Texte (content nur leer), keine globalen html/body/:root-Regeln, keine @imports, keine externen URLs, keine !important-Regeln. Schrift über var(--display) und var(--body), Farben nach deiner Wahl als vier Hex-Farbrollen in design.colors (background, foreground, accent, onAccent). Schriften lokal verfügbar: Archivo (variabel), Bodoni, Gloock; Fließtext Karla oder Atkinson. Das sind verfügbare Dateien, keine vorgeschriebenen Schriftpaare.
+HTML-Tags: section, article, header, footer, nav, div, span, p, h1 bis h4, ul/ol/li, dl/dt/dd, a, img, figure/figcaption, details/summary, strong/em/b/i/small, br/hr. Genau ein h1. Interne IDs beginnen mit ad-. CSS nur für eigene Klassen, flache Regeln und @media/@supports. Keine inhaltlichen CSS-content-Texte (content nur leer), keine globalen html/body/:root-Regeln, keine @imports, keine externen URLs, keine !important-Regeln. Schrift über var(--display) und var(--body), Farben nach deiner Wahl als vier Hex-Farbrollen in design.colors (background, foreground, accent, onAccent). Schriften lokal verfügbar: zugeschnittenes Archivo als archivo-maler (Stärke 800–900, Breite 66–85%), archivo-fliesen (700, 100–118%), archivo-elektro (800, 92–100%) oder archivo-reinigung (650, 84–100%), außerdem Bodoni und Gloock; Fließtext Karla oder Atkinson. Das Profil nach gewünschter Stärke/Breite wählen, unabhängig von der Branche; CSS innerhalb dieser Achsen halten. Die vollständige Archivo-Datei wird für neue Entwürfe nicht verwendet. Das sind verfügbare Dateien, keine vorgeschriebenen Schriftpaare.
+Setze design.contentVersion="full-page-1". Die freien Inhaltsbereiche erhalten data-ad-section="services|process|preparation|area|gallery|faq|placeholders" (jeweils genau einen passenden Wert). Das sind inhaltliche Prüfmarkierungen, keine Layoutvorgabe. services erklärt die Leistungen mit allgemeinem Branchenwissen, klar als solches bezeichnet. process enthält einen sichtbaren Beispiel-Hinweis. preparation nennt mindestens drei konkrete Angaben als Liste. area verwendet ausschließlich {{service_area}} für den Gebietsvorschlag. gallery nutzt zwei unterschiedliche verfügbare Bildslots, falls vorhanden; sonst einen mit data-ad-placeholder="photos" markierten {{placeholder_photos}}. faq zeigt dieselben drei bis vier Fragen/Antworten wie das faq-Inhaltsfeld, mit details/summary. placeholders enthält je einen eigenen Block mit data-ad-placeholder="photos", "team", "references" und dem passenden Texttoken {{placeholder_photos}}, {{placeholder_team}}, {{placeholder_references}}. Das System setzt die Kennzeichnungen ein und entfernt die Entwurfsplatzhalter vor Vorschau/Live-Veröffentlichung. Nichts davon als tatsächlich vorhandenes Team oder echte Referenz ausgeben. Den geschützten Öffnungszeiten-/Kontaktbereich mit #anfrage erreichbar machen; kein zweites Formular erfinden.
 Faktentokens: {{name}}, {{city}}, {{branch}}, {{phone}}, {{street}}, {{postal_code}}; geprüfte Linktokens: {{phone_url}}, {{map_url}}. Bilder nur als img src="{{image_1}}", {{image_2}} oder {{image_3}}. Diese optionalen Slots werden mit freigegebenen Bildern gefüllt oder entfallen. Keine Bildrechte oder Bildmotive erfinden. Das System kennzeichnet Symbolbilder automatisch. Dekorative Ziffern nur in aria-hidden="true"-Elementen, keine Zahlen als unbelegte Tatsachen.
 
 FORMAT: Liefere die Inhalte ausschließlich über das Tool „${DEMO_TOOL_NAME}“. Icons wählst du passend zur Leistung aus der vorgegebenen Liste.`;
@@ -150,8 +166,9 @@ export function buildDemoPrompt(f: ContentFacts, seed: number, feedback?: string
     `Design-Gruppe: ${f.group}`,
     `Gestaltungsstandard: ${FREE_DESIGN_VERSION}.`,
     ...FREE_DESIGN_CRITERIA,
+    `Pflichtinhalte frei anordnen und mit data-ad-section markieren: ${AUTHORED_SECTION_KEYS.join(', ')}.`,
 
-    `Verfügbare Bildslots (nur Bildbeschreibung, keine Betriebsfakten): ${JSON.stringify(f.imageBrief ?? [])}. Wähle passende Slots bewusst oder gestalte ohne Bild; keine Motive erfinden.`,
+    `Verfügbare Bildslots (nur Bildbeschreibung, keine Betriebsfakten): ${JSON.stringify(f.imageBrief ?? [])}. Gestalte eine Bildstrecke mit zwei bis drei unterschiedlichen passenden Slots, soweit verfügbar. Ohne passende Bilder den markierten Foto-Platzhalter verwenden; keine Motive erfinden.`,
     'Du gestaltest die Betriebsseite selbst im design-Objekt. Die übrigen Inhaltsfelder bleiben reiner Text für Faktenprüfung und Wiederverwendung.',
     'Jeder Text ergänzt Information: Hero = Tätigkeit, Unterzeile = belegte Einordnung, Leistungen = konkreter Umfang. Name und Stadt nicht abschnittsweise wiederholen.',
     `Passende Icons (bevorzugt): ${icons}`,
@@ -171,7 +188,7 @@ export function buildDemoPrompt(f: ContentFacts, seed: number, feedback?: string
       'Keine Leistungen bestätigt: Hauptüberschrift, Unterzeile, Über-uns, seo_title und seo_description nennen nur die Branche und die Stadt, keine einzelnen Leistungen als festes Angebot. Konkrete Leistungen stehen nur in der Leistungsliste (dort als Beispiele gekennzeichnet).',
     );
   }
-  let prompt = `Erstelle die Texte für den Website-Entwurf dieses Betriebs:\n\n${lines.join('\n')}\n\nAnforderungen: ${f.verifiedServices?.length ? 'Nur die bestätigten Leistungen' : '3–5 klar gekennzeichnete Beispiel-Leistungen'}. FAQ: null bis vier tatsächlich hilfreiche Fragen, keine Pflichtanzahl. Über uns: leer lassen, wenn keine zusätzlichen belegten Angaben vorliegen; sonst kurz und ohne Wiederholung der Leistungsliste.`;
+  let prompt = `Erstelle die Texte für den Website-Entwurf dieses Betriebs:\n\n${lines.join('\n')}\n\nAnforderungen: ${f.verifiedServices?.length ? 'Nur die bestätigten Leistungen' : '3–5 klar gekennzeichnete Beispiel-Leistungen'}. FAQ: drei bis vier konkrete Fragen zum Ablauf einer Anfrage, identisch in faq und im gestalteten FAQ-Bereich. Über uns: leer lassen, wenn keine zusätzlichen belegten Angaben vorliegen; sonst kurz und ohne Wiederholung der Leistungsliste.`;
   if (feedback?.length) {
     prompt += `\n\nDein letzter Entwurf hat diese Regeln verletzt – korrigiere sie:\n- ${feedback.join('\n- ')}`;
   }
@@ -288,6 +305,13 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
       rule: 'Beispiel-Kennzeichnung',
       detail: 'Unbestätigte Leistungen im HTML sichtbar als Beispiele kennzeichnen.',
     });
+  const fullPage = f.requireFullPage || c.design?.contentVersion === FULL_PAGE_VERSION;
+  if (fullPage && c.design) {
+    if (c.design.contentVersion !== FULL_PAGE_VERSION)
+      v.push({ field: 'design', rule: 'Vollständige Seite', detail: 'contentVersion full-page-1 fehlt.' });
+    for (const detail of authoredSectionIssues(c.design.html, c.faq?.length ?? 0, f.imageBrief?.length))
+      v.push({ field: 'design', rule: 'Vollständige Seite', detail });
+  }
   const minServices = f.verifiedServices?.length ? 1 : 3;
   if (
     f.verifiedServices?.length &&
@@ -303,8 +327,8 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
   if (!Array.isArray(c.services) || c.services.length < minServices || c.services.length > 6) {
     v.push({ field: 'services', rule: 'Anzahl', detail: `${c.services?.length ?? 0} Leistungen (erlaubt ${minServices}–6)` });
   }
-  if (!Array.isArray(c.faq) || c.faq.length > 4) {
-    v.push({ field: 'faq', rule: 'Anzahl', detail: `${c.faq?.length ?? 0} Fragen (erlaubt 0–4)` });
+  if (!Array.isArray(c.faq) || c.faq.length > 4 || (fullPage && c.faq.length < 3)) {
+    v.push({ field: 'faq', rule: 'Anzahl', detail: `${c.faq?.length ?? 0} Fragen (erlaubt ${fullPage ? '3–4' : '0–4'})` });
   }
   if (v.length) return v;
   if (
@@ -466,13 +490,13 @@ export const QA_SYSTEM_PROMPT = `Du prüfst Texte eines Website-Entwurfs für ei
 - Zahlen oder Ziffern.
 - Leistungen, die nicht zur Branche passen oder ungewöhnlich spezifisch sind.
 - Nicht Deutsch, nicht Sie-Form, unprofessioneller Ton, Übertreibungen, Superlative.
-- Platzhalter, unvollständige Sätze, Rechtschreib- oder Grammatikfehler.
+- Ungekennzeichnete Fülltexte, unvollständige Sätze, Rechtschreib- oder Grammatikfehler. Markierte Entwurfsplatzhalter für eigene Fotos, Team und Referenzen sind ausdrücklich erlaubt; daraus keine tatsächlichen Betriebsmerkmale ableiten.
 
-Wichtig zum Aufbau der Seite (kein Verstoß): Sind keine Leistungen bestätigt („leistungen“ leer), zeigt die Seite die Leistungen als branchentypische Beispiele und kennzeichnet sie dort sichtbar mit „Vorschlag · Beispiel-Leistungen“. Übliche Leistungen der Branche und ihre neutrale Beschreibung (z. B. typische Materialien oder Arbeitsschritte) sind deshalb erlaubt – prüfe nur, ob sie zur Branche passen. Allgemeine Hinweise zum Ablauf einer Anfrage („Sie schildern Ihr Vorhaben“, „Details werden abgesprochen“) sind keine erfundenen Fakten über den Betrieb.
+Wichtig zum Aufbau der Seite (kein Verstoß): Fachliche Erklärungen als allgemeines Branchenwissen, ein sichtbar gekennzeichneter Beispielablauf, eine Anfrage-Checkliste und drei bis vier allgemeine Ablauf-Fragen sind erwünscht. {{service_area}} wird im Entwurf als Stadt und Umgebung mit dem Hinweis „Vorschlag zum Einsatzgebiet · noch nicht bestätigt“ eingesetzt; das ist keine belegte Zusage. Live bleibt ohne Bestätigung nur die Stadt. Markierte Foto-/Team-/Referenz-Platzhalter verschwinden vor Live-Veröffentlichung. Solche klaren Kennzeichnungen nicht als erfundene Fakten oder fehlerhafte Platzhalter melden.  Sind keine Leistungen bestätigt („leistungen“ leer), zeigt die Seite die Leistungen als branchentypische Beispiele und kennzeichnet sie dort sichtbar mit „Vorschlag · Beispiel-Leistungen“. Übliche Leistungen der Branche und ihre neutrale Beschreibung (z. B. typische Materialien oder Arbeitsschritte) sind deshalb erlaubt – prüfe nur, ob sie zur Branche passen. Allgemeine Hinweise zum Ablauf einer Anfrage („Sie schildern Ihr Vorhaben“, „Details werden abgesprochen“) sind keine erfundenen Fakten über den Betrieb.
 
 Schweregrad:
 - Wenn ausdrücklich Startansichten angehängt sind: eindeutig unlesbare/überlagerte wesentliche Inhalte oder Hauptaktionen ebenfalls als „hoch“ melden, subjektive Gestaltungsvorlieben höchstens „mittel“. Ohne Bilder keine visuelle Prüfung behaupten.
-- „hoch“ sonst NUR für harte, überprüfbare Falschbehauptungen über den Betrieb: Jahreszahlen, Erfahrung, Auszeichnungen, Zertifikate, Meistertitel, Teamgröße, Personennamen, Marken, Preise, Garantien, Notdienst, Reaktionszeiten, Einzugsgebiet, Familienbetrieb; außerdem Bewertungen/Kundenstimmen, Zahlen oder Ziffern, Platzhalter, nicht branchenpassende Leistungen.
+- „hoch“ sonst NUR für harte, überprüfbare Falschbehauptungen über den Betrieb: Jahreszahlen, Erfahrung, Auszeichnungen, Zertifikate, Meistertitel, Teamgröße, Personennamen, Marken, Preise, Garantien, Notdienst, Reaktionszeiten, Einzugsgebiet, Familienbetrieb; außerdem Bewertungen/Kundenstimmen, Zahlen oder Ziffern, ungekennzeichnete Fülltexte, nicht branchenpassende Leistungen.
 - „mittel“ für weiche Formulierungen über Arbeitsweise, Haltung oder Atmosphäre, Werbefloskeln, Übertreibungen.
 - „niedrig“ für Stil, Wortwahl, Wiederholungen.
 Gib eine leere Liste zurück, wenn alles in Ordnung ist. Antworte ausschließlich über das Tool „${QA_TOOL_NAME}“.`;

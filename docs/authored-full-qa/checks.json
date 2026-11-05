@@ -1,0 +1,16 @@
+{
+  "templateTests": 187,
+  "isolatedCoreTests": 28,
+  "templateTypecheck": true,
+  "coreTypecheck": true,
+  "eslint": true,
+  "productionBuild": true,
+  "protectedContactAndCheckoutSourcesUnchanged": true,
+  "modelCallsMade": false,
+  "productionDemosRebuilt": false,
+  "limitations": [
+    "Fictitious test page; no model generation or VPS performance certification.",
+    "Full database integration suite omitted because its setup resets the target database.",
+    "Draft HTML with embedded stock images is larger than live HTML."
+  ]
+}
