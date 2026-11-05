@@ -28,6 +28,8 @@ else:
  if 'config' in a:print(json.dumps({'services':{'worker':{'environment':{'DRY_RUN':os.environ.get('CONFIG_MODE',os.environ['MODE'])}}}}))
  if 'build' in a and os.environ.get('BUILD_FAIL')=='1':sys.exit(1)
  if 'run' in a and os.environ.get('IMAGE_FAIL')=='1':sys.exit(1)
+ if '/repo/packages/core/scripts/worker-resume-check.ts' in a and 'run' in a and os.environ.get('RESUME_CHECK_FAIL')=='1':sys.exit(1)
+ if 'exec' in a and os.environ.get('RECORD_FAIL')=='1':sys.exit(1)
  if 'ps' in a:print('new-worker')
 '''
 
@@ -77,5 +79,27 @@ class WorkerUpdateTest(unittest.TestCase):
         r,calls=self.run_update(IMAGE_FAIL='1')
         self.assertNotEqual(r.returncode,0)
         self.assertFalse(any('up' in c or 'create' in c for c in calls))
+    def test_explicit_resume_starts_a_paused_worker_only_after_the_config_check_and_records_health(self):
+        r,calls=self.run_update(running='false',mode='false',RESUME_WORKER='true')
+        self.assertEqual(r.returncode,0,r.stderr)
+        check=next(i for i,c in enumerate(calls) if 'run' in c and '/repo/packages/core/scripts/worker-resume-check.ts' in c)
+        start=next(i for i,c in enumerate(calls) if 'up' in c)
+        record=next(i for i,c in enumerate(calls) if 'exec' in c and '--record' in c)
+        self.assertLess(check,start);self.assertLess(start,record)
+        self.assertTrue(any('--release='+RELEASE in c for c in calls))
+        self.assertFalse(any('create' in c for c in calls))
+    def test_failed_resume_config_check_never_starts_the_worker(self):
+        r,calls=self.run_update(running='false',RESUME_WORKER='true',RESUME_CHECK_FAIL='1')
+        self.assertNotEqual(r.returncode,0)
+        self.assertFalse(any('up' in c or 'create' in c for c in calls))
+    def test_resume_preserves_existing_dry_run_and_compose_files(self):
+        r,calls=self.run_update(running='false',mode='true',RESUME_WORKER='true')
+        self.assertEqual(r.returncode,0,r.stderr)
+        self.assertTrue(any('up' in c for c in calls))
+        self.assertFalse(any('live.yml' in s for c in calls if 'up' in c for s in c))
+    def test_failed_runtime_record_is_not_reported_as_success(self):
+        r,calls=self.run_update(running='false',RESUME_WORKER='true',RECORD_FAIL='1')
+        self.assertNotEqual(r.returncode,0)
+        self.assertNotIn('aktualisiert und gesund',r.stdout)
 
 if __name__=='__main__':unittest.main()

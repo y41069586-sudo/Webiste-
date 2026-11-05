@@ -92,6 +92,11 @@ class StudioPreviewTest(unittest.TestCase):
         self.assertFalse(any('up' in c for c in calls))
         self.assertTrue(archived);self.assertEqual(mode,0o600)
 
+    def test_fictional_preview_never_inherits_an_explicit_rollout_resume_flag(self):
+        result,calls,_,_=self.run_preview(RESUME_WORKER='true')
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertFalse(any('up' in c for c in calls))
+
     def test_started_without_html_blocks_another_paid_attempt(self):
         result,calls,_,_=self.run_preview(already_started=True)
         self.assertNotEqual(result.returncode,0)

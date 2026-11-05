@@ -280,3 +280,44 @@ fehlende/widersprüchliche Evidenz, konkrete Upload-Wiederaufnahme ohne POST, Wi
 nach Abbruch, Weitergabe der Deploy-ID sowie den negierten Preishinweis mit daneben weiterhin
 gesperrten Preis-/Gratisbehauptungen ab. Der tatsächliche Datei-Upload muss weiterhin auf dem
 VPS erfolgen; kein privater Worker-Token wird hier ausgelesen oder umgangen.
+
+## 05.11.2026 – Betreiber akzeptiert die Ansicht und beauftragt den regulären Rollout
+
+Betreiber: Link angesehen, Gestaltung gefällt; anschließend „alles an machen und Übernahme“.
+Die bestehende Pause wird damit für den Worker-Rollout aufgehoben. Keine Befreiung neuer
+Kundendemos von technischen/Inhalts-/Studio-Prüfungen und keine pauschale Demo-/Brieffreigabe.
+Der fiktive Test ist kein Kundendatensatz, seine Ansicht war keine unabhängige QA.
+
+Die veröffentlichte Testansicht wurde nochmals abgerufen: Deploy `6aecf41768610ee9e39ac6e1`,
+HTML-SHA256 `e9cf8167113100c9252572e056ee47993c70b4e09740f160b7639f90c7a9053f`.
+Die gestalterische Betreiberbestätigung gilt dieser Version. Regulärer `generateDemoContent`
+und Einzelprobe verwenden bereits denselben `authorStudioContent`; keine weitere Vorlagen-
+oder Generatorumstellung nötig. Die Übernahme erfolgt durch ein aktuelles dauerhaftes Image.
+
+Direkt gelesener Betriebsstand vor Rollout: Not-Aus false, autoApproveDemos false, reguläre KI-
+und Lighthouse-QA true, 30 €/Woche KI, 8 Recherchekandidaten pro Takt. Wöchentliche Suche und
+automatische Domainregistrierung bleiben false gemäß bisherigen Betreiberentscheidungen.
+Keine aktiven/erstellten/Retry-Queuejobs, keine Briefe. Bestehende Demos bleiben unverändert.
+Keine Schalter-/Budgetänderung erforderlich oder ausgeführt; kein erneuter Testbrief/Kauf.
+
+Der vorhandene Updater unterstützt nun ausdrücklich `RESUME_WORKER=true`: vorhandene Compose-
+Auswahl und Dry-Run-Modus privat abgleichen, Worker bauen, Studioversion und normalen Autorpfad
+im neuen Image importieren/prüfen. `worker-resume-check.ts` prüft Not-Aus, manuelle Demo-Freigabe,
+aktivierte KI-/Lighthouse-QA, Anthropic-Konfiguration und freien Standard-Renderadapter. Kein
+Modell-/Hosting-/Brief-/Queue-Aufruf in der Vorprüfung. Bei Fehler kein Start. Ohne Flag bleibt
+der vorher pausierte Container wie bisher pausiert.
+Die fiktive Einzelprobe setzt beim Aufruf des Updaters ausdrücklich `RESUME_WORKER=false`,
+damit auch ein geerbtes Rollout-Flag keine normale Automatik während eines Tests startet.
+
+Nach `up -d --no-deps worker` und Docker-Healthcheck läuft der Prüfer per `compose exec` im
+tatsächlichen Container mit `--record`: lokalen Health-Endpoint inklusive DB und Queue prüfen,
+dann atomar `worker-runtime-release` und Audit mit Commit, Version, Zeit, Gates und Budget
+schreiben. Kein Erfolgsnachweis bei negativem Health oder ungültigem Release. Zeitstempel
+belegt den beobachteten Start, nicht unbegrenzt spätere Gesundheit. Scheitert nur das Speichern,
+meldet der Updater keinen Erfolg; ein bereits gestarteter Worker kann trotzdem laufen.
+
+Fünf neue isolierte Prüferfälle und zehn Updater-Orchestrierungstests bestehen: pausierter
+Standard, ausdrückliches Resume, gesperrte Gates, unveränderte Compose-/Dry-Run-Auswahl und
+ausbleibender Erfolgsnachweis bei Fehler. Konfiguration/DB/Health im Test sind Fixtures, keine
+echten Provideraufrufe. Kein lokaler Image-Build oder VPS-Start behauptet; hier fehlt VPS-Zugang.
+Tatsächlicher Build und Workerstart bleiben bis zum Betreiber-Terminalaufruf offen.

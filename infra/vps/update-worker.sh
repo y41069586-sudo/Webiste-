@@ -5,6 +5,8 @@ ROOT="${DIR:-/opt/seitenwerk}"
 BRANCH='claude/website-brief-maschine-0d0s37'
 RELEASE="${RELEASE:?Der freigegebene vollständige Commit fehlt.}"
 [[ "$RELEASE" =~ ^[a-f0-9]{40}$ ]] || { echo 'Ungültiger Release-Commit.' >&2; exit 1; }
+RESUME="${RESUME_WORKER:-false}"
+[[ "$RESUME" = true || "$RESUME" = false ]] || { echo 'RESUME_WORKER muss true oder false sein.' >&2; exit 1; }
 cd "$ROOT"
 [[ "$(git rev-parse --show-toplevel)" = "$ROOT" ]] || { echo 'Unerwartetes Repository.' >&2; exit 1; }
 git diff --quiet && git diff --cached --quiet || { echo 'Lokale Codeänderungen vorhanden; nichts überschrieben.' >&2; exit 1; }
@@ -31,8 +33,11 @@ git merge --ff-only "$RELEASE"
 # Parse privately; never print the expanded configuration or credentials.
 "${compose[@]}" config --format json | python3 -c 'import json,sys; x=json.load(sys.stdin); actual=str(x["services"]["worker"]["environment"]["DRY_RUN"]).lower(); assert actual==sys.argv[1], "DRY_RUN würde geändert; Aktualisierung gestoppt."' "$mode"
 "${compose[@]}" build worker
-"${compose[@]}" run --rm -T --no-deps --entrypoint node worker --import tsx --input-type=module -e "const m=await import('/repo/packages/templates/src/index.ts');if(m.FREE_DESIGN_VERSION!=='free-design-1')process.exit(1);console.log('Freie Gestaltung im neuen Image bestätigt.');"
-if [[ "$was_running" != true ]]; then
+"${compose[@]}" run --rm -T --no-deps --entrypoint node worker --import tsx --input-type=module -e "const m=await import('/repo/packages/templates/src/index.ts');const s=await import('/repo/packages/core/src/demos/studio.ts');const a=await import('/repo/packages/core/src/demos/studio-author.ts');const b=await import('/repo/packages/core/src/demos/build.ts');if(m.FREE_DESIGN_VERSION!=='free-design-1'||s.STUDIO_VERSION!=='design-studio-1'||typeof a.authorStudioContent!=='function'||typeof b.generateDemoContent!=='function')process.exit(1);console.log('Freies Gestaltungsstudio im neuen Worker-Image bestätigt.');"
+if [[ "$RESUME" = true ]]; then
+  "${compose[@]}" run --rm -T --no-deps --entrypoint node worker --import tsx /repo/packages/core/scripts/worker-resume-check.ts
+fi
+if [[ "$was_running" != true && "$RESUME" != true ]]; then
   # `create` never starts containers and does not accept the run/up-only --no-deps flag.
   "${compose[@]}" create worker
   echo "Worker-Code aktualisiert. Worker bleibt pausiert; DRY_RUN=$mode."
@@ -43,6 +48,9 @@ for ((attempt=0; attempt<36; attempt++)); do
   current="$("${compose[@]}" ps -q worker)"
   health="$(docker inspect -f '{{.State.Health.Status}}' "$current")"
   if [[ "$health" = healthy ]]; then
+    if [[ "$RESUME" = true ]]; then
+      "${compose[@]}" exec -T worker node --import tsx /repo/packages/core/scripts/worker-resume-check.ts --record --release="$RELEASE"
+    fi
     echo "Worker aktualisiert und gesund; DRY_RUN=$mode unverändert."
     git log -1 --format='Stand: %h %s'
     exit 0

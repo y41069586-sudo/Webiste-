@@ -1183,3 +1183,15 @@ denselben unvollständigen Deploy über dokumentiertes Manifest-Update fortsetze
 Modellaufruf und kein zweiter Deploy als Fehlerumgehung. Tatsächlichen Negationskontext des
 Preisworts eng ausnehmen; erfundene Preise/Rabatte/Gratisversprechen bleiben gesperrt.
 Technische und gestalterische Abnahme werden dadurch nicht nachträglich behauptet.
+
+## 05.11.2026 – Gestaltung bestätigt, reguläre Übernahme und Workerstart beauftragt
+
+Betreiber hat die veröffentlichte fiktive Studio-Vorschau angesehen und akzeptiert; danach
+ausdrücklich Wiederaufnahme und Übernahme beauftragt. Die vorherige Worker-Pause ist für
+diesen Rollout aufgehoben. Bestehende Einzel-Demo-/Briefprüfungen, Budget und Not-Aus bleiben
+wirksam. Live gelesen: Not-Aus bereits aus, manuelle Demo-Freigabe und vollständige QA an;
+keine Änderungen an Schaltern nötig. Gespeichertes KI-Budget 30 €/Woche unverändert.
+Normaler Generator nutzt bereits denselben Studio-Autor. Updater erhält explizites Resume
+nach Image-/Konfigurationsprüfung und protokolliert den tatsächlich gesunden Start erst per
+Exec im laufenden Container. Keine vorhandenen Demos neu bauen oder freigeben. Codefreigabe
+und gemessenen VPS-Start getrennt halten; Umsetzung und Grenzen in `docs/design-studio.md`.

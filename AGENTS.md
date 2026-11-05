@@ -1,5 +1,22 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Neueste Betreiberfreigabe 05.11.2026 – regulären Generator übernehmen und Worker fortsetzen
+
+Betreiber hat den fiktiven Prüfentwurf angesehen, dessen Gestaltung bestätigt und anschließend
+ausdrücklich Übernahme und Wiederaufnahme des normalen Betriebs beauftragt. Das hebt die bisherige
+Worker-Pause für diesen geprüften Rollout auf. Keine globale Demo-/Brieffreigabe oder QA-Ausnahme:
+neue Demos weiter einzeln manuell, Briefe weiter nur im Status approved versenden. Vorhandene
+Demos nicht automatisch neu erzeugen/freigeben. Manuelle Suche und Domain-Schalter beibehalten.
+KI-Budget laut aktuellem DB-Befund 30 €/Woche, Recherche 8 pro Takt; unverändert lassen.
+
+`infra/vps/update-worker.sh` darf mit ausdrücklichem `RESUME_WORKER=true` den vorhandenen
+pausierten Worker nach Image-/Konfigurationsprüfung starten. Ohne Flag bleibt er pausiert.
+Exakte vorhandene Compose-Dateien, private ENV, Zahlungs-/Versandmodi und Budgets erhalten;
+kein Not-Aus abschalten. `worker-resume-check.ts` prüft vor Start nur lesend den regulären
+Generator und manuelle/technische Gates. Erst nach Container-/DB-/Queue-Health tatsächlichen
+Laufzeitbeleg in `worker-runtime-release` + Audit speichern. Autorisierung, geprüfter Code und
+tatsächlich gestarteter VPS sind getrennte Zustände. Details: `docs/design-studio.md`.
+
 ## Neuester Betreiberauftrag 05.11.2026 – freies Gestaltungsstudio
 
 Osteria Sera ist Qualitätsmaßstab, keine kopierbare Vorlage. Neue Demos laufen über Art Direction
