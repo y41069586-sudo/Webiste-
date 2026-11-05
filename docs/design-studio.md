@@ -213,3 +213,36 @@ Diff-Prüfung bestanden. Template-CSS wurde in der isolierten Reparaturablage ge
 Kein echter Anthropic-Aufruf und kein Netlify-Upload während dieser lokalen Reparatur. Kein
 neuer Web-Produktionsbuild nötig (Web/Template-Code unverändert). Der tatsächliche VPS-Lauf
 und seine sichtbare Gestaltung bleiben offen; keinen fertigen Preview-Link erfinden.
+
+## 05.11.2026 – Bezahlten, inhaltlich blockierten Kandidaten ohne neue KI ansehen
+
+Neue VPS-Rückmeldung: Snapshot und beide Preflights bestanden; Konzept und zwei Umsetzungen
+lieferten tatsächlich Toolantworten und wurden abgerechnet. Beide Umsetzungen hatten einen
+Inhaltsregelverstoß; zuletzt `design / Preise/Rabatte / Preis`. Keine unabhängige QA erreicht,
+kein HTML gerendert. Die alte Diagnose zeigte nur den Seitenanfang, nicht die betroffene Stelle;
+ein Fehlalarm oder eine tatsächlich erfundene Preisaussage ist damit noch nicht belegt.
+
+`validateDemoContent` zeigt jetzt Kontext um die tatsächliche Trefferposition. Die bestehende
+Preisprüfung bleibt wirksam, einschließlich Beträgen, Rabatten und Gratisversprechen. Der
+Umsetzungsprompt erklärt zusätzlich, dass der aktuelle lexikalische Prüfer auch allgemeine
+Preisfragen blockiert; FAQ auf Anfrageangaben, Unterlagen, Fotos und Wunschzeitraum beschränken.
+Keine Kaufpreise oder geschützten Kontakt-/Checkoutbereiche geändert.
+
+`STUDIO_PREVIEW_RECOVER=true` nutzt ausschließlich bereits gespeicherte `attempt-2.json`,
+ersatzweise `attempt-1.json`, mit gültigem fiktivem Studio-Startnachweis. Kein neuer Ordner,
+kein Reset des Markers, keine Modell-/DB-/Konfigurations-/Queue-Aufrufe. Fehlende gespeicherte
+Umsetzung blockiert ohne Rückfall auf Generierung. `recover-studio-preview.ts` normalisiert
+den vorhandenen Inhalt und behält die HTML-/CSS-Sandbox bei. Das gerenderte HTML erhält einen
+deutlich sichtbaren Hinweis „Fiktiver Prüfentwurf · Nicht freigegeben“ außerhalb des Modellbereichs.
+Auch bei Inhaltsverstößen darf dieser ausdrücklich ungeprüfte, fiktive Kandidat zur Ansicht
+als Draft geteilt werden; niemals als freigegebene Kundendemo. Keine Ersatzvorlage und keine
+neue Modellgestaltung. Das ursprüngliche `result.json`, beide Versuche und der Startmarker
+bleiben unverändert. `recovered-content.json` und `recovery.json` dokumentieren Quelle/SHA,
+erneute Regelbefunde, ausgebliebene QA und null neue KI-Aufrufe. Vorhandenes HTML wird nicht
+überschrieben; Wiederholung teilt die vorhandene Seite weiter.
+
+Sieben isolierte Wiederherstellungstests prüfen vorhandenen Inhalt, exakten Diagnosekontext,
+erhaltene Originaldateien, Modus 600, neueste/erste Antwort, fehlende Artefakte, fiktiven Nachweis,
+Sandbox und Nichtüberschreiben. Shell-Tests decken zusätzlich Wiederherstellung/Share ohne
+Generierung oder Build ab, einschließlich Fehlern und fehlenden Artefakten. Echte VPS-Dateien
+sind hier nicht zugänglich; erst der Betreiberlauf liefert ihren Preview-Link und Trefferkontext.

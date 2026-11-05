@@ -36,6 +36,10 @@ elif a and a[0]=='inspect':
 else:
  if 'create' in a and '--no-deps' in a:sys.exit(2)
  if 'config' in a:print(json.dumps({'services':{'worker':{'environment':{'DRY_RUN':'false'}}}}))
+ if '/repo/packages/core/scripts/recover-studio-preview.ts' in a:
+  if os.environ.get('RECOVERY_FAIL'):sys.exit(1)
+  p=Path(os.environ['STUDIO_PREVIEW_DIR']);(p/'index.html').write_text('<h1>Elektro Kontur: nicht freigegeben</h1>')
+  (p/'recovery.json').write_text('{"newAiCalls":0,"manualApproved":false}')
  if '/repo/packages/core/scripts/studio-preview.ts' in a:
   if '--preflight' in a:sys.exit(1 if os.environ.get('PREFLIGHT_FAIL') else 0)
   p=Path(os.environ['STUDIO_PREVIEW_DIR']);(p/'started.json').write_text('{"fictional":true}')
@@ -46,7 +50,7 @@ else:
 '''
 
 class StudioPreviewTest(unittest.TestCase):
-    def run_preview(self, already_started=False, rendered=False, **extra):
+    def run_preview(self, already_started=False, rendered=False, saved=False, **extra):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);repo=root/'repo';repo.mkdir()
             scripts=repo/'infra/vps';scripts.mkdir(parents=True)
@@ -56,9 +60,10 @@ class StudioPreviewTest(unittest.TestCase):
             (repo/'.env.worker').chmod(0o600)
             for n in ['docker-compose.worker.yml','docker-compose.worker.live.yml']:(repo/n).write_text('services: {}\n')
             output=root/'preview'
-            if already_started or rendered:
+            if already_started or rendered or saved:
                 output.mkdir();(output/'started.json').write_text('{"fictional":true}')
             if rendered:(output/'index.html').write_text('<h1>Elektro Kontur</h1>')
+            if saved:(output/'attempt-2.json').write_text('{"content":{}}')
             bins=root/'bin';bins.mkdir()
             for n in ['git','docker','install']:
                 p=bins/n;p.write_text(FAKE);p.chmod(0o700)
@@ -150,5 +155,26 @@ class StudioPreviewTest(unittest.TestCase):
         self.assertNotEqual(result.returncode,0)
         self.assertFalse(any('merge' in c or 'build' in c or 'up' in c for c in calls))
         self.assertEqual(self.generations(calls),[])
+
+    def test_recovery_views_saved_candidate_without_preflight_paid_calls_or_build(self):
+        result,calls,archived,_=self.run_preview(saved=True,STUDIO_PREVIEW_USE_CHECKOUT='true',STUDIO_PREVIEW_RECOVER='true',STUDIO_PREVIEW_SHARE='true')
+        self.assertEqual(result.returncode,0,result.stderr)
+        recovery=[c for c in calls if '/repo/packages/core/scripts/recover-studio-preview.ts' in c]
+        self.assertEqual(len(recovery),1);self.assertIn('LLM_PROVIDER=mock',recovery[0])
+        self.assertEqual(self.generations(calls),[]);self.assertEqual(len(self.shares(calls)),1)
+        self.assertFalse(any('--preflight' in c or 'build' in c or 'up' in c for c in calls))
+        self.assertTrue(archived)
+
+    def test_recovery_never_falls_back_to_paid_generation_when_artifacts_are_missing(self):
+        for started in [False,True]:
+            result,calls,_,_=self.run_preview(already_started=started,STUDIO_PREVIEW_RECOVER='true')
+            self.assertNotEqual(result.returncode,0)
+            self.assertFalse(any(c[0]=='docker' for c in calls))
+            self.assertEqual(self.generations(calls),[])
+
+    def test_failed_recovery_never_shares_or_generates(self):
+        result,calls,_,_=self.run_preview(saved=True,STUDIO_PREVIEW_USE_CHECKOUT='true',STUDIO_PREVIEW_RECOVER='true',STUDIO_PREVIEW_SHARE='true',RECOVERY_FAIL='1')
+        self.assertNotEqual(result.returncode,0)
+        self.assertEqual(self.generations(calls),[]);self.assertEqual(self.shares(calls),[])
 
 if __name__=='__main__':unittest.main()

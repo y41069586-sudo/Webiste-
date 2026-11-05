@@ -128,7 +128,7 @@ Arbeite auf dem Qualitätsniveau einer sorgfältig gestalteten unabhängigen Unt
 Der Betrieb hat diesen Entwurf nicht beauftragt; er soll ihn später ansehen und kann ihn übernehmen. Du kennst ihn nicht persönlich und darfst nichts über ihn behaupten, was nicht in den gelieferten Fakten steht.
 
 HARTE REGELN (jeder Verstoß macht den Text unbrauchbar):
-1. Keine erfundenen Fakten: kein Gründungsjahr, keine Jahre an Erfahrung, kein „Familienbetrieb“, keine Generationen, keine Auszeichnungen, keine Zertifikate, keine Meistertitel, keine Innungs- oder Kammermitgliedschaft, keine Teamgröße, keine Namen von Personen, keine Marken oder Hersteller, keine Preise, keine Rabatte, keine Garantien, keine Versprechen zu Reaktionszeiten, kein Notdienst, keine Einzugsgebiete.
+1. Keine erfundenen Fakten: kein Gründungsjahr, keine Jahre an Erfahrung, kein „Familienbetrieb“, keine Generationen, keine Auszeichnungen, keine Zertifikate, keine Meistertitel, keine Innungs- oder Kammermitgliedschaft, keine Teamgröße, keine Namen von Personen, keine Marken oder Hersteller, keine Preise, keine Rabatte, keine Garantien, keine Versprechen zu Reaktionszeiten, kein Notdienst, keine Einzugsgebiete. Auch neutrale Preisfragen oder Aussagen zur Preisermittlung weglassen: Der aktuelle Inhaltsprüfer blockiert Preiswörter unabhängig von einem Betrag. FAQ stattdessen zu benötigten Angaben, Fotos, Unterlagen, Umfang und Wunschzeitraum schreiben.
 2. Keine Zahlen und Ziffern im gesamten Text.
 3. Keine Bewertungen, Sterne, Kundenstimmen, Zitate oder Testimonials – auch keine allgemeinen wie „zufriedene Kunden“.
 4. Leistungen: nur allgemein übliche Leistungen dieser Branche, neutral beschrieben. Sie werden auf der Seite als Beispiele gekennzeichnet.
@@ -373,7 +373,16 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
     if (/\d/.test(stripped)) v.push({ field, rule: 'Zahlen', detail: `enthält Ziffern: „${value.slice(0, 80)}“` });
     for (const { rule, re } of FORBIDDEN) {
       const m = re.exec(stripped);
-      if (m) v.push({ field, rule, detail: `„${m[0]}“ in „${value.slice(0, 80)}“` });
+      if (m) {
+        // Show the actual offending context, including on long authored pages; the page's first 80 chars are unrelated.
+        const start = Math.max(0, m.index - 60);
+        const end = Math.min(stripped.length, m.index + m[0].length + 90);
+        v.push({
+          field,
+          rule,
+          detail: `„${m[0]}“ in „${start ? '…' : ''}${stripped.slice(start, end)}${end < stripped.length ? '…' : ''}“`,
+        });
+      }
     }
     if (/["„“”«»]/.test(value) && /[„“”«»]\s*[–-]\s*[A-ZÄÖÜ]/.test(value))
       v.push({ field, rule: 'Zitat', detail: 'Zitat mit Namensangabe' });

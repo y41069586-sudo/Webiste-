@@ -1164,3 +1164,12 @@ Runtime-Voraussetzungen und optionalen Hostingzugang prüfen. Gespeicherter fikt
 bleibt nach QA-Fehlern ohne neue Generierung ansehbar, Startmarker ohne HTML weiter gesperrt.
 Draft-URL vor Ausgabe abrufen, keine Kunden-/Produktionsfreigaben daraus ableiten. Umfang,
 tatsächliche lokale Browser-/Rechteprüfungen und offene Modellabnahme: `docs/design-studio.md`.
+
+## 05.11.2026 – Gespeicherte Studio-Antwort vor weiterem KI-Verbrauch ansehen
+
+Betreiber zeigt bestandene Vorprüfungen und drei abgerechnete Modellantworten; Umsetzung scheitert
+an einem Preiswort im freien HTML. Fehlerkontext künftig am tatsächlichen Treffer statt am
+Textanfang ausgeben, bestehende Preisregel erhalten. Den bezahlten fiktiven Kandidaten mit
+ausdrücklichem Nichtfreigabe-Hinweis zur Ansicht wiederherstellen, ohne neue KI-Aufrufe, Datenbank,
+Kundenpublikation oder Gates zu ändern. Originalartefakte bleiben erhalten. Details/Prüfgrenzen
+in `docs/design-studio.md`.

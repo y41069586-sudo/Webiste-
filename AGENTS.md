@@ -27,6 +27,13 @@ Netlify-Lesezugang prüfen. Vorhandenes fiktives HTML darf nach QA-Fehlern ohne 
 werden; kein HTML → Startmarker weiter respektieren. Draft-Link vor Ausgabe tatsächlich abrufen.
 Lokale Chromium-/Lighthouse- und UID-Tests ersetzen keine echte Modell-/VPS-Abnahme.
 
+05.11., weiterer VPS-Befund: Konzept und zwei HTML/CSS-Toolantworten sind bezahlt und privat
+gespeichert, beide durch Preiswort-Regel blockiert. Kein weiterer bezahlter Neustart zur Ansicht.
+`STUDIO_PREVIEW_RECOVER=true` darf den neuesten gespeicherten fiktiven Versuch ausschließlich
+als sichtbar nicht freigegebenen Prüfentwurf rendern/teilen: kein Modell-/DB-Aufruf, keine
+QA-/Freigabefiktion, Sandbox bleibt aktiv. Originalmarker/-fehler/-versuche erhalten. Preisprüfung
+nicht blind lockern; genaue Trefferstelle aus dem neuen Diagnosekontext prüfen.
+
 ## Neuester Betreiberauftrag 05.11.2026 – vollständige freie Demos und kleinere Ausgabe
 
 Für neue freie Demos gilt zusätzlich `full-page-1`: Leistungen fachlich als Branchenwissen erklären,
