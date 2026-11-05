@@ -2,6 +2,7 @@ import type { BranchGroup, RenderContext, TemplateDef } from '../types';
 import { documentShell } from '../partials/shared';
 import { kitFontCss, kitFontFamily } from '../kits/fonts';
 import { protectedBusinessContact } from '../kits/render';
+import { purgeCss } from '../kits/purge';
 import { authoredFragment, checkAuthoredDesign, scopedDesignCss, FREE_DESIGN_VERSION } from './design';
 
 export const authoredTemplateId = (group: BranchGroup) => `authored-${group}`;
@@ -35,12 +36,15 @@ export function renderAuthored(ctx: RenderContext): string {
   const fragment = authoredFragment(d.html, replacements, p.photos(3));
   const contact = protectedBusinessContact(ctx, d);
   const body = `<main id="inhalt"><div id="sw-ai-design">${fragment}</div></main>${contact.html}${p.footer({ className: 'sw-authored-footer', linkClass: 'underline' })}`;
-  const fonts = kitFontCss([d.displayFont, d.textFont]);
+  // Archivo als zugeschnittene Datei (Stärken 400–900, normale Breite): 34 statt 90 KB
+  const fonts = kitFontCss([d.displayFont === 'archivo' ? 'archivo-free' : d.displayFont, d.textFont]);
   const vars = `--display:'${kitFontFamily(d.displayFont)}',serif;--body:'${kitFontFamily(d.textFont)}',sans-serif;--design-bg:${d.colors.background};--design-ink:${d.colors.foreground};--design-accent:${d.colors.accent};--design-on:${d.colors.onAccent};`;
-  return documentShell(p, 'k sw-authored', body)
+  const html = documentShell(p, 'k sw-authored', body)
     .replace('<body ', `<body data-design="${FREE_DESIGN_VERSION}" `)
     .replace(
       '</head>',
       `<style>${fonts}${contact.css}#sw-ai-design{${vars}position:relative;isolation:isolate;contain:layout paint;background:var(--design-bg);color:var(--design-ink);font-family:var(--body)}#sw-ai-design *{box-sizing:border-box}#sw-ai-design img{max-width:100%;height:auto}#sw-ai-design .ad-stock-note{display:block;font:11px/1.5 var(--body);margin-top:8px;color:inherit}#sw-ai-design :focus-visible{outline:3px solid currentColor;outline-offset:5px}${scopedDesignCss(d.css)}</style></head>`,
     );
+  // Gemeinsames Tailwind-CSS (erster <style>-Block) auf die genutzten Klassen kürzen, wie bei den Kits
+  return html.replace(/<style>([\s\S]*?)<\/style>/, (_m, css: string) => `<style>${purgeCss(css, html)}</style>`);
 }

@@ -326,6 +326,20 @@ ${b.faq ? sec('fragen', 'k-f', `<div class="k-narrow"><h2 id="k-f" class="k-cent
  * Große Überschrift: Die Schriftgröße richtet sich nach dem längsten Wort, damit es immer in eine Zeile passt
  * (keine Trennung wie „Kosmeti-k“ oder „Fußbodentechni-k“). Breitenfaktor je Schrift, verfügbare Breite je Layout (CSS).
  */
+/** Farbe `fg` zu Anteil `t` über `bg` gemischt (für Linien und Nebentext aus den vier Farbrollen). */
+function mix(fg: string, bg: string, t: number): string {
+  const n = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const a = n(fg),
+    b = n(bg);
+  return `#${a
+    .map((v, i) =>
+      Math.round(v * t + b[i]! * (1 - t))
+        .toString(16)
+        .padStart(2, '0'),
+    )
+    .join('')}`;
+}
+
 function h1Of(kit: Kit, text: string): string {
   const longest = Math.max(...text.split(/\s+/).map((w) => w.length), 4);
   const perChar = kit.display.startsWith('archivo')
@@ -559,15 +573,26 @@ const LAYOUT_CSS: Record<string, string> = {
 /** Existing contact markup and styles, reused independently of any business-page composition. */
 export function protectedBusinessContact(ctx: RenderContext, d: import('../authored/design').AuthoredDesign) {
   const base = kitFor(ctx.facts.group, ctx.facts.branchLabel) ?? KITS[0]!;
-  const kit = { ...base, display: d.displayFont, text: d.textFont };
+  // Schrift und Farben des KI-Entwurfs übernehmen, nicht Breite/Stärke des alten Gewerks-Kits
+  const kit: Kit = {
+    ...base,
+    display: d.displayFont === 'archivo' ? 'archivo-free' : d.displayFont,
+    text: d.textFont,
+    stretch: undefined,
+    weight: d.displayFont === 'archivo' ? 700 : 500,
+    leading: 1.05,
+  };
   const k: KitColors = {
     base: d.colors.background,
-    surface: d.colors.background,
+    surface: mix(d.colors.foreground, d.colors.background, 0.06),
     ink: d.colors.foreground,
-    muted: d.colors.foreground,
-    line: d.colors.foreground,
+    muted: mix(d.colors.foreground, d.colors.background, 0.78),
+    line: mix(d.colors.foreground, d.colors.background, 0.22),
     accent: d.colors.accent,
     onAccent: d.colors.onAccent,
   };
-  return { html: blocks(ctx, kit).kontakt, css: baseCss(kit, k) };
+  // Die Kit-Regeln gelten sonst nur innerhalb von <main>; der geschützte Kontakt steht außerhalb des KI-Bereichs
+  const css = baseCss(kit, k).replace(/\.k main\b/g, '.k .sw-pc');
+  const b = blocks(ctx, kit);
+  return { html: `<div class="sw-pc">${b.offen}${b.kontakt}</div>`, css };
 }

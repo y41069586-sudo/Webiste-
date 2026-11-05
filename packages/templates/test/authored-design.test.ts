@@ -127,3 +127,55 @@ describe('Individuelles HTML/CSS statt Layoutvorgabe', () => {
     );
   });
 });
+
+describe('Vollständige Seiten und Änderungen im freien Entwurf (05.11.2026)', () => {
+  it('meldet Kurzseiten: zu wenige Abschnitte, zu wenig Text, Bilder ungenutzt', async () => {
+    const { authoredCompleteness } = await import('../src');
+    const short = authoredCompleteness(design.html, 3);
+    expect(short.join(' ')).toMatch(/Abschnitte/);
+    expect(short.join(' ')).toMatch(/Zeichen/);
+    expect(short.join(' ')).toMatch(/Bildslots/);
+    const sections = Array.from(
+      { length: 6 },
+      (_, i) =>
+        `<section><h2>Teil ${i}</h2><p>${'Fachwissen für Besucher. '.repeat(14)}</p><img src="{{image_${(i % 2) + 1}}}" alt="x"></section>`,
+    ).join('');
+    expect(authoredCompleteness(`<div><h1>x</h1>${sections}</div>`, 3)).toEqual([]);
+  });
+
+  it('übernimmt eine zusätzliche Leistung im Aufbau des vorhandenen Eintrags', async () => {
+    const { updateAuthoredCopy } = await import('../src');
+    const d = {
+      ...design,
+      html: '<div class="ad-page"><h1>{{name}}</h1><ul class="ad-l"><li class="ad-i"><h3>Innenanstrich</h3><p>Wände.</p></li><li class="ad-i"><h3>Lackieren</h3><p>Türen.</p></li></ul></div>',
+    };
+    const i = demoInput('authored-handwerk', 'custom');
+    const current = {
+      ...i.content,
+      services: [
+        { title: 'Innenanstrich', text: 'Wände.', icon: 'check' as const },
+        { title: 'Lackieren', text: 'Türen.', icon: 'check' as const },
+      ],
+      design: d,
+    };
+    const next = {
+      ...current,
+      services: [...current.services, { title: 'Fassade', text: 'Außenwände.', icon: 'check' as const }],
+    };
+    const out = updateAuthoredCopy(current, next);
+    expect(out.design!.html).toContain('<li class="ad-i"><h3>Fassade</h3><p>Außenwände.</p></li>');
+    expect((out.design!.html.match(/class="ad-i"/g) ?? []).length).toBe(3);
+    expect(checkAuthoredDesign(out.design!)).toEqual([]);
+    const fewer = updateAuthoredCopy(current, { ...current, services: [current.services[1]!] });
+    expect(fewer.design!.html).not.toContain('Innenanstrich');
+    expect(fewer.design!.html).toContain('Lackieren');
+  });
+
+  it('kürzt ungenutztes CSS und nutzt die zugeschnittene Archivo-Datei', () => {
+    const h = render();
+    // erster <style>-Block = gemeinsames Tailwind-CSS (ungekürzt rund 49 KB)
+    expect(h.match(/<style>([\s\S]*?)<\/style>/)![1]!.length).toBeLessThan(25_000);
+    expect(h).toContain('url(data:font/woff2;base64,');
+    expect(h.length).toBeLessThan(600_000);
+  });
+});

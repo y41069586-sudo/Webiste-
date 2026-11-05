@@ -1,5 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest';
-import { renderSite, TEMPLATES } from '@wbm/templates';
+import { isAuthoredTemplate, renderSite, TEMPLATES } from '@wbm/templates';
+import { testAuthoredDesign } from '../src/demos/mock-handlers';
 import { browserChecks, closeBrowser, validateHtml } from '../src/render';
 import { libraryContent } from '../src/demos/library';
 
@@ -54,12 +55,25 @@ describe('Alle Templates × Paletten: axe, HTML, Layout (volle und minimale Date
             einzelhandel: 'blumenladen',
             kurse: 'tanzschule',
           };
-          const content = libraryContent(
+          const base = libraryContent(
             branchFor[t.group],
             t.group,
             { name: facts.name, stadt: 'Dortmund', branche: facts.branchLabel },
             3,
           );
+          // Frei gestaltete Seiten mit einem vollständigen Testentwurf prüfen statt sie auszulassen
+          const content = isAuthoredTemplate(t.id)
+            ? {
+                ...base,
+                design: testAuthoredDesign(base, {
+                  verified: false,
+                  images: [
+                    { slot: 1, alt: 'Beispielbild' },
+                    { slot: 2, alt: 'Beispielbild' },
+                  ],
+                }),
+              }
+            : base;
           const html = renderSite({
             templateId: t.id,
             palette,
@@ -157,7 +171,10 @@ describe('Vertrauensblock mit langen Kontaktdaten überlappt auf kleinen Handys 
   afterAll(closeBrowser);
   for (const t of TEMPLATES) {
     it(`${t.id}`, async () => {
-      const content = libraryContent('maler', t.group, { name: fullFacts.name, stadt: 'Dortmund', branche: 'Betrieb' }, 3);
+      const lib = libraryContent('maler', t.group, { name: fullFacts.name, stadt: 'Dortmund', branche: 'Betrieb' }, 3);
+      const content = isAuthoredTemplate(t.id)
+        ? { ...lib, design: testAuthoredDesign(lib, { verified: false, images: [{ slot: 1, alt: 'Beispielbild' }] }) }
+        : lib;
       const html = renderSite({
         templateId: t.id,
         palette: t.palettes[0]!,

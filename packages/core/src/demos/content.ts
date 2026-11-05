@@ -1,4 +1,10 @@
-import { FREE_DESIGN_CRITERIA, FREE_DESIGN_VERSION, checkAuthoredDesign, authoredText } from '@wbm/templates';
+import {
+  FREE_DESIGN_CRITERIA,
+  FREE_DESIGN_VERSION,
+  checkAuthoredDesign,
+  authoredText,
+  authoredCompleteness,
+} from '@wbm/templates';
 import { ICON_KEYS, ICONS_BY_GROUP } from '@wbm/templates/icons';
 import type { SiteContent } from '@wbm/templates/types';
 import type { BranchGroup } from '../types';
@@ -154,6 +160,8 @@ export function buildDemoPrompt(f: ContentFacts, seed: number, feedback?: string
     `Verfügbare Bildslots (nur Bildbeschreibung, keine Betriebsfakten): ${JSON.stringify(f.imageBrief ?? [])}. Wähle passende Slots bewusst oder gestalte ohne Bild; keine Motive erfinden.`,
     'Du gestaltest die Betriebsseite selbst im design-Objekt. Die übrigen Inhaltsfelder bleiben reiner Text für Faktenprüfung und Wiederverwendung.',
     'Jeder Text ergänzt Information: Hero = Tätigkeit, Unterzeile = belegte Einordnung, Leistungen = konkreter Umfang. Name und Stadt nicht abschnittsweise wiederholen.',
+    'Die Seite muss vollständig wirken, auch wenn über den Betrieb wenig bekannt ist: alle Pflicht-Inhalte liefern und mit wahrem Fachwissen füllen (was zu einer Leistung gehört, wie eine Anfrage abläuft, was Besucher vorbereiten). Das sind Hinweise für Besucher, keine Behauptungen über den Betrieb.',
+    'Archivo ist mit Stärken 400 bis 900 in normaler Breite verfügbar (kein font-stretch).',
     `Passende Icons (bevorzugt): ${icons}`,
     ...(GROUP_HINTS[f.group] ? [`Hinweis zu den Leistungen: ${GROUP_HINTS[f.group]}`] : []),
     'Button-Text: schriftliche Anfrage oder unverbindliche Terminanfrage; kein verpflichtendes Gespräch, keine bestätigte Buchung.',
@@ -355,6 +363,11 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
     .filter(({ field }) => !field.startsWith('seo_'))
     .reduce((n, { value }) => n + ((value ?? '').match(/[a-zäöüß,]\s[–—]\s[a-zäöüß]/g) ?? []).length, 0);
   if (dashes > 3) v.push({ field: '*', rule: 'KI-Stil', detail: `${dashes} Gedankenstriche; Sätze lieber mit Punkt trennen` });
+  // Vollständige Seite statt Kurzseite (Betreiber 05.11.2026): erst nach den Faktenregeln, damit beide Rückmeldungen
+  // gemeinsam in den zweiten Versuch gehen und eine zu kurze Seite die Faktenprüfung nicht überspringt
+  if (c.design && typeof c.design.html === 'string')
+    for (const detail of authoredCompleteness(c.design.html, f.imageBrief?.length ?? 0))
+      v.push({ field: 'design', rule: 'Vollständigkeit', detail });
   return v;
 }
 
@@ -468,7 +481,7 @@ export const QA_SYSTEM_PROMPT = `Du prüfst Texte eines Website-Entwurfs für ei
 - Nicht Deutsch, nicht Sie-Form, unprofessioneller Ton, Übertreibungen, Superlative.
 - Platzhalter, unvollständige Sätze, Rechtschreib- oder Grammatikfehler.
 
-Wichtig zum Aufbau der Seite (kein Verstoß): Sind keine Leistungen bestätigt („leistungen“ leer), zeigt die Seite die Leistungen als branchentypische Beispiele und kennzeichnet sie dort sichtbar mit „Vorschlag · Beispiel-Leistungen“. Übliche Leistungen der Branche und ihre neutrale Beschreibung (z. B. typische Materialien oder Arbeitsschritte) sind deshalb erlaubt – prüfe nur, ob sie zur Branche passen. Allgemeine Hinweise zum Ablauf einer Anfrage („Sie schildern Ihr Vorhaben“, „Details werden abgesprochen“) sind keine erfundenen Fakten über den Betrieb.
+Wichtig zum Aufbau der Seite (kein Verstoß): Sind keine Leistungen bestätigt („leistungen“ leer), zeigt die Seite die Leistungen als branchentypische Beispiele und kennzeichnet sie dort sichtbar mit „Vorschlag · Beispiel-Leistungen“. Übliche Leistungen der Branche und ihre neutrale Beschreibung (z. B. typische Materialien oder Arbeitsschritte) sind deshalb erlaubt – prüfe nur, ob sie zur Branche passen. Allgemeine Hinweise zum Ablauf einer Anfrage („Sie schildern Ihr Vorhaben“, „Details werden abgesprochen“) sind keine erfundenen Fakten über den Betrieb. Ebenso erlaubt: allgemeines Fachwissen zu einer Leistung (was üblicherweise dazugehört, worauf man achtet), ein als Beispiel gekennzeichneter Ablauf und Hinweise, welche Angaben oder Fotos Besucher für eine Anfrage bereithalten. Melde solche Abschnitte nur, wenn sie dem Betrieb konkrete Eigenschaften, Zeiten, Preise oder Zusagen zuschreiben.
 
 Schweregrad:
 - Wenn ausdrücklich Startansichten angehängt sind: eindeutig unlesbare/überlagerte wesentliche Inhalte oder Hauptaktionen ebenfalls als „hoch“ melden, subjektive Gestaltungsvorlieben höchstens „mittel“. Ohne Bilder keine visuelle Prüfung behaupten.

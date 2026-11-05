@@ -34,7 +34,13 @@ export const KIT_TEMPLATES: TemplateDef[] = KITS.map((kit) => ({
 export * from './types';
 export { updateAuthoredCopy } from './authored/update';
 export { AUTHORED_TEMPLATES, authoredTemplateId, isAuthoredTemplate } from './authored/render';
-export { FREE_DESIGN_CRITERIA, freeDesignBrief } from './authored/criteria';
+export {
+  FREE_DESIGN_CRITERIA,
+  freeDesignBrief,
+  authoredCompleteness,
+  AUTHORED_MIN_SECTIONS,
+  AUTHORED_MIN_TEXT,
+} from './authored/criteria';
 export { checkAuthoredDesign, authoredText, FREE_DESIGN_VERSION, type AuthoredDesign } from './authored/design';
 export * from './palettes';
 export { ICON_KEYS, ICONS_BY_GROUP, icon } from './icons';
@@ -73,7 +79,12 @@ export function renderSite(input: RenderInput): string {
   if (input.mode === 'live' && !input.live) throw new Error('Live-Modus braucht live-Optionen');
   if (isAuthoredTemplate(tpl.id)) {
     const parts = buildParts({ ...input, artDirection: undefined, palette: 'anthrazit' });
-    return tpl.render({ ...input, artDirection: undefined, parts });
+    // Belegte Bildwelt des Betriebs als Metadaten am <body> (wie bei den Kits), Gestaltung entscheidet die KI
+    const d = input.artDirection;
+    const meta = d
+      ? ` data-character="${esc(d.character)}" data-type="${esc(d.typography)}" data-composition="${esc(d.composition)}" data-design-source="${esc(d.source)}"`
+      : '';
+    return tpl.render({ ...input, artDirection: undefined, parts }).replace('<body ', `<body data-template="${tpl.id}"${meta} `);
   }
   if (input.mode === 'demo' || input.mode === 'screenshot')
     input = { ...input, content: { ...input.content, cta_text: 'So erreichen Sie uns' } };
