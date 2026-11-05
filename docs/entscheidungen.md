@@ -1154,3 +1154,13 @@ values other than 0 or 1 are not supported“). Ursache: `minItems: 3` am FAQ-Fe
 erlauben nur 0 oder 1. Keine KI-Kosten (Ablehnung vor der Generierung). Behebung: `minItems` aus dem Schema entfernt
 (Anzahl 3–4 prüft `validateDemoContent`), zusätzlich entfernt `strictToolSchema` im Anthropic-Provider jede `minItems > 1`
 vor dem Senden. Neuer Test `strict-tool-schema.test.ts`. Die Mock-KI der Tests prüft Schemas nicht; deshalb fiel es nicht auf.
+
+## 05.11.2026 – Preview-Rechtefehler und Wiederaufnahme repariert
+
+VPS-EACCES entstand im direkten root-Checkout-Mount unter `umask 077`, nicht durch nachgewiesen
+fehlenden Studio-Code. Quellcode ohne Image-Neubuild nur noch als lesbarer, versionierter
+Core-Snapshot; keine pauschale Änderung privater Dateirechte. Vor Modellkosten echte lokale
+Runtime-Voraussetzungen und optionalen Hostingzugang prüfen. Gespeicherter fiktiver Entwurf
+bleibt nach QA-Fehlern ohne neue Generierung ansehbar, Startmarker ohne HTML weiter gesperrt.
+Draft-URL vor Ausgabe abrufen, keine Kunden-/Produktionsfreigaben daraus ableiten. Umfang,
+tatsächliche lokale Browser-/Rechteprüfungen und offene Modellabnahme: `docs/design-studio.md`.

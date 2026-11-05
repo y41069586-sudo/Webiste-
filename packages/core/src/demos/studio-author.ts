@@ -42,6 +42,7 @@ export async function authorStudioContent(
     feedback?: string[];
     photos?: NonNullable<BusinessFacts['photos']>;
     onPlan?: (plan: StudioPlan) => Promise<void>;
+    onAttempt?: (attempt: number, content: unknown, violations: RuleViolation[]) => Promise<void>;
   } = {},
 ): Promise<GeneratedContent> {
   const photos = opts.photos ?? [];
@@ -98,6 +99,7 @@ export async function authorStudioContent(
           },
         ];
         feedback = ['Alle Pflichtfelder gemäß Tool-Schema mit vollständigen Texten und Listen liefern.'];
+        await opts.onAttempt?.(attempt, raw, lastViolations);
         continue;
       }
       const violations = validateDemoContent(content, facts);
@@ -107,6 +109,7 @@ export async function authorStudioContent(
           rule: 'Individueller Entwurf fehlt',
           detail: 'Eigenes HTML/CSS im design-Objekt liefern; kein Kit-Fallback.',
         });
+      await opts.onAttempt?.(attempt, raw, violations);
       if (violations.length === 0) return { content, source: 'llm', attempts: attempt, violations: [], studioPlan };
       lastViolations = violations;
       feedback = violations.slice(0, 12).map((v) => `${v.field}: ${v.rule} – ${v.detail}`);
@@ -120,6 +123,9 @@ export async function authorStudioContent(
     }
   }
   throw new Error(
-    `Freier Studio-Entwurf fehlgeschlagen; keine Ersatzvorlage. ${lastViolations.map((v) => `${v.field}: ${v.rule}`).join(' | ')}`,
+    `Freier Studio-Entwurf fehlgeschlagen; keine Ersatzvorlage. ${lastViolations
+      .slice(0, 6)
+      .map((v) => `${v.field}: ${v.rule} – ${v.detail}`)
+      .join(' | ')}`,
   );
 }

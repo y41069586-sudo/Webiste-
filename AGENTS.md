@@ -19,6 +19,14 @@ genutzten Generator für einen fiktiven Elektrobetrieb aus. Private Dateien, kei
 keine Queue/Freigabe/Publikation. Not-Aus und Budget bleiben wirksam; Startmarker verhindert
 kostenpflichtige Wiederholung. Tatsächliches VPS-Ergebnis/Designabnahme weiterhin abwarten.
 
+05.11.2026, Preview-Reparatur nach EACCES: Quellcode-Modus bindet ausschließlich einen temporären
+`git archive`-Snapshot der versionierten Core/src- und Core/scripts-Dateien ein. Diese Kopie ist für
+UID 1000 lesbar; Checkout, `.env.worker` und andere private Dateien niemals pauschal chmod/chownen.
+Vor dem bezahlten Startmarker Schreibzugriff, Bilder, Schriften, Chromium und bei Share den
+Netlify-Lesezugang prüfen. Vorhandenes fiktives HTML darf nach QA-Fehlern ohne neue KI geteilt
+werden; kein HTML → Startmarker weiter respektieren. Draft-Link vor Ausgabe tatsächlich abrufen.
+Lokale Chromium-/Lighthouse- und UID-Tests ersetzen keine echte Modell-/VPS-Abnahme.
+
 ## Neuester Betreiberauftrag 05.11.2026 – vollständige freie Demos und kleinere Ausgabe
 
 Für neue freie Demos gilt zusätzlich `full-page-1`: Leistungen fachlich als Branchenwissen erklären,

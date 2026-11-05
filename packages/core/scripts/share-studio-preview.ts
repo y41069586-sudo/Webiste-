@@ -16,6 +16,41 @@ const HEADERS = `/*
 type Deploy = { id: string; site_id?: string; draft?: boolean; state?: string; required?: string[] };
 type Receipt = { siteId: string; sourceHash: string; deployId: string };
 
+async function netlifyApi<T>(
+  token: string,
+  request: typeof fetch,
+  method: string,
+  resource: string,
+  body?: Record<string, unknown> | Buffer,
+): Promise<T> {
+  const raw = Buffer.isBuffer(body);
+  const response = await request(`${API}${resource}`, {
+    method,
+    headers: {
+      authorization: `Bearer ${token}`,
+      ...(body === undefined ? {} : { 'content-type': raw ? 'application/octet-stream' : 'application/json' }),
+    },
+    body: body === undefined ? undefined : raw ? new Uint8Array(body) : JSON.stringify(body),
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!response.ok) throw Error(`Netlify ${method} HTTP ${response.status}; kein automatischer neuer Versuch.`);
+  const text = await response.text();
+  return (text ? JSON.parse(text) : {}) as T;
+}
+
+/** Read-only hosting check BEFORE spending tokens on a demo meant to be shared. */
+export async function checkStudioPreviewHosting(token: string, request: typeof fetch = fetch) {
+  if (!token.trim()) throw Error('NETLIFY_API_TOKEN fehlt im Worker; kein KI-Aufruf gestartet.');
+  const site = await netlifyApi<{ id: string; name: string; published_deploy?: { id: string } }>(
+    token,
+    request,
+    'GET',
+    `/sites/${SITE}`,
+  );
+  if (site.id !== SITE || site.name !== NAME) throw Error('Unerwartetes Netlify-Projekt; nichts geändert.');
+  return site;
+}
+
 export async function shareStudioPreview(options: {
   directory: string;
   token: string;
@@ -29,8 +64,12 @@ export async function shareStudioPreview(options: {
   let html: Buffer;
   try {
     html = await readFile(path.join(directory, 'index.html'));
-  } catch {
-    throw Error('Die Testseite index.html fehlt. Bitte die Ausgabe des Generierungslaufs schicken.');
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT') throw Error('Die Testseite index.html fehlt. Bitte die Ausgabe des Generierungslaufs schicken.');
+    if (code === 'EACCES' || code === 'EPERM')
+      throw Error(`Die Testseite index.html ist vorhanden, aber nicht lesbar (${code}); keine Dateien hochgeladen.`);
+    throw error;
   }
   const started = JSON.parse(await readFile(path.join(directory, 'started.json'), 'utf8')) as { fictional?: boolean };
   if (started.fictional !== true || html.length > 5 * 1024 * 1024 || !html.toString('utf8').includes('Elektro Kontur'))
@@ -42,23 +81,9 @@ export async function shareStudioPreview(options: {
     { path: '/index.html', data: html },
     { path: '/_headers', data: Buffer.from(HEADERS) },
   ].map((file) => ({ ...file, hash: createHash('sha1').update(file.data).digest('hex') }));
-  async function api<T>(method: string, resource: string, body?: Record<string, unknown> | Buffer): Promise<T> {
-    const raw = Buffer.isBuffer(body);
-    const response = await request(`${API}${resource}`, {
-      method,
-      headers: {
-        authorization: `Bearer ${options.token}`,
-        ...(body === undefined ? {} : { 'content-type': raw ? 'application/octet-stream' : 'application/json' }),
-      },
-      body: body === undefined ? undefined : raw ? new Uint8Array(body) : JSON.stringify(body),
-      signal: AbortSignal.timeout(30000),
-    });
-    if (!response.ok) throw Error(`Netlify ${method} HTTP ${response.status}; kein automatischer neuer Versuch.`);
-    const text = await response.text();
-    return (text ? JSON.parse(text) : {}) as T;
-  }
-  const site = await api<{ id: string; name: string; published_deploy?: { id: string } }>('GET', `/sites/${SITE}`);
-  if (site.id !== SITE || site.name !== NAME) throw Error('Unerwartetes Netlify-Projekt; nichts geändert.');
+  const api = <T>(method: string, resource: string, body?: Record<string, unknown> | Buffer) =>
+    netlifyApi<T>(options.token, request, method, resource, body);
+  const site = await checkStudioPreviewHosting(options.token, request);
   let receipt: Receipt | undefined;
   try {
     receipt = JSON.parse(await readFile(path.join(directory, 'share.json'), 'utf8')) as Receipt;
@@ -91,8 +116,17 @@ export async function shareStudioPreview(options: {
     assertDraft(deploy);
     if (deploy.state === 'ready') {
       const after = await api<{ published_deploy?: { id: string } }>('GET', `/sites/${SITE}`);
+      const previewUrl = `https://${deploy.id}--${NAME}.netlify.app/`;
+      const visible = await request(previewUrl, { signal: AbortSignal.timeout(30000) });
+      if (!visible.ok)
+        throw Error(`Vorschau noch nicht aufrufbar (HTTP ${visible.status}); derselbe Aufruf verwendet den bestehenden Deploy.`);
+      const visibleHtml = await visible.text();
+      if (!visibleHtml.includes('Elektro Kontur'))
+        throw Error('Die Vorschau-URL liefert nicht den erwarteten Testentwurf; keinen falschen Link anzeigen.');
       return {
-        previewUrl: `https://${deploy.id}--${NAME}.netlify.app/`,
+        previewUrl,
+        previewVerified: true,
+        htmlExact: createHash('sha256').update(visibleHtml).digest('hex') === sourceHash,
         draft: true,
         productionUnchanged: site.published_deploy?.id === after.published_deploy?.id,
         newAiCalls: 0,

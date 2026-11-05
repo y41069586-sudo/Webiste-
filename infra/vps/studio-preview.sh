@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Update the reviewed release and run precisely one fictional sample, keeping the daemon paused.
+# One fictional preview. Keep the daemon paused; preserve paid artifacts and share existing HTML without regeneration.
 set -euo pipefail
 umask 077
 ROOT="${DIR:-/opt/seitenwerk}"
@@ -8,36 +8,51 @@ RELEASE="${RELEASE:?Vollständigen geprüften Release-Commit setzen.}"
 cd "$ROOT"
 git diff --quiet && git diff --cached --quiet || { echo 'Lokale Codeänderungen vorhanden; nichts geändert.' >&2; exit 1; }
 [[ -s .env.worker ]] || { echo '.env.worker fehlt.' >&2; exit 1; }
-OUTPUT="${STUDIO_PREVIEW_DIR:-/opt/seitenwerk-design-preview}"
+OUTPUT="${STUDIO_PREVIEW_DIR:-/opt/seitenwerk-design-preview-v2}"
 [[ ! -L "$OUTPUT" ]] || { echo 'Unerwarteter Ausgabe-Symlink.' >&2; exit 1; }
-[[ ! -e "$OUTPUT/started.json" ]] || { echo 'Einzeltest bereits begonnen; vorhandene Dateien prüfen. Kein erneuter KI-Aufruf.' >&2; exit 1; }
+existing_html=false
+if [[ -e "$OUTPUT/started.json" ]]; then
+  if [[ -s "$OUTPUT/index.html" ]]; then
+    existing_html=true
+  else
+    echo 'Dieser Einzeltest wurde bereits begonnen. Keine weitere KI-Generierung.' >&2
+    [[ ! -f "$OUTPUT/result.json" ]] || cat "$OUTPUT/result.json"
+    exit 1
+  fi
+elif [[ -e "$OUTPUT/index.html" ]]; then
+  echo 'HTML ohne passenden Startnachweis; nichts überschrieben.' >&2
+  exit 1
+fi
 mapfile -t containers < <(docker ps -aq --filter label=com.docker.compose.project=seitenwerk-worker --filter label=com.docker.compose.service=worker)
 [[ "${#containers[@]}" = 1 ]] || { echo 'Vorhandener Worker nicht eindeutig.' >&2; exit 1; }
 files="$(docker inspect -f '{{index .Config.Labels "com.docker.compose.project.config_files"}}' "${containers[0]}")"
 IFS=',' read -r -a config_files <<< "$files"
+[[ "${#config_files[@]}" -gt 0 ]] || exit 1
 compose=(docker compose)
 for file in "${config_files[@]}"; do
-  [[ "$file" = "$ROOT/"* && -f "$file" ]] || exit 1
+  [[ "$file" = "$ROOT/"* && -f "$file" ]] || { echo 'Vorhandene Compose-Dateien fehlen.' >&2; exit 1; }
   compose+=(-f "$file")
 done
-# Pausing is intentional for the single paid test; never restart the queued automation here.
 "${compose[@]}" stop worker
 source_mounts=()
+source_snapshot=''
+cleanup() {
+  if [[ -n "$source_snapshot" && -d "$source_snapshot" ]]; then
+    rm -rf -- "$source_snapshot"
+  fi
+}
+trap cleanup EXIT
 if [[ "${STUDIO_PREVIEW_USE_CHECKOUT:-false}" = true ]]; then
-  # Only interpreted core TS changed: reuse installed dependencies and compiled templates.
   git fetch origin claude/website-brief-maschine-0d0s37
   git merge-base --is-ancestor "$RELEASE" FETCH_HEAD || { echo 'Release nicht veröffentlicht.' >&2; exit 1; }
   git merge-base --is-ancestor HEAD "$RELEASE" || { echo 'Lokaler Stand abweichend; kein Zurücksetzen.' >&2; exit 1; }
   git diff --quiet HEAD "$RELEASE" -- Dockerfile pnpm-lock.yaml package.json pnpm-workspace.yaml packages/templates packages/core/package.json apps/worker/package.json apps/worker/src \
     || { echo 'Abhängigkeiten oder gebaute Vorlagen geändert; Quellcode-Test ohne Neubuild gestoppt.' >&2; exit 1; }
   git merge --ff-only "$RELEASE"
-  source_mounts=(-v "$ROOT/packages/core/src:/repo/packages/core/src:ro" -v "$ROOT/packages/core/scripts:/repo/packages/core/scripts:ro")
-fi
-if [[ "${STUDIO_PREVIEW_USE_BUILT_IMAGE:-false}" = true || "${STUDIO_PREVIEW_USE_CHECKOUT:-false}" = true ]]; then
-  # Resume after the completed build: no pull, merge, rebuild or container recreation.
-  "${compose[@]}" run --rm -T --no-deps "${source_mounts[@]}" -e "STUDIO_PREVIEW_SHARE=${STUDIO_PREVIEW_SHARE:-false}" --entrypoint node worker --import tsx --input-type=module -e "const m=await import('/repo/packages/core/src/demos/studio.ts');const fs=await import('node:fs');if(m.STUDIO_VERSION!=='design-studio-1'||!fs.existsSync('/repo/packages/core/scripts/studio-preview.ts')||(process.env.STUDIO_PREVIEW_SHARE==='true'&&!fs.existsSync('/repo/packages/core/scripts/share-studio-preview.ts')))process.exit(1);console.log('Vorhandenes Studio-Image bestätigt; kein Neubuild.');" \
-    || { echo 'Vorhandenes Image enthält den Einzeltest nicht; gestoppt.' >&2; exit 1; }
-else
+  source_snapshot=$(mktemp -d /tmp/seitenwerk-studio-source.XXXXXX)
+  python3 "$ROOT/infra/vps/stage-studio-source.py" --repo "$ROOT" --release "$RELEASE" --output "$source_snapshot"
+  source_mounts=(-v "$source_snapshot/packages/core/src:/repo/packages/core/src:ro" -v "$source_snapshot/packages/core/scripts:/repo/packages/core/scripts:ro")
+elif [[ "${STUDIO_PREVIEW_USE_BUILT_IMAGE:-false}" != true && "$existing_html" != true ]]; then
   git fetch origin claude/website-brief-maschine-0d0s37
   git merge-base --is-ancestor "$RELEASE" FETCH_HEAD || { echo 'Release nicht veröffentlicht.' >&2; exit 1; }
   git merge-base --is-ancestor HEAD "$RELEASE" || { echo 'Lokaler Stand abweichend; kein Zurücksetzen.' >&2; exit 1; }
@@ -45,23 +60,40 @@ else
   RELEASE="$RELEASE" DIR="$ROOT" bash infra/vps/update-worker.sh
 fi
 install -d -m 0700 -o 1000 -g 1000 "$OUTPUT"
+run=("${compose[@]}" run --rm -T --no-deps "${source_mounts[@]}" -v "$OUTPUT:/preview")
+share_preview() {
+  "${run[@]}" --entrypoint node worker --import tsx /repo/packages/core/scripts/share-studio-preview.ts
+}
+if [[ "$existing_html" = true ]]; then
+  echo 'Vorhandener Entwurf wird verwendet; keine neuen KI-Aufrufe.'
+  if [[ "${STUDIO_PREVIEW_SHARE:-false}" = true ]]; then
+    share_preview
+  else
+    echo "Vorhandener Entwurf: $OUTPUT/index.html"
+  fi
+  exit 0
+fi
+preview=("${run[@]}" -e DRY_RUN=true -e LLM_PROVIDER=anthropic
+  -e PAYMENT_PROVIDER=mock -e EMAIL_PROVIDER=mock -e MAIL_PROVIDER=mock
+  -e REGISTRAR_PROVIDER=mock -e HOSTING_PROVIDER=mock -e LEAD_SOURCE=mock
+  -e "STUDIO_PREVIEW_SHARE=${STUDIO_PREVIEW_SHARE:-false}"
+  -e STUDIO_PREVIEW_CONFIRM=one-fictional-demo-no-send
+  --entrypoint node worker --import tsx /repo/packages/core/scripts/studio-preview.ts --out=/preview)
+if ! "${preview[@]}" --preflight; then
+  echo 'Vorprüfung fehlgeschlagen; keine KI-Generierung gestartet. Die konkrete Fehlermeldung steht oben.' >&2
+  exit 1
+fi
 status=0
-"${compose[@]}" run --rm -T --no-deps \
-  "${source_mounts[@]}" \
-  -v "$OUTPUT:/preview" \
-  -e DRY_RUN=true -e LLM_PROVIDER=anthropic \
-  -e PAYMENT_PROVIDER=mock -e EMAIL_PROVIDER=mock -e MAIL_PROVIDER=mock \
-  -e REGISTRAR_PROVIDER=mock -e HOSTING_PROVIDER=mock -e LEAD_SOURCE=mock \
-  -e STUDIO_PREVIEW_CONFIRM=one-fictional-demo-no-send \
-  --entrypoint node worker --import tsx /repo/packages/core/scripts/studio-preview.ts --out=/preview || status=$?
+"${preview[@]}" || status=$?
 if [[ -f "$OUTPUT/result.json" ]]; then
   tar -C "$OUTPUT" -czf "$OUTPUT.tar.gz" .
   echo "Prüfdateien: $OUTPUT.tar.gz (privat)."
 fi
-echo 'Worker bleibt pausiert. Keine Demo veröffentlicht, kein Brief und keine E-Mail versendet.'
-if [[ "$status" = 0 && "${STUDIO_PREVIEW_SHARE:-false}" = true && -f "$OUTPUT/index.html" ]]; then
-  "${compose[@]}" run --rm -T --no-deps -v "$OUTPUT:/preview" \
-    "${source_mounts[@]}" \
-    --entrypoint node worker --import tsx /repo/packages/core/scripts/share-studio-preview.ts
+echo 'Automatisierungs-Worker bleibt pausiert. Keine Briefe, E-Mails, Kundenzahlungen oder Domainkäufe.'
+# The HTML is an unapproved fictional preview. A later QA error must not force another paid generation to view it.
+if [[ "${STUDIO_PREVIEW_SHARE:-false}" = true && -s "$OUTPUT/index.html" ]]; then
+  share_status=0
+  share_preview || share_status=$?
+  [[ "$status" != 0 ]] || status=$share_status
 fi
 exit "$status"

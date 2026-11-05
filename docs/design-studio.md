@@ -161,3 +161,55 @@ Gezielte Tests: physische Wiederholung unterbinden, vor dem Tool abgeschnittene 
 unvollständiges Tool-JSON und genau eine Budgetreservierung/-abrechnung; außerdem prüft die
 Orchestrierung die zentralen Aufrufoptionen. CLI-Tests prüfen Quellcode-Bind-Mounts und Abbruch
 bei geänderten Abhängigkeiten. Echte Modellabnahme bleibt nach neuem VPS-Lauf offen.
+
+## 05.11.2026 – EACCES behoben, gesamter Preview-Lauf geprüft
+
+Die letzte VPS-Ausgabe zeigt `EACCES` beim Import von `core/src/demos/studio.ts`.
+Das Skript verwendet `umask 077`; von root neu ausgecheckte Dateien können dadurch Modus
+600 haben. Der als UID 1000 laufende Node-Prozess konnte sie im direkten Checkout-Mount nicht
+lesen. Die bisherige Sammelmeldung „Image enthält den Einzeltest nicht“ war dafür falsch.
+Dieser Abbruch erreichte die Modellgenerierung nicht. Kein Beleg für fehlenden Studio-Code.
+
+Der Quellcode-Modus erstellt jetzt einen temporären Snapshot mit `git archive` des gepinnten
+Commits, nur für `packages/core/src` und `packages/core/scripts`. Dateien 644/ausführbare 755,
+Unterordner 755; oberster Hostordner bleibt 700. Nur die zwei lesbaren Quellcode-Wurzeln werden
+read-only eingebunden. Keine `.git`-/`.env`-Dateien oder lokalen Änderungen kopieren, keine Links
+oder Spezialdateien zulassen, keine Rechte des Checkouts oder privater Konfiguration ändern.
+Ein EXIT-Trap entfernt nur diesen neu angelegten Snapshot. Abhängigkeits-/Template-Änderungen
+blockieren weiterhin den Modus ohne Neubuild. Worker bleibt pausiert.
+
+`--preflight` führt vor dem exklusiven Startmarker tatsächliche Ausgabe-Schreibprüfung,
+Bildoptimierung, Schriftdekodierung und Chromium aus. Bei angefordertem Share wird zusätzlich
+der Netlify-Projektzugang nur lesend geprüft. Keine Modellkosten oder Startmarker bei diesen
+Voraussetzungsfehlern. Direkt vor der Generierung werden die Voraussetzungen nochmals geprüft.
+Strukturierte Umsetzungsantworten und Validierungsbefunde werden als `attempt-N.json` gesichert;
+keine versteckten Gedankengänge oder privaten Konfigurationswerte anfordern/speichern.
+
+Bereits vorhandenes HTML mit fiktivem Startnachweis wird ohne Neubau, Modellaufrufe oder
+Image-Build geteilt. Auch ein späterer QA-Ausfall verhindert die Ansicht nicht; die fehlende
+Freigabe bleibt bestehen. Ohne HTML verhindert der Startmarker weiterhin eine weitere bezahlte
+Generierung. Default-Ablage jetzt `/opt/seitenwerk-design-preview-v2`; ein früherer Lauf wird
+nicht gelöscht. Bereits gespeicherte Draft-Receipts werden wiederverwendet. Vor Ausgabe des
+Links wird die tatsächliche Deploy-URL abgerufen und der fiktive Betrieb geprüft; SHA-256-
+Gleichheit wird separat gemeldet. Leserechtefehler sind keine „Datei fehlt“-Diagnose mehr.
+Die HTML-Vorschau ist weiterhin für jeden mit dem Link erreichbar; private Berichte und Archiv
+werden nicht hochgeladen. Keine Produktionsveröffentlichung oder Designfreigabe.
+
+Zusätzlicher Laufzeitbefund: Der Einzeltest hatte Symbolfotos in die simulierte Kunden-Liveversion
+mitgegeben; reguläre QA nutzt dort ausschließlich freigegebene Betriebsfotos. Die Einzelprobe
+verwendet jetzt dieselbe Fotoauswahl. Entwurfsseite und Screenshots behalten gekennzeichnete
+Symbolbilder. Keine Renderer-/Kontaktformular-/Preisänderung oder abgesenkte Messgrenze.
+
+Verifiziert: 56 gezielte Core-Tests (55 gemeinsam, zusätzlicher Leserechtefall separat),
+190 Template-Tests, 11 Preview- und 6 Updater-Orchestrierungstests sowie 4 Snapshot-/Rechtetests.
+Die Rechtetests enthalten den echten Fehlervergleich root/600 gegen UID 1000 in einem lokalen
+Container, nur in einem isolierten temporären `/dev/shm`-Pfad; keine SQL-/Datenbankaktionen.
+Der Preview-Runtime-Test nutzt echte Dateien, Schrift-/Bilddateien, Chromium, Screenshots,
+HTML-/Axe-/Layoutprüfungen und Lighthouse. Er besteht technisch. Modellantworten, Konfiguration,
+Datenbankzugriff und externes Netlify-HTTP sind dort isolierte Fixtures: Mock-QA bleibt ausdrücklich
+`unverifiable`, manuelle Freigabe false. Core-Typecheck, gezieltes ESLint, Shell-Syntax und
+Diff-Prüfung bestanden. Template-CSS wurde in der isolierten Reparaturablage gebaut.
+
+Kein echter Anthropic-Aufruf und kein Netlify-Upload während dieser lokalen Reparatur. Kein
+neuer Web-Produktionsbuild nötig (Web/Template-Code unverändert). Der tatsächliche VPS-Lauf
+und seine sichtbare Gestaltung bleiben offen; keinen fertigen Preview-Link erfinden.
