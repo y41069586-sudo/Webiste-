@@ -12,7 +12,14 @@ import { fileURLToPath } from 'node:url';
  * 24–42 KB statt 90 KB, damit die Live-Seite die Lighthouse-Grenze auch auf langsamen Rechnern hält.
  */
 export type KitDisplayFont =
-  'archivo' | 'archivo-maler' | 'archivo-fliesen' | 'archivo-elektro' | 'archivo-reinigung' | 'bodoni' | 'gloock';
+  | 'archivo'
+  | 'archivo-maler'
+  | 'archivo-fliesen'
+  | 'archivo-elektro'
+  | 'archivo-reinigung'
+  | 'archivo-free'
+  | 'bodoni'
+  | 'gloock';
 export type KitTextFont = 'atkinson' | 'karla';
 
 const FILES: Record<
@@ -23,6 +30,7 @@ const FILES: Record<
   'archivo-maler': { family: 'Kit Archivo', faces: [{ file: 'archivo-maler.woff2', weight: '800 900', stretch: '66% 85%' }] },
   'archivo-fliesen': { family: 'Kit Archivo', faces: [{ file: 'archivo-fliesen.woff2', weight: '700', stretch: '100% 118%' }] },
   'archivo-elektro': { family: 'Kit Archivo', faces: [{ file: 'archivo-elektro.woff2', weight: '800', stretch: '92% 100%' }] },
+  'archivo-free': { family: 'Kit Archivo', faces: [{ file: 'archivo-free.woff2', weight: '400 900' }] },
   'archivo-reinigung': {
     family: 'Kit Archivo',
     faces: [{ file: 'archivo-reinigung.woff2', weight: '650', stretch: '84% 100%' }],

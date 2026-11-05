@@ -73,6 +73,14 @@ describe('V5: zehn fiktive Demos durch bestehenden Generator und echte Browser-Q
             data: {},
             usage: { model: 'mock:invalid', inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 },
           });
+      if (index === 0) {
+        // Zweimal unbrauchbare KI-Antwort: seit der freien Gestaltung kein stiller Vorlagen-Ersatz, der Bau stoppt
+        await expect(buildDemo(lead!.id, { actor: 'test:quality', templateId })).rejects.toThrow(
+          /individueller Gestaltungsentwurf/,
+        );
+        spy?.mockRestore();
+        continue;
+      }
       const id = await buildDemo(lead!.id, { actor: 'test:quality', templateId });
       spy?.mockRestore();
       const qa = await qaDemo(id, 'test:quality', { lighthouse: false });
@@ -116,9 +124,8 @@ describe('V5: zehn fiktive Demos durch bestehenden Generator und echte Browser-Q
         JSON.stringify(images),
       ).toBe(true);
       await expect(approveDemo(id, 'test:unreviewed', { manual: true })).rejects.toThrow(/manuell/);
-      if (index === 0) expect((demo.contentJson?._meta as { source?: string })?.source).toBe('fallback');
     }
-    expect(results).toHaveLength(10);
+    expect(results).toHaveLength(9); // Fall 1 stoppt bewusst (kein Vorlagen-Ersatz)
     expect((await getConfig()).review.manualReviewFirstN).toBeGreaterThanOrEqual(30);
   }, 240_000);
 });

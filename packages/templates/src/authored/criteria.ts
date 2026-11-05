@@ -1,10 +1,33 @@
 import type { BusinessFacts, SiteContent } from '../types';
-import { FREE_DESIGN_VERSION } from './design';
+import { FREE_DESIGN_VERSION, authoredText } from './design';
+
+/** Mindestumfang des freien Entwurfs (Betreiber 05.11.2026: „die Websites sind so kurz“) */
+export const AUTHORED_MIN_SECTIONS = 6;
+export const AUTHORED_MIN_TEXT = 1800;
+
+/** Vollständigkeit für neue Generierungen (nicht beim Rendern gespeicherter Seiten): Abschnitte, Textmenge, Bilder. */
+export function authoredCompleteness(html: string, imageSlots: number): string[] {
+  const out: string[] = [];
+  const h2 = (html.match(/<h2[\s>]/g) ?? []).length;
+  if (h2 < AUTHORED_MIN_SECTIONS)
+    out.push(
+      `Nur ${h2} Abschnitte mit h2; mindestens ${AUTHORED_MIN_SECTIONS} Pflicht-Inhalte liefern (Leistungen mit Erklärung, Ablauf, Vorbereitung, Eindrücke, Fragen, Standort/Kontakt).`,
+    );
+  const text = authoredText(html).length;
+  if (text < AUTHORED_MIN_TEXT)
+    out.push(
+      `Nur ${text} Zeichen sichtbarer Text; mindestens ${AUTHORED_MIN_TEXT} Zeichen nützliches, wahres Fachwissen ergänzen.`,
+    );
+  const used = new Set([...html.matchAll(/\{\{image_([123])\}\}/g)].map((m) => m[1]));
+  if (imageSlots >= 2 && used.size < 2) out.push('Mindestens zwei der verfügbaren Bildslots sichtbar einsetzen.');
+  return out;
+}
 
 export const FREE_DESIGN_CRITERIA = [
   'Entwirf für diesen Betrieb ein eigenständiges Konzept. Keine Branchenvorlage, kein Pflicht-Hero, keine festgelegte Abschnittsfolge und kein vorgegebenes Farbschema.',
   'Entscheide selbst über Typografie, Größenverhältnisse, Farbgewicht, Bildkomposition, Abstände und Seitenrhythmus. Begründe das Konzept kurz anhand der vorhandenen Fakten und der Besucheraufgabe.',
   'Der erste Bildschirm muss Name, tatsächliche Tätigkeit, Ort und eine passende Handlung verständlich machen. Große Schrift allein ist keine Gestaltung.',
+  'Mindestens sechs Abschnitte mit h2 und zusammen mindestens 1800 Zeichen sichtbaren, nützlichen Text gestalten. Allgemeines Fachwissen statt Wiederholungen oder erfundener Betriebsmerkmale.',
   'Jede Seite enthält mindestens: fachlich erklärte Leistungen, einen gekennzeichneten Beispielablauf einer Anfrage, eine konkrete Anfrage-Checkliste, Einsatzgebiet, Öffnungszeiten/Kontakt, Bildstrecke, drei bis vier Ablauf-Fragen sowie markierte Entwurfsplatzhalter für eigene Fotos, Team und Referenzen. Die Reihenfolge und Gestaltung entscheidest du frei; auch bei dünner Datenlage keine Hero-Leistungen-Adresse-Kurzseite.',
   'Leistungen fachlich mit Branchenwissen erklären (Zweck, typische Varianten und nötige Angaben), klar als allgemeine Information getrennt von belegten Betriebsleistungen. Keine Spezialisierung, Arbeitsweise oder Ausstattung des Betriebs daraus ableiten.',
   'Den Anfrageablauf ausdrücklich als Beispiel kennzeichnen, ohne Rückruf-, Preis-, Besichtigungs- oder Terminzusagen. Die Checkliste nennt mindestens drei hilfreiche Angaben wie Anlass, Ort, Umfang und Wunschzeitraum.',

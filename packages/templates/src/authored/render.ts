@@ -42,7 +42,7 @@ export function renderAuthored(ctx: RenderContext): string {
   const fragment = authoredFragment(d.html, replacements, p.photos(3), p.draft);
   const contact = protectedBusinessContact(ctx, d);
   const body = `<main id="inhalt"><div id="sw-ai-design">${fragment}</div></main>${contact.html}${p.footer({ className: 'sw-authored-footer', linkClass: 'underline' })}`;
-  const fonts = kitFontCss([d.displayFont, d.textFont]);
+  const fonts = kitFontCss([d.displayFont === 'archivo' ? 'archivo-free' : d.displayFont, d.textFont]);
   const vars = `--display:'${kitFontFamily(d.displayFont)}',serif;--body:'${kitFontFamily(d.textFont)}',sans-serif;--design-bg:${d.colors.background};--design-ink:${d.colors.foreground};--design-accent:${d.colors.accent};--design-on:${d.colors.onAccent};`;
   const shell = documentShell(p, 'k sw-authored', body);
   const html = shell

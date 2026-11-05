@@ -52,9 +52,16 @@ export function checkAuthoredDesign(d: AuthoredDesign): string[] {
   if (d.html.length > 30000 || d.css.length > 20000 || !d.html.trim() || !d.css.trim())
     return ['HTML/CSS leer oder zu umfangreich.'];
   if (
-    !['archivo', 'archivo-maler', 'archivo-fliesen', 'archivo-elektro', 'archivo-reinigung', 'bodoni', 'gloock'].includes(
-      d.displayFont,
-    ) ||
+    ![
+      'archivo',
+      'archivo-free',
+      'archivo-maler',
+      'archivo-fliesen',
+      'archivo-elektro',
+      'archivo-reinigung',
+      'bodoni',
+      'gloock',
+    ].includes(d.displayFont) ||
     !['karla', 'atkinson'].includes(d.textFont)
   )
     errors.push('Schriftdatei nicht aus der lokal verfügbaren Bibliothek.');
@@ -71,8 +78,6 @@ export function checkAuthoredDesign(d: AuthoredDesign): string[] {
   )
     errors.push('Text- und Akzentfarben brauchen mindestens 4,5:1 Kontrast.');
   if (d.contentVersion && d.contentVersion !== 'full-page-1') errors.push('Unbekannter Inhaltsstandard.');
-  if (d.contentVersion === 'full-page-1' && d.displayFont === 'archivo')
-    errors.push('Für neue Entwürfe ein zugeschnittenes Archivo-Profil statt der vollständigen Datei wählen.');
   const tree = parseFragment(d.html, { onParseError: (e) => errors.push(`HTML: ${e.code}`) });
   let h1 = 0;
   const ids = new Set<string>();

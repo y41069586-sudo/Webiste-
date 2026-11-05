@@ -1,11 +1,13 @@
 {
-  "templateTests": 187,
+  "templateTests": 190,
   "isolatedCoreTests": 28,
   "templateTypecheck": true,
   "coreTypecheck": true,
   "eslint": true,
   "productionBuild": true,
-  "protectedContactAndCheckoutSourcesUnchanged": true,
+  "integrationBase": "f77bbef0313409828bc5891fefee6b8f8c7c514a",
+  "protectedContactAndCheckoutSourcesUnchangedFromIntegrationBase": true,
+  "concurrentCopyRevisionRepairPreserved": true,
   "modelCallsMade": false,
   "productionDemosRebuilt": false,
   "limitations": [

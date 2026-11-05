@@ -76,3 +76,25 @@ Das neue Image muss vor dem Austausch `free-design-1` exportieren. Fehler beim B
 Imageprüfung lassen den bisherigen Container bestehen. Nach Start wird sein Healthcheck geprüft.
 Sechs isolierte Python-Tests für diese Zustands-/Fehlerfälle und Bash-Syntaxprüfung bestanden.
 Die Netlify-App muss den neuen Stand übernehmen, bevor neue freie Demos produktiv abgewickelt werden.
+
+## Nachbesserung 05.11.2026 (Claude, Betreiberauftrag „die Websites sind so kurz“)
+
+- **Vollständige Seiten statt Kurzseiten:** Die Regel „wenig Information ergibt eine kurze Seite“ ist ersetzt. Pflicht-Inhalte
+  (Gestaltung und Reihenfolge frei): Leistungen mit fachlicher Erklärung (Branchenwissen, keine Betriebsbehauptung),
+  gekennzeichneter Beispielablauf einer Anfrage, „Gut vorbereitet anfragen“, Eindrücke mit Bildslots, 3–4 Fragen zum
+  Ablauf, Standort und Kontakt. `authoredCompleteness` prüft bei jeder Generierung ≥ 6 h2-Abschnitte, ≥ 1800 Zeichen
+  sichtbaren Text und ≥ 2 genutzte Bildslots (falls vorhanden); Verstöße gehen als Rückmeldung in den zweiten Versuch.
+  Die KI-QA wertet Fachwissen, Beispielablauf und Vorbereitungshinweise ausdrücklich nicht als erfundene Fakten.
+  Platzhalter für eigene Fotos/Team/Referenzen erzeugt das System nur im Entwurf außerhalb des KI-Bereichs.
+- **Ladezeit:** Archivo für freie Entwürfe als Instanz `archivo-free` (Stärken 400–900, normale Breite, 34 statt 90 KB);
+  ungenutztes Tailwind-CSS wird wie bei den Kits entfernt. Live-Seite 230 → 120 KB, Lighthouse 99 → 100 lokal
+  (auf dem VPS fiel eine 237-KB-Seite am 04.11. mit 81 durch).
+- **Geschützter Kontaktbereich:** übernimmt Schrift und Farben des KI-Entwurfs (Linien/Nebentext aus den Farbrollen
+  gemischt); die Kit-Regeln greifen jetzt auch außerhalb von `<main>`. Markup und Formular-Logik unverändert.
+- **Kostenlose Änderung vor dem Kauf:** Zusätzliche oder entfallende Leistungen/Fragen werden im Aufbau eines
+  vorhandenen Eintrags in den Entwurf übernommen statt blockiert; nur ein nicht erkennbarer Aufbau blockiert weiter.
+- **Tests:** vollständige Core-Suite (lokale Test-DB) statt nur isolierter Tests; Barrierefreiheit der freien Seiten
+  mit einem vollständigen Testentwurf; Fall „KI liefert zweimal Unbrauchbares“ stoppt bewusst ohne Vorlagen-Ersatz.
+
+
+Aktualisierung 05.11.2026: `full-page-1` und die vereinigte Umsetzung mit f77bbef folgen `docs/authored-full-pages.md`; frühere Kurzseiten-/FAQ-optional-Hinweise sind für neue Generierungen überholt. Die zusätzlichen Prüfprotokolle liegen in `docs/authored-full-qa/`.

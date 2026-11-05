@@ -11,7 +11,7 @@
       "headingFont": "\"Kit Archivo\", serif",
       "inputFont": "\"Kit Karla\", sans-serif",
       "buy": "flex",
-      "placeholders": 4,
+      "placeholders": 3,
       "disabled": true,
       "axe": []
     },
@@ -26,7 +26,7 @@
       "headingFont": "\"Kit Archivo\", serif",
       "inputFont": "\"Kit Karla\", sans-serif",
       "buy": "flex",
-      "placeholders": 4,
+      "placeholders": 3,
       "disabled": true,
       "axe": []
     },

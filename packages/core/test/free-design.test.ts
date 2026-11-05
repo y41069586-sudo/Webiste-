@@ -154,10 +154,10 @@ describe('Vollständige generierte Inhaltsstrecke', () => {
       ).toBe(true);
     }
   });
-  it('keeps the full Archivo file available only to old saved content', async () => {
+  it('accepts the generic Archivo name through the compact free-font renderer', async () => {
     const c = await full();
     c.design!.displayFont = 'archivo';
-    expect(validateDemoContent(c, facts).some((v) => v.detail.includes('zugeschnittenes Archivo-Profil'))).toBe(true);
+    expect(validateDemoContent(c, facts)).toEqual([]);
     delete c.design!.contentVersion;
     expect(checkAuthoredDesign(c.design!)).toEqual([]);
   });

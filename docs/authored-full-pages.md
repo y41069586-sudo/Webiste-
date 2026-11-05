@@ -15,7 +15,7 @@ keine freie Gestaltung durch eine neue Branchenvorlage:
 - Eigene Fotos, Team und Referenzen als eindeutig gekennzeichnete Entwurfsplatzhalter.
 
 Die Bereiche erhalten semantische `data-ad-section`-Markierungen, ohne eine feste Reihenfolge.
-Die Inhaltsprüfung blockiert fehlende Bereiche, zu kurze Checklisten, unmarkierte Abläufe,
+Mindestens sechs h2-Abschnitte und 1800 Zeichen nützlichen sichtbaren Text behalten die parallele Umfangsprüfung bei. Die Inhaltsprüfung blockiert fehlende Bereiche, zu kurze Checklisten, unmarkierte Abläufe,
 fehlende Gebietstokens, unvollständige Platzhalter und abweichende FAQ-Anzahlen. Das Schema
 fordert drei bis vier FAQs und ein zugeschnittenes Schriftprofil. Neue Generierungen müssen
 den Standard liefern; ältere gespeicherte Inhalte ohne Versionsfeld bleiben kompatibel.
@@ -33,8 +33,8 @@ für erfundene Garantien, Teamgrößen oder weitere Einzugsgebiete.
 `authored/render.ts` nutzt `purgeCss` für das gemeinsame Utility-CSS und das vorhandene
 Kontakt-CSS. Frei verfasstes CSS mit Medienregeln und Details-Zuständen bleibt ungekürzt.
 Neue Archivo-Entwürfe wählen eines der vorhandenen zugeschnittenen Profile anhand der
-benötigten Stärke/Breite, unabhängig von der Branche. Die vollständige Archivo-Datei bleibt
-nur für ältere gespeicherte Entwürfe zulässig. Keine Pflichtpaarung oder Branchen-Farbwelt.
+benötigten Stärke/Breite, unabhängig von der Branche. Der bisherige Name `archivo` nutzt jetzt ebenfalls die zugeschnittene freie Datei
+(`archivo-free`, 400–900 in normaler Breite) aus der parallelen Claude-Änderung. Keine Pflichtpaarung oder Branchen-Farbwelt.
 
 Zusätzliche, vertrauenswürdige CSS-Regeln unter `#anfrage` übernehmen Schriftfamilien,
 Hintergrund-/Textfarben, Feldränder, Buttons und Fokusfarben aus dem KI-Entwurf. Der Quelltext
@@ -46,7 +46,7 @@ nicht allein wegen des Teilworts „installat“ auf Sanitär-/Heizungstexte der
 
 ## Prüfungen
 
-187 Template-/Renderer-Tests und 28 isolierte Core-Tests bestehen. Dazu Template-/Core-Typechecks,
+190 Template-/Renderer-Tests und 28 isolierte Core-Tests bestehen. Dazu Template-/Core-Typechecks,
 ESLint für die geänderten Dateien, HTML- und Inhaltsvalidierung. Kein DB-Reset gegen Produktionsdaten,
 kein bezahlter Modellaufruf und keine neuen produktiven Demos oder Freigaben.
 
@@ -56,8 +56,8 @@ entsprechen dem dunklen Theme, Schriftfamilien sind Archivo/Karla. Demo-Felder b
 live bleibt der konfigurierte Endpoint erhalten. Entwurfsplatzhalter erscheinen nicht live.
 Prüfartefakte: `docs/authored-full-qa/`.
 
-Die Live-Testausgabe liegt bei rund 102 KB HTML. Die Demo ist mit eingebetteten Symbolbildern
+Die Live-Testausgabe liegt bei rund 102–105 KB HTML (Prüfprotokoll enthält die exakten Werte). Die Demo ist mit eingebetteten Symbolbildern
 entsprechend größer; eine kleinere Live-Ausgabe ist keine Größen-Garantie für jede künftige Demo.
-Abschließender Produktionsbuild bestanden. Lighthouse Performance/Accessibility/Best-Practices/SEO jeweils 100; 102.499 Byte HTML bzw. 66.413 Byte gzip in der lokalen Live-Testseite. Der CPU-Abgleich und die unveränderte 90-Punkte-Schwelle sind im Lighthouse-Protokoll dokumentiert.
+Zusammengeführter Stand: Produktionsbuild bestanden; Lighthouse Performance/Accessibility/Best-Practices/SEO jeweils 100 bei 103.484 Byte HTML und 66.884 Byte gzip in der lokalen Live-Testseite. Der CPU-Abgleich und die unveränderte 90-Punkte-Schwelle sind im Lighthouse-Protokoll dokumentiert.
 Lokaler Test ist kein Leistungsnachweis auf dem VPS und keine Abnahme realer Modellinhalte.
 Bestehende gespeicherte HTML-Demos werden nicht automatisch neu gebaut oder freigegeben.

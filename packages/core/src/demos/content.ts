@@ -4,6 +4,7 @@ import {
   FULL_PAGE_VERSION,
   AUTHORED_SECTION_KEYS,
   authoredSectionIssues,
+  authoredCompleteness,
   checkAuthoredDesign,
   authoredText,
 } from '@wbm/templates';
@@ -54,7 +55,16 @@ export const DEMO_CONTENT_SCHEMA = {
         css: { type: 'string', maxLength: 20000 },
         displayFont: {
           type: 'string',
-          enum: ['archivo-maler', 'archivo-fliesen', 'archivo-elektro', 'archivo-reinigung', 'bodoni', 'gloock'],
+          enum: [
+            'archivo',
+            'archivo-free',
+            'archivo-maler',
+            'archivo-fliesen',
+            'archivo-elektro',
+            'archivo-reinigung',
+            'bodoni',
+            'gloock',
+          ],
         },
         textFont: { type: 'string', enum: ['karla', 'atkinson'] },
         colors: {
@@ -134,7 +144,7 @@ niemals aus Branchenfokus oder Akquisesignal ableiten. Bestätigtes Einsatzgebie
 12. KI-STIL VERMEIDEN: Der Text darf nicht nach KI klingen. Keine Floskeln wie „ganzheitlich“, „maßgeschneidert“, „nahtlos“, „mit Leidenschaft“, „Liebe zum Detail“, „alles aus einer Hand“, „Herzlich willkommen“, „Entdecken Sie“. Keine Konstruktion „nicht nur …, sondern auch …“, keine Dreierketten von Adjektiven, höchstens drei Gedankenstriche im ganzen Text. Schreibe so, wie ein Handwerker oder eine Inhaberin selbst spricht: konkrete Hauptwörter aus dem Gewerk (Wand, Fuge, Sicherungskasten, Treppenhaus, Maniküre, Mittagstisch) statt Werbewörter. Kurze Sätze. Jede Überschrift sagt etwas, das nur zu diesem Gewerk passt.
 
 FREIE GESTALTUNG: Liefere zusätzlich design.concept, design.html und design.css. Erstelle eine eigene vollständige Komposition, nicht eine Auswahl aus Kits. Verwende in HTML einen äußeren .ad-page-Bereich und eigene ad-IDs. Kein html/body/head/main, kein JavaScript, kein style-Attribut, kein Formular, keine eingebetteten Dienste. Das echte Formular und die SeitenWerk-Kaufleiste werden außerhalb ergänzt und sind geschützt. CTA href="#anfrage" führt zum vorhandenen Formular.
-HTML-Tags: section, article, header, footer, nav, div, span, p, h1 bis h4, ul/ol/li, dl/dt/dd, a, img, figure/figcaption, details/summary, strong/em/b/i/small, br/hr. Genau ein h1. Interne IDs beginnen mit ad-. CSS nur für eigene Klassen, flache Regeln und @media/@supports. Keine inhaltlichen CSS-content-Texte (content nur leer), keine globalen html/body/:root-Regeln, keine @imports, keine externen URLs, keine !important-Regeln. Schrift über var(--display) und var(--body), Farben nach deiner Wahl als vier Hex-Farbrollen in design.colors (background, foreground, accent, onAccent). Schriften lokal verfügbar: zugeschnittenes Archivo als archivo-maler (Stärke 800–900, Breite 66–85%), archivo-fliesen (700, 100–118%), archivo-elektro (800, 92–100%) oder archivo-reinigung (650, 84–100%), außerdem Bodoni und Gloock; Fließtext Karla oder Atkinson. Das Profil nach gewünschter Stärke/Breite wählen, unabhängig von der Branche; CSS innerhalb dieser Achsen halten. Die vollständige Archivo-Datei wird für neue Entwürfe nicht verwendet. Das sind verfügbare Dateien, keine vorgeschriebenen Schriftpaare.
+HTML-Tags: section, article, header, footer, nav, div, span, p, h1 bis h4, ul/ol/li, dl/dt/dd, a, img, figure/figcaption, details/summary, strong/em/b/i/small, br/hr. Genau ein h1. Interne IDs beginnen mit ad-. CSS nur für eigene Klassen, flache Regeln und @media/@supports. Keine inhaltlichen CSS-content-Texte (content nur leer), keine globalen html/body/:root-Regeln, keine @imports, keine externen URLs, keine !important-Regeln. Schrift über var(--display) und var(--body), Farben nach deiner Wahl als vier Hex-Farbrollen in design.colors (background, foreground, accent, onAccent). Schriften lokal verfügbar: zugeschnittenes Archivo als archivo-maler (Stärke 800–900, Breite 66–85%), archivo-fliesen (700, 100–118%), archivo-elektro (800, 92–100%) oder archivo-reinigung (650, 84–100%), außerdem Bodoni und Gloock; Fließtext Karla oder Atkinson. Das Profil nach gewünschter Stärke/Breite wählen, unabhängig von der Branche; CSS innerhalb dieser Achsen halten. Alternativ archivo bzw. archivo-free: zugeschnittene freie Archivo-Datei mit Stärken 400–900 bei normaler Breite (kein font-stretch). Die große ursprüngliche Archivo-Datei wird nicht eingebettet. Das sind verfügbare Dateien, keine vorgeschriebenen Schriftpaare.
 Setze design.contentVersion="full-page-1". Die freien Inhaltsbereiche erhalten data-ad-section="services|process|preparation|area|gallery|faq|placeholders" (jeweils genau einen passenden Wert). Das sind inhaltliche Prüfmarkierungen, keine Layoutvorgabe. services erklärt die Leistungen mit allgemeinem Branchenwissen, klar als solches bezeichnet. process enthält einen sichtbaren Beispiel-Hinweis. preparation nennt mindestens drei konkrete Angaben als Liste. area verwendet ausschließlich {{service_area}} für den Gebietsvorschlag. gallery nutzt zwei unterschiedliche verfügbare Bildslots, falls vorhanden; sonst einen mit data-ad-placeholder="photos" markierten {{placeholder_photos}}. faq zeigt dieselben drei bis vier Fragen/Antworten wie das faq-Inhaltsfeld, mit details/summary. placeholders enthält je einen eigenen Block mit data-ad-placeholder="photos", "team", "references" und dem passenden Texttoken {{placeholder_photos}}, {{placeholder_team}}, {{placeholder_references}}. Das System setzt die Kennzeichnungen ein und entfernt die Entwurfsplatzhalter vor Vorschau/Live-Veröffentlichung. Nichts davon als tatsächlich vorhandenes Team oder echte Referenz ausgeben. Den geschützten Öffnungszeiten-/Kontaktbereich mit #anfrage erreichbar machen; kein zweites Formular erfinden.
 Faktentokens: {{name}}, {{city}}, {{branch}}, {{phone}}, {{street}}, {{postal_code}}; geprüfte Linktokens: {{phone_url}}, {{map_url}}. Bilder nur als img src="{{image_1}}", {{image_2}} oder {{image_3}}. Diese optionalen Slots werden mit freigegebenen Bildern gefüllt oder entfallen. Keine Bildrechte oder Bildmotive erfinden. Das System kennzeichnet Symbolbilder automatisch. Dekorative Ziffern nur in aria-hidden="true"-Elementen, keine Zahlen als unbelegte Tatsachen.
 
@@ -306,12 +316,6 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
       detail: 'Unbestätigte Leistungen im HTML sichtbar als Beispiele kennzeichnen.',
     });
   const fullPage = f.requireFullPage || c.design?.contentVersion === FULL_PAGE_VERSION;
-  if (fullPage && c.design) {
-    if (c.design.contentVersion !== FULL_PAGE_VERSION)
-      v.push({ field: 'design', rule: 'Vollständige Seite', detail: 'contentVersion full-page-1 fehlt.' });
-    for (const detail of authoredSectionIssues(c.design.html, c.faq?.length ?? 0, f.imageBrief?.length))
-      v.push({ field: 'design', rule: 'Vollständige Seite', detail });
-  }
   const minServices = f.verifiedServices?.length ? 1 : 3;
   if (
     f.verifiedServices?.length &&
@@ -379,6 +383,14 @@ export function validateDemoContent(c: SiteContent, f: ContentFacts): RuleViolat
     .filter(({ field }) => !field.startsWith('seo_'))
     .reduce((n, { value }) => n + ((value ?? '').match(/[a-zäöüß,]\s[–—]\s[a-zäöüß]/g) ?? []).length, 0);
   if (dashes > 3) v.push({ field: '*', rule: 'KI-Stil', detail: `${dashes} Gedankenstriche; Sätze lieber mit Punkt trennen` });
+  if (fullPage && c.design) {
+    if (c.design.contentVersion !== FULL_PAGE_VERSION)
+      v.push({ field: 'design', rule: 'Vollständige Seite', detail: 'contentVersion full-page-1 fehlt.' });
+    for (const detail of authoredCompleteness(c.design.html, f.imageBrief?.length ?? 0))
+      v.push({ field: 'design', rule: 'Vollständigkeit', detail });
+    for (const detail of authoredSectionIssues(c.design.html, c.faq?.length ?? 0, f.imageBrief?.length))
+      v.push({ field: 'design', rule: 'Vollständige Seite', detail });
+  }
   return v;
 }
 

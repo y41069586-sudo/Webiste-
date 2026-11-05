@@ -1126,3 +1126,11 @@ Vorschau/Live entfernt. Keine Testimonials, Personen, Projekte oder Kapazitäten
 zugeschnittenen Profile. Der geschützte Kontaktbereich erhält ausschließlich zusätzliche CSS-Regeln
 für Fonts und Farbrollen; Markup und Formularlogik bleiben unverändert. Keine Leistungs-/Lighthouse-
 Schwelle herabgesetzt. Prüfbericht: `docs/authored-full-pages.md`.
+
+
+## 05.11.2026 – Nachbesserung der freien Gestaltung (Claude)
+
+Betreiber: „die Websites sind so kurz, da ist nur Leistungen, wo und fertig“ und „mach du das selbst direkt“.
+Pflicht-Inhalte mit automatischer Vollständigkeitsprüfung, kleinere Seiten (Schrift-Instanz, CSS-Kürzung), angepasster
+Kontaktbereich, reparierte kostenlose Änderung vor dem Kauf, vollständige Testsuite. Details:
+`docs/free-design-standard.md` (Abschnitt Nachbesserung). Vorhandene Demos unverändert, keine Produktionsschalter.
