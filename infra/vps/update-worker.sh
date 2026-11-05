@@ -33,7 +33,8 @@ git merge --ff-only "$RELEASE"
 "${compose[@]}" build worker
 "${compose[@]}" run --rm -T --no-deps --entrypoint node worker --import tsx --input-type=module -e "const m=await import('/repo/packages/templates/src/index.ts');if(m.FREE_DESIGN_VERSION!=='free-design-1')process.exit(1);console.log('Freie Gestaltung im neuen Image bestätigt.');"
 if [[ "$was_running" != true ]]; then
-  "${compose[@]}" create --no-deps worker
+  # `create` never starts containers and does not accept the run/up-only --no-deps flag.
+  "${compose[@]}" create worker
   echo "Worker-Code aktualisiert. Worker bleibt pausiert; DRY_RUN=$mode."
   exit 0
 fi

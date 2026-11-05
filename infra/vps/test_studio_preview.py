@@ -24,11 +24,13 @@ elif a and a[0]=='inspect':
  elif '.Config.Env' in fmt:print('DRY_RUN=false')
  elif '.Config.Labels' in fmt:print(os.environ['DIR']+'/docker-compose.worker.yml,'+os.environ['DIR']+'/docker-compose.worker.live.yml')
 else:
+ if 'create' in a and '--no-deps' in a:sys.exit(2)
  if 'config' in a:print(json.dumps({'services':{'worker':{'environment':{'DRY_RUN':'false'}}}}))
- if any('studio-preview.ts' in s for s in a):
+ if '/repo/packages/core/scripts/studio-preview.ts' in a:
   p=Path(os.environ['STUDIO_PREVIEW_DIR'])
   (p/'started.json').write_text('{}')
   (p/'result.json').write_text(json.dumps({'stage':'blocked' if os.environ.get('PREVIEW_FAIL') else 'awaiting_manual_visual_review'}))
+  if not os.environ.get('PREVIEW_FAIL'):(p/'index.html').write_text('<h1>Test</h1>')
   if os.environ.get('PREVIEW_FAIL'):sys.exit(1)
 '''
 
@@ -86,5 +88,19 @@ class StudioPreviewTest(unittest.TestCase):
         result,calls,_,_=self.run_preview(DIRTY='1')
         self.assertNotEqual(result.returncode,0)
         self.assertFalse(any(c[0]=='docker' for c in calls))
+
+    def test_reuses_built_image_without_another_build_or_git_mutation(self):
+        result,calls,_,_=self.run_preview(STUDIO_PREVIEW_USE_BUILT_IMAGE='true')
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertFalse(any('build' in c or 'create' in c or 'up' in c for c in calls))
+        self.assertFalse(any(c[0]=='git' and any(x in c for x in ['fetch','merge']) for c in calls))
+        self.assertEqual(sum(any('/repo/packages/core/scripts/studio-preview.ts'==s for s in c) for c in calls),1)
+
+    def test_shares_only_after_success_and_never_restarts_daemon(self):
+        for failed in ['', '1']:
+            result,calls,_,_=self.run_preview(STUDIO_PREVIEW_USE_BUILT_IMAGE='true',STUDIO_PREVIEW_SHARE='true',PREVIEW_FAIL=failed)
+            shares=[c for c in calls if '/repo/packages/core/scripts/share-studio-preview.ts' in c]
+            self.assertEqual(len(shares),0 if failed else 1)
+            self.assertFalse(any('up' in c or 'build' in c for c in calls))
 
 if __name__=='__main__':unittest.main()

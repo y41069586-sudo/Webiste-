@@ -23,6 +23,8 @@ elif a and a[0]=='inspect':
  elif '.Config.Labels' in fmt:print(os.environ['DIR']+'/docker-compose.worker.yml'+(','+os.environ['DIR']+'/docker-compose.worker.live.yml' if os.environ['MODE']=='false' else ''))
  else:print('healthy')
 else:
+ if 'create' in a and '--no-deps' in a:
+  print('unknown flag: --no-deps',file=sys.stderr);sys.exit(2)
  if 'config' in a:print(json.dumps({'services':{'worker':{'environment':{'DRY_RUN':os.environ.get('CONFIG_MODE',os.environ['MODE'])}}}}))
  if 'build' in a and os.environ.get('BUILD_FAIL')=='1':sys.exit(1)
  if 'run' in a and os.environ.get('IMAGE_FAIL')=='1':sys.exit(1)
@@ -57,6 +59,7 @@ class WorkerUpdateTest(unittest.TestCase):
         r,calls=self.run_update(running='false',mode='false')
         self.assertEqual(r.returncode,0,r.stderr)
         self.assertTrue(any('create' in c for c in calls))
+        self.assertFalse(any('create' in c and '--no-deps' in c for c in calls))
         self.assertFalse(any('up' in c for c in calls))
     def test_changed_configuration_blocks_before_build(self):
         r,calls=self.run_update(CONFIG_MODE='false')

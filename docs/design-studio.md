@@ -115,3 +115,19 @@ Nur die ausdrücklich fiktive Testseite wird geteilt; JSON-Berichte, Archiv und 
 auf dem VPS. `noindex`, Skript-/Formularsperre und Cache-Control werden als Header mitgeliefert.
 Vier isolierte Tests prüfen Uploadumfang, Draft-Status, Wiederverwendung und Fehlerabbruch;
 TypeScript/ESLint bestanden. Ein realer Upload ist erst durch den VPS-Aufruf möglich.
+
+## 05.11.2026 – Korrektur des pausierten Updates nach VPS-Rückmeldung
+
+Der Betreiber-Screenshot belegt einen fertigen Image-Build einschließlich Importprüfung,
+danach Abbruch bei `docker compose create --no-deps worker`. Der ungültige Flag stammte
+aus unserem Updater. `create worker` ist der unterstützte Aufruf und startet keine Container.
+Die vorhandenen CLI-Fakes akzeptierten den falschen Flag; beide Fakes lehnen ihn jetzt ab.
+Die Optionen wurden zusätzlich mit dem vorhandenen echten `docker compose create --help` geprüft.
+
+`STUDIO_PREVIEW_USE_BUILT_IMAGE=true` überspringt Git-/Build-/Create-Schritte und prüft das
+vorhandene Image auf Studio-Version und Testdateien, bevor es einen einzelnen Test startet.
+`STUDIO_PREVIEW_SHARE=true` teilt bei erfolgreichem Test anschließend die vorhandene HTML-Datei
+als Netlify-Draft. Der Dauerdienst bleibt pausiert. Not-Aus, Budget und Doppelstartmarker gelten
+weiterhin. Sechs Update- und sechs Preview-CLI-Tests bestanden, einschließlich fehlendem
+Neubuild im Resume-Modus und Share nur nach erfolgreichem Test. Keine echte Generierung
+oder Sichtabnahme durch diese lokale Korrektur behaupten.
