@@ -1134,3 +1134,11 @@ Betreiber: „die Websites sind so kurz, da ist nur Leistungen, wo und fertig“
 Pflicht-Inhalte mit automatischer Vollständigkeitsprüfung, kleinere Seiten (Schrift-Instanz, CSS-Kürzung), angepasster
 Kontaktbereich, reparierte kostenlose Änderung vor dem Kauf, vollständige Testsuite. Details:
 `docs/free-design-standard.md` (Abschnitt Nachbesserung). Vorhandene Demos unverändert, keine Produktionsschalter.
+
+## 05.11.2026 – Hotfix: alle Demo-Bauten scheiterten an der KI-Schnittstelle
+
+Nach dem Worker-Update auf 168e672 schlug jeder Demo-Bau sofort mit HTTP 400 fehl („For 'array' type, 'minItems'
+values other than 0 or 1 are not supported“). Ursache: `minItems: 3` am FAQ-Feld des Demo-Schemas; strikte Tool-Schemas
+erlauben nur 0 oder 1. Keine KI-Kosten (Ablehnung vor der Generierung). Behebung: `minItems` aus dem Schema entfernt
+(Anzahl 3–4 prüft `validateDemoContent`), zusätzlich entfernt `strictToolSchema` im Anthropic-Provider jede `minItems > 1`
+vor dem Senden. Neuer Test `strict-tool-schema.test.ts`. Die Mock-KI der Tests prüft Schemas nicht; deshalb fiel es nicht auf.

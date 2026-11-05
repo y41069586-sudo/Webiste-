@@ -106,8 +106,8 @@ export const DEMO_CONTENT_SCHEMA = {
     seo_description: { type: 'string', description: 'max. 155 Zeichen' },
     faq: {
       type: 'array',
-      minItems: 3,
-      maxItems: 4,
+      // Keine minItems > 1: die Anthropic-Tool-Schnittstelle lehnt das mit 400 ab (05.11.2026, alle Demos scheiterten).
+      // Die Anzahl 3–4 prüft validateDemoContent.
       description:
         'Drei bis vier konkrete Fragen zum Ablauf einer Anfrage, mit allgemein richtigen Antworten ohne betriebliche Zusagen.',
       items: {

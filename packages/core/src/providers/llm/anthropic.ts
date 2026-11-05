@@ -112,7 +112,7 @@ export class AnthropicLlm implements LlmProvider {
             {
               name: req.toolName,
               description: req.toolDescription,
-              input_schema: req.inputSchema as Anthropic.Beta.BetaTool.InputSchema,
+              input_schema: strictToolSchema(req.inputSchema) as Anthropic.Beta.BetaTool.InputSchema,
               strict: true,
             },
           ],
@@ -216,4 +216,20 @@ export class AnthropicLlm implements LlmProvider {
     }
     return { data: text, usage: usages[usages.length - 1]!, usages, ...(req.webSearch ? { sources: [...sources] } : {}) };
   }
+}
+
+/**
+ * Strikte Tool-Schemas erlauben bei Listen nur minItems 0 oder 1 (sonst 400 „minItems values other than 0 or 1 are
+ * not supported“ – am 05.11.2026 scheiterte daran jede Demo). Höhere Untergrenzen werden vor dem Senden entfernt;
+ * die fachliche Anzahl prüfen die eigenen Validatoren nach der Antwort.
+ */
+export function strictToolSchema<T>(schema: T): T {
+  if (Array.isArray(schema)) return schema.map((x) => strictToolSchema(x)) as T;
+  if (!schema || typeof schema !== 'object') return schema;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(schema as Record<string, unknown>)) {
+    if (k === 'minItems' && typeof v === 'number' && v > 1) continue;
+    out[k] = strictToolSchema(v);
+  }
+  return out as T;
 }
