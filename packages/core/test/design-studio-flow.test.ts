@@ -7,6 +7,7 @@ vi.mock('../src/services/lead-research', () => ({
   assertAcquisitionEligible: async () => {},
 }));
 import { generateDemoContent } from '../src/demos/build';
+import { authorStudioContent } from '../src/demos/studio-author';
 import { MockLlm } from '../src/providers/llm/mock';
 import { DEFAULT_CONFIG } from '../src/config/settings';
 import { STUDIO_TOOL } from '../src/demos/studio';
@@ -46,6 +47,24 @@ describe('Studio generation orchestration without database or paid provider', ()
     generate.mockResolvedValueOnce({});
     await expect(generateDemoContent(lead, DEFAULT_CONFIG)).rejects.toThrow();
     expect(generate).toHaveBeenCalledTimes(1);
+  });
+  it('supports a fictional preview with no production lead identity', async () => {
+    const result = await authorStudioContent({
+      name: 'Fiktiver Elektrobetrieb',
+      branchLabel: 'Elektroinstallation',
+      branchKey: 'elektriker',
+      group: 'handwerk',
+      city: 'Testort',
+      street: 'Testweg',
+      houseNumber: '1',
+      postalCode: '12345',
+      phone: null,
+      hasOpeningHours: false,
+      socialOnly: false,
+    });
+    expect(result.content.design).toBeDefined();
+    expect(generate.mock.calls).toHaveLength(2);
+    expect(generate.mock.calls.every(([req]) => req.leadId === undefined)).toBe(true);
   });
   it('reuses the plan for one bounded correction and never returns a template fallback', async () => {
     generate.mockImplementation(async (req) => (req.toolName === STUDIO_TOOL ? mockResponse(req) : {}));

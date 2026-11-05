@@ -14,6 +14,11 @@ Bestehende Demo-, Brief-, Zahlungs- und Formulargrenzen erhalten. c5bf351-Strict
 erhalten: keine minItems > 1 in Tool-Schemas. Details und offene echte Modellabnahme:
 `docs/design-studio.md`.
 
+Einzelabnahme: `infra/vps/studio-preview.sh` pausiert den vorhandenen Worker und führt den gemeinsam
+genutzten Generator für einen fiktiven Elektrobetrieb aus. Private Dateien, kein Kundendatensatz,
+keine Queue/Freigabe/Publikation. Not-Aus und Budget bleiben wirksam; Startmarker verhindert
+kostenpflichtige Wiederholung. Tatsächliches VPS-Ergebnis/Designabnahme weiterhin abwarten.
+
 ## Neuester Betreiberauftrag 05.11.2026 – vollständige freie Demos und kleinere Ausgabe
 
 Für neue freie Demos gilt zusätzlich `full-page-1`: Leistungen fachlich als Branchenwissen erklären,

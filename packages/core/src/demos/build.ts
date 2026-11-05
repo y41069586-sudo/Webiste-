@@ -23,38 +23,19 @@ import { formatPhoneDe, phoneHref } from '../leads/normalize';
 import { formatOpeningHours } from '../leads/opening-hours';
 import { logger } from '../logger';
 import { getProviders } from '../providers';
-import { LlmNoToolCallError, LlmRefusalError } from '../providers/llm/anthropic';
 import { enqueue, QUEUES } from '../queue';
 import { audit } from '../services/audit';
 import { transitionLead } from '../services/lead-state';
-import { llmStructured } from '../services/llm';
 import { randomToken, sha256 } from '../util/crypto';
 import { formatEuroShort } from '../util/time';
 import { optimizeImage } from '../render/images';
 import { priceTaxSuffix } from '../invoices/build';
-import {
-  buildDemoPrompt,
-  DEMO_CONTENT_SCHEMA,
-  DEMO_SYSTEM_PROMPT,
-  DEMO_TOOL_NAME,
-  normalizeContent,
-  validateDemoContent,
-  type ContentFacts,
-  type RuleViolation,
-} from './content';
+import type { ContentFacts } from './content';
 import { libraryContent } from './library';
 import './mock-handlers';
-import {
-  STUDIO_SCHEMA,
-  STUDIO_SYSTEM,
-  STUDIO_TOOL,
-  STUDIO_VERSION,
-  parseStudioPlan,
-  studioPrompt,
-  studioImplementationBrief,
-  type StudioPlan,
-} from './studio';
-import { studioImages } from './studio-images';
+import { STUDIO_VERSION } from './studio';
+import { authorStudioContent, type GeneratedContent } from './studio-author';
+export type { GeneratedContent } from './studio-author';
 
 type Lead = typeof leads.$inferSelect;
 
@@ -294,14 +275,6 @@ export function demoPhotoSlots(
     .map((p) => ({ src: stockPhotoDataUri(p), alt: p.alt, origin: 'example' as const, rightsConfirmed: true }));
 }
 
-export interface GeneratedContent {
-  content: SiteContent;
-  source: 'llm' | 'fallback';
-  attempts: number;
-  violations: RuleViolation[];
-  studioPlan?: StudioPlan;
-}
-
 /**
  * Art direction first, then independent HTML/CSS implementation with the actual image material.
  * Each model call uses the existing budget ledger. No template fallback after failed authorship.
@@ -321,77 +294,7 @@ export async function generateDemoContent(
     designCharacter: direction?.source === 'business_evidence' ? direction.character : undefined,
     imageBrief: photos.map((p, i) => ({ slot: i + 1, alt: p.alt, example: p.origin === 'example' })),
   };
-  const seed = seedFromId(lead.id);
-  const images = await studioImages(photos);
-  const studioPlan = parseStudioPlan(
-    await llmStructured<unknown>({
-      tier: 'creative',
-      system: STUDIO_SYSTEM,
-      prompt: studioPrompt(facts),
-      images,
-      toolName: STUDIO_TOOL,
-      toolDescription: 'Zwei individuelle Gestaltungsrichtungen und die begründete Auswahl.',
-      inputSchema: STUDIO_SCHEMA,
-      maxTokens: 3000,
-      effort: 'high',
-      purpose: 'demo_art_direction',
-      leadId: lead.id,
-    }),
-  );
-  // Befunde der KI-Prüfung eines früheren Entwurfs gleich im ersten Versuch mitgeben
-  let feedback: string[] | undefined = qaFeedback?.length ? qaFeedback.slice(0, 12) : undefined;
-  let lastViolations: RuleViolation[] = [];
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const raw = await llmStructured<SiteContent>({
-        tier: 'creative',
-        system: DEMO_SYSTEM_PROMPT,
-        prompt: buildDemoPrompt(facts, seed + attempt, feedback) + '\n\n' + studioImplementationBrief(studioPlan),
-        images,
-        toolName: DEMO_TOOL_NAME,
-        toolDescription: 'Gibt individuelle Seitengestaltung (HTML/CSS) und geprüfte Texte zurück.',
-        inputSchema: DEMO_CONTENT_SCHEMA as unknown as Record<string, unknown>,
-        maxTokens: 10000,
-        effort: 'high',
-        purpose: 'demo_content',
-        leadId: lead.id,
-      });
-      let content: SiteContent;
-      try {
-        content = normalizeContent(raw);
-      } catch {
-        lastViolations = [
-          {
-            field: 'response',
-            rule: 'Ungültige Inhaltsstruktur',
-            detail: 'Pflichtfelder fehlen oder haben einen falschen Datentyp.',
-          },
-        ];
-        feedback = ['Alle Pflichtfelder gemäß Tool-Schema mit vollständigen Texten und Listen liefern.'];
-        continue;
-      }
-      const violations = validateDemoContent(content, facts);
-      if (!content.design)
-        violations.push({
-          field: 'design',
-          rule: 'Individueller Entwurf fehlt',
-          detail: 'Eigenes HTML/CSS im design-Objekt liefern; kein Kit-Fallback.',
-        });
-      if (violations.length === 0) return { content, source: 'llm', attempts: attempt, violations: [], studioPlan };
-      lastViolations = violations;
-      feedback = violations.slice(0, 12).map((v) => `${v.field}: ${v.rule} – ${v.detail}`);
-      logger.warn({ leadId: lead.id, attempt, violations: violations.length }, 'demo: Inhaltsregeln verletzt');
-    } catch (err) {
-      if (err instanceof LlmRefusalError || err instanceof LlmNoToolCallError) {
-        logger.warn({ leadId: lead.id, err: err.message }, 'demo: KI-Antwort unbrauchbar, Entwurf blockiert');
-        break;
-      }
-      throw err;
-    }
-  }
-  throw new Error(
-    `Freier Studio-Entwurf fehlgeschlagen; keine Ersatzvorlage. ${lastViolations.map((v) => `${v.field}: ${v.rule}`).join(' | ')}`,
-  );
+  return authorStudioContent(facts, { leadId: lead.id, seed: seedFromId(lead.id), feedback: qaFeedback, photos });
 }
 
 /** Ablauf-/Platzhalterkarten der Bibliothek sind keine Leistungen */

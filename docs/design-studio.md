@@ -69,3 +69,33 @@ Diese Messwerte betreffen Prüfartefakte, nicht die Seitengröße oder ein Model
 **Offen:** echter neuer Modelllauf und visuelle Abnahme seines Ergebnisses. Grüne Code-/Mock-Tests
 beweisen weder Sera-Qualität noch höhere Conversion. Code, Deployment, Worker-Update und
 Modellabnahme getrennt berichten.
+
+## Einzelprobe auf dem vorhandenen VPS
+
+`infra/vps/studio-preview.sh` aktualisiert auf einen veröffentlichten, vollständigen Commit und
+pausiert den Worker ausdrücklich für genau einen fiktiven Elektrobetrieb. Vorhandene Compose-Dateien
+und Secrets bleiben erhalten. Der Dauerdienst wird anschließend nicht gestartet. Das Script ruft
+`packages/core/scripts/studio-preview.ts` als separaten Node-Prozess auf; alle anderen Provider
+sind dabei Mock, DRY_RUN ist true. Keine Leads/Demos/Bestellungen werden angelegt oder verändert,
+keine Jobs gestartet. Der normale Generator und die Probe verwenden denselben `authorStudioContent`.
+Kosten laufen ohne erfundene Lead-ID durch das normale Ledger. Kein direkter SDK-Aufruf am Budget vorbei.
+
+Not-Aus und Wochenbudget gelten auch für die Probe. Aktiver Not-Aus stoppt vor dem ersten
+kostenpflichtigen Aufruf. Zum Ausführen im Admin gezielt prüfen; der Worker muss pausiert bleiben.
+Es wird kein Budget oder Modell umgestellt. Bis zu zwei Umsetzungsversuche wie im normalen Generator,
+danach eine unabhängige Sichtprüfung, technische Browserprüfung und Lighthouse. Kein automatischer
+bezahlter Neubau nach Sichtprüfung.
+
+Private Dateien: `/opt/seitenwerk-design-preview/` und `/opt/seitenwerk-design-preview.tar.gz`.
+Das Archiv enthält `index.html`, `content.json`, Desktop/Mobil-Ansichten, Prüftafeln, Review und
+`result.json`. Das endgültige Ergebnis wartet immer auf manuelle Abnahme. Kein öffentlicher Link
+und keine bestandene Gestaltung behaupten, bevor der VPS-Lauf tatsächlich zurückgemeldet wurde.
+Ein exklusiver Startmarker verhindert unbeabsichtigte Wiederholung auch nach einem Fehler.
+Vorhandene Artefakte werden nicht automatisch gelöscht; ein weiterer bezahlter Versuch ist eine
+bewusste neue Entscheidung. Lokale CLI-Tests verwenden ausschließlich Fake-Git/Docker.
+
+Prüfstand der Einzelprobe: 40 isolierte Core-Tests, vier neue Preview-CLI-Tests und sechs
+bestehende Update-CLI-Tests bestanden; Core-Typecheck, gezieltes ESLint, Shell-Syntax und
+Web-Produktionsbuild bestanden. Der Aufruf ohne Testbestätigung blockiert wie vorgesehen
+vor einer externen Aktion. Die 190 Template-Tests aus dem unveränderten Rendererstand bleiben
+der zuletzt ausgeführte Template-Nachweis. Ein bezahlter VPS-Lauf wurde hier nicht ausgeführt.
