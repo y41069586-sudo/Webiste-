@@ -99,3 +99,19 @@ bestehende Update-CLI-Tests bestanden; Core-Typecheck, gezieltes ESLint, Shell-S
 Web-Produktionsbuild bestanden. Der Aufruf ohne Testbestätigung blockiert wie vorgesehen
 vor einer externen Aktion. Die 190 Template-Tests aus dem unveränderten Rendererstand bleiben
 der zuletzt ausgeführte Template-Nachweis. Ein bezahlter VPS-Lauf wurde hier nicht ausgeführt.
+
+## Vorhandene Probe direkt im Browser ansehen
+
+`packages/core/scripts/share-studio-preview.ts` läuft separat mit dem Netlify-Token des Workers.
+Nur die vorhandene fiktive `index.html` und ein restriktiver `_headers`-Text werden als manueller
+Draft-Deploy auf dem bestehenden Projekt `seitenwerkworld` hochgeladen. Keine erneute Generierung,
+kein Build/Worker-Neustart, keine Produktionsveröffentlichung, keine Projekt-/DNS-Änderung.
+Die Netlify-Antwort muss `draft:true` bestätigen, bevor Datei-Bytes übertragen werden. Ein Receipt
+`share.json` bindet Deploy und SHA-256 der Quelldatei; wiederholte Aufrufe verwenden ihn weiter.
+Fehlende Testdateien, unerwartetes Projekt, Secret-Muster oder unbestätigter Draft stoppen.
+
+Die Vorschau ist **mit dem Link öffentlich erreichbar**, kein privat authentifizierter Zugang.
+Nur die ausdrücklich fiktive Testseite wird geteilt; JSON-Berichte, Archiv und Zugangsdaten bleiben
+auf dem VPS. `noindex`, Skript-/Formularsperre und Cache-Control werden als Header mitgeliefert.
+Vier isolierte Tests prüfen Uploadumfang, Draft-Status, Wiederverwendung und Fehlerabbruch;
+TypeScript/ESLint bestanden. Ein realer Upload ist erst durch den VPS-Aufruf möglich.
