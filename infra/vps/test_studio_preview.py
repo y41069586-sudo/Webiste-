@@ -16,6 +16,7 @@ with open(os.environ['CALLS'],'a') as f:f.write(json.dumps([name,*a])+'\n')
 if name=='git':
  if a==['rev-parse','--show-toplevel']:print(os.environ['DIR'])
  if a and a[0]=='diff' and os.environ.get('DIRTY')=='1':sys.exit(1)
+ if a and a[0]=='diff' and '--' in a and os.environ.get('DEPENDENCIES_CHANGED')=='1':sys.exit(1)
 elif name=='install':Path(a[-1]).mkdir(parents=True,exist_ok=True)
 elif a[:2]==['ps','-aq']:print('existing-worker')
 elif a and a[0]=='inspect':
@@ -102,5 +103,19 @@ class StudioPreviewTest(unittest.TestCase):
             shares=[c for c in calls if '/repo/packages/core/scripts/share-studio-preview.ts' in c]
             self.assertEqual(len(shares),0 if failed else 1)
             self.assertFalse(any('up' in c or 'build' in c for c in calls))
+
+    def test_source_only_preview_binds_core_read_only_without_building(self):
+        result,calls,_,_=self.run_preview(STUDIO_PREVIEW_USE_CHECKOUT='true')
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertFalse(any('build' in c or 'up' in c or 'create' in c for c in calls))
+        preview=next(c for c in calls if '/repo/packages/core/scripts/studio-preview.ts' in c)
+        self.assertTrue(any(s.endswith('/packages/core/src:/repo/packages/core/src:ro') for s in preview))
+        self.assertTrue(any(s.endswith('/packages/core/scripts:/repo/packages/core/scripts:ro') for s in preview))
+
+    def test_source_only_preview_stops_when_dependencies_changed(self):
+        result,calls,_,_=self.run_preview(STUDIO_PREVIEW_USE_CHECKOUT='true',DEPENDENCIES_CHANGED='1')
+        self.assertNotEqual(result.returncode,0)
+        self.assertFalse(any('merge' in c or 'build' in c or 'up' in c for c in calls))
+        self.assertFalse(any('/repo/packages/core/scripts/studio-preview.ts' in c for c in calls))
 
 if __name__=='__main__':unittest.main()

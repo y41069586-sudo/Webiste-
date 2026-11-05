@@ -14,6 +14,7 @@ import {
 } from './content';
 import {
   STUDIO_SCHEMA,
+  STUDIO_CALL_OPTIONS,
   STUDIO_SYSTEM,
   STUDIO_TOOL,
   parseStudioPlan,
@@ -40,6 +41,7 @@ export async function authorStudioContent(
     seed?: number;
     feedback?: string[];
     photos?: NonNullable<BusinessFacts['photos']>;
+    onPlan?: (plan: StudioPlan) => Promise<void>;
   } = {},
 ): Promise<GeneratedContent> {
   const photos = opts.photos ?? [];
@@ -61,12 +63,12 @@ export async function authorStudioContent(
       toolName: STUDIO_TOOL,
       toolDescription: 'Zwei individuelle Gestaltungsrichtungen und die begründete Auswahl.',
       inputSchema: STUDIO_SCHEMA,
-      maxTokens: 3000,
-      effort: 'high',
+      ...STUDIO_CALL_OPTIONS.concept,
       purpose: 'demo_art_direction',
       leadId,
     }),
   );
+  await opts.onPlan?.(studioPlan);
   // Befunde der KI-Prüfung eines früheren Entwurfs gleich im ersten Versuch mitgeben
   let feedback: string[] | undefined = qaFeedback?.length ? qaFeedback.slice(0, 12) : undefined;
   let lastViolations: RuleViolation[] = [];
@@ -80,8 +82,7 @@ export async function authorStudioContent(
         toolName: DEMO_TOOL_NAME,
         toolDescription: 'Gibt individuelle Seitengestaltung (HTML/CSS) und geprüfte Texte zurück.',
         inputSchema: DEMO_CONTENT_SCHEMA as unknown as Record<string, unknown>,
-        maxTokens: 10000,
-        effort: 'high',
+        ...STUDIO_CALL_OPTIONS.author,
         purpose: 'demo_content',
         leadId,
       });

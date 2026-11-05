@@ -10,7 +10,7 @@ import { generateDemoContent } from '../src/demos/build';
 import { authorStudioContent } from '../src/demos/studio-author';
 import { MockLlm } from '../src/providers/llm/mock';
 import { DEFAULT_CONFIG } from '../src/config/settings';
-import { STUDIO_TOOL } from '../src/demos/studio';
+import { STUDIO_TOOL, STUDIO_CALL_OPTIONS } from '../src/demos/studio';
 import { DEMO_TOOL_NAME } from '../src/demos/content';
 
 const lead = {
@@ -42,6 +42,8 @@ describe('Studio generation orchestration without database or paid provider', ()
     expect(generate.mock.calls[1]![0].prompt).toContain(result.studioPlan!.first.composition);
     expect(generate.mock.calls[1]![0].prompt).not.toContain(result.studioPlan!.second.composition);
     expect(generate.mock.calls.every(([req]) => req.tier === 'creative')).toBe(true);
+    expect(generate.mock.calls[0]![0]).toMatchObject(STUDIO_CALL_OPTIONS.concept);
+    expect(generate.mock.calls[1]![0]).toMatchObject(STUDIO_CALL_OPTIONS.author);
   });
   it('stops before authoring when the concept is malformed', async () => {
     generate.mockResolvedValueOnce({});

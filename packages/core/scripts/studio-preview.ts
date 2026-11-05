@@ -3,7 +3,13 @@ import { mkdir, open, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { renderSite, authoredTemplateId, stockPhotos, stockPhotoDataUri, type BusinessFacts } from '@wbm/templates';
 import { authorStudioContent } from '../src/demos/studio-author';
-import { STUDIO_VERSION, STUDIO_REVIEW_SCHEMA, STUDIO_REVIEW_PROMPT, studioReviewResult } from '../src/demos/studio';
+import {
+  STUDIO_VERSION,
+  STUDIO_REVIEW_SCHEMA,
+  STUDIO_REVIEW_PROMPT,
+  STUDIO_CALL_OPTIONS,
+  studioReviewResult,
+} from '../src/demos/studio';
 import { buildQaPrompt, QA_TOOL_NAME, QA_SYSTEM_PROMPT, type ContentFacts } from '../src/demos/content';
 import { visualReviewInput } from '../src/demos/visual-review';
 import { effectiveSwitches, getConfig } from '../src/config/service';
@@ -66,7 +72,7 @@ try {
     imageBrief: photos.map((p, i) => ({ slot: i + 1, alt: p.alt, example: true })),
   };
   console.log(JSON.stringify({ stage: 'authoring_one_fictional_demo', version: STUDIO_VERSION }));
-  const generated = await authorStudioContent(facts, { photos });
+  const generated = await authorStudioContent(facts, { photos, onPlan: (plan) => save('plan.json', plan) });
   await save('content.json', generated);
   const business: BusinessFacts = { ...facts, openingLines: [], photos };
   const html = renderSite({
@@ -93,8 +99,7 @@ try {
     toolName: QA_TOOL_NAME,
     toolDescription: 'Unabhängige Inhalts- und Gestaltungsprüfung.',
     inputSchema: STUDIO_REVIEW_SCHEMA,
-    maxTokens: 4500,
-    effort: 'high',
+    ...STUDIO_CALL_OPTIONS.review,
     purpose: 'demo_qa',
   });
   await save('visual-review.json', raw);

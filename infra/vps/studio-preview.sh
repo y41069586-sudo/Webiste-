@@ -22,9 +22,20 @@ for file in "${config_files[@]}"; do
 done
 # Pausing is intentional for the single paid test; never restart the queued automation here.
 "${compose[@]}" stop worker
-if [[ "${STUDIO_PREVIEW_USE_BUILT_IMAGE:-false}" = true ]]; then
+source_mounts=()
+if [[ "${STUDIO_PREVIEW_USE_CHECKOUT:-false}" = true ]]; then
+  # Only interpreted core TS changed: reuse installed dependencies and compiled templates.
+  git fetch origin claude/website-brief-maschine-0d0s37
+  git merge-base --is-ancestor "$RELEASE" FETCH_HEAD || { echo 'Release nicht veröffentlicht.' >&2; exit 1; }
+  git merge-base --is-ancestor HEAD "$RELEASE" || { echo 'Lokaler Stand abweichend; kein Zurücksetzen.' >&2; exit 1; }
+  git diff --quiet HEAD "$RELEASE" -- Dockerfile pnpm-lock.yaml package.json pnpm-workspace.yaml packages/templates packages/core/package.json apps/worker/package.json apps/worker/src \
+    || { echo 'Abhängigkeiten oder gebaute Vorlagen geändert; Quellcode-Test ohne Neubuild gestoppt.' >&2; exit 1; }
+  git merge --ff-only "$RELEASE"
+  source_mounts=(-v "$ROOT/packages/core/src:/repo/packages/core/src:ro" -v "$ROOT/packages/core/scripts:/repo/packages/core/scripts:ro")
+fi
+if [[ "${STUDIO_PREVIEW_USE_BUILT_IMAGE:-false}" = true || "${STUDIO_PREVIEW_USE_CHECKOUT:-false}" = true ]]; then
   # Resume after the completed build: no pull, merge, rebuild or container recreation.
-  "${compose[@]}" run --rm -T --no-deps -e "STUDIO_PREVIEW_SHARE=${STUDIO_PREVIEW_SHARE:-false}" --entrypoint node worker --import tsx --input-type=module -e "const m=await import('/repo/packages/core/src/demos/studio.ts');const fs=await import('node:fs');if(m.STUDIO_VERSION!=='design-studio-1'||!fs.existsSync('/repo/packages/core/scripts/studio-preview.ts')||(process.env.STUDIO_PREVIEW_SHARE==='true'&&!fs.existsSync('/repo/packages/core/scripts/share-studio-preview.ts')))process.exit(1);console.log('Vorhandenes Studio-Image bestätigt; kein Neubuild.');" \
+  "${compose[@]}" run --rm -T --no-deps "${source_mounts[@]}" -e "STUDIO_PREVIEW_SHARE=${STUDIO_PREVIEW_SHARE:-false}" --entrypoint node worker --import tsx --input-type=module -e "const m=await import('/repo/packages/core/src/demos/studio.ts');const fs=await import('node:fs');if(m.STUDIO_VERSION!=='design-studio-1'||!fs.existsSync('/repo/packages/core/scripts/studio-preview.ts')||(process.env.STUDIO_PREVIEW_SHARE==='true'&&!fs.existsSync('/repo/packages/core/scripts/share-studio-preview.ts')))process.exit(1);console.log('Vorhandenes Studio-Image bestätigt; kein Neubuild.');" \
     || { echo 'Vorhandenes Image enthält den Einzeltest nicht; gestoppt.' >&2; exit 1; }
 else
   git fetch origin claude/website-brief-maschine-0d0s37
@@ -36,6 +47,7 @@ fi
 install -d -m 0700 -o 1000 -g 1000 "$OUTPUT"
 status=0
 "${compose[@]}" run --rm -T --no-deps \
+  "${source_mounts[@]}" \
   -v "$OUTPUT:/preview" \
   -e DRY_RUN=true -e LLM_PROVIDER=anthropic \
   -e PAYMENT_PROVIDER=mock -e EMAIL_PROVIDER=mock -e MAIL_PROVIDER=mock \
@@ -49,6 +61,7 @@ fi
 echo 'Worker bleibt pausiert. Keine Demo veröffentlicht, kein Brief und keine E-Mail versendet.'
 if [[ "$status" = 0 && "${STUDIO_PREVIEW_SHARE:-false}" = true && -f "$OUTPUT/index.html" ]]; then
   "${compose[@]}" run --rm -T --no-deps -v "$OUTPUT:/preview" \
+    "${source_mounts[@]}" \
     --entrypoint node worker --import tsx /repo/packages/core/scripts/share-studio-preview.ts
 fi
 exit "$status"

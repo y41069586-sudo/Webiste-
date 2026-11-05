@@ -1,8 +1,8 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-const mocks = vi.hoisted(() => ({ create: vi.fn(), record: vi.fn(), budget: vi.fn() }));
+const mocks = vi.hoisted(() => ({ create: vi.fn(), count: vi.fn(), record: vi.fn(), budget: vi.fn() }));
 vi.mock('@anthropic-ai/sdk', () => ({
   default: class {
-    beta = { messages: { create: mocks.create } };
+    beta = { messages: { create: mocks.create, countTokens: mocks.count } };
   },
 }));
 vi.mock('../src/config/service', () => ({ getConfig: async () => ({}) }));
@@ -16,7 +16,7 @@ vi.mock('../src/db/client', () => ({ getDb: () => ({}) }));
 vi.mock('../src/providers', () => ({
   getProviders: () => ({ llm: Object.assign(new AnthropicLlm('fixture-key', false), { name: 'fixture' }) }),
 }));
-import { AnthropicLlm, LlmRefusalError } from '../src/providers/llm/anthropic';
+import { AnthropicLlm, LlmRefusalError, LlmOutputLimitError } from '../src/providers/llm/anthropic';
 import { LlmUsageError } from '../src/providers/types';
 import { llmStructured, llmText } from '../src/services/llm';
 const req = {
@@ -35,6 +35,48 @@ const response = (model: string, tool = false) => ({
   content: tool ? [{ type: 'tool_use', name: 'answer', input: { ok: true } }] : [{ type: 'text', text: 'No tool yet' }],
 });
 beforeEach(() => vi.clearAllMocks());
+it('admits and settles exactly one physical studio call even when its output is truncated', async () => {
+  mocks.count.mockResolvedValueOnce({ input_tokens: 100 });
+  mocks.create.mockResolvedValueOnce({ ...response('fixture-a'), stop_reason: 'max_tokens' });
+  const guard = {
+    beforeRequest: vi.fn().mockResolvedValue('reservation-one'),
+    afterResponse: vi.fn().mockResolvedValue(undefined),
+  };
+  await expect(
+    new AnthropicLlm('fixture', true).generateStructured({ ...req, maxTokens: 8000, maxAttempts: 1, budgetGuard: guard }),
+  ).rejects.toBeInstanceOf(LlmOutputLimitError);
+  expect(guard.beforeRequest).toHaveBeenCalledExactlyOnceWith({
+    model: 'fixture-a',
+    inputTokens: 100,
+    maxOutputTokens: 8000,
+    maxSearches: 0,
+  });
+  expect(guard.afterResponse).toHaveBeenCalledTimes(1);
+  expect(mocks.create).toHaveBeenCalledTimes(1);
+});
+it('does not silently repeat a studio call truncated before a tool and retains its charge', async () => {
+  mocks.create.mockResolvedValueOnce({ ...response('fixture-a'), stop_reason: 'max_tokens' });
+  await expect(llmStructured({ ...req, tier: 'creative', maxTokens: 8000, maxAttempts: 1 })).rejects.toBeInstanceOf(
+    LlmOutputLimitError,
+  );
+  expect(mocks.create).toHaveBeenCalledTimes(1);
+  expect(mocks.record).toHaveBeenCalledTimes(1);
+  expect(mocks.create.mock.calls[0]![0].max_tokens).toBe(8000);
+});
+it('rejects a truncated tool payload even when no second attempt is allowed', async () => {
+  mocks.create.mockResolvedValueOnce({ ...response('fixture-a', true), stop_reason: 'max_tokens' });
+  await expect(
+    new AnthropicLlm('fixture', false).generateStructured({ ...req, maxTokens: 8000, maxAttempts: 1 }),
+  ).rejects.toMatchObject({ code: 'LLM_OUTPUT_LIMIT', maxTokens: 8000, usages: [expect.any(Object)] });
+  expect(mocks.create).toHaveBeenCalledTimes(1);
+});
+it('does not retry an explicitly single-attempt response that omits the tool', async () => {
+  mocks.create.mockResolvedValueOnce(response('fixture-a'));
+  await expect(new AnthropicLlm('fixture', false).generateStructured({ ...req, maxAttempts: 1 })).rejects.toMatchObject({
+    usages: [expect.any(Object)],
+  });
+  expect(mocks.create).toHaveBeenCalledTimes(1);
+});
 it('accounts for every response at its actual model price when tool use needs a retry', async () => {
   mocks.create.mockResolvedValueOnce(response('fixture-a')).mockResolvedValueOnce(response('fixture-b', true));
   const result = await llmStructured({ ...req, tier: 'creative', idempotencyKey: 'fixture-request' });

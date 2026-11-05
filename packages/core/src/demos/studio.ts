@@ -3,6 +3,12 @@ import type { ContentFacts, QaIssue } from './content';
 
 export const STUDIO_VERSION = 'design-studio-1';
 export const STUDIO_TOOL = 'website_art_direction';
+/** Output caps include thinking and JSON. No silent physical retry at any studio stage. */
+export const STUDIO_CALL_OPTIONS = {
+  concept: { maxTokens: 8000, effort: 'medium', maxAttempts: 1 },
+  author: { maxTokens: 16000, effort: 'medium', maxAttempts: 1 },
+  review: { maxTokens: 6000, effort: 'medium', maxAttempts: 1 },
+} as const;
 const route = z.object({
   idea: z.string().trim().min(25).max(600),
   composition: z.string().trim().min(40).max(900),
@@ -61,6 +67,7 @@ export const STUDIO_SCHEMA = {
 } as const;
 
 export const STUDIO_SYSTEM = `Du bist Art Director für eine individuell gestaltete lokale Unternehmenswebsite. Du planst eine visuelle Identität und eine Besucherreise, keine Branchenvorlage. Noch kein HTML/CSS ausgeben.
+Antworte konzentriert über das Tool: zwei kurze, konkrete Richtungen, eine begründete Wahl und fünf bis sieben knappe Seitenmomente. Ziel: höchstens ungefähr neunhundert Wörter im gesamten strukturierten Ergebnis. Keine lange Vorrede oder wiederholte Selbstkritik vor dem Tool-Aufruf; die verfügbare Ausgabe wird für den umsetzbaren Plan benötigt.
 Entwickle zwei eigenständige, konkret beschriebene Richtungen aus Besuchsanlass, belegtem Angebot, Namen und tatsächlich verfügbaren Bildern. Sie müssen sich in Komposition, typografischer Hierarchie und Bildregie unterscheiden, nicht nur in Farbe. Wähle eine und begründe den Vorteil für diesen Betrieb. Keine Layout-Lotterie, keine festen Branchencodes, kein vorgefertigter Stil-Katalog.
 Qualitätsmaßstab der Gestaltungsstudie Osteria Sera: eine wiedererkennbare Identität vom Einstieg bis zum Schluss, bewusste Proportionen, sorgfältiger Bildausschnitt, Spannung zwischen dicht und ruhig, hilfreiche Inhalte und eine passende Hauptaktion. Kopiere NICHT deren rote Farbe, Restauranttexte, Wortmarke, Abschnitte oder Layout. Der nächste Betrieb braucht eine eigene Antwort.
 Die Beschreibung muss umsetzbar sein: Welche Information dominiert? Wie stehen Schrift und Bild zueinander? Welche Motive und Bildausschnitte eignen sich? Welche visuelle Idee verbindet die Abschnitte? Wie verändert sich die Komposition auf einem schmalen Bildschirm? Welche Gestaltungsmittel lässt du bewusst weg? Eine Ansammlung großer Überschriften oder gleicher Karten ist noch kein Konzept.

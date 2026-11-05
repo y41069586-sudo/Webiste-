@@ -1,5 +1,11 @@
 import { visualReviewInput } from '../demos/visual-review';
-import { STUDIO_VERSION, STUDIO_REVIEW_SCHEMA, STUDIO_REVIEW_PROMPT, studioReviewResult } from '../demos/studio';
+import {
+  STUDIO_VERSION,
+  STUDIO_REVIEW_SCHEMA,
+  STUDIO_REVIEW_PROMPT,
+  STUDIO_CALL_OPTIONS,
+  studioReviewResult,
+} from '../demos/studio';
 import { recipientFingerprint } from '../letters/binding';
 import { leadResearch } from '../services/lead-research';
 import { researchContentHash } from '../leads/acquisition';
@@ -119,8 +125,7 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
         toolName: QA_TOOL_NAME,
         toolDescription: 'Ergebnis der Qualitätsprüfung',
         inputSchema: (studio ? STUDIO_REVIEW_SCHEMA : QA_SCHEMA) as unknown as Record<string, unknown>,
-        maxTokens: studio ? 4500 : 3000,
-        effort: studio ? 'high' : 'low',
+        ...(studio ? STUDIO_CALL_OPTIONS.review : { maxTokens: 3000, effort: 'low' as const }),
         purpose: 'demo_qa',
         leadId: lead.id,
       });

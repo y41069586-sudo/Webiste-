@@ -33,8 +33,9 @@ Der reguläre `buildDemo`-Pfad arbeitet jetzt so:
 
 ## Kosten, Belege und Grenzen
 
-- Ein zusätzlicher logischer Creative-Aufruf (`demo_art_direction`, 3000 Ausgabetokens) pro Bau.
-  Umsetzung weiterhin 10000; Studio-QA bis 4500 statt 3000, höhere Denktiefe. Bestehende Modelle
+- Ein zusätzlicher logischer Creative-Aufruf (`demo_art_direction`, aktuell höchstens 8000
+  Ausgabetokens) pro Bau. Umsetzung höchstens 16000; Studio-QA höchstens 6000. Mittlere Denktiefe,
+  je Studio-Schritt ein physischer API-Versuch. Bestehende Modelle
   und Budgets unverändert. Jeder physische Provideraufruf einschließlich Wiederholungen nutzt
   weiter den vorhandenen Tokenzähler und das Budget-Ledger.
 - Keine bezahlten Modellaufrufe bei dieser lokalen Umsetzung/Verifikation. Mock-Plan und
@@ -131,3 +132,32 @@ als Netlify-Draft. Der Dauerdienst bleibt pausiert. Not-Aus, Budget und Doppelst
 weiterhin. Sechs Update- und sechs Preview-CLI-Tests bestanden, einschließlich fehlendem
 Neubuild im Resume-Modus und Share nur nach erfolgreichem Test. Keine echte Generierung
 oder Sichtabnahme durch diese lokale Korrektur behaupten.
+
+## 05.11.2026 – Erster echter Studio-Aufruf am Ausgabelimit abgebrochen
+
+Der VPS-Screenshot zeigt zwei abgerechnete `demo_art_direction`-Antworten mit
+`stop_reason=max_tokens`, zunächst bei 3000, dann durch die bisherige Provider-Wiederholung
+bei 6000 Ausgabetokens. Kein vollständiger Tool-Aufruf und keine erzeugte HTML-Datei.
+Das ist ein tatsächlicher Providerbefund; Mock-/Build-Tests hatten diese Laufzeitgrenze nicht
+nachgewiesen. Ursache der ganzen Ausschöpfung (Denken/Text/angefangenes JSON) ist ohne
+Antwortmetadaten nicht weiter belegt. Keine Behauptung, eine neue Grenze garantiere Erfolg.
+
+Korrektur: kurze konkrete Planausgabe mit fünf bis sieben Seitenmomenten, mittlere Denktiefe,
+8000 Tokens für Konzept, 16000 für Umsetzung, 6000 für Review. Zentrale `STUDIO_CALL_OPTIONS`
+setzen überall `maxAttempts:1`; Studio-Tokenabbrüche erzeugen `LlmOutputLimitError` mit korrektem
+Limit und allen bekannten Kosten. Keine stille Verdopplung, kein abgeschnittenes Tool-JSON.
+Inhaltsvalidierung darf weiter genau einen logischen Korrekturversuch auslösen; ein Tokenabbruch
+wird dagegen nicht nochmals automatisch bezahlt. Der gültige Plan wird im Einzeltest als
+`plan.json` vor der Umsetzung gespeichert. Modell- und Wochenbudgetkonfiguration unverändert.
+
+`STUDIO_PREVIEW_USE_CHECKOUT=true` aktualisiert bei pausiertem Worker nur den geprüften
+Quellcode und bindet Core/src sowie Core/scripts read-only in den Einzelprozess ein. Keine
+Image-Neuerstellung. Änderungen an Abhängigkeiten, Dockerfile, Worker-Entrypoint oder gebauten
+Templates blockieren diesen Modus. Für den bewusst neuen Test einen neuen Ausgabeordner
+verwenden, z. B. `/opt/seitenwerk-design-preview-v2`; den ersten Lauf samt Startmarker und
+Kostenbelegen behalten. Kein automatisches Löschen oder Zurücksetzen des Doppelstartschutzes.
+
+Gezielte Tests: physische Wiederholung unterbinden, vor dem Tool abgeschnittene Antworten,
+unvollständiges Tool-JSON und genau eine Budgetreservierung/-abrechnung; außerdem prüft die
+Orchestrierung die zentralen Aufrufoptionen. CLI-Tests prüfen Quellcode-Bind-Mounts und Abbruch
+bei geänderten Abhängigkeiten. Echte Modellabnahme bleibt nach neuem VPS-Lauf offen.

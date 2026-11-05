@@ -299,6 +299,8 @@ export interface LlmStructuredRequest {
   /** JSON-Schema des Tool-Inputs (additionalProperties: false) */
   inputSchema: Record<string, unknown>;
   maxTokens?: number;
+  /** Maximum physical tool-generation attempts. Studio stages use one explicit, budgeted attempt. */
+  maxAttempts?: 1 | 2;
   effort?: 'low' | 'medium' | 'high';
   /** Zweck für das Budget-Ledger, z. B. demo_content */
   purpose: string;

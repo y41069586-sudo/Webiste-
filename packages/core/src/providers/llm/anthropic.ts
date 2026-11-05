@@ -20,6 +20,21 @@ export class LlmNoToolCallError extends LlmUsageError {
   }
 }
 
+export class LlmOutputLimitError extends LlmUsageError {
+  readonly code = 'LLM_OUTPUT_LIMIT';
+  constructor(
+    public readonly toolName: string,
+    public readonly maxTokens: number,
+    usages: LlmUsage[],
+  ) {
+    super(
+      `Modellantwort für ${toolName} bei der Grenze von ${maxTokens} Ausgabetokens abgebrochen; kein vollständiges Ergebnis.`,
+      usages,
+    );
+    this.name = 'LlmOutputLimitError';
+  }
+}
+
 const FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 
 /**
@@ -98,7 +113,9 @@ export class AnthropicLlm implements LlmProvider {
     let lastErr: unknown;
     const usages: LlmUsage[] = [];
     let maxTokens = req.maxTokens ?? 8000;
-    for (let attempt = 0; attempt < 2; attempt++) {
+    const maxAttempts = req.maxAttempts ?? 2;
+    if (maxAttempts !== 1 && maxAttempts !== 2) throw new Error('Ungültige Anzahl von Modellversuchen.');
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const instruction =
         attempt === 0
           ? `\n\nGib dein Ergebnis ausschließlich über einen Aufruf des Tools "${req.toolName}" zurück.`
@@ -153,10 +170,15 @@ export class AnthropicLlm implements LlmProvider {
         // Eingaben immer als Objekt behandeln (SDK liefert geparstes JSON)
         return { data: block.input as T, usage, usages };
       }
-      if (res.stop_reason === 'max_tokens') maxTokens = Math.min(maxTokens * 2, 32000);
+      if (res.stop_reason === 'max_tokens') {
+        if (req.maxAttempts === 1) throw new LlmOutputLimitError(req.toolName, maxTokens, [...usages]);
+        maxTokens = Math.min(maxTokens * 2, 32000);
+      }
       logger.warn(
         { purpose: req.purpose, stopReason: res.stop_reason, attempt },
-        'llm: kein vollständiger Tool-Aufruf, wiederhole',
+        attempt + 1 < maxAttempts
+          ? 'llm: kein vollständiger Tool-Aufruf, wiederhole'
+          : 'llm: kein Tool-Aufruf, keine weitere Generierung',
       );
       lastErr = new LlmNoToolCallError(req.toolName, [...usages]);
     }
