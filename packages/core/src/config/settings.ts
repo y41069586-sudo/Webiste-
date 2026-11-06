@@ -554,6 +554,10 @@ export const DEFAULT_BRANCHES: BranchConfig[] = [
       ['dachdecker', 'Dachdeckerbetrieb', 'roofer', ['Dachdecker']],
       ['heizung', 'Heizungs- und Klimatechnik', 'hvac', ['Heizungsbau', 'Klimatechnik']],
       ['glaser', 'Glaserei', 'glaziery', ['Glaserei']],
+      // Weitere zahlungsstarke Gewerke (06.11.2026, Betreiber: „mehr Elektriker, Dachdecker und so“)
+      ['metallbau', 'Metallbau und Schlosserei', 'metal_construction', ['Metallbau', 'Schlosserei']],
+      ['maurer', 'Bauunternehmen und Maurer', 'builder', ['Bauunternehmen', 'Maurerbetrieb']],
+      ['stuckateur', 'Stuckateur und Putz', 'plasterer', ['Stuckateur', 'Verputzer']],
     ] as const
   ).map(([key, label, craft, queries]) => ({
     key,

@@ -1313,3 +1313,14 @@ Betreiber: „Lass nicht nach Go-Live 7 Tage, sondern direkt nach Abo 0 Euro Zah
   FAQ, Willkommenshinweis, Prüfseite, Checkout-Bedingungen, Bestätigungsmail, Firmen-Website) angepasst.
 - Risiko (dem Betreiber genannt): Wird die Website nicht innerhalb von 7 Tagen fertig, zahlt der Kunde schon, bevor sie
   online ist. Beschwerden/Erstattungen laufen über die bestehende Erstattung im Admin.
+
+## 06.11.2026 – Mehr Handwerksbranchen in der Suche
+
+Betreiber: „Man kann nur Maler und Elektriker auswählen … mach mehr so Elektriker, Dachdecker und so.“ In der Live-Konfiguration
+standen nur die 10 Branchen der ersten Fassung (die später ergänzten Gewerke fehlten, weil die gespeicherte Liste die
+Standardwerte ersetzt). Ergänzt und aktiviert (SQL mit Audit-Eintrag): Dachdecker, Sanitär, Heizung/Klima, Tischlerei,
+Zimmerei, Fliesenleger, Bodenleger, Parkettleger, Glaserei, Garten- und Landschaftsbau sowie neu Metallbau/Schlosserei
+(`craft=metal_construction`), Bauunternehmen/Maurer (`craft=builder`) und Stuckateur (`craft=plasterer`).
+Gewicht 1,1 für die auftragsstarken Gewerke (Dach, Sanitär, Heizung, Zimmerei, Metallbau, Bau). Der OSM-Index auf dem
+Server baut sich für neue Tags beim nächsten Suchlauf automatisch neu auf. Gewerke-Wörter zusätzlich in der
+Website-Erkennung als Branchenbegriffe hinterlegt.

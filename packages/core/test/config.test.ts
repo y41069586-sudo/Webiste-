@@ -73,6 +73,10 @@ describe('Konfiguration', () => {
       'handwerk',
       'handwerk',
       'handwerk',
+      // Metallbau, Bauunternehmen/Maurer, Stuckateur (06.11.2026)
+      'handwerk',
+      'handwerk',
+      'handwerk',
     ]);
   });
 
