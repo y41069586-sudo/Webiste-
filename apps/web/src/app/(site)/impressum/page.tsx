@@ -11,7 +11,7 @@ export default async function Page() {
     <LegalPage
       title="Impressum"
       markdown={cfg.legal.impressumMarkdown || legalDrafts(cfg).impressumMarkdown}
-      placeholder={`${cfg.sender.company} · ${cfg.sender.name} · ${cfg.sender.street}, ${cfg.sender.postalCode} ${cfg.sender.city} · ${cfg.sender.email} · ${cfg.sender.phone}. Der vollständige Impressumstext wird vom Betreiber in den Einstellungen hinterlegt.`}
+      placeholder={`${cfg.sender.company} · ${cfg.sender.name} · ${cfg.sender.street}, ${cfg.sender.postalCode} ${cfg.sender.city} · ${cfg.sender.email}. Der vollständige Impressumstext wird vom Betreiber in den Einstellungen hinterlegt.`}
     />
   );
 }

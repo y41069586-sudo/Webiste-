@@ -103,7 +103,8 @@ describe('Messung und Funnel (L4)', () => {
     expect(await recordDemoEngagement(demo.slug, { t: 74, s: 83, c: ['speisekarte', 'uebernehmen', 'BÖSE<script>'] }, req)).toBe(
       true,
     );
-    expect(await whatsappRedirect(demo.slug, req)).toMatch(/^https:\/\/wa\.me\/491701234567\?text=/);
+    // Kontakt nur per E-Mail (Betreiber, 06.11.2026): kein WhatsApp-Ziel, kein WhatsApp-Klick im Funnel
+    expect(await whatsappRedirect(demo.slug, req)).toBeNull();
     await recordEvent(db, { leadId: lead.id, type: 'cta_click', meta: { plan: 'monthly' }, req });
     const res = await startCheckout(demo.slug, { ...checkoutInput, plan: 'monthly' } as CheckoutInput, req);
     expect(res.ok).toBe(true);
@@ -121,7 +122,7 @@ describe('Messung und Funnel (L4)', () => {
       demo_views: 1,
       engaged: 1,
       cta_clicks: 1,
-      whatsapp: 1,
+      whatsapp: 0,
       checkouts: 1,
       abandoned: 0,
       purchases: 0,

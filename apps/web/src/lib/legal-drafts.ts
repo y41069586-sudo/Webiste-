@@ -1,4 +1,4 @@
-import { formatEuroShort, v4FirstYearCents, v4Offer, type AppConfig } from '@wbm/core';
+import { appUrl, formatEuroShort, v4FirstYearCents, v4Offer, type AppConfig } from '@wbm/core';
 import { sitePricing } from './site';
 
 /**
@@ -39,7 +39,7 @@ Deutschland
 
 ## Kontakt
 
-Telefon: ${required(s.phone, 'Telefonnummer')}
+Kontaktformular: ${appUrl('/kontakt')}
 
 E-Mail: ${email}
 
@@ -56,7 +56,7 @@ Stand: 27. Oktober 2026
 
 Verantwortlich für die nachfolgend beschriebene Datenverarbeitung ist die nachfolgend genannte natürliche Person.
 
-${contact}. E-Mail: ${email}; Telefon: ${required(s.phone, 'Telefonnummer')}. An diese Kontaktdaten können Sie auch Datenschutzanfragen richten.
+${contact}. E-Mail: ${email}. An diese Kontaktdaten können Sie auch Datenschutzanfragen richten.
 
 ## 2. Website und Hosting
 
@@ -72,13 +72,13 @@ Rechtsgrundlagen sind je nach Zweck Art. 6 Abs. 1 lit. b DSGVO (Anbahnung/Erfül
 
 ## 4. Kontakt und E-Mail
 
-Wenn Sie uns per E-Mail oder Telefon kontaktieren, verarbeiten wir Ihre Kontaktdaten und den mitgeteilten Inhalt zur Bearbeitung. Bei Vertragsanfragen gilt Art. 6 Abs. 1 lit. b DSGVO, sonst lit. f DSGVO mit dem Interesse, Anfragen sachgerecht zu beantworten. Erforderliche Nachweise werden zur Geltendmachung oder Abwehr von Ansprüchen aufbewahrt. Es gibt keine unaufgeforderte Werbung per E-Mail oder WhatsApp.
+Wenn Sie uns per E-Mail oder über das Kontaktformular kontaktieren, verarbeiten wir Ihre Kontaktdaten und den mitgeteilten Inhalt zur Bearbeitung. Bei Vertragsanfragen gilt Art. 6 Abs. 1 lit. b DSGVO, sonst lit. f DSGVO mit dem Interesse, Anfragen sachgerecht zu beantworten. Erforderliche Nachweise werden zur Geltendmachung oder Abwehr von Ansprüchen aufbewahrt. Es gibt keine unaufgeforderte Werbung per E-Mail.
 
 Für den Empfang an ${email} und die technische E-Mail-Anbindung wird Resend (Plus Five Five, Inc., USA) eingesetzt. Dabei fallen insbesondere Adressen, Nachrichteninhalte und Zustelldaten an. Resend speichert Daten in den USA; eine europäische Versandregion ändert diesen Speicherort nicht. Resend nennt für E-Mail-/Logdaten regulär 30 Tage; die Aufbewahrung in einem gesonderten Inbox-Postfach und in unserer Anwendung richtet sich zusätzlich nach deren Zweck und Einstellungen. Übermittlungsregelungen einschließlich Standardvertragsklauseln: https://resend.com/legal/dpa ; weitere Informationen: https://resend.com/security . Der automatische Versand und KI-Antworten unserer Anwendung sind derzeit deaktiviert. Eingehende Nachrichten werden zur manuellen Prüfung angezeigt.
 
-## 5. WhatsApp und externe Links
+## 5. Kontaktwege und externe Links
 
-WhatsApp ist ausschließlich als externer Link eingebunden. Beim bloßen Laden unserer Seite wird kein WhatsApp-Chat eingebettet. Erst durch Öffnen des Links bzw. die Nutzung des Messengers erfolgt eine Verbindung mit dem jeweiligen Anbieter. Für dessen weitere Verarbeitung gilt dessen Datenschutzerklärung. Sie können uns stattdessen per E-Mail oder Telefon kontaktieren.
+Wir bieten keinen Kontakt über WhatsApp oder Telefon an; Sie erreichen uns per E-Mail oder über das Kontaktformular. Externe Links öffnen Angebote anderer Anbieter, für deren Verarbeitung deren Datenschutzerklärungen gelten.
 
 ## 6. Zahlungen
 

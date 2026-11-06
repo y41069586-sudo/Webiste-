@@ -23,16 +23,7 @@ function greeting(name: string | null | undefined): string {
 
 function signatureText(cfg: AppConfig): string {
   const s = cfg.sender;
-  return [
-    'Viele Grüße',
-    s.name,
-    '',
-    '--',
-    s.company,
-    `${s.street}, ${s.postalCode} ${s.city}`,
-    `Tel. ${s.phone} · ${s.email}`,
-    s.website,
-  ].join('\n');
+  return ['Viele Grüße', s.name, '', '--', s.company, `${s.street}, ${s.postalCode} ${s.city}`, s.email, s.website].join('\n');
 }
 
 export function renderEmail(
@@ -74,7 +65,7 @@ export function renderEmail(
 ${htmlParts.join('\n')}
 <p>Viele Grüße<br>${esc(s.name)}</p>
 </div>
-<p style="font-size:12px;color:#6b7280;margin:16px 8px">${esc(s.company)} · ${esc(s.street)} · ${esc(s.postalCode)} ${esc(s.city)}<br>Tel. ${esc(s.phone)} · ${esc(s.email)} · ${esc(s.website)}</p>
+<p style="font-size:12px;color:#6b7280;margin:16px 8px">${esc(s.company)} · ${esc(s.street)} · ${esc(s.postalCode)} ${esc(s.city)}<br>${esc(s.email)} · ${esc(s.website)}</p>
 </div></body></html>`;
   return { subject: input.subject, text, html };
 }

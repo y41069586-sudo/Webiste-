@@ -1266,3 +1266,14 @@ Betreiberentscheidung (nach Marktrecherche, bewusst über dem Markt-Mittel von c
 - Schalter `offers.komplettEnabled` (Admin → Einstellungen → Neukundentarife), Einschalten nur mit Bestätigung,
   dass die AGB mit den Komplett-Regeln übernommen sind. Preissektion bestehender Demos wird beim Ausliefern aktualisiert.
 - Offen: Funnel-View `funnel_by_arm` zählt Komplett-Käufe noch nicht unter „monatlich“ (Materialized View, eigener Schritt).
+
+## 06.11.2026 – Kontakt nur per E-Mail, keine Betreiber-Telefonnummer
+
+Betreiber: „Sie sollen mich nur über E-Mail kontaktieren – entferne überall meine Nummer.“ Umgesetzt zentral in
+`publicOperatorSettings` (Telefon und WhatsApp-Nummer immer leer) sowie im Brief (Absenderblock ohne Tel.-Zeile,
+Kontaktzeile „per E-Mail an …“), in Demo-Absender/Vertrauensblock, E-Mail-Fußzeilen und Rechtstext-Entwürfen
+(Impressum: E-Mail und Kontaktformular). WhatsApp-Knöpfe entfallen, auch in bereits gebauten Demos (beim Ausliefern
+entfernt). Die Telefonnummer ist kein Pflichtfeld mehr und bleibt in den Einstellungen nur intern. Die Nummer des
+jeweiligen Betriebs auf seiner eigenen Demo („Anrufen“) bleibt unberührt. Hinweis: Das Impressum braucht neben der
+E-Mail einen zweiten schnellen Kontaktweg; das ist das Kontaktformular (keine Telefonpflicht, EuGH C-298/07).
+Bereits übernommene Rechtstexte enthalten die Nummer noch, bis sie im Admin neu übernommen werden.

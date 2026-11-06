@@ -39,7 +39,7 @@ export const SECTIONS: SectionDef[] = [
       { path: 'sender.postalCode', label: 'PLZ', type: 'text' },
       { path: 'sender.city', label: 'Ort', type: 'text' },
       { path: 'sender.email', label: 'E-Mail', type: 'email' },
-      { path: 'sender.phone', label: 'Telefon', type: 'text' },
+      { path: 'sender.phone', label: 'Telefon (nur intern – wird nirgends veröffentlicht)', type: 'text' },
       { path: 'sender.website', label: 'Website (ohne https://)', type: 'text' },
       { path: 'sender.taxNumber', label: 'Steuernummer (Rechnung)', type: 'text' },
       { path: 'sender.vatId', label: 'USt-IdNr. (optional)', type: 'text' },

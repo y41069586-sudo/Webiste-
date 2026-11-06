@@ -1,23 +1,35 @@
 import { expect, it } from 'vitest';
 import { DEFAULT_CONFIG, deepMerge } from '../src/config/settings';
-import { senderContactLine, whatsappMatchesPhone } from '../src/letters/compose';
+import { publicOperatorSettings } from '../src/config/operator';
+import { senderContactLine } from '../src/letters/compose';
+import { demoOptions, whatsappUrl } from '../src/demos/offer-options';
 
 const cfg = (phone: string, whatsappNumber: string) =>
   deepMerge(DEFAULT_CONFIG, {
-    sender: { phone, whatsappNumber, email: 'support@seitenwerk.test', intro: 'Ich gestalte Websites für lokale Betriebe.' },
+    sender: {
+      name: 'Max Beispiel',
+      phone,
+      whatsappNumber,
+      email: 'support@seitenwerk.test',
+      intro: 'Ich gestalte Websites für lokale Betriebe.',
+    },
   });
 
-it('lädt zur WhatsApp-Nachricht ein, wenn Telefon- und WhatsApp-Nummer übereinstimmen', () => {
-  const c = cfg('+49 1521 9682134', '4915219682134');
-  expect(whatsappMatchesPhone(c)).toBe(true);
-  expect(senderContactLine(c, { withIntro: false })).toBe(
-    'Fragen beantworte ich gern per WhatsApp-Nachricht an +49 1521 9682134 oder per E-Mail an support@seitenwerk.test.',
-  );
-  expect(whatsappMatchesPhone(cfg('01521 9682134', '4915219682134'))).toBe(true);
+// Betreiber (06.11.2026): Kunden erreichen ihn nur per E-Mail – keine Telefon- oder WhatsApp-Nummer nach außen
+it('Brief nennt nur die E-Mail, auch wenn Telefon und WhatsApp hinterlegt sind', () => {
+  const line = senderContactLine(cfg('+49 1521 9682134', '4915219682134'), { withIntro: false });
+  expect(line).toBe('Fragen beantworte ich gern per E-Mail an support@seitenwerk.test.');
+  expect(line).not.toMatch(/\d{4}|WhatsApp|Telefon/);
 });
-it('bleibt bei Telefon, wenn WhatsApp fehlt oder eine andere Nummer ist', () => {
-  expect(senderContactLine(cfg('0231 000000', ''), { withIntro: false })).toBe(
-    'Fragen beantworte ich gern: Telefon 0231 000000 oder E-Mail support@seitenwerk.test.',
-  );
-  expect(whatsappMatchesPhone(cfg('0231 000000', '4915219682134'))).toBe(false);
+
+it('öffentliche Betreiberdaten und Demo enthalten weder Telefon noch WhatsApp', () => {
+  const c = cfg('0231 000000', '4915219682134');
+  const pub = publicOperatorSettings(c, DEFAULT_CONFIG.sender);
+  expect(pub.sender.phone).toBe('');
+  expect(pub.sender.whatsappNumber).toBe('');
+  expect(whatsappUrl(c, 'abc')).toBeNull();
+  const d = demoOptions('abc', c);
+  expect(d.whatsappUrl).toBeNull();
+  expect(d.sender.phone).toBe('');
+  expect(d.trust?.phone).toBe('');
 });

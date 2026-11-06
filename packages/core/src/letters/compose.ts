@@ -191,19 +191,11 @@ export function whatsappMatchesPhone(cfg: AppConfig): boolean {
 export function senderContactLine(cfg: AppConfig, opts: { withIntro?: boolean } = {}): string {
   // Nur der erste Satz der hinterlegten Vorstellung: wer schreibt – der Brief bleibt einseitig
   const intro = (cfg.sender.intro.trim().match(/^.+?[.!?](?=\s|$)/)?.[0] ?? cfg.sender.intro.trim()).trim();
-  const phone = cfg.sender.phone.trim();
+  // Betreiber (06.11.2026): Kontakt nur per E-Mail – keine Telefon- oder WhatsApp-Nummer im Brief
   const email = cfg.sender.email.trim();
-  // Ist die Nummer zugleich die WhatsApp-Nummer, laden wir zur Nachricht ein (passt zu „Ich rufe Sie nicht an“)
-  if (whatsappMatchesPhone(cfg)) {
-    const ways = [`per WhatsApp-Nachricht an ${phone}`, email && `per E-Mail an ${email}`].filter(Boolean).join(' oder ');
-    return [opts.withIntro !== false && intro && !/\d/.test(intro) ? intro : '', `Fragen beantworte ich gern ${ways}.`]
-      .filter(Boolean)
-      .join(' ');
-  }
-  const ways = [phone && `Telefon ${phone}`, email && `E-Mail ${email}`].filter(Boolean).join(' oder ');
   return [
     opts.withIntro !== false && intro && !/\d/.test(intro) ? intro : '',
-    `Fragen beantworte ich gern${ways ? `: ${ways}` : ''}.`,
+    `Fragen beantworte ich gern${email ? ` per E-Mail an ${email}` : ''}.`,
   ]
     .filter(Boolean)
     .join(' ');
@@ -216,7 +208,6 @@ export function placeholderValues(i: ComposeInput): string[] {
       i.recipient.businessName,
       i.recipient.city,
       i.expiresLabel,
-      i.cfg.sender.phone,
       i.cfg.sender.email,
       ...(i.personalization
         ? reviewedLetterDetails(i.personalization)
@@ -264,7 +255,7 @@ export function composeLetter(i: ComposeInput): LetterData {
       postalCode: i.cfg.sender.postalCode,
       city: i.cfg.sender.city,
       email: i.cfg.sender.email,
-      phone: i.cfg.sender.phone,
+      phone: '',
       ...(whatsappMatchesPhone(i.cfg) ? { phoneLabel: 'WhatsApp' } : {}),
       website: i.cfg.sender.website,
     },

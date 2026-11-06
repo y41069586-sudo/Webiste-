@@ -25,5 +25,8 @@ export function publicOperatorSettings<T extends { sender: Record<string, unknow
     if (!sender[key] || sender[key] === defaults[key]) sender[key] = profile[key] ?? '';
   }
   if (unconfigured) for (const key of ['postalCode', 'city']) sender[key] = profile[key] ?? '';
+  // Betreiber (06.11.2026): Kontakt nur per E-Mail – eigene Telefon- und WhatsApp-Nummer nie veröffentlichen
+  sender.phone = '';
+  sender.whatsappNumber = '';
   return { ...cfg, sender };
 }

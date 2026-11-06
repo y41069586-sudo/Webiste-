@@ -23,7 +23,7 @@ export function goLiveBlockers(cfg: AppConfig): GoLiveBlocker[] {
   if (placeholder(s.company, d.company)) out.push({ key: 'sender.company', label: 'Absender: Firmenname' });
   if (placeholder(s.street, d.street)) out.push({ key: 'sender.street', label: 'Absender: Anschrift' });
   if (placeholder(s.email, d.email)) out.push({ key: 'sender.email', label: 'Absender: E-Mail' });
-  if (placeholder(s.phone, d.phone)) out.push({ key: 'sender.phone', label: 'Absender: Telefon' });
+  // Telefon nicht erforderlich: Kontakt nur per E-Mail und Kontaktformular (Betreiber, 06.11.2026)
   if (placeholder(s.website, d.website)) out.push({ key: 'sender.website', label: 'Absender: Website' });
   // WhatsApp ist freiwillig (Betreiberentscheidung 04.11.2026: privates Profil nicht zeigen) – ohne Nummer kein Button
   if (!s.intro.trim()) out.push({ key: 'sender.intro', label: 'Kurzvorstellung (2 Sätze)' });

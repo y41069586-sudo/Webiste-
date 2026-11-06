@@ -22,7 +22,7 @@ export function senderInfo(cfg: AppConfig): SenderInfo {
     postalCode: cfg.sender.postalCode,
     city: cfg.sender.city,
     email: cfg.sender.email,
-    phone: cfg.sender.phone,
+    phone: '',
     imprintUrl: appUrl('/impressum'),
     privacyUrl: appUrl('/datenschutz'),
   };
@@ -30,7 +30,9 @@ export function senderInfo(cfg: AppConfig): SenderInfo {
 
 /** wa.me-Link auf die Nummer des Betreibers mit vorausgefülltem Text (kein Bot, der Betrieb schreibt uns). */
 export function whatsappUrl(cfg: AppConfig, slug: string): string | null {
-  const n = cfg.sender.whatsappNumber.replace(/\D/g, '');
+  // Kontakt nur per E-Mail (Betreiber, 06.11.2026): kein WhatsApp-Link mehr
+  void cfg;
+  const n = '';
   if (!n) return null;
   return `https://wa.me/${n}?text=${encodeURIComponent(`Frage zu meinem Website-Entwurf ${slug}`)}`;
 }
@@ -151,7 +153,7 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
       intro: cfg.sender.intro,
       photoDataUri,
       email: cfg.sender.email,
-      phone: cfg.sender.phone,
+      phone: '',
       imprintUrl: appUrl('/impressum'),
     },
   };
