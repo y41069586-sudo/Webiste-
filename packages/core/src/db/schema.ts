@@ -696,8 +696,8 @@ export const tariffChanges = pgTable(
     orderId: uuid('order_id')
       .notNull()
       .references(() => orders.id, { onDelete: 'cascade' }),
-    fromTier: text('from_tier').$type<'basis' | 'care_plus'>().notNull(),
-    toTier: text('to_tier').$type<'basis' | 'care_plus'>().notNull(),
+    fromTier: text('from_tier').$type<'basis' | 'care_plus' | 'komplett'>().notNull(),
+    toTier: text('to_tier').$type<'basis' | 'care_plus' | 'komplett'>().notNull(),
     status: text('status')
       .$type<'requested' | 'scheduled' | 'applied' | 'rejected' | 'cancelled'>()
       .default('requested')

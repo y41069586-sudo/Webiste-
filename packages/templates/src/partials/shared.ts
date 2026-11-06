@@ -167,17 +167,27 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
   const points = (list: string[]) =>
     `<ul class="mt-3 flex-1 space-y-1.5 text-sm text-[#374151]">${list.map((p) => `<li class="flex gap-2"><span aria-hidden="true" class="text-[#047857]">✓</span><span>${esc(p)}</span></li>`).join('')}</ul>`;
   // V4: Einmalpreis und Monatsbetrag gleich deutlich, dazu die Summe des ersten Jahres – nichts wirkt versteckt
+  const komplett = cards.some((c) => c.komplett);
   const card = (c: (typeof cards)[number]) =>
-    c.monthly
+    c.komplett
       ? `<li class="flex flex-col rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] shadow-sm">
       <h3 class="text-base font-semibold">${esc(c.title)}</h3>
+      <p class="mt-3 flex flex-wrap items-baseline gap-x-2"><span class="text-3xl font-bold tracking-tight">${esc(c.monthly ?? '')}</span><span class="text-sm text-[#4b5563]">pro Monat</span></p>
+      <p class="mt-1 text-sm font-semibold text-[#047857]">${esc(c.price)} Einrichtung · Sie zahlen erst 7 Tage nach Go-Live</p>
+      ${c.firstYear ? `<p class="mt-3 rounded-lg bg-[#f3f4f6] px-3 py-2 text-sm text-[#374151]">12 Monate Mindestlaufzeit, insgesamt <strong class="text-[#111827]">${esc(c.firstYear)}</strong> – danach monatlich kündbar.</p>` : ''}
+      ${points(c.points.filter((p) => !p.startsWith('+ ')))}
+      ${button(c)}
+    </li>`
+      : c.monthly
+        ? `<li class="flex flex-col rounded-xl border ${c.recommended ? 'border-2 border-[#111827]' : 'border-[#d1d5db]'} bg-white p-5 text-[#111827] shadow-sm">
+      ${c.recommended ? '<p class="mb-2 inline-flex w-fit rounded-full bg-[#111827] px-2.5 py-0.5 text-xs font-semibold text-white">Empfohlen</p>' : ''}<h3 class="text-base font-semibold">${esc(c.title)}</h3>
       <p class="mt-3 flex flex-wrap items-baseline gap-x-2"><span class="text-3xl font-bold tracking-tight">${esc(c.price)}</span><span class="text-sm text-[#4b5563]">${esc(c.unit)} für die Einrichtung</span></p>
       <p class="mt-1 flex flex-wrap items-baseline gap-x-2"><span class="text-3xl font-bold tracking-tight">+ ${esc(c.monthly)}</span><span class="text-sm text-[#4b5563]">pro Monat, erst ab Go-Live</span></p>
       ${c.firstYear ? `<p class="mt-3 rounded-lg bg-[#f3f4f6] px-3 py-2 text-sm text-[#374151]">Erstes Jahr insgesamt: <strong class="text-[#111827]">${esc(c.firstYear)}</strong> – ohne versteckte Kosten.</p>` : ''}
       ${points(c.points.filter((p) => !p.startsWith('+ ')))}
       ${button(c)}
     </li>`
-      : `<li class="flex flex-col rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] shadow-sm">
+        : `<li class="flex flex-col rounded-xl border border-[#d1d5db] bg-white p-5 text-[#111827] shadow-sm">
       <h3 class="text-base font-semibold">${esc(c.title)}</h3>
       <p class="mt-2 text-3xl font-bold tracking-tight">${esc(c.price)}</p><p class="mt-1 text-sm text-[#4b5563]">${esc(c.unit)}</p>
       ${points(c.points)}
@@ -224,7 +234,9 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
     <p class="text-sm font-medium text-[#4b5563]">${brandMarkHtml(24)} Angebot von ${esc(providerName)}${demo.sender.name.trim() && demo.sender.company.trim() && !/platzhalter/i.test(demo.sender.company) ? `, ${esc(demo.sender.company)}` : ''} – nicht Teil der Website</p>
     <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">${v4 ? 'Gefällt Ihnen Ihre neue Website?' : 'Diese Seite übernehmen'}</h2>${
       v4
-        ? `<p class="mt-3">Sie haben Ihre Website gerade gesehen – bevor Sie irgendetwas bezahlen. Übernehmen Sie sie zum Festpreis: einmalig ${esc(demo.priceLabel)}, danach ${cards[0]?.monthly ? `ab ${esc(cards[0].monthly)} im Monat` : 'Ihr Monatstarif'}. Die Monatsgebühr beginnt erst, wenn Ihre Website online ist.</p>`
+        ? komplett
+          ? `<p class="mt-3">Sie haben Ihre Website gerade gesehen – bevor Sie irgendetwas bezahlen. Übernehmen Sie sie einmalig für ${esc(demo.priceLabel)} plus ${esc(cards[0]?.monthly ?? '')} im Monat – oder ganz ohne Einrichtungsgebühr im Tarif Komplett. Bei Komplett zahlen Sie erst, wenn Ihre Website online ist.</p>`
+          : `<p class="mt-3">Sie haben Ihre Website gerade gesehen – bevor Sie irgendetwas bezahlen. Übernehmen Sie sie zum Festpreis: einmalig ${esc(demo.priceLabel)}, danach ${cards[0]?.monthly ? `ab ${esc(cards[0].monthly)} im Monat` : 'Ihr Monatstarif'}. Die Monatsgebühr beginnt erst, wenn Ihre Website online ist.</p>`
         : ''
     }
     ${cards.length ? `<ul class="mt-6 grid gap-4 ${cards.length > 1 ? 'sm:grid-cols-2' : ''}">${cards.map(card).join('')}</ul>` : ''}
@@ -257,7 +269,7 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
       opts.review || v4
         ? `<details class="mt-5 rounded-xl border border-[#d1d5db] bg-white p-5 text-sm"><summary class="cursor-pointer font-semibold">Was Sie beauftragen – Ablauf und Leistungsgrenzen</summary>${
             v4
-              ? `<ul class="mt-3 space-y-3"><li><strong>Wir stellen den Entwurf fertig.</strong> Mit Ihren bestätigten Angaben, Texten, berechtigten Bildern und den vereinbarten Anpassungen.</li><li><strong>Sie behalten die Freigabe.</strong> Sie prüfen Ihre Inhalte und die fertige Vorschau, bevor wir die Website veröffentlichen.</li><li><strong>Wir richten die Website technisch ein.</strong> Der gewählte Monatstarif übernimmt anschließend Hosting, SSL und den vereinbarten Betreuungsumfang.</li></ul><p class="mt-4">Die Monatsgebühr beginnt erst nach bestätigtem Go-Live. Care+ enthält Basis vollständig. Zusatzfunktionen, größere Umbauten und Domains außerhalb des vereinbarten Umfangs benötigen Ihre gesonderte Zustimmung.</p>`
+              ? `<ul class="mt-3 space-y-3"><li><strong>Wir stellen den Entwurf fertig.</strong> Mit Ihren bestätigten Angaben, Texten, berechtigten Bildern und den vereinbarten Anpassungen.</li><li><strong>Sie behalten die Freigabe.</strong> Sie prüfen Ihre Inhalte und die fertige Vorschau, bevor wir die Website veröffentlichen.</li><li><strong>Wir richten die Website technisch ein.</strong> Der gewählte Monatstarif übernimmt anschließend Hosting, SSL und den vereinbarten Betreuungsumfang.</li></ul><p class="mt-4">Die Monatsgebühr beginnt erst nach bestätigtem Go-Live${komplett ? ' (bei Komplett 7 Tage danach)' : ''}.${komplett ? '' : ' Care+ enthält Basis vollständig.'} Zusatzfunktionen, größere Umbauten und Domains außerhalb des vereinbarten Umfangs benötigen Ihre gesonderte Zustimmung.</p>`
               : ''
           }<p class="mt-3">Sie übermitteln Ihre tatsächlichen Inhalte und Änderungswünsche. Wir stellen den Entwurf fertig, richten die vereinbarten technischen Leistungen ein und veröffentlichen erst nach Ihrer Freigabe.</p><ol class="mt-4 space-y-3"><li><strong>1. Website einrichten</strong><br>Firmenangaben, rechtliche Texte, Bilder und Wünsche unverbindlich ergänzen.</li><li><strong>2. Prüfen und bestellen</strong><br>Einrichtung, Tarif und alle Kosten prüfen; anschließend bezahlen.</li><li><strong>3. Prüfen und freigeben</strong><br>Website abstimmen. Erst nach bestätigtem Go-Live beginnt die Monatsgebühr.</li></ol><p class="mt-4">Zusatzseiten, größere Umbauten und Leistungen außerhalb des Tarifs benötigen ein gesondertes Angebot. Domainumfang, Kündigungsfrist und Übergabe sind in den verlinkten Vertragsbedingungen beschrieben.</p></details>`
         : ''
@@ -282,17 +294,24 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
               'Warum gibt es eine Monatsgebühr?',
               'Für laufendes Hosting, SSL, technische Bereitstellung und den gewählten Betreuungsumfang. Sie beginnt nicht durch den QR-Scan.',
             ],
-            [
-              'Was unterscheidet Basis und Care+?',
-              'Care+ enthält das Basis-Hosting vollständig sowie erweiterten Support und bis zu 60 Minuten kleine Inhaltsänderungen pro Monat. Keine doppelte Monatsgebühr.',
-            ],
+            komplett
+              ? [
+                  'Was unterscheidet Basis und Komplett?',
+                  'Basis: einmalig für die Einrichtung zahlen, danach nur die kleine Monatsgebühr, monatlich kündbar. Komplett: keine Einrichtungsgebühr, dafür ein höherer Monatspreis mit 12 Monaten Mindestlaufzeit; enthält zusätzlich bis zu 60 Minuten kleine Inhaltsänderungen pro Monat. Bei Komplett wird erst 7 Tage nach Go-Live abgebucht.',
+                ]
+              : [
+                  'Was unterscheidet Basis und Care+?',
+                  'Care+ enthält das Basis-Hosting vollständig sowie erweiterten Support und bis zu 60 Minuten kleine Inhaltsänderungen pro Monat. Keine doppelte Monatsgebühr.',
+                ],
             [
               'Kann ich den Tarif wechseln?',
               'Sie können einen Wechsel anfragen. Er benötigt Ihre Bestätigung und wird zum vereinbarten Periodenende vorbereitet. Es wird kein zweites Abo stillschweigend angelegt.',
             ],
             [
               'Kann ich kündigen oder wechseln?',
-              'Neue Monatstarife haben keine zwölfmonatige Mindestbindung. Kündigungsfrist und Übergabe stehen vor Abschluss transparent in den Vertragsbedingungen.',
+              komplett
+                ? 'Basis ist monatlich kündbar. Komplett hat 12 Monate Mindestlaufzeit ab der ersten Abbuchung und ist danach monatlich kündbar. Kündigungsfrist und Übergabe stehen vor Abschluss transparent in den Vertragsbedingungen.'
+                : 'Neue Monatstarife haben keine zwölfmonatige Mindestbindung. Kündigungsfrist und Übergabe stehen vor Abschluss transparent in den Vertragsbedingungen.',
             ],
             [
               'Was passiert mit meiner Domain?',

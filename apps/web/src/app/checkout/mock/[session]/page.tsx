@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { formatEuro, getConfig, mockCheckoutInfo } from '@wbm/core';
+import { formatEuro, getConfig, mockCheckoutInfo, v4TierLabel } from '@wbm/core';
 import { PublicCard, PublicShell } from '@/components/public/shell';
 import { mockPayAction } from './actions';
 
@@ -30,7 +30,7 @@ export default async function MockCheckoutPage({ params }: { params: Promise<{ s
         <h1 className="mb-1 text-2xl font-semibold">Testzahlung</h1>
         <p className="mb-6 text-slate-600">
           {o.offerSnapshot
-            ? `SeitenWerk ${o.offerSnapshot.tier === 'basis' ? 'Basis' : 'Care+'} – Einrichtung`
+            ? `SeitenWerk ${v4TierLabel(o.offerSnapshot.tier)} – Einrichtung`
             : o.plan === 'monthly'
               ? cfg.pricing.monthlyName
               : cfg.pricing.packageName}{' '}

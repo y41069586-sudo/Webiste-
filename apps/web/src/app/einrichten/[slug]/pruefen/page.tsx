@@ -13,6 +13,8 @@ import {
   setupFingerprint,
   v4CheckoutTerms,
   v4Offer,
+  v4OfferedTiers,
+  v4TierLabel,
 } from '@wbm/core';
 import { PublicShell, PublicCard } from '@/components/public/shell';
 import { PaymentForm } from './payment-form';
@@ -37,15 +39,23 @@ export default async function ReviewSetup({
   const data = d.data;
   const options =
     ctx.cfg.offers.activeVersion === 'v4'
-      ? (['basis', 'care_plus'] as const).map((plan) => ({
+      ? v4OfferedTiers(ctx.cfg).map((plan) => ({
           plan,
-          title: plan === 'basis' ? 'SeitenWerk Basis' : 'SeitenWerk Care+',
-          price: `${euro(planAmounts(ctx.cfg, plan).grossCents)} einmalig + insgesamt ${euro(v4Offer(plan).monthlyCents)}/Monat ab Go-Live`,
+          title: `SeitenWerk ${v4TierLabel(plan)}`,
+          price:
+            plan === 'komplett'
+              ? `0 € Einrichtung · ${euro(v4Offer(plan).monthlyCents)}/Monat, erste Abbuchung 7 Tage nach Go-Live · 12 Monate Mindestlaufzeit`
+              : `${euro(planAmounts(ctx.cfg, plan).grossCents)} einmalig + insgesamt ${euro(v4Offer(plan).monthlyCents)}/Monat ab Go-Live`,
           terms: v4CheckoutTerms(plan, ctx.cfg.offers.billingMode ?? 'saved_mandate'),
+          // Klare Preiszusammenfassung: was heute fällig ist; Kaufmodell als „Empfohlen“ markiert, keine Vorauswahl
+          dueNow: plan === 'komplett' ? '0 € (nur Zahlungsmittel hinterlegen)' : euro(planAmounts(ctx.cfg, plan).grossCents),
+          recommended: plan === 'basis' && v4OfferedTiers(ctx.cfg).includes('komplett'),
           includes:
             plan === 'basis'
               ? `Fertigstellung Ihrer Website, ${ctx.cfg.onboarding.includedChangeRounds} Änderungsrunden vor Go-Live, Standard-Domain im vereinbarten Kostenrahmen, Hosting, SSL und Basis-Support bei Betriebsstörungen.`
-              : `Alle Basis-Leistungen und zusätzlich bis zu ${v4Offer(plan).includedChangeMinutes} Minuten vereinbarte Änderungen pro Monat. Care+ enthält die Basisgebühr vollständig.`,
+              : plan === 'komplett'
+                ? `Alle Basis-Leistungen ohne Einrichtungsgebühr und zusätzlich bis zu ${v4Offer(plan).includedChangeMinutes} Minuten vereinbarte Änderungen pro Monat. Bei der Bestellung wird nichts abgebucht.`
+                : `Alle Basis-Leistungen und zusätzlich bis zu ${v4Offer(plan).includedChangeMinutes} Minuten vereinbarte Änderungen pro Monat. Care+ enthält die Basisgebühr vollständig.`,
         }))
       : [
           {

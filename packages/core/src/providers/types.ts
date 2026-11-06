@@ -534,20 +534,26 @@ export interface PaymentProvider {
     orderId: string;
     customerId: string;
     setupSessionId: string;
-    tier: 'basis' | 'care_plus';
+    tier: 'basis' | 'care_plus' | 'komplett';
     amountCents: number;
     liveAt: Date;
+    /** Erste Abbuchung (Komplett: Go-Live + 7 Tage); fehlt sie, wird sofort abgerechnet */
+    firstChargeAt?: Date;
+    /** Mindestlaufzeit in Monaten (nur Metadaten; Kündigung prüft die Bestellung) */
+    minTermMonths?: number;
     idempotencyKey: string;
   }): Promise<SubscriptionState>;
   subscriptionState?(subscriptionId: string): Promise<SubscriptionState>;
   scheduleTariffChange?(input: {
     subscriptionId: string;
-    tier: 'basis' | 'care_plus';
+    tier: 'basis' | 'care_plus' | 'komplett';
     amountCents: number;
     expectedPriceId?: string;
     idempotencyKey: string;
   }): Promise<{ scheduleId: string; effectiveAt: Date }>;
   cancelAtPeriodEnd?(subscriptionId: string, idempotencyKey: string): Promise<void>;
+  /** Kündigung zu einem festen Zeitpunkt (Ende der Mindestlaufzeit), Stripe „cancel_at“ */
+  cancelAt?(subscriptionId: string, at: Date, idempotencyKey: string): Promise<void>;
   releaseTariffSchedule?(scheduleId: string, idempotencyKey: string): Promise<void>;
   /** Session beim Anbieter abfragen (für die Erfolgsseite, falls der Webhook noch fehlt). */
   retrieveSession?(sessionId: string): Promise<PaymentSessionInfo | null>;

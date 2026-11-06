@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { and, desc, eq } from 'drizzle-orm';
-import { getDb, guaranteeStatus, schema } from '@wbm/core';
+import { getDb, guaranteeStatus, schema, v4TierLabel } from '@wbm/core';
 import { Card, PageHeader, StatusBadge, Table, Td, btn, input, label } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
@@ -86,7 +86,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <dt className="text-slate-500">Plan</dt>
             <dd>
               {order.offerSnapshot
-                ? `V4 ${order.offerSnapshot.tier === 'basis' ? 'Basis' : 'Care+'}`
+                ? `V4 ${v4TierLabel(order.offerSnapshot.tier)}`
                 : monthly
                   ? 'Monatlich (Option B)'
                   : 'Einmalzahlung (Option A)'}

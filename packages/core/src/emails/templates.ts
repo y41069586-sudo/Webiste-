@@ -2,6 +2,7 @@ import { appUrl } from '../config/env';
 import type { AppConfig } from '../config/settings';
 import { esc } from '../util/html';
 import { formatEuro } from '../util/time';
+import { v4TierLabel } from '../services/offers-v4';
 
 /**
  * Transaktions-Mails. Nur an Personen, die uns ihre Adresse selbst gegeben haben
@@ -92,14 +93,19 @@ export function orderConfirmationEmail(
     monthlyMinTermEnds?: string | null;
     /** Zufriedenheitsgarantie bis (formatiert) */
     guaranteeUntil?: string | null;
-    v4?: { tier: 'basis' | 'care_plus'; monthlyCents: number; billingMode?: 'saved_mandate' | 'manual_checkout' };
+    v4?: { tier: 'basis' | 'care_plus' | 'komplett'; monthlyCents: number; billingMode?: 'saved_mandate' | 'manual_checkout' };
   },
 ): EmailContent {
   const p = cfg.pricing;
   const terms: Block[] = [];
-  if (d.v4)
+  const komplett = d.v4?.tier === 'komplett';
+  if (d.v4 && komplett)
     terms.push(
-      `Einmalige Einrichtung: ${d.amount}. Ihr gewählter Tarif ${d.v4.tier === 'basis' ? 'Basis' : 'Care+'} kostet insgesamt ${formatEuro(d.v4.monthlyCents)} pro Monat. ${d.v4.billingMode === 'saved_mandate' ? 'Das Monatsabo startet automatisch nach bestätigtem Go-Live über das ausdrücklich vereinbarte, bei Stripe gespeicherte Zahlungsmittel.' : 'Das Monatsabo schließen Sie erst nach bestätigtem Go-Live gesondert ab.'} Keine Monatsabbuchung vor Go-Live und keine zwölfmonatige Mindestbindung.`,
+      `Ihr Tarif SeitenWerk Komplett: Es wurde nichts abgebucht. ${formatEuro(d.v4.monthlyCents)} pro Monat, die erste Abbuchung erfolgt 7 Tage nach dem bestätigten Go-Live Ihrer Website über das bei Stripe gespeicherte Zahlungsmittel. Mindestlaufzeit 12 Monate ab der ersten Abbuchung, danach monatlich kündbar. Für jede Abbuchung erhalten Sie eine eigene Rechnung.`,
+    );
+  else if (d.v4)
+    terms.push(
+      `Einmalige Einrichtung: ${d.amount}. Ihr gewählter Tarif ${v4TierLabel(d.v4.tier)} kostet insgesamt ${formatEuro(d.v4.monthlyCents)} pro Monat. ${d.v4.billingMode === 'saved_mandate' ? 'Das Monatsabo startet automatisch nach bestätigtem Go-Live über das ausdrücklich vereinbarte, bei Stripe gespeicherte Zahlungsmittel.' : 'Das Monatsabo schließen Sie erst nach bestätigtem Go-Live gesondert ab.'} Keine Monatsabbuchung vor Go-Live und keine zwölfmonatige Mindestbindung.`,
     );
   if (d.monthlyMinTermEnds)
     terms.push(
@@ -110,10 +116,14 @@ export function orderConfirmationEmail(
       `Zufriedenheitsgarantie: Sind Sie nicht zufrieden, antworten Sie bis zum ${d.guaranteeUntil} auf diese E-Mail – Sie bekommen Ihr Geld zurück${d.monthlyMinTermEnds ? ' und der Vertrag endet' : ''}.`,
     );
   return renderEmail(cfg, {
-    subject: `Ihre Bestellung: ${d.v4 ? `SeitenWerk ${d.v4.tier === 'basis' ? 'Basis' : 'Care+'} – Einrichtung` : d.monthlyMinTermEnds ? p.monthlyName : p.packageName} für ${d.company} (Rechnung ${d.invoiceNumber})`,
+    subject: komplett
+      ? `Ihre Bestellung: SeitenWerk Komplett für ${d.company}`
+      : `Ihre Bestellung: ${d.v4 ? `SeitenWerk ${v4TierLabel(d.v4.tier)} – Einrichtung` : d.monthlyMinTermEnds ? p.monthlyName : p.packageName} für ${d.company} (Rechnung ${d.invoiceNumber})`,
     name: d.name,
     blocks: [
-      `vielen Dank für Ihre Bestellung – die Zahlung über ${d.amount} ist eingegangen. Die Rechnung ${d.invoiceNumber} finden Sie im Anhang.`,
+      komplett
+        ? 'vielen Dank für Ihre Bestellung – Ihr Zahlungsmittel ist hinterlegt. Bezahlt wird erst, wenn Ihre fertige Website online ist.'
+        : `vielen Dank für Ihre Bestellung – die Zahlung über ${d.amount} ist eingegangen. Die Rechnung ${d.invoiceNumber} finden Sie im Anhang.`,
       ...terms,
       d.prepared
         ? 'Ihre vor der Zahlung gespeicherte Einrichtung wurde übernommen: Betriebsdaten, Texte, Bilder, Anfrage-Empfänger und Wunschdomain. Wir bereiten die Vorschau vor; veröffentlicht wird erst nach Ihrer Freigabe.'

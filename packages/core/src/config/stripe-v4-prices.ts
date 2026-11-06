@@ -3,7 +3,7 @@ import live from './stripe-v4-live.json';
 
 /** Getrennte vorhandene Kataloge; Live benötigt die explizite Runtime-Freigabe. */
 export function stripeV4Price(
-  component: 'setup' | 'basis' | 'care_plus',
+  component: 'setup' | 'basis' | 'care_plus' | 'komplett',
   testMode: boolean,
   amountCents: number,
   currency: string,

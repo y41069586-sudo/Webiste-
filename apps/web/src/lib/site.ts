@@ -1,10 +1,11 @@
-import { V4_PRICES, formatEuroShort, type AppConfig } from '@wbm/core';
+import { V4_PRICES, formatEuroShort, type AppConfig, v4OfferedTiers } from '@wbm/core';
 
 /** Preise und Garantie für die Firmen-Website – alles aus der Config, nichts fest im Text. */
 export function sitePricing(cfg: AppConfig) {
   const p = cfg.pricing;
   return {
     version: cfg.offers.activeVersion,
+    tiers: v4OfferedTiers(cfg),
     oneTime: formatEuroShort(cfg.offers.activeVersion === 'v4' ? V4_PRICES.setupCents : p.packageCents),
     basis: formatEuroShort(V4_PRICES.basisCents),
     carePlus: formatEuroShort(V4_PRICES.carePlusCents),

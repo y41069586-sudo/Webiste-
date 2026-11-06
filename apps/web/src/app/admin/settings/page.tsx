@@ -1,8 +1,17 @@
 import Link from 'next/link';
-import { effectiveSwitches, formatEuroShort, getConfig, v4FirstYearCents, v4Offer, type AppConfig } from '@wbm/core';
+import {
+  effectiveSwitches,
+  formatEuroShort,
+  getConfig,
+  v4FirstYearCents,
+  v4Offer,
+  type AppConfig,
+  v4TierLabel,
+  v4OfferedTiers,
+} from '@wbm/core';
 import { Card, Notice, PageHeader, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
-import { saveSection, toggleSwitch } from './actions';
+import { saveSection, toggleKomplett, toggleSwitch } from './actions';
 import { getPath, SECTIONS, SWITCHES } from './fields';
 import { SectionForm } from './section-form';
 import { AdoptLegalForm } from './adopt-legal-form';
@@ -138,20 +147,40 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           {cfg.offers.activeVersion === 'v4' ? (
             <Card title="Neukundentarife V4">
               <div className="grid gap-4 sm:grid-cols-2">
-                {(['basis', 'care_plus'] as const).map((tier) => (
+                {v4OfferedTiers(cfg).map((tier) => (
                   <div key={tier}>
-                    <h2 className="font-semibold">{tier === 'basis' ? 'Basis' : 'Care+'}</h2>
+                    <h2 className="font-semibold">{v4TierLabel(tier)}</h2>
                     <p>
-                      {formatEuroShort(v4Offer(tier).setupCents)} einmalig + {formatEuroShort(v4Offer(tier).monthlyCents)}
-                      /Monat insgesamt ab Go-Live
+                      {tier === 'komplett'
+                        ? `0 € Einrichtung · ${formatEuroShort(v4Offer(tier).monthlyCents)}/Monat, erste Abbuchung 7 Tage nach Go-Live`
+                        : `${formatEuroShort(v4Offer(tier).setupCents)} einmalig + ${formatEuroShort(v4Offer(tier).monthlyCents)}/Monat insgesamt ab Go-Live`}
                     </p>
                     <p className="text-sm text-slate-500">
-                      Erstes volles Betriebsjahr: {formatEuroShort(v4FirstYearCents(tier))}. Monatlich kündbar; Bestandsverträge
-                      bleiben unverändert.
+                      {tier === 'komplett'
+                        ? `12 Monate Mindestlaufzeit (${formatEuroShort(v4Offer(tier).monthlyCents * 12)}), danach monatlich kündbar.`
+                        : `Erstes volles Betriebsjahr: ${formatEuroShort(v4FirstYearCents(tier))}. Monatlich kündbar; Bestandsverträge bleiben unverändert.`}
                     </p>
                   </div>
                 ))}
               </div>
+              <form action={toggleKomplett} className="mt-5 space-y-3 border-t border-slate-200 pt-4 text-sm">
+                <p>
+                  <strong>Tarif Komplett</strong> (0 € + 179 €/Monat, 12 Monate) ersetzt Care+ für Neukunden:{' '}
+                  {cfg.offers.komplettEnabled ? 'an' : 'aus'}.
+                </p>
+                <input type="hidden" name="value" value={String(!cfg.offers.komplettEnabled)} />
+                {!cfg.offers.komplettEnabled ? (
+                  <label className="flex items-start gap-2">
+                    <input type="checkbox" name="confirm" required />
+                    <span>
+                      AGB mit den Komplett-Regeln (Mindestlaufzeit, Zahlung nach Go-Live) sind unter „Rechtstexte“ übernommen.
+                    </span>
+                  </label>
+                ) : null}
+                <SubmitButton type="submit" className={btn.secondary}>
+                  {cfg.offers.komplettEnabled ? 'Komplett ausschalten' : 'Komplett einschalten'}
+                </SubmitButton>
+              </form>
             </Card>
           ) : null}
         </div>

@@ -72,6 +72,17 @@ export async function toggleSwitch(form: FormData): Promise<void> {
   revalidatePath('/admin', 'layout');
 }
 
+/** Tarif „Komplett“ (0 € + 179 €/Monat) für Neukunden an/aus – protokolliert, ändert keine Bestandsverträge. */
+export async function toggleKomplett(form: FormData): Promise<void> {
+  const session = await requireAdmin();
+  const value = String(form.get('value')) === 'true';
+  if (value && form.get('confirm') !== 'on')
+    throw new Error('Bitte bestätigen, dass die AGB zum Tarif Komplett übernommen sind.');
+  await updateConfig({ offers: { komplettEnabled: value } } as AppConfigPatch, actorOf(session));
+  await audit(getDb(), { entity: 'offers', entityId: 'komplett', action: value ? 'on' : 'off', actor: actorOf(session) });
+  revalidatePath('/admin', 'layout');
+}
+
 /**
  * Übernimmt Impressum, Datenschutz und Vertragsbedingungen aus den Entwürfen als gültige Fassung – nur mit
  * ausdrücklicher Bestätigung des Betreibers (eigene Verantwortung, keine anwaltliche Prüfung).

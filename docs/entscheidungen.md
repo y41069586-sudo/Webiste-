@@ -1245,3 +1245,24 @@ Bestellung selbst eintragen, kostenlos und unverbindlich; online erst nach Freig
 „Kein Interesse“. Reines HTML (`<dialog open>` + `<form method="dialog">`), kein Skript, nichts im Browser
 gespeichert; Screenshots und Brief-Bild bleiben unverändert. Inhalt deckt sich mit `/einrichten/[slug]`
 (Angaben, Texte, Leistungen, Öffnungszeiten, Fotos, Domain, Freitext „Wünsche“).
+
+## 06.11.2026 – Tarif „Komplett“: 0 € Einrichtung + 179 €/Monat
+
+Betreiberentscheidung (nach Marktrecherche, bewusst über dem Markt-Mittel von ca. 60–150 €/Monat):
+- Neukunden wählen zwischen **Basis** (597 € einmalig + 19 €/Monat, monatlich kündbar, als „Empfohlen“ markiert,
+  keine Vorauswahl) und **Komplett** (0 € Einrichtung, 179 €/Monat). Care+ wird für Neukunden nicht mehr angeboten,
+  Bestandsverträge bleiben unverändert.
+- Komplett: bei der Bestellung wird nichts abgebucht (Stripe-Checkout `mode=setup`, Karte oder SEPA-Mandat
+  gespeichert). Erste Abbuchung **7 Tage nach bestätigtem Go-Live**, **12 Monate Mindestlaufzeit ab der ersten
+  Abbuchung**, danach 179 € monatlich kündbar. Damit ist die Regel „keine zwölfmonatige Standardbindung“ für diesen
+  einen Tarif ausdrücklich aufgehoben (Betreiber, 06.11.2026); Basis bleibt monatlich kündbar.
+- Kündigung in der Mindestlaufzeit wirkt zu deren Ende (Stripe `cancel_at`); Wechsel aus Komplett erst danach,
+  Wechsel in Komplett nur als Neubestellung.
+- Leistungen Komplett: alles aus Basis, bis zu 60 Minuten Änderungen/Monat, Pflege lokaler Suchgrundlagen
+  (Seitentitel, Beschreibungen, strukturierte Firmendaten; keine Ranking-Zusage), bevorzugter Support werktags.
+- Keine 0-€-Rechnung; Bestätigungsmail mit Onboarding-Link ohne Anhang; Rechnungen je Abbuchung.
+- Live-Stripe-Preis angelegt (Betreiber-OK): `prod_VZw1NFNeBoh82i` / `price_1UYm9IKIPZjo7zRA6i880q7z` (179 €/Monat).
+  Kein Sandbox-Preis vorhanden (Connector nur live) – Sandbox-Checkout für Komplett bricht mit klarer Meldung ab.
+- Schalter `offers.komplettEnabled` (Admin → Einstellungen → Neukundentarife), Einschalten nur mit Bestätigung,
+  dass die AGB mit den Komplett-Regeln übernommen sind. Preissektion bestehender Demos wird beim Ausliefern aktualisiert.
+- Offen: Funnel-View `funnel_by_arm` zählt Komplett-Käufe noch nicht unter „monatlich“ (Materialized View, eigener Schritt).

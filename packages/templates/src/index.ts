@@ -145,3 +145,4 @@ export {
 export { renderSubpage } from './subpage';
 export { renderMaintenanceHtml } from './maintenance';
 export { renderClaimLetterHtml, type ClaimLetterData } from './claim-letter';
+export { offerSection } from './partials/shared';

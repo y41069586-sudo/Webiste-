@@ -42,7 +42,10 @@ export async function sendOrderInvoice(orderId: string): Promise<'sent' | 'alrea
   if (order.invoiceSentAt) return 'already';
   const customer = await db.query.customers.findFirst({ where: eq(customers.orderId, orderId) });
   if (!customer) throw new Error('Kunde zur Bestellung fehlt');
-  const { pdf, number } = await ensureInvoicePdf(orderId);
+  // „Komplett“: 0 € bei Bestellung, keine Rechnung – nur Bestätigung mit Onboarding-Link
+  const invoiced = Boolean(order.invoiceNumber);
+  const doc = invoiced ? await ensureInvoicePdf(orderId) : null;
+  const number = doc?.number ?? '';
   const site = await db.query.sites.findFirst({ where: eq(sites.customerId, customer.id) });
   const mail = orderConfirmationEmail(cfg, {
     prepared: Boolean(site?.onboardingSubmittedAt),
@@ -61,7 +64,7 @@ export async function sendOrderInvoice(orderId: string): Promise<'sent' | 'alrea
     kind: 'invoice',
     idempotencyKey: `invoice:${order.id}`,
     to: order.customerEmail,
-    attachments: [{ filename: `Rechnung-${number}.pdf`, content: pdf, contentType: 'application/pdf' }],
+    attachments: doc ? [{ filename: `Rechnung-${number}.pdf`, content: doc.pdf, contentType: 'application/pdf' }] : [],
     orderId: order.id,
     customerId: customer.id,
     leadId: order.leadId,

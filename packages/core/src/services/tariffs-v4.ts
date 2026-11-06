@@ -26,6 +26,12 @@ export async function requestTariffChange(token: string, to: string, consent: bo
     )
       throw new Error('Tarifwechsel nur bei aktivem, ungekündigtem V4-Abo.');
     if (to === offer.tier) throw new Error('Dieser Tarif ist bereits aktiv.');
+    // „Komplett“ nur als Neubestellung (enthält die Einrichtung); aus Komplett erst nach der Mindestlaufzeit heraus
+    if (to === 'komplett') throw new Error('Komplett ist nur bei einer Neubestellung wählbar.');
+    if (order.minTermEndsAt && order.minTermEndsAt > new Date())
+      throw new Error(
+        `Ein Tarifwechsel ist erst nach Ende der Mindestlaufzeit möglich (${order.minTermEndsAt.toLocaleDateString('de-DE')}).`,
+      );
     const pending = await tx.query.tariffChanges.findFirst({
       where: and(eq(tariffChanges.orderId, order.id), inArray(tariffChanges.status, ['requested', 'scheduled'])),
     });
@@ -172,7 +178,12 @@ export async function requestCancellationV4(token: string, consent: boolean) {
     if (order.cancelAtPeriodEnd) return;
     const p = getProviders().payment;
     if (!p.cancelAtPeriodEnd) throw new Error('Kündigung nicht eingerichtet.');
-    await p.cancelAtPeriodEnd(order.stripeSubscriptionId, `v4-cancel-${order.id}`);
+    // Mindestlaufzeit (Komplett): Kündigung wirkt zum Ende der 12 Monate, nicht früher
+    const inMinTerm = order.offerSnapshot.minTermMonths > 0 && order.minTermEndsAt && order.minTermEndsAt > new Date();
+    if (inMinTerm) {
+      if (!p.cancelAt) throw new Error('Kündigung zum Ende der Mindestlaufzeit nicht eingerichtet.');
+      await p.cancelAt(order.stripeSubscriptionId, order.minTermEndsAt!, `v4-cancel-${order.id}`);
+    } else await p.cancelAtPeriodEnd(order.stripeSubscriptionId, `v4-cancel-${order.id}`);
     await tx.update(orders).set({ cancelAtPeriodEnd: true, updatedAt: new Date() }).where(eq(orders.id, order.id));
     await tx
       .update(tariffChanges)
@@ -183,7 +194,7 @@ export async function requestCancellationV4(token: string, consent: boolean) {
       entityId: order.id,
       action: 'v4_cancellation_requested',
       actor: 'public:customer',
-      context: { atPeriodEnd: true },
+      context: inMinTerm ? { atMinTermEnd: order.minTermEndsAt!.toISOString() } : { atPeriodEnd: true },
     });
   });
 }

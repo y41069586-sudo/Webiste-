@@ -29,7 +29,14 @@ export function packageAmounts(cfg: AppConfig): Amounts {
 export function planAmounts(cfg: AppConfig, plan: OrderPlan): Amounts {
   return amountsFor(
     cfg,
-    isV4Tier(plan) ? V4_PRICES.setupCents : plan === 'monthly' ? cfg.pricing.monthlyCents : cfg.pricing.packageCents,
+    // „Komplett“: keine Einrichtungszahlung – bei der Bestellung wird nur das Zahlungsmittel gespeichert
+    plan === 'komplett'
+      ? 0
+      : isV4Tier(plan)
+        ? V4_PRICES.setupCents
+        : plan === 'monthly'
+          ? cfg.pricing.monthlyCents
+          : cfg.pricing.packageCents,
   );
 }
 
@@ -112,10 +119,11 @@ export function buildInvoiceData(
       }
     : { title: `${p.packageName}${domain}`, description: p.packageDescription };
   if (isV4Tier(order.plan ?? '')) {
-    const care = order.plan === 'care_plus';
-    line.title = `SeitenWerk ${care ? 'Care+' : 'Basis'}${domain}${rate ? ' – Monatstarif' : ' – Einrichtung'}`;
+    const komplett = order.plan === 'komplett';
+    const care = order.plan === 'care_plus' || komplett;
+    line.title = `SeitenWerk ${komplett ? 'Komplett' : care ? 'Care+' : 'Basis'}${domain}${rate ? ' – Monatstarif' : ' – Einrichtung'}`;
     line.description = rate
-      ? `Domain, Hosting, SSL und technische Betreuung${care ? '; zusätzlich bis zu 60 Minuten kleine Inhaltsänderungen im Monat' : '; Inhaltsänderungen separat nach Freigabe'}. Monatlich kündbar. Keine weitere Basisgebühr.`
+      ? `${komplett ? 'Erstellung, ' : ''}Domain, Hosting, SSL und technische Betreuung${care ? '; zusätzlich bis zu 60 Minuten kleine Inhaltsänderungen im Monat' : '; Inhaltsänderungen separat nach Freigabe'}. ${komplett ? 'Mindestlaufzeit 12 Monate ab der ersten Abbuchung, danach monatlich kündbar.' : 'Monatlich kündbar. Keine weitere Basisgebühr.'}`
       : 'Erstellung und Einrichtung der Website. Monatsabrechnung beginnt erst nach bestätigtem Go-Live gemäß vereinbartem Tarif; kein Hosting-Jahrespaket im Einrichtungspreis.';
   }
   return {

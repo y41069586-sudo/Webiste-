@@ -1,4 +1,4 @@
-import { assertV4BillingReady } from './offers-v4';
+import { assertV4BillingReady, v4TierLabel } from './offers-v4';
 import { and, eq, isNotNull, isNull, lte, sql } from 'drizzle-orm';
 import { appUrl } from '../config/env';
 import { getConfig } from '../config/service';
@@ -103,7 +103,7 @@ export async function startSubscriptionCheckout(token: string): Promise<Subscrip
         customerRef: c.id,
         customerEmail: c.email,
         amountCents: offer.monthlyCents,
-        productName: `SeitenWerk ${offer.tier === 'basis' ? 'Basis' : 'Care+'}`,
+        productName: `SeitenWerk ${v4TierLabel(offer.tier)}`,
         billingStartsAt: site!.liveAt!,
         confirmedGoLive: true,
         successUrl: appUrl(`/verlaengern/${token}?erfolg=1`),

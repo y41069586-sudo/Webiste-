@@ -91,13 +91,15 @@ export class MockPayment implements PaymentProvider {
     }
     const { stripeV4Price } = await import('../../config/stripe-v4-prices');
     const { addMonths } = await import('../../util/time');
-    const now = new Date();
+    // Komplett: erste Abbuchung zum vereinbarten Termin (Go-Live + 7 Tage); bis dahin Testphase
+    const start = input.firstChargeAt && input.firstChargeAt > new Date() ? input.firstChargeAt : new Date();
     const sub = {
       id,
-      status: 'active',
-      priceId: stripeV4Price(input.tier, true, input.amountCents, 'eur'),
-      periodStart: now,
-      periodEnd: addMonths(now, 1),
+      status: start > new Date() ? 'trialing' : 'active',
+      // Für Komplett gibt es noch keinen Sandbox-Katalogpreis: der Mock nutzt eine eigene, eindeutige Kennung
+      priceId: input.tier === 'komplett' ? 'price_mock_komplett' : stripeV4Price(input.tier, true, input.amountCents, 'eur'),
+      periodStart: start,
+      periodEnd: addMonths(start, 1),
       cancelAtPeriodEnd: false,
     };
     await this.saveMock(sub);
@@ -129,6 +131,13 @@ export class MockPayment implements PaymentProvider {
       delete sub.scheduled;
       await this.saveMock(sub);
     }
+  }
+  async cancelAt(id: string, at: Date): Promise<void> {
+    const sub = await this.mockState(id);
+    delete sub.scheduled;
+    sub.cancelAtPeriodEnd = true;
+    (sub as { cancelAt?: string }).cancelAt = at.toISOString();
+    await this.saveMock(sub);
   }
   async cancelAtPeriodEnd(id: string): Promise<void> {
     const sub = await this.mockState(id);

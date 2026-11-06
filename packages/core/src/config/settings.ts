@@ -79,6 +79,8 @@ export const appConfigSchema = z.object({
     .object({
       activeVersion: z.enum(['v4', 'legacy']).default('v4'),
       billingMode: z.enum(['saved_mandate', 'manual_checkout']).optional(),
+      /** Tarif „Komplett“ (0 € + 179 €/Monat, 12 Monate) statt Care+ für Neukunden anbieten */
+      komplettEnabled: z.boolean().optional(),
     })
     .default({ activeVersion: 'v4' }),
   pricing: z.object({
@@ -561,7 +563,7 @@ export const DEFAULT_BRANCHES: BranchConfig[] = [
 ];
 
 export const DEFAULT_CONFIG: AppConfig = {
-  offers: { activeVersion: 'v4' },
+  offers: { activeVersion: 'v4', komplettEnabled: false },
   sender: {
     name: 'Vorname Nachname',
     company: 'Website-Brief (Platzhalter)',

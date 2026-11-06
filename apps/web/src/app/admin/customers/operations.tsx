@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { desc, eq } from 'drizzle-orm';
-import { careOverview, getDb, schema } from '@wbm/core';
+import { careOverview, getDb, schema, v4TierLabel } from '@wbm/core';
 import { ActionForm } from '@/components/action-form';
 import { Card, Notice, Table, Td, input, label } from '@/components/ui';
 import { dt, eur } from '@/lib/format';
@@ -35,15 +35,14 @@ export async function CustomerOperations({
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>
             <p className="font-semibold">
-              {offer.tier === 'basis' ? 'Basis' : 'Care+'} · {eur(offer.monthlyCents)}/Monat insgesamt
+              {v4TierLabel(offer.tier)} · {eur(offer.monthlyCents)}/Monat insgesamt
             </p>
             <p className="mt-2 text-sm text-slate-600">
               Status: {order.subscriptionStatus ?? 'noch nicht gestartet'} · Abrechnung seit {dt(order.billingStartedAt)}
               {order.cancelAtPeriodEnd ? ' · Kündigung zum Periodenende vorgemerkt' : ''}
             </p>
             <p className="mt-1 text-xs text-slate-500">
-              Ursprüngliches Angebot: {order.offerSnapshot!.tier === 'basis' ? 'Basis' : 'Care+'}; der Kaufstand bleibt
-              unverändert.
+              Ursprüngliches Angebot: {v4TierLabel(order.offerSnapshot!.tier)}; der Kaufstand bleibt unverändert.
             </p>
           </div>
           {!order.stripeSubscriptionId && order.offerSnapshot?.billingMode === 'saved_mandate' && !order.endedAt ? (
@@ -56,7 +55,7 @@ export async function CustomerOperations({
           {changes.map((r) => (
             <tr key={r.id}>
               <Td>
-                {r.fromTier === 'basis' ? 'Basis' : 'Care+'} → {r.toTier === 'basis' ? 'Basis' : 'Care+'}
+                {v4TierLabel(r.fromTier)} → {v4TierLabel(r.toTier)}
               </Td>
               <Td>{r.status}</Td>
               <Td>{dt(r.effectiveAt)}</Td>

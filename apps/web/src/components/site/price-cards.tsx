@@ -5,7 +5,7 @@ import { Check, delay } from './section';
 
 /** Zwei gleichwertige Preiskarten – keine Vorauswahl, keine versteckten Kosten. */
 export function PriceCards({ p }: { p: SitePricing }) {
-  if (p.version === 'v4') return <V4PriceCards />;
+  if (p.version === 'v4') return <V4PriceCards tiers={p.tiers} />;
   return (
     <div>
       <div className="grid gap-4 md:grid-cols-2">

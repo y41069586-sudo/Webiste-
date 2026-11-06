@@ -1,4 +1,5 @@
 import { V4PriceCards } from '@/components/site/v4-price-cards';
+import { v4OfferedTiers } from '@wbm/core';
 import { getSiteConfig } from '@/lib/site-config';
 import Link from 'next/link';
 import { PriceToggle, type PlanView } from '@/components/site/price-toggle';
@@ -18,7 +19,7 @@ export default async function PricesPage() {
           Vergleich.
         </PageIntro>
         <div className="mx-auto max-w-6xl px-5 py-12">
-          <V4PriceCards />
+          <V4PriceCards tiers={v4OfferedTiers(cfg)} />
         </div>
       </>
     );

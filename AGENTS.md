@@ -383,7 +383,7 @@ Fortlaufender Umsetzungsstand: `docs/v4-quality-handoff.md`; früherer Prüfstan
   Alte V4-Snapshots ohne billingMode oder mit manual_checkout behalten den separaten Abo-Checkout.
   Zahlungsbestätigung kommt über invoice.paid; active allein ist kein Geldeingang. Incomplete/SEPA/SCA
   dürfen kein zweites Abo auslösen. V4 bleibt ausschließlich Sandbox.
-- Keine zwölfmonatige Standardbindung für V4. Tarifwechsel nur als bestätigter Wechsel zum nächsten Periodenende
+- Keine zwölfmonatige Standardbindung für V4 (Ausnahme seit 06.11.2026, Betreiber: Tarif „Komplett“ 0 € + 179 €/Monat mit 12 Monaten ab erster Abbuchung, siehe docs/entscheidungen.md). Tarifwechsel nur als bestätigter Wechsel zum nächsten Periodenende
   ohne Proration vorbereiten; keine zweite Subscription erzeugen. Rechts-/Kündigungsdetails bleiben freigabepflichtig.
 - Stripe-Plugin wurde für **Sandbox** ausdrücklich beauftragt. Drei Produkte/Preise und blaues Branding sind vorhanden:
   `packages/core/src/config/stripe-v4-sandbox.json`. Wiederverwenden, keine Duplikate anlegen.

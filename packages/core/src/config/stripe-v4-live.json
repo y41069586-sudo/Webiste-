@@ -25,6 +25,14 @@
       "amountCents": 9900,
       "currency": "eur",
       "livemode": true
+    },
+    {
+      "component": "komplett",
+      "productId": "prod_VZw1NFNeBoh82i",
+      "priceId": "price_1UYm9IKIPZjo7zRA6i880q7z",
+      "amountCents": 17900,
+      "currency": "eur",
+      "livemode": true
     }
   ]
 }

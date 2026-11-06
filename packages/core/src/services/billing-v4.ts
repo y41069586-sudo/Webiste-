@@ -6,6 +6,7 @@ import { assertV4BillingReady } from './offers-v4';
 import { audit } from './audit';
 import { assertNotHalted, raiseAlert } from './budget';
 import { effectiveSwitches, getConfig } from '../config/service';
+import { addMonths } from '../util/time';
 
 /** Called only after the existing live-check has committed actual publication evidence. */
 export async function startBillingV4(orderId: string, actor = 'job:go-live') {
@@ -21,7 +22,7 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
     const site = customer
       ? await tx.query.sites.findFirst({ where: and(eq(sites.customerId, customer.id), eq(sites.status, 'live')) })
       : null;
-    assertV4BillingReady({
+    const ready = assertV4BillingReady({
       offer: order.offerSnapshot,
       paid: order.status === 'paid',
       liveAt: site?.liveAt ?? null,
@@ -55,6 +56,9 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
       tier: order.offerSnapshot.tier,
       amountCents: order.offerSnapshot.monthlyCents,
       liveAt: site!.liveAt!,
+      // Komplett: erste Abbuchung Go-Live + 7 Tage (ready.startsAt); Basis/Care+: ab Go-Live
+      firstChargeAt: ready.startsAt,
+      minTermMonths: order.offerSnapshot.minTermMonths || undefined,
       idempotencyKey: `v4-go-live-${order.id}`,
     });
     await tx
@@ -64,6 +68,10 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
         subscriptionStatus: sub.status,
         billingActionUrl: sub.hostedInvoiceUrl ?? null,
         billingStartedAt: sub.periodStart,
+        // Mindestlaufzeit ab der ersten Abbuchung (nicht ab Bestellung)
+        ...(order.offerSnapshot.minTermMonths
+          ? { minTermEndsAt: addMonths(ready.startsAt, order.offerSnapshot.minTermMonths) }
+          : {}),
         updatedAt: new Date(),
       })
       .where(eq(orders.id, order.id));

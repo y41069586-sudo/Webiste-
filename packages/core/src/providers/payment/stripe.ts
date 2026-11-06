@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import { createHash } from 'node:crypto';
 import { stripeV4Price } from '../../config/stripe-v4-prices';
-import { isV4Tier, v4Offer, v4CheckoutTerms, type V4Tier } from '../../services/offers-v4';
+import { isV4Tier, v4Offer, v4CheckoutTerms, v4TierLabel, type V4Tier } from '../../services/offers-v4';
 import { CHECKOUT_FIELDS } from '../types';
 import type {
   CheckoutSession,
@@ -118,7 +118,9 @@ function collectionParams(input: CheckoutSessionInput): Partial<Stripe.Checkout.
           type: 'custom',
           custom: c.recurringTerms
             ? tier
-              ? `AGB und ${tier === 'basis' ? 'Basis' : 'Care+'}: ${v4Offer(tier).monthlyCents / 100} €/Monat ab Go-Live`
+              ? tier === 'komplett'
+                ? `AGB und Komplett: ${v4Offer(tier).monthlyCents / 100} €/Monat, 12 Monate Mindestlaufzeit`
+                : `AGB und ${v4TierLabel(tier)}: ${v4Offer(tier).monthlyCents / 100} €/Monat ab Go-Live`
               : 'AGB und gewählter Monatstarif ab Go-Live'
             : `AGB (Stand ${c.termsVersion}) gelesen und akzeptiert`.slice(0, 100),
         },
@@ -188,6 +190,7 @@ export class StripePayment implements PaymentProvider {
   }
 
   async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSession> {
+    if (input.metadata.plan === 'komplett') return this.createKomplettSetupSession(input);
     const v4 = isV4Tier(input.metadata.plan ?? '');
     const savedMandate = v4 && input.metadata.billingMode !== 'manual_checkout';
     if (v4 && input.recurring) throw new Error('V4-Einrichtung darf noch kein Monatsabo starten.');
@@ -290,13 +293,59 @@ export class StripePayment implements PaymentProvider {
     return { sessionId: session.id, url: session.url };
   }
 
+  /**
+   * „Komplett“: Checkout im Modus „setup“ – Stripe legt den Kunden an und speichert Karte oder SEPA-Mandat,
+   * abgebucht wird nichts. Das Abo entsteht erst nach bestätigtem Go-Live (startSavedSubscription).
+   * Telefonnummer gibt es im Setup-Modus nicht (Stripe), sie kommt aus dem Onboarding.
+   */
+  private async createKomplettSetupSession(input: CheckoutSessionInput): Promise<CheckoutSession> {
+    if (input.amountCents !== 0 || input.recurring) throw new Error('Komplett-Bestellung darf bei Bestellung nichts abbuchen.');
+    // Preis muss im Katalog der gewählten Umgebung freigegeben sein, bevor jemand bestellen kann
+    stripeV4Price('komplett', this.testMode, v4Offer('komplett').monthlyCents, 'eur', this.cfg.allowLive);
+    const minutes = Math.min(24 * 60, Math.max(30, input.expiresInMinutes ?? 60));
+    const { phone_number_collection: _phone, ...collect } = collectionParams(input);
+    void _phone;
+    const session = await this.stripe.checkout.sessions.create(
+      {
+        mode: 'setup',
+        locale: 'de',
+        currency: 'eur',
+        customer_creation: 'always',
+        allowed_payment_method_types: input.paymentMethods ?? DEFAULT_PAYMENT_METHODS,
+        client_reference_id: input.orderId,
+        integration_identifier: v4IntegrationLabel(input.idempotencyKey),
+        ...(input.customerEmail ? { customer_email: input.customerEmail } : {}),
+        ...collect,
+        metadata: input.metadata,
+        setup_intent_data: { description: input.productName.slice(0, 500), metadata: input.metadata },
+        success_url: input.successUrl,
+        cancel_url: input.cancelUrl,
+        expires_at: Math.floor(Date.now() / 1000) + minutes * 60,
+        custom_text: {
+          submit: {
+            message: `${v4CheckoutTerms('komplett')}${input.collect ? ` AGB: ${input.collect.termsUrl}` : ''}`.slice(0, 1200),
+          },
+        },
+      } as Stripe.Checkout.SessionCreateParams,
+      { idempotencyKey: input.idempotencyKey },
+    );
+    if (!session.url) throw new Error('Stripe hat keine Checkout-URL geliefert');
+    return { sessionId: session.id, url: session.url };
+  }
+
   /** Abo mit Testphase bis zum Ende des inklusiven Hostings (Stripe: trial_end ≥ 48 h in der Zukunft). */
   async createSubscriptionCheckout(input: SubscriptionCheckoutInput): Promise<CheckoutSession> {
     const v4 = input.metadata.offerVersion === 'v4';
     if (v4 && (!input.confirmedGoLive || !isV4Tier(input.metadata.tier ?? '')))
       throw new Error('V4-Monatsabo benötigt bestätigten Go-Live und einen gültigen Tarif.');
     const recurringPrice = v4
-      ? stripeV4Price(input.metadata.tier as 'basis' | 'care_plus', this.testMode, input.amountCents, 'eur', this.cfg.allowLive)
+      ? stripeV4Price(
+          input.metadata.tier as 'basis' | 'care_plus' | 'komplett',
+          this.testMode,
+          input.amountCents,
+          'eur',
+          this.cfg.allowLive,
+        )
       : null;
     if (input.confirmedGoLive && (!Number.isFinite(input.billingStartsAt.getTime()) || input.billingStartsAt > new Date()))
       throw new Error('Go-Live ist noch nicht bestätigt.');
@@ -383,22 +432,28 @@ export class StripePayment implements PaymentProvider {
   ): Promise<SubscriptionState> {
     const price = stripeV4Price(input.tier, this.testMode, input.amountCents, 'eur', this.cfg.allowLive);
     if (!Number.isFinite(input.liveAt.getTime()) || input.liveAt > new Date()) throw new Error('Bestätigter Go-Live fehlt.');
+    const komplett = input.tier === 'komplett';
     const session = await this.stripe.checkout.sessions.retrieve(input.setupSessionId, {
-      expand: ['payment_intent.payment_method'],
+      expand: komplett ? ['setup_intent.payment_method'] : ['payment_intent.payment_method'],
     });
-    if (session.mode !== 'payment' || session.payment_status !== 'paid' || session.metadata?.orderId !== input.orderId)
-      throw new Error('Einrichtungszahlung ist nicht bestätigt oder falsch zugeordnet.');
+    if (session.metadata?.orderId !== input.orderId) throw new Error('Bestellung ist falsch zugeordnet.');
     const customer = idOf(session.customer);
-    const intent = typeof session.payment_intent === 'object' ? session.payment_intent : null;
-    const method = intent && typeof intent.payment_method === 'object' ? intent.payment_method : null;
-    if (
-      !customer ||
-      !intent ||
-      intent.setup_future_usage !== 'off_session' ||
-      !method ||
-      idOf(method.customer) !== customer ||
-      !['card', 'sepa_debit'].includes(method.type)
-    )
+    let method: Stripe.PaymentMethod | null = null;
+    if (komplett) {
+      // Setup-Modus: nichts bezahlt, nur Zahlungsmittel gespeichert
+      const setup = typeof session.setup_intent === 'object' ? session.setup_intent : null;
+      if (session.mode !== 'setup' || session.status !== 'complete' || !setup || setup.status !== 'succeeded')
+        throw new Error('Hinterlegtes Zahlungsmittel ist nicht bestätigt.');
+      method = typeof setup.payment_method === 'object' ? setup.payment_method : null;
+    } else {
+      if (session.mode !== 'payment' || session.payment_status !== 'paid')
+        throw new Error('Einrichtungszahlung ist nicht bestätigt oder falsch zugeordnet.');
+      const intent = typeof session.payment_intent === 'object' ? session.payment_intent : null;
+      if (!intent || intent.setup_future_usage !== 'off_session')
+        throw new Error('Wiederverwendbares Zahlungsmittel/Mandat fehlt; manuelle Prüfung erforderlich.');
+      method = typeof intent.payment_method === 'object' ? intent.payment_method : null;
+    }
+    if (!customer || !method || idOf(method.customer) !== customer || !['card', 'sepa_debit'].includes(method.type))
       throw new Error('Wiederverwendbares Zahlungsmittel/Mandat fehlt; manuelle Prüfung erforderlich.');
     // Recover a crash after Stripe succeeded but before our DB commit, even after Stripe's idempotency TTL.
     for await (const existing of this.stripe.subscriptions.list({ customer, status: 'all', limit: 100 })) {
@@ -412,6 +467,10 @@ export class StripePayment implements PaymentProvider {
         items: [{ price }],
         payment_behavior: 'allow_incomplete',
         off_session: true,
+        // Erste Abbuchung erst zum vereinbarten Termin (Komplett: Go-Live + 7 Tage); liegt er schon zurück, sofort
+        ...(input.firstChargeAt && input.firstChargeAt.getTime() > Date.now() + 3600_000
+          ? { trial_end: Math.floor(input.firstChargeAt.getTime() / 1000) }
+          : {}),
         payment_settings: { save_default_payment_method: 'on_subscription' },
         metadata: {
           kind: 'subscription',
@@ -419,6 +478,7 @@ export class StripePayment implements PaymentProvider {
           tier: input.tier,
           orderId: input.orderId,
           customerId: input.customerId,
+          ...(input.minTermMonths ? { minTermMonths: String(input.minTermMonths) } : {}),
         },
         expand: ['latest_invoice'],
       },
@@ -485,6 +545,20 @@ export class StripePayment implements PaymentProvider {
     if (sub.status === 'canceled') return;
     if (sub.schedule) await this.releaseTariffSchedule(idOf(sub.schedule)!, `${idempotencyKey}-release`);
     await this.stripe.subscriptions.update(id, { cancel_at_period_end: true, proration_behavior: 'none' }, { idempotencyKey });
+  }
+
+  /** Kündigung zum Ende der Mindestlaufzeit; liegt der Termin nicht in der Zukunft, zum Periodenende. */
+  async cancelAt(id: string, at: Date, idempotencyKey: string): Promise<void> {
+    if (!Number.isFinite(at.getTime()) || at.getTime() <= Date.now() + 3600_000)
+      return this.cancelAtPeriodEnd(id, idempotencyKey);
+    const sub = await this.stripe.subscriptions.retrieve(id);
+    if (sub.status === 'canceled') return;
+    if (sub.schedule) await this.releaseTariffSchedule(idOf(sub.schedule)!, `${idempotencyKey}-release`);
+    await this.stripe.subscriptions.update(
+      id,
+      { cancel_at: Math.floor(at.getTime() / 1000), proration_behavior: 'none' },
+      { idempotencyKey },
+    );
   }
 
   async expireSession(sessionId: string): Promise<void> {

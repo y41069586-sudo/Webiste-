@@ -1,4 +1,4 @@
-import { isV4Tier, v4Offer, v4CheckoutTerms } from './offers-v4';
+import { isV4Tier, v4Offer, v4CheckoutTerms, v4OfferedTiers, v4TierLabel } from './offers-v4';
 import { and, desc, eq, gt, inArray, isNull, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { appUrl, getEnv } from '../config/env';
@@ -122,7 +122,7 @@ export async function getCheckoutContext(slug: string, db: DbOrTx = getDb()): Pr
   if (avail.mode === 'live' && goLiveBlockers(cfg).length)
     return { state: 'disabled', reason: 'Online-Bestellung ist noch nicht freigeschaltet.' };
   const a = planAmounts(cfg, cfg.offers.activeVersion === 'v4' ? 'basis' : 'one_time');
-  const m = planAmounts(cfg, cfg.offers.activeVersion === 'v4' ? 'care_plus' : 'monthly');
+  const m = planAmounts(cfg, cfg.offers.activeVersion === 'v4' ? v4OfferedTiers(cfg)[1]! : 'monthly');
   const l = found.lead;
   return {
     state: 'ok',
@@ -205,7 +205,8 @@ export async function startCheckout(
   const domain = dom.domain;
   const avail = checkoutAvailability();
   const plan: OrderPlan = input.plan;
-  if (cfg.offers.activeVersion === 'v4' && !isV4Tier(plan)) return { ok: false, error: 'Bitte Basis oder Care+ wählen.' };
+  if (cfg.offers.activeVersion === 'v4' && !(isV4Tier(plan) && v4OfferedTiers(cfg).includes(plan)))
+    return { ok: false, error: 'Bitte einen der angebotenen Tarife wählen.' };
   if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
     return {
       ok: false,
@@ -305,7 +306,7 @@ export async function startCheckout(
       orderId: order.id,
       amountCents: amounts.grossCents,
       currency: 'eur',
-      productName: `${isV4Tier(plan) ? `SeitenWerk ${plan === 'basis' ? 'Basis' : 'Care+'} – Einrichtung` : plan === 'monthly' ? p.monthlyName : p.packageName} – ${domain}`,
+      productName: `${isV4Tier(plan) ? `SeitenWerk ${v4TierLabel(plan)}${plan === 'komplett' ? '' : ' – Einrichtung'}` : plan === 'monthly' ? p.monthlyName : p.packageName} – ${domain}`,
       productDescription: isV4Tier(plan)
         ? v4CheckoutTerms(plan, cfg.offers.billingMode ?? 'saved_mandate')
         : plan === 'monthly'
@@ -383,7 +384,8 @@ async function startHostedCheckoutLocked(
   const plan = (ORDER_PLANS as readonly string[]).includes(planRaw) ? (planRaw as OrderPlan) : null;
   if (!plan) return { ok: false, error: 'Bitte wählen Sie eine der beiden Optionen.' };
   const { cfg, lead, demo } = ctx;
-  if (cfg.offers.activeVersion === 'v4' && !isV4Tier(plan)) return { ok: false, error: 'Bitte Basis oder Care+ wählen.' };
+  if (cfg.offers.activeVersion === 'v4' && !(isV4Tier(plan) && v4OfferedTiers(cfg).includes(plan)))
+    return { ok: false, error: 'Bitte einen der angebotenen Tarife wählen.' };
   if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
     return { ok: false, error: 'Die monatliche Zahlung ist derzeit nicht verfügbar.' };
   const rl = await rateLimit(db, `checkout:${meta.ipHash}`, 10, 3600);
@@ -468,7 +470,9 @@ async function startHostedCheckoutLocked(
           ? `${formatEuro(p.monthlyCents)} pro Monat, erste Rate sofort. Mindestlaufzeit ${p.minTermMonths} Monate, ab Monat ${p.minTermMonths + 1} ${formatEuro(p.subscriptionCents)}/Monat, dann monatlich kündbar.`
           : `Einmalig ${formatEuro(p.packageCents)} inklusive Domain und ${p.hostingMonthsIncluded} Monaten Hosting.`,
       g.enabled && !isV4Tier(plan) ? `${g.days} Tage Garantie nach den verlinkten Garantiebedingungen.` : '',
-      'Rechnung per E-Mail, danach tragen Sie Ihre Angaben für die Website ein.',
+      plan === 'komplett'
+        ? 'Danach tragen Sie Ihre Angaben für die Website ein. Die erste Rechnung kommt mit der ersten Abbuchung.'
+        : 'Rechnung per E-Mail, danach tragen Sie Ihre Angaben für die Website ein.',
     ]
       .filter(Boolean)
       .join(' ');
@@ -477,7 +481,7 @@ async function startHostedCheckoutLocked(
       amountCents: amounts.grossCents,
       currency: 'eur',
       productName:
-        `${isV4Tier(plan) ? `SeitenWerk ${plan === 'basis' ? 'Basis' : 'Care+'} – Einrichtung` : plan === 'monthly' ? p.monthlyName : p.packageName} – ${lead.anonymizedAt ? 'Website' : lead.businessName}`.slice(
+        `${isV4Tier(plan) ? `SeitenWerk ${v4TierLabel(plan)}${plan === 'komplett' ? '' : ' – Einrichtung'}` : plan === 'monthly' ? p.monthlyName : p.packageName} – ${lead.anonymizedAt ? 'Website' : lead.businessName}`.slice(
           0,
           250,
         ),
@@ -651,7 +655,7 @@ export async function fulfillOrder(
     const order = (await tx.query.orders.findFirst({ where: eq(orders.id, orderId) }))!;
     if (order.status === 'paid' || order.status === 'refunded') {
       const c = await tx.query.customers.findFirst({ where: eq(customers.orderId, order.id) });
-      return { state: 'paid', orderId, customerId: c!.id, invoiceNumber: order.invoiceNumber!, alreadyPaid: true };
+      return { state: 'paid', orderId, customerId: c!.id, invoiceNumber: order.invoiceNumber ?? '', alreadyPaid: true };
     }
     if (order.status === 'failed' && !info.paymentIntentId) return { state: 'not_payable', orderId };
     const amountOk = info.amountTotal === undefined || info.amountTotal === order.amountCents;
@@ -675,8 +679,13 @@ export async function fulfillOrder(
     }
 
     const paidAt = new Date();
-    const number = await nextInvoiceNumber(tx, cfg, paidAt);
-    const invoice = buildInvoiceData(cfg, order, { number, paidAt, issuedAt: paidAt, amounts: orderAmounts(order) });
+    // „Komplett“: 0 € bei Bestellung (nur Zahlungsmittel gespeichert) – keine Rechnung über 0 €; die Rechnungen
+    // entstehen mit den Monatsabbuchungen ab Go-Live.
+    const noCharge = order.amountCents === 0 && order.plan === 'komplett';
+    const number = noCharge ? null : await nextInvoiceNumber(tx, cfg, paidAt);
+    const invoice = number
+      ? buildInvoiceData(cfg, order, { number, paidAt, issuedAt: paidAt, amounts: orderAmounts(order) })
+      : null;
     const monthly = order.plan === 'monthly';
     await tx
       .update(orders)
@@ -685,7 +694,7 @@ export async function fulfillOrder(
         paidAt,
         stripePaymentIntent: info.paymentIntentId ?? order.stripePaymentIntent,
         invoiceNumber: number,
-        invoiceJson: invoice as unknown as Record<string, unknown>,
+        invoiceJson: invoice as unknown as Record<string, unknown> | null,
         // Garantie gilt für beide Optionen ab Zahlung; Mindestlaufzeit nur für Option B
         // Vorläufig: spätester Beginn (Zahlung + 14 Tage); beim Go-Live wird auf Go-Live + 14 Tage verkürzt
         guaranteeEndsAt: cfg.guarantee.enabled && !order.offerSnapshot ? guaranteeEndFor(cfg, paidAt, null) : null,
@@ -737,7 +746,7 @@ export async function fulfillOrder(
       actor,
       context: { invoiceNumber: number, amountCents: order.amountCents, plan: order.plan },
     });
-    return { state: 'paid', orderId, customerId: cust.id, invoiceNumber: number, alreadyPaid: false };
+    return { state: 'paid', orderId, customerId: cust.id, invoiceNumber: number ?? '', alreadyPaid: false };
   });
 
   if (result.state === 'paid' && !result.alreadyPaid) {
@@ -753,6 +762,7 @@ async function afterPaid(orderId: string, customerId: string): Promise<void> {
     logger.error({ orderId, ...errInfo(err) }, 'Einrichtung nach Zahlung wird über den Folgejob erneut versucht');
   }
   try {
+    // Bei „Komplett“ ohne Rechnung: derselbe Job sendet nur die Bestellbestätigung mit Onboarding-Link
     await enqueue(QUEUES.sendInvoice, { orderId }, { singletonKey: `invoice-${orderId}` });
     await enqueue(QUEUES.onboarding, { customerId }, { singletonKey: `onboarding-${customerId}` });
   } catch (err) {

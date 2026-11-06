@@ -1,5 +1,5 @@
 import { desc, eq } from 'drizzle-orm';
-import { getDb, schema, formatEuro, formatDateLongDe, v4Offer, careOverview } from '@wbm/core';
+import { getDb, schema, formatEuro, formatDateLongDe, v4Offer, careOverview, v4TierLabel } from '@wbm/core';
 import { ActionForm } from '@/components/action-form';
 import { manageTariff } from './actions';
 import { SubscribeButton } from './subscribe-button';
@@ -39,7 +39,7 @@ export async function TariffPanel({
     <div className="space-y-6">
       <div>
         <p className="text-sm text-slate-500">Ihre private Tarifverwaltung · {customer.company}</p>
-        <h1 className="mt-2 text-3xl font-semibold">SeitenWerk {offer.tier === 'basis' ? 'Basis' : 'Care+'}</h1>
+        <h1 className="mt-2 text-3xl font-semibold">SeitenWerk {v4TierLabel(offer.tier)}</h1>
         <p className="mt-3 text-lg">
           {formatEuro(offer.monthlyCents)} pro Monat insgesamt. Monatlich kündbar. Keine zusätzliche Basisgebühr.
         </p>
@@ -105,7 +105,7 @@ export async function TariffPanel({
         <section className="border-t border-slate-200 pt-5">
           <h2 className="text-lg font-semibold">Ihr Tarifwechsel</h2>
           <p className="my-3">
-            Zu {pending.toTier === 'basis' ? 'Basis' : 'Care+'}:{' '}
+            Zu {v4TierLabel(pending.toTier)}:{' '}
             {pending.status === 'requested' ? 'wird geprüft' : `vorgemerkt ab ${formatDateLongDe(pending.effectiveAt!)}`}. Bis
             dahin gilt Ihr aktueller Tarif.
           </p>
@@ -118,8 +118,8 @@ export async function TariffPanel({
         <section className="border-t border-slate-200 pt-5">
           <h2 className="text-lg font-semibold">Tarif wechseln</h2>
           <p className="my-3">
-            {target.tier === 'basis' ? 'Basis' : 'Care+'} für insgesamt {formatEuro(target.monthlyCents)}/Monat ab dem nächsten
-            Abrechnungszeitraum. Kein zweites Abo, keine anteilige Zwischenabrechnung. Wir bestätigen den Termin nach Prüfung.
+            {v4TierLabel(target.tier)} für insgesamt {formatEuro(target.monthlyCents)}/Monat ab dem nächsten Abrechnungszeitraum.
+            Kein zweites Abo, keine anteilige Zwischenabrechnung. Wir bestätigen den Termin nach Prüfung.
           </p>
           <ActionForm action={action} submit="Tarifwechsel anfragen">
             <input type="hidden" name="operation" value="switch" />

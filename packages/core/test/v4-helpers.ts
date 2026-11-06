@@ -8,7 +8,7 @@ import { startHostedCheckout, simulateMockPayment, processPaymentWebhook } from 
 import { getProviders } from '../src/providers';
 import type { MockPayment } from '../src/providers/mock/payment';
 const meta = { ua: 'fixture/browser', ipHash: 'v4-fixture', isBot: false };
-export async function buy(tier: 'basis' | 'care_plus') {
+export async function buy(tier: 'basis' | 'care_plus' | 'komplett') {
   const db = getDb();
   const [lead] = await db
     .insert(leads)
