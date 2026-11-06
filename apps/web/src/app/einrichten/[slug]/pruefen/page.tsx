@@ -44,7 +44,7 @@ export default async function ReviewSetup({
           title: `SeitenWerk ${v4TierLabel(plan)}`,
           price:
             plan === 'komplett'
-              ? `0 € Einrichtung · ${euro(v4Offer(plan).monthlyCents)}/Monat, erste Abbuchung 7 Tage nach Go-Live · 12 Monate Mindestlaufzeit`
+              ? `0 € Einrichtung · ${euro(v4Offer(plan).monthlyCents)}/Monat, erste Abbuchung 7 Tage nach der Bestellung · 12 Monate Mindestlaufzeit`
               : `${euro(planAmounts(ctx.cfg, plan).grossCents)} einmalig + insgesamt ${euro(v4Offer(plan).monthlyCents)}/Monat ab Go-Live`,
           terms: v4CheckoutTerms(plan, ctx.cfg.offers.billingMode ?? 'saved_mandate'),
           // Klare Preiszusammenfassung: was heute fällig ist; Kaufmodell als „Empfohlen“ markiert, keine Vorauswahl

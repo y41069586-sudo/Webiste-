@@ -92,7 +92,7 @@ export function orderConfirmationEmail(
   const komplett = d.v4?.tier === 'komplett';
   if (d.v4 && komplett)
     terms.push(
-      `Ihr Tarif SeitenWerk Komplett: Es wurde nichts abgebucht. ${formatEuro(d.v4.monthlyCents)} pro Monat, die erste Abbuchung erfolgt 7 Tage nach dem bestätigten Go-Live Ihrer Website über das bei Stripe gespeicherte Zahlungsmittel. Mindestlaufzeit 12 Monate ab der ersten Abbuchung, danach monatlich kündbar. Für jede Abbuchung erhalten Sie eine eigene Rechnung.`,
+      `Ihr Tarif SeitenWerk Komplett: Es wurde nichts abgebucht. ${formatEuro(d.v4.monthlyCents)} pro Monat, die erste Abbuchung erfolgt 7 Tage nach Ihrer Bestellung über das bei Stripe gespeicherte Zahlungsmittel. Mindestlaufzeit 12 Monate ab der ersten Abbuchung, danach monatlich kündbar. Für jede Abbuchung erhalten Sie eine eigene Rechnung.`,
     );
   else if (d.v4)
     terms.push(

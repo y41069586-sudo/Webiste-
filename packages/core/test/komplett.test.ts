@@ -9,16 +9,22 @@ import { startBillingV4 } from '../src/services/billing-v4';
 import { requestCancellationV4, requestTariffChange } from '../src/services/tariffs-v4';
 import { sendOrderInvoice } from '../src/render/invoice';
 import { startHostedCheckout } from '../src/services/orders';
-import { v4CheckoutTerms, v4Offer, v4OfferedTiers } from '../src/services/offers-v4';
+import { KOMPLETT_AGB_MARKER, komplettTermsCurrent, v4CheckoutTerms, v4Offer, v4OfferedTiers } from '../src/services/offers-v4';
 import { getProviders } from '../src/providers';
 import { resetDb } from './helpers';
 import { buy, live } from './v4-helpers';
 
-describe('Tarif „Komplett“: 0 € Einrichtung, 179 €/Monat, erste Abbuchung 7 Tage nach Go-Live, 12 Monate', () => {
+describe('Tarif „Komplett“: 0 € Einrichtung, 179 €/Monat, erste Abbuchung 7 Tage nach der Bestellung, 12 Monate', () => {
   beforeEach(async () => {
     await resetDb();
     clearDomainCache();
-    await updateConfig({ offers: { activeVersion: 'v4', billingMode: 'saved_mandate', komplettEnabled: true } }, 'test:komplett');
+    await updateConfig(
+      {
+        offers: { activeVersion: 'v4', billingMode: 'saved_mandate', komplettEnabled: true },
+        legal: { termsMarkdown: `AGB … Die erste Monatsgebühr wird 7 ${KOMPLETT_AGB_MARKER}.` },
+      },
+      'test:komplett',
+    );
   });
   afterAll(() => stopBoss());
 
@@ -31,11 +37,13 @@ describe('Tarif „Komplett“: 0 € Einrichtung, 179 €/Monat, erste Abbuchun
       monthlyCents: 17900,
       minTermMonths: 12,
       billingDelayDays: 7,
+      billingStart: 'order',
       billingMode: 'saved_mandate',
     });
     const t = v4CheckoutTerms('komplett');
     expect(t).toMatch(/nichts abgebucht/);
-    expect(t).toMatch(/7 Tage nach dem bestätigten Go-Live/);
+    expect(t).toMatch(/7 Tage nach Ihrer Bestellung/);
+    expect(t).not.toMatch(/nach dem bestätigten Go-Live/);
     expect(t).toMatch(/Mindestlaufzeit 12 Monate/);
   });
 
@@ -56,23 +64,27 @@ describe('Tarif „Komplett“: 0 € Einrichtung, 179 €/Monat, erste Abbuchun
     expect(customer.accessToken.length).toBeGreaterThan(10);
   });
 
-  it('Go-Live: Abo startet mit erster Abbuchung 7 Tage später, Mindestlaufzeit 12 Monate ab dann', async () => {
-    const { order, customer } = await buy('komplett');
-    await expect(startBillingV4(order.id)).rejects.toThrow(/Go-Live/);
-    await live(customer.id);
-    const sub = await startBillingV4(order.id);
+  it('Bestellung: Abo startet sofort, erste Abbuchung 7 Tage danach – ohne Go-Live; Mindestlaufzeit 12 Monate ab dann', async () => {
+    const { order } = await buy('komplett');
     const after = (await getDb().query.orders.findFirst({ where: eq(orders.id, order.id) }))!;
-    const site = await getDb().query.sites.findFirst({
-      where: eq((await import('../src/db/schema')).sites.customerId, customer.id),
-    });
-    const firstCharge = site!.liveAt!.getTime() + 7 * 86_400_000;
-    expect((sub as { status: string }).status).toBe('trialing');
+    expect(after.stripeSubscriptionId).toBeTruthy();
+    expect(after.subscriptionStatus).toBe('trialing');
+    const firstCharge = after.paidAt!.getTime() + 7 * 86_400_000;
     expect(Math.abs(after.billingStartedAt!.getTime() - firstCharge)).toBeLessThan(2000);
-    const months = (after.minTermEndsAt!.getTime() - firstCharge) / 86_400_000;
-    expect(months).toBeGreaterThan(360);
-    expect(months).toBeLessThan(370);
-    // genau ein Abo, auch bei erneutem Aufruf
+    const days = (after.minTermEndsAt!.getTime() - firstCharge) / 86_400_000;
+    expect(days).toBeGreaterThan(360);
+    expect(days).toBeLessThan(370);
+    // genau ein Abo, auch bei erneutem Aufruf oder späterem Go-Live
     expect((await startBillingV4(order.id)) as { id: string }).toMatchObject({ id: after.stripeSubscriptionId });
+  });
+
+  it('ohne übernommene aktuelle AGB ist Komplett nicht bestellbar', async () => {
+    await updateConfig(
+      { legal: { termsMarkdown: 'Alte AGB: erste Monatsgebühr 7 Tage nach dem bestätigten Go-Live.' } },
+      'test:komplett',
+    );
+    expect(komplettTermsCurrent({ legal: { termsMarkdown: 'nach dem bestätigten Go-Live' } })).toBe(false);
+    await expect(buy('komplett')).rejects.toThrow(/nicht bestellbar/);
   });
 
   it('Kündigung wirkt zum Ende der Mindestlaufzeit; Tarifwechsel vorher gesperrt, Wechsel nach Komplett nie', async () => {

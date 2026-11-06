@@ -18,7 +18,7 @@ export function V4PriceCards({ tiers }: { tiers: V4Tier[] }) {
               {tier === 'basis'
                 ? 'Ihre professionelle Website – einfach und zuverlässig online.'
                 : tier === 'komplett'
-                  ? 'Ohne Einrichtungsgebühr – Sie zahlen erst, wenn Ihre Website online ist.'
+                  ? 'Ohne Einrichtungsgebühr – bei der Bestellung zahlen Sie 0 €.'
                   : 'Ihre Website – wir kümmern uns auch danach darum.'}
             </p>
             {tier === 'komplett' ? (
@@ -26,7 +26,7 @@ export function V4PriceCards({ tiers }: { tiers: V4Tier[] }) {
                 <p className="mt-6 text-4xl font-semibold">
                   {formatEuroShort(offer.monthlyCents)} <span className="text-base font-normal">pro Monat</span>
                 </p>
-                <p className="mt-2 text-xl">0 € Einrichtung · erste Abbuchung 7 Tage nach Go-Live</p>
+                <p className="mt-2 text-xl">0 € Einrichtung · erste Abbuchung 7 Tage nach Bestellung</p>
               </>
             ) : (
               <>
@@ -71,7 +71,9 @@ export function V4PriceCards({ tiers }: { tiers: V4Tier[] }) {
         );
       })}
       <p className="text-sm text-[#5b6475] md:col-span-2">
-        Die Monatsgebühr beginnt erst nach dem bestätigten Go-Live über das beim Kauf ausdrücklich vereinbarte Zahlungsmittel.
+        {tiers.includes('komplett')
+          ? 'Basis: Die Monatsgebühr beginnt erst nach dem bestätigten Go-Live. Komplett: Die erste Monatsgebühr wird 7 Tage nach der Bestellung abgebucht. Beides über das beim Kauf ausdrücklich vereinbarte Zahlungsmittel.'
+          : 'Die Monatsgebühr beginnt erst nach dem bestätigten Go-Live über das beim Kauf ausdrücklich vereinbarte Zahlungsmittel.'}
         Steuerstatus und verbindliche Steuerangaben sind noch zu klären; der echte Verkauf bleibt gesperrt. Keine Zahlung durch
         bloßes Ansehen einer Demo.
       </p>

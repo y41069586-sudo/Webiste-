@@ -154,7 +154,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
                     <h2 className="font-semibold">{v4TierLabel(tier)}</h2>
                     <p>
                       {tier === 'komplett'
-                        ? `0 € Einrichtung · ${formatEuroShort(v4Offer(tier).monthlyCents)}/Monat, erste Abbuchung 7 Tage nach Go-Live`
+                        ? `0 € Einrichtung · ${formatEuroShort(v4Offer(tier).monthlyCents)}/Monat, erste Abbuchung 7 Tage nach der Bestellung`
                         : `${formatEuroShort(v4Offer(tier).setupCents)} einmalig + ${formatEuroShort(v4Offer(tier).monthlyCents)}/Monat insgesamt ab Go-Live`}
                     </p>
                     <p className="text-sm text-slate-500">
@@ -175,7 +175,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
                   <label className="flex items-start gap-2">
                     <input type="checkbox" name="confirm" required />
                     <span>
-                      AGB mit den Komplett-Regeln (Mindestlaufzeit, Zahlung nach Go-Live) sind unter „Rechtstexte“ übernommen.
+                      AGB mit den Komplett-Regeln (Mindestlaufzeit, erste Abbuchung 7 Tage nach Bestellung) sind unter „Rechtstexte“ übernommen.
                     </span>
                   </label>
                 ) : null}

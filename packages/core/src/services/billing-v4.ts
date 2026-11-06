@@ -22,10 +22,13 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
     const site = customer
       ? await tx.query.sites.findFirst({ where: and(eq(sites.customerId, customer.id), eq(sites.status, 'live')) })
       : null;
+    // Komplett (seit 06.11.2026): Abo beginnt direkt mit der Bestellung, erste Abbuchung 7 Tage danach – ohne Go-Live
+    const fromOrder = order.offerSnapshot.billingStart === 'order';
     const ready = assertV4BillingReady({
       offer: order.offerSnapshot,
       paid: order.status === 'paid',
       liveAt: site?.liveAt ?? null,
+      paidAt: order.paidAt,
       cancelled: Boolean(order.endedAt),
     });
     if (!customer || !order.stripeSessionId) throw new Error('Einrichtungszahlung/Kunde fehlt.');
@@ -40,11 +43,12 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
       if (provider.testMode && order.paymentMode !== 'test')
         throw new Error('Echte Bestellungen dürfen kein Test-Monatsabo starten.');
       if (
-        !site?.previewApprovedAt ||
-        !site.hostingProvider ||
-        site.hostingProvider === 'mock' ||
-        site.liveCheckJson?.ok !== true ||
-        !site.productionUrl?.startsWith('https://')
+        !fromOrder &&
+        (!site?.previewApprovedAt ||
+          !site.hostingProvider ||
+          site.hostingProvider === 'mock' ||
+          site.liveCheckJson?.ok !== true ||
+          !site.productionUrl?.startsWith('https://'))
       )
         throw new Error('Stripe-Monatsstart erfordert Freigabe und tatsächlich bestätigtes HTTPS-Hosting.');
     }
@@ -55,11 +59,12 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
       setupSessionId: order.stripeSessionId,
       tier: order.offerSnapshot.tier,
       amountCents: order.offerSnapshot.monthlyCents,
-      liveAt: site!.liveAt!,
-      // Komplett: erste Abbuchung Go-Live + 7 Tage (ready.startsAt); Basis/Care+: ab Go-Live
+      // Bezugspunkt: Bestellung (Komplett) bzw. bestätigter Go-Live (Basis/Care+)
+      liveAt: fromOrder ? order.paidAt! : site!.liveAt!,
+      // Komplett: erste Abbuchung Bestellung + 7 Tage (ready.startsAt); Basis/Care+: ab Go-Live
       firstChargeAt: ready.startsAt,
       minTermMonths: order.offerSnapshot.minTermMonths || undefined,
-      idempotencyKey: `v4-go-live-${order.id}`,
+      idempotencyKey: `${fromOrder ? 'v4-order' : 'v4-go-live'}-${order.id}`,
     });
     await tx
       .update(orders)
@@ -97,20 +102,25 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
 /** Retry only missing starts; never re-create an already installed or cancelled subscription. */
 export async function sweepBillingV4() {
   const db = getDb();
-  const rows = await db
+  const open = and(
+    eq(orders.status, 'paid'),
+    isNull(orders.endedAt),
+    isNull(orders.stripeSubscriptionId),
+    sql`${orders.offerSnapshot}->>'billingMode'='saved_mandate'`,
+  );
+  const afterGoLive = await db
     .select({ id: orders.id })
     .from(orders)
     .innerJoin(customers, eq(customers.orderId, orders.id))
     .innerJoin(sites, eq(sites.customerId, customers.id))
-    .where(
-      and(
-        eq(orders.status, 'paid'),
-        eq(sites.status, 'live'),
-        isNull(orders.endedAt),
-        isNull(orders.stripeSubscriptionId),
-        sql`${orders.offerSnapshot}->>'billingMode'='saved_mandate'`,
-      ),
-    );
+    .where(and(open, eq(sites.status, 'live'), sql`coalesce(${orders.offerSnapshot}->>'billingStart','') <> 'order'`));
+  // Komplett: Abo direkt nach der Bestellung (falls der Start beim Bezahlen nicht geklappt hat)
+  const fromOrder = await db
+    .select({ id: orders.id })
+    .from(orders)
+    .innerJoin(customers, eq(customers.orderId, orders.id))
+    .where(and(open, sql`${orders.offerSnapshot}->>'billingStart' = 'order'`));
+  const rows = [...afterGoLive, ...fromOrder];
   let started = 0;
   for (const row of rows) {
     try {
@@ -120,7 +130,7 @@ export async function sweepBillingV4() {
       await raiseAlert(db, {
         level: 'error',
         code: `v4_billing_start_${row.id}`,
-        message: 'Abo konnte nach Go-Live nicht gestartet werden; Zahlungsmittel und Verbindung im Admin prüfen.',
+        message: 'Monatsabo konnte nicht gestartet werden; Zahlungsmittel und Verbindung im Admin prüfen.',
         context: { orderId: row.id },
       });
     }

@@ -1,4 +1,5 @@
-import { isV4Tier, v4Offer, v4CheckoutTerms, v4OfferedTiers, v4TierLabel } from './offers-v4';
+import { isV4Tier, komplettTermsCurrent, v4Offer, v4CheckoutTerms, v4OfferedTiers, v4TierLabel } from './offers-v4';
+import { startBillingV4 } from './billing-v4';
 import { and, desc, eq, gt, inArray, isNull, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { appUrl, getEnv } from '../config/env';
@@ -207,6 +208,12 @@ export async function startCheckout(
   const plan: OrderPlan = input.plan;
   if (cfg.offers.activeVersion === 'v4' && !(isV4Tier(plan) && v4OfferedTiers(cfg).includes(plan)))
     return { ok: false, error: 'Bitte einen der angebotenen Tarife wählen.' };
+  // Komplett nur mit übernommenen AGB, die die aktuelle Abbuchung (7 Tage nach Bestellung) enthalten
+  if (plan === 'komplett' && !komplettTermsCurrent(cfg))
+    return {
+      ok: false,
+      error: 'Der Tarif Komplett ist gerade nicht bestellbar. Bitte Basis wählen oder uns per E-Mail schreiben.',
+    };
   if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
     return {
       ok: false,
@@ -214,7 +221,7 @@ export async function startCheckout(
       fieldErrors: { plan: 'Bitte Einmalzahlung wählen.' },
     };
   if (isV4Tier(plan) && !input.subscription)
-    return { ok: false, error: 'Bitte dem monatlichen Tarif ab Go-Live ausdrücklich zustimmen.' };
+    return { ok: false, error: 'Bitte dem gewählten Monatstarif ausdrücklich zustimmen.' };
   const subscriptionOptIn = plan === 'one_time' && cfg.pricing.subscriptionEnabled && input.subscription;
   const amounts = planAmounts(cfg, plan);
 
@@ -386,6 +393,12 @@ async function startHostedCheckoutLocked(
   const { cfg, lead, demo } = ctx;
   if (cfg.offers.activeVersion === 'v4' && !(isV4Tier(plan) && v4OfferedTiers(cfg).includes(plan)))
     return { ok: false, error: 'Bitte einen der angebotenen Tarife wählen.' };
+  // Komplett nur mit übernommenen AGB, die die aktuelle Abbuchung (7 Tage nach Bestellung) enthalten
+  if (plan === 'komplett' && !komplettTermsCurrent(cfg))
+    return {
+      ok: false,
+      error: 'Der Tarif Komplett ist gerade nicht bestellbar. Bitte Basis wählen oder uns per E-Mail schreiben.',
+    };
   if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
     return { ok: false, error: 'Die monatliche Zahlung ist derzeit nicht verfügbar.' };
   const rl = await rateLimit(db, `checkout:${meta.ipHash}`, 10, 3600);
@@ -680,7 +693,7 @@ export async function fulfillOrder(
 
     const paidAt = new Date();
     // „Komplett“: 0 € bei Bestellung (nur Zahlungsmittel gespeichert) – keine Rechnung über 0 €; die Rechnungen
-    // entstehen mit den Monatsabbuchungen ab Go-Live.
+    // entstehen mit den Monatsabbuchungen (erste 7 Tage nach der Bestellung).
     const noCharge = order.amountCents === 0 && order.plan === 'komplett';
     const number = noCharge ? null : await nextInvoiceNumber(tx, cfg, paidAt);
     const invoice = number
@@ -771,6 +784,14 @@ async function afterPaid(orderId: string, customerId: string): Promise<void> {
   }
   const order = await getDb().query.orders.findFirst({ where: eq(orders.id, orderId) });
   if (order?.plan === 'monthly') await ensureSubscriptionSchedule(orderId);
+  // Komplett: Monatsabo sofort anlegen, erste Abbuchung 7 Tage nach der Bestellung (Fehler holt sweepBillingV4 nach)
+  if (order?.offerSnapshot?.billingStart === 'order') {
+    try {
+      await startBillingV4(orderId, 'job:order-paid');
+    } catch (err) {
+      logger.error({ orderId, ...errInfo(err) }, 'Monatsabo nach Bestellung wird über den pipeline-tick erneut versucht');
+    }
+  }
   await notifyAdmin({
     key: `order-paid:${orderId}`,
     title: `Neue Bestellung ${order?.invoiceNumber ?? ''}`,

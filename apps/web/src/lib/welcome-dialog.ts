@@ -23,7 +23,7 @@ export function welcomeDialog(businessName: string, slug: string, expiresLabel: 
 <h2 id="sw-welcome-title">Ihr Website-Entwurf für ${esc(businessName)}</h2>
 <p>Wir haben ihn ohne Gespräch mit Ihnen vorbereitet, nur aus öffentlich auffindbaren Angaben. Deshalb kann noch nicht alles stimmen. Das ist kein Problem – Sie können alles ändern:</p>
 <ul><li>Name, Kontakt und Öffnungszeiten</li><li>Leistungen, Texte und Fotos</li><li>Farben und Gestaltung nach Ihren Wünschen</li></ul>
-<p><strong>Vor der Bestellung</strong> tragen Sie Ihre richtigen Angaben selbst ein und schreiben Ihre Wünsche dazu – kostenlos und unverbindlich. Online geht die Seite erst nach Ihrer Freigabe.${komplett ? ' Im Tarif Komplett zahlen Sie sogar erst, wenn Ihre Website online ist.' : ''}</p>
+<p><strong>Vor der Bestellung</strong> tragen Sie Ihre richtigen Angaben selbst ein und schreiben Ihre Wünsche dazu – kostenlos und unverbindlich. Online geht die Seite erst nach Ihrer Freigabe.${komplett ? ' Im Tarif Komplett zahlen Sie bei der Bestellung nichts, die erste Monatsgebühr erst 7 Tage danach.' : ''}</p>
 <form method="dialog"><button class="sw-welcome-btn" type="submit" autofocus>Entwurf ansehen</button></form>
 <p class="sw-welcome-small">Unverbindlich · online bis ${esc(expiresLabel)} · <a href="/d/${esc(slug)}/kein-interesse">Kein Interesse</a></p>
 </div></dialog>`;

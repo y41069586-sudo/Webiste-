@@ -83,7 +83,7 @@ export function PaymentForm({
       <p className="text-sm text-slate-600">
         Ihre Angaben und Einrichtung werden für die Bestellung übernommen. Im nächsten Schritt prüfen Sie die Zahlung bei Stripe.
         {options.some((o) => o.plan === 'komplett')
-          ? ' Bei Komplett hinterlegen Sie dort nur Ihr Zahlungsmittel – abgebucht wird erst 7 Tage nach Go-Live.'
+          ? ' Bei Komplett hinterlegen Sie dort nur Ihr Zahlungsmittel – abgebucht wird erst 7 Tage nach der Bestellung.'
           : ''}
         Erst die abschließende Zahlungsbestätigung löst die Bestellung aus; vor der Veröffentlichung prüfen und bestätigen Sie
         Ihre fertige Website.

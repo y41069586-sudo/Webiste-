@@ -536,8 +536,9 @@ export interface PaymentProvider {
     setupSessionId: string;
     tier: 'basis' | 'care_plus' | 'komplett';
     amountCents: number;
+    /** Bezugspunkt: bestätigter Go-Live (Basis/Care+) bzw. Bestellung (Komplett) */
     liveAt: Date;
-    /** Erste Abbuchung (Komplett: Go-Live + 7 Tage); fehlt sie, wird sofort abgerechnet */
+    /** Erste Abbuchung (Komplett: Bestellung + 7 Tage); fehlt sie, wird sofort abgerechnet */
     firstChargeAt?: Date;
     /** Mindestlaufzeit in Monaten (nur Metadaten; Kündigung prüft die Bestellung) */
     minTermMonths?: number;

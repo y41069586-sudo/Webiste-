@@ -148,7 +148,7 @@ export interface OfferCard {
   monthly?: string;
   /** V4: Gesamtkosten der ersten zwölf Monate ab Go-Live inkl. Einrichtung (z. B. „825 €“) – volle Kostentransparenz */
   firstYear?: string;
-  /** Tarif „Komplett“: 0 € Einrichtung, erste Abbuchung 7 Tage nach Go-Live, 12 Monate Mindestlaufzeit */
+  /** Tarif „Komplett“: 0 € Einrichtung, erste Abbuchung 7 Tage nach der Bestellung, 12 Monate Mindestlaufzeit */
   komplett?: boolean;
   /** Hervorgehobene Empfehlung (nur Kennzeichnung, keine Vorauswahl) */
   recommended?: boolean;

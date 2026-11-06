@@ -91,7 +91,7 @@ export class MockPayment implements PaymentProvider {
     }
     const { stripeV4Price } = await import('../../config/stripe-v4-prices');
     const { addMonths } = await import('../../util/time');
-    // Komplett: erste Abbuchung zum vereinbarten Termin (Go-Live + 7 Tage); bis dahin Testphase
+    // Komplett: erste Abbuchung zum vereinbarten Termin (Bestellung + 7 Tage); bis dahin Testphase
     const start = input.firstChargeAt && input.firstChargeAt > new Date() ? input.firstChargeAt : new Date();
     const sub = {
       id,

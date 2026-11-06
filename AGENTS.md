@@ -380,6 +380,9 @@ Fortlaufender Umsetzungsstand: `docs/v4-quality-handoff.md`; früherer Prüfstan
 - Monatsabrechnung erst nach bezahlter Einrichtung, dokumentierter Tarifzustimmung und tatsächlich bestätigtem Go-Live.
   Neue V4-Bestellungen speichern nach ausdrücklicher Zustimmung ein Stripe-Zahlungsmittel/Mandat bei der
   Einrichtung. Genau ein Monatsabo startet erst nach bestätigtem Go-Live, ohne Rückdatierung.
+  Ausnahme seit 06.11.2026 (Betreiber): Tarif „Komplett“ legt das Abo direkt nach der Bestellung an (0 € heute),
+  erste Abbuchung 7 Tage nach der Bestellung, unabhängig vom Go-Live (`billingStart: 'order'`). Bestellbar nur,
+  wenn die übernommenen AGB diese Regel enthalten. Ältere Komplett-Snapshots behalten „7 Tage nach Go-Live“.
   Alte V4-Snapshots ohne billingMode oder mit manual_checkout behalten den separaten Abo-Checkout.
   Zahlungsbestätigung kommt über invoice.paid; active allein ist kein Geldeingang. Incomplete/SEPA/SCA
   dürfen kein zweites Abo auslösen. V4 bleibt ausschließlich Sandbox.

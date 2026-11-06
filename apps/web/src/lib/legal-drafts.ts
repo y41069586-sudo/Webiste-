@@ -1,4 +1,4 @@
-import { appUrl, formatEuroShort, v4FirstYearCents, v4Offer, type AppConfig } from '@wbm/core';
+import { appUrl, formatEuroShort, KOMPLETT_AGB_MARKER, v4FirstYearCents, v4Offer, type AppConfig } from '@wbm/core';
 import { sitePricing } from './site';
 
 /**
@@ -174,7 +174,7 @@ ${taxClause} Änderungen des Steuerstatus ändern bestehende vereinbarte Gesamtp
 
 Die Einrichtungsgebühr ist nach dem verbindlich festgelegten Vertragsschluss über Stripe per angebotener Kartenzahlung zu zahlen. Banküberweisung wird derzeit nicht angeboten. Für bestätigte Zahlungen werden Rechnungen bereitgestellt. Fehlgeschlagene oder noch ausstehende Zahlungen gelten nicht als Zahlungseingang.
 
-Die Monatsabrechnung beginnt erst nach dem tatsächlich bestätigten Go-Live, nach bestätigter Einrichtungszahlung (bei Komplett: hinterlegtem Zahlungsmittel) und ausdrücklicher Tarifzustimmung, ohne Rückdatierung. Beim Tarif Komplett wird bei der Bestellung nichts abgebucht: Der Kunde hinterlegt im Checkout lediglich sein Zahlungsmittel (Karte oder SEPA-Lastschriftmandat). Die erste Monatsgebühr wird ${v4Offer('komplett').billingDelayDays} Tage nach dem bestätigten Go-Live abgebucht, danach monatlich im Voraus. Für jede Abbuchung wird eine Rechnung bereitgestellt. Der Kunde stimmt der Speicherung und wiederkehrenden Belastung des Zahlungsmittels im dafür vorgesehenen Checkout ausdrücklich zu. Ältere Bestellungen mit gesondertem Abo-Abschluss behalten das vereinbarte Verfahren. Eine offene Zahlungsbestätigung löst kein zusätzliches Abonnement aus.
+Bei Basis und Care+ beginnt die Monatsabrechnung erst nach dem tatsächlich bestätigten Go-Live, nach bestätigter Einrichtungszahlung und ausdrücklicher Tarifzustimmung, ohne Rückdatierung. Beim Tarif Komplett wird bei der Bestellung nichts abgebucht: Der Kunde hinterlegt im Checkout lediglich sein Zahlungsmittel (Karte oder SEPA-Lastschriftmandat). Die erste Monatsgebühr wird ${v4Offer('komplett').billingDelayDays} ${KOMPLETT_AGB_MARKER}, unabhängig vom Zeitpunkt des Go-Live, danach monatlich im Voraus. Für jede Abbuchung wird eine Rechnung bereitgestellt. Der Kunde stimmt der Speicherung und wiederkehrenden Belastung des Zahlungsmittels im dafür vorgesehenen Checkout ausdrücklich zu. Ältere Bestellungen mit gesondertem Abo-Abschluss behalten das vereinbarte Verfahren. Eine offene Zahlungsbestätigung löst kein zusätzliches Abonnement aus.
 
 ## 6. Domain und Hosting
 

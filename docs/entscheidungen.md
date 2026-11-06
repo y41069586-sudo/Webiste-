@@ -1298,3 +1298,18 @@ Nicht freigegeben: GASTRO_ONLINE_SUCHE und GASTRO_TISCH_ONLINE_RESERVIERT (Prim�
 GASTRO_WEBSITE_ERWARTET(_KURZ), GASTRO_SPEISEKARTE_ONLINE, GASTRO_RESERVIERUNG_ONLINE (Quelle älter als 24 Monate),
 BEWERTUNG_45_STERNE_US (US-Daten). Gastronomie-Briefe bleiben damit vorerst beim neutralen Text ohne Studienzahl.
 Keine Rechtsprüfung; die Verantwortung für die Freigabe bleibt beim Betreiber.
+
+## 06.11.2026 – Komplett: erste Abbuchung 7 Tage nach der Bestellung statt nach Go-Live
+
+Betreiber: „Lass nicht nach Go-Live 7 Tage, sondern direkt nach Abo 0 Euro Zahlung, dann nach 7 Tagen.“
+- Komplett-Snapshot `billingStart: 'order'`, `consentVersion: v4-komplett-2026-11-06b`. Nach der Bestellung (Zahlungsmittel
+  im Stripe-Setup-Checkout hinterlegt, 0 €) legt `afterPaid` sofort genau ein Abo an: Testphase bis Bestellung + 7 Tage,
+  dann 179 €/Monat. Mindestlaufzeit 12 Monate ab dieser ersten Abbuchung. Go-Live, Vorschau-Freigabe und HTTPS-Prüfung
+  sind für Komplett keine Voraussetzung mehr; `sweepBillingV4` holt einen fehlgeschlagenen Start nach.
+- Basis/Care+ unverändert (Monatsgebühr erst ab bestätigtem Go-Live). Ältere Komplett-Bestellungen behalten ihren
+  Snapshot (`confirmed_go_live`, 7 Tage nach Go-Live).
+- AGB Ziffer 5 neu formuliert; Komplett ist erst bestellbar, wenn die übernommenen AGB den Satz „… Tage nach der Bestellung
+  abgebucht“ enthalten (Checkout-Sperre + Hinweis „Noch offen“ in den Einstellungen). Alle Kundentexte (Demo-Preiskarte,
+  FAQ, Willkommenshinweis, Prüfseite, Checkout-Bedingungen, Bestätigungsmail, Firmen-Website) angepasst.
+- Risiko (dem Betreiber genannt): Wird die Website nicht innerhalb von 7 Tagen fertig, zahlt der Kunde schon, bevor sie
+  online ist. Beschwerden/Erstattungen laufen über die bestehende Erstattung im Admin.

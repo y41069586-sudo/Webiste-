@@ -10,8 +10,12 @@ export interface V4OfferSnapshot {
   monthlyCents: number;
   /** 0 = monatlich kündbar; „Komplett“ 12 Monate ab erster Abbuchung */
   minTermMonths: number;
-  billingStart: 'confirmed_go_live';
-  /** Erste Abbuchung so viele Tage nach dem bestätigten Go-Live (Komplett: 7) */
+  /**
+   * Bezugspunkt der ersten Abbuchung: bestätigter Go-Live (Basis/Care+, ältere Komplett-Bestellungen) oder die
+   * Bestellung selbst (Komplett seit 06.11.2026, Betreiber: „direkt nach Abo 0 Euro … dann nach 7 Tagen“).
+   */
+  billingStart: 'confirmed_go_live' | 'order';
+  /** Erste Abbuchung so viele Tage nach dem Bezugspunkt (Komplett: 7 Tage nach der Bestellung) */
   billingDelayDays?: number;
   includedChangeMinutes: number;
   consentVersion: string;
@@ -21,9 +25,17 @@ export interface V4OfferSnapshot {
 export const V4_PRICES = { setupCents: 59700, basisCents: 1900, carePlusCents: 9900, komplettCents: 17900 } as const;
 /**
  * „Komplett“ (06.11.2026, Betreiber): 0 € Einrichtung, 179 €/Monat, 12 Monate Mindestlaufzeit ab erster Abbuchung,
- * danach 179 € monatlich kündbar. Erste Abbuchung 7 Tage nach Go-Live. Enthält alles aus Care+.
+ * danach 179 € monatlich kündbar. Erste Abbuchung 7 Tage nach der Bestellung (seit 06.11.2026 abends; vorher nach
+ * Go-Live – solche Bestellungen behalten ihren Snapshot). Enthält alles aus Care+.
  */
 export const KOMPLETT_TERMS = { minTermMonths: 12, billingDelayDays: 7, includedChangeMinutes: 60 } as const;
+export const KOMPLETT_CONSENT_VERSION = 'v4-komplett-2026-11-06b';
+/** Satz aus den AGB, an dem erkennbar ist, dass die übernommene Fassung die aktuelle Komplett-Abbuchung enthält. */
+export const KOMPLETT_AGB_MARKER = 'Tage nach der Bestellung abgebucht';
+/** Komplett darf nur bestellt werden, wenn die übernommenen AGB die aktuelle Abbuchungsregel enthalten. */
+export function komplettTermsCurrent(cfg: { legal?: { termsMarkdown?: string } }): boolean {
+  return Boolean(cfg.legal?.termsMarkdown?.includes(KOMPLETT_AGB_MARKER));
+}
 export const V4_TIER_LABEL: Record<V4Tier, string> = { basis: 'Basis', care_plus: 'Care+', komplett: 'Komplett' };
 export function v4TierLabel(tier: V4Tier): string {
   return V4_TIER_LABEL[tier];
@@ -47,10 +59,10 @@ export function v4Offer(
       setupCents: 0,
       monthlyCents: V4_PRICES.komplettCents,
       minTermMonths: KOMPLETT_TERMS.minTermMonths,
-      billingStart: 'confirmed_go_live',
+      billingStart: 'order',
       billingDelayDays: KOMPLETT_TERMS.billingDelayDays,
       includedChangeMinutes: KOMPLETT_TERMS.includedChangeMinutes,
-      consentVersion: 'v4-komplett-2026-11-06',
+      consentVersion: KOMPLETT_CONSENT_VERSION,
       consentAt,
       // Ohne Einrichtungszahlung gibt es nur den Weg über das gespeicherte Zahlungsmittel
       billingMode: 'saved_mandate',
@@ -74,14 +86,14 @@ export function v4FirstYearCents(tier: V4Tier): number {
 }
 export function v4PriceText(cfg: { offers?: { komplettEnabled?: boolean } } = {}): string {
   return cfg.offers?.komplettEnabled
-    ? 'Basis: 597 € einmalig + 19 €/Monat ab Go-Live, monatlich kündbar. Oder Komplett: 0 € Einrichtung, 179 €/Monat, erste Zahlung 7 Tage nach Go-Live, 12 Monate Mindestlaufzeit, danach monatlich kündbar.'
+    ? 'Basis: 597 € einmalig + 19 €/Monat ab Go-Live, monatlich kündbar. Oder Komplett: 0 € Einrichtung, 179 €/Monat, erste Zahlung 7 Tage nach der Bestellung, 12 Monate Mindestlaufzeit, danach monatlich kündbar.'
     : '597 € einmalig + wahlweise 19 €/Monat (Basis) oder insgesamt 99 €/Monat (Care+) ab Go-Live. Monatlich kündbar.';
 }
 /** Exact selected contract, also visible when both tiers share the same one-time Stripe price. */
 export function v4CheckoutTerms(tier: V4Tier, billingMode: V4OfferSnapshot['billingMode'] = 'saved_mandate'): string {
   const offer = v4Offer(tier);
   if (tier === 'komplett')
-    return `Sie wählen SeitenWerk Komplett: jetzt 0 € – es wird nichts abgebucht. Sie hinterlegen nur Ihr Zahlungsmittel. ${formatEuroShort(offer.monthlyCents)}/Monat, erste Abbuchung ${KOMPLETT_TERMS.billingDelayDays} Tage nach dem bestätigten Go-Live Ihrer Website. Mindestlaufzeit ${KOMPLETT_TERMS.minTermMonths} Monate ab der ersten Abbuchung, danach monatlich kündbar. Mit der Bestellung stimmen Sie dem wiederkehrenden Einzug über das bei Stripe gespeicherte Zahlungsmittel ausdrücklich zu.`;
+    return `Sie wählen SeitenWerk Komplett: jetzt 0 € – es wird nichts abgebucht. Sie hinterlegen nur Ihr Zahlungsmittel. ${formatEuroShort(offer.monthlyCents)}/Monat, erste Abbuchung ${KOMPLETT_TERMS.billingDelayDays} Tage nach Ihrer Bestellung – unabhängig davon, wann Ihre Website online geht. Mindestlaufzeit ${KOMPLETT_TERMS.minTermMonths} Monate ab der ersten Abbuchung, danach monatlich kündbar. Mit der Bestellung stimmen Sie dem wiederkehrenden Einzug über das bei Stripe gespeicherte Zahlungsmittel ausdrücklich zu.`;
   return `Sie wählen SeitenWerk ${v4TierLabel(tier)}: jetzt ${formatEuroShort(offer.setupCents)} einmalig für die Einrichtung. Danach insgesamt ${formatEuroShort(offer.monthlyCents)}/Monat, ab dem bestätigten Go-Live. ${billingMode === 'saved_mandate' ? 'Mit dem Kauf stimmen Sie dem wiederkehrenden Einzug über das bei Stripe gespeicherte Zahlungsmittel ausdrücklich zu.' : 'Der Monatstarif wird nach Go-Live in einem gesonderten Abo-Checkout bestätigt.'} Monatlich kündbar, keine zwölfmonatige Mindestbindung und keine zusätzliche Basisgebühr.`;
 }
 /** No session/mandate/Go-Live inference: missing evidence always blocks monthly billing. */
@@ -89,11 +101,32 @@ export function assertV4BillingReady(input: {
   offer: V4OfferSnapshot;
   paid: boolean;
   liveAt: Date | null;
+  /** Zeitpunkt der bestätigten Bestellung (Bezugspunkt bei billingStart „order“) */
+  paidAt?: Date | null;
   now?: Date;
   cancelled?: boolean;
 }) {
   const now = input.now ?? new Date();
   const consentAt = input.offer.consentAt ? new Date(input.offer.consentAt) : null;
+  if (input.offer.billingStart === 'order') {
+    const paidAt = input.paidAt ?? null;
+    if (
+      !input.paid ||
+      input.cancelled ||
+      !consentAt ||
+      !Number.isFinite(consentAt.getTime()) ||
+      consentAt > now ||
+      !paidAt ||
+      !Number.isFinite(paidAt.getTime()) ||
+      paidAt > now
+    )
+      throw new Error('Monatsabrechnung erfordert bestätigte Bestellung mit Zahlungsmittel und ausdrückliche Zustimmung.');
+    return {
+      amountCents: input.offer.monthlyCents,
+      startsAt: new Date(paidAt.getTime() + (input.offer.billingDelayDays ?? 0) * 86_400_000),
+      idempotencySuffix: `v4-${input.offer.tier}`,
+    };
+  }
   if (
     !input.paid ||
     input.cancelled ||

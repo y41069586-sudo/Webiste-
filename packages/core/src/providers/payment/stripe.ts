@@ -467,7 +467,7 @@ export class StripePayment implements PaymentProvider {
         items: [{ price }],
         payment_behavior: 'allow_incomplete',
         off_session: true,
-        // Erste Abbuchung erst zum vereinbarten Termin (Komplett: Go-Live + 7 Tage); liegt er schon zurück, sofort
+        // Erste Abbuchung erst zum vereinbarten Termin (Komplett: Bestellung + 7 Tage); liegt er schon zurück, sofort
         ...(input.firstChargeAt && input.firstChargeAt.getTime() > Date.now() + 3600_000
           ? { trial_end: Math.floor(input.firstChargeAt.getTime() / 1000) }
           : {}),
