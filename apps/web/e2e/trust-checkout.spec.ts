@@ -44,7 +44,14 @@ for (const [index, [name, branch, city]] of profiles.entries()) {
     // Actual short-URL/QR routing, no public marketing detour.
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/q/${demo.trackToken}`);
-    await expect(page).toHaveURL(new RegExp(`/d/${demo.slug}$`));
+    await expect(page).toHaveURL(new RegExp(`/d/${demo.slug}\\?start=1$`));
+    // Willkommenshinweis: Entwurf, alles änderbar – schließt ohne Skript
+    const welcome = page.locator('dialog.sw-welcome');
+    await expect(welcome).toBeVisible();
+    await expect(welcome).toContainText('Vor der Bestellung');
+    if (index === 0) await page.screenshot({ path: path.join(out, `${id}-willkommen-390.jpg`), type: 'jpeg', quality: 82 });
+    await welcome.getByRole('button', { name: 'Entwurf ansehen' }).click();
+    await expect(welcome).toBeHidden();
     await expect(page.getByText(name!, { exact: true }).first()).toBeVisible();
     await expect(page.locator('.sw-demo-context')).toContainText('nicht die offizielle Website');
     for (const width of [320, 360, 390, 430, 1440]) {

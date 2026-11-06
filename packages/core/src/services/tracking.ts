@@ -124,7 +124,8 @@ export async function handleScan(
       await correctDeliveryEstimate(tx, lead.id, new Date());
     }
   });
-  return { redirect: demoUrl(`/d/${demo.slug}`) };
+  // ?start=1: Willkommenshinweis „Entwurf – alles noch änderbar“ beim ersten Aufruf über QR/Kurz-URL
+  return { redirect: demoUrl(`/d/${demo.slug}?start=1`) };
 }
 
 export async function handleOptOut(slug: string, req: RequestMeta): Promise<boolean> {

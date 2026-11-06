@@ -12,6 +12,7 @@ import {
 } from '@wbm/core';
 import { requestMetaFrom } from '@/lib/request';
 import { simplePage } from '@/lib/public-page';
+import { welcomeDialog } from '@/lib/welcome-dialog';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,6 +73,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     .replace('Nach der Einmalzahlung ergänzen Sie Ihre Angaben.', 'Ihre vor der Zahlung gespeicherten Angaben werden übernommen.')
     .replaceAll(EXPIRES_PLACEHOLDER, label)
     .replace('<h2 id="uebernehmen-titel"', `${notice}<h2 id="uebernehmen-titel"`)
+    .replace(/<body([^>]*)>/, (m) =>
+      query.get('start') === '1'
+        ? `${m}${welcomeDialog(found.lead.businessName, slug, found.demo.expiresAt ? formatDateDe(found.demo.expiresAt) : 'auf Weiteres')}`
+        : m,
+    )
     .replace('</body>', cfg.metrics.engagementBeacon ? `<script>${BEACON_SCRIPT}</script></body>` : '</body>');
   return new Response(page, { status: 200, headers: DEMO_HEADERS });
 }

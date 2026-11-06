@@ -1235,3 +1235,13 @@ Betreiberauftrag: „Bau die Briefe alle so neu: Kunden, die Sie gerade verliere
 - Belege: Handwerk Bitkom 40 % Ausschlusskriterium; Gastronomie Website erwartet / Online-Suche; Handel Infos
   vorab; Beauty, Kurse: flexible Online-Termine. Dienstleistung ohne Beleg → neutraler Brief. Stand Produktion
   06.11.: keine Aussage freigegeben – Freigabe im Admin unter „Mehr → Erlaubte Aussagen“.
+
+## 06.11.2026 – Willkommenshinweis nach dem Scan
+
+Betreiberauftrag: Nach dem Scan sollen Betriebe sofort wissen, dass der Entwurf Fehler enthalten kann und alles
+änderbar ist. Umsetzung: `/q/{token}` und Kurz-URL leiten auf `/d/{slug}?start=1`; dort liegt über der Demo ein
+Fenster (Name, Kontakt, Öffnungszeiten, Leistungen, Texte, Fotos, Farben/Gestaltung als Wunsch änderbar; vor der
+Bestellung selbst eintragen, kostenlos und unverbindlich; online erst nach Freigabe) mit „Entwurf ansehen“ und
+„Kein Interesse“. Reines HTML (`<dialog open>` + `<form method="dialog">`), kein Skript, nichts im Browser
+gespeichert; Screenshots und Brief-Bild bleiben unverändert. Inhalt deckt sich mit `/einrichten/[slug]`
+(Angaben, Texte, Leistungen, Öffnungszeiten, Fotos, Domain, Freitext „Wünsche“).
