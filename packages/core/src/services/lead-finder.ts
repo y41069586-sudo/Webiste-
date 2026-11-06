@@ -21,6 +21,7 @@ import { transitionLead } from './lead-state';
 import { isSuppressed } from './suppression';
 import { campaignBranches, campaignRank, assessAcquisition } from '../leads/acquisition';
 import { prescreen } from '../leads/prescreen';
+import { isBestLead } from '../leads/best-only';
 import { leadResearch } from './lead-research';
 import { probeOwnWebsite } from '../leads/website-probe';
 import { runWithProgress, type SearchProgressReporter } from './progress';
@@ -597,13 +598,19 @@ async function findLeadsRun(opts: FindLeadsOptions): Promise<FindLeadsSummary> {
     // Suchen und Prüfen gleichzeitig (Betreiber 06.11.2026): jeder passende Treffer geht sofort zur KI-Prüfung bzw.
     // in den Demo-Bau, statt nach der Suche im 5-Minuten-Takt. Der Takt bleibt als Sicherheitsnetz.
     if (savedId && place.source !== 'mock' && !effectiveSwitches(cfg).killSwitch) {
-      if (target === 'discovered' && place.phone && cfg.research.autoAi && getProviders().llm.name !== 'mock')
+      // Sparmodus: nur die besten Betriebe sofort zur KI-Prüfung, die übrigen warten
+      const best = isBestLead(cfg, {
+        leadSegment: result.segment,
+        prescreenScore: result.qualified ? pre.score : 0,
+        score: result.score,
+      });
+      if (target === 'discovered' && place.phone && best && cfg.research.autoAi && getProviders().llm.name !== 'mock')
         await enqueue(
           QUEUES.researchLead,
           { leadId: savedId, triggeredBy: 'search' },
           { singletonKey: `research:${savedId}` },
         ).catch((err) => logger.warn({ err: String(err) }, 'research sofort einreihen fehlgeschlagen'));
-      else if (target === 'qualified')
+      else if (target === 'qualified' && best)
         await enqueue(QUEUES.pipelineTick, {}, { singletonKey: 'pipeline-tick-now' }).catch(() => undefined);
     }
     if (target !== 'rejected') summary.prescreenTiers[pre.tier]++;

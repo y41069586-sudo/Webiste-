@@ -1,3 +1,4 @@
+import { bestMinScore, bestOnlyEnabled } from '../leads/best-only';
 import { and, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 import { effectiveSwitches, getConfig, getSetting, setSetting } from '../config/service';
 import { getDb } from '../db/client';
@@ -329,6 +330,10 @@ export async function enqueueAiResearch(): Promise<number> {
         eq(leads.status, 'discovered'),
         isNull(leads.anonymizedAt),
         isNotNull(leads.phone),
+        // Sparmodus: nur die besten Betriebe prüfen (social_only oder genug Punkte)
+        bestOnlyEnabled(cfg)
+          ? sql`(${leads.leadSegment} IN ('social_only','neu') OR ${leads.prescreenScore} >= ${bestMinScore(cfg)} OR ${leads.score} >= ${bestMinScore(cfg)})`
+          : undefined,
         // Fehlgeschlagene Prüfungen (Budget, Netz, Ausfall) nach 6 Stunden erneut versuchen statt für immer liegen lassen
         sql`NOT EXISTS (SELECT 1 FROM settings s WHERE s.key = 'ai-research:' || ${leads.id}::text
           AND NOT (s.value->>'state' = 'error' AND s.updated_at < now() - interval '6 hours'))`,

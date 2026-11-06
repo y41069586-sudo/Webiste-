@@ -1,3 +1,4 @@
+import { bestMinScore, bestOnlyEnabled } from '../leads/best-only';
 import { and, desc, eq, inArray, isNull, notExists, sql } from 'drizzle-orm';
 import { effectiveSwitches, getConfig } from '../config/service';
 import type { AppConfig } from '../config/settings';
@@ -130,6 +131,10 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
         and(
           eq(leads.status, 'qualified'),
           isNull(leads.anonymizedAt),
+          // Sparmodus: Demos (KI-Kosten) nur für die besten Betriebe; die übrigen bleiben „geeignet“ und warten
+          bestOnlyEnabled(cfg)
+            ? sql`(${leads.leadSegment} IN ('social_only','neu') OR ${leads.prescreenScore} >= ${bestMinScore(cfg)} OR ${leads.score} >= ${bestMinScore(cfg)})`
+            : undefined,
           notExists(
             db
               .select({ x: demos.id })

@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import {
+  bestMinScore,
+  bestOnlyEnabled,
   effectiveSwitches,
   formatEuroShort,
   getConfig,
@@ -206,7 +208,16 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               <Card key={section.id} title={section.title}>
                 {section.description ? <p className="mb-4 text-sm text-slate-600">{section.description}</p> : null}
                 <SectionForm
-                  fields={section.fields.map((f) => ({ ...f, value: getPath(cfg, f.path) }))}
+                  fields={section.fields.map((f) => ({
+                    ...f,
+                    // Sparmodus ist ohne Eintrag an: wirksamen Wert zeigen, damit Speichern ihn nicht versehentlich ausschaltet
+                    value:
+                      f.path === 'research.bestOnly'
+                        ? bestOnlyEnabled(cfg)
+                        : f.path === 'research.bestMinScore'
+                          ? bestMinScore(cfg)
+                          : getPath(cfg, f.path),
+                  }))}
                   action={saveSection.bind(null, section.id)}
                 />
               </Card>

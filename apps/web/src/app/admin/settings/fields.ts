@@ -261,6 +261,12 @@ export const SECTIONS: SectionDef[] = [
       { path: 'research.perTick', label: 'KI-Prüfung: Betriebe je Durchlauf (alle 5 Minuten)', type: 'number' },
       { path: 'research.maxSearches', label: 'KI-Prüfung: höchstens Websuchen je Betrieb', type: 'number' },
       {
+        path: 'research.bestOnly',
+        label: 'Sparmodus: KI-Prüfung und Demos nur für die besten Betriebe (nur Social Media statt Website oder genug Punkte)',
+        type: 'bool',
+      },
+      { path: 'research.bestMinScore', label: 'Sparmodus: Mindestpunkte (Standard 40)', type: 'number' },
+      {
         path: 'support.autoReplyClasses',
         label: 'Automatisch beantworten (nur mit AUTO_REPLY)',
         type: 'multi',

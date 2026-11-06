@@ -1277,3 +1277,12 @@ entfernt). Die Telefonnummer ist kein Pflichtfeld mehr und bleibt in den Einstel
 jeweiligen Betriebs auf seiner eigenen Demo („Anrufen“) bleibt unberührt. Hinweis: Das Impressum braucht neben der
 E-Mail einen zweiten schnellen Kontaktweg; das ist das Kontaktformular (keine Telefonpflicht, EuGH C-298/07).
 Bereits übernommene Rechtstexte enthalten die Nummer noch, bis sie im Admin neu übernommen werden.
+
+## 06.11.2026 – Sparmodus: KI nur für die besten Betriebe
+
+Betreiber (Guthaben: 6 € KI, 15 € easyNova, 5 € INWX): „nur die besten Betriebe“. Verbrauch zuletzt ca. 0,55 € KI je
+fertiger Demo inkl. Prüfung. `research.bestOnly` (ohne Eintrag an) begrenzt die KI-Prüfung (Takt und Sofortprüfung
+bei der Suche) und den Demo-Bau auf Betriebe mit Segment `social_only`/`neu` oder ab `research.bestMinScore`
+(Standard 40) Vorauswahl- bzw. Eignungspunkten. Da OSM kaum Bewertungen liefert, sind fast alle echten Treffer
+„etabliert“; 40 Punkte entsprechen etwa der oberen Hälfte (Stand Produktion 06.11.). Nichts wird gelöscht; übrige
+Betriebe warten. Schalter und Mindestpunkte im Admin unter Einstellungen (KI-Prüfung).

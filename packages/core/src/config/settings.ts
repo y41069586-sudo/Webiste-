@@ -330,6 +330,12 @@ export const appConfigSchema = z.object({
       perTick: z.number().int().min(1).max(20),
       /** Höchstens so viele Websuchen je Betrieb */
       maxSearches: z.number().int().min(1).max(15),
+      /**
+       * Sparmodus (Betreiber 06.11.2026, knappes KI-Guthaben): KI-Prüfung und Demo-Bau nur für die besten Betriebe –
+       * „social_only“ oder ab `bestMinScore` Punkten. Fehlt der Wert, ist der Sparmodus an.
+       */
+      bestOnly: z.boolean().optional(),
+      bestMinScore: z.number().int().min(0).max(100).optional(),
     })
     .default({ autoAi: false, perTick: 3, maxSearches: 8 }),
   switches: z.object({
