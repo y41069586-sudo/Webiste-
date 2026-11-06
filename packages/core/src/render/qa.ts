@@ -9,6 +9,7 @@ import { chromium, type Page } from 'playwright';
 import { getEnv } from '../config/env';
 import type { QaResult } from '../db/schema';
 import { withPage } from './browser';
+import { withRenderSlot, boundedRender } from './limits';
 
 type Check = QaResult['checks'][number];
 
@@ -260,6 +261,28 @@ export async function lighthouseCheck(
   minScore = 0.9,
   assets: { path: string; content: Buffer | string; contentType?: string }[] = [],
 ): Promise<Check> {
+  return withRenderSlot(() => {
+    let cleanup = async () => {};
+    // Includes launch and teardown: a stuck browser.close must never retain the global render slot.
+    return boundedRender(
+      () =>
+        lighthouseInSlot(liveHtml, minScore, assets, (dispose) => {
+          cleanup = dispose;
+        }),
+      () => cleanup(),
+      165_000,
+    ).finally(() => {
+      void cleanup().catch(() => undefined);
+    });
+  });
+}
+
+async function lighthouseInSlot(
+  liveHtml: string,
+  minScore: number,
+  assets: { path: string; content: Buffer | string; contentType?: string }[],
+  onCleanup: (dispose: () => Promise<void>) => void,
+): Promise<Check> {
   // Netlify serves HTML compressed. Model that delivery while retaining Lighthouse's mobile throttling.
   const compressedHtml = gzipSync(liveHtml);
   const server = createServer((req, res) => {
@@ -283,6 +306,10 @@ export async function lighthouseCheck(
     });
     res.end(gzip ? compressedHtml : liveHtml);
   });
+  onCleanup(async () => {
+    server.closeAllConnections();
+    server.close();
+  });
   await new Promise<void>((r) => server.listen(0, '127.0.0.1', () => r()));
   const port = (server.address() as { port: number }).port;
   const debugPort = await freePort();
@@ -291,6 +318,11 @@ export async function lighthouseCheck(
     headless: true,
     ...(executablePath ? { executablePath } : {}),
     args: [`--remote-debugging-port=${debugPort}`, '--disable-dev-shm-usage'],
+  });
+  onCleanup(async () => {
+    server.closeAllConnections();
+    server.close();
+    await browser.close().catch(() => undefined);
   });
   try {
     const { default: lighthouse } = await import('lighthouse');
@@ -302,7 +334,11 @@ export async function lighthouseCheck(
       formFactor: 'mobile' as const,
       screenEmulation: { mobile: true, width: 390, height: 844, deviceScaleFactor: 2, disabled: false },
     };
-    let result = await lighthouse(`http://127.0.0.1:${port}/`, options);
+    let result = await boundedRender(
+      () => lighthouse(`http://127.0.0.1:${port}/`, options),
+      () => browser.close(),
+      65_000,
+    );
     if (!result) throw new Error('Lighthouse lieferte kein Ergebnis');
     const baseline = {
       performance: result.lhr.categories.performance?.score,
@@ -312,10 +348,15 @@ export async function lighthouseCheck(
     const cpuSlowdownMultiplier = lighthouseCpuMultiplier(baseline.benchmarkIndex);
     if (cpuSlowdownMultiplier < 3.9) {
       // Keep the standard report as evidence. Same page, network and scoring threshold; only CPU is calibrated.
-      result = await lighthouse(`http://127.0.0.1:${port}/`, {
-        ...options,
-        throttling: { ...baseline.throttling, cpuSlowdownMultiplier },
-      });
+      result = await boundedRender(
+        () =>
+          lighthouse(`http://127.0.0.1:${port}/`, {
+            ...options,
+            throttling: { ...baseline.throttling, cpuSlowdownMultiplier },
+          }),
+        () => browser.close(),
+        65_000,
+      );
       if (!result) throw new Error('Kalibrierte Lighthouse-Messung fehlgeschlagen');
     }
     const scores = Object.fromEntries(Object.entries(result.lhr.categories).map(([k, v]) => [k, v.score ?? 0]));

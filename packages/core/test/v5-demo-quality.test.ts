@@ -1,3 +1,6 @@
+import { QA_TOOL_NAME } from '../src/demos/content';
+import { registerMockStructured } from '../src/providers';
+import { studioQaFixture } from './helpers';
 import { imagesPainted } from '../src/render/screenshots';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -30,6 +33,7 @@ const cases = [
 const out = path.resolve('../../data/exports/v5-quality');
 describe('V5: zehn fiktive Demos durch bestehenden Generator und echte Browser-QA', () => {
   beforeAll(async () => {
+    registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     await resetDb();
     await updateConfig({ offers: { activeVersion: 'v4' } }, 'test:quality');
     await mkdir(out, { recursive: true });
@@ -75,9 +79,7 @@ describe('V5: zehn fiktive Demos durch bestehenden Generator und echte Browser-Q
           });
       if (index === 0) {
         // Zweimal unbrauchbare KI-Antwort: seit der freien Gestaltung kein stiller Vorlagen-Ersatz, der Bau stoppt
-        await expect(buildDemo(lead!.id, { actor: 'test:quality', templateId })).rejects.toThrow(
-          /individueller Gestaltungsentwurf/,
-        );
+        await expect(buildDemo(lead!.id, { actor: 'test:quality', templateId })).rejects.toThrow(/Gestaltungskonzept/);
         spy?.mockRestore();
         continue;
       }

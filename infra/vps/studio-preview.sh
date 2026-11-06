@@ -64,7 +64,7 @@ elif [[ "${STUDIO_PREVIEW_USE_BUILT_IMAGE:-false}" != true && "$existing_html" !
   git merge-base --is-ancestor "$RELEASE" FETCH_HEAD || { echo 'Release nicht veröffentlicht.' >&2; exit 1; }
   git merge-base --is-ancestor HEAD "$RELEASE" || { echo 'Lokaler Stand abweichend; kein Zurücksetzen.' >&2; exit 1; }
   git merge --ff-only "$RELEASE"
-  RESUME_WORKER=false RELEASE="$RELEASE" DIR="$ROOT" bash infra/vps/update-worker.sh
+  RESUME_WORKER=false RESTORE_REPAIR_PAUSE=false RELEASE="$RELEASE" DIR="$ROOT" bash infra/vps/update-worker.sh
 fi
 install -d -m 0700 -o 1000 -g 1000 "$OUTPUT"
 run=("${compose[@]}" run --rm -T --no-deps "${source_mounts[@]}" -v "$OUTPUT:/preview")

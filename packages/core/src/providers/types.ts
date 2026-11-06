@@ -301,6 +301,9 @@ export interface LlmStructuredRequest {
   maxTokens?: number;
   /** Maximum physical tool-generation attempts. Studio stages use one explicit, budgeted attempt. */
   maxAttempts?: 1 | 2;
+  /** Bound token counting and generation together for short worker QA stages. */
+  timeoutMs?: number;
+  signal?: AbortSignal;
   effort?: 'low' | 'medium' | 'high';
   /** Zweck für das Budget-Ledger, z. B. demo_content */
   purpose: string;

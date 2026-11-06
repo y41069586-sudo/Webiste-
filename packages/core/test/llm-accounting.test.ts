@@ -118,3 +118,36 @@ it('never uses a tool call cut off at max_tokens; retries with twice the room an
   expect(result.usages).toHaveLength(2);
   expect(mocks.create.mock.calls.map((c) => c[0].max_tokens)).toEqual([600, 1200]);
 });
+it('bounds token counting and generation with the same deadline before the job expires', async () => {
+  const guard = { beforeRequest: vi.fn(), afterResponse: vi.fn() };
+  mocks.count.mockImplementationOnce(
+    (_params, options: { signal: AbortSignal }) =>
+      new Promise((_resolve, reject) => {
+        options.signal.addEventListener('abort', () => reject(options.signal.reason), { once: true });
+      }),
+  );
+  await expect(
+    new AnthropicLlm('fixture', false).generateStructured({
+      ...req,
+      maxAttempts: 1,
+      budgetGuard: guard,
+      timeoutMs: 10,
+    }),
+  ).rejects.toThrow();
+  expect(mocks.count).toHaveBeenCalledTimes(1);
+  expect(mocks.create).not.toHaveBeenCalled();
+  expect(guard.beforeRequest).not.toHaveBeenCalled();
+});
+it('does not start a physical provider call after the build or QA has already been aborted', async () => {
+  const controller = new AbortController();
+  controller.abort(Error('job deadline'));
+  await expect(
+    new AnthropicLlm('fixture', false).generateStructured({
+      ...req,
+      maxAttempts: 1,
+      signal: controller.signal,
+    }),
+  ).rejects.toThrow('job deadline');
+  expect(mocks.create).not.toHaveBeenCalled();
+  expect(mocks.count).not.toHaveBeenCalled();
+});

@@ -13,15 +13,17 @@ import { qaDemo } from '../src/render/demo-qa';
 import { approveDemo, publishDemo } from '../src/services/demo-review';
 import { generateLetter } from '../src/render/letter';
 import { assertLetterBinding } from '../src/letters/binding';
-import { getProviders } from '../src/providers';
+import { getProviders, registerMockStructured } from '../src/providers';
+import { QA_TOOL_NAME } from '../src/demos/content';
 import { optOutLead } from '../src/services/suppression';
 import { closeBrowser } from '../src/render/browser';
 import { stopBoss } from '../src/queue';
 import { randomToken } from '../src/util/crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { resetDb, resetVariants } from './helpers';
+import { resetDb, resetVariants, studioQaFixture } from './helpers';
 
 beforeEach(async () => {
+  registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
   await resetDb();
   await resetVariants();
   await updateConfig({ offers: { activeVersion: 'v4' }, targeting: { branches: DEFAULT_CONFIG.targeting.branches } }, 'test');

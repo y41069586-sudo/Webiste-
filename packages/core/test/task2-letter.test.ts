@@ -1,3 +1,6 @@
+import { QA_TOOL_NAME } from '../src/demos/content';
+import { registerMockStructured } from '../src/providers';
+import { studioQaFixture } from './helpers';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { and, eq } from 'drizzle-orm';
 import { getDb } from '../src/db/client';
@@ -43,6 +46,7 @@ describe('V4 actual generation, reviewed facts and immutable print assignment', 
   let lead: typeof leads.$inferSelect, demo: typeof demos.$inferSelect, letter: typeof letters.$inferSelect;
   let variantId: string;
   beforeAll(async () => {
+    registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     await resetDb();
     await resetVariants();
     await updateConfig({ offers: { activeVersion: 'v4' }, switches: { dryRun: true } }, 'test');

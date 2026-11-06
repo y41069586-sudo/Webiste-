@@ -7,6 +7,9 @@ RELEASE="${RELEASE:?Der freigegebene vollständige Commit fehlt.}"
 [[ "$RELEASE" =~ ^[a-f0-9]{40}$ ]] || { echo 'Ungültiger Release-Commit.' >&2; exit 1; }
 RESUME="${RESUME_WORKER:-false}"
 [[ "$RESUME" = true || "$RESUME" = false ]] || { echo 'RESUME_WORKER muss true oder false sein.' >&2; exit 1; }
+RESTORE_PAUSE="${RESTORE_REPAIR_PAUSE:-false}"
+[[ "$RESTORE_PAUSE" = true || "$RESTORE_PAUSE" = false ]] || exit 1
+[[ "$RESTORE_PAUSE" != true || "$RESUME" = true ]] || { echo 'Reparaturpause nur mit ausdrücklich angefordertem Workerstart aufheben.' >&2; exit 1; }
 cd "$ROOT"
 [[ "$(git rev-parse --show-toplevel)" = "$ROOT" ]] || { echo 'Unerwartetes Repository.' >&2; exit 1; }
 git diff --quiet && git diff --cached --quiet || { echo 'Lokale Codeänderungen vorhanden; nichts überschrieben.' >&2; exit 1; }
@@ -35,7 +38,12 @@ git merge --ff-only "$RELEASE"
 "${compose[@]}" build worker
 "${compose[@]}" run --rm -T --no-deps --entrypoint node worker --import tsx --input-type=module -e "const m=await import('/repo/packages/templates/src/index.ts');const s=await import('/repo/packages/core/src/demos/studio.ts');const a=await import('/repo/packages/core/src/demos/studio-author.ts');const b=await import('/repo/packages/core/src/demos/build.ts');if(m.FREE_DESIGN_VERSION!=='free-design-1'||s.STUDIO_VERSION!=='design-studio-1'||typeof a.authorStudioContent!=='function'||typeof b.generateDemoContent!=='function')process.exit(1);console.log('Freies Gestaltungsstudio im neuen Worker-Image bestätigt.');"
 if [[ "$RESUME" = true ]]; then
-  "${compose[@]}" run --rm -T --no-deps --entrypoint node worker --import tsx /repo/packages/core/scripts/worker-resume-check.ts
+  repair_args=()
+  if [[ "$RESTORE_PAUSE" = true ]]; then
+    "${compose[@]}" stop worker
+    repair_args=(--restore-repair-pause)
+  fi
+  "${compose[@]}" run --rm -T --no-deps --entrypoint node worker --import tsx /repo/packages/core/scripts/worker-resume-check.ts "${repair_args[@]}"
 fi
 if [[ "$was_running" != true && "$RESUME" != true ]]; then
   # `create` never starts containers and does not accept the run/up-only --no-deps flag.

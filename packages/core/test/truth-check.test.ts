@@ -1,3 +1,6 @@
+import { QA_TOOL_NAME } from '../src/demos/content';
+import { registerMockStructured } from '../src/providers';
+import { studioQaFixture } from './helpers';
 import { eq, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { approveClaim, blockClaim, loadClaimDefinitions, sourcesPageClaims, syncClaims } from '../src/claims/library';
@@ -227,6 +230,7 @@ describe('Slot-Briefe passen im ungünstigsten Fall auf eine Seite', () => {
 describe('Slot-Briefe im echten Ablauf', () => {
   let leadId: string;
   beforeAll(async () => {
+    registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     await resetDb();
     await resetVariants();
     await getDb().execute(sql`TRUNCATE claim_usages, claims CASCADE`);

@@ -39,6 +39,8 @@ export async function authorStudioContent(
   opts: {
     leadId?: string;
     seed?: number;
+    recentConcepts?: string[];
+    signal?: AbortSignal;
     feedback?: string[];
     photos?: NonNullable<BusinessFacts['photos']>;
     onPlan?: (plan: StudioPlan) => Promise<void>;
@@ -55,17 +57,19 @@ export async function authorStudioContent(
   const leadId = opts.leadId;
   const qaFeedback = opts.feedback;
   const images = await studioImages(photos);
+  opts.signal?.throwIfAborted();
   const studioPlan = parseStudioPlan(
     await llmStructured<unknown>({
       tier: 'creative',
       system: STUDIO_SYSTEM,
-      prompt: studioPrompt(facts),
+      prompt: studioPrompt(facts, { seed, recentConcepts: opts.recentConcepts }),
       images,
       toolName: STUDIO_TOOL,
       toolDescription: 'Zwei individuelle Gestaltungsrichtungen und die begründete Auswahl.',
       inputSchema: STUDIO_SCHEMA,
       ...STUDIO_CALL_OPTIONS.concept,
       purpose: 'demo_art_direction',
+      signal: opts.signal,
       leadId,
     }),
   );
@@ -74,6 +78,7 @@ export async function authorStudioContent(
   let feedback: string[] | undefined = qaFeedback?.length ? qaFeedback.slice(0, 12) : undefined;
   let lastViolations: RuleViolation[] = [];
   for (let attempt = 1; attempt <= 2; attempt++) {
+    opts.signal?.throwIfAborted();
     try {
       const raw = await llmStructured<SiteContent>({
         tier: 'creative',
@@ -85,6 +90,7 @@ export async function authorStudioContent(
         inputSchema: DEMO_CONTENT_SCHEMA as unknown as Record<string, unknown>,
         ...STUDIO_CALL_OPTIONS.author,
         purpose: 'demo_content',
+        signal: opts.signal,
         leadId,
       });
       let content: SiteContent;

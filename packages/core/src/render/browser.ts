@@ -1,6 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright';
 import { getEnv } from '../config/env';
 import { logger } from '../logger';
+import { withRenderSlot, boundedRender } from './limits';
 
 interface BrowserGlobal {
   __wbmBrowser?: Promise<Browser>;
@@ -50,6 +51,13 @@ export async function withPage<T>(
   opts: { width: number; height: number; deviceScaleFactor?: number; isMobile?: boolean; allowNetwork?: boolean },
   fn: (page: Page, ctx: BrowserContext) => Promise<T>,
 ): Promise<T> {
+  return withRenderSlot(() => boundedRender(() => withPageInSlot(opts, fn), closeBrowser, 50_000));
+}
+
+async function withPageInSlot<T>(
+  opts: { width: number; height: number; deviceScaleFactor?: number; isMobile?: boolean; allowNetwork?: boolean },
+  fn: (page: Page, ctx: BrowserContext) => Promise<T>,
+): Promise<T> {
   const browser = await getBrowser();
   const ctx = await browser.newContext({
     viewport: { width: opts.width, height: opts.height },
@@ -66,7 +74,11 @@ export async function withPage<T>(
     ctx.setDefaultNavigationTimeout(45_000);
     if (!opts.allowNetwork) await ctx.route(/^https?:\/\//, (route) => route.abort());
     const page = await ctx.newPage();
-    return await fn(page, ctx);
+    return await boundedRender(
+      () => fn(page, ctx),
+      () => ctx.close(),
+      45_000,
+    );
   } finally {
     await ctx.close().catch(() => undefined);
   }

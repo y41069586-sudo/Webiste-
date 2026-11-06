@@ -5,14 +5,27 @@ const state = vi.hoisted(() => ({
   env: { ANTHROPIC_API_KEY: 'fixture-only', LLM_PROVIDER: 'anthropic' },
   template: 'authored-handwerk',
   set: vi.fn(),
+  owner: 'codex:production-repair',
+  priorKill: false as boolean | string,
+  update: vi.fn(),
   audit: vi.fn(),
   close: vi.fn(),
-  transaction: vi.fn(async (fn: (tx: unknown) => Promise<void>) => fn({ marker: 'tx-fixture' })),
+  transaction: vi.fn(async (fn: (tx: unknown) => Promise<void>) =>
+    fn({
+      marker: 'tx-fixture',
+      execute: async () => [],
+      query: {
+        settings: { findFirst: async () => ({ updatedBy: state.owner }) },
+        auditLog: { findFirst: async () => ({ contextJson: { previousKillSwitch: state.priorKill } }) },
+      },
+    }),
+  ),
 }));
 vi.mock('../src/config/service', () => ({
   getConfig: async () => state.cfg,
   effectiveSwitches: () => state.cfg!.switches,
   setSetting: state.set,
+  updateConfig: state.update,
 }));
 vi.mock('../src/config/env', () => ({ getEnv: () => state.env }));
 vi.mock('../src/db/client', () => ({ getDb: () => ({ transaction: state.transaction }), closeDb: state.close }));
@@ -34,6 +47,11 @@ beforeEach(() => {
   state.cfg.review.qaLighthouse = true;
   state.env = { ANTHROPIC_API_KEY: 'fixture-only', LLM_PROVIDER: 'anthropic' };
   state.template = 'authored-handwerk';
+  state.owner = 'codex:production-repair';
+  state.priorKill = false;
+  state.update.mockReset().mockImplementation(async () => {
+    state.cfg!.switches.killSwitch = false;
+  });
   state.set.mockClear();
   state.audit.mockClear();
   state.close.mockClear();
@@ -117,6 +135,28 @@ describe('Resume the regular worker without changing switches or spending tokens
     expect(state.set).not.toHaveBeenCalled();
     expect(state.audit).not.toHaveBeenCalled();
     expect(state.close).toHaveBeenCalledOnce();
+  });
+  it('restores only its own audited temporary pause after an explicit verified-rollout flag', async () => {
+    state.cfg!.switches.killSwitch = true;
+    const before = structuredClone(state.cfg);
+    expect(await checkWorkerResume({ restoreRepairPause: true })).toMatchObject({ killSwitch: false, newAiCalls: 0 });
+    expect(state.update).toHaveBeenCalledWith(
+      { switches: { killSwitch: false } },
+      'operator:verified-repair-rollout',
+      expect.any(Object),
+    );
+    before!.switches.killSwitch = false;
+    expect(state.cfg).toEqual(before);
+  });
+  it('never clears a later operator pause, a pre-existing Not-Aus, or a pause without the rollout flag', async () => {
+    state.cfg!.switches.killSwitch = true;
+    await expect(checkWorkerResume()).rejects.toThrow(/Not-Aus/);
+    state.owner = 'admin:operator';
+    await expect(checkWorkerResume({ restoreRepairPause: true })).rejects.toThrow(/keine automatische Aufhebung/);
+    state.owner = 'codex:production-repair';
+    state.priorKill = true;
+    await expect(checkWorkerResume({ restoreRepairPause: true })).rejects.toThrow(/keine automatische Aufhebung/);
+    expect(state.update).not.toHaveBeenCalled();
   });
   it('requires the full pinned release before recording anything', async () => {
     await expect(checkWorkerResume({ record: true, release: 'short' })).rejects.toThrow(/Release-Commit/);

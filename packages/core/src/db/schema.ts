@@ -135,6 +135,15 @@ export const leads = pgTable(
 // Demos
 // ---------------------------------------------------------------------------
 export interface QaResult {
+  /** Completed visual verdict, bound to exact bytes and source facts; survives a later technical-stage failure. */
+  visualCheckpoint?: {
+    htmlHash: string;
+    businessFactsHash: string;
+    researchHash: string;
+    checks: { name: string; passed: boolean; details?: string; score?: number }[];
+    rebuildFeedback: string[];
+    visualBlocking: boolean;
+  };
   renderedAssets?: {
     businessFactsHash: string;
     htmlHash: string;

@@ -14,7 +14,9 @@ async function reviewBoard(page: Page, mobile: boolean): Promise<Buffer> {
   await page.addStyleTag({ content: '.sw-demo-context,.sw-demo-toolbar,#uebernehmen,#frage{display:none!important}' });
   const height = await page.evaluate(() => document.documentElement.scrollHeight);
   if (height > 18000) throw new Error('Entwurf länger als 18000 px; Sichtprüfung begrenzen und Gestaltung manuell prüfen.');
-  const full = await page.screenshot({ type: 'jpeg', quality: 82, fullPage: true });
+  // Boards have fixed output sizes: 2x source pixels only quadruple CPU/RAM before downsampling.
+  // Keep the separate print/hero captures at 2x, capture the full-page evidence at CSS resolution.
+  const full = await page.screenshot({ type: 'jpeg', quality: 78, fullPage: true, scale: 'css', timeout: 25_000 });
   // Use the captured page as pixels, never render model HTML in the board document.
   const data = await page.evaluate(
     async ({ src, mobile }) => {

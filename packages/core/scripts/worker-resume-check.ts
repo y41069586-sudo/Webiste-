@@ -1,8 +1,10 @@
-/** Read-only rollout check; --record logs an observed healthy running container, never changes operating switches. */
+/** Default read-only rollout check; explicit repair flag restores only its own audited temporary pause. */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { authoredTemplateId } from '@wbm/templates';
-import { getConfig, effectiveSwitches, setSetting } from '../src/config/service';
+import { getConfig, effectiveSwitches, setSetting, updateConfig } from '../src/config/service';
+import { and, desc, eq, sql } from 'drizzle-orm';
+import { settings, auditLog } from '../src/db/schema';
 import type { AppConfig } from '../src/config/settings';
 import { getEnv } from '../src/config/env';
 import { closeDb } from '../src/db/client';
@@ -27,12 +29,33 @@ export function assertWorkerResumeConfig(
     throw Error('Normaler Demo-Bau verwendet nicht den frei gestalteten Generator.');
 }
 
-export async function checkWorkerResume(options: { record?: boolean; release?: string } = {}) {
+export async function checkWorkerResume(options: { record?: boolean; release?: string; restoreRepairPause?: boolean } = {}) {
   try {
     if (options.record && !/^[a-f0-9]{40}$/.test(options.release ?? ''))
       throw Error('Vollständiger Release-Commit erforderlich.');
-    const cfg = await getConfig({ fresh: true });
+    let cfg = await getConfig({ fresh: true });
     const env = getEnv();
+    if (options.restoreRepairPause && !options.record && effectiveSwitches(cfg).killSwitch) {
+      // Only restore the pause this repair itself installed; never override a later operator Not-Aus.
+      assertWorkerResumeConfig(cfg, false, env);
+      await getDb().transaction(async (tx) => {
+        await tx.execute(sql`SELECT key FROM settings WHERE key='app_config' FOR UPDATE`);
+        const row = await tx.query.settings.findFirst({ where: eq(settings.key, 'app_config') });
+        const prior = await tx.query.auditLog.findFirst({
+          where: and(
+            eq(auditLog.entityId, 'app_config'),
+            eq(auditLog.action, 'temporary_production_repair_pause'),
+            eq(auditLog.actor, 'codex:production-repair'),
+          ),
+          orderBy: desc(auditLog.createdAt),
+        });
+        const before = prior?.contextJson?.previousKillSwitch;
+        if (row?.updatedBy !== 'codex:production-repair' || !(before === false || before === 'false'))
+          throw Error('Not-Aus stammt nicht mehr von dieser Reparatur; keine automatische Aufhebung.');
+        await updateConfig({ switches: { killSwitch: false } }, 'operator:verified-repair-rollout', tx);
+      });
+      cfg = await getConfig({ fresh: true });
+    }
     const sw = effectiveSwitches(cfg);
     assertWorkerResumeConfig(cfg, sw.killSwitch, env);
     const report = {
@@ -81,6 +104,7 @@ export async function checkWorkerResume(options: { record?: boolean; release?: s
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   checkWorkerResume({
     record: process.argv.includes('--record'),
+    restoreRepairPause: process.argv.includes('--restore-repair-pause'),
     release: process.argv.find((arg) => arg.startsWith('--release='))?.slice(10),
   })
     .then((report) => console.log(JSON.stringify(report)))

@@ -1,6 +1,7 @@
 import { PgBoss, type SendOptions } from 'pg-boss';
 import { queueRuntimeConfig } from './queue-config';
 import { logger } from './logger';
+import { getPool } from './db/client';
 import type { DemoRevisionPatch } from './demos/revision-types';
 
 /** Alle Queues mit Standardoptionen (Retries mit Backoff, Dead-Letter). */
@@ -178,6 +179,41 @@ export async function enqueue<Q extends QueueName>(
   options: SendOptions = {},
 ): Promise<string | null> {
   const boss = await getBoss();
+  if (name === QUEUES.buildDemo || name === QUEUES.qaDemo) {
+    const payload = data as QueuePayloads['build-demo'] | QueuePayloads['qa-demo'];
+    const field = name === QUEUES.buildDemo ? 'leadId' : 'demoId';
+    const entityId =
+      field === 'leadId' ? (payload as QueuePayloads['build-demo']).leadId : (payload as QueuePayloads['qa-demo']).demoId;
+    if (!entityId) throw Error(`${name}: ${field} fehlt.`);
+    const key = `${name === QUEUES.buildDemo ? 'demo' : 'qa'}:${entityId}`;
+    // singletonKey alone has no pending-job constraint on existing pg-boss standard queues.
+    // Serialize admission across app/worker processes; include old jobs without a key too.
+    const client = await getPool().connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [`${name}:${entityId}`]);
+      const pending = await client.query(
+        `SELECT id FROM pgboss.job WHERE name=$1 AND state IN ('created','retry','active') AND data->>$2=$3 LIMIT 1`,
+        [name, field, entityId],
+      );
+      if (pending.rowCount) {
+        await client.query('COMMIT');
+        return null;
+      }
+      const id = await boss.send(name, data as object, {
+        ...options,
+        singletonKey: key,
+        db: { executeSql: (text: string, values?: unknown[]) => client.query(text, values) },
+      });
+      await client.query('COMMIT');
+      return id;
+    } catch (error) {
+      await client.query('ROLLBACK').catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
   return boss.send(name, data as object, options);
 }
 

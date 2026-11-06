@@ -88,6 +88,13 @@ class WorkerUpdateTest(unittest.TestCase):
         self.assertLess(check,start);self.assertLess(start,record)
         self.assertTrue(any('--release='+RELEASE in c for c in calls))
         self.assertFalse(any('create' in c for c in calls))
+    def test_repair_restore_stops_old_code_before_clearing_its_owned_pause(self):
+        r,calls=self.run_update(RESUME_WORKER='true',RESTORE_REPAIR_PAUSE='true')
+        self.assertEqual(r.returncode,0,r.stderr)
+        stop=next(i for i,c in enumerate(calls) if 'stop' in c)
+        check=next(i for i,c in enumerate(calls) if '--restore-repair-pause' in c)
+        start=next(i for i,c in enumerate(calls) if 'up' in c)
+        self.assertLess(stop,check);self.assertLess(check,start)
     def test_failed_resume_config_check_never_starts_the_worker(self):
         r,calls=self.run_update(running='false',RESUME_WORKER='true',RESUME_CHECK_FAIL='1')
         self.assertNotEqual(r.returncode,0)

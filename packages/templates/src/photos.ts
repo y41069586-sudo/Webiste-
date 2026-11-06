@@ -56,7 +56,12 @@ export function stockPhotos(
   group: BranchGroup,
   seed = 0,
   branchLabel = '',
-  opts: { includeReview?: boolean; allowGenerated?: boolean; mood?: 'warm' | 'neutral' | 'dark' | 'natural' } = {},
+  opts: {
+    includeReview?: boolean;
+    allowGenerated?: boolean;
+    mood?: 'warm' | 'neutral' | 'dark' | 'natural';
+    avoidFiles?: string[];
+  } = {},
 ): StockPhoto[] {
   const root = path.resolve(imagesDir());
   const list = stockPhotoManifest().filter((p) => {
@@ -93,11 +98,19 @@ export function stockPhotos(
   const matching = rotated.filter(fits);
   // Prefer a relevant activity/detail over another generic interior. Ties keep stable variety.
   const roleOrder = { work: 0, detail: 1, product: 1, interior: 2 };
+  const rank = (p: StockPhoto) => {
+    let h = seed >>> 0;
+    for (const ch of p.file) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x7feb352d) >>> 0;
+    h ^= h >>> 15;
+    return (h >>> 0) / 4294967296 + (p.hero ? 0.12 : 0) + (roleOrder[p.role ?? 'interior'] === 0 ? 0.12 : 0);
+  };
   matching.sort(
     (a, b) =>
+      Number(Boolean(opts.avoidFiles?.includes(a.file))) - Number(Boolean(opts.avoidFiles?.includes(b.file))) ||
       Number(Boolean(b.moods?.includes(opts.mood!))) - Number(Boolean(a.moods?.includes(opts.mood!))) ||
-      Number(Boolean(b.hero)) - Number(Boolean(a.hero)) ||
-      roleOrder[a.role ?? 'interior'] - roleOrder[b.role ?? 'interior'],
+      rank(b) - rank(a),
   );
   // Unknown specialties must not silently receive an unrelated service photograph.
   return matching.length ? matching : label.trim() ? rotated.filter((p) => !p.keywords?.length) : rotated;

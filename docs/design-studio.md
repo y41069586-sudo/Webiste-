@@ -34,7 +34,7 @@ Der reguläre `buildDemo`-Pfad arbeitet jetzt so:
 ## Kosten, Belege und Grenzen
 
 - Ein zusätzlicher logischer Creative-Aufruf (`demo_art_direction`, aktuell höchstens 8000
-  Ausgabetokens) pro Bau. Umsetzung höchstens 16000; Studio-QA höchstens 6000. Mittlere Denktiefe,
+  Ausgabetokens) pro Bau. Umsetzung höchstens 16000 mit mittlerer Denktiefe; Studio-QA höchstens 2800 mit niedriger Denktiefe und 90-Sekunden-Aufrufgrenze,
   je Studio-Schritt ein physischer API-Versuch. Bestehende Modelle
   und Budgets unverändert. Jeder physische Provideraufruf einschließlich Wiederholungen nutzt
   weiter den vorhandenen Tokenzähler und das Budget-Ledger.

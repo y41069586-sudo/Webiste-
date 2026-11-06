@@ -153,11 +153,15 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
       const available = Object.fromEntries(segments.map((s) => [s, bySeg.get(s)!.length]));
       const plan = allocate(capacity, shares, available);
       for (const [seg, n] of Object.entries(plan)) {
+        let admitted = 0;
         for (const leadId of bySeg.get(seg)!.slice(0, n)) {
-          await enqueue(QUEUES.buildDemo, { leadId, triggeredBy: 'pipeline' }, { singletonKey: `demo:${leadId}` });
-          result.demosEnqueued++;
+          const jobId = await enqueue(QUEUES.buildDemo, { leadId, triggeredBy: 'pipeline' }, { singletonKey: `demo:${leadId}` });
+          if (jobId) {
+            result.demosEnqueued++;
+            admitted++;
+          }
         }
-        if (n) result.bySegment[seg] = n;
+        if (admitted) result.bySegment[seg] = admitted;
       }
     }
   }

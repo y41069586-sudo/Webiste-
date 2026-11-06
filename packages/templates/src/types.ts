@@ -108,6 +108,8 @@ export interface BusinessFacts {
   logoSrc?: string | null;
   /** Fotos des Kunden (nur Live/Vorschau; nie in Demos) */
   photos?: {
+    /** Curated local source ID for diversity; never a model-controlled fetch URL. */
+    assetId?: string;
     src: string;
     alt: string;
     rightsConfirmed?: boolean;

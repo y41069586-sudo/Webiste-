@@ -1,5 +1,29 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Produktionsreparatur 06.11.2026 – begrenzte QA und atomare Demo-Queue
+
+Aktueller Betreiberauftrag: Produktionsstau, Timeouts und doppelte Builds beheben, vollständige
+Core-Suite ausführen; Standortzweck und Vielfalt verbessern. Keine Gates/Preise/Formulare lockern.
+Für die Reparatur wurde ausschließlich der zuvor ausgeschaltete Not-Aus vorübergehend aktiviert
+(`updated_by=codex:production-repair`, Audit `temporary_production_repair_pause`). 290 redundante
+wartende Builds abgebrochen, Datensätze erhalten: 23 Builds für 23 Leads sowie vier QA-Aufträge.
+
+`enqueue` erzwingt zentrale transaktionale Deduplizierung von build-demo je Lead und qa-demo je Demo,
+inklusive alter unkeyed Jobs. singletonKey allein schützt die vorhandene standard-Queue nicht.
+Keine Queue-Policy-/Schemaänderung oder pauschale Löschung. Renderarbeit seriell, tatsächliche
+Browser-/Modellgrenzen und innere Job-Deadlines vor pg-boss; unveränderte visuelle Urteile an
+HTML/Fakten/Recherche gebunden speichern. Laufzeitfehler werden sichtbar qa_failed, nicht building.
+
+Nur nach geprüftem neuen Image darf `RESUME_WORKER=true RESTORE_REPAIR_PAUSE=true` zuerst den
+alten Worker stoppen und genau diese eigene, auditierte Pause aufheben. Das ist die enge Ausnahme
+zum allgemeinen Not-Aus-Verbot unten; spätere Betreiberänderungen oder zuvor aktiver Not-Aus
+blockieren weiter. Ohne beide Flags keine Aufhebung. Tatsächlichen VPS-Stand erst nach Healthbeleg
+behaupten. Weitere Details/Prüfnachweise: `docs/production-demo-repair-2026-11-06.md`.
+
+Neue Entwürfe: Gebietsvorschlag nur bei Arbeit beim Kunden; Studios/Gastro/Handel/Kurse erhalten
+Standort und Anfahrt, keine erfundene Verkehrsanbindung. Jüngste Konzepte und berechtigte Bildmotive
+für Variation berücksichtigen, keine vorgegebenen Layouts oder unpassenden Ersatzbilder.
+
 ## Neueste Betreiberfreigabe 05.11.2026 – regulären Generator übernehmen und Worker fortsetzen
 
 Betreiber hat den fiktiven Prüfentwurf angesehen, dessen Gestaltung bestätigt und anschließend

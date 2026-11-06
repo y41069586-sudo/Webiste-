@@ -1,5 +1,6 @@
+import { studioQaFixture } from './helpers';
 import { eq } from 'drizzle-orm';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { getDb } from '../src/db/client';
 import { demos, leads } from '../src/db/schema';
 import { buildDemo, closeBrowser, qaDemo } from '../src/render';
@@ -16,6 +17,7 @@ import { resetDb } from './helpers';
 describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
   let leadId: string;
   beforeAll(async () => {
+    registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     await resetDb();
     await findLeads({ actor: 'job:test' });
     const q = await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1);
@@ -104,9 +106,9 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
 
   it('KI-Befund „hoch“: einmal automatisch mit den Befunden neu bauen, beim zweiten Mal nur melden', async () => {
     const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
-    registerMockStructured(QA_TOOL_NAME, () => ({
-      issues: [{ field: 'about', problem: 'Erfundene Gründungsjahr-Angabe', severity: 'hoch' }],
-    }));
+    registerMockStructured(QA_TOOL_NAME, () =>
+      studioQaFixture([{ field: 'about', problem: 'Erfundene Gründungsjahr-Angabe', severity: 'hoch' }]),
+    );
     try {
       const first = await buildDemo(other.id, { actor: 'job:test' });
       await qaDemo(first, 'job:test', { lighthouse: false });
@@ -115,7 +117,7 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
       const jobs = (
         await boss
           .getDb()
-          .executeSql(`SELECT data FROM pgboss.job WHERE name = 'build-demo' AND singleton_key = $1`, [`demo-rebuild:${first}`])
+          .executeSql(`SELECT data FROM pgboss.job WHERE name = 'build-demo' AND singleton_key = $1`, [`demo:${other.id}`])
       ).rows as { data: { leadId: string; qaFeedback: string[] } }[];
       expect(jobs).toHaveLength(1);
       expect(jobs[0]!.data.leadId).toBe(other.id);
@@ -137,9 +139,9 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
       const again = (
         await boss
           .getDb()
-          .executeSql(`SELECT 1 FROM pgboss.job WHERE name = 'build-demo' AND singleton_key = $1`, [`demo-rebuild:${second}`])
+          .executeSql(`SELECT 1 FROM pgboss.job WHERE name = 'build-demo' AND singleton_key = $1`, [`demo:${other.id}`])
       ).rows;
-      expect(again).toHaveLength(0);
+      expect(again).toHaveLength(1); // The first pending rebuild remains; no second job for this lead.
       expect(
         await getDb()
           .select()
@@ -147,15 +149,15 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
           .where(eq(alerts.code, `demo_qa_failed:${second}`)),
       ).toHaveLength(1);
     } finally {
-      registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));
+      registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     }
   }, 90_000);
 
   it('keeps a controlled single run in manual review without queued QA or a later paid rebuild', async () => {
     const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
-    registerMockStructured(QA_TOOL_NAME, () => ({
-      issues: [{ field: 'about', problem: 'Fiktiver Kontrollbefund', severity: 'hoch' }],
-    }));
+    registerMockStructured(QA_TOOL_NAME, () =>
+      studioQaFixture([{ field: 'about', problem: 'Fiktiver Kontrollbefund', severity: 'hoch' }]),
+    );
     try {
       const demoId = await buildDemo(other.id, {
         actor: 'operator:controlled-demo-no-send',
@@ -174,7 +176,7 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
         ).rows,
       ).toHaveLength(0);
     } finally {
-      registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));
+      registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     }
   }, 60_000);
 
@@ -185,6 +187,7 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
     registerMockStructured(QA_TOOL_NAME, () => {
       throw Error('AI must not be called again');
     });
+
     const demo = (await getDb().query.demos.findFirst({ where: eq(demos.id, id) }))!;
     const storage = getProviders().storage,
       html = (await storage.get(demo.htmlStorageKey!))!;
@@ -196,7 +199,31 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
       await expect(qaDemo(id, 'test:reuse', { reuseUnchangedAi: true })).rejects.toThrow('passt nicht unverändert');
     } finally {
       await storage.put(demo.htmlStorageKey!, html, 'text/html');
-      registerMockStructured(QA_TOOL_NAME, () => ({ issues: [] }));
+      registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     }
   }, 60_000);
+  it('keeps a completed visual verdict across a later technical failure without paying for another review', async () => {
+    const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
+    const id = await buildDemo(other.id, { actor: 'test:checkpoint', enqueueQa: false });
+    let reviews = 0;
+    registerMockStructured(QA_TOOL_NAME, () => {
+      reviews++;
+      return studioQaFixture();
+    });
+    const put = vi.spyOn(getProviders().storage, 'put').mockRejectedValueOnce(Error('Simulated artifact write failure'));
+    try {
+      const failed = await qaDemo(id, 'test:checkpoint', { lighthouse: false, enqueueRebuild: false });
+      expect(failed.passed).toBe(false);
+      expect((await getDb().query.demos.findFirst({ where: eq(demos.id, id) }))?.status).toBe('qa_failed');
+      expect(failed.visualCheckpoint).toBeDefined();
+    } finally {
+      put.mockRestore();
+    }
+    try {
+      expect((await qaDemo(id, 'test:checkpoint', { lighthouse: false, enqueueRebuild: false })).passed).toBe(true);
+      expect(reviews).toBe(1);
+    } finally {
+      registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
+    }
+  }, 90_000);
 });

@@ -4,6 +4,7 @@ import { kitFontCss, kitFontFamily } from '../kits/fonts';
 import { purgeCss } from '../kits/purge';
 import { protectedBusinessContact } from '../kits/render';
 import { authoredFragment, checkAuthoredDesign, scopedDesignCss, FREE_DESIGN_VERSION } from './design';
+import { locationText, adaptLocationHeading } from './location';
 
 export const authoredTemplateId = (group: BranchGroup) => `authored-${group}`;
 export const isAuthoredTemplate = (id: string) => id.startsWith('authored-');
@@ -32,14 +33,12 @@ export function renderAuthored(ctx: RenderContext): string {
     postal_code: f.postalCode,
     phone_url: p.callHref && p.callHref.startsWith('tel:') ? p.callHref : '#anfrage',
     map_url: p.mapsHref,
-    service_area: p.draft
-      ? `${f.city} und Umgebung · Vorschlag zum Einsatzgebiet, noch nicht bestätigt. Einsatzort vorab anfragen.`
-      : f.city,
+    service_area: locationText(f, p.draft),
     placeholder_photos: 'Entwurfsplatzhalter: Hier ergänzen Sie eigene, freigegebene Fotos Ihres Betriebs.',
     placeholder_team: 'Entwurfsplatzhalter: Hier ergänzen Sie eine bestätigte Vorstellung und eigene Bilder Ihres Teams.',
     placeholder_references: 'Entwurfsplatzhalter: Hier ergänzen Sie echte, zur Veröffentlichung freigegebene Referenzen.',
   };
-  const fragment = authoredFragment(d.html, replacements, p.photos(3), p.draft);
+  const fragment = authoredFragment(adaptLocationHeading(d.html, f), replacements, p.photos(3), p.draft);
   const contact = protectedBusinessContact(ctx, d);
   const body = `<main id="inhalt"><div id="sw-ai-design">${fragment}</div></main>${contact.html}${p.footer({ className: 'sw-authored-footer', linkClass: 'underline' })}`;
   const fonts = kitFontCss([d.displayFont === 'archivo' ? 'archivo-free' : d.displayFont, d.textFont]);

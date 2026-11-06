@@ -3,7 +3,7 @@ import { leadResearch, researchLetterFacts, assertAcquisitionEligible } from '..
 import { researchContentHash, type LeadResearch } from '../leads/acquisition';
 import { authoredTemplateId, isAuthoredTemplate, freeDesignBrief, checkAuthoredDesign, type ArtDirection } from '@wbm/templates';
 import { v4Offer, V4_TIERS } from '../services/offers-v4';
-import { eq, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import {
   renderSite,
   stockPhotos,
@@ -268,11 +268,14 @@ export function demoPhotoSlots(
   leadId: string,
   facts: BusinessFacts,
   own: NonNullable<BusinessFacts['photos']> = [],
+  recentFiles: string[] = [],
 ): NonNullable<BusinessFacts['photos']> {
   if (own.length) return own;
-  return stockPhotos(facts.group, seedFromId(leadId), [facts.branchLabel, ...(facts.verifiedServices ?? [])].join(' '))
+  return stockPhotos(facts.group, seedFromId(leadId), [facts.branchLabel, ...(facts.verifiedServices ?? [])].join(' '), {
+    avoidFiles: recentFiles,
+  })
     .slice(0, 3)
-    .map((p) => ({ src: stockPhotoDataUri(p), alt: p.alt, origin: 'example' as const, rightsConfirmed: true }));
+    .map((p) => ({ src: stockPhotoDataUri(p), alt: p.alt, origin: 'example' as const, rightsConfirmed: true, assetId: p.file }));
 }
 
 /**
@@ -285,6 +288,8 @@ export async function generateDemoContent(
   direction?: ArtDirection,
   qaFeedback?: string[],
   photos: NonNullable<BusinessFacts['photos']> = [],
+  recentConcepts: string[] = [],
+  signal?: AbortSignal,
 ): Promise<GeneratedContent> {
   const research = await leadResearch(lead);
   const facts = {
@@ -294,7 +299,14 @@ export async function generateDemoContent(
     designCharacter: direction?.source === 'business_evidence' ? direction.character : undefined,
     imageBrief: photos.map((p, i) => ({ slot: i + 1, alt: p.alt, example: p.origin === 'example' })),
   };
-  return authorStudioContent(facts, { leadId: lead.id, seed: seedFromId(lead.id), feedback: qaFeedback, photos });
+  return authorStudioContent(facts, {
+    leadId: lead.id,
+    seed: seedFromId(lead.id),
+    feedback: qaFeedback,
+    photos,
+    recentConcepts,
+    signal,
+  });
 }
 
 /** Ablauf-/Platzhalterkarten der Bibliothek sind keine Leistungen */
@@ -364,6 +376,7 @@ export async function buildDemo(
     qaFeedback?: string[];
     /** Controlled CLI runs QA themselves; default keeps the existing queue automation. */
     enqueueQa?: boolean;
+    signal?: AbortSignal;
   },
 ): Promise<string> {
   const db = getDb();
@@ -378,7 +391,11 @@ export async function buildDemo(
   const researchHash = researchContentHash(research);
   const existing = await db.select().from(demos).where(eq(demos.leadId, leadId));
   const open = existing.find((d) => ['building', 'pending_review', 'approved', 'published'].includes(d.status));
-  if (open && !opts.regenerate) return open.id;
+  if (open && !opts.regenerate) {
+    if (open.status === 'building' && opts.enqueueQa !== false)
+      await enqueue(QUEUES.qaDemo, { demoId: open.id }, { singletonKey: `qa:${open.id}` });
+    return open.id;
+  }
   if (!['qualified', 'demo_built', 'failed'].includes(lead.status) && !opts.regenerate) {
     throw new Error(`Lead im Status ${lead.status} – Demo nicht vorgesehen`);
   }
@@ -386,8 +403,30 @@ export async function buildDemo(
   const design = await resolveBusinessDesign(lead);
   const { templateId, palette } = chooseTemplate(lead);
   const verifiedServices = leadContentFacts(lead, cfg, research).verifiedServices;
-  const photoSlots = demoPhotoSlots(lead.id, { ...leadToFacts(lead, cfg), verifiedServices }, design.photos);
-  const generated = await generateDemoContent(lead, cfg, design.direction, opts.qaFeedback, photoSlots);
+  const recent = await db
+    .select({ content: demos.contentJson })
+    .from(demos)
+    .innerJoin(leads, eq(demos.leadId, leads.id))
+    .where(eq(leads.branch, lead.branch))
+    .orderBy(desc(demos.createdAt))
+    .limit(5);
+  const recentConcepts = recent
+    .map((r) => (r.content?.design as SiteContent['design'])?.concept)
+    .filter((s): s is string => Boolean(s))
+    .map((s) => s.slice(0, 350));
+  const recentFiles = recent.flatMap((r) => (r.content?._meta as { photoAssets?: string[] } | undefined)?.photoAssets ?? []);
+  const photoSlots = demoPhotoSlots(lead.id, { ...leadToFacts(lead, cfg), verifiedServices }, design.photos, recentFiles);
+  opts.signal?.throwIfAborted();
+  const generated = await generateDemoContent(
+    lead,
+    cfg,
+    design.direction,
+    opts.qaFeedback,
+    photoSlots,
+    recentConcepts,
+    opts.signal,
+  );
+  opts.signal?.throwIfAborted();
   const facts = {
     ...leadToFacts(lead, cfg),
     verifiedServices,
@@ -413,6 +452,7 @@ export async function buildDemo(
   let demoId: string;
   try {
     demoId = await db.transaction(async (tx) => {
+      opts.signal?.throwIfAborted();
       // Do not hold a DB connection during LLM work. Lock only the final persistence stage.
       // Opt-out/anonymization take the same lock and cannot be followed by newly restored demo files.
       await tx.execute(sql`SELECT id FROM leads WHERE id=${leadId} FOR UPDATE`);
@@ -421,6 +461,13 @@ export async function buildDemo(
         throw Error('Betrieb inzwischen gesperrt; keine Demo gespeichert.');
       if (researchContentHash(await leadResearch(current, tx)) !== researchHash)
         throw Error('Recherche während der Demo-Erstellung geändert; neu prüfen.');
+      if (!opts.regenerate) {
+        const winner = await tx.query.demos.findFirst({
+          where: and(eq(demos.leadId, leadId), inArray(demos.status, ['building', 'pending_review', 'approved', 'published'])),
+          columns: { id: true },
+        });
+        if (winner) return winner.id;
+      }
       const [demo] = await tx
         .insert(demos)
         .values({
@@ -440,6 +487,7 @@ export async function buildDemo(
               designSourceRef: design.sourceRef,
               designRequiresReview: design.requiresReview,
               researchHash,
+              photoAssets: photoSlots.map((p) => p.assetId).filter(Boolean),
               studio: { version: STUDIO_VERSION, plan: generated.studioPlan },
               ...(brief ? { designBrief: brief } : {}),
               ...(opts.qaFeedback?.length ? { qaRetry: 1 } : {}),
@@ -450,6 +498,7 @@ export async function buildDemo(
       const demoId = demo!.id;
       createdId = demoId;
       await getProviders().storage.put(demoHtmlKey(demoId), html, 'text/html; charset=utf-8');
+      opts.signal?.throwIfAborted();
       await tx
         .update(demos)
         .set({ htmlStorageKey: demoHtmlKey(demoId) })

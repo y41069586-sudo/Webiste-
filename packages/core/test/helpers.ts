@@ -2,6 +2,21 @@ import { sql } from 'drizzle-orm';
 import { getDb } from '../src/db/client';
 import { invalidateConfigCache } from '../src/config/service';
 import { DEFAULT_BRANCHES } from '../src/config/settings';
+import { STUDIO_REVIEW_DIMENSIONS } from '../src/demos/studio';
+import type { QaIssue } from '../src/demos/content';
+
+/** Explicit evidence fixture for integration mechanics; the default mock must remain unverifiable. */
+export function studioQaFixture(issues: QaIssue[] = []) {
+  return {
+    issues,
+    craft: STUDIO_REVIEW_DIMENSIONS.map((dimension) => ({
+      dimension,
+      verdict: 'pass',
+      evidence: `Expliziter Testbeleg für ${dimension}; kein echtes Modell- oder Gestaltungsurteil.`,
+      correction: '',
+    })),
+  };
+}
 
 /** Leert alle fachlichen Tabellen (Schema bleibt). */
 export async function resetDb(): Promise<void> {

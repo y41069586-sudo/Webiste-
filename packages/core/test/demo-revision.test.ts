@@ -1,3 +1,6 @@
+import { QA_TOOL_NAME } from '../src/demos/content';
+import { registerMockStructured } from '../src/providers';
+import { studioQaFixture } from './helpers';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { getSetting } from '../src/config/service';
@@ -16,6 +19,7 @@ describe('Kostenlose Änderung vor dem Kauf', () => {
   let demoId: string;
   let slug: string;
   beforeAll(async () => {
+    registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     await resetDb();
     await findLeads({ actor: 'job:test' });
     const lead = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;

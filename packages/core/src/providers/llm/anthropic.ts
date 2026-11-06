@@ -57,15 +57,25 @@ export class AnthropicLlm implements LlmProvider {
     this.client = new Anthropic({ apiKey, maxRetries: 0, timeout: 180_000 });
   }
 
-  private async create(params: Anthropic.Beta.MessageCreateParamsNonStreaming, guard?: LlmBudgetGuard) {
-    if (!guard) return this.client.beta.messages.create(params, { maxRetries: 0 });
-    const counted = await this.client.beta.messages.countTokens({
-      model: params.model,
-      system: params.system,
-      messages: params.messages,
-      tools: params.tools,
-      tool_choice: params.tool_choice,
-    });
+  private async create(
+    params: Anthropic.Beta.MessageCreateParamsNonStreaming,
+    guard?: LlmBudgetGuard,
+    timeoutMs = 180_000,
+    taskSignal?: AbortSignal,
+  ) {
+    const signal = taskSignal ? AbortSignal.any([taskSignal, AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs);
+    signal.throwIfAborted();
+    if (!guard) return this.client.beta.messages.create(params, { maxRetries: 0, signal });
+    const counted = await this.client.beta.messages.countTokens(
+      {
+        model: params.model,
+        system: params.system,
+        messages: params.messages,
+        tools: params.tools,
+        tool_choice: params.tool_choice,
+      },
+      { signal, maxRetries: 0 },
+    );
     let inputTokens = counted.input_tokens;
     const search = params.tools?.find((t) => t.type === 'web_search_20260209');
     const maxSearches = search && 'max_uses' in search ? (search.max_uses ?? 0) : 0;
@@ -84,7 +94,7 @@ export class AnthropicLlm implements LlmProvider {
     });
     // No fallback model at another price; no automatic retry of an uncertain network outcome.
     const { fallbacks: _fallbacks, betas: _betas, ...bounded } = params;
-    const response = await this.client.beta.messages.create(bounded, { maxRetries: 0 });
+    const response = await this.client.beta.messages.create(bounded, { maxRetries: 0, signal });
     await guard.afterResponse(reservation, this.usageOf(response.model, response.usage));
     return response;
   }
@@ -152,6 +162,8 @@ export class AnthropicLlm implements LlmProvider {
           ...(this.useServerFallback ? { betas: [FALLBACK_BETA], fallbacks: 'default' as const } : {}),
         },
         req.budgetGuard,
+        req.timeoutMs,
+        req.signal,
       ).catch((cause: unknown) => {
         if (usages.length) throw new LlmUsageError('LLM-Aufruf nach berechneter Antwort fehlgeschlagen', [...usages], { cause });
         throw cause;

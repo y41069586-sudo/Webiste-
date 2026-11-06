@@ -1,4 +1,5 @@
 import { visualReviewInput } from '../demos/visual-review';
+import { abortableTask } from './limits';
 import {
   STUDIO_VERSION,
   STUDIO_REVIEW_SCHEMA,
@@ -31,6 +32,7 @@ import { renderComposite, takeScreenshots } from './screenshots';
 type Check = QaResult['checks'][number];
 
 export interface DemoQaOptions {
+  signal?: AbortSignal;
   /** Reuse only an existing successful AI check bound to exactly the same stored HTML. */
   reuseUnchangedAi?: boolean;
   /** Controlled single runs must not leave a later paid rebuild in the daemon queue. */
@@ -47,6 +49,46 @@ export interface DemoQaOptions {
  * Danach Screenshots + Komposit; Status pending_review / approved / qa_failed.
  */
 export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions = {}): Promise<QaResult> {
+  const started = Date.now();
+  try {
+    return await abortableTask(() => runDemoQa(demoId, actor, opts), opts.signal);
+  } catch (error) {
+    if (opts.reuseUnchangedAi) throw error;
+    const db = getDb();
+    const current = await db.query.demos.findFirst({ where: eq(demos.id, demoId) });
+    if (!current || !['building', 'pending_review', 'qa_failed'].includes(current.status)) throw error;
+    const result: QaResult = {
+      passed: false,
+      checkedAt: new Date().toISOString(),
+      checks: [{ name: 'qa-runtime', passed: false, details: error instanceof Error ? error.message : 'QA abgebrochen' }],
+      ...(current.qaResultJson?.visualCheckpoint ? { visualCheckpoint: current.qaResultJson.visualCheckpoint } : {}),
+    };
+    await db
+      .update(demos)
+      .set({ status: 'qa_failed', reviewRequired: true, qaResultJson: result, updatedAt: new Date() })
+      .where(eq(demos.id, demoId));
+    await audit(db, {
+      entity: 'demo',
+      entityId: demoId,
+      action: 'qa_runtime_failed',
+      actor,
+      context: { ms: Date.now() - started },
+    });
+    return result;
+  } finally {
+    logger.info({ demoId, ms: Date.now() - started }, 'demo-qa Lauf beendet');
+  }
+}
+
+async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Promise<QaResult> {
+  const phase = async <T>(name: string, run: () => Promise<T>): Promise<T> => {
+    const started = Date.now();
+    try {
+      return await run();
+    } finally {
+      logger.info({ demoId, phase: name, ms: Date.now() - started }, 'demo-qa Phase beendet');
+    }
+  };
   const db = getDb();
   const cfg = await getConfig({ fresh: true });
   const demo = await db.query.demos.findFirst({ where: eq(demos.id, demoId) });
@@ -93,7 +135,8 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
 
   // Capture once from the stored HTML. Reused for AI review, admin and the bound letter composite.
   const studio = isAuthoredTemplate(demo.templateId);
-  const shots = await takeScreenshots(html, { hideDemoChrome: true, studioReview: studio });
+  const shots = await phase('screenshots', () => takeScreenshots(html, { hideDemoChrome: true, studioReview: studio }));
+  opts.signal?.throwIfAborted();
   const visual = getKit(demo.templateId) || isAuthoredTemplate(demo.templateId) ? visualReviewInput(shots) : undefined;
 
   let visualBlocking = false;
@@ -114,21 +157,35 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
       if (!craft?.passed) throw Error('Keine bestandene Studio-Sichtprüfung zum gespeicherten HTML vorhanden.');
       checks.push({ ...craft });
     }
+  } else if (
+    opts.llm !== false &&
+    demo.qaResultJson?.visualCheckpoint?.htmlHash === sha256(html) &&
+    demo.qaResultJson.visualCheckpoint.businessFactsHash === recipientFingerprint(lead) &&
+    demo.qaResultJson.visualCheckpoint.researchHash === researchContentHash(research)
+  ) {
+    checks.push(...demo.qaResultJson.visualCheckpoint.checks);
+    visualBlocking = demo.qaResultJson.visualCheckpoint.visualBlocking;
+    rebuildFeedback.push(...demo.qaResultJson.visualCheckpoint.rebuildFeedback);
   } else if (opts.llm !== false) {
     try {
-      const res = await llmStructured<{ issues: QaIssue[] }>({
-        tier: 'bulk',
-        system: QA_SYSTEM_PROMPT,
-        prompt:
-          buildQaPrompt(facts, content) + (visual ? `\n\n${visual.prompt}` : '') + (studio ? `\n\n${STUDIO_REVIEW_PROMPT}` : ''),
-        ...(visual ? { images: visual.images } : {}),
-        toolName: QA_TOOL_NAME,
-        toolDescription: 'Ergebnis der Qualitätsprüfung',
-        inputSchema: (studio ? STUDIO_REVIEW_SCHEMA : QA_SCHEMA) as unknown as Record<string, unknown>,
-        ...(studio ? STUDIO_CALL_OPTIONS.review : { maxTokens: 3000, effort: 'low' as const }),
-        purpose: 'demo_qa',
-        leadId: lead.id,
-      });
+      const res = await phase('visual-ai', () =>
+        llmStructured<{ issues: QaIssue[] }>({
+          tier: 'bulk',
+          system: QA_SYSTEM_PROMPT,
+          prompt:
+            buildQaPrompt(facts, content) +
+            (visual ? `\n\n${visual.prompt}` : '') +
+            (studio ? `\n\n${STUDIO_REVIEW_PROMPT}` : ''),
+          ...(visual ? { images: visual.images } : {}),
+          toolName: QA_TOOL_NAME,
+          toolDescription: 'Ergebnis der Qualitätsprüfung',
+          inputSchema: (studio ? STUDIO_REVIEW_SCHEMA : QA_SCHEMA) as unknown as Record<string, unknown>,
+          ...(studio ? STUDIO_CALL_OPTIONS.review : { maxTokens: 3000, effort: 'low' as const }),
+          purpose: 'demo_qa',
+          signal: opts.signal,
+          leadId: lead.id,
+        }),
+      );
       const craft = studio ? studioReviewResult(res) : undefined;
       if (craft) checks.push({ name: STUDIO_VERSION, passed: craft.passed, details: craft.details });
       const high = res.issues.filter((i) => i.severity === 'hoch');
@@ -148,7 +205,36 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
           .filter(Boolean)
           .join(' | '),
       });
+      const visualCheckpoint = {
+        htmlHash: sha256(html),
+        businessFactsHash: recipientFingerprint(lead),
+        researchHash: researchContentHash(research),
+        checks: checks.filter((c) => c.name === 'ki-pruefung' || c.name === STUDIO_VERSION),
+        rebuildFeedback: [...rebuildFeedback],
+        visualBlocking,
+      };
+      opts.signal?.throwIfAborted();
+      await db
+        .update(demos)
+        .set({
+          qaResultJson: {
+            ...demo.qaResultJson,
+            passed: false,
+            checkedAt: new Date().toISOString(),
+            checks: [...checks],
+            visualCheckpoint,
+          },
+        })
+        .where(eq(demos.id, demoId));
+      demo.qaResultJson = {
+        ...demo.qaResultJson,
+        passed: false,
+        checkedAt: new Date().toISOString(),
+        checks: [...checks],
+        visualCheckpoint,
+      };
     } catch (err) {
+      opts.signal?.throwIfAborted();
       if (studio) {
         visualBlocking = true;
         if (!checks.some((c) => c.name === STUDIO_VERSION))
@@ -188,7 +274,12 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
   }
 
   // 4) Browser: Konsole, axe, Layout
-  checks.push(...(await browserChecks({ html, expectedFacts: { name: bizFacts.name, city: bizFacts.city } })));
+  checks.push(
+    ...(await phase('browser-checks', () =>
+      browserChecks({ html, expectedFacts: { name: bizFacts.name, city: bizFacts.city } }),
+    )),
+  );
+  opts.signal?.throwIfAborted();
 
   // 5) Lighthouse auf der Live-Variante (ohne Banner/noindex)
   if (opts.lighthouse !== false) {
@@ -206,7 +297,8 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
           canonicalUrl: 'http://127.0.0.1/',
         },
       });
-      checks.push(await lighthouseCheck(liveHtml));
+      checks.push(await phase('lighthouse', () => lighthouseCheck(liveHtml)));
+      opts.signal?.throwIfAborted();
     } catch (err) {
       checks.push({ name: 'lighthouse', passed: false, details: `Fehler: ${err instanceof Error ? err.message : String(err)}` });
     }
@@ -214,7 +306,8 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
 
   // 6) Screenshots + Komposit (ohne Banner)
   // Use exactly the stored page served by the demo route; newer template code must not change its screenshot.
-  const composite = await renderComposite(shots.desktop, shots.mobile, { businessName: bizFacts.name });
+  const composite = await phase('composite', () => renderComposite(shots.desktop, shots.mobile, { businessName: bizFacts.name }));
+  opts.signal?.throwIfAborted();
   const base = `demos/${demoId}`;
   await storage.put(`${base}/desktop.jpg`, shots.desktop, 'image/jpeg');
   await storage.put(`${base}/mobile.jpg`, shots.mobile, 'image/jpeg');
@@ -242,6 +335,7 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
       : undefined;
   const quality = { ...assessDemoQuality(checks, previousScores, cfg.review.qualityMinimum), htmlHash };
   const result: QaResult = {
+    ...(demo.qaResultJson?.visualCheckpoint ? { visualCheckpoint: demo.qaResultJson.visualCheckpoint } : {}),
     renderedAssets: {
       businessFactsHash: recipientFingerprint(lead),
       htmlHash,
@@ -266,6 +360,7 @@ export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions 
       : passed && decide
         ? Boolean(current?.reviewNote) || (await requiresManualReview(db))
         : true;
+  opts.signal?.throwIfAborted();
   await db
     .update(demos)
     .set({
