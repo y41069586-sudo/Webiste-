@@ -257,6 +257,8 @@ describe('V4-Einladung passt für jede Branche auf eine Seite (fester Text, lang
       const { OPERATOR_TEST_CONFIG } = await import('./helpers');
       const { previewInvitationCopy } = await import('../src/letters/personalization');
       const { invitationContextHash, LETTER_TEXT_LIMITS: L } = await import('../src/letters/writer');
+      const { ALL_LOSS_CLAIM_IDS, lossClaimRendering } = await import('../src/letters/loss');
+      const { loadClaimDefinitions } = await import('../src/claims/library');
       // Text bis kurz vor die Grenze verlängern (ganze Wörter)
       const filler = (start: string, max: number) => {
         let t = start;
@@ -290,6 +292,8 @@ describe('V4-Einladung passt für jede Branche auf eine Seite (fester Text, lang
           ...(['A', 'B'] as const).map((arm) => ({ arm, sequence: 1 as const, mode: 'fakten' as const })),
           { arm: 'A' as const, sequence: 1 as const, mode: 'ki' as const },
           { arm: 'B' as const, sequence: 1 as const, mode: 'ki-beobachtung' as const },
+          { arm: 'A' as const, sequence: 1 as const, mode: 'verlust' as const },
+          { arm: 'B' as const, sequence: 1 as const, mode: 'ki-verlust' as const },
           { arm: 'A' as const, sequence: 2 as const, mode: 'fest' as const },
           { arm: 'A' as const, sequence: 3 as const, mode: 'fest' as const },
         ];
@@ -339,23 +343,28 @@ describe('V4-Einladung passt für jede Branche auf eine Seite (fester Text, lang
             details: facts ? longFacts : [],
           };
           // KI-Fassung genau an den Längengrenzen des Schreibers (LETTER_TEXT_LIMITS)
-          const base = previewInvitationCopy(context, sequence, arm === 'B' ? 'B' : 'A');
+          const loss = mode === 'verlust' || mode === 'ki-verlust';
+          const base = previewInvitationCopy(context, sequence, arm === 'B' ? 'B' : 'A', { loss });
+          if (loss && !base.loss) failures.push(`${b.key}: Verlustbrief trotz Websuche nicht aktiv`);
+          // Längster Beleg, der im Verlustbrief vorkommen kann, als ungünstigster Fall
+          const longest = loadClaimDefinitions()
+            .filter((c) => ALL_LOSS_CLAIM_IDS.includes(c.id))
+            .sort((x, y) => y.text_de.length + y.footnote_de.length - x.text_de.length - x.footnote_de.length)[0]!;
+          const lossClaim = lossClaimRendering(
+            { id: longest.id, textDe: longest.text_de, footnoteDe: longest.footnote_de },
+            'go.example-websites.de/quellen',
+          );
           const invitationCopy =
-            mode === 'ki' || mode === 'ki-beobachtung'
+            mode === 'ki-verlust'
               ? {
                   copy: {
                     ...base,
-                    subject: filler('Ihre Website-Idee für den Betrieb am Westfalenpark', 118),
-                    opening:
-                      mode === 'ki'
-                        ? filler('ich habe für Ihren Betrieb eine eigene Website gebaut', L.body / 2)
-                        : `${filler('mir ist aufgefallen, dass Ihr Eintrag neue Öffnungszeiten am Samstag nennt', L.observation)} ${filler('deshalb habe ich für Ihren Betrieb eine eigene Website gebaut', (L.total - L.observation) / 2 - 1)}`,
+                    opening: `${filler('wer in Dortmund einen Betrieb wie Ihren sucht und online nichts Eigenes von Ihnen findet, fragt womöglich beim nächsten an', L.lossBody / 2)} ${base.research}`,
                     intro: [
                       filler(
-                        'Wer in Dortmund nach Ihnen sucht, sieht dort Ihr Angebot',
-                        mode === 'ki' ? L.body / 2 : (L.total - L.observation) / 2 - 1,
+                        'Deshalb habe ich für Ihren Betrieb eine eigene Website gebaut, dort sehen Interessierte',
+                        L.lossBody / 2,
                       ),
-                      ...(base.research ? [base.research] : []),
                     ],
                   },
                   contextHash: invitationContextHash(context, sequence),
@@ -364,10 +373,34 @@ describe('V4-Einladung passt für jede Branche auf eine Seite (fester Text, lang
                   attempts: 1,
                   reviewReasons: [],
                 }
-              : undefined;
+              : mode === 'ki' || mode === 'ki-beobachtung'
+                ? {
+                    copy: {
+                      ...base,
+                      subject: filler('Ihre Website-Idee für den Betrieb am Westfalenpark', 118),
+                      opening:
+                        mode === 'ki'
+                          ? filler('ich habe für Ihren Betrieb eine eigene Website gebaut', L.body / 2)
+                          : `${filler('mir ist aufgefallen, dass Ihr Eintrag neue Öffnungszeiten am Samstag nennt', L.observation)} ${filler('deshalb habe ich für Ihren Betrieb eine eigene Website gebaut', (L.total - L.observation) / 2 - 1)}`,
+                      intro: [
+                        filler(
+                          'Wer in Dortmund nach Ihnen sucht, sieht dort Ihr Angebot',
+                          mode === 'ki' ? L.body / 2 : (L.total - L.observation) / 2 - 1,
+                        ),
+                        ...(base.research ? [base.research] : []),
+                      ],
+                    },
+                    contextHash: invitationContextHash(context, sequence),
+                    demoHash: 'test',
+                    engine: 'llm' as const,
+                    attempts: 1,
+                    reviewReasons: [],
+                  }
+                : undefined;
           const data = composeLetter({
             variant: v4LetterVariant(industry, arm, sequence),
             ...(invitationCopy ? { invitationCopy } : {}),
+            ...(loss ? { lossLetter: true, claimTexts: [lossClaim.span.text], footnotes: lossClaim.footnotes } : {}),
             cfg,
             sequence,
             recipient,
@@ -386,6 +419,11 @@ describe('V4-Einladung passt für jede Branche auf eine Seite (fester Text, lang
           });
           const { html, domIssues } = await fitLetterLayout(data, cfg);
           const label = `${b.key} ${arm}${sequence} ${mode}`;
+          if (process.env.LETTER_SAMPLE_DIR && mode.includes('verlust'))
+            (await import('node:fs')).writeFileSync(
+              `${process.env.LETTER_SAMPLE_DIR}/${b.key}-${mode}.pdf`,
+              await htmlToPdf(html),
+            );
           if (domIssues.length) failures.push(`${label}: ${JSON.stringify(domIssues)}`);
           const check = await validateLetterPdf(await htmlToPdf(html), {
             recipientLines: data.recipientLines,

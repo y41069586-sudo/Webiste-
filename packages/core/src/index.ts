@@ -85,6 +85,7 @@ export * from './services/monitoring';
 export * from './claims/library';
 export * from './playbooks';
 export * from './letters/slots';
+export * from './letters/loss';
 export {
   checkLetterTruth,
   DEFAULT_BLOCKLIST,

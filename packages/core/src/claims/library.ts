@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { getDb, type DbOrTx } from '../db/client';
 import { claims } from '../db/schema';
 import { CLAIM_CHECK_RESULTS, INDUSTRIES, type Industry } from '../types';
+import { ALL_LOSS_CLAIM_IDS } from '../letters/loss-claims';
 import { sha256 } from '../util/crypto';
 import { addMonths } from '../util/time';
 import { audit } from '../services/audit';
@@ -334,18 +335,23 @@ export async function usableClaims(
  * verwendet werden darf (freigegeben und in einer aktiven Variante referenziert).
  */
 export async function sourcesPageClaims(db: DbOrTx = getDb()): Promise<(ClaimRow & { inUse: boolean })[]> {
+  // Belege des Briefs „Kunden, die Sie gerade verlieren könnten“ stehen in keiner Slot-Variante, sind aber im Einsatz
+  const lossIds = sql.join(
+    ALL_LOSS_CLAIM_IDS.map((id) => sql`${id}`),
+    sql`, `,
+  );
   const rows = await db.execute<{ id: string; in_use: boolean }>(sql`
     SELECT c.id,
-           (c.status = 'approved' AND c.expires_at > now() AND EXISTS (
+           (c.status = 'approved' AND c.expires_at > now() AND (c.id IN (${lossIds}) OR EXISTS (
               SELECT 1 FROM variants v
               WHERE v.active AND v.status = 'active' AND v.slots_json::text LIKE '%{CLAIM:' || c.id || '}%'
-           )) AS in_use
+           ))) AS in_use
     FROM claims c
     WHERE EXISTS (SELECT 1 FROM claim_usages u WHERE u.claim_id = c.id)
-       OR (c.status = 'approved' AND c.expires_at > now() AND EXISTS (
+       OR (c.status = 'approved' AND c.expires_at > now() AND (c.id IN (${lossIds}) OR EXISTS (
               SELECT 1 FROM variants v
               WHERE v.active AND v.status = 'active' AND v.slots_json::text LIKE '%{CLAIM:' || c.id || '}%'
-           ))`);
+           )))`);
   if (!rows.rows.length) return [];
   const inUse = new Map(rows.rows.map((r) => [r.id, r.in_use]));
   const full = await db

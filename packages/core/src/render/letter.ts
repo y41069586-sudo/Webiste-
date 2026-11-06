@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { assertLetterLeadEligible } from '../letters/eligibility';
 import { writePreviewInvitation } from '../letters/writer';
+import { LOSS_LETTER_VERSION, lossClaimRendering, pickLossClaim } from '../letters/loss';
 import { leadResearch, researchLetterFacts } from '../services/lead-research';
 import { researchContentHash } from '../leads/acquisition';
 import { letterDemoBinding, recipientFingerprint } from '../letters/binding';
@@ -106,13 +107,21 @@ export async function fitLetterLayout(
     if (data.intro)
       data.intro = data.intro.map((p) => (p.trim() === text.trim() ? '' : p.replace(text, by)).trim()).filter(Boolean);
   };
+  // Verlustbrief: der Recherchesatz belegt den Aufhänger und bleibt immer stehen
+  const loss = data.copyEvidence?.version === LOSS_LETTER_VERSION;
+  const dropLossDetail = () => {
+    if (data.intro) data.intro = data.intro.map((p) => p.replace(/ Im Entwurf sehen Interessierte [^]*$/, ''));
+  };
   for (const shorten of [
     () => (data.compact = true),
     () => dropFromIntro(' Ein Blick dauert keine Minute.'),
     () => (data.noAction = senderContactLine(cfg, { withIntro: false })),
     // Recherchehinweis ist Zusatz; Beobachtung und belegte Angaben bleiben
-    () => dropFromIntro(' Bei unserer dokumentierten Suche haben wir keinen eigenen Webauftritt von Ihnen gefunden.'),
-    () => dropFromIntro(' – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.', '.'),
+    () =>
+      loss
+        ? dropFromIntro(' – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.', '.')
+        : dropFromIntro(' Bei unserer dokumentierten Suche haben wir keinen eigenen Webauftritt von Ihnen gefunden.'),
+    () => (loss ? dropLossDetail() : dropFromIntro(' – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.', '.')),
     () => (data.postscript = undefined),
   ]) {
     if (!data.previewInvitation || !domIssues.some((i) => i.check === 'ueberlappung')) break;
@@ -293,6 +302,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     screenshotPage,
     footnotes: slotRender?.footnotes,
   };
+  let lossClaim: Awaited<ReturnType<typeof pickLossClaim>> = null;
+  let lossSpan: { id: string; text: string } | null = null;
   if (cfg.offers.activeVersion === 'v4') {
     composeInput.personalization ??= {
       businessName: lead.businessName,
@@ -302,13 +313,23 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     };
     const demoHtml = demo.htmlStorageKey ? await storage.get(demo.htmlStorageKey) : null;
     if (!demoHtml?.length) throw Error('Ausgelieferte Demo fehlt; kein persönlicher Brief ohne Abgleich.');
+    // „Kunden, die Sie gerade verlieren könnten“: nur Erstbrief ohne Slot-Belege, mit freigegebenem Branchenbeleg
+    lossClaim = sequence === 1 && !slotRender && !opts.test ? await pickLossClaim(db, lead.industry ?? null) : null;
     composeInput.invitationCopy = await writePreviewInvitation({
       context: composeInput.personalization,
       sequence,
       variant: /Leistungen auf einen Blick/.test(composeInput.variant.subject) ? 'B' : 'A',
       demoHtml: demoHtml.toString('utf8'),
       leadId,
+      loss: Boolean(lossClaim),
     });
+    if (lossClaim && composeInput.invitationCopy.copy.loss) {
+      const r = lossClaimRendering(lossClaim, sourcesLabel);
+      lossSpan = r.span;
+      composeInput.lossLetter = true;
+      composeInput.claimTexts = [r.span.text];
+      composeInput.footnotes = r.footnotes;
+    } else lossClaim = null;
     // The new text must be based on the exact delivered document already attested by QA.
     if (composeInput.invitationCopy.demoHash !== binding.htmlHash)
       throw Error('Demo während des Textabgleichs geändert; Brief erneut erstellen.');
@@ -330,8 +351,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const truth: TruthCheckResult = await runTruthCheck(
     {
       letter: data,
-      claimSpans: slotRender?.claimSpans ?? [],
-      claims: variant.claims,
+      claimSpans: [...(slotRender?.claimSpans ?? []), ...(lossSpan ? [lossSpan] : [])],
+      claims: [...variant.claims, ...(lossClaim ? [lossClaim] : [])],
       allowedClaimIds: lead.industry ? getPlaybook(lead.industry).allowed_claims : [],
       industry: lead.industry ?? null,
       placeholderValues: placeholderValues(composeInput),

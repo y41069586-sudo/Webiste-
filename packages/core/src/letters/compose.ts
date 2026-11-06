@@ -80,6 +80,8 @@ export interface ComposeInput {
   invitationCopy?: WrittenInvitation;
   sequence?: 1 | 2 | 3;
   testRecipient?: boolean;
+  /** Brief „Kunden, die Sie gerade verlieren könnten“ (nur mit freigegebenem Beleg in claimTexts) */
+  lossLetter?: boolean;
   /** Approved slot claims remain verbatim with their existing footnotes. */
   claimTexts?: string[];
   domain: string | null;
@@ -302,7 +304,9 @@ export function composeLetter(i: ComposeInput): LetterData {
       throw Error('Brieftext gehört nicht zum aktuellen Faktenpaket oder zur Versandfolge.');
     const copy =
       i.invitationCopy?.copy ??
-      previewInvitationCopy(context, i.sequence ?? 1, /Leistungen auf einen Blick/.test(v.subject) ? 'B' : 'A');
+      previewInvitationCopy(context, i.sequence ?? 1, /Leistungen auf einen Blick/.test(v.subject) ? 'B' : 'A', {
+        loss: i.lossLetter === true,
+      });
     // Never launder an unsafe stored arm through the new composer. Its offending text stays blockable.
     const original = [v.subject, v.hook, ...v.intro, v.offerWithDomain, v.offerWithoutDomain, v.noAction].join(' ');
     const unsafe =
@@ -310,7 +314,16 @@ export function composeLetter(i: ComposeInput): LetterData {
       letterTruthBlocklist(i.cfg).some((pattern) => new RegExp(pattern, 'i').test(original));
     if (!unsafe) {
       data.subject = copy.subject;
-      data.intro = [lowerFirstWord(copy.opening), ...copy.intro, ...(i.claimTexts ?? []), copy.scan];
+      // Verlustbrief: Aufhänger und Recherche, direkt danach der Beleg, dann die Brücke zum Entwurf
+      data.intro = copy.loss
+        ? [
+            lowerFirstWord(copy.opening),
+            // Beleg und Brücke in einem Absatz: „… Handwerksbetriebs.¹ Deshalb habe ich …“
+            [...(i.claimTexts ?? []), copy.intro[0] ?? ''].join(' ').trim(),
+            ...copy.intro.slice(1),
+            copy.scan,
+          ]
+        : [lowerFirstWord(copy.opening), ...copy.intro, ...(i.claimTexts ?? []), copy.scan];
       data.qrCaption = copy.qrCaption;
       data.copyEvidence = {
         version: copy.version,
@@ -329,6 +342,12 @@ export function composeLetter(i: ComposeInput): LetterData {
       data.offer = copy.next;
       data.noAction = senderContactLine(i.cfg);
       data.postscript = `**P. S.** Ihre Vorschau ist bis ${i.expiresLabel} online. Schauen Sie gern vorher kurz rein – vielleicht gefällt sie Ihnen ja.`;
+      // Verlustbrief trägt Beleg und Fußnote: Ablaufdatum in die QR-Zeile statt eigenem P. S. (bleibt so immer drin)
+      if (copy.loss && data.intro?.length) {
+        data.intro[data.intro.length - 1] =
+          `**QR-Code mit der Handykamera scannen und kostenlos ansehen:** Ihre Vorschau ist nur über Ihren persönlichen Link erreichbar und bis ${i.expiresLabel} online.`;
+        data.postscript = undefined;
+      }
     }
   }
   return data;

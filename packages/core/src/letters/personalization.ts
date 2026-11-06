@@ -1,3 +1,4 @@
+import { LOSS_BRIDGE, LOSS_LETTER_VERSION, lossHook, lossSubject } from './loss-copy';
 /** Branch context describes what a preview could show, never an unverified company service. */
 export function letterBranchBenefit(branchLabel: string): string {
   const profiles: [RegExp, string][] = [
@@ -355,7 +356,12 @@ const PROFILES: { key: string; branch: RegExp; focus?: RegExp; title: string; be
 ];
 
 /** Uses only reviewed details as facts. A sector profile describes a possible use, never a promise. */
-export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 1 | 2 | 3 = 1, variant = 'A') {
+export function previewInvitationCopy(
+  context: VerifiedLetterContext,
+  sequence: 1 | 2 | 3 = 1,
+  variant = 'A',
+  opts: { loss?: boolean } = {},
+) {
   const facts = reviewedLetterDetails(context).filter(
     (f) => !/€|\beuro\b|\beur\b|\bpreis|\btarif|\d\s*%|\d+\s*[,.]-|\bab\s+\d/i.test(f.text),
   );
@@ -408,7 +414,7 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
   const headline = context.businessName.length < 58 ? `${context.businessName}: ${humanTitle}` : humanTitle;
   // Lokaler Bezug im Nutzen-Satz („wer in Dortmund …“); ohne kurzen Ortsnamen neutral
   const benefit = profile.benefit.replace(' in {ort}', place).replace(/^(Eine|Wer|Neue|Der)\b/, (w) => w.toLowerCase());
-  return {
+  const base = {
     version: PREVIEW_LETTER_VERSION,
     level: (selected.length || observation || website ? 'verified' : 'basic') as 'verified' | 'basic',
     profile: profile.key,
@@ -436,5 +442,24 @@ export function previewInvitationCopy(context: VerifiedLetterContext, sequence: 
       text: f.text,
       source: f.source,
     })),
+    /** Verlust-Aufhänger aktiv: Reihenfolge Aufhänger → Recherche → Beleg → Brücke (siehe compose) */
+    loss: false,
+  };
+  // „Kunden, die Sie gerade verlieren könnten“: nur Erstbrief, nur mit dokumentierter Website-Suche; der Beleg
+  // (Studienaussage mit Fußnote) wird vom Aufrufer nur gesetzt, wenn eine freigegebene Aussage existiert.
+  if (!opts.loss || sequence !== 1 || !research) return base;
+  const lossDetail = (serviceFacts.length ? serviceFacts : selected)[0]?.text;
+  return {
+    ...base,
+    version: LOSS_LETTER_VERSION,
+    subject: lossSubject(context.businessName),
+    opening: `${lossHook(context.branchLabel, context.city)} ${research}`,
+    intro: [
+      // Nur die erste belegte Angabe: der Beleg braucht Platz, der Brief bleibt einseitig
+      `${LOSS_BRIDGE}${lossDetail ? ` Im Entwurf sehen Interessierte **${lossDetail}** – und erreichen Sie mit einem Fingertipp.` : ''}`,
+    ],
+    observation: undefined,
+    sources: [...selected, website!].map((f) => ({ text: f.text, source: f.source })),
+    loss: true,
   };
 }

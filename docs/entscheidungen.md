@@ -1217,3 +1217,21 @@ schreibe ich, was anders werden soll, und es wird wirklich neu generiert … dan
   Ablauf in 5 Schritten, „Für dich“-Liste; Hinweise und Einrichtung eingeklappt. Ruhige Gestaltungsebene
   `admin-calm.css` (helle Seitenleiste, eine Akzentfarbe, keine Verläufe). Kopfleiste: „Live“/„Testmodus“,
   „Automatik an/aus“, Einzelheiten im Tooltip.
+
+## 06.11.2026 – Erstbrief „Kunden, die Sie gerade verlieren könnten“
+
+Betreiberauftrag: „Bau die Briefe alle so neu: Kunden, die Sie gerade verlieren.“
+
+- Gilt für jeden Erstbrief (V4-Einladung), wenn **beides** vorliegt: dokumentierte Website-Suche („kein eigener
+  Webauftritt gefunden“) und eine **vom Betreiber freigegebene** Studienaussage der Branche
+  (`LOSS_CLAIMS` in `packages/core/src/letters/loss-claims.ts`). Sonst automatisch der bisherige neutrale Brief.
+- Aufbau: fester Betreff „{Firma}: Kunden, die Sie gerade verlieren könnten“ → Aufhänger aus Sicht einer
+  suchenden Person („… fragt womöglich beim nächsten an“) → Recherchesatz → Beleg wörtlich mit Fußnote und
+  Quellenseite → „Deshalb habe ich … gebaut“ → QR-Zeile mit „online bis …“.
+- Bewusst „könnten“ und „womöglich“: Ein tatsächlicher Verlust dieses Betriebs ist nicht belegbar (§ 5 UWG);
+  die Zahl stammt ausschließlich aus der freigegebenen Aussage. Keine Umsatzbeträge.
+- Der KI-Schreiber hat im Verlustmodus eigene Regeln (Möglichkeitsform, kein „verlieren“ im Einstieg, keine Zahl,
+  kleineres Längenbudget 260 Zeichen); der Recherchesatz wird beim Einpassen nie gestrichen.
+- Belege: Handwerk Bitkom 40 % Ausschlusskriterium; Gastronomie Website erwartet / Online-Suche; Handel Infos
+  vorab; Beauty, Kurse: flexible Online-Termine. Dienstleistung ohne Beleg → neutraler Brief. Stand Produktion
+  06.11.: keine Aussage freigegeben – Freigabe im Admin unter „Mehr → Erlaubte Aussagen“.

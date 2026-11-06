@@ -1,4 +1,4 @@
-import { approvalBlocker, getPlaybooks, listClaims, type ClaimRow } from '@wbm/core';
+import { approvalBlocker, getPlaybooks, listClaims, LOSS_CLAIMS, type ClaimRow } from '@wbm/core';
 import { Badge, Card, Notice, PageHeader, Stat, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { approveClaimAction, blockClaimAction, syncClaimsAction, unblockClaimAction } from './actions';
@@ -131,7 +131,7 @@ export default async function ClaimsPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <PageHeader
-        title="Claims & Playbooks"
+        title="Erlaubte Aussagen"
         subtitle="Nur freigegebene Claims dürfen in Briefen und Demos stehen (§ 5 UWG). Quellen gelten 24 Monate."
         actions={
           <form action={syncClaimsAction}>
@@ -151,6 +151,28 @@ export default async function ClaimsPage({ searchParams }: { searchParams: Promi
         <Stat label="Wartet auf Freigabe" value={count('needs_verification')} />
         <Stat label="Gesperrt" value={count('blocked')} hint="abgelaufen, US-Daten oder manuell" />
       </div>
+      <Card title="Brief „Kunden, die Sie gerade verlieren könnten“" className="mb-6">
+        <p className="text-sm text-slate-600">
+          Der neue Erstbrief nutzt je Branche genau eine dieser Aussagen als Beleg (mit Fußnote). Solange für eine Branche keine
+          freigegeben ist, bekommt sie automatisch den bisherigen neutralen Brief. Quelle öffnen, Wortlaut prüfen, dann unten
+          freigeben.
+        </p>
+        <ul className="loss-claims">
+          {Object.entries(LOSS_CLAIMS).map(([industry, ids]) => {
+            const on = ids!.find((id) => byId.get(id)?.status === 'approved');
+            return (
+              <li key={industry}>
+                <strong>{playbooks.find((p) => p.id === industry)?.label ?? industry}</strong>
+                <span className={on ? 'is-on' : ''}>
+                  {on
+                    ? `an · ${on}`
+                    : `aus · freigeben: ${ids!.filter((id) => byId.get(id)?.status === 'needs_verification').join(' oder ') || 'keine prüfbare Aussage'}`}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </Card>
       <div className="mb-6">
         <Notice kind="info">
           Prüfprotokoll mit Datum und Wortlaut: <code>docs/claims-verifikation.md</code>. Ändert sich Text oder Quelle in{' '}
