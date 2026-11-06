@@ -162,17 +162,11 @@ Der Kunde liefert zutreffende Unternehmens-, Kontakt- und Rechtsangaben sowie re
 
 Basis: ${p.oneTime} einmalige Einrichtung zuzüglich ${p.basis} monatlich für Hosting, SSL und technischen Basis-Support bei Betriebsstörungen.
 
-${
-  cfg.offers.komplettEnabled
-    ? `Komplett: keine Einrichtungsgebühr; ${formatEuroShort(v4Offer('komplett').monthlyCents)} monatlich für Erstellung, Hosting, SSL, Betreuung und die in Ziffer 7 beschriebenen Leistungen. Mindestlaufzeit ${v4Offer('komplett').minTermMonths} Monate ab der ersten Abbuchung; die Mindestvergütung beträgt ${formatEuroShort(v4Offer('komplett').monthlyCents * v4Offer('komplett').minTermMonths)}. Danach läuft der Vertrag zum selben Preis weiter und ist monatlich kündbar.`
-    : `Care+: ${p.oneTime} einmalige Einrichtung dazu insgesamt ${p.carePlus}/Monat. Die Basisleistung ist vollständig enthalten; es werden keine weiteren ${p.basis} zusätzlich berechnet.`
-}
+Care+ (für bestehende Bestellungen und solange angeboten): ${p.oneTime} einmalige Einrichtung dazu insgesamt ${p.carePlus}/Monat. Die Basisleistung ist vollständig enthalten; es werden keine weiteren ${p.basis} zusätzlich berechnet.
 
-${
-  cfg.offers.komplettEnabled
-    ? `Rechnerische Übersicht für zwölf berechnete Monate: Basis ${formatEuroShort(v4FirstYearCents('basis'))}, Komplett ${formatEuroShort(v4Offer('komplett').monthlyCents * 12)}. Für Basis begründet dies keine Mindestlaufzeit oder Vorauszahlungspflicht.`
-    : `Rechnerische Übersicht bei zwölf vollständig berechneten Monaten: Basis ${formatEuroShort(v4FirstYearCents('basis'))}, Care+ ${formatEuroShort(v4FirstYearCents('care_plus'))}. Dies begründet keine Mindestlaufzeit oder Vorauszahlungspflicht.`
-}
+Komplett (sofern angeboten): keine Einrichtungsgebühr; ${formatEuroShort(v4Offer('komplett').monthlyCents)} monatlich für Erstellung, Hosting, SSL, Betreuung und die in Ziffer 7 beschriebenen Leistungen. Mindestlaufzeit ${v4Offer('komplett').minTermMonths} Monate ab der ersten Abbuchung; die Mindestvergütung beträgt ${formatEuroShort(v4Offer('komplett').monthlyCents * v4Offer('komplett').minTermMonths)}. Danach läuft der Vertrag zum selben Preis weiter und ist monatlich kündbar.
+
+Rechnerische Übersicht bei zwölf vollständig berechneten Monaten: Basis ${formatEuroShort(v4FirstYearCents('basis'))}, Care+ ${formatEuroShort(v4FirstYearCents('care_plus'))}, Komplett ${formatEuroShort(v4Offer('komplett').monthlyCents * 12)}. Für Basis und Care+ begründet dies keine Mindestlaufzeit oder Vorauszahlungspflicht.
 
 ${taxClause} Änderungen des Steuerstatus ändern bestehende vereinbarte Gesamtpreise nicht automatisch.
 
@@ -180,11 +174,7 @@ ${taxClause} Änderungen des Steuerstatus ändern bestehende vereinbarte Gesamtp
 
 Die Einrichtungsgebühr ist nach dem verbindlich festgelegten Vertragsschluss über Stripe per angebotener Kartenzahlung zu zahlen. Banküberweisung wird derzeit nicht angeboten. Für bestätigte Zahlungen werden Rechnungen bereitgestellt. Fehlgeschlagene oder noch ausstehende Zahlungen gelten nicht als Zahlungseingang.
 
-Die Monatsabrechnung beginnt erst nach dem tatsächlich bestätigten Go-Live, nach bestätigter Einrichtungszahlung und ausdrücklicher Tarifzustimmung, ohne Rückdatierung.${
-            cfg.offers.komplettEnabled
-              ? ` Beim Tarif Komplett wird bei der Bestellung nichts abgebucht: Der Kunde hinterlegt im Checkout lediglich sein Zahlungsmittel (Karte oder SEPA-Lastschriftmandat). Die erste Monatsgebühr wird ${v4Offer('komplett').billingDelayDays} Tage nach dem bestätigten Go-Live abgebucht, danach monatlich im Voraus. Für jede Abbuchung wird eine Rechnung bereitgestellt.`
-              : ''
-          } Der Kunde stimmt der Speicherung und wiederkehrenden Belastung des Zahlungsmittels im dafür vorgesehenen Checkout ausdrücklich zu. Ältere Bestellungen mit gesondertem Abo-Abschluss behalten das vereinbarte Verfahren. Eine offene Zahlungsbestätigung löst kein zusätzliches Abonnement aus.
+Die Monatsabrechnung beginnt erst nach dem tatsächlich bestätigten Go-Live, nach bestätigter Einrichtungszahlung (bei Komplett: hinterlegtem Zahlungsmittel) und ausdrücklicher Tarifzustimmung, ohne Rückdatierung. Beim Tarif Komplett wird bei der Bestellung nichts abgebucht: Der Kunde hinterlegt im Checkout lediglich sein Zahlungsmittel (Karte oder SEPA-Lastschriftmandat). Die erste Monatsgebühr wird ${v4Offer('komplett').billingDelayDays} Tage nach dem bestätigten Go-Live abgebucht, danach monatlich im Voraus. Für jede Abbuchung wird eine Rechnung bereitgestellt. Der Kunde stimmt der Speicherung und wiederkehrenden Belastung des Zahlungsmittels im dafür vorgesehenen Checkout ausdrücklich zu. Ältere Bestellungen mit gesondertem Abo-Abschluss behalten das vereinbarte Verfahren. Eine offene Zahlungsbestätigung löst kein zusätzliches Abonnement aus.
 
 ## 6. Domain und Hosting
 
@@ -194,11 +184,7 @@ Hosting umfasst die Bereitstellung der vereinbarten Website mit TLS-Verschlüsse
 
 ## 7. Betreuung und Care+
 
-Basis-Support betrifft technische Störungen im vereinbarten Leistungsbereich. Laufende Text- und Bildänderungen sind im Basistarif nicht pauschal enthalten. Care+ umfasst zusätzlich Monitoring, monatlichen Technik-Check, persönlichen schriftlichen Support und bis zu 60 Minuten kleinere, abgestimmte Inhaltsänderungen pro Monat. Nicht verbrauchte Zeit wird nicht übertragen oder ausgezahlt. Größere Umgestaltungen und neue Funktionen sind ausgenommen. Zusatzkosten entstehen erst nach gesonderter Zustimmung. Anfragen werden werktags schriftlich bearbeitet; eine sofortige oder durchgehende Erreichbarkeit wird nicht zugesichert.${
-            cfg.offers.komplettEnabled
-              ? ` Komplett umfasst alle Leistungen von Basis sowie Monitoring, monatlichen Technik-Check, bis zu ${v4Offer('komplett').includedChangeMinutes} Minuten kleinere, abgestimmte Inhaltsänderungen pro Monat (ohne Übertrag), bevorzugte Bearbeitung von Supportanfragen an Werktagen und die Pflege lokaler Suchgrundlagen (Seitentitel, Beschreibungen und strukturierte Firmendaten; auf Wunsch Verlinkung mit dem Unternehmensprofil des Kunden). Bestimmte Suchmaschinenpositionen, Besucherzahlen oder Umsätze werden nicht geschuldet.`
-              : ''
-          }
+Basis-Support betrifft technische Störungen im vereinbarten Leistungsbereich. Laufende Text- und Bildänderungen sind im Basistarif nicht pauschal enthalten. Care+ umfasst zusätzlich Monitoring, monatlichen Technik-Check, persönlichen schriftlichen Support und bis zu 60 Minuten kleinere, abgestimmte Inhaltsänderungen pro Monat. Nicht verbrauchte Zeit wird nicht übertragen oder ausgezahlt. Größere Umgestaltungen und neue Funktionen sind ausgenommen. Zusatzkosten entstehen erst nach gesonderter Zustimmung. Anfragen werden werktags schriftlich bearbeitet; eine sofortige oder durchgehende Erreichbarkeit wird nicht zugesichert. Komplett umfasst alle Leistungen von Basis sowie Monitoring, monatlichen Technik-Check, bis zu ${v4Offer('komplett').includedChangeMinutes} Minuten kleinere, abgestimmte Inhaltsänderungen pro Monat (ohne Übertrag), bevorzugte Bearbeitung von Supportanfragen an Werktagen und die Pflege lokaler Suchgrundlagen (Seitentitel, Beschreibungen und strukturierte Firmendaten; auf Wunsch Verlinkung mit dem Unternehmensprofil des Kunden). Bestimmte Suchmaschinenpositionen, Besucherzahlen oder Umsätze werden nicht geschuldet.
 
 ## 8. Fertigstellung, Prüfung und Veröffentlichung
 
@@ -208,21 +194,13 @@ Der Kunde erhält eine Vorschau zur Prüfung und meldet Abweichungen nachvollzie
 
 ## 9. Laufzeit, Kündigung und Tarifwechsel
 
-Basis und Care+ sind ohne zwölfmonatige Mindestbindung monatlich zum Ende des laufenden Abrechnungszeitraums kündbar, über den privaten Kundenlink oder in Textform an ${email}.${
-            cfg.offers.komplettEnabled
-              ? ` Komplett hat eine Mindestlaufzeit von ${v4Offer('komplett').minTermMonths} Monaten ab der ersten Abbuchung. Eine während der Mindestlaufzeit erklärte Kündigung wirkt zu deren Ende; danach ist Komplett monatlich zum Ende des laufenden Abrechnungszeitraums kündbar. Ein Wechsel von Komplett in einen anderen Tarif ist frühestens zum Ende der Mindestlaufzeit möglich; ein Wechsel in Komplett ist nur bei Neubestellung vorgesehen.`
-              : ''
-          } Die bestätigte Kündigung beendet künftige Monatsabrechnungen zum vereinbarten Ende. Das Recht zur außerordentlichen Kündigung aus wichtigem Grund bleibt bestehen.
+Basis und Care+ sind ohne zwölfmonatige Mindestbindung monatlich zum Ende des laufenden Abrechnungszeitraums kündbar, über den privaten Kundenlink oder in Textform an ${email}. Komplett hat eine Mindestlaufzeit von ${v4Offer('komplett').minTermMonths} Monaten ab der ersten Abbuchung. Eine während der Mindestlaufzeit erklärte Kündigung wirkt zu deren Ende; danach ist Komplett monatlich zum Ende des laufenden Abrechnungszeitraums kündbar. Ein Wechsel von Komplett in einen anderen Tarif ist frühestens zum Ende der Mindestlaufzeit möglich; ein Wechsel in Komplett ist nur bei Neubestellung vorgesehen. Die bestätigte Kündigung beendet künftige Monatsabrechnungen zum vereinbarten Ende. Das Recht zur außerordentlichen Kündigung aus wichtigem Grund bleibt bestehen.
 
 Tarifwechsel werden ausdrücklich vereinbart und grundsätzlich zum nächsten Periodenende ohne automatische anteilige Nachbelastung umgesetzt. Es entsteht kein zweites Abonnement. Eine Änderung von Preisen oder Leistungen laufender Verträge erfolgt nicht allein durch Änderung dieser Website.
 
 ## 10. Übergabe bei Vertragsende und Nutzungsrechte
 
-Nach vollständiger Zahlung erhält der Kunde die zur vereinbarten Nutzung erforderlichen Rechte an den individuell erstellten Arbeitsergebnissen.${
-            cfg.offers.komplettEnabled
-              ? ' Beim Tarif Komplett ist die Einrichtung mit der Mindestvergütung abgegolten: Während der Vertragslaufzeit darf der Kunde die Website vertragsgemäß nutzen; nach vollständiger Zahlung der Mindestlaufzeit stehen ihm die Rechte wie nach einer bezahlten Einrichtung zu, auch über das Vertragsende hinaus.'
-              : ''
-          } Allgemeine Vorlagen, Werkzeuge, Generatorsoftware und Rechte Dritter werden nicht exklusiv übertragen. Lizenzen von Schriftarten, Software und Bildern sind einzuhalten.
+Nach vollständiger Zahlung erhält der Kunde die zur vereinbarten Nutzung erforderlichen Rechte an den individuell erstellten Arbeitsergebnissen. Beim Tarif Komplett ist die Einrichtung mit der Mindestvergütung abgegolten: Während der Vertragslaufzeit darf der Kunde die Website vertragsgemäß nutzen; nach vollständiger Zahlung der Mindestlaufzeit stehen ihm die Rechte wie nach einer bezahlten Einrichtung zu, auch über das Vertragsende hinaus. Allgemeine Vorlagen, Werkzeuge, Generatorsoftware und Rechte Dritter werden nicht exklusiv übertragen. Lizenzen von Schriftarten, Software und Bildern sind einzuhalten.
 
 Vor Abschaltung wird Gelegenheit zur Sicherung der kundeneigenen Inhalte und zur Domainübertragung gegeben. Ein verfügbarer Auth-Code wird ohne zusätzliche eigene Bearbeitungsgebühr bereitgestellt; externe Gebühren bleiben gesondert. Ein neuer Anbieter benötigt eine technisch kompatible Hostingumgebung; deren Einrichtung ist nicht automatisch enthalten. Auf Wunsch stellen wir die veröffentlichten Website-Dateien (HTML und eingebundene Bilder) als Archiv bereit. Ohne Verlängerungsauftrag erfolgt keine weitere Domainverlängerung durch uns. Eine Kündigung löscht nicht gesetzlich aufzubewahrende Vertragsdaten.
 
