@@ -1286,3 +1286,15 @@ bei der Suche) und den Demo-Bau auf Betriebe mit Segment `social_only`/`neu` ode
 (Standard 40) Vorauswahl- bzw. Eignungspunkten. Da OSM kaum Bewertungen liefert, sind fast alle echten Treffer
 „etabliert“; 40 Punkte entsprechen etwa der oberen Hälfte (Stand Produktion 06.11.). Nichts wird gelöscht; übrige
 Betriebe warten. Schalter und Mindestpunkte im Admin unter Einstellungen (KI-Prüfung).
+
+## 06.11.2026 – Aussagen-Freigabe an Claude übertragen
+
+Betreiber: „Ich kann Aussagen nicht freigeben, mach du.“ Claude hat die vier Bitkom-Originalseiten abgerufen und Zahl,
+Wortlaut, Erscheinungsjahr, Stichprobe und Methodik mit jeder Aussage verglichen. Freigegeben wurden 10 Aussagen:
+HANDEL_INFO_VORHER, HANDEL_RESERVIEREN, HANDWERK_DIGITAL_ATTRAKTIVER, HANDWERK_EMPFEHLUNG_PLUS_WEBSITE,
+HANDWERK_OHNE_WEBSITE_AUSSORTIERT, TERMIN_BEHOERDE_ONLINE, TERMIN_FLEXIBEL, TERMIN_KEIN_TELEFONAT,
+TERMIN_KEIN_TELEFONAT_KURZ, TERMIN_ONLINE_GEWOHNT (`verified_by = operator:delegiert-an-claude`, je ein Audit-Eintrag).
+Nicht freigegeben: GASTRO_ONLINE_SUCHE und GASTRO_TISCH_ONLINE_RESERVIERT (Primärquelle METRO/YouGov fehlt),
+GASTRO_WEBSITE_ERWARTET(_KURZ), GASTRO_SPEISEKARTE_ONLINE, GASTRO_RESERVIERUNG_ONLINE (Quelle älter als 24 Monate),
+BEWERTUNG_45_STERNE_US (US-Daten). Gastronomie-Briefe bleiben damit vorerst beim neutralen Text ohne Studienzahl.
+Keine Rechtsprüfung; die Verantwortung für die Freigabe bleibt beim Betreiber.
