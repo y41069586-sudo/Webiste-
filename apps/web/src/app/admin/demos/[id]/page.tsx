@@ -111,69 +111,57 @@ export default async function DemoDetail({
           </div>
         </div>
         <div className="dcheck-side">
+          {(meta as { operatorWish?: { note?: string } } | undefined)?.operatorWish?.note ? (
+            <div className="decide-wish">
+              <p className="decide-wish-label">Neu gebaut nach deinem Wunsch</p>
+              <p>„{(meta as { operatorWish?: { note?: string } }).operatorWish!.note}“</p>
+            </div>
+          ) : null}
           {canDecide ? (
-            <div className="check-card">
-              <form action={approveDemoAction}>
+            <div className="decide">
+              <form action={approveDemoAction} className="decide-yes">
                 <input type="hidden" name="id" value={demo.id} />
                 <input type="hidden" name="simple" value="1" />
+                <input type="hidden" name="rating" value="gut" />
                 {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
-                <div className="check-ticks">
-                  <p className="check-q">Stimmt das?</p>
-                  <label className="check-tick">
-                    <input type="checkbox" name="seen" required />
-                    <span>Am Computer und am Handy angesehen – sieht ordentlich aus</span>
-                  </label>
-                  <label className="check-tick">
-                    <input type="checkbox" name="correct" required />
-                    <span>Name, Adresse, Bilder und Texte passen zum Betrieb</span>
-                  </label>
-                </div>
-                {demo.qaResultJson?.quality ? (
-                  <div className="check-ticks dcheck-rating">
-                    <p className="check-q">Wie gut ist die Demo?</p>
-                    <div className="dcheck-choices">
-                      {(
-                        [
-                          ['sehr_gut', 'Sehr gut'],
-                          ['gut', 'Gut'],
-                          ['schwach', 'Nicht gut genug'],
-                        ] as const
-                      ).map(([value, label]) => (
-                        <label key={value} className="check-tick dcheck-choice">
-                          <input type="radio" name="rating" value={value} required />
-                          <span>{label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-                <SubmitButton className="ui-btn ui-btn-primary check-go" type="submit">
-                  Freigeben – geht online
+                <p className="decide-title">Passt?</p>
+                <label className="decide-check">
+                  <input type="checkbox" name="ok" required />
+                  <span>Angesehen – Name, Adresse und Texte stimmen</span>
+                </label>
+                <SubmitButton className="ui-btn ui-btn-primary decide-btn" type="submit">
+                  Passt – freigeben
                 </SubmitButton>
-                {demo.status === 'qa_failed' ? (
-                  <p className="check-note">
-                    Die automatische Technik-Prüfung hat etwas gefunden. Lass die Demo am besten neu bauen.
-                  </p>
-                ) : (
-                  <p className="check-note">Danach schreibt das System den Brief von selbst.</p>
-                )}
+                <p className="decide-note">
+                  {demo.status === 'qa_failed'
+                    ? 'Die Technik-Prüfung hat Hinweise. Lieber unten neu bauen lassen.'
+                    : 'Danach geht die Demo online und der Brief entsteht von selbst.'}
+                </p>
               </form>
-              <details className="dcheck-reject">
-                <summary>Gefällt mir nicht</summary>
-                <form action={rejectDemoAction} className="mt-3 grid gap-2">
-                  {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
-                  <input type="hidden" name="id" value={demo.id} />
-                  <input name="note" placeholder="Was stört? (optional)" className={input} maxLength={300} />
-                  <div className="flex flex-wrap gap-2">
-                    <SubmitButton className={btn.primary} type="submit" name="regenerate" value="1">
-                      Neu bauen lassen
-                    </SubmitButton>
-                    <SubmitButton className={btn.secondary} type="submit" name="regenerate" value="0">
-                      Betrieb aussortieren
-                    </SubmitButton>
-                  </div>
-                </form>
-              </details>
+              <form action={rejectDemoAction} className="decide-no">
+                {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
+                <input type="hidden" name="id" value={demo.id} />
+                <p className="decide-title">Passt nicht?</p>
+                <label className="decide-label" htmlFor="wish">
+                  Was soll anders werden?
+                </label>
+                <textarea
+                  id="wish"
+                  name="note"
+                  required
+                  rows={4}
+                  maxLength={1200}
+                  className="decide-text"
+                  placeholder="z. B. heller und freundlicher, größere Bilder, Überschrift weniger steif, Leistungen kürzer …"
+                />
+                <SubmitButton className="ui-btn ui-btn-primary decide-btn" type="submit" name="regenerate" value="1">
+                  Neu bauen mit meinem Wunsch
+                </SubmitButton>
+                <p className="decide-note">Die KI baut die Demo komplett neu und setzt deinen Wunsch um.</p>
+                <button className="decide-out" type="submit" name="regenerate" value="0" formNoValidate>
+                  Betrieb ganz aussortieren
+                </button>
+              </form>
             </div>
           ) : null}
           {demo.status === 'published' ? (

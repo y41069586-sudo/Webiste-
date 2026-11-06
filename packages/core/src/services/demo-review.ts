@@ -9,6 +9,7 @@ import { audit } from './audit';
 import { transitionLead } from './lead-state';
 import { leadResearch } from './lead-research';
 import { assessAcquisition } from '../leads/acquisition';
+import { saveOperatorWish } from '../demos/operator-wish';
 
 /** Anzahl manuell geprüfter Demos (für die Regel „erste N manuell“). */
 export async function manuallyReviewedCount(db: DbOrTx): Promise<number> {
@@ -160,6 +161,19 @@ export async function rejectDemo(demoId: string, actor: string, note: string, re
     if (!demo) throw new Error('Demo nicht gefunden');
     leadId = demo.leadId;
     await tx.update(demos).set({ status: 'rejected', reviewNote: note, updatedAt: new Date() }).where(eq(demos.id, demoId));
+    // Wunschtext geht wirklich in den Neubau (vorher nur gespeichert, der Neubau lief ohne ihn)
+    if (regenerate && note.trim() && note.trim() !== 'abgelehnt')
+      await saveOperatorWish(
+        demo.leadId,
+        {
+          note,
+          previousConcept: ((demo.contentJson as { design?: { concept?: string } } | null)?.design?.concept ?? '').slice(0, 400),
+          demoId,
+          at: new Date().toISOString(),
+        },
+        actor,
+        tx,
+      );
     await tx.execute(sql`UPDATE counters SET value = value + 1 WHERE name = 'demos_reviewed'`);
     await transitionLead(tx, demo.leadId, regenerate ? 'qualified' : 'rejected', {
       actor,
@@ -209,6 +223,8 @@ export async function publishDemo(demoId: string, actor: string, now = new Date(
     });
     await audit(tx, { entity: 'demo', entityId: demoId, action: 'publish', actor });
   });
+  // Brief nicht erst beim nächsten 5-Minuten-Takt anlegen: Takt sofort anstoßen (er prüft Not-Aus und Budget selbst)
+  await enqueue(QUEUES.pipelineTick, {}, { singletonKey: 'pipeline-tick-now' }).catch(() => undefined);
 }
 
 /** Aktuell veröffentlichte Demo eines Leads. */

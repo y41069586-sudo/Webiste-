@@ -12,27 +12,13 @@ import {
   systemHealth,
 } from '@wbm/core';
 import { SubmitButton } from '@/components/admin/submit-button';
-import { Card, Notice, btn } from '@/components/ui';
+import { Notice, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur, num } from '@/lib/format';
 import { acknowledgeAlert } from './actions';
 import { settingsTodos } from './settings/todos';
 
 export const metadata = { title: 'Heute' };
-
-/** Pipeline in Arbeitsreihenfolge (Zustandsmaschine, CLAUDE.md § 2) */
-const STAGES: [string, string][] = [
-  ['discovered', 'Gefunden'],
-  ['qualified', 'Geeignet'],
-  ['demo_built', 'Demo zu prüfen'],
-  ['demo_published', 'Demo online'],
-  ['letter_generated', 'Brief zu prüfen'],
-  ['letter_sent', 'Brief verschickt'],
-  ['scanned', 'QR gescannt'],
-  ['cta_clicked', 'Interesse'],
-  ['paid', 'Bezahlt'],
-  ['live', 'Live'],
-];
 
 const SALES_ONLY = new Set(['tax.operatorConfirmed', 'sender.bankIban', 'legal.termsMarkdown']);
 
@@ -62,7 +48,7 @@ export default async function TodayPage() {
   await requireAdmin();
   const db = getDb();
   const now = new Date();
-  const [byStatus, inbox, openAlerts, letterBudget, llmBudget, health, cfg, testJobs] = await Promise.all([
+  const [byStatus, inbox, openAlerts, letterBudget, llmBudget, health, cfg, testJobs, live] = await Promise.all([
     db
       .select({ status: schema.leads.status, n: sql<number>`count(*)::int` })
       .from(schema.leads)
@@ -88,10 +74,19 @@ export default async function TodayPage() {
     systemHealth(undefined, { maxAgeMs: 30_000 }),
     getConfig(),
     providerTestJobCount(getProviders().mail.name),
+    db
+      .execute<{ checking: number; building: number; failed: number }>(
+        sql`SELECT
+          (SELECT count(*)::int FROM leads WHERE status = 'discovered' AND phone IS NOT NULL) AS checking,
+          (SELECT count(*)::int FROM leads WHERE status = 'qualified')
+            + (SELECT count(*)::int FROM demos WHERE status = 'building') AS building,
+          (SELECT count(*)::int FROM demos WHERE status = 'qa_failed') AS failed`,
+      )
+      .then((r) => r.rows[0] ?? { checking: 0, building: 0, failed: 0 })
+      .catch(() => ({ checking: 0, building: 0, failed: 0 })),
   ]);
   const counts = Object.fromEntries(byStatus.map((r) => [r.status, r.n])) as Record<string, number>;
   const total = byStatus.reduce((a, r) => a + r.n, 0);
-  const maxStage = Math.max(1, ...STAGES.map(([s]) => counts[s] ?? 0));
   const todos = settingsTodos(cfg);
   const blockers = goLiveBlockers(cfg);
   const workerOk = health.workerHeartbeatAgeSec !== null && health.workerHeartbeatAgeSec < 15 * 60;
@@ -129,7 +124,6 @@ export default async function TodayPage() {
     },
   ];
   const doneCount = steps.filter((s) => s.done).length;
-  const waiting = inbox.length + openAlerts.length;
   const dateLabel = new Intl.DateTimeFormat('de-DE', {
     weekday: 'long',
     day: 'numeric',
@@ -137,46 +131,67 @@ export default async function TodayPage() {
     timeZone: 'Europe/Berlin',
   }).format(now);
 
-  return (
-    <>
-      <section className="admin-hero">
-        <div>
-          <p className="admin-hero-date">{dateLabel}</p>
-          <h1>{greeting(now)}.</h1>
-          <p className="admin-hero-sub">
-            {waiting === 0
-              ? 'Gerade wartet nichts auf dich.'
-              : waiting === 1
-                ? 'Eine Sache wartet auf dich.'
-                : `${num(waiting)} Dinge warten auf dich.`}
-            {doneCount < steps.length ? ` Startklar: ${doneCount} von ${steps.length} Schritten erledigt.` : ''}
-          </p>
-        </div>
-        <div className="admin-hero-actions">
-          <Link href="/admin/ablauf" className={btn.primary}>
-            Ablauf: nächster Schritt
-          </Link>
-          <Link href="/admin/suche" className={btn.secondary}>
-            Betriebe suchen
-          </Link>
-        </div>
-      </section>
+  const sent = ['letter_sent', 'letter_delivered', 'scanned', 'cta_clicked', 'checkout_started', 'followup_sent'].reduce(
+    (n, st) => n + (counts[st] ?? 0),
+    0,
+  );
+  const customers =
+    (counts['paid'] ?? 0) + (counts['onboarding'] ?? 0) + (counts['preview_approved'] ?? 0) + (counts['live'] ?? 0);
+  const demoWaiting = inbox.filter((i) => i.kind === 'demo').length + live.failed;
+  const letterWaiting = inbox.filter((i) => i.kind === 'letter').length;
+  const flow = [
+    { label: 'Gefunden', value: total, hint: 'Betriebe insgesamt', href: '/admin/leads', tone: '' },
+    {
+      label: 'KI prüft',
+      value: live.checking,
+      hint: 'Website? Bewertungen?',
+      href: '/admin/suche',
+      tone: live.checking ? 'is-busy' : '',
+    },
+    {
+      label: 'Demo im Bau',
+      value: live.building,
+      hint: 'automatisch',
+      href: '/admin/demos?tab=building',
+      tone: live.building ? 'is-busy' : '',
+    },
+    {
+      label: 'Wartet auf dich',
+      value: demoWaiting + letterWaiting,
+      hint: 'Demos & Briefe',
+      href: demoWaiting ? '/admin/demos' : '/admin/letters',
+      tone: demoWaiting + letterWaiting ? 'is-you' : '',
+    },
+    {
+      label: 'Verschickt',
+      value: sent,
+      hint: customers ? `${num(customers)} Kunden` : 'Briefe unterwegs',
+      href: '/admin/outbox',
+      tone: sent ? 'is-good' : '',
+    },
+  ];
+  const statusLine =
+    inbox.length === 0
+      ? live.checking + live.building > 0
+        ? 'Die KI arbeitet gerade. Du musst nichts tun.'
+        : 'Gerade wartet nichts auf dich.'
+      : inbox.length === 1
+        ? 'Eine Sache wartet auf dich.'
+        : `${num(inbox.length)} Dinge warten auf dich.`;
+  const errorAlerts = openAlerts.filter((a) => a.level === 'error').length;
 
-      <div className="admin-kpis">
-        {(
-          [
-            ['Betriebe', total, '/admin/leads'],
-            ['Demos online', counts['demo_published'] ?? 0, '/admin/leads?status=demo_published'],
-            ['Briefe verschickt', (counts['letter_sent'] ?? 0) + (counts['letter_delivered'] ?? 0), '/admin/letters'],
-            ['Kunden', (counts['paid'] ?? 0) + (counts['onboarding'] ?? 0) + (counts['live'] ?? 0), '/admin/customers'],
-          ] as const
-        ).map(([label, value, href]) => (
-          <Link key={label} href={href} className="admin-kpi">
-            <span>{label}</span>
-            <strong>{num(value)}</strong>
-          </Link>
-        ))}
-      </div>
+  return (
+    <div className="home">
+      <header className="home-head">
+        <div>
+          <p className="home-date">{dateLabel}</p>
+          <h1 className="home-title">{greeting(now)}.</h1>
+          <p className="home-sub">{statusLine}</p>
+        </div>
+        <Link href="/admin/suche" className="home-go">
+          Betriebe finden
+        </Link>
+      </header>
 
       {health.problems.length ? (
         <Notice kind={health.status === 'down' ? 'error' : 'warn'}>
@@ -184,124 +199,102 @@ export default async function TodayPage() {
         </Notice>
       ) : null}
 
-      <div className="admin-today">
-        <div className="admin-today-main">
-          <Card title={`Wartet auf dich${waiting ? ` · ${waiting}` : ''}`}>
-            {waiting === 0 ? (
-              <div className="admin-empty">
-                <span className="admin-empty-mark" aria-hidden="true">
-                  ✓
+      <section className="home-block" aria-labelledby="flow-h">
+        <h2 id="flow-h" className="home-h2">
+          So läuft es gerade
+        </h2>
+        <ol className="home-flow">
+          {flow.map((f, i) => (
+            <li key={f.label} className={f.tone}>
+              <Link href={f.href}>
+                <span className="home-flow-step">{i + 1}</span>
+                <span className="home-flow-label">{f.label}</span>
+                <strong className="home-flow-num">{num(f.value)}</strong>
+                <span className="home-flow-hint">{f.hint}</span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="home-block" aria-labelledby="todo-h">
+        <h2 id="todo-h" className="home-h2">
+          Für dich
+        </h2>
+        {inbox.length === 0 ? (
+          <div className="empty">
+            <p className="empty-title">Alles erledigt.</p>
+            <p className="empty-text">Neue Demos, Briefe und Nachrichten erscheinen hier von selbst.</p>
+          </div>
+        ) : (
+          <ul className="home-todo">
+            {inbox.slice(0, 12).map((item) => {
+              const k = INBOX_KIND[item.kind]!;
+              return (
+                <li key={`${item.kind}-${item.id}`}>
+                  <Link href={k.href(item.id)}>
+                    <span className={`home-todo-kind ${k.tone}`}>{k.label}</span>
+                    <span className="home-todo-name">{item.title}</span>
+                    <span className="home-todo-age">{ago(item.created_at, now)}</span>
+                    <span className="home-todo-go">Öffnen →</span>
+                  </Link>
+                </li>
+              );
+            })}
+            {inbox.length > 12 ? (
+              <li className="home-todo-more">
+                <Link href="/admin/demos">… und {num(inbox.length - 12)} weitere</Link>
+              </li>
+            ) : null}
+          </ul>
+        )}
+      </section>
+
+      <p className="home-costs">
+        Diese Woche: Briefe {eur(letterBudget.spentCents)} von {eur(letterBudget.limitCents)} · KI {eur(llmBudget.spentCents)} von{' '}
+        {eur(llmBudget.limitCents)} · <Link href="/admin/budget">Kosten ansehen</Link>
+      </p>
+
+      {openAlerts.length ? (
+        <details className="home-fold">
+          <summary>
+            {errorAlerts ? `${num(errorAlerts)} Fehler` : 'Hinweise'} vom System ({num(openAlerts.length)})
+          </summary>
+          <ul className="home-alerts">
+            {openAlerts.map((a) => (
+              <li key={a.id}>
+                <span className={a.level === 'error' ? 'home-alert is-error' : 'home-alert'}>
+                  {a.level === 'error' ? 'Fehler' : 'Hinweis'}
                 </span>
-                <p>
-                  <strong>Alles erledigt.</strong>
-                  <br />
-                  Neue Demos, Briefe und Anfragen erscheinen hier automatisch.
-                </p>
-              </div>
-            ) : (
-              <ul className="admin-inbox">
-                {inbox.map((item) => {
-                  const k = INBOX_KIND[item.kind]!;
-                  return (
-                    <li key={`${item.kind}-${item.id}`}>
-                      <Link href={k.href(item.id)}>
-                        <span className={`admin-inbox-kind ${k.tone}`}>{k.label}</span>
-                        <span className="admin-inbox-title">{item.title}</span>
-                        <span className="admin-inbox-age">{ago(item.created_at, now)}</span>
-                        <span className="admin-inbox-go" aria-hidden="true">
-                          →
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-                {openAlerts.map((a) => (
-                  <li key={a.id} className="admin-inbox-alert">
-                    <div>
-                      <span className={`admin-inbox-kind ${a.level === 'error' ? 'is-error' : 'is-alert'}`}>
-                        {a.level === 'error' ? 'Fehler' : 'Hinweis'}
-                      </span>
-                      <span className="admin-inbox-title">{a.message}</span>
-                      <span className="admin-inbox-age">{dt(a.createdAt)}</span>
-                    </div>
-                    <form action={acknowledgeAlert}>
-                      <input type="hidden" name="id" value={a.id} />
-                      <SubmitButton className={btn.ghost}>Erledigt</SubmitButton>
-                    </form>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
+                <span className="home-alert-text">{a.message}</span>
+                <span className="home-todo-age">{dt(a.createdAt)}</span>
+                <form action={acknowledgeAlert}>
+                  <input type="hidden" name="id" value={a.id} />
+                  <SubmitButton className={btn.ghost}>Erledigt</SubmitButton>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
 
-          <Card title="Wo stehen deine Betriebe?">
-            {total === 0 ? (
-              <p className="text-sm text-slate-600">
-                Noch keine Betriebe.{' '}
-                <Link href="/admin/suche" className="font-semibold text-brand-700 underline">
-                  Erste Suche starten
-                </Link>
-              </p>
-            ) : (
-              <ul className="admin-pipeline">
-                {STAGES.map(([status, label]) => (
-                  <li key={status}>
-                    <Link href={`/admin/leads?status=${status}`}>
-                      <span
-                        className="admin-pipeline-bar"
-                        style={{ width: `${Math.round(((counts[status] ?? 0) / maxStage) * 100)}%` }}
-                      />
-                      <span>{label}</span>
-                      <strong>{num(counts[status] ?? 0)}</strong>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-        </div>
-
-        <aside className="admin-today-side">
-          {doneCount < steps.length ? (
-            <Card title={`Startklar · ${doneCount}/${steps.length}`}>
-              <div className="admin-progress" aria-hidden="true">
-                <span style={{ width: `${Math.round((doneCount / steps.length) * 100)}%` }} />
-              </div>
-              <ol className="admin-steps">
-                {steps.map((s) => (
-                  <li key={s.label} className={s.done ? 'is-done' : ''}>
-                    <span className="admin-step-mark" aria-label={s.done ? 'erledigt' : 'offen'}>
-                      {s.done ? '✓' : ''}
-                    </span>
-                    {s.done ? <span>{s.label}</span> : <Link href={s.href}>{s.label}</Link>}
-                  </li>
-                ))}
-              </ol>
-            </Card>
-          ) : null}
-          <Card title="Diese Woche">
-            <div className="admin-mini">
-              <div>
-                <span>Briefe</span>
-                <strong>{eur(letterBudget.spentCents)}</strong>
-                <small>von {eur(letterBudget.limitCents)}</small>
-              </div>
-              <div>
-                <span>KI-Kosten</span>
-                <strong>{eur(llmBudget.spentCents)}</strong>
-                <small>Limit {eur(llmBudget.limitCents)}</small>
-              </div>
-            </div>
-            <div className="admin-progress mt-3" aria-hidden="true">
-              <span
-                style={{
-                  width: `${Math.min(100, Math.round((letterBudget.spentCents / Math.max(1, letterBudget.limitCents ?? 0)) * 100))}%`,
-                }}
-              />
-            </div>
-          </Card>
-        </aside>
-      </div>
-    </>
+      {doneCount < steps.length ? (
+        <details className="home-fold">
+          <summary>
+            Einrichtung: {doneCount} von {steps.length} erledigt
+          </summary>
+          <ol className="admin-steps">
+            {steps.map((st) => (
+              <li key={st.label} className={st.done ? 'is-done' : ''}>
+                <span className="admin-step-mark" aria-label={st.done ? 'erledigt' : 'offen'}>
+                  {st.done ? '✓' : ''}
+                </span>
+                {st.done ? <span>{st.label}</span> : <Link href={st.href}>{st.label}</Link>}
+              </li>
+            ))}
+          </ol>
+        </details>
+      ) : null}
+    </div>
   );
 }

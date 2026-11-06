@@ -1195,3 +1195,25 @@ Normaler Generator nutzt bereits denselben Studio-Autor. Updater erhält explizi
 nach Image-/Konfigurationsprüfung und protokolliert den tatsächlich gesunden Start erst per
 Exec im laufenden Container. Keine vorhandenen Demos neu bauen oder freigeben. Codefreigabe
 und gemessenen VPS-Start getrennt halten; Umsetzung und Grenzen in `docs/design-studio.md`.
+
+## 06.11.2026 – Ablauf ohne Handprüfung, Ablehnen mit Wunsch, ruhiger Admin
+
+Betreiberauftrag: „KI soll suchen und gleichzeitig prüfen … automatisch Demos … ich gebe frei, bei ‚passt nicht‘
+schreibe ich, was anders werden soll, und es wird wirklich neu generiert … danach Briefe … Admin komplett
+übersichtlicher.“
+
+- **Suche und Prüfung gleichzeitig:** `findLeads` reiht jeden neu gespeicherten Treffer mit Telefonnummer sofort
+  in `research-lead` ein (statt erst nach der Suche); `research-lead` läuft mit 3 parallel. Bereits geeignete Treffer
+  stoßen sofort einen Pipeline-Takt an. Not-Aus, Mock-Quellen und Mock-KI lösen nichts aus.
+- **Handprüfung der Betriebe entfernt:** `/admin/ablauf` und `/admin/ablauf/pruefen` leiten um; nichts blockiert
+  mehr den Demo-Bau. Die Demo-Freigabe bleibt Pflicht (Nachweis „angesehen“ per Pflicht-Haken).
+- **Ablehnen mit Wunsch:** Der Wunsch wird am Betrieb gespeichert (`settings`-Schlüssel `demo-redo-wish:{leadId}`),
+  in Konzept- und Umsetzungsaufruf eingefügt (Vorrang vor Geschmack, nie vor Fakten-, Rechts- und
+  Sicherheitsregeln; Text als untrusted gekennzeichnet, Steuerzeichen entfernt), mit der neuen Demo als
+  `_meta.operatorWish` gespeichert und danach gelöscht. „Betrieb ganz aussortieren“ speichert keinen Wunsch.
+- **Brief sofort nach Freigabe:** `publishDemo` stößt den Pipeline-Takt direkt an; der Takt legt den Brief an
+  (Not-Aus und Budget prüft er selbst). Versand weiterhin nur nach Freigabe.
+- **Admin:** 5 Bereiche (Start, Betriebe finden, Freigeben, Nachrichten, Mehr). Startseite = Status-Satz,
+  Ablauf in 5 Schritten, „Für dich“-Liste; Hinweise und Einrichtung eingeklappt. Ruhige Gestaltungsebene
+  `admin-calm.css` (helle Seitenleiste, eine Akzentfarbe, keine Verläufe). Kopfleiste: „Live“/„Testmodus“,
+  „Automatik an/aus“, Einzelheiten im Tooltip.

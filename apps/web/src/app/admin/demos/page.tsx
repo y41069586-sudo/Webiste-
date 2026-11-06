@@ -1,26 +1,29 @@
 import Link from 'next/link';
 import { desc, eq, inArray, sql } from 'drizzle-orm';
 import { getDb, schema, type DemoStatus } from '@wbm/core';
-import { Badge, Card, Notice, PageHeader, StatusBadge, btn } from '@/components/ui';
+import { Notice, PageHeader } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt } from '@/lib/format';
 
 export const metadata = { title: 'Demos' };
 
 const TABS: { key: string; label: string; statuses: DemoStatus[] }[] = [
-  { key: 'review', label: 'Zur Prüfung', statuses: ['pending_review'] },
-  { key: 'failed', label: 'QA fehlgeschlagen', statuses: ['qa_failed'] },
-  { key: 'building', label: 'In Arbeit', statuses: ['building'] },
-  { key: 'published', label: 'Veröffentlicht', statuses: ['approved', 'published'] },
-  { key: 'closed', label: 'Abgelehnt/abgelaufen', statuses: ['rejected', 'expired', 'deleted'] },
+  { key: 'review', label: 'Wartet auf dich', statuses: ['pending_review', 'qa_failed'] },
+  { key: 'building', label: 'Wird gebaut', statuses: ['building'] },
+  { key: 'published', label: 'Online', statuses: ['approved', 'published'] },
+  { key: 'closed', label: 'Abgelehnt', statuses: ['rejected', 'expired', 'deleted'] },
 ];
 
-export default async function DemosPage({ searchParams }: { searchParams: Promise<{ tab?: string; fertig?: string }> }) {
+export default async function DemosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; fertig?: string; neu?: string; aus?: string }>;
+}) {
   await requireAdmin();
   const sp = await searchParams;
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0]!;
   const db = getDb();
-  const [rows, counts, reviewed] = await Promise.all([
+  const [rows, counts] = await Promise.all([
     db
       .select({
         demo: schema.demos,
@@ -35,87 +38,84 @@ export default async function DemosPage({ searchParams }: { searchParams: Promis
       .select({ status: schema.demos.status, n: sql<number>`count(*)::int` })
       .from(schema.demos)
       .groupBy(schema.demos.status),
-    db.execute<{ value: number }>(sql`SELECT value FROM counters WHERE name = 'demos_reviewed'`),
   ]);
   const countFor = (t: (typeof TABS)[number]) => counts.filter((c) => t.statuses.includes(c.status)).reduce((s, c) => s + c.n, 0);
   return (
     <>
-      <PageHeader title="Demos" subtitle={`Manuell geprüft: ${reviewed.rows[0]?.value ?? 0} (Pflicht für die ersten 30)`} />
+      <PageHeader
+        title="Demos freigeben"
+        subtitle="Ansehen, dann „Passt“ oder „Passt nicht“ mit deinem Wunsch. Danach entsteht der Brief von selbst."
+      />
+      {sp.neu ? (
+        <div className="mb-4">
+          <Notice kind="success">
+            Die Demo wird mit deinem Wunsch komplett neu gebaut. Sie erscheint hier wieder, sobald sie fertig ist.
+          </Notice>
+        </div>
+      ) : null}
+      {sp.aus ? (
+        <div className="mb-4">
+          <Notice kind="info">Der Betrieb ist aussortiert und bekommt keinen Brief.</Notice>
+        </div>
+      ) : null}
       {sp.fertig ? (
         <div className="mb-4">
           <Notice kind="success">
             Alle wartenden Demos sind geprüft. Die Briefe entstehen jetzt automatisch –{' '}
-            <Link className="underline" href="/admin/ablauf">
-              zurück zum Ablauf
+            <Link className="underline" href="/admin/letters">
+              zu den Briefen
             </Link>
             .
           </Notice>
         </div>
       ) : null}
-      <nav className="mb-4 flex flex-wrap gap-2" aria-label="Filter">
+      <nav className="seg" aria-label="Filter">
         {TABS.map((t) => (
-          <Link key={t.key} href={`/admin/demos?tab=${t.key}`} className={t.key === tab.key ? btn.primary : btn.secondary}>
-            {t.label} ({countFor(t)})
+          <Link key={t.key} href={`/admin/demos?tab=${t.key}`} className={t.key === tab.key ? 'is-active' : ''}>
+            {t.label}
+            <span>{countFor(t)}</span>
           </Link>
         ))}
       </nav>
       {rows.length === 0 ? (
-        <Notice>Keine Demos in dieser Ansicht.</Notice>
+        <div className="empty">
+          <p className="empty-title">{tab.key === 'review' ? 'Gerade wartet keine Demo auf dich.' : 'Hier ist nichts.'}</p>
+          <p className="empty-text">Neue Demos entstehen von selbst, sobald die KI einen passenden Betrieb gefunden hat.</p>
+        </div>
       ) : (
-        <div>
-          <p className="mb-4 text-sm text-slate-600">
-            Jede Demo einzeln auf Fakten, Darstellung, mobile Bedienbarkeit und Text prüfen. Technische QA allein ist keine
-            Versandfreigabe.
-          </p>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {rows.map(({ demo, lead }) => (
-              <Card key={demo.id} className="overflow-hidden">
-                <div className="-m-4 mb-3">
+        <div className="demo-grid">
+          {rows.map(({ demo, lead }) => {
+            const failed = demo.qaResultJson?.checks.filter((c) => !c.passed).length ?? 0;
+            const wish = (demo.contentJson?._meta as { operatorWish?: { note?: string } } | undefined)?.operatorWish?.note;
+            return (
+              <Link key={demo.id} href={`/admin/demos/${demo.id}`} className="demo-card">
+                <div className="demo-card-shot">
                   {demo.compositeKey ? (
-                    <img
-                      src={`/admin/files/${demo.compositeKey}`}
-                      alt={`Vorschau ${lead.name}`}
-                      className="aspect-[5/3] w-full bg-slate-100 object-cover"
-                    />
+                    <img src={`/admin/files/${demo.compositeKey}`} alt="" />
                   ) : (
-                    <div className="flex aspect-[5/3] items-center justify-center bg-slate-100 text-sm text-slate-500">
-                      Noch keine Screenshots
-                    </div>
+                    <span>{demo.status === 'building' ? 'Wird gebaut …' : 'Noch kein Bild'}</span>
                   )}
                 </div>
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <Link href={`/admin/demos/${demo.id}`} className="font-semibold text-brand-700 hover:underline">
-                      {lead.name}
-                    </Link>
-                    <div className="text-xs text-slate-500">
-                      {lead.branch} · {lead.city} · {demo.templateId}/{demo.palette}
-                    </div>
-                  </div>
-                  <StatusBadge status={demo.status} />
+                <div className="demo-card-body">
+                  <p className="demo-card-name">{lead.name}</p>
+                  <p className="demo-card-meta">
+                    {lead.branch} · {lead.city}
+                  </p>
+                  <p className={`demo-card-state ${failed ? 'is-warn' : ''}`}>
+                    {demo.status === 'building'
+                      ? 'Wird gerade gebaut und geprüft'
+                      : demo.qaResultJson
+                        ? failed
+                          ? `Technik: ${failed} ${failed === 1 ? 'Hinweis' : 'Hinweise'}`
+                          : 'Technik in Ordnung'
+                        : 'Technik-Prüfung läuft'}
+                    {wish ? ' · nach deinem Wunsch neu gebaut' : ''}
+                  </p>
+                  <p className="demo-card-date">{dt(demo.createdAt)}</p>
                 </div>
-                <div className="mt-2 flex flex-wrap gap-1 text-xs">
-                  {demo.qaResultJson?.checks.map((c) => (
-                    <Badge key={c.name} color={c.passed ? 'green' : 'red'}>
-                      {c.name}
-                      {c.score !== undefined ? ` ${c.score}` : ''}
-                    </Badge>
-                  ))}
-                </div>
-                <div className="mt-3 text-xs text-slate-500">
-                  Erstellt {dt(demo.createdAt)}
-                  {demo.expiresAt ? ` · läuft ab ${dt(demo.expiresAt)}` : ''}
-                </div>
-                {tab.key === 'review' || tab.key === 'failed' ? (
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <Link href={`/admin/demos/${demo.id}`} className={btn.secondary}>
-                      Prüfen
-                    </Link>
-                  </div>
-                ) : null}
-              </Card>
-            ))}
-          </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </>

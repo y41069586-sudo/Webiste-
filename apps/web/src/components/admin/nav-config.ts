@@ -14,6 +14,8 @@ export interface NavSection {
   label: string;
   hint: string;
   icon: string;
+  /** Reiter über dem Inhalt anzeigen (Standard ja); „Mehr“ zeigt stattdessen einen Rücklink zur Übersicht */
+  tabs?: boolean;
   pages: NavPage[];
 }
 
@@ -21,70 +23,62 @@ export type CountKey = 'demos' | 'letters' | 'support' | 'alerts';
 
 export const SECTIONS: NavSection[] = [
   {
-    id: 'heute',
-    label: 'Heute',
-    hint: 'Was jetzt ansteht',
-    icon: 'M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
-    pages: [{ href: '/admin', label: 'Übersicht', count: 'alerts' }],
+    id: 'start',
+    label: 'Start',
+    hint: 'Was auf dich wartet',
+    icon: 'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10',
+    pages: [{ href: '/admin', label: 'Start' }],
   },
   {
-    id: 'akquise',
-    label: 'Akquise',
-    hint: 'Betriebe, Demos, Briefe',
-    icon: 'M3 12h4l3-8 4 16 3-8h4',
+    id: 'finden',
+    label: 'Betriebe finden',
+    hint: 'Suchen, KI prüft sofort',
+    icon: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4',
     pages: [
-      { href: '/admin/ablauf', label: 'Schritt für Schritt' },
-      { href: '/admin/suche', label: 'Betriebe suchen' },
+      { href: '/admin/suche', label: 'Suchen' },
       { href: '/admin/leads', label: 'Alle Betriebe' },
-      { href: '/admin/demos', label: 'Demos prüfen', count: 'demos' },
-      { href: '/admin/letters', label: 'Briefe freigeben', count: 'letters' },
-      { href: '/admin/outbox', label: 'Verschickte Post' },
     ],
   },
   {
-    id: 'kunden',
-    label: 'Kunden',
-    hint: 'Aufträge, Websites, Nachrichten',
-    icon: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 19c.8-3 3.2-5 6-5s5.2 2 6 5M16 5a3 3 0 0 1 0 6M18 14c1.6.7 2.6 2.3 3 5',
+    id: 'freigeben',
+    label: 'Freigeben',
+    hint: 'Demos und Briefe',
+    icon: 'M5 12.5l4.5 4.5L19 7.5',
     pages: [
-      { href: '/admin/support', label: 'Nachrichten', count: 'support' },
+      { href: '/admin/demos', label: 'Demos', count: 'demos' },
+      { href: '/admin/letters', label: 'Briefe', count: 'letters' },
+      { href: '/admin/outbox', label: 'Verschickt' },
+    ],
+  },
+  {
+    id: 'nachrichten',
+    label: 'Nachrichten',
+    hint: 'Fragen von Betrieben',
+    icon: 'M4 6h16v10H8l-4 3.5V6z',
+    pages: [{ href: '/admin/support', label: 'Nachrichten', count: 'support' }],
+  },
+  {
+    id: 'mehr',
+    label: 'Mehr',
+    hint: 'Kunden, Zahlen, Einstellungen',
+    icon: 'M5 12h.01M12 12h.01M19 12h.01',
+    tabs: false,
+    pages: [
+      { href: '/admin/mehr', label: 'Übersicht' },
       { href: '/admin/orders', label: 'Bestellungen' },
       { href: '/admin/customers', label: 'Kunden & Websites' },
-    ],
-  },
-  {
-    id: 'auswertung',
-    label: 'Auswertung',
-    hint: 'Zahlen und Kosten',
-    icon: 'M5 19V11M10 19V6M15 19v-5M20 19V9',
-    pages: [
       { href: '/admin/kpis', label: 'Kennzahlen' },
       { href: '/admin/funnel', label: 'Weg zum Kauf' },
       { href: '/admin/budget', label: 'Kosten' },
       { href: '/admin/reports', label: 'Wochenberichte' },
-    ],
-  },
-  {
-    id: 'labor',
-    label: 'Labor',
-    hint: 'Brieftexte testen',
-    icon: 'M9 4v6l-4 8a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2l-4-8V4M8 4h8',
-    pages: [
       { href: '/admin/variants', label: 'Brief-Versionen' },
       { href: '/admin/optimizer', label: 'Automatische Auswahl' },
       { href: '/admin/learning', label: 'Lern-Vorschläge' },
       { href: '/admin/objections', label: 'Einwände' },
       { href: '/admin/claims', label: 'Erlaubte Aussagen' },
-    ],
-  },
-  {
-    id: 'system',
-    label: 'System',
-    hint: 'Einstellungen',
-    icon: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14.3 3h-4l-.4 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5.5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2l.4 2.6h4l.4-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z',
-    pages: [
       { href: '/admin/settings', label: 'Einstellungen' },
       { href: '/admin/audit', label: 'Verlauf' },
+      { href: '/admin/jobs', label: 'Hintergrund-Aufträge' },
     ],
   },
 ];

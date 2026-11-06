@@ -17,6 +17,7 @@ const PAGES = [
   '/admin/letters',
   '/admin/demos',
   '/admin/jobs',
+  ...(process.env.ADMIN_SHOTS_EXTRA ?? '').split(',').filter(Boolean),
 ];
 const SIZES = [
   ['ipad-quer', 1180, 820],

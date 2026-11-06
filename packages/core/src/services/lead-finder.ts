@@ -24,6 +24,8 @@ import { prescreen } from '../leads/prescreen';
 import { leadResearch } from './lead-research';
 import { probeOwnWebsite } from '../leads/website-probe';
 import { runWithProgress, type SearchProgressReporter } from './progress';
+import { effectiveSwitches } from '../config/service';
+import { enqueue, QUEUES } from '../queue';
 
 export interface FindLeadsOptions {
   cities?: string[];
@@ -557,6 +559,7 @@ async function findLeadsRun(opts: FindLeadsOptions): Promise<FindLeadsSummary> {
         : acquisition && place.source !== 'mock' && acquisition.state !== 'ready'
           ? 'discovered'
           : 'qualified';
+    let savedId = '';
     await db.transaction(async (tx) => {
       let id: string;
       if (existing) {
@@ -581,6 +584,7 @@ async function findLeadsRun(opts: FindLeadsOptions): Promise<FindLeadsSummary> {
       if (place.source !== 'google_places' && place.designHint && /^#[0-9a-f]{6}$/i.test(place.designHint.primaryColor))
         await setSetting(hintKey(id), { ...place.designHint, checkedAt: new Date().toISOString() }, 'source:design-hint', tx);
       else if (place.source !== 'google_places') await tx.delete(settings).where(eq(settings.key, hintKey(id)));
+      savedId = id;
       const current = existing?.status ?? 'discovered';
       if (current !== target) {
         await transitionLead(tx, id, target, {
@@ -590,6 +594,18 @@ async function findLeadsRun(opts: FindLeadsOptions): Promise<FindLeadsSummary> {
         });
       }
     });
+    // Suchen und Prüfen gleichzeitig (Betreiber 06.11.2026): jeder passende Treffer geht sofort zur KI-Prüfung bzw.
+    // in den Demo-Bau, statt nach der Suche im 5-Minuten-Takt. Der Takt bleibt als Sicherheitsnetz.
+    if (savedId && place.source !== 'mock' && !effectiveSwitches(cfg).killSwitch) {
+      if (target === 'discovered' && place.phone && cfg.research.autoAi && getProviders().llm.name !== 'mock')
+        await enqueue(
+          QUEUES.researchLead,
+          { leadId: savedId, triggeredBy: 'search' },
+          { singletonKey: `research:${savedId}` },
+        ).catch((err) => logger.warn({ err: String(err) }, 'research sofort einreihen fehlgeschlagen'));
+      else if (target === 'qualified')
+        await enqueue(QUEUES.pipelineTick, {}, { singletonKey: 'pipeline-tick-now' }).catch(() => undefined);
+    }
     if (target !== 'rejected') summary.prescreenTiers[pre.tier]++;
     if (target === 'qualified') summary.qualified++;
     else if (target === 'discovered') summary.needsReview++;

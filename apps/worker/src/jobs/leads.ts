@@ -40,9 +40,14 @@ defineJob('find-leads', async (data, ctx) => {
   }
 });
 
-// KI-Prüfung eines gefundenen Betriebs (Websuche) – eingereiht vom Pipeline-Takt
-defineJob('research-lead', async (data, ctx) => {
-  const status = await aiResearchLead(data.leadId);
-  ctx.log.info({ state: status.state, sources: status.sources }, 'research-lead');
-  return status;
-});
+// KI-Prüfung eines gefundenen Betriebs (Websuche) – sofort während der Suche eingereiht, der Takt fängt Reste auf.
+// Drei gleichzeitig: die Prüfung wartet fast nur auf die KI, nicht auf den Prozessor.
+defineJob(
+  'research-lead',
+  async (data, ctx) => {
+    const status = await aiResearchLead(data.leadId);
+    ctx.log.info({ state: status.state, sources: status.sources }, 'research-lead');
+    return status;
+  },
+  { concurrency: 3 },
+);

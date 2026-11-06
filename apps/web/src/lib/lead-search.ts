@@ -18,7 +18,36 @@ export interface LeadSearchStatus {
   progress: Awaited<ReturnType<typeof readSearchProgress>>;
   /** Letztes Lebenszeichen des Worker-Servers (Takt alle 5 Minuten) */
   workerSeenAt: string | null;
+  /** Was nach der Suche passiert (seit Start der letzten Suche): KI-Prüfung, Demo-Bau, Freigabe */
+  flow: SearchFlow;
   now: string;
+}
+
+export interface SearchFlow {
+  /** KI prüft gerade bzw. wartet auf Prüfung */
+  checking: number;
+  /** KI: passt */
+  fits: number;
+  /** KI: aussortiert (Website gefunden, unsicher, ungeeignet) */
+  sortedOut: number;
+  /** Demo wird gebaut oder geprüft */
+  building: number;
+  /** Demo wartet auf deine Freigabe */
+  waiting: number;
+}
+
+async function loadFlow(since: string | null): Promise<SearchFlow> {
+  const from = since ?? new Date(Date.now() - 24 * 3600_000).toISOString();
+  const r = await getDb().execute<SearchFlow & Record<string, unknown>>(sql`SELECT
+      (SELECT count(*)::int FROM leads l WHERE l.status = 'discovered' AND l.anonymized_at IS NULL AND l.phone IS NOT NULL) AS checking,
+      (SELECT count(*)::int FROM settings s WHERE s.key LIKE 'ai-research:%' AND s.updated_at >= ${from}::timestamptz
+         AND s.value->>'state' = 'ready') AS fits,
+      (SELECT count(*)::int FROM settings s WHERE s.key LIKE 'ai-research:%' AND s.updated_at >= ${from}::timestamptz
+         AND s.value->>'state' IN ('excluded', 'has_website', 'review')) AS "sortedOut",
+      (SELECT count(*)::int FROM leads l WHERE l.status = 'qualified' AND l.anonymized_at IS NULL)
+        + (SELECT count(*)::int FROM demos d WHERE d.status = 'building') AS building,
+      (SELECT count(*)::int FROM demos d WHERE d.status = 'pending_review') AS waiting`);
+  return r.rows[0] ?? { checking: 0, fits: 0, sortedOut: 0, building: 0, waiting: 0 };
 }
 
 export async function loadLeadSearchStatus(): Promise<LeadSearchStatus> {
@@ -32,11 +61,19 @@ export async function loadLeadSearchStatus(): Promise<LeadSearchStatus> {
       .then((r) => r.rows[0]?.seen ?? null)
       .catch(() => null),
   ]);
+  const flow = await loadFlow(progress?.startedAt ?? null).catch(() => ({
+    checking: 0,
+    fits: 0,
+    sortedOut: 0,
+    building: 0,
+    waiting: 0,
+  }));
   return {
     active: queue.active,
     waiting: queue.waiting.length,
     progress,
     workerSeenAt: worker ? new Date(worker).toISOString() : null,
+    flow,
     now: new Date().toISOString(),
   };
 }

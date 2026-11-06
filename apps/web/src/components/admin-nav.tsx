@@ -68,6 +68,12 @@ export function AdminNav({ counts = {} }: { counts?: NavCounts }) {
 export function SectionTabs({ counts = {} }: { counts?: NavCounts }) {
   const pathname = usePathname();
   const { section, page } = locate(pathname);
+  if (section.tabs === false)
+    return page && page.href !== section.pages[0]!.href ? (
+      <Link href={section.pages[0]!.href} className="admin-back">
+        ← {section.label}
+      </Link>
+    ) : null;
   if (section.pages.length < 2) return null;
   return (
     <div className="admin-section">

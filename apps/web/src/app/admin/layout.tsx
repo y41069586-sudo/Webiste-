@@ -1,4 +1,5 @@
 import './admin.css';
+import './admin-calm.css';
 import { AdminArrow } from '@/components/admin-arrow';
 import { Brand } from '@/components/brand';
 import type { ReactNode } from 'react';
@@ -39,12 +40,14 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     sw.followupEnabled && 'Folgebriefe',
     sw.autoReply && 'Antworten',
   ].filter(Boolean);
-  const chips: { label: string; tone: string }[] = [
-    ...(sw.killSwitch ? [{ label: 'NOT-AUS aktiv', tone: 'is-alarm' }] : []),
+  const chips: { label: string; tone: string; title?: string }[] = [
+    ...(sw.killSwitch ? [{ label: 'Not-Aus aktiv', tone: 'is-alarm', title: 'Alles ist angehalten' }] : []),
     sw.dryRun
-      ? { label: `Testmodus${sw.dryRunLockedByEnv ? ' · gesichert' : ''}`, tone: 'is-test' }
-      : { label: 'LIVE – echte Aktionen', tone: 'is-live' },
-    auto.length ? { label: `Automatik: ${auto.join(', ')}`, tone: 'is-on' } : { label: 'Automatik aus', tone: '' },
+      ? { label: 'Testmodus', tone: 'is-test', title: sw.dryRunLockedByEnv ? 'Testmodus, auf dem Server gesichert' : 'Testmodus' }
+      : { label: 'Live', tone: 'is-on', title: 'Live: Briefe gehen nach deiner Freigabe wirklich raus' },
+    auto.length
+      ? { label: 'Automatik an', tone: 'is-on', title: `Automatisch: ${auto.join(', ')}` }
+      : { label: 'Automatik aus', tone: '', title: 'Nichts läuft automatisch' },
   ];
   return (
     <div className="admin-shell">
@@ -98,7 +101,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           <NavToggle />
           <div className="admin-topbar-status" aria-label="Systemstatus">
             {chips.map((c) => (
-              <span key={c.label} className={`admin-chip ${c.tone}`}>
+              <span key={c.label} className={`admin-chip ${c.tone}`} title={c.title}>
                 {c.label}
               </span>
             ))}

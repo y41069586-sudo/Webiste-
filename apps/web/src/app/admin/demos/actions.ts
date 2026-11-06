@@ -24,8 +24,10 @@ export async function approveDemoAction(form: FormData): Promise<void> {
   // Betreibers gilt für jeden Bereich; „Nicht gut genug“ liegt unter dem Mindestniveau und sperrt die Freigabe.
   const simple = form.get('simple') === '1';
   const rating = RATING_SCORES[String(form.get('rating') ?? '')] ?? NaN;
-  const seen = form.get('seen') === 'on';
-  const correct = form.get('correct') === 'on';
+  // Neue Freigabe (06.11.2026): ein Haken „Angesehen – Name, Adresse und Texte stimmen“ statt zwei Haken und Note
+  const ok = form.get('ok') === 'on';
+  const seen = ok || form.get('seen') === 'on';
+  const correct = ok || form.get('correct') === 'on';
   try {
     await approveDemo(String(form.get('id')), actorOf(s), {
       manual: true,
@@ -64,9 +66,16 @@ export async function bulkApproveDemos(form: FormData): Promise<void> {
 
 export async function rejectDemoAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
-  await rejectDemo(String(form.get('id')), actorOf(s), String(form.get('note') || 'abgelehnt'), form.get('regenerate') === '1');
+  const regenerate = form.get('regenerate') === '1';
+  const note = String(form.get('note') ?? '')
+    .trim()
+    .slice(0, 1200);
+  // Neubau braucht einen Wunsch – sonst baut die KI nur dasselbe noch einmal
+  if (regenerate && !note) throw new Error('Bitte kurz schreiben, was anders werden soll.');
+  await rejectDemo(String(form.get('id')), actorOf(s), note || 'abgelehnt', regenerate);
   revalidatePath('/admin/demos');
   if (form.get('flow') === '1') redirect('/admin/ablauf/naechste-demo');
+  redirect(regenerate ? '/admin/demos?neu=1' : '/admin/demos?aus=1');
 }
 
 /** Kostenlose Anpassung vor dem Kauf: Änderung speichern, der Server erzeugt die Demo unter demselben Link neu. */

@@ -42,6 +42,8 @@ export async function authorStudioContent(
     recentConcepts?: string[];
     signal?: AbortSignal;
     feedback?: string[];
+    /** Änderungswunsch des Betreibers (siehe operator-wish.ts) */
+    operatorWish?: string;
     photos?: NonNullable<BusinessFacts['photos']>;
     onPlan?: (plan: StudioPlan) => Promise<void>;
     onAttempt?: (attempt: number, content: unknown, violations: RuleViolation[]) => Promise<void>;
@@ -62,7 +64,7 @@ export async function authorStudioContent(
     await llmStructured<unknown>({
       tier: 'creative',
       system: STUDIO_SYSTEM,
-      prompt: studioPrompt(facts, { seed, recentConcepts: opts.recentConcepts }),
+      prompt: studioPrompt(facts, { seed, recentConcepts: opts.recentConcepts, operatorWish: opts.operatorWish }),
       images,
       toolName: STUDIO_TOOL,
       toolDescription: 'Zwei individuelle Gestaltungsrichtungen und die begründete Auswahl.',
@@ -75,7 +77,8 @@ export async function authorStudioContent(
   );
   await opts.onPlan?.(studioPlan);
   // Befunde der KI-Prüfung eines früheren Entwurfs gleich im ersten Versuch mitgeben
-  let feedback: string[] | undefined = qaFeedback?.length ? qaFeedback.slice(0, 12) : undefined;
+  const startFeedback = [...(opts.operatorWish ? [opts.operatorWish] : []), ...(qaFeedback ?? [])];
+  let feedback: string[] | undefined = startFeedback.length ? startFeedback.slice(0, 12) : undefined;
   let lastViolations: RuleViolation[] = [];
   for (let attempt = 1; attempt <= 2; attempt++) {
     opts.signal?.throwIfAborted();

@@ -13,6 +13,7 @@ import { registerMockStructured } from '../src/providers';
 import { QA_TOOL_NAME } from '../src/demos/content';
 import { alerts } from '../src/db/schema';
 import { resetDb } from './helpers';
+import { loadOperatorWish, operatorWishPrompt } from '../src/demos/operator-wish';
 
 describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
   let leadId: string;
@@ -90,6 +91,27 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
     await rejectDemo(demoId, 'admin:test', 'Farben passen nicht', true);
     const lead = await getDb().query.leads.findFirst({ where: eq(leads.id, other.id) });
     expect(lead?.status).toBe('qualified');
+    // Wunsch des Betreibers bleibt am Betrieb, bis der Neubau gespeichert ist
+    const wish = await loadOperatorWish(other.id);
+    expect(wish?.note).toBe('Farben passen nicht');
+    expect(wish?.demoId).toBe(demoId);
+    const prompt = operatorWishPrompt(wish!);
+    expect(prompt).toContain('„Farben passen nicht“');
+    expect(prompt).toMatch(/nie vor Fakten/);
+    const redo = await buildDemo(other.id, { actor: 'job:test', regenerate: true });
+    const rebuilt = await getDb().query.demos.findFirst({ where: eq(demos.id, redo) });
+    expect((rebuilt?.contentJson as { _meta?: { operatorWish?: { note: string } } } | null)?._meta?.operatorWish?.note).toBe(
+      'Farben passen nicht',
+    );
+    expect(await loadOperatorWish(other.id)).toBeNull();
+  }, 90_000);
+
+  it('Ablehnen ohne Neubau speichert keinen Wunsch', async () => {
+    const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
+    const demoId = await buildDemo(other.id, { actor: 'job:test' });
+    await qaDemo(demoId, 'job:test', { lighthouse: false });
+    await rejectDemo(demoId, 'admin:test', 'kein Interesse', false);
+    expect(await loadOperatorWish(other.id)).toBeNull();
   }, 60_000);
 
   it('Review-Regel: erste N manuell, danach Stichprobe nur mit AUTO_APPROVE_DEMOS', async () => {

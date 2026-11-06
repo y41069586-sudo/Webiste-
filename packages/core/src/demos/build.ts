@@ -35,6 +35,7 @@ import { libraryContent } from './library';
 import './mock-handlers';
 import { STUDIO_VERSION } from './studio';
 import { authorStudioContent, type GeneratedContent } from './studio-author';
+import { clearOperatorWish, loadOperatorWish, operatorWishPrompt } from './operator-wish';
 export type { GeneratedContent } from './studio-author';
 
 type Lead = typeof leads.$inferSelect;
@@ -290,6 +291,7 @@ export async function generateDemoContent(
   photos: NonNullable<BusinessFacts['photos']> = [],
   recentConcepts: string[] = [],
   signal?: AbortSignal,
+  operatorWish?: string,
 ): Promise<GeneratedContent> {
   const research = await leadResearch(lead);
   const facts = {
@@ -306,6 +308,7 @@ export async function generateDemoContent(
     photos,
     recentConcepts,
     signal,
+    operatorWish,
   });
 }
 
@@ -417,6 +420,7 @@ export async function buildDemo(
   const recentFiles = recent.flatMap((r) => (r.content?._meta as { photoAssets?: string[] } | undefined)?.photoAssets ?? []);
   const photoSlots = demoPhotoSlots(lead.id, { ...leadToFacts(lead, cfg), verifiedServices }, design.photos, recentFiles);
   opts.signal?.throwIfAborted();
+  const wish = await loadOperatorWish(lead.id);
   const generated = await generateDemoContent(
     lead,
     cfg,
@@ -425,6 +429,7 @@ export async function buildDemo(
     photoSlots,
     recentConcepts,
     opts.signal,
+    wish ? operatorWishPrompt(wish) : undefined,
   );
   opts.signal?.throwIfAborted();
   const facts = {
@@ -491,6 +496,7 @@ export async function buildDemo(
               studio: { version: STUDIO_VERSION, plan: generated.studioPlan },
               ...(brief ? { designBrief: brief } : {}),
               ...(opts.qaFeedback?.length ? { qaRetry: 1 } : {}),
+              ...(wish ? { operatorWish: { note: wish.note, fromDemo: wish.demoId } } : {}),
             },
           } as unknown as Record<string, unknown>,
         })
@@ -504,6 +510,8 @@ export async function buildDemo(
         .set({ htmlStorageKey: demoHtmlKey(demoId) })
         .where(eq(demos.id, demoId));
       await transitionLead(tx, leadId, 'demo_built', { actor: opts.actor, soft: true });
+      // Wunsch ist mit diesem Neubau umgesetzt; ein weiterer Neubau braucht einen neuen Wunsch
+      if (wish) await clearOperatorWish(leadId, tx);
       await audit(tx, {
         entity: 'demo',
         entityId: demoId,

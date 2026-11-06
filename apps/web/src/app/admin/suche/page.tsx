@@ -63,7 +63,10 @@ export default async function LeadSearchPage() {
   );
   return (
     <>
-      <PageHeader title="Betriebe suchen" subtitle="Findet Betriebe ohne eigene Website. Kostet nichts." />
+      <PageHeader
+        title="Betriebe finden"
+        subtitle="Sucht Betriebe ohne eigene Website. Die KI prüft jeden Treffer sofort, passende bekommen von selbst eine Demo."
+      />
 
       <SearchLive initial={status} stop={stopFindLeads} />
 
@@ -74,20 +77,18 @@ export default async function LeadSearchPage() {
               <>Die letzte Suche ({dt(last.completed_on)}) hat nicht geklappt. Starte sie einfach noch einmal.</>
             ) : (
               <>
-                Letzte Suche {dt(last.completed_on)}: <strong>{num(toCheck)}</strong>{' '}
-                {toCheck === 1 ? 'passender Betrieb' : 'passende Betriebe'} gefunden.{' '}
-                {toCheck ? (
-                  <Link href="/admin/ablauf/pruefen" className="font-semibold underline">
-                    Jetzt prüfen →
-                  </Link>
-                ) : null}
+                Letzte Suche {dt(last.completed_on)}: <strong>{num(toCheck)}</strong> {toCheck === 1 ? 'Betrieb' : 'Betriebe'}{' '}
+                gefunden und an die KI gegeben.{' '}
+                <Link href="/admin/demos" className="font-semibold underline">
+                  Zu den Demos →
+                </Link>
               </>
             )}
           </Notice>
         </div>
       ) : null}
 
-      <Card title="Neue Suche">
+      <Card title="Neue Suche" className="find-card">
         <form action={startFindLeads} className="space-y-6">
           <fieldset>
             <legend className="ui-label">Wo?</legend>
@@ -122,7 +123,7 @@ export default async function LeadSearchPage() {
             </div>
           </details>
           <details className="admin-details">
-            <summary>Wie streng? (ab {minScore} von 100 Punkten)</summary>
+            <summary>Vorauswahl für Betriebe ohne Telefonnummer (ab {minScore} Punkten)</summary>
             <div className="mt-3 space-y-3">
               <div className="flex flex-wrap items-center gap-3">
                 <input
@@ -146,9 +147,9 @@ export default async function LeadSearchPage() {
             </div>
           </details>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5">
-            <p className="text-sm text-slate-500">Die erste Suche dauert 5–10 Minuten, danach geht es schnell.</p>
-            <SubmitButton className={btn.primary} disabled={running}>
-              Suche starten
+            <p className="text-sm text-slate-500">Treffer gehen sofort an die KI. Du musst nichts prüfen.</p>
+            <SubmitButton className={`${btn.primary} find-go`} disabled={running}>
+              Betriebe finden
             </SubmitButton>
           </div>
         </form>

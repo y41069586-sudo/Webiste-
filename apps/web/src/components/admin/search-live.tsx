@@ -17,7 +17,7 @@ const STEPS: { key: Progress['phase'][]; label: string }[] = [
 
 const OUTCOME: Record<Progress['log'][number]['outcome'], { label: string; tone: string }> = {
   geeignet: { label: 'Übernommen', tone: 'is-good' },
-  pruefen: { label: 'Zur Prüfung', tone: 'is-good' },
+  pruefen: { label: 'KI prüft', tone: 'is-good' },
   unter_schwelle: { label: 'Zu wenig Punkte', tone: 'is-low' },
   aussortiert: { label: 'Aussortiert', tone: 'is-out' },
   uebersprungen: { label: 'Schon bekannt', tone: 'is-skip' },
@@ -40,6 +40,34 @@ function remaining(p: Progress, now: number): string | null {
   else if (p.phase === 'karte_laden' && p.bytes?.total) frac = p.bytes.done / p.bytes.total;
   if (frac <= 0.02 || frac >= 1) return null;
   return duration((elapsed / frac) * (1 - frac));
+}
+
+/** Was nach der Suche passiert: Die KI prüft jeden Treffer sofort, passende bekommen von selbst eine Demo. */
+function FlowStrip({ flow }: { flow: LeadSearchStatus['flow'] }) {
+  const steps = [
+    { n: flow.checking, label: 'KI prüft gerade', tone: flow.checking ? 'is-busy' : '' },
+    { n: flow.fits, label: 'passen', tone: 'is-good' },
+    { n: flow.sortedOut, label: 'aussortiert', tone: '' },
+    { n: flow.building, label: 'Demo wird gebaut', tone: flow.building ? 'is-busy' : '' },
+    { n: flow.waiting, label: 'warten auf dich', tone: flow.waiting ? 'is-you' : '' },
+  ];
+  return (
+    <div className="flowstrip">
+      <ol>
+        {steps.map((s) => (
+          <li key={s.label} className={s.tone}>
+            <strong>{s.n}</strong>
+            <span>{s.label}</span>
+          </li>
+        ))}
+      </ol>
+      {flow.waiting > 0 ? (
+        <a href="/admin/demos" className="ui-btn ui-btn-primary">
+          {flow.waiting === 1 ? '1 Demo ansehen' : `${flow.waiting} Demos ansehen`} →
+        </a>
+      ) : null}
+    </div>
+  );
 }
 
 export function SearchLive({ initial, stop }: { initial: LeadSearchStatus; stop: () => Promise<void> }) {
@@ -116,16 +144,12 @@ export function SearchLive({ initial, stop }: { initial: LeadSearchStatus; stop:
               {p.phase === 'fehler'
                 ? 'Das hat nicht geklappt – starte die Suche einfach noch einmal.'
                 : taken === 1
-                  ? '1 passender Betrieb gefunden'
-                  : `${taken} passende Betriebe gefunden`}
+                  ? '1 Betrieb gefunden – die KI prüft ihn'
+                  : `${taken} Betriebe gefunden – die KI prüft sie`}
             </h2>
           </div>
-          {taken > 0 ? (
-            <a href="/admin/ablauf/pruefen" className="ui-btn ui-btn-primary">
-              Jetzt prüfen →
-            </a>
-          ) : null}
         </div>
+        <FlowStrip flow={status.flow} />
         {p.log.length ? (
           <details className="admin-details mt-3">
             <summary>Einzelheiten</summary>
@@ -247,7 +271,7 @@ export function SearchLive({ initial, stop }: { initial: LeadSearchStatus; stop:
           </div>
           <div className="is-good">
             <strong>{p.counts.qualified + p.counts.needsReview}</strong>
-            <span>übernommen</span>
+            <span>zur KI</span>
           </div>
           <div className="is-low">
             <strong>{p.counts.belowMin}</strong>
@@ -259,6 +283,8 @@ export function SearchLive({ initial, stop }: { initial: LeadSearchStatus; stop:
           </div>
         </div>
       ) : null}
+
+      {p && !waitingForWorker ? <FlowStrip flow={status.flow} /> : null}
 
       {p?.log.length && !waitingForWorker ? (
         <div className="search-live-log">
