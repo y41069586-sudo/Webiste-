@@ -24,6 +24,12 @@ Neue Entwürfe: Gebietsvorschlag nur bei Arbeit beim Kunden; Studios/Gastro/Hand
 Standort und Anfahrt, keine erfundene Verkehrsanbindung. Jüngste Konzepte und berechtigte Bildmotive
 für Variation berücksichtigen, keine vorgegebenen Layouts oder unpassenden Ersatzbilder.
 
+Prüfstand 06.11.: volle Core-Suite 110 Dateien, 1001 bestandene Tests, null Fehler,
+zwei optionale osmium-Tests übersprungen; ergänzende Render-Budget-/Limit-Tests fünf bestanden,
+Template-Unit-Suite 192, VPS-Skripttests 27, Typechecks aller vier Pakete/Apps und ESLint bestanden.
+Code zunächst auf codex/demo-art-direction gesichert; tatsächlichen Serverstand nur anhand
+worker-runtime-release nach dem Update melden, nicht aus dem Git-Push ableiten.
+
 ## Neueste Betreiberfreigabe 05.11.2026 – regulären Generator übernehmen und Worker fortsetzen
 
 Betreiber hat den fiktiven Prüfentwurf angesehen, dessen Gestaltung bestätigt und anschließend

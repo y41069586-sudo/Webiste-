@@ -4,7 +4,7 @@
 
 Die vorhandenen pg-boss-Queues verwenden policy=standard. Ein singletonKey allein besitzt dort
 keinen Index, der wartende Duplikate verhindert. Gelesen: 313 wartende/retry Builds für 23 Leads,
-vier QA-Aufträge, keine aktiven Jobs oder Flow-Abhängigkeiten. Zur Reparatur den vorher falschen
+vier QA-Aufträge, keine aktiven Jobs oder Flow-Abhängigkeiten. Zur Reparatur den zuvor ausgeschalteten
 Not-Aus mit eigenem Actor/Audit vorübergehend aktiviert. Unter dieser Pause 290 überzählige
 wartende Jobs storniert, nicht gelöscht; je Lead einen Auftrag erhalten. Kontrollabfrage bestätigt
 21 created + zwei retry Builds für 23 verschiedene Leads, drei created + eine retry QA.
@@ -17,7 +17,9 @@ Keine Demo/Brieffreigabe, neue Generierung, Modellkosten oder Veröffentlichung 
   boss.send über denselben Transaktionsclient. Andere Queues unverändert. Pipeline zählt nur
   tatsächlich eingereihte Jobs. Zusätzliche Lead-Zeilensperre verhindert doppelte Demo-Persistierung.
   Ein erneuter Build-Aufruf für eine vorhandene building-Demo stellt deren deduplizierte QA sicher.
-- Ein Builder und ein globaler CPU-Renderplatz, maximal180 Sekunden Wartezeit (über der maximal165 Sekunden langen regulären Lighthouse-Phase, innerhalb der Job-Deadline). Context/Page einschließlich
+- Ein Builder und ein globaler CPU-Renderplatz, maximal 180 Sekunden Wartezeit (Lighthouse ist
+  auf maximal 165 Sekunden begrenzt; wartende Builds verwerfen nicht nach 30 Sekunden bezahlte
+  Inhalte). Context/Page einschließlich
   evaluate/image.decode und Cleanup begrenzen; Lighthouse einschließlich Launch/Teardown zusätzlich
   begrenzt. Abbruch schließt den tatsächlichen Context/Browser. Keine Bewertungsschwelle abgesenkt.
 - Prüftafeln aus CSS-Auflösung statt vierfacher DPR2-Pixelmenge; Übersicht sowie Anfang/Mitte/Ende
@@ -40,19 +42,45 @@ Keine Demo/Brieffreigabe, neue Generierung, Modellkosten oder Veröffentlichung 
 
 ## Prüfungen und verbleibender Rollout
 
-Die sechs gemeldeten Integrationstest-Dateien erhalten explizite Studio-QA-Fixtures mit sämtlichen
+Die sechs gemeldeten Integrationstest-Dateien sowie acquisition-integration erhalten explizite Studio-QA-Fixtures mit sämtlichen
 Dimensionen. Der normale Mock bleibt unverifiable; Fixtures sind keine echte Designabnahme.
 Die bisherige große Briefmatrix wird pro Branche mit denselben neun Fällen geprüft, ohne einen
 gemeinsamen Zehn-Minuten-Timer. Kein Fall entfernt und keine PDF-/Layoutgrenze gelockert.
 
 Lokale Umgebung: kein systemweiter postgresql-Service; vorhandenes Test-Docker-Dateisystem voll.
-Statt fremde Dateien/Docker-Daten zu löschen, offiziellen PostgreSQL17.11-Binaries nach /tmp
-extrahiert, isolierten lokalen Testserver an Port55432 gestartet. Nur ausdrücklich benannte lokale
+Statt fremde Dateien/Docker-Daten zu löschen, offiziellen PostgreSQL-17.11-Binaries nach /tmp
+extrahiert, isolierten lokalen Testserver an Port 55432 gestartet. Nur ausdrücklich benannte lokale
 Testdatenbanken zurückgesetzt, vollständige Core-vitest-Konfiguration mit Migrationen und echtem
 Chromium verwendet. Keine Produktions-DB als Testziel und keine bezahlten KI-Aufrufe.
 
-Vollständiger Suite-Ausgang wird nach Abschluss ergänzt. Lokale Prüfungen beweisen keine echte
-Modelllaufzeit oder bestandene Demo auf dem VPS. Neues Image dort noch nicht installiert.
+Abgeschlossene Prüfungen am 06.11.2026:
+
+- Vollständige Core-Suite ohne Dateifilter: **110 Dateien bestanden; 1001 Tests bestanden,
+  null Fehler; zwei optionale osmium-Integrationstests mangels lokalem Binary übersprungen**.
+  Dauer 1983,06 Sekunden. Alle sechs vom Betreiber genannten Problemdateien sowie
+  acquisition-integration bestanden. Echte Chromium-/PDF-/axe-/Lighthouse-Prüfungen,
+  Modell-/Versand-/Zahlungsprovider als Test-Fixtures.
+- Ergänzende Render-Limit-/Wartebudget-Suite: zwei Dateien, fünf Tests bestanden. Der zusätzlich
+  während des Gesamtlaufs ergänzte Budgettest bestätigt 165 Sekunden legitime Wartezeit ohne
+  verworfenen bezahlten Build; anschließend wird derselbe Renderplatz erfolgreich übernommen.
+- Template-Unit-Suite: neun Dateien, 192 Tests bestanden.
+- VPS-Update-/Preview-Skripte: 27 Python-Tests bestanden, einschließlich Stoppen des alten
+  Workers vor der gezielten Aufhebung der eigenen Reparaturpause.
+- TypeScript für Core, Templates, Worker und Web-App sowie ESLint der geänderten TS-Dateien
+  und git diff --check bestanden.
+
+Der Fullsuite-Aufruf verwendete dieselbe vitest-Konfiguration wie npx vitest run:
+
+```sh
+cd packages/core
+TEST_DATABASE_URL=postgres://wbm:wbm@127.0.0.1:55432/wbm_test_fullsuite_repair \
+CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium \
+TEMPLATES_CSS_PATH=/tmp/seitenwerk-preview-repair/packages/templates/dist/site.css \
+node node_modules/vitest/vitest.mjs run --reporter=verbose
+```
+
+Keine bezahlten Modellaufrufe oder echte Sendungen durch die Tests. Lokale Prüfungen beweisen
+keine echte Modelllaufzeit oder bestandene Demo auf dem VPS. Neues Image dort noch nicht installiert.
 Der Update-Aufruf muss zuerst den alten Worker stoppen, dann nur die eigene Reparaturpause
 aufheben; spätere Betreiber-Not-Aus-Änderungen blockieren. Private ENV, Modi, Preise, Budgets und
 manuelle Freigaben bleiben erhalten. Laufzeitbeleg erst nach DB-/Queue-/Container-Health.
