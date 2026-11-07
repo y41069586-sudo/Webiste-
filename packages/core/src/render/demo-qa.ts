@@ -13,7 +13,14 @@ import { researchContentHash } from '../leads/acquisition';
 import { sha256 } from '../util/crypto';
 import { assessDemoQuality, type ManualQualityScores } from '../quality/demo';
 import { eq } from 'drizzle-orm';
-import { getKit, renderSite, slopFindingsForPage, isAuthoredTemplate, checkAuthoredDesign } from '@wbm/templates';
+import {
+  getKit,
+  renderSite,
+  slopFindingsForPage,
+  isAuthoredTemplate,
+  checkAuthoredDesign,
+  applyMobileHeroLayer,
+} from '@wbm/templates';
 import { getConfig } from '../config/service';
 import { getDb } from '../db/client';
 import { demos, leads, type QaResult } from '../db/schema';
@@ -98,8 +105,11 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
   const content = storedContent(demo.contentJson);
   if (!content) throw new Error('Demo ohne Inhalt');
   const storage = getProviders().storage;
-  const html = (await storage.get(demo.htmlStorageKey ?? ''))?.toString('utf8');
-  if (!html) throw new Error('Demo-HTML fehlt im Speicher');
+  const stored = (await storage.get(demo.htmlStorageKey ?? ''))?.toString('utf8');
+  if (!stored) throw new Error('Demo-HTML fehlt im Speicher');
+  // Wie die Demo-Route ausliefert: mit Handy-Einstieg (Vollbild-Foto), damit Prüfung, Vorschaubilder und Brief-Bild
+  // genau die Seite zeigen, die der Betrieb sieht
+  const html = applyMobileHeroLayer(stored);
 
   const research = await leadResearch(lead);
   const facts = leadContentFacts(lead, cfg, research);
