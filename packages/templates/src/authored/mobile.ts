@@ -37,6 +37,10 @@ export const MOBILE_LAYER_CSS = [
   `${M} img,img${'[data-ad-hero="media"]'}{display:block!important;width:100%!important;height:100%!important;max-width:none!important;object-fit:cover!important;margin:0!important}`,
   `${H} img[data-ad-hero="media"]{position:absolute!important;inset:0!important;z-index:-1!important}`,
   `${M} figcaption,${M} .ad-stock-note{position:absolute!important;top:12px;right:12px;left:auto!important;bottom:auto!important;margin:0!important;padding:4px 9px!important;border-radius:6px;background:rgba(0,0,0,.5)!important;color:#fff!important;font:500 11px/1.4 var(--body)!important;letter-spacing:normal!important;text-transform:none!important;max-width:60%!important}`,
+  // Ohne jedes Foto (z. B. Gewerk ohne passende Bibliotheksbilder): kein leerer schwarzer Kasten, sondern kompakter
+  // Einstieg mit Farbverlauf in der Akzentfarbe des Entwurfs
+  `${H}:not(:has([data-ad-hero="media"])){min-height:0!important;padding:64px 20px 56px!important;background:radial-gradient(130% 90% at 100% 0%,color-mix(in srgb,var(--design-accent) 70%,transparent) 0%,transparent 62%),linear-gradient(180deg,#1b1e24,#101216)!important}`,
+  `${H}:not(:has([data-ad-hero="media"]))::after{display:none}`,
   // Nur ein Bildhinweis: eigener Symbolbild-Hinweis ersetzt eine zusätzliche Bildunterschrift der KI
   `${M} .ad-stock-note ~ figcaption{display:none!important}`,
   `}`,
