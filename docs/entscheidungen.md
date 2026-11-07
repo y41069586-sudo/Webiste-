@@ -1324,3 +1324,12 @@ Zimmerei, Fliesenleger, Bodenleger, Parkettleger, Glaserei, Garten- und Landscha
 Gewicht 1,1 für die auftragsstarken Gewerke (Dach, Sanitär, Heizung, Zimmerei, Metallbau, Bau). Der OSM-Index auf dem
 Server baut sich für neue Tags beim nächsten Suchlauf automatisch neu auf. Gewerke-Wörter zusätzlich in der
 Website-Erkennung als Branchenbegriffe hinterlegt.
+
+## 07.11.2026 – Lead-Suche hing: osmium bei 2 GB Container-Limit OOM-gekillt
+
+Erste Suche nach dem Branchen-Ausbau (06.11.) hing über 2 Stunden in „NRW-Karte wird ausgewertet“. `dmesg`: „Memory
+cgroup out of memory: Killed process … (osmium)“ bei ~1,9 GB RSS – der Filter mit 18 Handwerks-Tags plus Grenzen braucht
+mehr als die 2 GB des Containers (mit einem Tag: EXIT 0). Folge im Code: jede Suchanfrage startete einen neuen Neubau,
+fiel danach auf Overpass zurück → Schleife. Behoben: `mem_limit` 4 GB (VPS hat 8 GB, Datenbank liegt bei Supabase),
+gescheiterter Neubau wird 30 Minuten lang nicht wiederholt, Fehlermeldung mit stderr/Signal (Commit e3ed652).
+Nebenbefund: Docker-Build-Cache 74 GB und alte Images 69 GB (Festplatte 79 %) – Aufräumen empfohlen.
