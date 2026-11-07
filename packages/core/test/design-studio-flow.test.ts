@@ -140,4 +140,20 @@ describe('Studio generation orchestration without database or paid provider', ()
     expect(result.content.design).toBeDefined();
     expect(result.precheckOpen).toEqual(open);
   });
+  it('markiert Inhaltsbereiche für die Handy-Absicherung und ersetzt sichtbares „Platzhalter“', () => {
+    const tidy = tidyAuthoredDesign({
+      html: '<section data-ad-section="services" class="a b"><h2>X</h2></section><section data-ad-section="faq"><h2>Y</h2></section><div data-ad-section="placeholders" class="ad-mguard"><p>Entwurfsplatzhalter: {{placeholder_photos}} und Platzhalter</p></div>',
+      css: '.a{}',
+    });
+    expect(tidy.html).toBe(
+      '<section data-ad-section="services" class="a b ad-mguard"><h2>X</h2></section><section data-ad-section="faq" class="ad-mguard"><h2>Y</h2></section><div data-ad-section="placeholders" class="ad-mguard"><p>Entwurfshinweis: {{placeholder_photos}} und Vorschlag</p></div>',
+    );
+  });
+  it('entfernt harte Worttrennung aus dem KI-CSS', () => {
+    const tidy = tidyAuthoredDesign({
+      html: '<p>x</p>',
+      css: '.h{font-size:5rem;word-break:break-all;overflow-wrap:anywhere}.p{word-wrap: break-word;color:#111}',
+    });
+    expect(tidy.css).toBe('.h{font-size:5rem;}.p{color:#111}');
+  });
 });

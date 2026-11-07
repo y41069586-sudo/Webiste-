@@ -175,7 +175,7 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
     }
   }, 90_000);
 
-  it('Gestaltungsbefund (revise): einmal automatisch neu bauen, mit dem Korrekturhinweis der Prüfung', async () => {
+  it('zwei Gestaltungsbefunde (revise): einmal automatisch neu bauen, mit den Korrekturhinweisen der Prüfung', async () => {
     const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
     registerMockStructured(QA_TOOL_NAME, () => {
       const f = studioQaFixture();
@@ -184,6 +184,7 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
         verdict: 'revise',
         correction: 'Hero-Überschrift am Desktop vollständig im Einstieg zeigen.',
       };
+      f.craft[2] = { ...f.craft[2]!, verdict: 'revise', correction: 'Abstand unter der Bildstrecke deutlich verringern.' };
       return f;
     });
     try {
@@ -200,6 +201,29 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
       expect(jobs[0]!.data.qaFeedback.join(' ')).toContain('Hero-Überschrift am Desktop vollständig im Einstieg zeigen.');
     } finally {
       registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
+    }
+  }, 90_000);
+
+  it('ein einzelner Gestaltungsbefund blockiert nicht: Demo geht mit Hinweis in die manuelle Prüfung', async () => {
+    const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
+    await updateConfig({ switches: { autoApproveDemos: true }, review: { manualReviewFirstN: 0, sampleRatePercent: 0 } }, 'test');
+    registerMockStructured(QA_TOOL_NAME, () => {
+      const f = studioQaFixture();
+      f.craft[2] = { ...f.craft[2]!, verdict: 'revise', correction: 'Abstand unter der Bildstrecke etwas verringern.' };
+      return f;
+    });
+    try {
+      const demoId = await buildDemo(other.id, { actor: 'job:test' });
+      const result = await qaDemo(demoId, 'job:test', { lighthouse: false });
+      expect(result.passed, JSON.stringify(result.checks.filter((c) => !c.passed))).toBe(true);
+      const demo = await getDb().query.demos.findFirst({ where: eq(demos.id, demoId) });
+      expect(demo).toMatchObject({ status: 'pending_review', reviewRequired: true });
+      expect(result.checks.find((c) => c.name === 'design-studio-1')?.details).toMatch(
+        /^Hinweis für die manuelle Prüfung \(kein Blocker\): Gestaltung rhythm/,
+      );
+    } finally {
+      registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
+      await updateConfig({ switches: { autoApproveDemos: false } }, 'test');
     }
   }, 90_000);
 

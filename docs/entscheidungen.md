@@ -1399,3 +1399,15 @@ wurde bei jedem Pipeline-Takt erneut kostenpflichtig gebaut.
   Modell seinen ersten Entwurf nicht sah („behalte alles Übrige bei“). Jetzt wird der vorherige Entwurf mitgegeben und
   die vollständige Antwort verlangt; scheitert der zweite Versuch dennoch (Regeln, Struktur, Aufruffehler), bleibt der
   regelkonforme erste Entwurf erhalten und die Endprüfung entscheidet.
+- **Zweite Korrektur (gleicher Tag, nach Betreiber-Lauf):** Inhaltlich gescheiterte Bau-Aufträge („Studio-Entwurf
+  fehlgeschlagen“, ungültiges Konzept) werden nicht mehr zweimal von pg-boss wiederholt (bis zu 9 bezahlte Aufrufe),
+  sondern als nicht wiederholbar beendet; die Kostenbremse zählt diese Abbrüche mit. Sichtbares Wort „Platzhalter“
+  wird beim Angleichen neutral ersetzt. Inhaltsbereiche neuer Entwürfe tragen die Klasse `ad-mguard`; die Handy-Ebene
+  stapelt darin am Handy alles untereinander (keine seitlichen Wischreihen, keine starren Spalten). Ältere Demos ohne
+  diese Klasse bleiben unverändert.
+- **Designprüfung (Betreiber-Entscheidung 07.11.2026, „Kleine Hinweise an mich“):** Genau ein Gestaltungs-
+  Kritikpunkt („revise“) blockiert nicht mehr; die Demo besteht, geht aber immer in die manuelle Prüfung, und der
+  Hinweis steht auf der Prüfseite neben „Passt?“. Ab zwei Kritikpunkten oder bei „nicht prüfbar“ bleibt die Demo
+  blockiert (dann einmalige automatische Nachbesserung). Technik- und harte Inhaltsbefunde blockieren unverändert.
+- Handy-Einstieg niedriger (72 svh statt 86 svh) und oben heller, Text näher am Bildschirmanfang (Befund „großer
+  dunkler Bereich über der Überschrift“). Harte Worttrennung (`word-break`/`overflow-wrap`) wird aus KI-CSS entfernt.

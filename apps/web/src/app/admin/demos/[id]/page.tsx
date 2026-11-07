@@ -46,6 +46,10 @@ export default async function DemoDetail({
   )?._meta;
   const brief = meta?.designBrief;
   const canDecide = ['pending_review', 'qa_failed'].includes(demo.status);
+  const designHint = demo.qaResultJson?.checks
+    .find((c) => c.name === 'design-studio-1' && c.passed && c.details?.startsWith('Hinweis für die manuelle Prüfung'))
+    ?.details?.replace(/^Hinweis für die manuelle Prüfung \(kein Blocker\): /, '')
+    .split(' || ')[0];
   const canRevise = ['pending_review', 'approved', 'published'].includes(demo.status);
   const content = (demo.contentJson ?? {}) as {
     hero_headline?: string;
@@ -116,6 +120,9 @@ export default async function DemoDetail({
               <p className="decide-wish-label">Neu gebaut nach deinem Wunsch</p>
               <p>„{(meta as { operatorWish?: { note?: string } }).operatorWish!.note}“</p>
             </div>
+          ) : null}
+          {designHint ? (
+            <Notice kind="warn">Hinweis der KI-Designprüfung (kein Blocker, du entscheidest): {designHint}</Notice>
           ) : null}
           {canDecide ? (
             <div className="decide">

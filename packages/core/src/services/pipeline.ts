@@ -143,7 +143,7 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
           ),
           // 07.11.2026: Ein Betrieb, dessen Entwurf zweimal binnen 24 Stunden gescheitert ist, wird nicht bei jedem Takt
           // erneut (kostenpflichtig) gebaut; er wartet einen Tag oder einen manuellen Neubau ab
-          sql`(SELECT count(*) FROM pgboss.job j WHERE j.name = 'build-demo' AND j.state = 'failed' AND j.data->>'leadId' = ${leads.id}::text AND j.created_on > now() - interval '24 hours') < 2`,
+          sql`(SELECT count(*) FROM pgboss.job j WHERE j.name = 'build-demo' AND (j.state = 'failed' OR (j.state = 'completed' AND j.output->>'stopped' = 'NonRetryableError')) AND j.data->>'leadId' = ${leads.id}::text AND j.created_on > now() - interval '24 hours') < 2`,
         ),
       )
       .orderBy(desc(leads.score))

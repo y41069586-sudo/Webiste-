@@ -149,7 +149,7 @@ niemals aus Branchenfokus oder Akquisesignal ableiten. Bestätigtes Einsatzgebie
 
 FREIE GESTALTUNG: Liefere zusätzlich design.concept, design.html und design.css. Erstelle eine eigene vollständige Komposition, nicht eine Auswahl aus Kits. Verwende in HTML einen äußeren .ad-page-Bereich und eigene ad-IDs. Kein html/body/head/main, kein JavaScript, kein style-Attribut, kein Formular, keine eingebetteten Dienste. Das echte Formular und die SeitenWerk-Kaufleiste werden außerhalb ergänzt und sind geschützt. CTA href="#anfrage" führt zum vorhandenen Formular.
 HTML-Tags: section, article, header, footer, nav, div, span, p, h1 bis h4, ul/ol/li, dl/dt/dd, a, img, figure/figcaption, details/summary, strong/em/b/i/small, br/hr. Genau ein h1. Interne IDs beginnen mit ad-. CSS nur für eigene Klassen, flache Regeln und @media/@supports. Keine inhaltlichen CSS-content-Texte (content nur leer), keine globalen html/body/:root-Regeln, keine @imports, keine externen URLs, keine !important-Regeln. Schrift über var(--display) und var(--body), Farben nach deiner Wahl als vier Hex-Farbrollen in design.colors (background, foreground, accent, onAccent). Schriften lokal verfügbar: zugeschnittenes Archivo als archivo-maler (Stärke 800–900, Breite 66–85%), archivo-fliesen (700, 100–118%), archivo-elektro (800, 92–100%) oder archivo-reinigung (650, 84–100%), außerdem Bodoni und Gloock; Fließtext Karla oder Atkinson. Das Profil nach gewünschter Stärke/Breite wählen, unabhängig von der Branche; CSS innerhalb dieser Achsen halten. Alternativ archivo bzw. archivo-free: zugeschnittene freie Archivo-Datei mit Stärken 400–900 bei normaler Breite (kein font-stretch). Die große ursprüngliche Archivo-Datei wird nicht eingebettet. Das sind verfügbare Dateien, keine vorgeschriebenen Schriftpaare.
-Setze design.contentVersion="full-page-2". Minimalistisch und clean wie eine hochwertige kleine Unternehmensseite: wenig Text, viel Weißraum, ein wiederkehrendes Zierelement, eine Akzentfarbe. Die Inhaltsbereiche erhalten data-ad-section in GENAU dieser Reihenfolge, jeweils mit h2: services, gallery, inquiry, area, faq, placeholders. Davor steht der Einstieg (ohne data-ad-section, ohne h2) mit h1, einem Bild aus den Bildslots, Name, Tätigkeit mit Ort, höchstens einem kurzen Satz und dem Button zu #anfrage. services: die Leistungen als große Kacheln, jede mit h3 und einem kurzen Satz, wo möglich mit Bild aus den Bildslots (Wiederholung erlaubt); mindestens drei Kacheln, ausführlichere Erklärungen höchstens aufklappbar (details/summary). gallery: zwei bis drei unterschiedliche verfügbare Bildslots, sonst ein mit data-ad-placeholder="photos" markierter {{placeholder_photos}}. inquiry heißt sichtbar „So einfach fragen Sie an“ (oder sinngemäß kurz) und fasst Ablauf und nötige Angaben in EINEM kompakten Block zusammen: drei bis vier kurze Listenpunkte, keine Zusagen. area heißt „So erreichen Sie uns“ (bei Arbeit beim Kunden sinngemäß) mit Adresse, {{map_url}}-Link, {{phone_url}}-Anruf und ausschließlich {{service_area}} für Standort/Anfahrt oder den Gebietsvorschlag; Öffnungszeiten und Formular folgen direkt danach im geschützten Kontaktbereich (#anfrage). faq zeigt dieselben drei bis vier kurzen Fragen/Antworten wie das faq-Inhaltsfeld, mit details/summary. placeholders steht zuletzt, klein und unauffällig, mit je einem Block data-ad-placeholder="photos", "team", "references" und dem passenden Texttoken {{placeholder_photos}}, {{placeholder_team}}, {{placeholder_references}}; er wird vor Vorschau/Live entfernt. Nichts davon als tatsächlich vorhandenes Team oder echte Referenz ausgeben. Kein zweites Formular erfinden.
+Setze design.contentVersion="full-page-2". Minimalistisch und clean wie eine hochwertige kleine Unternehmensseite: wenig Text, viel Weißraum, ein wiederkehrendes Zierelement, eine Akzentfarbe. Die Inhaltsbereiche erhalten data-ad-section in GENAU dieser Reihenfolge, jeweils mit h2: services, gallery, inquiry, area, faq, placeholders. Davor steht der Einstieg (ohne data-ad-section, ohne h2) mit h1, einem Bild aus den Bildslots, Name, Tätigkeit mit Ort, höchstens einem kurzen Satz und dem Button zu #anfrage. services: die Leistungen als große Kacheln, jede mit h3 und einem kurzen Satz, wo möglich mit Bild aus den Bildslots (Wiederholung erlaubt); mindestens drei Kacheln, ausführlichere Erklärungen höchstens aufklappbar (details/summary). gallery: zwei bis drei unterschiedliche verfügbare Bildslots, sonst ein mit data-ad-placeholder="photos" markierter {{placeholder_photos}}. inquiry heißt sichtbar „So einfach fragen Sie an“ (oder sinngemäß kurz) und fasst Ablauf und nötige Angaben in EINEM kompakten Block zusammen: drei bis vier kurze Listenpunkte, keine Zusagen. area heißt „So erreichen Sie uns“ (bei Arbeit beim Kunden sinngemäß) mit Adresse, {{map_url}}-Link, {{phone_url}}-Anruf und ausschließlich {{service_area}} für Standort/Anfahrt oder den Gebietsvorschlag; Öffnungszeiten und Formular folgen direkt danach im geschützten Kontaktbereich (#anfrage). faq zeigt dieselben drei bis vier kurzen Fragen/Antworten wie das faq-Inhaltsfeld, mit details/summary. placeholders steht zuletzt, klein und unauffällig, mit je einem Block data-ad-placeholder="photos", "team", "references" und dem passenden Texttoken {{placeholder_photos}}, {{placeholder_team}}, {{placeholder_references}}; er wird vor Vorschau/Live entfernt; das Wort „Platzhalter“ nicht sichtbar schreiben (nur die Tokens). Nichts davon als tatsächlich vorhandenes Team oder echte Referenz ausgeben. Kein zweites Formular erfinden.
 Faktentokens: {{name}}, {{city}}, {{branch}}, {{phone}}, {{street}}, {{postal_code}}; geprüfte Linktokens: {{phone_url}}, {{map_url}}. Bilder nur als img src="{{image_1}}", {{image_2}} oder {{image_3}}. Diese optionalen Slots werden mit freigegebenen Bildern gefüllt oder entfallen. Keine Bildrechte oder Bildmotive erfinden. Das System kennzeichnet Symbolbilder automatisch. Dekorative Ziffern nur in aria-hidden="true"-Elementen, keine Zahlen als unbelegte Tatsachen.
 
 FORMAT: Liefere die Inhalte ausschließlich über das Tool „${DEMO_TOOL_NAME}“. Icons wählst du passend zur Leistung aus der vorgegebenen Liste.`;
@@ -436,9 +436,32 @@ export function tidyAuthoredDesign<D extends { html: string; css: string }>(d: D
     ...d,
     css: d.css
       .replace(/\s*!\s*important\b/gi, '')
+      // Harte Worttrennung („Gartenges/taltung“) entfernen: zu lange Wörter fallen dann im Selbsttest als Überlauf auf
+      // und werden nachgebessert; am Handy trennt die Handy-Ebene sauber mit Silbentrennung
+      .replace(
+        /(?<=^|[;{\s])(?:word-break\s*:\s*break-(?:all|word)|(?:overflow-wrap|word-wrap)\s*:\s*(?:anywhere|break-word))\s*;?/gi,
+        '',
+      )
       // Zierzeichen über CSS-content (z. B. Pfeile, Ziffern) entfallen; Inhalte gehören ins HTML
       .replace(/(^|[;{\s])content\s*:\s*(["'])(?:(?!\2)[^\\])+\2/gi, '$1content:""'),
-    html: d.html.replace(/<(\/?)(aside|main|address)(?=[\s>/])/gi, '<$1div'),
+    html: d.html
+      .replace(/<(\/?)(aside|main|address)(?=[\s>/])/gi, '<$1div')
+      // Sichtbares Wort „Platzhalter“ ist für Betriebstexte gesperrt; im Entwurfsblock neutral benennen
+      .replace(
+        />([^<]*)</g,
+        (_m, text: string) =>
+          `>${text.replace(/entwurfs-?\s?platzhalter/gi, 'Entwurfshinweis').replace(/platzhalter/gi, 'Vorschlag')}<`,
+      )
+      // Layout-Absicherung (MOBILE_LAYER_CSS, nur für neu erzeugte Entwürfe): Inhaltsbereiche markieren
+      .replace(/<([a-z][a-z0-9]*)(\s[^<>]*)?>/gi, (tag, name: string, attrs = '') => {
+        if (!/\sdata-ad-section\s*=/.test(attrs)) return tag;
+        const marked = /\sclass\s*=\s*"/.test(attrs)
+          ? attrs.replace(/(\sclass\s*=\s*")([^"]*)"/, (_c: string, pre: string, v: string) =>
+              /\bad-mguard\b/.test(v) ? `${pre}${v}"` : `${pre}${v ? `${v} ` : ''}ad-mguard"`,
+            )
+          : `${attrs.replace(/\s*\/$/, '')} class="ad-mguard"`;
+        return `<${name}${marked}>`;
+      }),
   };
 }
 

@@ -204,7 +204,15 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
         }),
       );
       const craft = studio ? studioReviewResult(res) : undefined;
-      if (craft) checks.push({ name: STUDIO_VERSION, passed: craft.passed, details: craft.details });
+      if (craft)
+        checks.push({
+          name: STUDIO_VERSION,
+          passed: craft.passed,
+          details:
+            craft.passed && craft.corrections.length
+              ? `Hinweis für die manuelle Prüfung (kein Blocker): ${craft.corrections.join(' | ')} || ${craft.details}`
+              : craft.details,
+        });
       const high = res.issues.filter((i) => i.severity === 'hoch');
       visualBlocking = (craft ? !craft.passed : false) || high.some((i) => i.field.startsWith('visual.'));
       rebuildFeedback.push(...high.slice(0, 8).map((i) => `${i.field}: ${i.problem}`));
@@ -371,7 +379,9 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
   const decide = ['building', 'pending_review', 'qa_failed'].includes(current?.status ?? '');
   // Mit Prüfhinweis (z. B. Überarbeitung für Brief 3) immer manuell prüfen
   const styleNeedsManual =
-    (demo.contentJson?._meta as { designRequiresReview?: boolean } | undefined)?.designRequiresReview === true;
+    (demo.contentJson?._meta as { designRequiresReview?: boolean } | undefined)?.designRequiresReview === true ||
+    // Bestandene Gestaltungsprüfung mit Hinweis: immer der Betreiber, nie automatische Freigabe
+    checks.some((c) => c.name === STUDIO_VERSION && c.passed && /^Hinweis für die manuelle Prüfung/.test(c.details ?? ''));
   const manual =
     !quality.complete || styleNeedsManual
       ? true

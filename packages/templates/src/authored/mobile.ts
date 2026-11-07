@@ -14,6 +14,7 @@ export const MOBILE_LAYER_VERSION = '1';
 const BP = 700;
 const H = '#sw-ai-design [data-ad-hero="section"]';
 const M = `${H} [data-ad-hero="media"]`;
+const G = '#sw-ai-design [data-ad-section].ad-mguard';
 
 export const MOBILE_LAYER_CSS = [
   `#sw-ai-design [data-ad-hero-added]{display:none}`,
@@ -22,8 +23,8 @@ export const MOBILE_LAYER_CSS = [
   // Lange Wörter (z. B. „Kosmetikinstitut“) sauber trennen statt aus dem Rahmen laufen zu lassen
   `#sw-ai-design h1,#sw-ai-design h2,#sw-ai-design h3,#sw-ai-design p,#sw-ai-design li,#sw-ai-design dd,#sw-ai-design dt{overflow-wrap:break-word;hyphens:auto}`,
   `#sw-ai-design [data-ad-hero-added]{display:block}`,
-  `${H}{position:relative!important;isolation:isolate;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;gap:14px;min-height:min(86svh,760px)!important;width:100vw!important;max-width:none!important;margin:0 calc(50% - 50vw)!important;padding:88px 20px 112px!important;overflow:hidden!important;background:#14161a!important;color:#fff!important;border:0!important;box-shadow:none!important;text-align:left!important}`,
-  `${H}::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(10,12,16,.28) 0%,rgba(10,12,16,.55) 38%,rgba(10,12,16,.82) 62%,rgba(10,12,16,.92) 100%)}`,
+  `${H}{position:relative!important;isolation:isolate;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;gap:14px;min-height:min(72svh,640px)!important;width:100vw!important;max-width:none!important;margin:0 calc(50% - 50vw)!important;padding:72px 20px 56px!important;overflow:hidden!important;background:#14161a!important;color:#fff!important;border:0!important;box-shadow:none!important;text-align:left!important}`,
+  `${H}::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(10,12,16,.12) 0%,rgba(10,12,16,.38) 34%,rgba(10,12,16,.78) 60%,rgba(10,12,16,.9) 100%)}`,
   // Zwischenebenen der KI neutralisieren, damit das Foto die ganze Fläche bekommt und Text darüber lesbar bleibt
   `${H} *{position:static!important;float:none!important;transform:none!important;grid-column:auto!important;grid-row:auto!important;min-height:0!important;background:transparent!important;box-shadow:none!important;color:#fff!important;border-color:rgba(255,255,255,.35)!important;text-shadow:0 1px 14px rgba(0,0,0,.35);-webkit-text-stroke:0!important;max-width:100%!important}`,
   `${H} > *:not([data-ad-hero="media"]){width:100%!important;margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important}`,
@@ -43,6 +44,12 @@ export const MOBILE_LAYER_CSS = [
   `${H}:not(:has([data-ad-hero="media"]))::after{display:none}`,
   // Nur ein Bildhinweis: eigener Symbolbild-Hinweis ersetzt eine zusätzliche Bildunterschrift der KI
   `${M} .ad-stock-note ~ figcaption{display:none!important}`,
+  // Absicherung neuer Entwürfe (Klasse ad-mguard, beim Bau gesetzt): am Handy alles untereinander, keine seitlich
+  // wischbaren Reihen oder starren Spalten, die aus dem Bild laufen (07.11.2026, häufigster Layoutbefund)
+  `${G},${G} *{min-width:0!important;max-width:100%!important}`,
+  `${G} *{flex-wrap:wrap!important;grid-auto-flow:row!important;overflow-x:visible!important;scroll-snap-type:none!important}`,
+  `${G} [class]{grid-template-columns:minmax(0,1fr)!important}`,
+  `${G} img{height:auto}`,
   `}`,
 ].join('');
 

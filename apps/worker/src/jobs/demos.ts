@@ -23,6 +23,13 @@ defineJob(
       return { demoId };
     } catch (err) {
       if (err instanceof Error && /Status|nicht gefunden/.test(err.message)) throw new NonRetryableError(err.message);
+      // 07.11.2026: Inhaltlich gescheiterte Entwürfe nicht zweimal komplett wiederholen (je bis zu drei bezahlte
+      // KI-Aufrufe); der Pipeline-Takt bzw. der Betreiber entscheidet über einen späteren Neubau
+      if (
+        err instanceof Error &&
+        /Studio-Entwurf fehlgeschlagen|Gestaltungskonzept|individueller Gestaltungsentwurf|Recherche während/.test(err.message)
+      )
+        throw new NonRetryableError(err.message);
       throw err;
     }
   },

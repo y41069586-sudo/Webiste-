@@ -92,14 +92,26 @@ describe('Independent studio plan and visual quality gate', () => {
     emptyEvidence.craft[0]!.evidence = '';
     expect(() => studioReviewResult(emptyEvidence)).toThrow();
   });
-  it('blocks revisions or unverifiable dimensions rather than averaging weaknesses away', () => {
+  it('blocks two revisions or any unverifiable dimension rather than averaging weaknesses away', () => {
     expect(studioReviewResult(review()).passed).toBe(true);
-    for (const verdict of ['revise', 'unverifiable']) {
-      const result = review();
-      result.craft[3]!.verdict = verdict;
-      result.craft[3]!.correction = 'Den angeschnittenen Bildfokus im mobilen Einstieg neu ausrichten.';
-      expect(studioReviewResult(result).passed).toBe(false);
+    const unverifiable = review();
+    unverifiable.craft[3]!.verdict = 'unverifiable';
+    expect(studioReviewResult(unverifiable).passed).toBe(false);
+    const two = review();
+    for (const i of [1, 3]) {
+      two.craft[i]!.verdict = 'revise';
+      two.craft[i]!.correction = 'Den angeschnittenen Bildfokus im mobilen Einstieg neu ausrichten.';
     }
+    expect(studioReviewResult(two).passed).toBe(false);
+  });
+  it('passes a single revision as a hint for the operator (Betreiber 07.11.2026), with its correction', () => {
+    const one = review();
+    one.craft[3]!.verdict = 'revise';
+    one.craft[3]!.correction = 'Den angeschnittenen Bildfokus im mobilen Einstieg neu ausrichten.';
+    const result = studioReviewResult(one);
+    expect(result.passed).toBe(true);
+    expect(result.corrections).toHaveLength(1);
+    expect(result.corrections[0]).toContain('Den angeschnittenen Bildfokus');
   });
   it('uses actual overview boards instead of falsely describing hero images as full-page proof', () => {
     const data = visualReviewInput({
