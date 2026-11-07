@@ -175,6 +175,34 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
     }
   }, 90_000);
 
+  it('Gestaltungsbefund (revise): einmal automatisch neu bauen, mit dem Korrekturhinweis der Prüfung', async () => {
+    const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
+    registerMockStructured(QA_TOOL_NAME, () => {
+      const f = studioQaFixture();
+      f.craft[1] = {
+        ...f.craft[1]!,
+        verdict: 'revise',
+        correction: 'Hero-Überschrift am Desktop vollständig im Einstieg zeigen.',
+      };
+      return f;
+    });
+    try {
+      const first = await buildDemo(other.id, { actor: 'job:test', selfTest: true });
+      await qaDemo(first, 'job:test', { lighthouse: false });
+      expect((await getDb().query.demos.findFirst({ where: eq(demos.id, first) }))?.status).toBe('qa_failed');
+      const boss = await getBoss();
+      const jobs = (
+        await boss
+          .getDb()
+          .executeSql(`SELECT data FROM pgboss.job WHERE name = 'build-demo' AND singleton_key = $1`, [`demo:${other.id}`])
+      ).rows as { data: { qaFeedback: string[] } }[];
+      expect(jobs).toHaveLength(1);
+      expect(jobs[0]!.data.qaFeedback.join(' ')).toContain('Hero-Überschrift am Desktop vollständig im Einstieg zeigen.');
+    } finally {
+      registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
+    }
+  }, 90_000);
+
   it('keeps a controlled single run in manual review without queued QA or a later paid rebuild', async () => {
     const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
     registerMockStructured(QA_TOOL_NAME, () =>

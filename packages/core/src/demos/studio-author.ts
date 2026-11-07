@@ -8,6 +8,8 @@ import {
   DEMO_SYSTEM_PROMPT,
   DEMO_TOOL_NAME,
   normalizeContent,
+  ensureVerifiedServiceInHero,
+  tidyAuthoredDesign,
   validateDemoContent,
   type ContentFacts,
   type RuleViolation,
@@ -31,6 +33,8 @@ export interface GeneratedContent {
   attempts: number;
   violations: RuleViolation[];
   studioPlan?: StudioPlan;
+  /** Befunde des technischen Selbsttests, die nach der Nachbesserung noch offen sind (entscheidet dann die Demo-QA) */
+  precheckOpen?: RuleViolation[];
 }
 
 /** Shared by normal lead generation and the isolated fictional preview. All paid calls retain budget admission. */
@@ -47,6 +51,11 @@ export async function authorStudioContent(
     photos?: NonNullable<BusinessFacts['photos']>;
     onPlan?: (plan: StudioPlan) => Promise<void>;
     onAttempt?: (attempt: number, content: unknown, violations: RuleViolation[]) => Promise<void>;
+    /**
+     * Technischer Selbsttest des fertigen Entwurfs (Rendern, Kontrast, Überlauf), bevor er gespeichert wird.
+     * Befunde führen zu genau einer Nachbesserung; danach entscheidet die normale Demo-QA.
+     */
+    precheck?: (content: SiteContent) => Promise<RuleViolation[]>;
   } = {},
 ): Promise<GeneratedContent> {
   const photos = opts.photos ?? [];
@@ -99,6 +108,8 @@ export async function authorStudioContent(
       let content: SiteContent;
       try {
         content = normalizeContent(raw);
+        if (content.design) content = { ...content, design: tidyAuthoredDesign(content.design) };
+        content = ensureVerifiedServiceInHero(content, facts);
       } catch {
         lastViolations = [
           {
@@ -119,7 +130,26 @@ export async function authorStudioContent(
           detail: 'Eigenes HTML/CSS im design-Objekt liefern; kein Kit-Fallback.',
         });
       await opts.onAttempt?.(attempt, raw, violations);
-      if (violations.length === 0) return { content, source: 'llm', attempts: attempt, violations: [], studioPlan };
+      if (violations.length === 0) {
+        const open = opts.precheck ? await opts.precheck(content).catch(() => [] as RuleViolation[]) : [];
+        opts.signal?.throwIfAborted();
+        if (open.length === 0 || attempt === 2)
+          return {
+            content,
+            source: 'llm',
+            attempts: attempt,
+            violations: [],
+            studioPlan,
+            ...(open.length ? { precheckOpen: open } : {}),
+          };
+        lastViolations = open;
+        feedback = [
+          'Der fertige Entwurf wurde im Browser getestet (Desktop 1440 px, Handy 390 px und 320 px). Behebe genau diese Befunde und behalte alles Übrige bei:',
+          ...open.slice(0, 11).map((v) => `${v.field}: ${v.rule} – ${v.detail}`),
+        ];
+        logger.warn({ leadId, attempt, findings: open.length }, 'demo: technischer Selbsttest mit Befunden, Nachbesserung');
+        continue;
+      }
       lastViolations = violations;
       feedback = violations.slice(0, 12).map((v) => `${v.field}: ${v.rule} – ${v.detail}`);
       logger.warn({ leadId, attempt, violations: violations.length }, 'demo: Inhaltsregeln verletzt');

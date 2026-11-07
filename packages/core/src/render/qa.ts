@@ -220,7 +220,23 @@ export async function browserChecks(opts: BrowserQaOptions): Promise<Check[]> {
           name: `axe-${vp.label}`,
           passed: violations.length === 0,
           ...(violations.length
-            ? { details: violations.map((v) => `${v.id} (${v.impact}, ${v.nodes.length}×): ${v.help}`).join(' | ') }
+            ? {
+                // Mit Fundstelle und Farbangaben, damit eine automatische Nachbesserung genau diese Stelle trifft
+                details: violations
+                  .map((v) => {
+                    const where = v.nodes
+                      .slice(0, 3)
+                      .map((n) => {
+                        const colors = n.any?.[0]?.message?.match(
+                          /foreground color: #[0-9a-f]{3,8}, background color: #[0-9a-f]{3,8}/i,
+                        )?.[0];
+                        return `${String(n.target?.[0] ?? '').slice(0, 80)}${colors ? ` (${colors})` : ''}`;
+                      })
+                      .join('; ');
+                    return `${v.id} (${v.impact}, ${v.nodes.length}×): ${v.help}${where ? ` – ${where}` : ''}`;
+                  })
+                  .join(' | '),
+              }
             : {}),
         });
         const issues = await layoutIssues(page);

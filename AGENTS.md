@@ -1190,3 +1190,8 @@ gesperrt; keinen physischen Versand oder kompletten bezahlten Go-Live behaupten.
 - Private Entwürfe in bestehenden Settings, HttpOnly-Cookie, keine Tokens in URLs. Immutable Bestellkopie vor Provider-Aufruf; Übergabe erst nach bestätigter Zahlung. Bestehende bezahlte Kunden behalten ihren Onboarding-Zugang.
 - `completePreparedOnboarding` übernimmt Daten und reiht über den normalen Worker den Website-Bau ein. Keine doppelte KI-Generierung allein wegen wiederholter Übergabeaufrufe.
 - Details, Prüfnachweise und Image-Update ohne Workerstart: `docs/activation-2026-10-31/prepayment-setup.md`. Kein neuer Steuerstatus, Stripe-Live-Modus oder allgemeiner Worker-/Versandstart durch diese UI-Änderung.
+
+## Demo-Bau ohne Wiederholungsfehler – Betreiber 07.11.2026
+
+- Worker baut mit `selfTest: true`: Entwurf vor dem Speichern im Browser testen, Befunde in genau einen Nachbesserungsversuch. Endprüfung baut bei Gestaltungs-/Technik-/Textbefunden höchstens einmal mit den Befunden neu (`qaRetry`). Gates bleiben: durchgefallene Demos sind nicht freigebbar, manuelle Freigabe bleibt Pflicht.
+- Pipeline überspringt Betriebe mit ≥ 2 gescheiterten Bau-Aufträgen in 24 h (Kostenbremse). Details: `docs/entscheidungen.md` (07.11.2026 – Fehler beim Bau beheben).

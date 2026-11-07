@@ -56,6 +56,9 @@ export interface DemoQaOptions {
  * Konsolenfehler, axe-core (Desktop/Mobil), Layout-Prüfung, Lighthouse.
  * Danach Screenshots + Komposit; Status pending_review / approved / qa_failed.
  */
+/** Technische Prüfungen, deren Befunde einer Nachbesserung als Hinweis dienen */
+const TECH_FEEDBACK = /^(axe-|layout-|struktur-|hero-lesbarkeit-|bilder-|freie-gestaltung$|html|lighthouse$)/;
+
 export async function qaDemo(demoId: string, actor: string, opts: DemoQaOptions = {}): Promise<QaResult> {
   const started = Date.now();
   try {
@@ -205,6 +208,7 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
       const high = res.issues.filter((i) => i.severity === 'hoch');
       visualBlocking = (craft ? !craft.passed : false) || high.some((i) => i.field.startsWith('visual.'));
       rebuildFeedback.push(...high.slice(0, 8).map((i) => `${i.field}: ${i.problem}`));
+      if (craft) rebuildFeedback.push(...craft.corrections.slice(0, 6));
       checks.push({
         name: 'ki-pruefung',
         passed: high.length === 0,
@@ -394,10 +398,20 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
     context: { failed: checks.filter((c) => !c.passed).map((c) => c.name) },
   });
   const failedNames = checks.filter((c) => !c.passed).map((c) => c.name);
-  const contentOnly =
-    !visualBlocking && failedNames.length > 0 && failedNames.every((n) => n === 'ki-pruefung' || n === 'inhaltsregeln');
-  if (opts.enqueueRebuild !== false && !passed && decide && contentOnly && !meta?.qaRetry && rebuildFeedback.length) {
-    // Nur Textbefunde: einmal automatisch neu schreiben lassen (mit den Befunden), statt liegen zu bleiben
+  // Technische Befunde (Kontrast, Überlauf, Struktur …) mit Fundstelle als Korrekturhinweis mitgeben
+  for (const c of checks)
+    if (!c.passed && c.details && TECH_FEEDBACK.test(c.name))
+      rebuildFeedback.push(`Technik ${c.name}: ${c.details.slice(0, 400)}`);
+  // 07.11.2026 (Betreiber: „es sollen keine Fehler wieder entstehen“): nicht nur Textbefunde, sondern auch Gestaltungs-
+  // und Technikbefunde führen zu genau einer automatischen Nachbesserung mit den Befunden. Ausgenommen: Recherche-
+  // Abweichung und Laufzeitfehler (dort hilft ein Neubau nicht).
+  const repairable =
+    failedNames.length > 0 &&
+    !checks.some(
+      (c) => !c.passed && (c.name === 'research_binding' || c.name === 'qa-runtime' || /^Fehler:/.test(c.details ?? '')),
+    );
+  if (opts.enqueueRebuild !== false && !passed && decide && repairable && !meta?.qaRetry && rebuildFeedback.length) {
+    // Einmal automatisch neu bauen lassen (mit den Befunden), statt liegen zu bleiben
     await enqueue(
       QUEUES.buildDemo,
       {

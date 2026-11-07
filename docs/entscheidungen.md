@@ -1371,3 +1371,27 @@ krass viel Text, schönes Design – nimm dir ein Beispiel“.
   bleibt für bestehende Seiten/Überarbeitungen gültig (inkl. Beispiel-Kennzeichnung im HTML).
 - KI-Regeln (Gestaltungsplanung, Umsetzung, Prüfung) auf Minimalismus, kurze Absätze, aufklappbare Details und
   „keine Warnsätze“ umgestellt; Cyc Beauté als Qualitätsmaßstab in Prinzipien (nicht zum Kopieren).
+
+## 07.11.2026 – Demos: Fehler beim Bau beheben statt erst in der Endprüfung
+
+Anlass (Betreiber): „es sollen keine Fehler wieder entstehen“. Befund: 15 von 15 Bestands-Demos fielen durch
+(KI-Gestaltungsprüfung 11×, KI-Inhaltsprüfung 8×, Kontrast/Überlauf 8×); bei Gestaltungs- oder Technikbefunden gab es
+keine Nachbesserung, nur „qa_failed“. Außerdem scheiterte ein Betrieb sechsmal in 24 h am selben Inhaltsregel-Befund und
+wurde bei jedem Pipeline-Takt erneut kostenpflichtig gebaut.
+
+- **Selbsttest beim Bau** (`buildDemo({ selfTest: true })`, Worker): fertiger Entwurf wird gerendert (mit Handy-Ebene)
+  und mit denselben Browser-Prüfungen wie die Demo-QA getestet (axe, Layout 1440/390/320, Struktur, Bilder); Befunde
+  gehen mit Fundstelle in genau einen zweiten Autorenversuch. Danach offene Befunde blockieren nicht (Endprüfung
+  entscheidet), sie stehen in `_meta.precheckOpen`.
+- **Endprüfung bessert einmal nach**: Auch Gestaltungsbefunde („revise“ mit Korrektursatz) und Technikbefunde führen
+  zu genau einem automatischen Neubau mit den Befunden (vorher nur reine Textbefunde). Ausgenommen: Recherche-Abweichung,
+  Laufzeitfehler, KI-Aufruffehler. Höchstens einmal je Demo (`qaRetry`).
+- **axe-Details** nennen Fundstelle und Farbwerte (statt nur „color-contrast 7×“).
+- **KI-Inhaltsprüfung** kennt jetzt Straße, PLZ und Telefon als belegte Fakten (vorher als „nicht belegt“/Ziffern gemeldet).
+- **Formangleichung vor der Prüfung** (`tidyAuthoredDesign`, nur Vereinfachungen): `!important` entfällt, Text in
+  CSS-`content` wird leer, `aside`/`main`/`address` werden `div`. `checkAuthoredDesign` prüft danach unverändert.
+- **Betriebsbezug**: Prompt verlangt einen bestätigten Leistungstitel wörtlich im Einstieg; fehlt er dennoch, wird
+  „{Leistung} in {Stadt}.“ der Unterzeile vorangestellt (`ensureVerifiedServiceInHero`, nur geprüfte Fakten).
+- **Kostenbremse Pipeline**: Betriebe mit ≥ 2 gescheiterten Bau-Aufträgen in 24 h werden vom Takt übersprungen.
+- Bestands-Demos werden nicht neu gebaut (Betreiber: „Nicht neu bauen“); erneute Prüfung abgebrochen, nur Cyc Beauté
+  geprüft. Durchgefallene Demos sind nicht freigebbar (Schutzregel) und kosten nichts weiter.

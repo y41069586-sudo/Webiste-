@@ -1,7 +1,14 @@
 import { resolveBusinessDesign } from './business-design';
 import { leadResearch, researchLetterFacts, assertAcquisitionEligible } from '../services/lead-research';
 import { researchContentHash, type LeadResearch } from '../leads/acquisition';
-import { authoredTemplateId, isAuthoredTemplate, freeDesignBrief, checkAuthoredDesign, type ArtDirection } from '@wbm/templates';
+import {
+  applyMobileHeroLayer,
+  authoredTemplateId,
+  isAuthoredTemplate,
+  freeDesignBrief,
+  checkAuthoredDesign,
+  type ArtDirection,
+} from '@wbm/templates';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { renderSite, stockPhotos, stockPhotoDataUri, type BusinessFacts, type SiteContent } from '@wbm/templates';
 import { getConfig } from '../config/service';
@@ -17,7 +24,8 @@ import { audit } from '../services/audit';
 import { transitionLead } from '../services/lead-state';
 import { randomToken, sha256 } from '../util/crypto';
 import { optimizeImage } from '../render/images';
-import type { ContentFacts } from './content';
+import { browserChecks } from '../render/qa';
+import type { ContentFacts, RuleViolation } from './content';
 import { libraryContent } from './library';
 import './mock-handlers';
 import { STUDIO_VERSION } from './studio';
@@ -157,6 +165,7 @@ export async function generateDemoContent(
   recentConcepts: string[] = [],
   signal?: AbortSignal,
   operatorWish?: string,
+  precheck?: (content: SiteContent) => Promise<RuleViolation[]>,
 ): Promise<GeneratedContent> {
   const research = await leadResearch(lead);
   const facts = {
@@ -174,6 +183,7 @@ export async function generateDemoContent(
     recentConcepts,
     signal,
     operatorWish,
+    precheck,
   });
 }
 
@@ -244,6 +254,8 @@ export async function buildDemo(
     qaFeedback?: string[];
     /** Controlled CLI runs QA themselves; default keeps the existing queue automation. */
     enqueueQa?: boolean;
+    /** Technischer Selbsttest im Browser vor dem Speichern (Worker: an), mit einer Nachbesserung bei Befunden */
+    selfTest?: boolean;
     signal?: AbortSignal;
   },
 ): Promise<string> {
@@ -286,6 +298,44 @@ export async function buildDemo(
   const photoSlots = demoPhotoSlots(lead.id, { ...leadToFacts(lead, cfg), verifiedServices }, design.photos, recentFiles);
   opts.signal?.throwIfAborted();
   const wish = await loadOperatorWish(lead.id);
+  const facts = {
+    ...leadToFacts(lead, cfg),
+    verifiedServices,
+    exampleServices: verifiedServices?.length ? exampleServicesFor(lead, cfg, verifiedServices) : undefined,
+    photos: photoSlots,
+  };
+  const senderPhoto = await senderPhotoDataUri(cfg);
+  // 07.11.2026: Entwurf vor dem Speichern so testen, wie die Demo-QA ihn sieht (gerendert, mit Handy-Einstieg), damit
+  // Kontrast-, Überlauf- und Strukturfehler schon beim Bau nachgebessert werden statt erst in der Endprüfung aufzufallen
+  const precheck = opts.selfTest
+    ? async (content: SiteContent): Promise<RuleViolation[]> => {
+        if (isAuthoredTemplate(templateId)) {
+          const issues = content.design ? checkAuthoredDesign(content.design) : ['Individueller Entwurf fehlt'];
+          if (issues.length)
+            return issues.slice(0, 8).map((detail) => ({ field: 'design', rule: 'Gestaltungsregel verletzt', detail }));
+        }
+        const page = applyMobileHeroLayer(
+          renderDemoHtml({
+            templateId,
+            palette,
+            artDirection: design.direction,
+            content,
+            facts,
+            slug: 'selbsttest',
+            cfg,
+            photoDataUri: senderPhoto,
+          }),
+        ).replaceAll(EXPIRES_PLACEHOLDER, 'nach Ablauf der Frist');
+        const checks = await browserChecks({ html: page, expectedFacts: { name: facts.name, city: facts.city } });
+        return checks
+          .filter((c) => !c.passed)
+          .map((c) => ({
+            field: `browser.${c.name}`,
+            rule: 'Technische Prüfung nicht bestanden',
+            detail: (c.details ?? 'ohne Detail').slice(0, 400),
+          }));
+      }
+    : undefined;
   const generated = await generateDemoContent(
     lead,
     cfg,
@@ -295,14 +345,9 @@ export async function buildDemo(
     recentConcepts,
     opts.signal,
     wish ? operatorWishPrompt(wish) : undefined,
+    precheck,
   );
   opts.signal?.throwIfAborted();
-  const facts = {
-    ...leadToFacts(lead, cfg),
-    verifiedServices,
-    exampleServices: verifiedServices?.length ? exampleServicesFor(lead, cfg, verifiedServices) : undefined,
-    photos: photoSlots,
-  };
   if (isAuthoredTemplate(templateId) && (!generated.content.design || checkAuthoredDesign(generated.content.design).length))
     throw Error('Kein gültiger individueller Gestaltungsentwurf. Zur Prüfung liegen lassen; keine Standardvorlage als Ersatz.');
   const brief = freeDesignBrief(facts, generated.content);
@@ -315,7 +360,7 @@ export async function buildDemo(
     facts,
     slug,
     cfg,
-    photoDataUri: await senderPhotoDataUri(cfg),
+    photoDataUri: senderPhoto,
   });
 
   let createdId: string | undefined;
@@ -361,6 +406,7 @@ export async function buildDemo(
               studio: { version: STUDIO_VERSION, plan: generated.studioPlan },
               ...(brief ? { designBrief: brief } : {}),
               ...(opts.qaFeedback?.length ? { qaRetry: 1 } : {}),
+              ...(generated.precheckOpen?.length ? { precheckOpen: generated.precheckOpen.map((v) => v.field) } : {}),
               ...(wish ? { operatorWish: { note: wish.note, fromDemo: wish.demoId } } : {}),
             },
           } as unknown as Record<string, unknown>,

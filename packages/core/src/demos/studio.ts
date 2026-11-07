@@ -147,7 +147,13 @@ const reviewSchema = z.object({
     }),
   ),
 });
-export function studioReviewResult(raw: unknown): { issues: QaIssue[]; passed: boolean; details: string } {
+export function studioReviewResult(raw: unknown): {
+  issues: QaIssue[];
+  passed: boolean;
+  details: string;
+  /** Ausführbare Korrekturen der beanstandeten Dimensionen (für die einmalige automatische Nachbesserung) */
+  corrections: string[];
+} {
   const result = reviewSchema.parse(raw);
   if (
     result.craft.length !== STUDIO_REVIEW_DIMENSIONS.length ||
@@ -159,6 +165,9 @@ export function studioReviewResult(raw: unknown): { issues: QaIssue[]; passed: b
   return {
     issues: result.issues,
     passed: result.craft.every((x) => x.verdict === 'pass'),
+    corrections: result.craft
+      .filter((x) => x.verdict === 'revise')
+      .map((x) => `Gestaltung ${x.dimension}: ${x.evidence} → ${x.correction}`),
     details: result.craft
       .map((x) => `${x.dimension}: ${x.verdict} – ${x.evidence}${x.correction ? ` → ${x.correction}` : ''}`)
       .join(' | '),

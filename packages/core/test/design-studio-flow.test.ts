@@ -11,7 +11,7 @@ import { authorStudioContent } from '../src/demos/studio-author';
 import { MockLlm } from '../src/providers/llm/mock';
 import { DEFAULT_CONFIG } from '../src/config/settings';
 import { STUDIO_TOOL, STUDIO_CALL_OPTIONS } from '../src/demos/studio';
-import { DEMO_TOOL_NAME } from '../src/demos/content';
+import { DEMO_TOOL_NAME, ensureVerifiedServiceInHero, tidyAuthoredDesign } from '../src/demos/content';
 
 const lead = {
   id: '11111111-1111-4111-8111-111111111111',
@@ -72,5 +72,56 @@ describe('Studio generation orchestration without database or paid provider', ()
     generate.mockImplementation(async (req) => (req.toolName === STUDIO_TOOL ? mockResponse(req) : {}));
     await expect(generateDemoContent(lead, DEFAULT_CONFIG)).rejects.toThrow(/keine Ersatzvorlage/);
     expect(generate.mock.calls.map(([req]) => req.toolName)).toEqual([STUDIO_TOOL, DEMO_TOOL_NAME, DEMO_TOOL_NAME]);
+  });
+  it('technischer Selbsttest: Befunde führen zu genau einer Nachbesserung mit den Befunden', async () => {
+    const precheck = vi
+      .fn()
+      .mockResolvedValueOnce([
+        { field: 'browser.axe-mobil', rule: 'Technische Prüfung nicht bestanden', detail: 'color-contrast – .ad-kicker' },
+      ])
+      .mockResolvedValueOnce([]);
+    const result = await generateDemoContent(lead, DEFAULT_CONFIG, undefined, undefined, [], [], undefined, undefined, precheck);
+    expect(generate.mock.calls.map(([req]) => req.toolName)).toEqual([STUDIO_TOOL, DEMO_TOOL_NAME, DEMO_TOOL_NAME]);
+    expect(generate.mock.calls[2]![0].prompt).toContain('color-contrast – .ad-kicker');
+    expect(precheck).toHaveBeenCalledTimes(2);
+    expect(result.attempts).toBe(2);
+    expect(result.precheckOpen).toBeUndefined();
+  });
+  it('technischer Selbsttest: nach der Nachbesserung offene Befunde blockieren nicht (Endprüfung entscheidet)', async () => {
+    const open = [{ field: 'browser.layout-klein', rule: 'Technische Prüfung nicht bestanden', detail: 'offscreen: H3' }];
+    const precheck = vi.fn().mockResolvedValue(open);
+    const result = await generateDemoContent(lead, DEFAULT_CONFIG, undefined, undefined, [], [], undefined, undefined, precheck);
+    expect(generate.mock.calls).toHaveLength(3);
+    expect(result.content.design).toBeDefined();
+    expect(result.precheckOpen).toEqual(open);
+  });
+  it('gleicht !important und nicht erlaubte Blockelemente vor der Prüfung an', () => {
+    const tidy = tidyAuthoredDesign({
+      html: '<aside class="x"><main><address>{{street}}</address></main></aside><p>Aside bleibt Text</p>',
+      css: '.x{color:#111 !important;margin:0!IMPORTANT}',
+    });
+    expect(tidy.html).toBe('<div class="x"><div><div>{{street}}</div></div></div><p>Aside bleibt Text</p>');
+    expect(tidy.css).toBe('.x{color:#111;margin:0}');
+  });
+  it('leert Text in CSS-content und lässt leere Werte stehen', () => {
+    const tidy = tidyAuthoredDesign({
+      html: '<p>x</p>',
+      css: '.a::before{content:"→"}.b::after{content: \'01\'}.c::after{content:""}',
+    });
+    expect(tidy.css).toBe('.a::before{content:""}.b::after{content:""}.c::after{content:""}');
+  });
+  it('stellt einen bestätigten Leistungstitel in die Unterzeile, wenn er im Einstieg fehlt', () => {
+    const base = {
+      hero_headline: 'Kim Thanh',
+      hero_subline: 'Ruhige Termine in Dortmund nach Absprache.',
+    } as Parameters<typeof ensureVerifiedServiceInHero>[0];
+    const out = ensureVerifiedServiceInHero(base, { verifiedServices: ['Maniküre'], city: 'Dortmund' });
+    expect(out.hero_subline).toBe('Maniküre in Dortmund. Ruhige Termine in Dortmund nach Absprache.');
+    expect(ensureVerifiedServiceInHero(out, { verifiedServices: ['Maniküre'], city: 'Dortmund' })).toBe(out);
+    expect(ensureVerifiedServiceInHero(base, { verifiedServices: [], city: 'Dortmund' })).toBe(base);
+    const long = { ...base, hero_subline: 'x'.repeat(175) };
+    expect(ensureVerifiedServiceInHero(long, { verifiedServices: ['Maniküre'], city: 'Dortmund' }).hero_subline).toBe(
+      'Maniküre in Dortmund.',
+    );
   });
 });
