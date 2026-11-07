@@ -1415,7 +1415,7 @@ wurde bei jedem Pipeline-Takt erneut kostenpflichtig gebaut.
 ## 07.11.2026 – Betreiber-Lauf: Admin-Build, Admin-Mails, Brieftexte, Demo-Sperren
 
 - **Admin-Build (Netlify) schlug fehl:** Der Selbsttest hatte die Browser-Prüfbibliothek in `demos/build.ts` gezogen, das die
-  Web-App bündelt. Jetzt liefert der Worker die Browserprüfung (`opts.browserCheck`); `build.ts` importiert `render/qa` nicht mehr.
+  Web-App bündelt. Die andere Sitzung hat die Browserprüfung nach `render/browser-checks.ts` ausgelagert (ohne Lighthouse); `build.ts` importiert nur diese Datei. Diese Lösung gilt.
 - **Betreiber-Mails scheiterten (Resend 422):** `ADMIN_EMAIL` war nicht gesetzt, Standard `admin@example.com`. Neu:
   `adminRecipient()` nimmt bei Platzhalter die Absenderadresse aus den Einstellungen. Empfehlung: `ADMIN_EMAIL` setzen.
 - **Brieftexte:** Beanstandet nur die Wirkungsprüfung einzelne Sätze, werden genau diese Sätze entfernt und der Brief einmal

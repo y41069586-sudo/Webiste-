@@ -24,6 +24,7 @@ import { audit } from '../services/audit';
 import { transitionLead } from '../services/lead-state';
 import { randomToken, sha256 } from '../util/crypto';
 import { optimizeImage } from '../render/images';
+import { browserChecks } from '../render/browser-checks';
 import type { ContentFacts, RuleViolation } from './content';
 import { libraryContent } from './library';
 import './mock-handlers';
@@ -255,11 +256,6 @@ export async function buildDemo(
     enqueueQa?: boolean;
     /** Technischer Selbsttest im Browser vor dem Speichern (Worker: an), mit einer Nachbesserung bei Befunden */
     selfTest?: boolean;
-    /** Browser-Prüfung des fertigen Entwurfs (vom Worker geliefert, damit die Admin-Seite keine Browser-Bibliotheken bündelt) */
-    browserCheck?: (
-      html: string,
-      expected: { name: string; city: string },
-    ) => Promise<{ name: string; passed: boolean; details?: string }[]>;
     signal?: AbortSignal;
   },
 ): Promise<string> {
@@ -311,36 +307,35 @@ export async function buildDemo(
   const senderPhoto = await senderPhotoDataUri(cfg);
   // 07.11.2026: Entwurf vor dem Speichern so testen, wie die Demo-QA ihn sieht (gerendert, mit Handy-Einstieg), damit
   // Kontrast-, Überlauf- und Strukturfehler schon beim Bau nachgebessert werden statt erst in der Endprüfung aufzufallen
-  const precheck =
-    opts.selfTest && opts.browserCheck
-      ? async (content: SiteContent): Promise<RuleViolation[]> => {
-          if (isAuthoredTemplate(templateId)) {
-            const issues = content.design ? checkAuthoredDesign(content.design) : ['Individueller Entwurf fehlt'];
-            if (issues.length)
-              return issues.slice(0, 8).map((detail) => ({ field: 'design', rule: 'Gestaltungsregel verletzt', detail }));
-          }
-          const page = applyMobileHeroLayer(
-            renderDemoHtml({
-              templateId,
-              palette,
-              artDirection: design.direction,
-              content,
-              facts,
-              slug: 'selbsttest',
-              cfg,
-              photoDataUri: senderPhoto,
-            }),
-          ).replaceAll(EXPIRES_PLACEHOLDER, 'nach Ablauf der Frist');
-          const checks = await opts.browserCheck!(page, { name: facts.name, city: facts.city });
-          return checks
-            .filter((c) => !c.passed)
-            .map((c) => ({
-              field: `browser.${c.name}`,
-              rule: 'Technische Prüfung nicht bestanden',
-              detail: (c.details ?? 'ohne Detail').slice(0, 400),
-            }));
+  const precheck = opts.selfTest
+    ? async (content: SiteContent): Promise<RuleViolation[]> => {
+        if (isAuthoredTemplate(templateId)) {
+          const issues = content.design ? checkAuthoredDesign(content.design) : ['Individueller Entwurf fehlt'];
+          if (issues.length)
+            return issues.slice(0, 8).map((detail) => ({ field: 'design', rule: 'Gestaltungsregel verletzt', detail }));
         }
-      : undefined;
+        const page = applyMobileHeroLayer(
+          renderDemoHtml({
+            templateId,
+            palette,
+            artDirection: design.direction,
+            content,
+            facts,
+            slug: 'selbsttest',
+            cfg,
+            photoDataUri: senderPhoto,
+          }),
+        ).replaceAll(EXPIRES_PLACEHOLDER, 'nach Ablauf der Frist');
+        const checks = await browserChecks({ html: page, expectedFacts: { name: facts.name, city: facts.city } });
+        return checks
+          .filter((c) => !c.passed)
+          .map((c) => ({
+            field: `browser.${c.name}`,
+            rule: 'Technische Prüfung nicht bestanden',
+            detail: (c.details ?? 'ohne Detail').slice(0, 400),
+          }));
+      }
+    : undefined;
   const generated = await generateDemoContent(
     lead,
     cfg,
