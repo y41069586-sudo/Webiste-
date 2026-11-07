@@ -2672,9 +2672,10 @@ html[data-admin-nav='open'] .admin-overlay {
   gap: 16px;
   grid-template-columns: minmax(0, 1fr);
 }
-@media (min-width: 900px) {
+/* Nebeneinander erst, wenn neben dem Handy (413 px) noch eine brauchbare Computer-Ansicht Platz hat */
+@media (min-width: 1600px) {
   .dcheck-views {
-    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(0, 1fr) 413px;
   }
 }
 .dcheck-label {
@@ -2694,13 +2695,17 @@ html[data-admin-nav='open'] .admin-overlay {
   background: #fff;
 }
 .dcheck-desktop iframe {
-  height: 640px;
+  height: 720px;
 }
+/* Handy-Vorschau in exakt der Bildschirmgröße eines iPhone 15 Pro: 393 × 852 CSS-Pixel (Betreiber 07.11.2026) */
 .dcheck-phone iframe {
-  max-width: 300px;
-  height: 620px;
-  border-radius: 28px;
-  border-width: 6px;
+  box-sizing: content-box;
+  width: 393px;
+  height: 852px;
+  max-width: calc(100vw - 52px);
+  margin: 0 auto;
+  border-radius: 55px;
+  border-width: 10px;
   border-color: #1b2030;
 }
 .dcheck-side {
