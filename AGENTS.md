@@ -1,5 +1,22 @@
 # SeitenWerk – dauerhafte Anweisungen für Codex
 
+## Fortsetzung von Claude – 07.11.2026
+
+Auf Betreiberauftrag auf dem veröffentlichten Claude-Stand 9cff2c0 weiterarbeiten, nicht auf
+älteren Codex-Ständen. Bestehende Demos (insbesondere Cyc Beauté) nicht neu erzeugen, verändern
+oder freigeben. Kostenbremse, nicht wiederholbare Inhaltsfehler, Selbsttest/Nachbesserung sowie
+full-page-2 und Handy-Absicherung erhalten. Aktuelle Betreiberentscheidung: genau ein begründeter
+Gestaltungs-revise wird als Hinweis manuell geprüft; zwei oder mehr sowie unverifiable blockieren.
+Diese ausdrückliche Entscheidung ersetzt die ältere Regel, nach der jeder revise blockierte.
+Technische und harte inhaltliche Fehler bleiben blockierend; keine automatischen Freigaben.
+
+Netlify-Reparatur: build.ts darf den gemeinsamen Browser-Selbsttest verwenden, ohne dadurch
+Lighthouse/Chromium-Trace-Auswertung in den Web-Bundlegraph zu ziehen. Die unveränderten
+Browserprüfungen liegen separat in render/browser-checks.ts; render/qa.ts exportiert sie für
+bestehende Aufrufer weiter. Lighthouse bleibt unverändert für die Worker-Endprüfung verfügbar.
+Keine Schwellen-/Style-/Konfigurationslockerung als Ersatz für den Build-Fix.
+Details und Prüfstand: docs/handoff-netlify-fix-2026-11-07.md.
+
 ## Produktionsreparatur 06.11.2026 – begrenzte QA und atomare Demo-Queue
 
 Aktueller Betreiberauftrag: Produktionsstau, Timeouts und doppelte Builds beheben, vollständige

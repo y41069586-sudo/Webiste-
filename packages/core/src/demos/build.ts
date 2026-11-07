@@ -24,7 +24,7 @@ import { audit } from '../services/audit';
 import { transitionLead } from '../services/lead-state';
 import { randomToken, sha256 } from '../util/crypto';
 import { optimizeImage } from '../render/images';
-import { browserChecks } from '../render/qa';
+import { browserChecks } from '../render/browser-checks';
 import type { ContentFacts, RuleViolation } from './content';
 import { libraryContent } from './library';
 import './mock-handlers';
