@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { formatDateDe, getDb, getProviders, schema } from '@wbm/core';
+import { applyMobileHeroLayer, formatDateDe, getDb, getProviders, schema } from '@wbm/core';
 import { adminOrNull } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +14,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const html = await getProviders().storage.get(demo.htmlStorageKey);
   if (!html) return new Response('not found', { status: 404 });
   const label = demo.expiresAt ? `am ${formatDateDe(demo.expiresAt)}` : 'nach Ablauf der Frist';
-  return new Response(html.toString('utf8').replaceAll('__WBM_EXPIRES_LABEL__', label), {
+  return new Response(applyMobileHeroLayer(html.toString('utf8')).replaceAll('__WBM_EXPIRES_LABEL__', label), {
     headers: {
       'content-type': 'text/html; charset=utf-8',
       'cache-control': 'private, no-store',

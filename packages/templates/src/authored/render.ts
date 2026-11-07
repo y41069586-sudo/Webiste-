@@ -5,6 +5,7 @@ import { purgeCss } from '../kits/purge';
 import { protectedBusinessContact } from '../kits/render';
 import { authoredFragment, checkAuthoredDesign, scopedDesignCss, FREE_DESIGN_VERSION } from './design';
 import { locationText, adaptLocationHeading } from './location';
+import { applyMobileHeroLayer } from './mobile';
 
 export const authoredTemplateId = (group: BranchGroup) => `authored-${group}`;
 export const isAuthoredTemplate = (id: string) => id.startsWith('authored-');
@@ -51,7 +52,9 @@ export function renderAuthored(ctx: RenderContext): string {
       `<style>${fonts}${purgeCss(contact.css, shell)}${authoredContactCss(d)}#sw-ai-design{${vars}position:relative;isolation:isolate;contain:layout paint;background:var(--design-bg);color:var(--design-ink);font-family:var(--body)}#sw-ai-design *{box-sizing:border-box}#sw-ai-design img{max-width:100%;height:auto}#sw-ai-design .ad-stock-note{display:block;font:11px/1.5 var(--body);margin-top:8px;color:inherit}#sw-ai-design :focus-visible{outline:3px solid currentColor;outline-offset:5px}${scopedDesignCss(d.css)}</style></head>`,
     );
   // Prune only shared utility CSS; authored selectors and details/media rules stay intact.
-  return html.replace(/<style>([\s\S]*?)<\/style>/, (_m, css: string) => `<style>${purgeCss(css, html)}</style>`);
+  const pruned = html.replace(/<style>([\s\S]*?)<\/style>/, (_m, css: string) => `<style>${purgeCss(css, html)}</style>`);
+  // Handy: Einstieg als Vollbild-Foto mit Text darüber (eigener, nicht gekürzter Stilblock)
+  return applyMobileHeroLayer(pruned);
 }
 
 /** Theme only: no generated style can reach this protected form. Its markup/actions remain unchanged. */

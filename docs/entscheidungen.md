@@ -1333,3 +1333,18 @@ mehr als die 2 GB des Containers (mit einem Tag: EXIT 0). Folge im Code: jede Su
 fiel danach auf Overpass zurück → Schleife. Behoben: `mem_limit` 4 GB (VPS hat 8 GB, Datenbank liegt bei Supabase),
 gescheiterter Neubau wird 30 Minuten lang nicht wiederholt, Fehlermeldung mit stderr/Signal (Commit e3ed652).
 Nebenbefund: Docker-Build-Cache 74 GB und alte Images 69 GB (Festplatte 79 %) – Aufräumen empfohlen.
+
+## 07.11.2026 – Demos: Handy-Einstieg als Vollbild-Foto mit Text darüber; KI-Prüfung abgeschnitten
+
+Betreiber: „Auf Handy viel Text, zerquetscht … bei vielen nur Text sichtbar am Anfang … Text drüber und im Hintergrund
+Bild.“ KI-Prüfung und Demo-Bau dafür per Not-Aus angehalten (Audit-Eintrag).
+- Neue Handy-Ebene `applyMobileHeroLayer` (packages/templates/src/authored/mobile.ts): Bis 700 px wird der Einstieg (höchster
+  Vorfahre der h1 ohne h2/Inhaltsbereich) zum Vollbild-Foto mit dunklem Verlauf, Name/Ort/Satz in Weiß darüber und
+  breiten Knöpfen; „Anfrage“ in der Akzentfarbe. Hat der Einstieg kein Bild, wird das erste Seitenbild nur fürs Handy
+  übernommen (samt Symbolbild-Hinweis), am Computer ausgeblendet. Computer-Ansicht unverändert. Nur Einfügungen in den
+  gespeicherten Text (kein Neu-Serialisieren), idempotent über `data-mobile-layer`.
+- Greift beim Rendern neuer Demos und beim Ausliefern gespeicherter Demos (öffentlich `/d/…` und Admin-Vorschau) – die
+  bereits gebauten Demos bekommen den neuen Einstieg ohne Neubau und ohne KI-Kosten.
+- KI-Regeln: Bild in den Einstiegsbereich, dort wenig Text; mobil kurze Absätze, lange Erklärungen in details/summary.
+- Nebenbefund: 6 von 8 Demos „qa_failed“, weil die Gestaltungsprüfung (Haiku) bei 2800 Ausgabetokens abgeschnitten wurde.
+  Grenze auf 8000 angehoben (< 0,5 Cent je Prüfung).

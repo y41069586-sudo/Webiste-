@@ -131,7 +131,7 @@ export { closeBrowser } from './render/browser';
 export * from './quality/demo';
 export * from './quality/letter';
 
-export { brandMarkHtml } from '@wbm/templates';
+export { brandMarkHtml, applyMobileHeroLayer } from '@wbm/templates';
 
 export { saveBusinessDesignEvidence, businessDesignEvidence, resolveBusinessDesign } from './demos/business-design';
 export * from './leads/acquisition';
