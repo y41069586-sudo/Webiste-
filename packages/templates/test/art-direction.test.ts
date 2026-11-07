@@ -48,7 +48,12 @@ it('provides checked, optimized draft motifs for the primary sectors without cro
   }
   // Eigene Elektro-Motive, nie fachfremde (Maler/Fliesen/Reinigung); unbekannte Gewerke bleiben ohne Foto
   expect(stockPhotos('handwerk', 0, 'Elektriker').every((p) => p.file.startsWith('handwerk/elektro-'))).toBe(true);
-  expect(stockPhotos('handwerk', 0, 'Dachdecker')).toEqual([]);
+  // Seit 07.11.2026 eigene CC0-Motive für weitere Gewerke, jeweils nur passende
+  expect(stockPhotos('handwerk', 0, 'Dachdeckerbetrieb').every((p) => p.file.startsWith('handwerk/dach-'))).toBe(true);
+  expect(stockPhotos('handwerk', 0, 'Glaserei').every((p) => p.file.startsWith('handwerk/glas-'))).toBe(true);
+  expect(stockPhotos('handwerk', 0, 'Bodenleger').every((p) => /handwerk\/(boden|estrich)-/.test(p.file))).toBe(true);
+  expect(stockPhotos('handwerk', 0, 'Fliesenleger Badezimmer').some((p) => p.file.includes('zimmerei'))).toBe(false);
+  expect(stockPhotos('handwerk', 0, 'Schornsteinfeger')).toEqual([]);
   expect(stockPhotos('handwerk', 0, 'Fensterreinigung').some((p) => p.role === 'work')).toBe(false);
   const input = demoInput('handwerk-klar', 'werkblau');
   input.facts.branchLabel = 'Handwerksbetrieb';

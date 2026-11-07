@@ -58,3 +58,38 @@ Gleiche Regeln (Pexels-Lizenz, keine erkennbaren Gesichter, nur gekennzeichnet i
 Quelle je Datei im Manifest und EXIF: Friseur (Kampus Production, Nataliya Vaitkevich, Matheus Wladeka),
 Barbier-Werkzeug (Pavel Danilyuk), Nagelstudio (Leeloo The First, cottonbro studio), Kosmetik (Roman Odintsov,
 Polina Tankilevitch), Tanz (Pavel Danilyuk, cottonbro studio), Musikunterricht (Yan Krukau, Charles Parker).
+
+## Ergänzung 07.11.2026: CC0-Motive für weitere Gewerke
+
+Für Dachdecker, Zimmerei, Tischlerei, Metallbau, Bau/Maurer, Stuckateur, Boden/Parkett/Estrich und Glaserei gab es
+keine passenden Motive – Demos dieser Gewerke hatten gar kein Foto. Ergänzt aus Openverse, ausschließlich mit Lizenz
+CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/, gemeinfrei, keine Namensnennung nötig; Angaben trotzdem
+im Manifest). Jedes Motiv einzeln angesehen: keine erkennbaren Gesichter, keine Firmennamen, keine historischen
+Stiche. Ein Dachdecker-Foto mit erkennbarem Gesicht wurde verworfen. Lokal auf höchstens 1200 px und unter 150 KB
+optimiert; keine Laufzeit-Anfrage an die Quellen. Nur im Entwurf, gekennzeichnet als Symbolbild.
+
+| Datei                            | Quelle                    | Urheber                | Originalseite                                                                          |
+| -------------------------------- | ------------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
+| `dach-schindeln-cc0.jpg`         | rawpixel                  | –                      | https://www.rawpixel.com/image/6045441/free-public-domain-cc0-photo                    |
+| `dach-ziegel-cc0.jpg`            | rawpixel                  | –                      | https://www.rawpixel.com/image/5941772/free-public-domain-cc0-photo                    |
+| `zimmerei-leimholz-cc0.jpg`      | StockSnap                 | The Building Envelope  | https://stocksnap.io/photo/wood-beam-QKV5VFW7N1                                        |
+| `zimmerei-binder-cc0.jpg`        | StockSnap                 | The Building Envelope  | https://stocksnap.io/photo/wood-beam-IQ7IW4Y17S                                        |
+| `tischler-hobel-cc0.jpg`         | rawpixel                  | –                      | https://www.rawpixel.com/image/5939095/wood-plan                                       |
+| `tischler-werkstatt-cc0.jpg`     | rawpixel                  | –                      | https://www.rawpixel.com/image/5939289/the-carpenters-workshed                         |
+| `tischler-holzwerkstatt-cc0.jpg` | rawpixel                  | –                      | https://www.rawpixel.com/image/5939140/wood-workshop-hdr                               |
+| `metall-schweissen-cc0.jpg`      | rawpixel                  | –                      | https://www.rawpixel.com/image/5970254/welder-sparks                                   |
+| `metall-schweissfunken-cc0.jpg`  | rawpixel                  | –                      | https://www.rawpixel.com/image/5904743/photo-image-public-domain-blue-person           |
+| `metall-funken-cc0.jpg`          | rawpixel                  | –                      | https://www.rawpixel.com/image/8718005/man-gas-metal-arc-welding-mig                   |
+| `bau-ziegelmauer-cc0.jpg`        | rawpixel                  | –                      | https://www.rawpixel.com/image/6043442/brick-wall-texture-free-public-domain-cc0-photo |
+| `bau-mauerwerk-cc0.jpg`          | rawpixel                  | –                      | https://www.rawpixel.com/image/5920370/brick-wall-free-public-domain-cc0-photo         |
+| `bau-naturstein-cc0.jpg`         | rawpixel                  | –                      | https://www.rawpixel.com/image/6049178/free-public-domain-cc0-photo                    |
+| `putz-struktur-cc0.jpg`          | StockSnap                 | Steve Johnson          | https://stocksnap.io/photo/white-plaster-V1SCOCHDK7                                    |
+| `putz-rau-cc0.jpg`               | rawpixel                  | –                      | https://www.rawpixel.com/image/5959439/free-public-domain-cc0-photo                    |
+| `putz-glatt-cc0.jpg`             | rawpixel                  | –                      | https://www.rawpixel.com/image/5963098/free-public-domain-cc0-photo                    |
+| `boden-eiche-cc0.jpg`            | rawpixel                  | –                      | https://www.rawpixel.com/image/5960137/free-public-domain-cc0-photo                    |
+| `boden-dielen-cc0.jpg`           | rawpixel                  | –                      | https://www.rawpixel.com/image/5941923/free-public-domain-cc0-photo                    |
+| `boden-raum-cc0.jpg`             | rawpixel                  | –                      | https://www.rawpixel.com/image/5949759/free-public-domain-cc0-photo                    |
+| `estrich-halle-cc0.jpg`          | WordPress Photo Directory | Dylan Espinoza Pereira | https://wordpress.org/photos/photo/35969e3fab/                                         |
+| `glas-sprossenfenster-cc0.jpg`   | StockSnap                 | Nathan Fertig          | https://stocksnap.io/photo/white-window-LMUGL3LQ7X                                     |
+| `glas-industriefenster-cc0.jpg`  | StockSnap                 | Bob Richards           | https://stocksnap.io/photo/brick-wall-VBBD3LOZIS                                       |
+| `glas-holzfenster-cc0.jpg`       | rawpixel                  | –                      | https://www.rawpixel.com/image/3290798/free-photo-image-wood-germany-apparel           |

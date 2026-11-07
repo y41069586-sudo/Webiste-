@@ -14,11 +14,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 29204,
-    "keywords": [
-      "café",
-      "cafe",
-      "kaffee"
-    ],
+    "keywords": ["café", "cafe", "kaffee"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -26,9 +22,7 @@
       "y": 45
     },
     "role": "product",
-    "moods": [
-      "warm"
-    ]
+    "moods": ["warm"]
   },
   {
     "file": "gastronomie/pasta.jpg",
@@ -45,12 +39,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 56582,
-    "keywords": [
-      "restaurant",
-      "trattoria",
-      "pizzeria",
-      "gasthaus"
-    ],
+    "keywords": ["restaurant", "trattoria", "pizzeria", "gasthaus"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -58,9 +47,7 @@
       "y": 45
     },
     "role": "product",
-    "moods": [
-      "warm"
-    ]
+    "moods": ["warm"]
   },
   {
     "file": "gastronomie/gastraum.jpg",
@@ -77,11 +64,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 102141,
-    "keywords": [
-      "restaurant",
-      "gasthaus",
-      "bistro"
-    ],
+    "keywords": ["restaurant", "gasthaus", "bistro"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -89,10 +72,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "dark",
-      "warm"
-    ]
+    "moods": ["dark", "warm"]
   },
   {
     "file": "gastronomie/backwaren.jpg",
@@ -109,12 +89,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 55196,
-    "keywords": [
-      "bäckerei",
-      "backstube",
-      "café",
-      "cafe"
-    ],
+    "keywords": ["bäckerei", "backstube", "café", "cafe"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -122,9 +97,7 @@
       "y": 45
     },
     "role": "product",
-    "moods": [
-      "warm"
-    ]
+    "moods": ["warm"]
   },
   {
     "file": "gastronomie/cafetisch.jpg",
@@ -141,11 +114,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 78700,
-    "keywords": [
-      "café",
-      "cafe",
-      "kaffee"
-    ],
+    "keywords": ["café", "cafe", "kaffee"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -153,9 +122,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "warm"
-    ]
+    "moods": ["warm"]
   },
   {
     "file": "einzelhandel/blumen.jpg",
@@ -172,10 +139,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 92990,
-    "keywords": [
-      "blumen",
-      "florist"
-    ],
+    "keywords": ["blumen", "florist"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -183,9 +147,7 @@
       "y": 45
     },
     "role": "product",
-    "moods": [
-      "natural"
-    ]
+    "moods": ["natural"]
   },
   {
     "file": "einzelhandel/kleiderstange.jpg",
@@ -202,11 +164,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 43559,
-    "keywords": [
-      "mode",
-      "boutique",
-      "kleid"
-    ],
+    "keywords": ["mode", "boutique", "kleid"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -214,9 +172,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "einzelhandel/buecherregal.jpg",
@@ -233,10 +189,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 94117,
-    "keywords": [
-      "buch",
-      "bücher"
-    ],
+    "keywords": ["buch", "bücher"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -244,9 +197,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "kurse/trainingsraum.jpg",
@@ -263,11 +214,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 50185,
-    "keywords": [
-      "fitness",
-      "training",
-      "gym"
-    ],
+    "keywords": ["fitness", "training", "gym"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -275,9 +222,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "kurse/kettlebells.jpg",
@@ -294,11 +239,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 61179,
-    "keywords": [
-      "fitness",
-      "training",
-      "gym"
-    ],
+    "keywords": ["fitness", "training", "gym"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -306,9 +247,7 @@
       "y": 45
     },
     "role": "detail",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "kurse/ballettschuhe.jpg",
@@ -325,9 +264,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 35377,
-    "keywords": [
-      "ballett"
-    ],
+    "keywords": ["ballett"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -335,9 +272,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "kurse/yogamatte.jpg",
@@ -354,10 +289,7 @@
     "checkedAt": "2026-10-24",
     "checkedVia": "Openverse-Katalog (api.openverse.org); Quellseite blockiert automatische Abrufe – Stichprobe im Browser empfohlen",
     "bytes": 15215,
-    "keywords": [
-      "yoga",
-      "pilates"
-    ],
+    "keywords": ["yoga", "pilates"],
     "width": 1000,
     "height": 750,
     "focalPoint": {
@@ -365,9 +297,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "natural"
-    ]
+    "moods": ["natural"]
   },
   {
     "file": "generated/maler.webp",
@@ -381,10 +311,7 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": [
-      "maler",
-      "anstrich"
-    ],
+    "keywords": ["maler", "anstrich"],
     "kind": "generated",
     "bytes": 124428,
     "width": 1200,
@@ -394,9 +321,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "generated/friseur.webp",
@@ -410,13 +335,7 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": [
-      "friseur",
-      "haarsalon",
-      "frisör",
-      "barber",
-      "barbier"
-    ],
+    "keywords": ["friseur", "haarsalon", "frisör", "barber", "barbier"],
     "kind": "generated",
     "bytes": 102408,
     "width": 1200,
@@ -426,9 +345,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "generated/gartenbau.webp",
@@ -442,11 +359,7 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": [
-      "garten",
-      "landschaft",
-      "gärtner"
-    ],
+    "keywords": ["garten", "landschaft", "gärtner"],
     "kind": "generated",
     "bytes": 140466,
     "width": 900,
@@ -456,9 +369,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "generated/reinigung.webp",
@@ -472,11 +383,7 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": [
-      "reinig",
-      "gebäudeservice",
-      "gebaeudeservice"
-    ],
+    "keywords": ["reinig", "gebäudeservice", "gebaeudeservice"],
     "kind": "generated",
     "bytes": 79958,
     "width": 1100,
@@ -486,9 +393,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "generated/sanitaer.webp",
@@ -502,11 +407,7 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": [
-      "sanitär",
-      "sanitaer",
-      "installat"
-    ],
+    "keywords": ["sanitär", "sanitaer", "installat"],
     "kind": "generated",
     "bytes": 94416,
     "width": 1100,
@@ -516,9 +417,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "generated/maler-werkzeuge.webp",
@@ -532,9 +431,7 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-26",
-    "keywords": [
-      "maler"
-    ],
+    "keywords": ["maler"],
     "kind": "generated",
     "bytes": 39566,
     "width": 800,
@@ -544,9 +441,7 @@
       "y": 45
     },
     "role": "detail",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "generated/maler-arbeit.webp",
@@ -560,9 +455,7 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-26",
-    "keywords": [
-      "maler"
-    ],
+    "keywords": ["maler"],
     "kind": "generated",
     "bytes": 39098,
     "width": 1000,
@@ -572,9 +465,7 @@
       "y": 45
     },
     "role": "work",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "generated/maler-raum.webp",
@@ -588,10 +479,7 @@
     "sourceUrl": "https://openai.com/policies/terms-of-use/",
     "openverseId": "",
     "checkedAt": "2026-10-25",
-    "keywords": [
-      "maler",
-      "anstrich"
-    ],
+    "keywords": ["maler", "anstrich"],
     "kind": "generated",
     "bytes": 34160,
     "reviewOnly": true,
@@ -602,9 +490,7 @@
       "y": 45
     },
     "role": "interior",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "beauty/barber-werkzeug.jpg",
@@ -626,14 +512,8 @@
       "y": 48
     },
     "role": "detail",
-    "keywords": [
-      "barber",
-      "barbier"
-    ],
-    "moods": [
-      "warm",
-      "dark"
-    ]
+    "keywords": ["barber", "barbier"],
+    "moods": ["warm", "dark"]
   },
   {
     "file": "handwerk/maler-farbrolle-pexels-994164.jpg",
@@ -651,19 +531,13 @@
     "bytes": 186183,
     "width": 1600,
     "height": 1600,
-    "keywords": [
-      "maler",
-      "anstrich"
-    ],
+    "keywords": ["maler", "anstrich"],
     "role": "work",
     "focalPoint": {
       "x": 61,
       "y": 46
     },
-    "moods": [
-      "neutral",
-      "warm"
-    ]
+    "moods": ["neutral", "warm"]
   },
   {
     "file": "handwerk/reinigung-werkzeuge.webp",
@@ -679,12 +553,7 @@
     "checkedAt": "2026-10-27",
     "checkedVia": "Official photo page, license and terms; image visually reviewed. Draft illustration, no business/project attribution.",
     "bytes": 71056,
-    "keywords": [
-      "reinigung",
-      "büroreinigung",
-      "treppenhaus",
-      "unterhalt"
-    ],
+    "keywords": ["reinigung", "büroreinigung", "treppenhaus", "unterhalt"],
     "width": 1200,
     "height": 801,
     "focalPoint": {
@@ -692,9 +561,7 @@
       "y": 52
     },
     "role": "detail",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/reinigung-arbeitsdetail.webp",
@@ -710,13 +577,7 @@
     "checkedAt": "2026-10-27",
     "checkedVia": "Official photo page, license and terms; image visually reviewed. Draft illustration, no business/project attribution.",
     "bytes": 30114,
-    "keywords": [
-      "büroreinigung",
-      "treppenhausreinigung",
-      "unterhaltsreinigung",
-      "gewerbereinigung",
-      "reinigungsunternehmen"
-    ],
+    "keywords": ["büroreinigung", "treppenhausreinigung", "unterhaltsreinigung", "gewerbereinigung", "reinigungsunternehmen"],
     "width": 1200,
     "height": 800,
     "focalPoint": {
@@ -724,9 +585,7 @@
       "y": 52
     },
     "role": "work",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/fliesen-oberflaeche.webp",
@@ -742,12 +601,7 @@
     "checkedAt": "2026-10-27",
     "checkedVia": "Official photo page, license and terms; image visually reviewed. Draft illustration, no business/project attribution.",
     "bytes": 29100,
-    "keywords": [
-      "fliesen",
-      "fliesenverlegung",
-      "badsanierung",
-      "fugensanierung"
-    ],
+    "keywords": ["fliesen", "fliesenverlegung", "badsanierung", "fugensanierung"],
     "width": 1200,
     "height": 800,
     "focalPoint": {
@@ -755,9 +609,7 @@
       "y": 50
     },
     "role": "detail",
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/fliesen-duschgestaltung.webp",
@@ -773,11 +625,7 @@
     "checkedAt": "2026-10-27",
     "checkedVia": "Official photo page/license/terms, image visually reviewed; not a business reference.",
     "bytes": 130588,
-    "keywords": [
-      "fliesen",
-      "badsanierung",
-      "fliesenverlegung"
-    ],
+    "keywords": ["fliesen", "badsanierung", "fliesenverlegung"],
     "width": 1000,
     "height": 1501,
     "focalPoint": {
@@ -786,9 +634,7 @@
     },
     "role": "interior",
     "hero": true,
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/maler-materialien-pexels-7217935.jpg",
@@ -806,18 +652,13 @@
     "bytes": 126005,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "maler",
-      "anstrich"
-    ],
+    "keywords": ["maler", "anstrich"],
     "role": "detail",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/maler-farbwanne-pexels-5691700.jpg",
@@ -835,18 +676,13 @@
     "bytes": 108514,
     "width": 1600,
     "height": 1068,
-    "keywords": [
-      "maler",
-      "anstrich"
-    ],
+    "keywords": ["maler", "anstrich"],
     "role": "detail",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/maler-wandanstrich-pexels-7218011.jpg",
@@ -864,18 +700,13 @@
     "bytes": 114644,
     "width": 1600,
     "height": 1065,
-    "keywords": [
-      "maler",
-      "anstrich"
-    ],
+    "keywords": ["maler", "anstrich"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/fliesen-nivellierung-pexels-11806476.jpg",
@@ -893,19 +724,13 @@
     "bytes": 182736,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "fliesen",
-      "fliesenverlegung",
-      "badsanierung"
-    ],
+    "keywords": ["fliesen", "fliesenverlegung", "badsanierung"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/fliesen-werkzeug-pexels-18861859.jpg",
@@ -923,18 +748,13 @@
     "bytes": 124431,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "fliesen",
-      "fliesenverlegung"
-    ],
+    "keywords": ["fliesen", "fliesenverlegung"],
     "role": "detail",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/reinigung-bodenpflege-pexels-6195949.jpg",
@@ -952,21 +772,13 @@
     "bytes": 115912,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "büroreinigung",
-      "unterhaltsreinigung",
-      "gebäudereinigung",
-      "gewerbereinigung",
-      "reinigungsunternehmen"
-    ],
+    "keywords": ["büroreinigung", "unterhaltsreinigung", "gebäudereinigung", "gewerbereinigung", "reinigungsunternehmen"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/reinigung-sauger-pexels-6195273.jpg",
@@ -984,21 +796,13 @@
     "bytes": 111897,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "büroreinigung",
-      "unterhaltsreinigung",
-      "gebäudereinigung",
-      "gewerbereinigung",
-      "reinigungsunternehmen"
-    ],
+    "keywords": ["büroreinigung", "unterhaltsreinigung", "gebäudereinigung", "gewerbereinigung", "reinigungsunternehmen"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/elektro-verteiler-pexels-257736.jpg",
@@ -1016,19 +820,13 @@
     "bytes": 170842,
     "width": 1600,
     "height": 1065,
-    "keywords": [
-      "elektro",
-      "elektriker",
-      "elektroinstallation"
-    ],
+    "keywords": ["elektro", "elektriker", "elektroinstallation"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/elektro-steckdose-pexels-5691589.jpg",
@@ -1046,19 +844,13 @@
     "bytes": 80854,
     "width": 1600,
     "height": 1065,
-    "keywords": [
-      "elektro",
-      "elektriker",
-      "elektroinstallation"
-    ],
+    "keywords": ["elektro", "elektriker", "elektroinstallation"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/elektro-sicherungen-pexels-28950842.jpg",
@@ -1076,19 +868,13 @@
     "bytes": 193099,
     "width": 1600,
     "height": 996,
-    "keywords": [
-      "elektro",
-      "elektriker",
-      "elektroinstallation"
-    ],
+    "keywords": ["elektro", "elektriker", "elektroinstallation"],
     "role": "detail",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/sanitaer-rohre-pexels-6419128.jpg",
@@ -1106,21 +892,13 @@
     "bytes": 190939,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "sanitär",
-      "sanitaer",
-      "installateur",
-      "klempner",
-      "heizung"
-    ],
+    "keywords": ["sanitär", "sanitaer", "installateur", "klempner", "heizung"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/sanitaer-heizung-pexels-29226620.jpg",
@@ -1138,21 +916,13 @@
     "bytes": 133304,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "sanitär",
-      "sanitaer",
-      "installateur",
-      "klempner",
-      "heizung"
-    ],
+    "keywords": ["sanitär", "sanitaer", "installateur", "klempner", "heizung"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/garten-heckenschnitt-pexels-38936350.jpg",
@@ -1170,21 +940,13 @@
     "bytes": 135082,
     "width": 1600,
     "height": 1068,
-    "keywords": [
-      "garten",
-      "gärtner",
-      "gaertner",
-      "landschaftsbau",
-      "gartenpflege"
-    ],
+    "keywords": ["garten", "gärtner", "gaertner", "landschaftsbau", "gartenpflege"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/garten-hecke-pexels-38936334.jpg",
@@ -1202,21 +964,13 @@
     "bytes": 117611,
     "width": 1600,
     "height": 1068,
-    "keywords": [
-      "garten",
-      "gärtner",
-      "gaertner",
-      "landschaftsbau",
-      "gartenpflege"
-    ],
+    "keywords": ["garten", "gärtner", "gaertner", "landschaftsbau", "gartenpflege"],
     "role": "detail",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/garten-strauchschnitt-pexels-5231138.jpg",
@@ -1234,21 +988,13 @@
     "bytes": 190605,
     "width": 1400,
     "height": 932,
-    "keywords": [
-      "garten",
-      "gärtner",
-      "gaertner",
-      "landschaftsbau",
-      "gartenpflege"
-    ],
+    "keywords": ["garten", "gärtner", "gaertner", "landschaftsbau", "gartenpflege"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "beauty/friseur-schere-pexels-8834034.jpg",
@@ -1266,20 +1012,13 @@
     "bytes": 70581,
     "width": 1600,
     "height": 1068,
-    "keywords": [
-      "friseur",
-      "frisör",
-      "haarsalon",
-      "haar"
-    ],
+    "keywords": ["friseur", "frisör", "haarsalon", "haar"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "beauty/friseur-werkzeug-pexels-8468134.jpg",
@@ -1297,20 +1036,13 @@
     "bytes": 154277,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "friseur",
-      "frisör",
-      "haarsalon",
-      "haar"
-    ],
+    "keywords": ["friseur", "frisör", "haarsalon", "haar"],
     "role": "detail",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "beauty/friseur-haarschnitt-pexels-6487878.jpg",
@@ -1328,20 +1060,13 @@
     "bytes": 87204,
     "width": 1600,
     "height": 1065,
-    "keywords": [
-      "friseur",
-      "frisör",
-      "haarsalon",
-      "haar"
-    ],
+    "keywords": ["friseur", "frisör", "haarsalon", "haar"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "beauty/barber-scheren-pexels-7518712.jpg",
@@ -1359,20 +1084,13 @@
     "bytes": 178747,
     "width": 1100,
     "height": 735,
-    "keywords": [
-      "barber",
-      "barbier",
-      "friseur",
-      "haarsalon"
-    ],
+    "keywords": ["barber", "barbier", "friseur", "haarsalon"],
     "role": "detail",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "beauty/nagel-lack-pexels-4677845.jpg",
@@ -1390,19 +1108,13 @@
     "bytes": 95218,
     "width": 1600,
     "height": 1065,
-    "keywords": [
-      "nagel",
-      "nail",
-      "maniküre"
-    ],
+    "keywords": ["nagel", "nail", "maniküre"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "beauty/nagel-rot-pexels-3997381.jpg",
@@ -1420,19 +1132,13 @@
     "bytes": 111727,
     "width": 1600,
     "height": 1065,
-    "keywords": [
-      "nagel",
-      "nail",
-      "maniküre"
-    ],
+    "keywords": ["nagel", "nail", "maniküre"],
     "role": "detail",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "beauty/kosmetik-pflege-pexels-7691112.jpg",
@@ -1450,20 +1156,13 @@
     "bytes": 77068,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "kosmetik",
-      "beauty",
-      "haut",
-      "spa"
-    ],
+    "keywords": ["kosmetik", "beauty", "haut", "spa"],
     "role": "product",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "beauty/kosmetik-studio-pexels-3736314.jpg",
@@ -1481,20 +1180,13 @@
     "bytes": 59693,
     "width": 1600,
     "height": 1065,
-    "keywords": [
-      "kosmetik",
-      "beauty",
-      "haut",
-      "spa"
-    ],
+    "keywords": ["kosmetik", "beauty", "haut", "spa"],
     "role": "interior",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "kurse/tanz-studio-pexels-6926602.jpg",
@@ -1512,18 +1204,13 @@
     "bytes": 160566,
     "width": 1600,
     "height": 1068,
-    "keywords": [
-      "tanz",
-      "dance"
-    ],
+    "keywords": ["tanz", "dance"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "kurse/tanz-bewegung-pexels-6221472.jpg",
@@ -1541,18 +1228,13 @@
     "bytes": 118315,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "tanz",
-      "dance"
-    ],
+    "keywords": ["tanz", "dance"],
     "role": "detail",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "kurse/musik-klavierunterricht-pexels-8520461.jpg",
@@ -1570,21 +1252,13 @@
     "bytes": 152090,
     "width": 1600,
     "height": 1067,
-    "keywords": [
-      "musik",
-      "klavier",
-      "piano",
-      "musikschule",
-      "musikunterricht"
-    ],
+    "keywords": ["musik", "klavier", "piano", "musikschule", "musikunterricht"],
     "role": "work",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "kurse/musik-klavier-pexels-6647602.jpg",
@@ -1602,21 +1276,13 @@
     "bytes": 124353,
     "width": 1600,
     "height": 1065,
-    "keywords": [
-      "musik",
-      "klavier",
-      "piano",
-      "musikschule",
-      "musikunterricht"
-    ],
+    "keywords": ["musik", "klavier", "piano", "musikschule", "musikunterricht"],
     "role": "detail",
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "neutral"
-    ]
+    "moods": ["neutral"]
   },
   {
     "file": "handwerk/maler-wohnraum-pexels-1571460.jpg",
@@ -1634,22 +1300,596 @@
     "bytes": 174295,
     "width": 1400,
     "height": 900,
-    "keywords": [
-      "innenanstrich",
-      "innenraum",
-      "raumgestaltung",
-      "tapezier",
-      "wohnraum"
-    ],
+    "keywords": ["innenanstrich", "innenraum", "raumgestaltung", "tapezier", "wohnraum"],
     "role": "interior",
     "hero": true,
     "focalPoint": {
       "x": 50,
       "y": 50
     },
-    "moods": [
-      "warm",
-      "neutral"
-    ]
+    "moods": ["warm", "neutral"]
+  },
+  {
+    "file": "handwerk/dach-schindeln-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Holzschindeln auf einem Dach in Nahaufnahme",
+    "title": "Holzschindeln auf einem Dach in Nahaufnahme",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/6045441/free-public-domain-cc0-photo",
+    "openverseId": "d6cb4a74-b434-421f-8682-8b3e4d4e262b",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["dachdeck", "bedachung", "dacharbeit", "dachsanier", "dachdecker"],
+    "bytes": 134924,
+    "width": 1024,
+    "height": 681,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["natural"]
+  },
+  {
+    "file": "handwerk/dach-ziegel-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Ziegeldach mit Schornstein vor blauem Himmel",
+    "title": "Ziegeldach mit Schornstein vor blauem Himmel",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5941772/free-public-domain-cc0-photo",
+    "openverseId": "53955021-d070-4657-b199-8e910a3978b5",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["dachdeck", "bedachung", "dacharbeit", "dachsanier", "dachdecker"],
+    "bytes": 141292,
+    "width": 1024,
+    "height": 768,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "work",
+    "moods": ["natural"],
+    "hero": true
+  },
+  {
+    "file": "handwerk/zimmerei-leimholz-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Verbindung eines Leimholzbinders mit Stahlbolzen",
+    "title": "Wood Beam",
+    "creator": "The Building Envelope",
+    "creatorUrl": "https://stocksnap.io/author/129953",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "StockSnap",
+    "sourceUrl": "https://stocksnap.io/photo/wood-beam-QKV5VFW7N1",
+    "openverseId": "afbfd3fb-b465-4937-a78a-da5068a25576",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["zimmerei", "zimmerer", "holzbau", "dachstuhl"],
+    "bytes": 139084,
+    "width": 900,
+    "height": 1200,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["warm"]
+  },
+  {
+    "file": "handwerk/zimmerei-binder-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Gebogene Holzbinder einer Dachkonstruktion",
+    "title": "Wood Beam",
+    "creator": "The Building Envelope",
+    "creatorUrl": "https://stocksnap.io/author/129953",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "StockSnap",
+    "sourceUrl": "https://stocksnap.io/photo/wood-beam-IQ7IW4Y17S",
+    "openverseId": "93ff0790-a2be-4248-84af-7fdb5db167f8",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["zimmerei", "zimmerer", "holzbau", "dachstuhl"],
+    "bytes": 134018,
+    "width": 900,
+    "height": 1200,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "interior",
+    "moods": ["warm"],
+    "hero": true
+  },
+  {
+    "file": "handwerk/tischler-hobel-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Alte Holzhobel auf einer Werkbank",
+    "title": "Wood plan",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5939095/wood-plan",
+    "openverseId": "5cd5bdbe-67b7-4883-ab27-fa032cf64211",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["tischler", "schreiner", "möbelbau", "moebelbau"],
+    "bytes": 117257,
+    "width": 1024,
+    "height": 685,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["warm"]
+  },
+  {
+    "file": "handwerk/tischler-werkstatt-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Holzwerkstatt mit Werkbank und Fenster",
+    "title": "The carpenters workshed",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5939289/the-carpenters-workshed",
+    "openverseId": "5c80ba69-5f3b-4979-a817-5f9d6fffca97",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["tischler", "schreiner", "möbelbau", "moebelbau"],
+    "bytes": 130442,
+    "width": 1024,
+    "height": 680,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "interior",
+    "moods": ["warm"],
+    "hero": true
+  },
+  {
+    "file": "handwerk/tischler-holzwerkstatt-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Werkstatt mit Holzwerkzeugen und Regalen",
+    "title": "Wood workshop HDR",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5939140/wood-workshop-hdr",
+    "openverseId": "ebe506d5-3473-4af7-bd94-9762ad5d69a0",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["tischler", "schreiner", "möbelbau", "moebelbau"],
+    "bytes": 122549,
+    "width": 1024,
+    "height": 683,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "interior",
+    "moods": ["warm"]
+  },
+  {
+    "file": "handwerk/metall-schweissen-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Funkenflug beim Bearbeiten von Metall, Hand im Schutzhandschuh",
+    "title": "Welder Sparks",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5970254/welder-sparks",
+    "openverseId": "f7e892c9-b0d9-47fe-8df1-2a15e7649931",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["metallbau", "schlosser", "schweiß", "schweiss", "stahlbau"],
+    "bytes": 119919,
+    "width": 1024,
+    "height": 683,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "work",
+    "moods": ["dark"],
+    "hero": true
+  },
+  {
+    "file": "handwerk/metall-schweissfunken-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Schweißarbeiten an einer Metallplatte mit Schutzhandschuhen",
+    "title": "Person welding metal",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5904743/photo-image-public-domain-blue-person",
+    "openverseId": "a504baca-b4ee-40a4-830b-0eb334d66c8e",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["metallbau", "schlosser", "schweiß", "schweiss", "stahlbau"],
+    "bytes": 72336,
+    "width": 1024,
+    "height": 683,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "work",
+    "moods": ["dark"]
+  },
+  {
+    "file": "handwerk/metall-funken-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Schweißer mit Schutzhelm und hellem Funkenflug",
+    "title": "man gas metal arc welding",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/8718005/man-gas-metal-arc-welding-mig",
+    "openverseId": "ec2662eb-d486-47df-8c05-8683f22b0552",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["metallbau", "schlosser", "schweiß", "schweiss", "stahlbau"],
+    "bytes": 118301,
+    "width": 907,
+    "height": 1024,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "work",
+    "moods": ["dark"]
+  },
+  {
+    "file": "handwerk/bau-ziegelmauer-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Rote Ziegelmauer in schräger Perspektive",
+    "title": "Brick wall texture",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/6043442/brick-wall-texture-free-public-domain-cc0-photo",
+    "openverseId": "7dc301d4-c331-4154-bba7-34fb2853eb93",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["maurer", "mauerwerk", "bauunternehmen", "rohbau"],
+    "bytes": 149788,
+    "width": 1024,
+    "height": 679,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["warm"],
+    "hero": true
+  },
+  {
+    "file": "handwerk/bau-mauerwerk-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Mauerwerk aus roten Ziegeln mit hellen Fugen",
+    "title": "Brick wall",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5920370/brick-wall-free-public-domain-cc0-photo",
+    "openverseId": "f9baa4d4-c58d-4c67-a602-7f8a73209fe4",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["maurer", "mauerwerk", "bauunternehmen", "rohbau"],
+    "bytes": 146884,
+    "width": 1024,
+    "height": 671,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["warm"]
+  },
+  {
+    "file": "handwerk/bau-naturstein-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Mauer aus grauen Natursteinen",
+    "title": "Mauer aus grauen Natursteinen",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/6049178/free-public-domain-cc0-photo",
+    "openverseId": "d47f48e8-c3d1-4773-b839-d1000773d457",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["maurer", "mauerwerk", "bauunternehmen", "rohbau"],
+    "bytes": 137899,
+    "width": 1024,
+    "height": 683,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["neutral"]
+  },
+  {
+    "file": "handwerk/putz-struktur-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Weißer Strukturputz an einer Wand",
+    "title": "White Plaster",
+    "creator": "Steve Johnson",
+    "creatorUrl": "http://artbystevej.com",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "StockSnap",
+    "sourceUrl": "https://stocksnap.io/photo/white-plaster-V1SCOCHDK7",
+    "openverseId": "a36b0b8c-916d-483f-a036-0ab1797501ec",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["stuck", "verputz", "putzarbeit", "innenputz", "außenputz"],
+    "bytes": 87513,
+    "width": 960,
+    "height": 699,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["neutral"],
+    "hero": true
+  },
+  {
+    "file": "handwerk/putz-rau-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Rauer weißer Wandputz in Nahaufnahme",
+    "title": "Rauer weißer Wandputz in Nahaufnahme",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5959439/free-public-domain-cc0-photo",
+    "openverseId": "48f44a7d-836d-473c-9a6c-e9bc5d937eba",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["stuck", "verputz", "putzarbeit", "innenputz", "außenputz"],
+    "bytes": 121371,
+    "width": 1024,
+    "height": 683,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["neutral"]
+  },
+  {
+    "file": "handwerk/putz-glatt-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Glatt verputzte rote Wandfläche",
+    "title": "Glatt verputzte rote Wandfläche",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5963098/free-public-domain-cc0-photo",
+    "openverseId": "cc00b185-ce4d-4ced-91d5-1b73fdb2207a",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["stuck", "verputz", "putzarbeit", "innenputz", "außenputz"],
+    "bytes": 148076,
+    "width": 1024,
+    "height": 683,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["warm"]
+  },
+  {
+    "file": "handwerk/boden-eiche-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Verlegter Holzboden aus hellen Eichendielen",
+    "title": "Verlegter Holzboden aus hellen Eichendielen",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5960137/free-public-domain-cc0-photo",
+    "openverseId": "0e091677-cefc-4b94-a748-fbe9c70dd022",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["bodenleg", "bodenbel", "parkett", "laminat", "estrich", "dielen"],
+    "bytes": 143248,
+    "width": 1024,
+    "height": 683,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["warm"]
+  },
+  {
+    "file": "handwerk/boden-dielen-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Heller Dielenboden in Draufsicht",
+    "title": "Heller Dielenboden in Draufsicht",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5941923/free-public-domain-cc0-photo",
+    "openverseId": "b4a33d0a-7bee-4b61-abed-a4ce2abb85fa",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["bodenleg", "bodenbel", "parkett", "laminat", "estrich", "dielen"],
+    "bytes": 99745,
+    "width": 1024,
+    "height": 683,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "detail",
+    "moods": ["neutral"]
+  },
+  {
+    "file": "handwerk/boden-raum-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Leerer heller Raum mit verlegtem Holzboden",
+    "title": "Leerer heller Raum mit verlegtem Holzboden",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/5949759/free-public-domain-cc0-photo",
+    "openverseId": "78707563-5b7d-4c4b-b0a6-f7e2c9666b7c",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["bodenleg", "bodenbel", "parkett", "laminat", "estrich", "dielen"],
+    "bytes": 49656,
+    "width": 1024,
+    "height": 552,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "interior",
+    "moods": ["warm"],
+    "hero": true
+  },
+  {
+    "file": "handwerk/estrich-halle-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Leere Halle mit glattem Betonboden",
+    "title": "A spacious, empty interior of a warehouse or storage facility with high ceilings and gray walls. Natural light streams i",
+    "creator": "Dylan Espinoza Pereira",
+    "creatorUrl": "https://wordpress.org/photos/author/despinozap20/",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "WordPress Photo Directory",
+    "sourceUrl": "https://wordpress.org/photos/photo/35969e3fab/",
+    "openverseId": "d900fd77-e505-483e-b75b-e172b35ed9ca",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["estrich", "bodenleg", "bodenbel"],
+    "bytes": 141457,
+    "width": 900,
+    "height": 1200,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "interior",
+    "moods": ["neutral"]
+  },
+  {
+    "file": "handwerk/glas-sprossenfenster-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Weißes Sprossenfenster mit Blumentöpfen auf der Fensterbank",
+    "title": "White Window",
+    "creator": "Nathan Fertig",
+    "creatorUrl": "https://stocksnap.io/author/1532",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "StockSnap",
+    "sourceUrl": "https://stocksnap.io/photo/white-window-LMUGL3LQ7X",
+    "openverseId": "1f384bfb-b95e-467b-9d42-8ad7c1df2f10",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["glaser", "glaserei", "verglasung", "fensterbau"],
+    "bytes": 78548,
+    "width": 960,
+    "height": 612,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "interior",
+    "moods": ["neutral"],
+    "hero": true
+  },
+  {
+    "file": "handwerk/glas-industriefenster-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Hohes Sprossenfenster in einer Ziegelwand",
+    "title": "Brick Wall",
+    "creator": "Bob Richards",
+    "creatorUrl": "https://stocksnap.io/author/112960",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "StockSnap",
+    "sourceUrl": "https://stocksnap.io/photo/brick-wall-VBBD3LOZIS",
+    "openverseId": "1f7a399e-e11b-4b2b-bfcc-d08705181439",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["glaser", "glaserei", "verglasung", "fensterbau"],
+    "bytes": 131810,
+    "width": 960,
+    "height": 720,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "interior",
+    "moods": ["warm"]
+  },
+  {
+    "file": "handwerk/glas-holzfenster-cc0.jpg",
+    "group": "handwerk",
+    "alt": "Holzfenster mit Blick auf ein Fachwerkhaus",
+    "title": "House wooden frame thatched roof",
+    "creator": null,
+    "creatorUrl": null,
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "rawpixel",
+    "sourceUrl": "https://www.rawpixel.com/image/3290798/free-photo-image-wood-germany-apparel",
+    "openverseId": "2a0053af-0f79-4cec-8b69-fd93590d6aee",
+    "checkedAt": "2026-11-07",
+    "checkedVia": "Openverse API (license=cc0)",
+    "keywords": ["glaser", "glaserei", "verglasung", "fensterbau"],
+    "bytes": 140780,
+    "width": 745,
+    "height": 1024,
+    "focalPoint": {
+      "x": 50,
+      "y": 50
+    },
+    "role": "interior",
+    "moods": ["natural"]
   }
 ]

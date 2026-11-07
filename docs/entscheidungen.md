@@ -1348,3 +1348,12 @@ Bild.“ KI-Prüfung und Demo-Bau dafür per Not-Aus angehalten (Audit-Eintrag).
 - KI-Regeln: Bild in den Einstiegsbereich, dort wenig Text; mobil kurze Absätze, lange Erklärungen in details/summary.
 - Nebenbefund: 6 von 8 Demos „qa_failed“, weil die Gestaltungsprüfung (Haiku) bei 2800 Ausgabetokens abgeschnitten wurde.
   Grenze auf 8000 angehoben (< 0,5 Cent je Prüfung).
+
+## 07.11.2026 – Bildbibliothek: CC0-Fotos für die neuen Gewerke
+
+Betreiber: „Yeah do it“ (passende lizenzfreie Fotos für Gewerke ohne Bilder). 23 Motive aus Openverse, nur CC0 1.0,
+jedes einzeln angesehen (keine erkennbaren Gesichter, keine Firmennamen): Dach (2), Zimmerei (2), Tischlerei (3),
+Metallbau (3), Bau/Maurer (3), Stuckateur/Putz (3), Boden/Parkett (3) + Estrich (1), Glaserei (3). Lizenz und Quelle in
+Manifest, EXIF und README. Stichwörter bewusst eng (z. B. „zimmerei“ statt „zimmer“, damit „Badezimmer“ eines
+Fliesenlegers keine Zimmerei-Fotos zieht; kein bloßes „bau“ wegen Metallbau/Landschaftsbau). Unbekannte Gewerke bleiben
+weiterhin ohne fachfremdes Foto.
