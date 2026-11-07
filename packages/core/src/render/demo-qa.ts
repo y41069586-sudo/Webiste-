@@ -160,7 +160,7 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
     const prior = demo.qaResultJson?.checks.find((c) => c.name === 'ki-pruefung');
     if (
       !prior?.passed ||
-      demo.qaResultJson?.renderedAssets?.htmlHash !== sha256(html) ||
+      demo.qaResultJson?.renderedAssets?.htmlHash !== sha256(stored) ||
       demo.qaResultJson.renderedAssets.businessFactsHash !== recipientFingerprint(lead) ||
       recordedResearch !== researchContentHash(research)
     )
@@ -173,7 +173,7 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
     }
   } else if (
     opts.llm !== false &&
-    demo.qaResultJson?.visualCheckpoint?.htmlHash === sha256(html) &&
+    demo.qaResultJson?.visualCheckpoint?.htmlHash === sha256(stored) &&
     demo.qaResultJson.visualCheckpoint.businessFactsHash === recipientFingerprint(lead) &&
     demo.qaResultJson.visualCheckpoint.researchHash === researchContentHash(research)
   ) {
@@ -220,7 +220,7 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
           .join(' | '),
       });
       const visualCheckpoint = {
-        htmlHash: sha256(html),
+        htmlHash: sha256(stored),
         businessFactsHash: recipientFingerprint(lead),
         researchHash: researchContentHash(research),
         checks: checks.filter((c) => c.name === 'ki-pruefung' || c.name === STUDIO_VERSION),
@@ -332,12 +332,12 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
     checks.push({
       name: 'studio-evidence',
       passed: true,
-      details: `html=${sha256(html)}; desktop=${sha256(shots.reviewBoards.desktop)}; mobile=${sha256(shots.reviewBoards.mobile)}; assets=${base}/studio-{desktop,mobile}.jpg`,
+      details: `html=${sha256(stored)}; desktop=${sha256(shots.reviewBoards.desktop)}; mobile=${sha256(shots.reviewBoards.mobile)}; assets=${base}/studio-{desktop,mobile}.jpg`,
     });
   }
 
   const passed = checks.every((c) => c.passed);
-  const htmlHash = sha256(html);
+  const htmlHash = sha256(stored);
   const previousQuality = demo.qaResultJson?.quality;
   const previousScores =
     previousQuality?.passed && previousQuality.htmlHash === htmlHash

@@ -78,10 +78,13 @@ describe('Freie Generierung und weitere Inhaltsbearbeitung', () => {
       expect(validateDemoContent(bad, facts).some((v) => v.rule === 'Preise/Rabatte')).toBe(true);
     }
   });
-  it('requires an example disclosure when no services have been verified', () => {
+  it('requires an example disclosure in the HTML only for legacy pages; full-page-2 uses the central draft note', () => {
     const c = content();
     c.design!.html = c.design!.html.replace('<p>Beispiel-Leistungen</p>', '');
-    expect(validateDemoContent(c, facts).some((v) => v.rule === 'Beispiel-Kennzeichnung')).toBe(true);
+    const legacy = { ...c, design: { ...c.design!, contentVersion: 'full-page-1' as const } };
+    expect(validateDemoContent(legacy, facts).some((v) => v.rule === 'Beispiel-Kennzeichnung')).toBe(true);
+    const v2 = { ...c, design: { ...c.design!, contentVersion: 'full-page-2' as const } };
+    expect(validateDemoContent(v2, facts).some((v) => v.rule === 'Beispiel-Kennzeichnung')).toBe(false);
   });
   it('updates exact authored copy, escapes user input, and preserves the independent layout', () => {
     const c = content();
@@ -144,7 +147,7 @@ describe('Vollständige generierte Inhaltsstrecke', () => {
   it('checks semantic coverage and three to four FAQs for new drafts', async () => {
     const c = await full();
     expect(validateDemoContent(c, { ...facts, requireFullPage: true, imageBrief: [] })).toEqual([]);
-    for (const key of ['services', 'process', 'preparation', 'area', 'gallery', 'faq', 'placeholders']) {
+    for (const key of ['services', 'gallery', 'inquiry', 'area', 'faq', 'placeholders']) {
       const bad = { ...c, design: { ...c.design!, html: c.design!.html.replace(`data-ad-section="${key}"`, '') } };
       expect(validateDemoContent(bad, { ...facts, requireFullPage: true }).some((v) => v.rule === 'Vollständige Seite')).toBe(
         true,
