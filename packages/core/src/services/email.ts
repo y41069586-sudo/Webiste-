@@ -119,12 +119,21 @@ export async function sendTransactionalEmail(
   }
 }
 
+/**
+ * Empfänger der Betreiber-Mails: ADMIN_EMAIL, solange es nicht der Platzhalter ist; sonst die Absenderadresse aus den
+ * Einstellungen (07.11.2026: Platzhalter admin@example.com ließ jede Meldung mit Resend HTTP 422 scheitern).
+ */
+export function adminRecipient(cfg: { sender: { email: string } }): string {
+  const env = getEnv().ADMIN_EMAIL;
+  return /@example\.(com|org|net)$/i.test(env) ? cfg.sender.email : env;
+}
+
 /** Kurze Benachrichtigung an den Betreiber (ADMIN_EMAIL). Fehler werden nur geloggt. */
 export async function notifyAdmin(input: { key: string; title: string; lines: string[]; link?: string }): Promise<void> {
   try {
     const cfg = await getConfig();
     const content = adminNotificationEmail(cfg, input);
-    await sendTransactionalEmail({ ...content, kind: 'admin', idempotencyKey: `admin:${input.key}`, to: getEnv().ADMIN_EMAIL });
+    await sendTransactionalEmail({ ...content, kind: 'admin', idempotencyKey: `admin:${input.key}`, to: adminRecipient(cfg) });
   } catch (err) {
     logger.warn({ key: input.key, ...errInfo(err) }, 'Admin-Benachrichtigung fehlgeschlagen');
   }

@@ -132,6 +132,29 @@ export async function fitLetterLayout(
   return { html, domIssues };
 }
 
+/** Entfernt Sätze, die eine beanstandete Aussage enthalten, aus den frei formulierten Brieftexten. */
+export function stripFlaggedSentences(data: ReturnType<typeof composeLetter>, statements: string[]): boolean {
+  const norm = (t: string) => t.replace(/\s+/g, ' ').trim().toLowerCase();
+  const flagged = statements.map(norm).filter(Boolean);
+  if (!flagged.length) return false;
+  let changed = false;
+  const clean = (text: string): string => {
+    const kept = text.split(/(?<=[.!?])\s+/).filter((sentence) => {
+      const n = norm(sentence);
+      const hit = flagged.some((f) => n.includes(f) || f.includes(n));
+      if (hit) changed = true;
+      return !hit;
+    });
+    return kept.join(' ');
+  };
+  if (data.intro) data.intro = data.intro.map(clean).filter(Boolean);
+  data.offer = clean(data.offer);
+  data.noAction = clean(data.noAction);
+  data.qrCaption = clean(data.qrCaption);
+  if (data.postscript) data.postscript = clean(data.postscript) || undefined;
+  return changed;
+}
+
 export interface GenerateLetterOptions {
   actor: string;
   /** Testbrief an eigene Adresse (z. B. erster echter Brief) */
@@ -335,33 +358,59 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       throw Error('Demo während des Textabgleichs geändert; Brief erneut erstellen.');
   }
   const data = composeLetter(composeInput);
-  const { html, domIssues } = await fitLetterLayout(data, cfg);
-  const pdf = await htmlToPdf(html);
+  let { html, domIssues } = await fitLetterLayout(data, cfg);
+  let pdf = await htmlToPdf(html);
   const expectedPages = screenshotPage ? 2 : 1;
-  const pdfCheck = await validateLetterPdf(pdf, {
+  let pdfCheck = await validateLetterPdf(pdf, {
     qrExpectedUrl: url,
     recipientLines: recipientLines(recipient),
     position: cfg.letter.addressPosition,
     expectedPages,
     returnAddressLine: returnAddressLine(data.sender),
   });
-  const issues = [...domIssues, ...pdfCheck.issues];
+  let issues = [...domIssues, ...pdfCheck.issues];
 
   // Wahrheits-Check (B5.4) – blockierend; ohne passed keine Freigabe
-  const truth: TruthCheckResult = await runTruthCheck(
-    {
-      letter: data,
-      claimSpans: [...(slotRender?.claimSpans ?? []), ...(lossSpan ? [lossSpan] : [])],
-      claims: [...variant.claims, ...(lossClaim ? [lossClaim] : [])],
-      allowedClaimIds: lead.industry ? getPlaybook(lead.industry).allowed_claims : [],
-      industry: lead.industry ?? null,
-      placeholderValues: placeholderValues(composeInput),
-      sourcesLabel,
-      extraBlocklist: letterTruthBlocklist(cfg),
-      maxStatistics: cfg.letter.maxStatistics,
-    },
-    { leadId, checkSourcesPage: !sw.dryRun, idempotencyKey: `truth:${leadId}:${seqDb}:${Date.now()}` },
-  );
+  const runTruth = () =>
+    runTruthCheck(
+      {
+        letter: data,
+        claimSpans: [...(slotRender?.claimSpans ?? []), ...(lossSpan ? [lossSpan] : [])],
+        claims: [...variant.claims, ...(lossClaim ? [lossClaim] : [])],
+        allowedClaimIds: lead.industry ? getPlaybook(lead.industry).allowed_claims : [],
+        industry: lead.industry ?? null,
+        placeholderValues: placeholderValues(composeInput),
+        sourcesLabel,
+        extraBlocklist: letterTruthBlocklist(cfg),
+        maxStatistics: cfg.letter.maxStatistics,
+      },
+      { leadId, checkSourcesPage: !sw.dryRun, idempotencyKey: `truth:${leadId}:${seqDb}:${Date.now()}` },
+    );
+  let truth: TruthCheckResult = await runTruth();
+  // 07.11.2026: Beanstandet nur die Wirkungsprüfung einzelne Sätze, diese Sätze entfernen und genau einmal neu prüfen,
+  // statt den ganzen Brief zu sperren (Betreiber: „Briefe scheitern“). Pflichttexte (Datenschutz, Widerspruch) bleiben.
+  const flagged = truth.violations.filter((v) => v.rule === 'llm' && /Unbelegte Wirkungsaussage/.test(v.detail));
+  if (!truth.passed && flagged.length && flagged.length === truth.violations.length) {
+    const statements = [
+      ...flagged
+        .map((v) => v.detail)
+        .join(' ')
+        .matchAll(/„([^“]{8,})“/g),
+    ].map((m) => m[1]!);
+    if (stripFlaggedSentences(data, statements)) {
+      ({ html, domIssues } = await fitLetterLayout(data, cfg));
+      pdf = await htmlToPdf(html);
+      pdfCheck = await validateLetterPdf(pdf, {
+        qrExpectedUrl: url,
+        recipientLines: recipientLines(recipient),
+        position: cfg.letter.addressPosition,
+        expectedPages,
+        returnAddressLine: returnAddressLine(data.sender),
+      });
+      issues = [...domIssues, ...pdfCheck.issues];
+      truth = await runTruth();
+    }
+  }
   const truthIssues = truth.violations.map((v) => `wahrheits_check/${v.rule}: ${v.detail}`);
 
   // Kosten schätzen (im DRY_RUN ohne API-Aufruf)

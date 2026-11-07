@@ -31,7 +31,7 @@ import { INDUSTRIES, OBJECTION_LABEL, type Industry, type ObjectionCategory } fr
 import { addDays, formatDateDe, startOfIsoWeek } from '../util/time';
 import { evaluateIndustries } from './arms';
 import { audit } from './audit';
-import { sendTransactionalEmail } from './email';
+import { adminRecipient, sendTransactionalEmail } from './email';
 import { funnelRows, refreshFunnel, type FunnelRow } from './funnel';
 import { llmStructured } from './llm';
 import { objectionStats } from './objections';
@@ -766,7 +766,7 @@ export async function runLearningAgent(opts: { now?: Date; force?: boolean; acto
       ...mail,
       kind: 'weekly_report',
       idempotencyKey: `learning:${row!.id}:${now.toISOString().slice(0, 13)}`,
-      to: getEnv().ADMIN_EMAIL,
+      to: adminRecipient(await getConfig()),
     });
   } catch (err) {
     logger.warn({ ...errInfo(err) }, 'Lern-Agent: Bericht nicht gemailt');

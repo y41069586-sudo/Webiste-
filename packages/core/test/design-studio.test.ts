@@ -92,7 +92,7 @@ describe('Independent studio plan and visual quality gate', () => {
     emptyEvidence.craft[0]!.evidence = '';
     expect(() => studioReviewResult(emptyEvidence)).toThrow();
   });
-  it('blocks two revisions or any unverifiable dimension rather than averaging weaknesses away', () => {
+  it('blocks any unverifiable dimension but never design criticism alone', () => {
     expect(studioReviewResult(review()).passed).toBe(true);
     const unverifiable = review();
     unverifiable.craft[3]!.verdict = 'unverifiable';
@@ -102,7 +102,9 @@ describe('Independent studio plan and visual quality gate', () => {
       two.craft[i]!.verdict = 'revise';
       two.craft[i]!.correction = 'Den angeschnittenen Bildfokus im mobilen Einstieg neu ausrichten.';
     }
-    expect(studioReviewResult(two).passed).toBe(false);
+    const result = studioReviewResult(two);
+    expect(result.passed).toBe(true);
+    expect(result.corrections).toHaveLength(2);
   });
   it('passes a single revision as a hint for the operator (Betreiber 07.11.2026), with its correction', () => {
     const one = review();

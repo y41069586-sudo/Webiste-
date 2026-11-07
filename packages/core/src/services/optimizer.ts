@@ -1,5 +1,5 @@
 import { eq, sql } from 'drizzle-orm';
-import { appUrl, getEnv } from '../config/env';
+import { appUrl } from '../config/env';
 import { effectiveSwitches, getConfig, updateConfig } from '../config/service';
 import { getDb } from '../db/client';
 import { reports, variants } from '../db/schema';
@@ -9,7 +9,7 @@ import { renderEmail } from '../emails/templates';
 import { logger } from '../logger';
 import { addDays, formatDateDe, formatEuro, startOfIsoWeek } from '../util/time';
 import { audit } from './audit';
-import { sendTransactionalEmail } from './email';
+import { adminRecipient, sendTransactionalEmail } from './email';
 import { refreshFunnel } from './funnel';
 import { allocationsFrom, applyAllocations, evaluateIndustries, type IndustryAllocation } from './arms';
 import { kpiRows, kpiSummary } from './kpis';
@@ -223,7 +223,7 @@ export async function runWeeklyOptimizer(now = new Date(), rng?: () => number): 
       ...mail,
       kind: 'weekly_report',
       idempotencyKey: `report:${row!.id}:${now.toISOString().slice(0, 13)}`,
-      to: getEnv().ADMIN_EMAIL,
+      to: adminRecipient(await getConfig()),
     });
   } catch (err) {
     logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'Wochenbericht nicht gemailt');

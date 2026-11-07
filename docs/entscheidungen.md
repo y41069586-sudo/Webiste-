@@ -1411,3 +1411,13 @@ wurde bei jedem Pipeline-Takt erneut kostenpflichtig gebaut.
   blockiert (dann einmalige automatische Nachbesserung). Technik- und harte Inhaltsbefunde blockieren unverändert.
 - Handy-Einstieg niedriger (72 svh statt 86 svh) und oben heller, Text näher am Bildschirmanfang (Befund „großer
   dunkler Bereich über der Überschrift“). Harte Worttrennung (`word-break`/`overflow-wrap`) wird aus KI-CSS entfernt.
+
+## 07.11.2026 – Betreiber-Lauf: Admin-Build, Admin-Mails, Brieftexte, Demo-Sperren
+
+- **Admin-Build (Netlify) schlug fehl:** Der Selbsttest hatte die Browser-Prüfbibliothek in `demos/build.ts` gezogen, das die
+  Web-App bündelt. Jetzt liefert der Worker die Browserprüfung (`opts.browserCheck`); `build.ts` importiert `render/qa` nicht mehr.
+- **Betreiber-Mails scheiterten (Resend 422):** `ADMIN_EMAIL` war nicht gesetzt, Standard `admin@example.com`. Neu:
+  `adminRecipient()` nimmt bei Platzhalter die Absenderadresse aus den Einstellungen. Empfehlung: `ADMIN_EMAIL` setzen.
+- **Brieftexte:** Beanstandet nur die Wirkungsprüfung einzelne Sätze, werden genau diese Sätze entfernt und der Brief einmal
+  neu geprüft (`stripFlaggedSentences`), statt den Brief zu sperren. Pflichttexte bleiben unberührt.
+- **Demos:** Gestaltungs-Kritik der KI blockiert nie (nur Hinweis neben „Passt?“); „nicht prüfbar“, Technik- und Faktenbefunde bleiben Sperren.

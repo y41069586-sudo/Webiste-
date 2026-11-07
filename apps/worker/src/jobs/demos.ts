@@ -1,5 +1,5 @@
 import { getConfig, publishDemo } from '@wbm/core';
-import { buildDemo, qaDemo, reviseDemo, abortableTask } from '@wbm/core/render';
+import { browserChecks, buildDemo, qaDemo, reviseDemo, abortableTask } from '@wbm/core/render';
 import { defineJob, NonRetryableError } from '../runtime';
 
 defineJob(
@@ -17,6 +17,7 @@ defineJob(
             templateId: data.templateId,
             qaFeedback: data.qaFeedback,
             selfTest: true,
+            browserCheck: (html, expectedFacts) => browserChecks({ html, expectedFacts }),
           }),
         signal,
       );

@@ -106,7 +106,7 @@ Setze dieses Konzept als eigenständig geschriebenes HTML/CSS um. Keine Mischung
 }
 
 /** Höchstzahl an Gestaltungs-Kritikpunkten, die als Hinweis an den Betreiber gehen statt zu blockieren */
-export const STUDIO_MAX_SOFT_REVISE = 1;
+export const STUDIO_MAX_SOFT_REVISE = 6;
 export const STUDIO_REVIEW_DIMENSIONS = ['identity', 'hierarchy', 'rhythm', 'imagery', 'mobile', 'action'] as const;
 export const STUDIO_REVIEW_SCHEMA = {
   type: 'object',
@@ -166,8 +166,8 @@ export function studioReviewResult(raw: unknown): {
     throw new Error('Gestaltungsbefund ohne ausführbaren Korrekturhinweis.');
   return {
     issues: result.issues,
-    // Betreiber 07.11.2026: genau ein Gestaltungs-Kritikpunkt blockiert nicht, sondern geht als Hinweis in die
-    // manuelle Prüfung; ab zwei Kritikpunkten (oder nicht prüfbar) bleibt die Demo blockiert
+    // Betreiber 07.11.2026 („ohne was zu sperren“): Gestaltungs-Kritik blockiert nie, sie geht als Hinweis in die
+    // manuelle Prüfung; nur „nicht prüfbar“ (keine Aussage möglich) bleibt blockiert
     passed:
       result.craft.every((x) => x.verdict !== 'unverifiable') &&
       result.craft.filter((x) => x.verdict === 'revise').length <= STUDIO_MAX_SOFT_REVISE,
