@@ -41,5 +41,31 @@ Das vorhandene Docker-/System-Dateisystem ist voll. Deshalb bestehende Dateien/D
 nicht gelöscht, Abhängigkeiten aus dem vorhandenen Stand nach /tmp kopiert und PostgreSQL17.11
 als lokale Test-Binaries dort entpackt. Keine Produktionsdaten als Testziel.
 
-Vollständige Testergebnisse und Deploymentstatus werden nach Abschluss ergänzt. Ein Git-Push
-oder erfolgreicher Web-Build bestätigt kein aktualisiertes Worker-Image auf dem VPS.
+Abgeschlossene Prüfungen am 07.11.2026:
+
+- Vollständige Core-Suite ohne Dateifilter, ein einziger Lauf auf wbm_test_handoff_core:
+  **115 Dateien bestanden, 1035 Tests bestanden, null Fehler; drei optionale osmium-Tests
+  mangels lokalem Binary übersprungen**. Dauer 1907,07 Sekunden. Keine Tests/Fixtures/Grenzwerte
+  für diese Reparatur geändert. Die sechs im Claude-Bericht erwähnten Ausfälle sind in diesem
+  isolierten Lauf nicht reproduziert worden; dessen externe Umgebung wurde nicht als repariert
+  ausgegeben.
+- Vollständiger Next-16.4.2-Turbopack-Produktionsbuild einschließlich TypeScript, Page-Data-
+  Sammlung und Prerendering erfolgreich. Die sieben Hinweise zum bisherigen dynamischen
+  Dateisystem-Tracing in Claims/Playbooks/Assets sind nicht fatal und wurden nicht durch
+  pauschales Ignorieren von Dateien verdeckt.
+- Core-, Worker- und Web-Typechecks sowie ESLint der drei geänderten TS-Dateien bestanden.
+- Tatsächlichen erzeugten Standalone-Server mit separater Fixture-Datenbank, Mock-Providern
+  und eigenem zufälligem lokalem Session-Secret gestartet: / und /login liefern HTTP200,
+  /admin und /admin/demos ohne Anmeldung HTTP307 nach /login. Session-Schutz nicht gelockert.
+- Git-diff-Prüfung und Vergleich des unverändert verschobenen Browser-Prüfblocks bestanden.
+
+Testumgebung: Node24.19.0, vorhandene unverändert kopierte Lockfile-Abhängigkeiten, offizielles
+PostgreSQL17.11 lokal auf Port55432 und echtes /usr/bin/chromium. Keine bezahlten Modellaufrufe
+oder echten E-Mails/Briefe/Zahlungen/Domainkäufe durch diese Tests. Der Web-Build nutzte eine
+andere Testdatenbank als der komplette Core-Lauf; keine parallel geteilte Testdatenbank.
+
+Ein Git-Push oder erfolgreicher Web-Build bestätigt kein aktualisiertes Worker-Image auf dem VPS.
+Der vorhandene Update-Aufruf mit gepinntem Release erhält den tatsächlichen laufenden/pausierten
+Container-Zustand, Compose-Dateien, private ENV und DRY_RUN. Keine Wiederaufnahme oder Aufhebung
+eines Betreiber-Not-Aus erzwingen. Die frühere Codex-Reparaturpause ist bereits aufgehoben;
+RESTORE_REPAIR_PAUSE ist für diese Übergabe nicht erforderlich.

@@ -15,6 +15,10 @@ Lighthouse/Chromium-Trace-Auswertung in den Web-Bundlegraph zu ziehen. Die unver
 Browserprüfungen liegen separat in render/browser-checks.ts; render/qa.ts exportiert sie für
 bestehende Aufrufer weiter. Lighthouse bleibt unverändert für die Worker-Endprüfung verfügbar.
 Keine Schwellen-/Style-/Konfigurationslockerung als Ersatz für den Build-Fix.
+Prüfstand: komplette Core-Suite 115 Dateien, 1035 bestandene Tests, null Fehler; drei optionale
+osmium-Tests übersprungen. Vollständiger Next-Produktionsbuild, Core-/Worker-/Web-Typechecks,
+ESLint und HTTP-Laufzeittests des Standalone-Builds bestanden. Keine Tests für diesen Fix gelockert.
+Update erhält aktuellen Container-Zustand; keine alten RESUME-/RESTORE-Flags übernehmen.
 Details und Prüfstand: docs/handoff-netlify-fix-2026-11-07.md.
 
 ## Produktionsreparatur 06.11.2026 – begrenzte QA und atomare Demo-Queue
