@@ -124,4 +124,20 @@ describe('Studio generation orchestration without database or paid provider', ()
       'Maniküre in Dortmund.',
     );
   });
+  it('technischer Selbsttest: scheitert die Nachbesserung, bleibt der regelkonforme erste Entwurf', async () => {
+    let authorCalls = 0;
+    generate.mockImplementation(async (req) => {
+      if (req.toolName === DEMO_TOOL_NAME && ++authorCalls === 2) return { hero_headline: 'Bruchstück' };
+      return mockResponse(req);
+    });
+    const open = [{ field: 'browser.axe-desktop', rule: 'Technische Prüfung nicht bestanden', detail: 'color-contrast – .ad-x' }];
+    const precheck = vi.fn().mockResolvedValue(open);
+    const result = await generateDemoContent(lead, DEFAULT_CONFIG, undefined, undefined, [], [], undefined, undefined, precheck);
+    expect(generate.mock.calls).toHaveLength(3);
+    expect(generate.mock.calls[2]![0].prompt).toContain('VOLLSTÄNDIGEN Entwurf');
+    expect(generate.mock.calls[2]![0].prompt).toContain('Vorheriger Entwurf');
+    expect(result.attempts).toBe(1);
+    expect(result.content.design).toBeDefined();
+    expect(result.precheckOpen).toEqual(open);
+  });
 });

@@ -89,6 +89,8 @@ export async function authorStudioContent(
   const startFeedback = [...(opts.operatorWish ? [opts.operatorWish] : []), ...(qaFeedback ?? [])];
   let feedback: string[] | undefined = startFeedback.length ? startFeedback.slice(0, 12) : undefined;
   let lastViolations: RuleViolation[] = [];
+  // Regelkonformer erster Entwurf mit offenen Selbsttest-Befunden: bleibt erhalten, falls die Nachbesserung scheitert
+  let fallback: GeneratedContent | undefined;
   for (let attempt = 1; attempt <= 2; attempt++) {
     opts.signal?.throwIfAborted();
     try {
@@ -120,6 +122,7 @@ export async function authorStudioContent(
         ];
         feedback = ['Alle Pflichtfelder gemäß Tool-Schema mit vollständigen Texten und Listen liefern.'];
         await opts.onAttempt?.(attempt, raw, lastViolations);
+        if (fallback) return fallback;
         continue;
       }
       const violations = validateDemoContent(content, facts);
@@ -143,17 +146,30 @@ export async function authorStudioContent(
             ...(open.length ? { precheckOpen: open } : {}),
           };
         lastViolations = open;
+        fallback = { content, source: 'llm', attempts: attempt, violations: [], studioPlan, precheckOpen: open };
+        // 07.11.2026: Das Modell sieht seinen ersten Entwurf sonst nicht und lieferte nur Bruchstücke („behalte alles
+        // Übrige bei“). Deshalb: vorherigen Entwurf mitgeben und ausdrücklich die vollständige Antwort verlangen.
         feedback = [
-          'Der fertige Entwurf wurde im Browser getestet (Desktop 1440 px, Handy 390 px und 320 px). Behebe genau diese Befunde und behalte alles Übrige bei:',
-          ...open.slice(0, 11).map((v) => `${v.field}: ${v.rule} – ${v.detail}`),
+          'Dein vorheriger Entwurf wurde im Browser getestet (Desktop 1440 px, Handy 390 px und 320 px). Liefere den VOLLSTÄNDIGEN Entwurf erneut mit allen Pflichtfeldern (Texte, Leistungen, FAQ, design mit html, css, Farben und Schriften) und behebe dabei genau diese Befunde; alles Übrige darf gleich bleiben:',
+          ...open.slice(0, 10).map((v) => `${v.field}: ${v.rule} – ${v.detail}`),
+          `Vorheriger Entwurf (eigene frühere Ausgabe, zum Überarbeiten): ${JSON.stringify({
+            hero_headline: content.hero_headline,
+            hero_subline: content.hero_subline,
+            design: content.design,
+          }).slice(0, 60000)}`,
         ];
         logger.warn({ leadId, attempt, findings: open.length }, 'demo: technischer Selbsttest mit Befunden, Nachbesserung');
         continue;
       }
+      if (fallback) return fallback;
       lastViolations = violations;
       feedback = violations.slice(0, 12).map((v) => `${v.field}: ${v.rule} – ${v.detail}`);
       logger.warn({ leadId, attempt, violations: violations.length }, 'demo: Inhaltsregeln verletzt');
     } catch (err) {
+      if (fallback) {
+        logger.warn({ leadId }, 'demo: Nachbesserung fehlgeschlagen, regelkonformer erster Entwurf bleibt');
+        return fallback;
+      }
       if (err instanceof LlmRefusalError || err instanceof LlmNoToolCallError) {
         logger.warn({ leadId, err: err.message }, 'demo: KI-Antwort unbrauchbar, Entwurf blockiert');
         break;

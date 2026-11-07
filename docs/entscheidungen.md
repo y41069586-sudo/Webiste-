@@ -1395,3 +1395,7 @@ wurde bei jedem Pipeline-Takt erneut kostenpflichtig gebaut.
 - **Kostenbremse Pipeline**: Betriebe mit ≥ 2 gescheiterten Bau-Aufträgen in 24 h werden vom Takt übersprungen.
 - Bestands-Demos werden nicht neu gebaut (Betreiber: „Nicht neu bauen“); erneute Prüfung abgebrochen, nur Cyc Beauté
   geprüft. Durchgefallene Demos sind nicht freigebbar (Schutzregel) und kosten nichts weiter.
+- **Korrektur (gleicher Tag):** Die Nachbesserung nach dem Selbsttest lieferte im Betrieb ein Bruchstück, weil das
+  Modell seinen ersten Entwurf nicht sah („behalte alles Übrige bei“). Jetzt wird der vorherige Entwurf mitgegeben und
+  die vollständige Antwort verlangt; scheitert der zweite Versuch dennoch (Regeln, Struktur, Aufruffehler), bleibt der
+  regelkonforme erste Entwurf erhalten und die Endprüfung entscheidet.
