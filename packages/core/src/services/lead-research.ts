@@ -29,7 +29,8 @@ export async function storedLeadResearch(leadId: string, db: DbOrTx = getDb()) {
  * Belegte Befunde, die als persönlicher Einstieg taugen („mir ist aufgefallen: …“), in dieser Rangfolge.
  * Bewusst nicht: Bewertungen (eigene Regeln), freie Termine (wirkt herabsetzend), reine Verzeichnisdaten.
  */
-const OBSERVATION_KINDS = ['new_offer', 'takeover', 'expansion', 'active_profile', 'work_photos', 'service_advertising'] as const;
+// 'takeover' (z. B. „Gesellschaft verkauft“) ist kein passender Brief-Aufhänger (Betreiber 07.11.2026)
+const OBSERVATION_KINDS = ['new_offer', 'expansion', 'active_profile', 'work_photos', 'service_advertising'] as const;
 
 export function researchLetterFacts(research: LeadResearch | null): VerifiedLetterContext['details'] {
   if (!research) return [];
@@ -53,6 +54,22 @@ export function researchLetterFacts(research: LeadResearch | null): VerifiedLett
       verified: observation.verified,
       checkedAt: observation.observedAt,
       kind: 'public_observation' as const,
+    } as (typeof details)[number]);
+  // Dokumentierte Website-Suche (Beleg für den „Kunden verlieren“-Brief): nur wenn die Suche aktuell „nicht gefunden“
+  // ergab und alle drei Suchwege tatsächlich geprüft wurden – sonst bleibt es beim neutralen Einladungstext.
+  const w = research.website;
+  if (
+    w.result === 'not_found' &&
+    isFresh(w.checkedAt, 30, now) &&
+    (['name_city', 'directory_links', 'profile_links'] as const).every((m) => w.methods.includes(m))
+  )
+    details.push({
+      text: 'not_found',
+      source: w.source,
+      verified: true,
+      checkedAt: w.checkedAt,
+      kind: 'website_search' as const,
+      checks: ['name_city_search', 'directory_links', 'social_links'],
     } as (typeof details)[number]);
   // Use the same defensive business-fact rules as the existing invitation composer.
   return details.flatMap((detail) => reviewedLetterDetails({ businessName: '', city: '', branchLabel: '', details: [detail] }));

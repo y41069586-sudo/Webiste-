@@ -1421,3 +1421,8 @@ wurde bei jedem Pipeline-Takt erneut kostenpflichtig gebaut.
 - **Brieftexte:** Beanstandet nur die Wirkungsprüfung einzelne Sätze, werden genau diese Sätze entfernt und der Brief einmal
   neu geprüft (`stripFlaggedSentences`), statt den Brief zu sperren. Pflichttexte bleiben unberührt.
 - **Demos:** Gestaltungs-Kritik der KI blockiert nie (nur Hinweis neben „Passt?“); „nicht prüfbar“, Technik- und Faktenbefunde bleiben Sperren.
+- **Verlust-Brief kam nie zustande (Betreiber-Frage):** `researchLetterFacts` (automatische KI-Recherche) erzeugte nie den Beleg
+  `website_search`/„keine eigene Website gefunden“, den der Brief „Kunden, die Sie gerade verlieren könnten“ voraussetzt; nur die
+  manuelle Demo-Prüfung tat das. Jetzt wird er aus `research.website` abgeleitet (Ergebnis „nicht gefunden“, aktuell, alle drei
+  Suchwege name_city, directory_links, profile_links geprüft), sonst bleibt der neutrale Text. „Firma verkauft“ (takeover) ist
+  kein Brief-Aufhänger mehr.

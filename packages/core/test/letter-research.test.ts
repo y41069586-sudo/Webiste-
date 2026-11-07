@@ -60,3 +60,24 @@ it('rejects a guarantee disguised as a research fact', () => {
     }),
   ).toThrow(/prüfen/);
 });
+
+import { researchLetterFacts } from '../src/services/lead-research';
+const aiResearch = (methods: string[], result = 'not_found') =>
+  ({
+    version: 1,
+    identityHash: 'x',
+    checkedAt: new Date().toISOString(),
+    lawfulUseConfirmed: true,
+    website: { result, checkedAt: new Date().toISOString(), methods, source: 'ai-research:fixture' },
+    signals: [],
+  }) as unknown as Parameters<typeof researchLetterFacts>[0];
+it('leitet aus der KI-Recherche den Beleg „keine Website“ nur bei vollständiger Suche ab', () => {
+  const all = researchLetterFacts(aiResearch(['name_city', 'phone', 'directory_links', 'profile_links']));
+  expect(all.some((d) => d.kind === 'website_search' && d.text === 'not_found')).toBe(true);
+  expect(researchLetterFacts(aiResearch(['name_city', 'directory_links'])).some((d) => d.kind === 'website_search')).toBe(false);
+  expect(
+    researchLetterFacts(aiResearch(['name_city', 'directory_links', 'profile_links'], 'found')).some(
+      (d) => d.kind === 'website_search',
+    ),
+  ).toBe(false);
+});
