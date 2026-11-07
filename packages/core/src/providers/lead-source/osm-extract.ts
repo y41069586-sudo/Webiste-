@@ -227,7 +227,24 @@ export function searchIndex(index: OsmExtractIndex, query: LeadSearchQuery): Lea
   return { places, requests: 0, costCents: 0, ...(warnings.length ? { warnings } : {}) };
 }
 
-const run = promisify(execFile);
+const execFileP = promisify(execFile);
+/** Wie execFile, aber mit osmium-Fehlerausgabe und Abbruchsignal im Fehlertext (sonst nur „Command failed“). */
+async function run(cmd: string, args: string[], opts: { maxBuffer: number; timeout: number }) {
+  try {
+    return await execFileP(cmd, args, opts);
+  } catch (err) {
+    const e = err as NodeJS.ErrnoException & { stderr?: string; signal?: string | null; killed?: boolean; code?: unknown };
+    const stderr = String(e.stderr ?? '')
+      .trim()
+      .slice(-500);
+    const why = e.signal
+      ? `abgebrochen durch ${e.signal}${e.signal === 'SIGKILL' ? ' (vermutlich zu wenig Arbeitsspeicher oder Zeitlimit)' : ''}`
+      : `Exit-Code ${String(e.code ?? '?')}`;
+    throw new Error(`${cmd} ${args[0] ?? ''} fehlgeschlagen: ${why}${stderr ? ` – ${stderr}` : ''}`);
+  }
+}
+/** Nach einem fehlgeschlagenen Neubau so lange nicht erneut bauen (sonst baut jede Suchanfrage erneut). */
+const BUILD_RETRY_MS = 30 * 60_000;
 
 export interface OsmExtractOptions {
   url: string;
@@ -245,6 +262,7 @@ export class OsmExtractLeadSource implements LeadSource {
   readonly kind = 'osm' as const;
   private index?: OsmExtractIndex;
   private building?: Promise<OsmExtractIndex>;
+  private failed?: { at: number; error: Error };
 
   constructor(private readonly o: OsmExtractOptions) {}
 
@@ -271,11 +289,31 @@ export class OsmExtractLeadSource implements LeadSource {
       }
       if (this.fresh(this.index, pairs)) return this.index;
     }
+    // Neubau kürzlich gescheitert: nicht bei jeder Anfrage erneut bauen. Ein vorhandener (älterer) Index wird weiter
+    // genutzt, wenn er die gesuchten Tags enthält; sonst übernimmt der Ausweich (Overpass) nur diese Anfrage.
+    if (this.failed && Date.now() - this.failed.at < BUILD_RETRY_MS) {
+      const old = this.index as OsmExtractIndex | undefined;
+      if (old && pairs.every((p) => old.tagPairs.includes(p))) return old;
+      throw this.failed.error;
+    }
     // Vorhandene Tags behalten, damit ein Neubau keine früher gesuchten Branchen verliert
     const known: string[] = (this.index as OsmExtractIndex | undefined)?.tagPairs ?? [];
-    this.building ??= this.build([...new Set([...pairs, ...known])].sort()).finally(() => {
-      this.building = undefined;
-    });
+    this.building ??= this.build([...new Set([...pairs, ...known])].sort())
+      .then(
+        (index) => {
+          this.failed = undefined;
+          return index;
+        },
+        (err: unknown) => {
+          const error = err instanceof Error ? err : new Error(String(err));
+          this.failed = { at: Date.now(), error };
+          logger.error({ err: error.message }, 'osm-auszug: Neubau des Index fehlgeschlagen; nächster Versuch in 30 Minuten');
+          throw error;
+        },
+      )
+      .finally(() => {
+        this.building = undefined;
+      });
     this.index = await this.building;
     return this.index;
   }

@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import os from 'node:os';
@@ -95,5 +95,23 @@ describe.skipIf(!hasOsmium)('OSM-Auszug mit osmium (echte Verarbeitung, lokaler 
       fallback,
     });
     expect((await src.search(query(painter))).warnings).toEqual(['fallback']);
+  });
+
+  it('gescheiterter Neubau: Fehlertext von osmium im Log, kein erneuter Bau bei jeder Anfrage', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'wbm-osm-test-'));
+    const count = path.join(dir, 'calls');
+    const bin = path.join(dir, 'osmium-kaputt.sh');
+    writeFileSync(bin, `#!/bin/sh\necho x >> ${count}\necho "Kein Platz auf dem Gerät" >&2\nexit 1\n`);
+    chmodSync(bin, 0o755);
+    let fallbackCalls = 0;
+    const fallback: LeadSource = {
+      kind: 'osm',
+      search: async () => ({ places: [], requests: 1, costCents: 0, warnings: [`fallback ${++fallbackCalls}`] }),
+    };
+    const src = new OsmExtractLeadSource({ url, dir, userAgent: 'test', baseTags: painter, osmiumBin: bin, fallback });
+    await expect(src.ensureIndex()).rejects.toThrow(/Exit-Code 1 – Kein Platz auf dem Gerät/);
+    for (let i = 0; i < 3; i++) await src.search(query(painter));
+    expect(fallbackCalls).toBe(3);
+    expect(readFileSync(count, 'utf8').trim().split('\n')).toHaveLength(1);
   });
 });
