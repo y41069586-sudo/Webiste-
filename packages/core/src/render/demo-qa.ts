@@ -1,3 +1,4 @@
+import { formatDateDe } from '../util/time';
 import { visualReviewInput } from '../demos/visual-review';
 import { abortableTask } from './limits';
 import {
@@ -109,7 +110,10 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
   if (!stored) throw new Error('Demo-HTML fehlt im Speicher');
   // Wie die Demo-Route ausliefert: mit Handy-Einstieg (Vollbild-Foto), damit Prüfung, Vorschaubilder und Brief-Bild
   // genau die Seite zeigen, die der Betrieb sieht
-  const html = applyMobileHeroLayer(stored);
+  const html = applyMobileHeroLayer(stored).replaceAll(
+    '__WBM_EXPIRES_LABEL__',
+    demo.expiresAt ? `am ${formatDateDe(demo.expiresAt)}` : 'nach Ablauf der Frist',
+  );
 
   const research = await leadResearch(lead);
   const facts = leadContentFacts(lead, cfg, research);

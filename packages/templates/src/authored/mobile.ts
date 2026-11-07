@@ -23,7 +23,7 @@ export const MOBILE_LAYER_CSS = [
   `#sw-ai-design h1,#sw-ai-design h2,#sw-ai-design h3,#sw-ai-design p,#sw-ai-design li,#sw-ai-design dd,#sw-ai-design dt{overflow-wrap:break-word;hyphens:auto}`,
   `#sw-ai-design [data-ad-hero-added]{display:block}`,
   `${H}{position:relative!important;isolation:isolate;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;gap:14px;min-height:min(86svh,760px)!important;width:100vw!important;max-width:none!important;margin:0 calc(50% - 50vw)!important;padding:88px 20px 112px!important;overflow:hidden!important;background:#14161a!important;color:#fff!important;border:0!important;box-shadow:none!important;text-align:left!important}`,
-  `${H}::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(10,12,16,.12) 0%,rgba(10,12,16,.38) 42%,rgba(10,12,16,.86) 100%)}`,
+  `${H}::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(10,12,16,.28) 0%,rgba(10,12,16,.55) 38%,rgba(10,12,16,.82) 62%,rgba(10,12,16,.92) 100%)}`,
   // Zwischenebenen der KI neutralisieren, damit das Foto die ganze Fläche bekommt und Text darüber lesbar bleibt
   `${H} *{position:static!important;float:none!important;transform:none!important;grid-column:auto!important;grid-row:auto!important;min-height:0!important;background:transparent!important;box-shadow:none!important;color:#fff!important;border-color:rgba(255,255,255,.35)!important;text-shadow:0 1px 14px rgba(0,0,0,.35);-webkit-text-stroke:0!important;max-width:100%!important}`,
   `${H} > *:not([data-ad-hero="media"]){width:100%!important;margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important}`,
