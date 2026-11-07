@@ -129,12 +129,17 @@ describe('Individuelles HTML/CSS statt Layoutvorgabe', () => {
 });
 
 describe('Vollständige Seiten und Änderungen im freien Entwurf (05.11.2026)', () => {
-  it('meldet Kurzseiten: zu wenige Abschnitte, zu wenig Text, Bilder ungenutzt', async () => {
+  it('meldet Kurzseiten: zu wenige Abschnitte, Bilder ungenutzt – aber keine Mindesttextmenge mehr (07.11.2026)', async () => {
     const { authoredCompleteness } = await import('../src');
     const short = authoredCompleteness(design.html, 3);
     expect(short.join(' ')).toMatch(/Abschnitte/);
-    expect(short.join(' ')).toMatch(/Zeichen/);
+    expect(short.join(' ')).not.toMatch(/Zeichen/);
     expect(short.join(' ')).toMatch(/Bildslots/);
+    const brief = Array.from(
+      { length: 5 },
+      (_, i) => `<section><h2>Teil ${i}</h2><p>Kurz.</p><img src="{{image_${(i % 2) + 1}}}" alt="x"></section>`,
+    ).join('');
+    expect(authoredCompleteness(`<div><h1>x</h1>${brief}</div>`, 3)).toEqual([]);
     const sections = Array.from(
       { length: 6 },
       (_, i) =>

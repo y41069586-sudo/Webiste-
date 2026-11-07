@@ -34,7 +34,13 @@ export const KIT_TEMPLATES: TemplateDef[] = KITS.map((kit) => ({
 export * from './types';
 export { updateAuthoredCopy } from './authored/update';
 export { AUTHORED_TEMPLATES, authoredTemplateId, isAuthoredTemplate } from './authored/render';
-export { FULL_PAGE_VERSION, AUTHORED_SECTION_KEYS, authoredSectionIssues } from './authored/sections';
+export {
+  FULL_PAGE_VERSION,
+  LEGACY_FULL_PAGE_VERSION,
+  AUTHORED_SECTION_KEYS,
+  authoredSectionIssues,
+  type FullPageVersion,
+} from './authored/sections';
 export { locationPurpose, locationText, adaptLocationHeading } from './authored/location';
 export { applyMobileHeroLayer, MOBILE_LAYER_VERSION } from './authored/mobile';
 export {

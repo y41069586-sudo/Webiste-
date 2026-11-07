@@ -1357,3 +1357,17 @@ Metallbau (3), Bau/Maurer (3), Stuckateur/Putz (3), Boden/Parkett (3) + Estrich 
 Manifest, EXIF und README. Stichwörter bewusst eng (z. B. „zimmerei“ statt „zimmer“, damit „Badezimmer“ eines
 Fliesenlegers keine Zimmerei-Fotos zieht; kein bloßes „bau“ wegen Metallbau/Landschaftsbau). Unbekannte Gewerke bleiben
 weiterhin ohne fachfremdes Foto.
+
+## 07.11.2026 – Demos „cleaner“: Inhaltsstandard full-page-2 (Vorbild Cyc Beauté)
+
+Betreiber: ein Hinweis oben statt Warnsätze je Abschnitt; Reihenfolge Bild-Einstieg (Text über Foto bleibt) → Leistungen
+als Kacheln mit Foto → Bildstrecke → „So einfach fragen Sie an“ (Ablauf + Angaben in einem Block) → „So erreichen Sie
+uns“ → kurze Fragen → kleiner Entwurfs-Platzhalter unten; keine Mindesttextmenge; „Cyc Beauté … minimalistisch, nicht
+krass viel Text, schönes Design – nimm dir ein Beispiel“.
+- Entwurfsbanner: „Leistungen und Bilder sind Beispiele – dies ist nicht die offizielle Website des Betriebs.“ Damit
+  zentral gekennzeichnet; weiterhin keine erfundenen Fakten oder Zusagen (§ 5 UWG).
+- `FULL_PAGE_VERSION = full-page-2`: Bereiche services, gallery, inquiry, area, faq, placeholders in fester Reihenfolge
+  (geprüft), Leistungen mit h3-Kacheln, inquiry mit ≥ 3 Listenpunkten, ≥ 5 h2, keine Mindestzeichen. `full-page-1`
+  bleibt für bestehende Seiten/Überarbeitungen gültig (inkl. Beispiel-Kennzeichnung im HTML).
+- KI-Regeln (Gestaltungsplanung, Umsetzung, Prüfung) auf Minimalismus, kurze Absätze, aufklappbare Details und
+  „keine Warnsätze“ umgestellt; Cyc Beauté als Qualitätsmaßstab in Prinzipien (nicht zum Kopieren).

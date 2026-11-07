@@ -424,7 +424,7 @@ ${jsonLd}
   let banner = '';
   if (isDemo && demo) {
     banner =
-      `<aside class="sw-demo-context" aria-label="Hinweis zum Entwurf"><strong>Unverbindlicher Website-Entwurf</strong> von ${esc(demo.sender.company)} für ${esc(facts.name)}. Dies ist nicht die offizielle Website des Betriebs.</aside>
+      `<aside class="sw-demo-context" aria-label="Hinweis zum Entwurf"><strong>Unverbindlicher Website-Entwurf</strong> von ${esc(demo.sender.company)} für ${esc(facts.name)}. Leistungen und Bilder sind Beispiele – dies ist nicht die offizielle Website des Betriebs.</aside>
 +<aside class="sw-demo-toolbar" aria-label="Website übernehmen"><div class="sw-demo-toolbar-inner">
 +  <span class="sw-provider-mark">${brandMarkHtml(24)}</span><p class="sw-demo-toolbar-title text-sm"><strong>Ihr Entwurf.</strong> Erst einrichten, dann kostenpflichtig bestellen.</p>
 +  <div class="sw-demo-actions"><a href="${esc(demo.checkoutUrl)}" class="sw-demo-buy">Website übernehmen</a><a href="#uebernehmen" class="sw-demo-ask">Preise und Leistungen</a><a href="#frage" class="sw-demo-ask">Fragen</a></div>

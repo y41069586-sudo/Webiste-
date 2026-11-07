@@ -10,7 +10,7 @@ export interface AuthoredDesign {
   html: string;
   css: string;
   displayFont: KitDisplayFont;
-  contentVersion?: 'full-page-1';
+  contentVersion?: 'full-page-1' | 'full-page-2';
   colors: { background: string; foreground: string; accent: string; onAccent: string };
   textFont: 'karla' | 'atkinson';
 }
@@ -77,7 +77,7 @@ export function checkAuthoredDesign(d: AuthoredDesign): string[] {
     contrastRatio(d.colors.onAccent, d.colors.accent) < 4.5
   )
     errors.push('Text- und Akzentfarben brauchen mindestens 4,5:1 Kontrast.');
-  if (d.contentVersion && d.contentVersion !== 'full-page-1') errors.push('Unbekannter Inhaltsstandard.');
+  if (d.contentVersion && !['full-page-1', 'full-page-2'].includes(d.contentVersion)) errors.push('Unbekannter Inhaltsstandard.');
   const tree = parseFragment(d.html, { onParseError: (e) => errors.push(`HTML: ${e.code}`) });
   let h1 = 0;
   const ids = new Set<string>();
@@ -90,7 +90,7 @@ export function checkAuthoredDesign(d: AuthoredDesign): string[] {
       if (!ATTRS.has(a.name)) errors.push(`Nicht erlaubtes Attribut: ${a.name}`);
       if (
         a.name === 'data-ad-section' &&
-        !['services', 'process', 'preparation', 'area', 'gallery', 'faq', 'placeholders'].includes(a.value)
+        !['services', 'process', 'preparation', 'inquiry', 'area', 'gallery', 'faq', 'placeholders'].includes(a.value)
       )
         errors.push('Unbekannter Inhaltsbereich.');
       if (a.name === 'data-ad-placeholder' && !['photos', 'team', 'references'].includes(a.value))

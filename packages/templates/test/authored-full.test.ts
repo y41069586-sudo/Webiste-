@@ -18,20 +18,34 @@ const input = () => {
   return { ...i, content: { ...i.content, design: d } };
 };
 describe('Vollständige freie Seiten, Laufzeit und Größe', () => {
+  it('full-page-2: feste Reihenfolge, Leistungen als Kacheln, ein Anfrage-Block, keine Warnsätze nötig', () => {
+    const v2 = `<div class="ad-page"><header><h1>{{name}}</h1><img src="{{image_1}}" alt="x"><a href="#anfrage">Anfragen</a></header><section data-ad-section="services"><h2>Leistungen</h2><article><h3>Innenanstrich</h3><p>Wände und Decken.</p></article><article><h3>Lackieren</h3><p>Türen und Rahmen.</p></article><article><h3>Tapezieren</h3><p>Vlies und Raufaser.</p></article></section><section data-ad-section="gallery"><h2>Eindrücke</h2><img src="{{image_1}}" alt="a"><img src="{{image_2}}" alt="b"></section><section data-ad-section="inquiry"><h2>So einfach fragen Sie an</h2><ul><li>Anlass nennen</li><li>Ort angeben</li><li>Wunschzeitraum nennen</li></ul></section><section data-ad-section="area"><h2>So erreichen Sie uns</h2><p>{{service_area}}</p></section><section data-ad-section="faq"><h2>Kurze Fragen</h2><details><summary>Welche Angaben?</summary><p>Anlass und Ort.</p></details><details><summary>Fotos?</summary><p>Gern.</p></details><details><summary>Buchung?</summary><p>Nein.</p></details></section><section data-ad-section="placeholders"><h2>Noch zu ergänzen</h2><p data-ad-placeholder="photos">{{placeholder_photos}}</p><p data-ad-placeholder="team">{{placeholder_team}}</p><p data-ad-placeholder="references">{{placeholder_references}}</p></section></div>`;
+    expect(authoredSectionIssues(v2, 3, 2)).toEqual([]);
+    const swapped = v2
+      .replace('data-ad-section="services"', 'data-ad-section="tmp"')
+      .replace('data-ad-section="gallery"', 'data-ad-section="services"')
+      .replace('data-ad-section="tmp"', 'data-ad-section="gallery"');
+    expect(authoredSectionIssues(swapped, 3, 2).join()).toMatch(/Reihenfolge/);
+    expect(authoredSectionIssues(v2.replace('<li>Wunschzeitraum nennen</li>', ''), 3, 2).join()).toMatch(
+      /So einfach fragen Sie an/,
+    );
+  });
   it('requires all semantic content blocks, not a fixed layout order', () => {
-    expect(authoredSectionIssues(d.html, 3, 2)).toEqual([]);
+    expect(authoredSectionIssues(d.html, 3, 2, 'full-page-1')).toEqual([]);
     for (const section of ['services', 'process', 'preparation', 'area', 'gallery', 'faq', 'placeholders']) {
-      expect(authoredSectionIssues(d.html.replace(`data-ad-section="${section}"`, ''), 3, 2).length).toBeGreaterThan(0);
+      expect(
+        authoredSectionIssues(d.html.replace(`data-ad-section="${section}"`, ''), 3, 2, 'full-page-1').length,
+      ).toBeGreaterThan(0);
     }
   });
   it('rejects missing example labels, invented area output and incomplete FAQs', () => {
-    expect(authoredSectionIssues(d.html.replace('Beispielablauf', 'Ablauf'), 3, 2)).toContain(
+    expect(authoredSectionIssues(d.html.replace('Beispielablauf', 'Ablauf'), 3, 2, 'full-page-1')).toContain(
       'Anfrageablauf sichtbar als Beispiel kennzeichnen.',
     );
-    expect(authoredSectionIssues(d.html.replace('{{service_area}}', 'Wir sind im gesamten Ruhrgebiet tätig.'), 3, 2)).toContain(
-      'Einsatzgebiet nur über den geprüften service_area-Token ausgeben.',
-    );
-    expect(authoredSectionIssues(d.html, 2, 2).length).toBeGreaterThan(0);
+    expect(
+      authoredSectionIssues(d.html.replace('{{service_area}}', 'Wir sind im gesamten Ruhrgebiet tätig.'), 3, 2, 'full-page-1'),
+    ).toContain('Einsatzgebiet nur über den geprüften service_area-Token ausgeben.');
+    expect(authoredSectionIssues(d.html, 2, 2, 'full-page-1').length).toBeGreaterThan(0);
   });
   it('labels the proposed area and missing assets in draft, removes placeholders and unconfirmed surrounding region live', () => {
     const i = input();

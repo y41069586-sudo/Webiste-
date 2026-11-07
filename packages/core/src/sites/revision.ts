@@ -1,4 +1,11 @@
-import { checkAuthoredDesign, authoredText, updateAuthoredCopy, authoredSectionIssues, FULL_PAGE_VERSION } from '@wbm/templates';
+import {
+  checkAuthoredDesign,
+  authoredText,
+  updateAuthoredCopy,
+  authoredSectionIssues,
+  FULL_PAGE_VERSION,
+  LEGACY_FULL_PAGE_VERSION,
+} from '@wbm/templates';
 import { ICON_KEYS } from '@wbm/templates/icons';
 import type { SiteContent } from '@wbm/templates/types';
 import { DEMO_CONTENT_SCHEMA, DEMO_SYSTEM_PROMPT, normalizeContent, type RuleViolation } from '../demos/content';
@@ -118,8 +125,9 @@ const LIMITS: Record<string, [number, number]> = {
 export function validateRevision(c: SiteContent, customerText: string, knownFacts: string[]): RuleViolation[] {
   const v: RuleViolation[] = [];
   if (c.design) for (const detail of checkAuthoredDesign(c.design)) v.push({ field: 'design', rule: 'Freie Gestaltung', detail });
-  if (c.design?.contentVersion === FULL_PAGE_VERSION)
-    for (const detail of authoredSectionIssues(c.design.html, c.faq?.length ?? 0))
+  // Überarbeitungen prüfen nach dem Standard, mit dem die Seite gebaut wurde (full-page-1 bleibt gültig)
+  if (c.design?.contentVersion === FULL_PAGE_VERSION || c.design?.contentVersion === LEGACY_FULL_PAGE_VERSION)
+    for (const detail of authoredSectionIssues(c.design.html, c.faq?.length ?? 0, undefined, c.design.contentVersion))
       v.push({ field: 'design', rule: 'Vollständige Seite', detail });
   const source = `${customerText}\n${knownFacts.join('\n')}`.toLowerCase();
   if (!Array.isArray(c.services) || c.services.length < 1 || c.services.length > 6)
