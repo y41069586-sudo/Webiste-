@@ -99,10 +99,25 @@ export function parseStudioPlan(raw: unknown): StudioPlan {
   return plan;
 }
 
+/**
+ * Dieselben Maßstäbe, die die automatische Prüfung anwendet (render/browser-checks.ts, Schwellen unverändert).
+ * Der Baue-KI vorab bekannt, damit Fehler gar nicht erst entstehen (Betreiber 08.11.2026).
+ */
+export const BUILD_QA_CRITERIA = [
+  'Prüfmaßstäbe der automatischen Prüfung (jeder Verstoß blockiert; baue von vornherein so):',
+  '1. Breite: Nichts ragt über den Bildschirm, bei 320, 390 und 1440 px. Kein horizontales Scrollen. Auf dem Handy max-width:100%, und Flex-/Grid-Kinder brauchen min-width:0.',
+  '2. Überlappung: Textelemente (h1–h3, p, li, a, button, label, span, summary) dürfen sich nicht überlagern. Keine Beschriftung über Adresse, Telefonnummer oder Button.',
+  '3. Kontrast: Text mindestens 4,5:1 zum Hintergrund. Auf Fotos braucht heller Text einen dunklen Verlauf darunter.',
+  '4. Hauptüberschrift (h1): höchstens die Hälfte der Bildschirmhöhe (1440×900 und 390×844), besser ein Drittel. Lange Namen kleiner setzen, nie mitten im Wort umbrechen.',
+  '5. Genau eine h1 im Inhalt. Jedes Sprungziel (#anfrage) existiert. Jedes Bild hat alt-Text und einen gültigen Bildslot.',
+  '6. Keine !important-Regeln, kein Text in CSS-content, kein JavaScript, keine Elemente außerhalb der erlaubten Liste.',
+  '7. Abstände zwischen Abschnitten gleichmäßig; keine großen leeren Flächen.',
+].join('\n');
+
 export function studioImplementationBrief(plan: StudioPlan): string {
   return `VERBINDLICHE GESTALTERISCHE AUFGABE (${STUDIO_VERSION}; Vorschlag, keine Betriebsfakten):
 ${JSON.stringify({ visitorTask: plan.visitorTask, direction: plan[plan.selected], reason: plan.reason, pageJourney: plan.pageJourney, restraint: plan.restraint })}
-Setze dieses Konzept als eigenständig geschriebenes HTML/CSS um. Keine Mischung mit der verworfenen Richtung. Die Reihenfolge der Inhaltsbereiche ist fest (services, gallery, inquiry, area, faq, placeholders); Gestaltung, Proportionen und Abschnitthöhen bestimmst du. Das sichtbare Design soll den Plan erkennbar tragen und minimalistisch bleiben. Verwende passende Bildausschnitte und mobile Regeln. Falls Fakten oder technische Grenzen dem Konzept widersprechen, haben Wahrheit, Sicherheit und Lesbarkeit Vorrang. design.concept fasst die tatsächlich umgesetzte Idee zusammen.`;
+Setze dieses Konzept als eigenständig geschriebenes HTML/CSS um. Keine Mischung mit der verworfenen Richtung. Die Reihenfolge der Inhaltsbereiche ist fest (services, gallery, inquiry, area, faq, placeholders); Gestaltung, Proportionen und Abschnitthöhen bestimmst du. Das sichtbare Design soll den Plan erkennbar tragen und minimalistisch bleiben. Verwende passende Bildausschnitte und mobile Regeln. Falls Fakten oder technische Grenzen dem Konzept widersprechen, haben Wahrheit, Sicherheit und Lesbarkeit Vorrang. design.concept fasst die tatsächlich umgesetzte Idee zusammen.\n${BUILD_QA_CRITERIA}`;
 }
 
 /** Höchstzahl an Gestaltungs-Kritikpunkten, die als Hinweis an den Betreiber gehen statt zu blockieren */
