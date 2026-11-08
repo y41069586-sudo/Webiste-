@@ -337,7 +337,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     const demoHtml = demo.htmlStorageKey ? await storage.get(demo.htmlStorageKey) : null;
     if (!demoHtml?.length) throw Error('Ausgelieferte Demo fehlt; kein persönlicher Brief ohne Abgleich.');
     // „Kunden, die Sie gerade verlieren könnten“: nur Erstbrief ohne Slot-Belege, mit freigegebenem Branchenbeleg
-    lossClaim = sequence === 1 && !slotRender && !opts.test ? await pickLossClaim(db, lead.industry ?? null) : null;
+    // 08.11.2026: auch bei Textbausteinen (Handwerk u. a.) zulassen; deren Beleg ist derselbe freigegebene Claim
+    lossClaim = sequence === 1 && !opts.test ? await pickLossClaim(db, lead.industry ?? null) : null;
     composeInput.invitationCopy = await writePreviewInvitation({
       context: composeInput.personalization,
       sequence,
