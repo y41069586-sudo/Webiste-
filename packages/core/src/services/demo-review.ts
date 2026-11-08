@@ -36,6 +36,8 @@ export async function approveDemo(
   opts: {
     manual: boolean;
     note?: string;
+    /** Du hast die technischen Befunde selbst angesehen und gibst trotzdem frei (wird protokolliert) */
+    acceptTechnical?: boolean;
     review?: {
       letterFacts?: import('../letters/personalization').VerifiedLetterContext['details'];
       facts: boolean;
@@ -55,7 +57,11 @@ export async function approveDemo(
     if (!['pending_review', 'qa_failed'].includes(demo.status)) {
       throw new Error(`Demo im Status ${demo.status} kann nicht freigegeben werden`);
     }
-    if (!demo.qaResultJson?.passed || demo.qaResultJson.checks.some((c) => !c.passed))
+    // 08.11.2026 (Betreiber): technische Befunde dürfen die Freigabe nicht blockieren, wenn du sie selbst gesehen
+    // hast. Die Befunde bleiben sichtbar und werden im Protokoll festgehalten.
+    const failedTech = (demo.qaResultJson?.checks ?? []).filter((c) => !c.passed).map((c) => c.name);
+    if (!demo.qaResultJson) throw new Error('Demo ohne technisches Prüfergebnis; bitte zuerst prüfen.');
+    if (!opts.acceptTechnical && (!demo.qaResultJson?.passed || failedTech.length))
       throw new Error('Technische QA nicht bestanden; Befunde beheben und erneut prüfen.');
     if (!opts.manual && (demo.contentJson?._meta as { designRequiresReview?: boolean } | undefined)?.designRequiresReview)
       throw new Error('Neuer Gestaltungskontext benötigt eine individuelle visuelle Freigabe.');
@@ -146,7 +152,10 @@ export async function approveDemo(
       entityId: demoId,
       action: opts.manual ? 'approve' : 'auto_approve',
       actor,
-      context: { note: opts.note },
+      context: {
+        note: opts.note,
+        ...(opts.acceptTechnical && failedTech.length ? { technischeBefunde: failedTech, bewusstFreigegeben: true } : {}),
+      },
     });
   });
   await enqueue(QUEUES.publishDemo, { demoId }, { singletonKey: `publish:${demoId}` });

@@ -132,6 +132,18 @@ export default async function DemoDetail({
                 <input type="hidden" name="rating" value="gut" />
                 {inFlow ? <input type="hidden" name="flow" value="1" /> : null}
                 <p className="decide-title">Passt?</p>
+                {demo.qaResultJson && demo.qaResultJson.checks.some((c) => !c.passed) ? (
+                  <label className="decide-check">
+                    <input type="checkbox" name="accept_technical" />
+                    <span>
+                      Technische Befunde trotzdem freigeben (ich habe die Demo selbst angesehen). Befunde:{' '}
+                      {demo.qaResultJson.checks
+                        .filter((c) => !c.passed)
+                        .map((c) => c.name)
+                        .join(', ')}
+                    </span>
+                  </label>
+                ) : null}
                 <label className="decide-check">
                   <input type="checkbox" name="ok" required />
                   <span>Angesehen – Name, Adresse und Texte stimmen</span>

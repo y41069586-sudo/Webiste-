@@ -83,6 +83,10 @@ export default async function DemosPage({
               Ich habe die Demos angesehen und sie stimmen.
             </label>
             <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="accept_technical" />
+              Auch Demos mit technischen Befunden freigeben (ich habe sie selbst angesehen).
+            </label>
+            <label className="flex items-center gap-2 text-sm">
               Gesamtnote:
               <select name="rating" defaultValue="gut" className="rounded border px-2 py-1">
                 <option value="sehr_gut">Sehr gut</option>

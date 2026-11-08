@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import {
   approveDemo,
   demoRevisionKey,
@@ -34,6 +34,7 @@ export async function approveDemoAction(form: FormData): Promise<void> {
   try {
     await approveDemo(String(form.get('id')), actorOf(s), {
       manual: true,
+      acceptTechnical: form.get('accept_technical') === 'on',
       note: String(form.get('note') ?? '') || undefined,
       review: {
         qualityScores: Object.fromEntries(
@@ -128,6 +129,7 @@ export async function bulkApproveDemosAction(form: FormData): Promise<void> {
     try {
       await approveDemo(row.id, actorOf(s), {
         manual: true,
+        acceptTechnical: form.get('accept_technical') === 'on',
         review: {
           qualityScores: Object.fromEntries(
             Object.keys(DEMO_QUALITY_DIMENSIONS).map((key) => [key, rating]),
