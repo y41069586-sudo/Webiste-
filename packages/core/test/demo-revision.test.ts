@@ -21,7 +21,7 @@ describe('Kostenlose Änderung vor dem Kauf', () => {
   beforeAll(async () => {
     registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     await resetDb();
-    await findLeads({ actor: 'job:test' });
+    await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     const lead = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
     demoId = await buildDemo(lead.id, { actor: 'job:test' });
     await qaDemo(demoId, 'job:test', { lighthouse: false });

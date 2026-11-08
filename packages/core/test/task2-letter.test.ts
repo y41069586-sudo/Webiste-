@@ -50,7 +50,7 @@ describe('V4 actual generation, reviewed facts and immutable print assignment', 
     await resetDb();
     await resetVariants();
     await updateConfig({ offers: { activeVersion: 'v4' }, switches: { dryRun: true } }, 'test');
-    await findLeads({ actor: 'test' });
+    await findLeads({ actor: 'test', cities: ['Dortmund'] });
     lead = (
       await getDb()
         .select()

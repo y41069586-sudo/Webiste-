@@ -346,7 +346,7 @@ describe('Playbooks', () => {
 
   it('Lead-Finder speichert die Branche je Lead; Tabelle playbooks wird gespiegelt', async () => {
     await resetDb();
-    await findLeads({ actor: 'job:test' });
+    await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     const rows = await getDb().select({ industry: leads.industry, group: leads.branchGroup }).from(leads);
     expect(rows.length).toBeGreaterThan(0);
     for (const r of rows) expect(r.industry).toBe(r.group);

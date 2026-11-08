@@ -235,7 +235,7 @@ describe('Slot-Briefe im echten Ablauf', () => {
     await resetVariants();
     await getDb().execute(sql`TRUNCATE claim_usages, claims CASCADE`);
     await syncClaims(getDb());
-    await findLeads({ actor: 'job:test', branches: ['maler'] });
+    await findLeads({ actor: 'job:test', branches: ['maler'], cities: ['Dortmund'] });
     const lead = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
     leadId = lead.id;
     expect(lead.industry).toBe('handwerk');

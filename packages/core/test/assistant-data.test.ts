@@ -7,7 +7,7 @@ describe('Assistent: Datenbank-Abfragen', () => {
   beforeEach(resetDb);
 
   it('liefert Zählungen, Listen und Namenssuche aus echten Tabellen', async () => {
-    await findLeads({ actor: 'job:test' });
+    await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     const d = dbAssistantData;
     const byStatus = await d.leadCounts({}, 'status');
     expect(byStatus.reduce((s, r) => s + r.n, 0)).toBeGreaterThan(0);

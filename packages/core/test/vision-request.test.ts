@@ -1,14 +1,12 @@
 import { expect, it, vi } from 'vitest';
 import { AnthropicLlm } from '../src/providers/llm/anthropic';
 it('passes base64 image blocks and the bounded schema through the existing SDK without network calls', async () => {
-  const create = vi
-    .fn()
-    .mockResolvedValue({
-      model: 'mock-sdk-model',
-      usage: { input_tokens: 2, output_tokens: 1 },
-      content: [{ type: 'tool_use', id: 'test', name: 'design', input: { character: 'warm' } }],
-      stop_reason: 'tool_use',
-    });
+  const create = vi.fn().mockResolvedValue({
+    model: 'mock-sdk-model',
+    usage: { input_tokens: 2, output_tokens: 1 },
+    content: [{ type: 'tool_use', id: 'test', name: 'design', input: { character: 'warm' } }],
+    stop_reason: 'tool_use',
+  });
   const provider = new AnthropicLlm('test-placeholder-never-used', false);
   Object.defineProperty(provider, 'client', { value: { beta: { messages: { create } } } });
   const result = await provider.generateStructured({

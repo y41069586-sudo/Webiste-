@@ -20,7 +20,7 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
   beforeAll(async () => {
     registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     await resetDb();
-    await findLeads({ actor: 'job:test' });
+    await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     const q = await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1);
     leadId = q[0]!.id;
   });

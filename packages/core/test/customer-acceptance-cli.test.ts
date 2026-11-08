@@ -31,23 +31,21 @@ async function fixture() {
       trackToken: randomBytes(16).toString('hex'),
     })
     .returning();
-  await db
-    .insert(orders)
-    .values({
-      id,
-      leadId: lead!.id,
-      plan: 'care_plus',
-      provider: 'stripe',
-      paymentMode: 'test',
-      status: 'paid',
-      amountCents: 59700,
-      netCents: 59700,
-      customerEmail: own,
-      customerCompany: 'Fiktiver TESTBETRIEB',
-      customerName: 'Test',
-      offerSnapshot: v4Offer('care_plus', new Date().toISOString()),
-      billingAddressJson: { street: 'Testweg 1', postalCode: '12345', city: 'Testort', country: 'DE' },
-    });
+  await db.insert(orders).values({
+    id,
+    leadId: lead!.id,
+    plan: 'care_plus',
+    provider: 'stripe',
+    paymentMode: 'test',
+    status: 'paid',
+    amountCents: 59700,
+    netCents: 59700,
+    customerEmail: own,
+    customerCompany: 'Fiktiver TESTBETRIEB',
+    customerName: 'Test',
+    offerSnapshot: v4Offer('care_plus', new Date().toISOString()),
+    billingAddressJson: { street: 'Testweg 1', postalCode: '12345', city: 'Testort', country: 'DE' },
+  });
   const [customer] = await db
     .insert(customers)
     .values({
@@ -59,16 +57,14 @@ async function fixture() {
       accessToken: randomBytes(16).toString('hex'),
     })
     .returning();
-  await db
-    .insert(sites)
-    .values({
-      customerId: customer!.id,
-      templateId: 'handwerk-klar',
-      palette: 'werkblau',
-      contentJson: {},
-      formKey: randomBytes(16).toString('hex'),
-      status: 'onboarding',
-    });
+  await db.insert(sites).values({
+    customerId: customer!.id,
+    templateId: 'handwerk-klar',
+    palette: 'werkblau',
+    contentJson: {},
+    formKey: randomBytes(16).toString('hex'),
+    status: 'onboarding',
+  });
 }
 function run(orderId = id, opts: { apply?: boolean; confirm?: string } = {}) {
   return exec(process.execPath, ['--import', 'tsx', script, `--order=${orderId}`, ...(opts.apply ? ['--apply'] : [])], {

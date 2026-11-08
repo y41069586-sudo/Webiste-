@@ -62,9 +62,9 @@ describe('Assistent ohne KI: versteht Fragen zum ganzen Projekt', () => {
   });
 
   it('schlägt Zielstädte, Warnungen und Suchen als Aktion vor', async () => {
-    expect((await ask('Füge Bochum als Zielstadt hinzu')).aktionen[0]).toMatchObject({
+    expect((await ask('Füge Lüneburg als Zielstadt hinzu')).aktionen[0]).toMatchObject({
       typ: 'zielstadt_hinzufuegen',
-      staedte: ['Bochum'],
+      staedte: ['Lüneburg'],
     });
     expect((await ask('Entferne Dortmund aus den Zielstädten')).aktionen[0]).toMatchObject({
       typ: 'zielstadt_entfernen',

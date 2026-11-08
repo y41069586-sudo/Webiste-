@@ -13,7 +13,7 @@ describe('Lead-Suche: Fortschritt, Stopp, Mindestgrenze', () => {
 
   it('meldet Phasen, Zähler und Protokoll an die Verwaltung', async () => {
     const progress = reporter('run-1');
-    const s = await findLeads({ actor: 'job:test', progress });
+    const s = await findLeads({ actor: 'job:test', progress, cities: ['Dortmund'] });
     await progress.finish('fertig', 'Fertig');
     const saved = await readSearchProgress();
     expect(saved?.runId).toBe('run-1');
@@ -29,17 +29,17 @@ describe('Lead-Suche: Fortschritt, Stopp, Mindestgrenze', () => {
   it('hält auf Wunsch an, ohne Geprüftes zu verlieren', async () => {
     const progress = reporter('run-2');
     await requestSearchStop('run-2', 'admin:test');
-    const s = await findLeads({ actor: 'job:test', progress });
+    const s = await findLeads({ actor: 'job:test', progress, cities: ['Dortmund'] });
     expect(s.stopped).toBe(true);
     expect(s.created).toBe(0);
     // Ein Stopp-Wunsch für einen anderen Lauf hält diesen nicht an
-    const other = await findLeads({ actor: 'job:test', progress: reporter('run-3') });
+    const other = await findLeads({ actor: 'job:test', progress: reporter('run-3'), cities: ['Dortmund'] });
     expect(other.stopped).toBeUndefined();
     expect(other.created).toBe(other.found);
   });
 
   it('sortiert offene Leads unter der Mindestgrenze aus, ohne sie zu löschen', async () => {
-    await findLeads({ actor: 'job:test' });
+    await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     const db = getDb();
     // Mock-Leads sind von der Grenze ausgenommen: für den Test wie OSM-Treffer behandeln
     await db.execute(sql`UPDATE leads SET source = 'osm' WHERE status IN ('discovered', 'qualified')`);

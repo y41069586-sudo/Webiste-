@@ -63,7 +63,7 @@ describe('Schnellprüfung (Datenbank)', () => {
   let ids: string[] = [];
   beforeAll(async () => {
     await resetDb();
-    await findLeads({ actor: 'job:test' });
+    await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     const db = getDb();
     const rows = await db.select({ id: leads.id }).from(leads).limit(3);
     ids = rows.map((r) => r.id);
