@@ -43,7 +43,8 @@ describe('Konfiguration', () => {
     expect(cfg.timing.demoExpiryDays).toBe(30);
     expect(cfg.timing.followupAfterDays).toBe(12);
     expect(cfg.review.manualReviewFirstN).toBe(30);
-    expect(cfg.targeting.cities).toEqual(['Dortmund']);
+    expect(cfg.targeting.cities[0]).toBe('Dortmund');
+    expect(cfg.targeting.cities).toContain('Köln');
     // Erste Charge (B10): Beauty, Handwerk, Gastronomie aktiv; Einzelhandel und Kurse vorbereitet, aber aus
     expect(cfg.targeting.branches.filter((b) => b.active).map((b) => b.queries[0])).toEqual([
       'Nagelstudio',

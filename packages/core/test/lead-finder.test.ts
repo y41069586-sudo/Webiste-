@@ -12,7 +12,7 @@ describe('Lead-Finder (Mock-Quelle)', () => {
   beforeEach(resetDb);
 
   it('findet, qualifiziert und begründet Ablehnungen', async () => {
-    const s = await findLeads({ actor: 'job:test' });
+    const s = await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     expect(s.source).toBe('mock');
     expect(s.queries).toBe(6); // Dortmund × 6 aktive Branchen (Beauty, Handwerk, Gastronomie)
     expect(s.found).toBe(36);
@@ -30,15 +30,15 @@ describe('Lead-Finder (Mock-Quelle)', () => {
   });
 
   it('ist idempotent (zweiter Lauf legt nichts doppelt an)', async () => {
-    const a = await findLeads({ actor: 'job:test' });
-    const b = await findLeads({ actor: 'job:test' });
+    const a = await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
+    const b = await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     expect(b.created).toBe(0);
     expect(b.updated).toBe(a.found);
     expect((await getDb().select().from(leads)).length).toBe(a.found);
   });
 
   it('Sperrliste greift bei erneuter Suche', async () => {
-    await findLeads({ actor: 'job:test' });
+    await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     const lead = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')))[0]!;
     await addSuppression(
       getDb(),
@@ -46,14 +46,14 @@ describe('Lead-Finder (Mock-Quelle)', () => {
       'test',
     );
     await getDb().delete(leads).where(eq(leads.id, lead.id));
-    await findLeads({ actor: 'job:test' });
+    await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     const again = await getDb().query.leads.findFirst({ where: eq(leads.sourceId, lead.sourceId) });
     expect(again?.status).toBe('rejected');
     expect(again?.rejectionReasons).toContain('suppressed');
   });
 
   it('Opt-out anonymisiert und speichert nur Hashes', async () => {
-    await findLeads({ actor: 'job:test' });
+    await findLeads({ actor: 'job:test', cities: ['Dortmund'] });
     const lead = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')))[0]!;
     await optOutLead(getDb(), lead.id, 'public:optout', 'kein_interesse');
     const after = await getDb().query.leads.findFirst({ where: eq(leads.id, lead.id) });
