@@ -219,10 +219,12 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
 
   const demo = await currentDemoForLead(db, leadId);
   if (!demo) throw new Error('Keine veröffentlichte Demo für den Lead');
+  // Technische Befunde gelten als bewusst freigegeben, wenn der Betreiber das bestätigt hat (acceptedTechnical)
+  const acceptedTechnical = (demo.qaResultJson as { acceptedTechnical?: boolean } | null)?.acceptedTechnical === true;
   if (
-    !demo.qaResultJson?.passed ||
-    demo.qaResultJson.checks.some((c) => !c.passed) ||
-    (demo.qaResultJson.quality && !demo.qaResultJson.quality.passed)
+    !demo.qaResultJson ||
+    (!acceptedTechnical && (!demo.qaResultJson.passed || demo.qaResultJson.checks.some((c) => !c.passed))) ||
+    (!acceptedTechnical && demo.qaResultJson.quality && !demo.qaResultJson.quality.passed)
   )
     throw new Error('Demo ist nicht technisch und gestalterisch freigegeben.');
   if (!opts.test && sequence > 1) {

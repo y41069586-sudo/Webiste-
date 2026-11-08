@@ -139,6 +139,8 @@ export async function approveDemo(
           ...demo.qaResultJson,
           ...(quality ? { quality: { ...quality, htmlHash: demo.qaResultJson.quality?.htmlHash } } : {}),
           ...(opts.manual ? { review: { ...opts.review!, actor, at: new Date().toISOString() } } : {}),
+          // bewusste Freigabe trotz technischer Befunde (Brief-Auftrag prüft das und lässt sie dann zu)
+          ...(opts.acceptTechnical ? { acceptedTechnical: true } : {}),
         },
         updatedAt: new Date(),
       })
