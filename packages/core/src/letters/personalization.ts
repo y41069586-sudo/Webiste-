@@ -371,7 +371,8 @@ export function previewInvitationCopy(
   const profile = PROFILES.find((p) => p.branch.test(context.branchLabel) && (!p.focus || p.focus.test(allDetail))) ?? {
     key: 'general',
     title: 'Ihre Website-Vorschau ist online',
-    benefit: 'Wer in {ort} nach Ihnen sucht, findet dort Ihr Angebot, Ihren Standort und Ihre Nummer zum Antippen.',
+    benefit:
+      'Wer in {ort} einen Betrieb wie Ihren braucht, sucht heute zuerst im Netz. Findet er dort keine Website, fragt er womöglich bei anderen an. Jeder Auftrag, den jemand bei einem anderen Betrieb bucht, kann Ihnen dann entgehen, ohne dass Sie es merken.',
     caption: 'Ihre Website-Vorschau ansehen',
   };
   const selected: typeof usable = [];

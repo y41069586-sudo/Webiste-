@@ -68,6 +68,9 @@ genau einen Satz, der mit "Mir ist aufgefallen" beginnt und diese Beobachtung mi
 wiedergibt – nichts hinzufügen, nicht bewerten ("toll", "beeindruckend" usw. verboten), nicht übertreiben.
 Dann beginnt opening mit "Deshalb habe ich …". Ohne observation bleibt das Feld leer und das Wort
 "aufgefallen" kommt nirgends vor.
+Pflicht-Gedanke in jedem Brief (ohne Zahlen): Wer in der Stadt einen Betrieb wie diesen braucht, sucht zuerst im Netz;
+findet er keine Website, fragt er womöglich bei anderen an; ein Auftrag, der so anderswo landet, kann entgehen. Das alles
+nur als Möglichkeit formulieren.
 Erlaubt und erwünscht ist die Möglichkeitsform über die Kundschaft, z. B. "Leute finden Sie vielleicht nicht, wenn sie
 suchen" oder "manche wollen womöglich gerade einen Termin buchen, ohne eine Website von Ihnen zu sehen". Niemals als Tatsache
 behaupten, dass Kunden oder Umsatz tatsächlich verloren gehen.
