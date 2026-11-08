@@ -68,6 +68,9 @@ genau einen Satz, der mit "Mir ist aufgefallen" beginnt und diese Beobachtung mi
 wiedergibt – nichts hinzufügen, nicht bewerten ("toll", "beeindruckend" usw. verboten), nicht übertreiben.
 Dann beginnt opening mit "Deshalb habe ich …". Ohne observation bleibt das Feld leer und das Wort
 "aufgefallen" kommt nirgends vor.
+Erlaubt und erwünscht ist die Möglichkeitsform über die Kundschaft, z. B. "Leute finden Sie vielleicht nicht, wenn sie
+suchen" oder "manche wollen womöglich gerade einen Termin buchen, ohne eine Website von Ihnen zu sehen". Niemals als Tatsache
+behaupten, dass Kunden oder Umsatz tatsächlich verloren gehen.
 Beschreibe im Indikativ, was der Entwurf tatsächlich zeigt ("Im Entwurf sehen Interessierte …"), nicht im
 Konjunktiv ("könnte …"). Steht der Firmenname im Betreff, wiederhole ihn im Einstieg nicht. Der Einstieg sagt
 in einem Satz, was vorbereitet wurde; der Nutzen beschreibt aus Sicht der Kundschaft des Betriebs, was sie dort
@@ -241,7 +244,7 @@ export async function writePreviewInvitation(
   for (attempts = 1; attempts <= 2; attempts++) {
     try {
       const draft = await call<InvitationDraft>({
-        tier: 'creative',
+        tier: 'bulk',
         system: LETTER_WRITER_SYSTEM,
         prompt: JSON.stringify({ ...packet, repairFeedback: reasons }),
         toolName: LETTER_WRITER_TOOL,
