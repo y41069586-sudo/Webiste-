@@ -8,7 +8,7 @@ import { ResendEmail } from './email/resend';
 import os from 'node:os';
 import path from 'node:path';
 import { DEFAULT_CONFIG } from '../config/settings';
-import { OsmExtractLeadSource } from './lead-source/osm-extract';
+import { OsmRegionsLeadSource } from './lead-source/regions-source';
 import { OverpassLeadSource } from './lead-source/overpass';
 import { EasyNovaMailProvider } from './mail/easynova';
 import { LetterXpressMailProvider } from './mail/letterxpress';
@@ -27,10 +27,9 @@ export const registry = {
     const userAgent = `SeitenWerk-LeadFinder/1.0 (+${env.APP_URL}; ${env.EMAIL_FROM?.match(/[^<\s]+@[^>\s]+/)?.[0] ?? 'kontakt über Website'})`;
     const overpass = new OverpassLeadSource(env.OVERPASS_URL, userAgent);
     if (!env.OSM_EXTRACT_URL) return [overpass];
+    // Alle Bundesländer: je Stadt die Karte ihres Landes (08.11.2026, Betreiberauftrag „B“)
     return [
-      new OsmExtractLeadSource({
-        url: env.OSM_EXTRACT_URL,
-        dir: env.OSM_EXTRACT_DIR ?? path.join(os.tmpdir(), 'wbm-osm'),
+      new OsmRegionsLeadSource(env.OSM_EXTRACT_DIR ?? path.join(os.tmpdir(), 'wbm-osm'), {
         userAgent,
         baseTags: DEFAULT_CONFIG.targeting.branches.flatMap((b) => b.osmTags),
         fallback: overpass,

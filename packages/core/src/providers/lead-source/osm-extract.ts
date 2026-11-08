@@ -266,6 +266,11 @@ export class OsmExtractLeadSource implements LeadSource {
 
   constructor(private readonly o: OsmExtractOptions) {}
 
+  /** Geladenen Index freigeben (Speicher): nur das aktive Bundesland bleibt im Speicher. Die Platte bleibt. */
+  release(): void {
+    this.index = undefined;
+  }
+
   private get indexFile() {
     return path.join(this.o.dir, 'index-v1.json');
   }
