@@ -179,7 +179,11 @@ Belegte Aussagen sind im Text mit [[BELEG]]…[[/BELEG]] markiert und gelten als
 Frage: Enthält der Brief außerhalb der markierten Belege eine Aussage über Wirkung, Umsatz, Erfolg,
 mehr Kunden, mehr Anfragen oder mehr Buchungen – oder eine Tatsachenbehauptung mit Zahl –, die nicht
 wörtlich aus einem Beleg stammt? Allgemeine Beschreibungen des Angebots (was die Website enthält, Preise,
-Garantie, Ablaufdatum) sind keine Wirkungsaussagen. Antworte nur über das Werkzeug.`;
+Garantie, Ablaufdatum) sind keine Wirkungsaussagen.
+Ausdrücklich erlaubt: eine als Möglichkeit formulierte Aussage ("könnte", "womöglich", "vielleicht"), dass
+Interessierte den Betrieb ohne Website womöglich nicht finden oder woanders anfragen. Sie ist keine unbelegte
+Wirkungsaussage, solange sie nicht behauptet, dass tatsächlich Umsatz, Kunden oder Anfragen verloren gehen,
+und sie nicht über den Inhalt des Belegs hinausgeht. Antworte nur über das Werkzeug.`;
 
 export const TRUTH_TOOL_SCHEMA = {
   type: 'object',
