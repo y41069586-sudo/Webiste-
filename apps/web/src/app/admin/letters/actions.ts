@@ -108,3 +108,26 @@ export async function lxpTestJobAction(form: FormData): Promise<void> {
   revalidatePath(`/admin/letters/${id}`);
   redirect(`/admin/letters/${id}?hinweis=${encodeURIComponent(msg)}`);
 }
+
+/**
+ * Sammelfreigabe + Versand (07.11.2026, Betreiber: „alle Briefe auf einmal bestätigen und verschicken“). Nur mit deiner
+ * Gesamtnote und „alle gelesen“. Briefe, die der Wahrheits-Check oder die Prüfung sperrt, bleiben still liegen.
+ */
+export async function bulkApproveAndSendLettersAction(form: FormData): Promise<void> {
+  const s = await requireAdmin();
+  const rating = RATING_SCORES[String(form.get('rating') ?? '')];
+  if (!rating || form.get('ok') !== 'on') redirect('/admin/letters?tab=review&sammel=nichts');
+  const scores = Object.fromEntries(Object.keys(LETTER_QUALITY_DIMENSIONS).map((key) => [key, rating])) as LetterQualityScores;
+  const rows = await getDb().select({ id: schema.letters.id }).from(schema.letters).where(eq(schema.letters.status, 'generated'));
+  let freigegeben = 0;
+  for (const row of rows) {
+    try {
+      if (await approveLetter(row.id, actorOf(s), scores)) freigegeben++;
+    } catch {
+      // gesperrter Brief: bleibt liegen, ohne Meldung pro Stück
+    }
+  }
+  if (freigegeben > 0) await enqueue(QUEUES.sendApprovedLetters, { triggeredBy: actorOf(s) }, { singletonKey: 'send-approved' });
+  revalidatePath('/admin/letters');
+  redirect(`/admin/letters?tab=approved&sammel=${freigegeben}von${rows.length}`);
+}

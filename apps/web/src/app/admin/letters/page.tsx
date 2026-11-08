@@ -13,7 +13,7 @@ import {
 import { Badge, Card, Notice, PageHeader, StatusBadge, Table, Td, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
-import { createTestLetterAction, sendApprovedNowAction } from './actions';
+import { bulkApproveAndSendLettersAction, createTestLetterAction, sendApprovedNowAction } from './actions';
 import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Briefe' };
@@ -25,7 +25,7 @@ const TABS: { key: string; label: string; statuses: LetterStatus[]; test?: boole
   { key: 'failed', label: 'Probleme', statuses: ['failed', 'cancelled'] },
 ];
 
-export default async function LettersPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function LettersPage({ searchParams }: { searchParams: Promise<{ tab?: string; sammel?: string }> }) {
   await requireAdmin();
   const sp = await searchParams;
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0]!;
@@ -89,6 +89,39 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
         <div className="mb-4">
           <Notice>
             Echte Briefe an Betriebe gehen erst raus, wenn dein eigener Testbrief gut angekommen ist (unten „Testbrief an mich“).
+          </Notice>
+        </div>
+      ) : null}
+      {tab.key === 'review' && waiting ? (
+        <Card title="Alle auf einmal">
+          <p className="mb-3 text-sm">
+            Hier gibst du die Gesamtnote einmal für alle wartenden Briefe. Briefe mit einer Sperre (z. B. unbelegte Aussage)
+            bleiben liegen, ohne Fehlermeldung.
+          </p>
+          <form action={bulkApproveAndSendLettersAction} className="grid gap-3">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="ok" required />
+              Ich habe die Briefe gelesen und sie stimmen.
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              Gesamtnote:
+              <select name="rating" defaultValue="gut" className="rounded border px-2 py-1">
+                <option value="sehr_gut">Sehr gut</option>
+                <option value="gut">Gut</option>
+              </select>
+            </label>
+            <SubmitButton type="submit" className={btn.primary} disabled={sw.killSwitch}>
+              Alle freigeben und verschicken
+            </SubmitButton>
+          </form>
+        </Card>
+      ) : null}
+      {sp.sammel ? (
+        <div className="mb-4">
+          <Notice kind="success">
+            {sp.sammel === 'nichts'
+              ? 'Nichts freigegeben: bitte Häkchen setzen und Gesamtnote wählen.'
+              : `Sammelfreigabe: ${sp.sammel.replace('von', ' von ')} Briefe freigegeben und in den Versand gegeben.`}
           </Notice>
         </div>
       ) : null}

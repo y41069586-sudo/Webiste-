@@ -1426,3 +1426,9 @@ wurde bei jedem Pipeline-Takt erneut kostenpflichtig gebaut.
   manuelle Demo-Prüfung tat das. Jetzt wird er aus `research.website` abgeleitet (Ergebnis „nicht gefunden“, aktuell, alle drei
   Suchwege name_city, directory_links, profile_links geprüft), sonst bleibt der neutrale Text. „Firma verkauft“ (takeover) ist
   kein Brief-Aufhänger mehr.
+
+## 08.11.2026 – Sammelfreigabe für Demos und Briefe
+
+- Admin: Buttons „Alle freigeben“ (Demos) und „Alle freigeben und verschicken“ (Briefe). Du setzt Häkchen „gelesen“ und eine Gesamtnote; diese gilt für alle freigegebenen Stücke.
+- Gesperrte Einzelstücke (technischer Fehler, Wahrheits-Check, Betriebsdaten) werden still übersprungen; kein Fehler für einzelne Stücke. Freigegebene Briefe gehen danach über den normalen Versand (Guthaben-Wächter, Kill-Switch, Budget bleiben aktiv).
+- Ursache des bisherigen Dauerfehlers: Die alte Sammelfreigabe übergab keine Bewertung; neue Briefe verlangen eine Bewertung, also scheiterte jeder Brief.

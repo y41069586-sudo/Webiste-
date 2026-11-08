@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { eq } from 'drizzle-orm';
 import {
   approveDemo,
   demoRevisionKey,
@@ -9,6 +10,8 @@ import {
   QUEUES,
   rejectDemo,
   setSetting,
+  getDb,
+  schema,
   DEMO_QUALITY_DIMENSIONS,
   type DemoRevisionPatch,
   type ManualQualityScores,
@@ -108,4 +111,39 @@ export async function reviseDemoAction(form: FormData): Promise<void> {
     wishMessageId: /^[0-9a-f-]{36}$/.test(wishId) ? wishId : null,
   });
   revalidatePath(`/admin/demos/${id}`);
+}
+
+/**
+ * Sammelfreigabe (07.11.2026, Betreiber: „alle Demos auf einmal freigeben, die ich freigeben kann“). Nur wenn du
+ * selbst die Gesamtnote und „alle gelesen“ bestätigst. Demos mit technischem Fehler oder Sperre werden still
+ * übersprungen; kein Fehler für einzelne Stücke.
+ */
+export async function bulkApproveDemosAction(form: FormData): Promise<void> {
+  const s = await requireAdmin();
+  const rating = RATING_SCORES[String(form.get('rating') ?? '')];
+  if (!rating || form.get('ok') !== 'on') redirect('/admin/demos?tab=review&sammel=nichts');
+  const rows = await getDb().select({ id: schema.demos.id }).from(schema.demos).where(eq(schema.demos.status, 'pending_review'));
+  let freigegeben = 0;
+  for (const row of rows) {
+    try {
+      await approveDemo(row.id, actorOf(s), {
+        manual: true,
+        review: {
+          qualityScores: Object.fromEntries(
+            Object.keys(DEMO_QUALITY_DIMENSIONS).map((key) => [key, rating]),
+          ) as ManualQualityScores,
+          facts: true,
+          desktop: true,
+          mobile: true,
+          images: true,
+          text: true,
+        },
+      });
+      freigegeben++;
+    } catch {
+      // Gesperrte Demo (technisch, Fakten, Qualität): bleibt liegen, ohne Meldung pro Stück
+    }
+  }
+  revalidatePath('/admin/demos');
+  redirect(`/admin/demos?tab=review&sammel=${freigegeben}von${rows.length}`);
 }
