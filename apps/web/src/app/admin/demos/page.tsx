@@ -19,7 +19,7 @@ const TABS: { key: string; label: string; statuses: DemoStatus[] }[] = [
 export default async function DemosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; fertig?: string; neu?: string; aus?: string; sammel?: string }>;
+  searchParams: Promise<{ tab?: string; fertig?: string; neu?: string; aus?: string; sammel?: string; technik?: string }>;
 }) {
   await requireAdmin();
   const sp = await searchParams;
@@ -104,7 +104,7 @@ export default async function DemosPage({
           <Notice kind="success">
             {sp.sammel === 'nichts'
               ? 'Nichts freigegeben: bitte Häkchen setzen und Gesamtnote wählen.'
-              : `Sammelfreigabe: ${sp.sammel.replace('von', ' von ')} Demos freigegeben.`}
+              : `Sammelfreigabe: ${sp.sammel.replace('von', ' von ')} Demos freigegeben.${sp.technik ? ' Die übrigen haben technische Befunde: Häkchen „Auch Demos mit technischen Befunden“ setzen, wenn du sie selbst angesehen hast.' : ''}`}
           </Notice>
         </div>
       ) : null}

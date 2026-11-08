@@ -123,7 +123,10 @@ export async function bulkApproveDemosAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
   const rating = RATING_SCORES[String(form.get('rating') ?? '')];
   if (!rating || form.get('ok') !== 'on') redirect('/admin/demos?tab=review&sammel=nichts');
-  const rows = await getDb().select({ id: schema.demos.id }).from(schema.demos).where(eq(schema.demos.status, 'pending_review'));
+  const rows = await getDb()
+    .select({ id: schema.demos.id })
+    .from(schema.demos)
+    .where(inArray(schema.demos.status, ['pending_review', 'qa_failed']));
   let freigegeben = 0;
   for (const row of rows) {
     try {
@@ -147,5 +150,7 @@ export async function bulkApproveDemosAction(form: FormData): Promise<void> {
     }
   }
   revalidatePath('/admin/demos');
-  redirect(`/admin/demos?tab=review&sammel=${freigegeben}von${rows.length}`);
+  redirect(
+    `/admin/demos?tab=review&sammel=${freigegeben}von${rows.length}${form.get('accept_technical') === 'on' ? '' : '&technik=1'}`,
+  );
 }
