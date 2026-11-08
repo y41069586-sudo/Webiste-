@@ -71,7 +71,7 @@ export default async function DemosPage({
           </Notice>
         </div>
       ) : null}
-      {tab.key === 'review' && counts.some((c) => c.status === 'pending_review' && c.n > 0) ? (
+      {tab.key === 'review' && counts.some((c) => ['pending_review', 'qa_failed'].includes(c.status) && c.n > 0) ? (
         <Card title="Alle auf einmal">
           <p className="mb-3 text-sm">
             Freigabe für alle wartenden Demos, die du freigeben kannst. Demos mit technischem Fehler oder Sperre bleiben liegen,

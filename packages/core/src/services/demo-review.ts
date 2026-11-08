@@ -75,7 +75,8 @@ export async function approveDemo(
       throw new Error('Fakten, Desktop, Mobil, Bilder und Text müssen tatsächlich manuell geprüft werden.');
     const quality = demo.qaResultJson.quality
       ? assessDemoQuality(
-          demo.qaResultJson.checks,
+          // Bestätigte Freigabe trotz Technik-Befunden: die Befunde zählen dann nicht mehr gegen die Bewertung
+          opts.acceptTechnical ? demo.qaResultJson.checks.map(() => ({ passed: true })) : demo.qaResultJson.checks,
           opts.review?.qualityScores ??
             (!opts.manual && demo.qaResultJson.quality?.passed
               ? Object.fromEntries(
