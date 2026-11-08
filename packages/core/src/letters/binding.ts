@@ -117,13 +117,16 @@ export async function assertLetterBinding(
   if (recorded.version !== 1 || !letter.demoId || !letter.pdfStorageKey) throw new Error('Briefzuordnung unvollständig.');
   const demo = await db.query.demos.findFirst({ where: eq(demos.id, letter.demoId) });
   const current = await currentDemoForLead(db, lead.id);
+  // Bewusst trotz technischer Befunde freigegebene Demo (acceptedTechnical) gilt hier als zugeordnet
+  const acceptedTechnical =
+    (demo?.qaResultJson as { acceptedTechnical?: boolean } | null | undefined)?.acceptedTechnical === true;
   if (
     !demo ||
     current?.id !== demo.id ||
     demo.status !== 'published' ||
-    !demo.qaResultJson?.passed ||
-    demo.qaResultJson.checks.some((c) => !c.passed) ||
-    demo.qaResultJson.quality?.passed === false
+    !demo.qaResultJson ||
+    (!acceptedTechnical && (!demo.qaResultJson.passed || demo.qaResultJson.checks.some((c) => !c.passed))) ||
+    (!acceptedTechnical && demo.qaResultJson.quality?.passed === false)
   )
     throw new Error('Brief gehört nicht mehr zur aktuell freigegebenen Demo.');
   const now = await letterDemoBinding(lead, demo, cfg, letter.isTest);
