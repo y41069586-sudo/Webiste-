@@ -286,6 +286,16 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const useRating = sw.useRatingInLetter && lead.rating && lead.ratingCount;
   const research = await leadResearch(lead);
   const researchedFacts = researchLetterFacts(research);
+  // 08.11.2026: Bestätigte Leistungen aus der Demo-Vorschau (Design-Brief „Leistung: …“) als belegte Angaben. Nur
+  // bestätigte Leistungen, keine Beispiel-Leistungen. Die Demo zeigt sie, daher darf der Brief sie nennen.
+  const demoServiceFacts = (
+    (demo.contentJson?._meta as { designBrief?: { verified?: string[] } } | undefined)?.designBrief?.verified ?? []
+  )
+    .filter((x) => x.startsWith('Leistung: '))
+    .map((x) => x.slice('Leistung: '.length).trim())
+    .filter(Boolean)
+    .slice(0, 3)
+    .map((text) => ({ text, source: 'Demo-Vorschau: bestätigte Leistung', verified: true }));
   if (
     research &&
     (demo.contentJson?._meta as { researchHash?: string } | undefined)?.researchHash !== researchContentHash(research)
@@ -299,13 +309,13 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     cfg,
     recipient,
     branchLabel: cfg.targeting.branches.find((b) => b.key === lead.branch)?.label ?? lead.branch,
-    ...(demo.qaResultJson?.review?.facts || researchedFacts.length
+    ...(demo.qaResultJson?.review?.facts || researchedFacts.length || demoServiceFacts.length
       ? {
           personalization: {
             businessName: lead.businessName,
             city: lead.city,
             branchLabel: cfg.targeting.branches.find((b) => b.key === lead.branch)?.label ?? lead.branch,
-            details: [...researchedFacts, ...(demo.qaResultJson?.review?.letterFacts ?? [])].filter(
+            details: [...researchedFacts, ...demoServiceFacts, ...(demo.qaResultJson?.review?.letterFacts ?? [])].filter(
               (f, i, all) => all.findIndex((other) => other.text === f.text) === i,
             ),
           },
