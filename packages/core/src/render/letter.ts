@@ -442,7 +442,17 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   }
 
   const status: GeneratedLetter['status'] = issues.length || !truth.passed ? 'failed' : 'generated';
-  if (existing && status === 'failed') throw new Error('Neu-Erzeugung nicht bestanden; bisheriger Brief bleibt erhalten.');
+  if (existing && status === 'failed') {
+    const gruende = [
+      ...issues.map(
+        (i) => `Layout: ${String((i as { detail?: string; kind?: string }).detail ?? (i as { kind?: string }).kind ?? i)}`,
+      ),
+      ...(truth.passed ? [] : truth.violations.map((v) => `Wahrheit/${v.rule}: ${v.detail}`)),
+    ].slice(0, 4);
+    throw new Error(
+      `Neu-Erzeugung nicht bestanden; bisheriger Brief bleibt erhalten. Grund: ${gruende.join(' | ').slice(0, 600)}`,
+    );
+  }
   const letterId = randomUUID();
   const key = `letters/${leadId}/${letterId}.pdf`;
   await storage.put(key, pdf, 'application/pdf');
