@@ -128,11 +128,13 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
   if (!letter.isTest) {
     const currentDemo = await currentDemoForLead(db, letter.leadId);
     const demo = letter.demoId ? await db.query.demos.findFirst({ where: eq(demos.id, letter.demoId) }) : null;
+    const acceptedTechnical =
+      (demo?.qaResultJson as { acceptedTechnical?: boolean } | null | undefined)?.acceptedTechnical === true;
     if (
       !demo ||
       currentDemo?.id !== demo.id ||
-      demo.qaResultJson?.passed === false ||
-      demo.qaResultJson?.quality?.passed === false ||
+      (!acceptedTechnical && demo.qaResultJson?.passed === false) ||
+      (!acceptedTechnical && demo.qaResultJson?.quality?.passed === false) ||
       demo.status !== 'published' ||
       (demo.expiresAt && demo.expiresAt < addDays(new Date(), 7))
     ) {
