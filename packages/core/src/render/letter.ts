@@ -202,7 +202,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const seqDb = opts.test ? 0 : sequence;
   const existing = await db.query.letters.findFirst({ where: and(eq(letters.leadId, leadId), eq(letters.sequence, seqDb)) });
   if (existing) {
-    const replaceable = ['generated', 'failed', 'approved'].includes(existing.status);
+    // Storniert (Demo ersetzt u. ä.) darf auf ausdrückliche Neuerzeugung ersetzt werden
+    const replaceable = ['generated', 'failed', 'approved', 'cancelled'].includes(existing.status);
     if (!(opts.regenerate || opts.test) || !replaceable) {
       return {
         letterId: existing.id,
