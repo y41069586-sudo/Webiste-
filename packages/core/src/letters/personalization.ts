@@ -372,7 +372,7 @@ export function previewInvitationCopy(
     key: 'general',
     title: 'Ihre Website-Vorschau ist online',
     benefit:
-      'Wer in {ort} einen Betrieb wie Ihren braucht, sucht heute zuerst im Netz. Findet er dort keine Website, fragt er womöglich bei anderen an. Jeder Auftrag, den jemand bei einem anderen Betrieb bucht, kann Ihnen dann entgehen, ohne dass Sie es merken.',
+      'Wer in {ort} einen Betrieb wie Ihren braucht, sucht heute zuerst im Netz. Findet er dort keinen Webauftritt, fragt er womöglich bei anderen an. Jeder Auftrag, den jemand bei einem anderen Betrieb bucht, kann Ihnen dann entgehen, ohne dass Sie es merken.',
     caption: 'Ihre Website-Vorschau ansehen',
   };
   const selected: typeof usable = [];
