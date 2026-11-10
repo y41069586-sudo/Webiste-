@@ -103,9 +103,9 @@ export function testAuthoredDesign(
     }<a href="#anfrage">${esc(result.cta_text)}</a></header><section data-ad-section="services"><h2>Leistungen</h2>${result.services
       .map((s) => `<article><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></article>`)
       .join('')}</section><section data-ad-section="gallery"><h2>Eindrücke</h2>${
-      images.length
+      images.length > 1
         ? images
-            .slice(0, 3)
+            .slice(1, 3)
             .map((i) => `<figure><img src="{{image_${i.slot}}}" alt="${esc(i.alt)}"></figure>`)
             .join('')
         : '<p data-ad-placeholder="photos">{{placeholder_photos}}</p>'

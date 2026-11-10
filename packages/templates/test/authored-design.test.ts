@@ -137,13 +137,14 @@ describe('Vollständige Seiten und Änderungen im freien Entwurf (05.11.2026)', 
     expect(short.join(' ')).toMatch(/Bildslots/);
     const brief = Array.from(
       { length: 5 },
-      (_, i) => `<section><h2>Teil ${i}</h2><p>Kurz.</p><img src="{{image_${(i % 2) + 1}}}" alt="x"></section>`,
+      // Jeder Bildslot höchstens einmal (10.11.2026)
+      (_, i) => `<section><h2>Teil ${i}</h2><p>Kurz.</p>${i < 2 ? `<img src="{{image_${i + 1}}}" alt="x">` : ''}</section>`,
     ).join('');
     expect(authoredCompleteness(`<div><h1>x</h1>${brief}</div>`, 3)).toEqual([]);
     const sections = Array.from(
       { length: 6 },
       (_, i) =>
-        `<section><h2>Teil ${i}</h2><p>${'Fachwissen für Besucher. '.repeat(14)}</p><img src="{{image_${(i % 2) + 1}}}" alt="x"></section>`,
+        `<section><h2>Teil ${i}</h2><p>${'Fachwissen für Besucher. '.repeat(14)}</p>${i < 2 ? `<img src="{{image_${i + 1}}}" alt="x">` : ''}</section>`,
     ).join('');
     expect(authoredCompleteness(`<div><h1>x</h1>${sections}</div>`, 3)).toEqual([]);
   });
@@ -182,5 +183,27 @@ describe('Vollständige Seiten und Änderungen im freien Entwurf (05.11.2026)', 
     expect(h.match(/<style>([\s\S]*?)<\/style>/)![1]!.length).toBeLessThan(25_000);
     expect(h).toContain('url(data:font/woff2;base64,');
     expect(h.length).toBeLessThan(600_000);
+  });
+});
+
+describe('Bildanteil neuer Entwürfe (10.11.2026)', () => {
+  it('meldet mehrfach genutzte Bildslots und Bilder in den Leistungskacheln', async () => {
+    const { authoredCompleteness } = await import('../src');
+    const page = (services: string, gallery: string) =>
+      `<div><header><h1>x</h1><img src="{{image_1}}" alt="a"></header><section data-ad-section="services"><h2>L</h2>${services}</section><section data-ad-section="gallery"><h2>G</h2>${gallery}</section><section data-ad-section="inquiry"><h2>I</h2></section><section data-ad-section="area"><h2>A</h2></section><section data-ad-section="faq"><h2>F</h2></section></div>`;
+    const bad = authoredCompleteness(
+      page(
+        '<article><h3>a</h3><img src="{{image_2}}" alt="b"></article>',
+        '<img src="{{image_2}}" alt="c"><img src="{{image_1}}" alt="d">',
+      ),
+      3,
+    );
+    expect(bad.join(' ')).toMatch(/höchstens einmal.*image_1.*image_2|höchstens einmal.*image_2.*image_1/);
+    expect(bad.join(' ')).toMatch(/Leistungskacheln ohne Bilder/);
+    const good = authoredCompleteness(
+      page('<article><h3>a</h3><p>t</p></article>', '<img src="{{image_2}}" alt="c"><img src="{{image_3}}" alt="d">'),
+      3,
+    );
+    expect(good).toEqual([]);
   });
 });

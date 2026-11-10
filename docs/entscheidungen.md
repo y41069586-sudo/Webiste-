@@ -1539,3 +1539,15 @@ automatisch umgebaut; Neubau je Demo über „Ablehnen mit Wunsch / Neu bauen“
   derselbe Auftrag).
 - **Kosten:** weniger doppelte KI-Aufrufe durch die Queue-Sicherung und den Wiederholschutz je Betrieb; KI-Wahrheitsprüfung läuft
   nur nach bestandener Regelprüfung und höchstens zweimal. Kein zusätzliches Ergebnis-Caching gebaut (Texte wechseln je Lauf).
+
+## 10.11.2026 – Demos: weniger Bilder, Leistungen ohne Bilder
+
+Betreiber: „Die Demos werden immer gleich gebaut: Bilder mit Leistung, dann Beispielbilder, die ganze Website besteht aus
+Bildern.“ Ursache: Die Vorgaben verlangten Bilder in jeder Leistungskachel („Wiederholung erlaubt“) und zusätzlich eine
+Bildstrecke aus denselben drei Bildslots. Neu (nur für neue Entwürfe, bestehende Demos bleiben gültig):
+
+- Leistungskacheln sind typografisch, ohne Bilder (Schrift, Fläche, dekorative Nummer oder Zierelement).
+- Höchstens drei Bilder auf der Seite, jeder Bildslot höchstens einmal: eins im Einstieg, die übrigen in einer kurzen
+  Bildstrecke. Die Seite lebt von Typografie, Weißraum und Farbflächen.
+- Durchgesetzt nicht nur im Prompt: `authoredCompleteness` meldet mehrfach genutzte Slots und Bilder in den Leistungen; der Bau
+  bessert dann einmal nach. Die Mindestzahl der Bilder in der Bildstrecke berücksichtigt das Einstiegsbild.

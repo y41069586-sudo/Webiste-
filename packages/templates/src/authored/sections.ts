@@ -114,7 +114,8 @@ export function authoredSectionIssues(
       }
     });
     const hasPlaceholder = serialize(gallery).includes('{{placeholder_photos}}');
-    const min = imageCount === undefined ? (hasPlaceholder ? 0 : 1) : Math.min(2, imageCount);
+    // 10.11.2026: ein Bild gehört in den Einstieg, jeder Slot nur einmal; die Bildstrecke zeigt die übrigen
+    const min = imageCount === undefined ? (hasPlaceholder ? 0 : 1) : Math.min(2, Math.max(0, imageCount - 1));
     if (slots.size < min || (min === 0 && !serialize(gallery).includes('{{placeholder_photos}}')))
       errors.push('Bildstrecke mit verfügbaren Bildslots oder einem markierten Foto-Platzhalter ergänzen.');
   }
