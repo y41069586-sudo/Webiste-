@@ -39,6 +39,15 @@ import { renderComposite, takeScreenshots } from './screenshots';
 
 type Check = QaResult['checks'][number];
 
+/** Nur die Leistungs-Kategorie unter der Schwelle, Barrierefreiheit, Best Practices und SEO bestanden? */
+export function lighthouseOnlyPerformanceFailed(details: string | undefined, min = 90): boolean {
+  if (!details) return false;
+  const score = (k: string) => Number(details.match(new RegExp(`${k}: (\\d+)`))?.[1] ?? NaN);
+  const perf = score('performance');
+  const others = ['accessibility', 'best-practices', 'seo'].map(score);
+  return Number.isFinite(perf) && perf < min && others.every((v) => Number.isFinite(v) && v >= min);
+}
+
 export interface DemoQaOptions {
   signal?: AbortSignal;
   /** Reuse only an existing successful AI check bound to exactly the same stored HTML. */
@@ -323,7 +332,17 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
           canonicalUrl: 'http://127.0.0.1/',
         },
       });
-      checks.push(await phase('lighthouse', () => lighthouseCheck(liveHtml)));
+      let lh = await phase('lighthouse', () => lighthouseCheck(liveHtml));
+      // 10.11.2026: Auf dem kleinen Server misst Lighthouse während eines parallelen Demo-Baus zu langsam (Leistung 79–84,
+      // ruhig gemessen 93–100 bei derselben Seite). Fällt nur die Leistung durch und alle anderen Kategorien bestehen,
+      // einmal nach kurzer Pause neu messen. Die Schwelle bleibt unverändert; ein zweites Durchfallen zählt.
+      if (!lh.passed && lighthouseOnlyPerformanceFailed(lh.details)) {
+        await new Promise((r) => setTimeout(r, 20_000));
+        opts.signal?.throwIfAborted();
+        const second = await phase('lighthouse', () => lighthouseCheck(liveHtml));
+        lh = second.passed ? { ...second, details: `${second.details ?? ''}; zweite Messung nach Lastspitze` } : second;
+      }
+      checks.push(lh);
       opts.signal?.throwIfAborted();
     } catch (err) {
       checks.push({ name: 'lighthouse', passed: false, details: `Fehler: ${err instanceof Error ? err.message : String(err)}` });
