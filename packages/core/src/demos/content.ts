@@ -443,7 +443,10 @@ export function tidyAuthoredDesign<D extends { html: string; css: string }>(d: D
         '',
       )
       // Zierzeichen über CSS-content (z. B. Pfeile, Ziffern) entfallen; Inhalte gehören ins HTML
-      .replace(/(^|[;{\s])content\s*:\s*(["'])(?:(?!\2)[^\\])+\2/gi, '$1content:""'),
+      // 10.11.2026: jede nichtleere content-Angabe (auch mit Escape wie \2022, attr(), counter(), open-quote)
+      .replace(/(^|[;{\s])content\s*:\s*([^;}]*)/gi, (m, pre: string, value: string) =>
+        /^\s*(?:""|''|none|normal)\s*(?:!\s*important)?\s*$/i.test(value) ? m : `${pre}content:""`,
+      ),
     html: d.html
       .replace(/<(\/?)(aside|main|address)(?=[\s>/])/gi, '<$1div')
       // Sichtbares Wort „Platzhalter“ ist für Betriebstexte gesperrt; im Entwurfsblock neutral benennen

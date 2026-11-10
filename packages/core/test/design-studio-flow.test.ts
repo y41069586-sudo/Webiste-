@@ -110,6 +110,15 @@ describe('Studio generation orchestration without database or paid provider', ()
     });
     expect(tidy.css).toBe('.a::before{content:""}.b::after{content:""}.c::after{content:""}');
   });
+  it('leert auch content mit Escape, attr(), counter() und open-quote (GaLa-Entwurf 10.11.2026)', () => {
+    const tidy = tidyAuthoredDesign({
+      html: '<p>x</p>',
+      css: '.a::before{content:"\\2022"}.b::after{content:attr(data-x)}.c::before{content:counter(n) ". "}.d::before{content:open-quote}.e::after{content:none}.f::after{content:""}',
+    });
+    expect(tidy.css).toBe(
+      '.a::before{content:""}.b::after{content:""}.c::before{content:""}.d::before{content:""}.e::after{content:none}.f::after{content:""}',
+    );
+  });
   it('stellt einen bestätigten Leistungstitel in die Unterzeile, wenn er im Einstieg fehlt', () => {
     const base = {
       hero_headline: 'Kim Thanh',
