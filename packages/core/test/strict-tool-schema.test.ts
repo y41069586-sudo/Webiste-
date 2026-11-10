@@ -15,7 +15,7 @@ describe('Strikte Tool-Schemas für die Anthropic-Schnittstelle (05.11.2026)', (
   it('Demo-Schema enthält keine von der Schnittstelle abgelehnten minItems', () => {
     expect(minItems(DEMO_CONTENT_SCHEMA).every((n) => n <= 1)).toBe(true);
   });
-  it('entfernt minItems > 1 vor dem Senden, lässt 0/1 und alles andere unverändert', () => {
+  it('entfernt minItems > 1 und maxItems vor dem Senden, lässt 0/1 und alles andere unverändert', () => {
     const s = {
       type: 'object',
       properties: {
@@ -25,7 +25,9 @@ describe('Strikte Tool-Schemas für die Anthropic-Schnittstelle (05.11.2026)', (
     };
     const out = strictToolSchema(s);
     expect(minItems(out)).toEqual([1]);
-    expect(out.properties.a.maxItems).toBe(4);
+    // maxItems lehnt die Schnittstelle bei strikten Schemas ebenfalls ab (Lern-Agent, 10.11.2026)
+    expect(out.properties.a).not.toHaveProperty('maxItems');
+    expect(s.properties.a.maxItems).toBe(4); // Original bleibt erhalten
     expect(s.properties.a.minItems).toBe(3); // Original bleibt für die eigene Prüfung erhalten
   });
 });

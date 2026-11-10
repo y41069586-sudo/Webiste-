@@ -253,7 +253,7 @@ export class AnthropicLlm implements LlmProvider {
 }
 
 /**
- * Strikte Tool-Schemas erlauben bei Listen nur minItems 0 oder 1 (sonst 400 „minItems values other than 0 or 1 are
+ * Strikte Tool-Schemas erlauben bei Listen nur minItems 0 oder 1 und kein maxItems (sonst 400 „minItems values other than 0 or 1 are
  * not supported“ – am 05.11.2026 scheiterte daran jede Demo). Höhere Untergrenzen werden vor dem Senden entfernt;
  * die fachliche Anzahl prüfen die eigenen Validatoren nach der Antwort.
  */
@@ -263,6 +263,9 @@ export function strictToolSchema<T>(schema: T): T {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(schema as Record<string, unknown>)) {
     if (k === 'minItems' && typeof v === 'number' && v > 1) continue;
+    // 10.11.2026: auch maxItems wird von strikten Tool-Schemas abgelehnt („maxItems is not supported“, Lern-Agent).
+    // Die Obergrenze erzwingen die Aufrufer nach der Antwort (z. B. slice auf MAX_HYPOTHESES).
+    if (k === 'maxItems') continue;
     out[k] = strictToolSchema(v);
   }
   return out as T;
