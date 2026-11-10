@@ -173,28 +173,57 @@ export async function stopBoss(): Promise<void> {
 }
 
 /** Job einreihen. Mit `singletonKey` idempotent (z. B. pro Lead). */
+/**
+ * Welche Felder einen Auftrag eindeutig machen. Brieferzeugung: Betrieb, Folge, Testbrief und Neuerzeugung (eine
+ * Neuerzeugung darf neben einem normalen Auftrag stehen, zwei gleiche nicht). Versand: die Brief-ID.
+ */
+function dedupeSpec(name: QueueName, data: unknown): { key: string; fields: [string, string][] } | null {
+  const d = (data ?? {}) as Record<string, unknown>;
+  if (name === QUEUES.buildDemo || name === QUEUES.qaDemo) {
+    const field = name === QUEUES.buildDemo ? 'leadId' : 'demoId';
+    const entityId = d[field];
+    if (typeof entityId !== 'string' || !entityId) throw Error(name + ': ' + field + ' fehlt.');
+    return { key: (name === QUEUES.buildDemo ? 'demo' : 'qa') + ':' + entityId, fields: [[field, entityId]] };
+  }
+  if (name === QUEUES.generateLetter && typeof d.leadId === 'string') {
+    const seq = String(d.sequence ?? '');
+    const test = d.test ? 'true' : '';
+    const regen = d.regenerate ? 'true' : '';
+    return {
+      key: 'letter:' + d.leadId + ':' + seq + ':' + (test ? 't' : '') + (regen ? 'r' : ''),
+      fields: [
+        ['leadId', d.leadId],
+        ['sequence', seq],
+        ['test', test],
+        ['regenerate', regen],
+      ],
+    };
+  }
+  if (name === QUEUES.sendLetter && typeof d.letterId === 'string') {
+    return { key: 'send:' + d.letterId, fields: [['letterId', d.letterId]] };
+  }
+  return null;
+}
+
 export async function enqueue<Q extends QueueName>(
   name: Q,
   data: QueuePayloads[Q],
   options: SendOptions = {},
 ): Promise<string | null> {
   const boss = await getBoss();
-  if (name === QUEUES.buildDemo || name === QUEUES.qaDemo) {
-    const payload = data as QueuePayloads['build-demo'] | QueuePayloads['qa-demo'];
-    const field = name === QUEUES.buildDemo ? 'leadId' : 'demoId';
-    const entityId =
-      field === 'leadId' ? (payload as QueuePayloads['build-demo']).leadId : (payload as QueuePayloads['qa-demo']).demoId;
-    if (!entityId) throw Error(`${name}: ${field} fehlt.`);
-    const key = `${name === QUEUES.buildDemo ? 'demo' : 'qa'}:${entityId}`;
+  // Aufträge, die nie doppelt gleichzeitig anstehen dürfen (Demo-Bau, Demo-Prüfung, Brieferzeugung, Briefversand)
+  const dedupe = dedupeSpec(name, data);
+  if (dedupe) {
     // singletonKey alone has no pending-job constraint on existing pg-boss standard queues.
     // Serialize admission across app/worker processes; include old jobs without a key too.
     const client = await getPool().connect();
     try {
       await client.query('BEGIN');
-      await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [`${name}:${entityId}`]);
+      await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [`${name}:${dedupe.key}`]);
+      const conditions = dedupe.fields.map(([field], n) => "coalesce(data->>'" + field + "', '') = $" + (n + 2)).join(' AND ');
       const pending = await client.query(
-        `SELECT id FROM pgboss.job WHERE name=$1 AND state IN ('created','retry','active') AND data->>$2=$3 LIMIT 1`,
-        [name, field, entityId],
+        "SELECT id FROM pgboss.job WHERE name=$1 AND state IN ('created','retry','active') AND " + conditions + ' LIMIT 1',
+        [name, ...dedupe.fields.map(([, value]) => value)],
       );
       if (pending.rowCount) {
         await client.query('COMMIT');
@@ -202,7 +231,7 @@ export async function enqueue<Q extends QueueName>(
       }
       const id = await boss.send(name, data as object, {
         ...options,
-        singletonKey: key,
+        singletonKey: dedupe.key,
         db: { executeSql: (text: string, values?: unknown[]) => client.query(text, values) },
       });
       await client.query('COMMIT');

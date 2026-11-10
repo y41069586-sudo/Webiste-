@@ -10,11 +10,12 @@ import { CORE_MESSAGE_PATTERN, coreSalesMessage, PREVIEW_LETTER_VERSION } from '
 import { canTransitionLetter, LetterCheckUnavailableError, LETTER_TRANSITIONS, wasSubmitted } from '../src/letters/state';
 import { checkLetterTruth, markedBody } from '../src/letters/truth-check';
 import { getProviders } from '../src/providers';
-import { stopBoss } from '../src/queue';
 import { restoreLetter } from '../src/services/letters';
 import { changeLetterStatus } from '../src/services/letter-status';
 import { handleScan } from '../src/services/tracking';
-import { SendBlockedError, sendLetter, syncLetterStatuses } from '../src/services/sending';
+import { SendBlockedError, sendApprovedLetters, sendLetter, syncLetterStatuses } from '../src/services/sending';
+import * as auditModule from '../src/services/audit';
+import { enqueue, QUEUES, stopBoss } from '../src/queue';
 import { setSiteProbeForTests } from '../src/services/site-health';
 import { runTruthCheck } from '../src/services/truth-check';
 import * as llm from '../src/services/llm';
@@ -22,14 +23,14 @@ import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
 import { OPERATOR_TEST_CONFIG, resetDb } from './helpers';
 
-async function seed(letterStatus = 'approved') {
+async function seed(letterStatus = 'approved', name = 'Testbetrieb Status') {
   const db = getDb();
   const [lead] = await db
     .insert(leads)
     .values({
       source: 'mock',
       sourceId: randomToken(10),
-      businessName: 'Testbetrieb Status',
+      businessName: name,
       branch: 'maler',
       branchGroup: 'handwerk',
       city: 'Dortmund',
@@ -294,6 +295,70 @@ describe('Statuszentrale, unklare Übergabe und QR-Zuordnung', () => {
     expect(sent.state).toBe('sent');
     const scan = await handleScan(lead.trackToken, { ua: 'test', ipHash: 'test-hash', isBot: true, audience: 'test' });
     expect('redirect' in scan && scan.redirect).toContain(`/d/${demo.slug}`);
+  });
+});
+
+describe('Datenbank-Ausfall nach erfolgreicher Übergabe und Queue-Races', () => {
+  beforeEach(async () => {
+    await resetDb();
+    process.env.DRY_RUN = 'false';
+    resetEnvCache();
+    await updateConfig(
+      { ...OPERATOR_TEST_CONFIG, switches: { dryRun: false, killSwitch: false }, budget: { weeklyBudgetCents: 1000 } },
+      'test',
+    );
+  });
+  afterEach(() => vi.restoreAllMocks());
+  afterAll(async () => {
+    delete process.env.DRY_RUN;
+    resetEnvCache();
+    await stopBoss();
+  });
+
+  it('DB-Fehler nach der Übergabe: Wiederholung liefert denselben easyNova-Auftrag, kein zweiter Druck', async () => {
+    const { letter } = await seed('approved');
+    const mail = getProviders().mail as unknown as { created: number };
+    const before = mail.created;
+    vi.spyOn(auditModule, 'audit').mockImplementationOnce(async () => undefined); // handover_started
+    vi.spyOn(auditModule, 'audit').mockImplementationOnce(async () => {
+      throw new Error('Datenbank-Zeitüberschreitung');
+    });
+    await expect(sendLetter(letter.id, 'test')).rejects.toThrow(/Zeitüberschreitung/);
+    const after = await statusOf(letter.id);
+    expect(after.statusReason ?? '').toMatch(/wird wiederholt/);
+    expect(after.status).toBe('approved'); // nie „storniert“, nie „verschickt“ ohne Nachweis
+    vi.restoreAllMocks();
+    expect((await sendLetter(letter.id, 'test')).state).toBe('sent');
+    expect(mail.created - before).toBe(1); // genau ein Auftrag beim Briefdienst
+  });
+
+  it('gleichzeitige Einreihung: Brieferzeugung und Versand stehen je Brief nur einmal an', async () => {
+    const { lead, letter } = await seed('approved');
+    const a = await Promise.all(
+      Array.from({ length: 5 }, () => enqueue(QUEUES.generateLetter, { leadId: lead.id, sequence: 1, triggeredBy: 'test' })),
+    );
+    expect(a.filter(Boolean)).toHaveLength(1);
+    const regen = await Promise.all(
+      Array.from({ length: 3 }, () =>
+        enqueue(QUEUES.generateLetter, { leadId: lead.id, sequence: 1, triggeredBy: 'test', regenerate: true }),
+      ),
+    );
+    expect(regen.filter(Boolean)).toHaveLength(1); // eigene Neuerzeugung darf neben dem normalen Auftrag stehen
+    const s = await Promise.all(Array.from({ length: 4 }, () => enqueue(QUEUES.sendLetter, { letterId: letter.id })));
+    expect(s.filter(Boolean)).toHaveLength(1);
+  });
+
+  it('Seitenausfall beim Stapelversand: kein Brief wird verändert oder berechnet', async () => {
+    const one = await seed('approved');
+    const two = await seed('approved', 'Zweiter Beispielbetrieb Müller');
+    setSiteProbeForTests(async () => false);
+    const res = await sendApprovedLetters('test');
+    setSiteProbeForTests(null);
+    expect(res.sent).toBe(0);
+    expect(res.stoppedBy).toBe('SendBlockedError');
+    expect((await statusOf(one.letter.id)).status).toBe('approved');
+    expect((await statusOf(two.letter.id)).status).toBe('approved');
+    expect(await getDb().select().from(budgetLedger)).toHaveLength(0);
   });
 });
 

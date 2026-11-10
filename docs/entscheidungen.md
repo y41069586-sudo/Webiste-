@@ -1509,3 +1509,33 @@ Grenzen, ehrlich benannt: Die CSS-Prüfung erlaubt nur `@media` und `@supports`,
 deshalb Übergänge (Hover/Fokus). Inline-SVG-Icons lässt die HTML-Prüfung nicht zu. Die Wirkung auf echte Demos ist erst nach einem
 Neubau sichtbar; ein Neubau kostet KI-Budget (Sonnet) und wurde nicht ohne deine Freigabe ausgelöst. Bestehende Demos werden nicht
 automatisch umgebaut; Neubau je Demo über „Ablehnen mit Wunsch / Neu bauen“ erzeugt eine neue Demo-Adresse (`/d/{slug}`); QR-Code und Kurz-URL der Briefe bleiben gültig, weil sie über den Lead-Token immer zur aktuellen veröffentlichten Demo leiten (`handleScan`). Die Adresse in einem bereits versendeten Brief ist also der QR-Code, nicht der Slug.
+
+## 10.11.2026 – Briefvorlage 3 im Wortlaut des Betreibers, Versandsicherheit, Tests
+
+- **Kernbotschaft:** erster Absatz jedes Erstbriefs nach dem Betreiber-Wortlaut („Wenn potenzielle Kunden … keine passende Website
+  finden, könnten sie sich für einen anderen Anbieter entscheiden. Dadurch können wertvolle Kundenanfragen verloren gehen.“), je
+  Branche nur Begriffe getauscht (Gäste/Lokal/Reservierungen, Terminanfragen, Kunden/Einkäufe). Danach „Genau deshalb habe ich …“
+  in Ich-Form, wie der übrige Brief und der Absender. Der Betreiberentwurf mit „haben wir von SeitenWerk“ wurde bewusst nicht
+  wörtlich übernommen, damit der Brief nicht zwischen „wir“ und „ich“ wechselt.
+- **Briefdesign (Vorlage 3):** Betreff in Markenfarbe, Kernbotschaft als Leitabsatz mit Akzentbalken, gerahmter QR-Bereich.
+  Layout, Briefkopf mit SeitenWerk-Marke, DIN-5008-Flächen und Pflichttexte unverändert (easyNova-Flächen sind fix). Dashboard und
+  PDF zeigen denselben Text: die Detailansicht bettet das gespeicherte PDF selbst ein.
+- **easyNova hat keine Suche nach Referenz und keinen Storno-Endpunkt** (OpenAPI, `docs/integrations.md`). Eine aktive Abfrage
+  „liegt der Brief schon dort?“ ist deshalb nicht möglich und wird nicht erfunden. Sicher gegen Doppelversand sind: gleicher
+  Idempotenz-Schlüssel (Brief-ID) bei jeder Wiederholung; Nachweis `handover_started` im Protokoll; keine Neuerzeugung (neue
+  Brief-ID = neuer Schlüssel) eines Briefs, dessen Übergabe begonnen, aber nie bestätigt wurde; solche Briefe werden einzeln zur
+  Prüfung im easyNova-Portal zurückgehalten.
+- **Statuszentrale:** `changeLetterStatus` prüft jeden Wechsel gegen die Übergangsmatrix und schreibt nur aus dem erwarteten
+  Ausgangsstatus (Race-Schutz). Keine neuen Datenbank-Stati: `queued` ohne Auftragsnummer = „wird übergeben“, `failed` mit
+  „Zurückgestellt: …“ = behebbar.
+- **Queue:** `generate-letter` und `send-letter` werden wie Demo-Bau/Demo-Prüfung gegen gleichzeitige Doppel-Einreihung gesichert
+  (vorher hatte `singletonKey` allein bei Standard-Queues keine Wirkung; das ließ einen Betrieb 510-mal denselben Auftrag
+  bekommen). Eine Neuerzeugung darf neben einem normalen Auftrag stehen, zwei gleiche nicht.
+- **Reihenfolge der Übergabe:** der Nachweis `handover_started` wird vor dem Aufruf des Briefdienstes geschrieben und liegt im
+  geschützten Block; scheitert er, geht nichts hinaus.
+- **Tests neu:** Statuszentrale, unklare Übergabe, DB-Ausfall nach erfolgreicher Übergabe (genau ein Auftrag beim Briefdienst),
+  gleichzeitige Einreihung, Seitenausfall beim Stapelversand, QR führt zur gebundenen Demo, kompletter Ablauf mit Mocks von Lead
+  bis bezahlter Bestellung (`e2e-pipeline.test.ts`). Der Mock-Briefdienst verhält sich jetzt wie easyNova (gleicher Schlüssel =
+  derselbe Auftrag).
+- **Kosten:** weniger doppelte KI-Aufrufe durch die Queue-Sicherung und den Wiederholschutz je Betrieb; KI-Wahrheitsprüfung läuft
+  nur nach bestandener Regelprüfung und höchstens zweimal. Kein zusätzliches Ergebnis-Caching gebaut (Texte wechseln je Lauf).

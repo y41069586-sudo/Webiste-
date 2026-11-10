@@ -4,6 +4,10 @@ import type { LetterSendOptions, LetterSendResult, LetterWebhookEvent, MailProvi
 /** Simulierter Briefversand – verschickt nichts. */
 export class MockMailProvider implements MailProvider {
   readonly name = 'mock';
+  /** Wie easyNova: gleicher Idempotenz-Schlüssel liefert denselben Auftrag, nichts doppelt. */
+  private readonly byKey = new Map<string, string>();
+  /** Anzahl tatsächlich neu angelegter Aufträge (für Tests zum Doppelversand-Schutz). */
+  created = 0;
   constructor(private readonly secret: string) {}
 
   async estimateCost(pdf: Buffer, opts: { color: boolean }): Promise<number | null> {
@@ -14,7 +18,12 @@ export class MockMailProvider implements MailProvider {
 
   async send(pdf: Buffer, opts: LetterSendOptions): Promise<LetterSendResult> {
     void pdf;
-    const id = `mock_${Date.now()}_${sha256(opts.idempotencyKey).slice(0, 12)}`;
+    let id = this.byKey.get(opts.idempotencyKey);
+    if (!id) {
+      id = `mock_${Date.now()}_${sha256(opts.idempotencyKey).slice(0, 12)}`;
+      this.byKey.set(opts.idempotencyKey, id);
+      this.created++;
+    }
     return { providerLetterId: id, status: 'queued', costCents: opts.color ? 135 : 115 };
   }
 

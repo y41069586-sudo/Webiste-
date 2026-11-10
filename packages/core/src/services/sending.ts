@@ -221,8 +221,14 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     { statusReason: 'Wird an den Briefdienst übergeben …' },
     { requireNoProviderId: true },
   );
-  // Nachweis, dass eine Übergabe begonnen wurde (auch wenn die Antwort des Briefdienstes nie ankommt)
-  if (claimed)
+  if (!claimed) {
+    await releaseReservation(db, reservationKey);
+    return { state: 'skipped', reason: 'Wird bereits übergeben oder ist schon übermittelt' };
+  }
+
+  try {
+    // Nachweis, dass eine Übergabe begonnen wurde (auch wenn die Antwort des Briefdienstes nie ankommt). Schlägt das
+    // Schreiben fehl, geht nichts an den Briefdienst und der Brief fällt unten auf „freigegeben“ zurück.
     await audit(db, {
       entity: 'letter',
       entityId: letterId,
@@ -230,12 +236,6 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
       actor,
       context: { provider: provider.name },
     });
-  if (!claimed) {
-    await releaseReservation(db, reservationKey);
-    return { state: 'skipped', reason: 'Wird bereits übergeben oder ist schon übermittelt' };
-  }
-
-  try {
     const recipient = letter.isTest
       ? cfg.letter.testRecipient
       : {
