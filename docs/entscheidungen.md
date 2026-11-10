@@ -1063,6 +1063,7 @@ außer der KI auf `mock`). Je Branche baut es Demo, komplette QA, Freigabe, Ver�
 ## 04.11.2026 (abends) – Erster echter Lauf: drei Fehler behoben
 
 Befund aus dem ersten echten Lauf (64 Betriebe Maler/Elektro in Bochum, Dortmund, Essen; 2 Demos):
+
 - **„Alles schwarz“:** Elektriker bekamen fest die dunkle Farbwelt („graphit“ als Gewerkspassung), beim Maler wählte der
   Zufall die dunkle. Neu: dunkle Farbwelten nur bei belegter dunkler Bildwelt des Betriebs, nie wegen Gewerk oder
   Öffnungszeiten. Je Kit mindestens zwei helle Farbwelten (neu: Maler „leinen“, Elektro „signal“, Gastro „terrakotta“).
@@ -1101,7 +1102,6 @@ Befund aus dem ersten echten Lauf (64 Betriebe Maler/Elektro in Bochum, Dortmund
 - Kompakte Handwerk-Entwürfe zeigen keinen künstlich verlängernden vierteiligen Beispielablauf mehr.
 - Neuer Regressionstest für kompakte Elektro-Datenlage. Geschützte Kauf-/Formular-/Freigabelogik unberührt.
 
-
 ## 04.11.2026 – individuelle Generierung statt erzwungener Branchenvorlage
 
 Ausdrücklicher neuer Auftrag: die KI soll selbst gestalten und nur Kriterien befolgen. Die
@@ -1124,7 +1124,6 @@ Betriebsbeauftragung, kein echter Lead, keine Produktionsdaten oder vorhandenen 
 Die Telefonnummer ist zwischen Verzeichnissen widersprüchlich, aktuelle Aktivität nicht bestätigt.
 Prüfnachweise und Grenzen: `docs/free-design-standard.md`.
 
-
 ## 05.11.2026 – Mindestinhalte auch bei frei gestalteten Seiten
 
 Betreiber wünscht ausführlichere Demos statt Hero/Leistungen/Adresse: fachliche Erklärung als
@@ -1138,7 +1137,6 @@ Vorschau/Live entfernt. Keine Testimonials, Personen, Projekte oder Kapazitäten
 zugeschnittenen Profile. Der geschützte Kontaktbereich erhält ausschließlich zusätzliche CSS-Regeln
 für Fonts und Farbrollen; Markup und Formularlogik bleiben unverändert. Keine Leistungs-/Lighthouse-
 Schwelle herabgesetzt. Prüfbericht: `docs/authored-full-pages.md`.
-
 
 ## 05.11.2026 – Nachbesserung der freien Gestaltung (Claude)
 
@@ -1249,6 +1247,7 @@ gespeichert; Screenshots und Brief-Bild bleiben unverändert. Inhalt deckt sich 
 ## 06.11.2026 – Tarif „Komplett“: 0 € Einrichtung + 179 €/Monat
 
 Betreiberentscheidung (nach Marktrecherche, bewusst über dem Markt-Mittel von ca. 60–150 €/Monat):
+
 - Neukunden wählen zwischen **Basis** (597 € einmalig + 19 €/Monat, monatlich kündbar, als „Empfohlen“ markiert,
   keine Vorauswahl) und **Komplett** (0 € Einrichtung, 179 €/Monat). Care+ wird für Neukunden nicht mehr angeboten,
   Bestandsverträge bleiben unverändert.
@@ -1302,6 +1301,7 @@ Keine Rechtsprüfung; die Verantwortung für die Freigabe bleibt beim Betreiber.
 ## 06.11.2026 – Komplett: erste Abbuchung 7 Tage nach der Bestellung statt nach Go-Live
 
 Betreiber: „Lass nicht nach Go-Live 7 Tage, sondern direkt nach Abo 0 Euro Zahlung, dann nach 7 Tagen.“
+
 - Komplett-Snapshot `billingStart: 'order'`, `consentVersion: v4-komplett-2026-11-06b`. Nach der Bestellung (Zahlungsmittel
   im Stripe-Setup-Checkout hinterlegt, 0 €) legt `afterPaid` sofort genau ein Abo an: Testphase bis Bestellung + 7 Tage,
   dann 179 €/Monat. Mindestlaufzeit 12 Monate ab dieser ersten Abbuchung. Go-Live, Vorschau-Freigabe und HTTPS-Prüfung
@@ -1338,6 +1338,7 @@ Nebenbefund: Docker-Build-Cache 74 GB und alte Images 69 GB (Festplatte 79 %) �
 
 Betreiber: „Auf Handy viel Text, zerquetscht … bei vielen nur Text sichtbar am Anfang … Text drüber und im Hintergrund
 Bild.“ KI-Prüfung und Demo-Bau dafür per Not-Aus angehalten (Audit-Eintrag).
+
 - Neue Handy-Ebene `applyMobileHeroLayer` (packages/templates/src/authored/mobile.ts): Bis 700 px wird der Einstieg (höchster
   Vorfahre der h1 ohne h2/Inhaltsbereich) zum Vollbild-Foto mit dunklem Verlauf, Name/Ort/Satz in Weiß darüber und
   breiten Knöpfen; „Anfrage“ in der Akzentfarbe. Hat der Einstieg kein Bild, wird das erste Seitenbild nur fürs Handy
@@ -1364,6 +1365,7 @@ Betreiber: ein Hinweis oben statt Warnsätze je Abschnitt; Reihenfolge Bild-Eins
 als Kacheln mit Foto → Bildstrecke → „So einfach fragen Sie an“ (Ablauf + Angaben in einem Block) → „So erreichen Sie
 uns“ → kurze Fragen → kleiner Entwurfs-Platzhalter unten; keine Mindesttextmenge; „Cyc Beauté … minimalistisch, nicht
 krass viel Text, schönes Design – nimm dir ein Beispiel“.
+
 - Entwurfsbanner: „Leistungen und Bilder sind Beispiele – dies ist nicht die offizielle Website des Betriebs.“ Damit
   zentral gekennzeichnet; weiterhin keine erfundenen Fakten oder Zusagen (§ 5 UWG).
 - `FULL_PAGE_VERSION = full-page-2`: Bereiche services, gallery, inquiry, area, faq, placeholders in fester Reihenfolge
@@ -1443,3 +1445,51 @@ wurde bei jedem Pipeline-Takt erneut kostenpflichtig gebaut.
 - **Brief trotz bestätigter technischer Befunde (08.11.2026):** Die bewusste Freigabe wird an der Demo gespeichert (`acceptedTechnical`). Der Brief-Auftrag lässt solche Demos zu. Ohne diese Bestätigung bleibt die Sperre wie bisher.
 - **Neuer Standardtext für alle Briefe (08.11.2026, Betreiberauftrag):** Der Grundtext nennt jetzt: Wer in {Stadt} einen Betrieb wie diesen braucht, sucht zuerst im Netz; findet er keine Website, fragt er womöglich bei anderen an; ein Auftrag kann dadurch entgehen. Nur als Möglichkeit, ohne Zahlen. Die 11 noch nicht versendeten Briefe (erzeugt, fehlgeschlagen) werden neu geschrieben. Bereits bei easyNova eingereichte Briefe bleiben unverändert.
 - **Brief-Freigabe: Bindung an bewusst freigegebene Demo (08.11.2026):** Die Prüfung der Zuordnung Brief ↔ Demo ließ Demos mit technischen Befunden auch dann nicht zu, wenn der Betreiber sie bestätigt hatte. Jetzt gilt die Bestätigung (`acceptedTechnical`) auch hier. Diagnose-Skript: `packages/core/scripts/probe-letter-approve.ts`.
+
+## 10.11.2026 – Briefe: Ursache der internen Stornierungen, Statusregeln, Wiederherstellung, Vorlage 3
+
+**Befund (Produktivdaten, 10.11.):** 10 Briefe standen intern auf „storniert“ (Grund: „Demo ersetzt, Qualitätsprüfung
+offen/fehlgeschlagen oder nicht mehr lange genug online“), ohne Auftragsnummer, ohne Versandzeit, ohne Budgetbuchung. Der
+Briefdienst hat sie nie gesehen. Ursache war unsere eigene Logik in `sendLetter`: jede nicht erfüllte technische
+Vorbedingung (Demo ersetzt, Zuordnung veraltet, QA offen, Wahrheits-Check nicht belegt, Claim abgelaufen) setzte den Brief
+endgültig auf `cancelled`. Zusätzlich: Bei Fehlern der KI-Wahrheitsprüfung oder der Quellenseite wurde der Brief als
+„nicht bestanden“ gewertet (technischer Ausfall = inhaltliches Urteil), und der Sperrlisteneintrag `keine Website` blockierte
+auch die zulässige allgemeine Aussage. Ein Brief-Job (`Langenberger`) lief 510-mal in Folge mit demselben Fehler.
+
+**Behoben:**
+
+- `letters/state.ts`: Übergangsmatrix. `cancelled` nur fachlich endgültig (Widerspruch/Sperrliste/gelöschter Betrieb/Demo
+  abgelaufen/Betreiber). Technische und behebbare Gründe stellen den Brief zurück (`failed`, „Zurückgestellt: …“) und lösen
+  bei veralteter Demo die automatische Neuerzeugung aus.
+- `sendLetter`: atomare Übernahme (`approved` → `queued` nur ohne Auftragsnummer), dadurch kein gleichzeitiger Doppelversand;
+  Fehler bei der Übergabe → zurück auf `approved` (gleicher Idempotenz-Schlüssel), nie `cancelled`; Abgleich gibt
+  unterbrochene Übergaben nach 15 Minuten wieder frei. Vor jeder Übergabe wird die öffentliche Seite geprüft (kein toter
+  QR-Code), sonst „Versand angehalten“ ohne Statusänderung.
+- Neuerzeugung ersetzt nie einen Brief mit Auftragsnummer/Versandzeit (`wasSubmitted`).
+- Wahrheitscheck: technische Ausfälle (KI, Quellenseite) sind `LetterCheckUnavailableError` mit Wiederholung (zwei Versuche,
+  danach Job-Retry mit steigenden Abständen, Alert), kein „nicht bestanden“. Prompt unterscheidet A (Angebotsbeschreibung),
+  B (Möglichkeitsformulierung, erlaubt) und C (konkrete unbelegte Behauptung, nur diese wird gemeldet). Sperrliste trifft nur
+  die Tatsachenbehauptung über den angeschriebenen Betrieb („Sie haben keine Website“), nicht die allgemeine Aussage. Treffer
+  der Sperrliste/Zahlenprüfung werden wie KI-Funde einmal automatisch durch Entfernen des Satzes korrigiert und neu geprüft.
+- Fester Vorlagentext (`[[VORLAGE]]`) wird von der KI-Prüfung ausgenommen; Sperrliste und Zahlenprüfung gelten weiter.
+- Wiederholschutz: Brief-Jobs mit fachlichen Ablehnungsgründen sind nicht wiederholbar; die Pipeline reiht einen Betrieb nach
+  zwei gescheiterten Versuchen in 6 Stunden nicht erneut ein.
+- Rechtliche Prüfung (B2B-Post): unverändert bleiben Werbewiderspruch/Sperrliste, Art.-14-/Art.-21-Hinweis, Quellenpflicht und
+  Irreführungsverbot. Es gab keinen E-Mail-Opt-in-Zwang im Briefpfad; die Fehlsperren waren die oben genannten technischen.
+  Keine KI-Rechtsfreigabe.
+- Admin „Probleme“: Grund im Klartext, Auftragsnummer/Bestätigung, Link zur Demo, Aktion „Alle wiederherstellen“
+  (`restoreStalledLetters`): übergebene Briefe bleiben zurückgehalten, passende gehen ohne KI-Kosten auf „wartet auf Freigabe“,
+  veraltete werden mit aktueller Demo und Vorlage neu erzeugt. Es wird nichts verschickt; die Freigabe bleibt beim Betreiber.
+  Freigabe nennt jetzt den Grund bei Ablehnung.
+
+**Briefvorlage `seitenwerk-standard-3`:** erster Absatz jedes Erstbriefs ist die feste, versionierte Kernbotschaft (mögliches
+Risiko, Möglichkeitsform, keine Zahl, kein Anspruch über den Betrieb), danach „Genau deshalb habe ich … eine unverbindliche
+Website-Vorschau gebaut“ mit belegten Leistungen, QR-Aufforderung, Ohne-Verkaufsgespräch-Hinweis. Betreff „Eine neue Website-Idee
+für {Firmenname}“. KI (Haiku) schreibt nur den persönlichen Teil und wiederholt die Kernbotschaft nicht. Die Statistik-Fassung
+(„40 %“, Fußnote) bleibt im Code, ist über `letter.lossStatistic` (Standard aus) abgeschaltet. Der Test prüft die Kernbotschaft im
+fertigen PDF-Text aller Branchen im ungünstigsten Layoutfall.
+
+**Offener Blocker (extern):** Die Netlify-Seite (`seitenwerkworld.netlify.app`, `seitenwerk.world`: Admin, Demos, QR-Ziele,
+Quellenseite) antwortet am 10.11. mit HTTP 503 `usage_exceeded`. Solange das Netlify-Kontingent erschöpft ist, ist jeder QR-Code
+tot. Der neue Schutz hält Versand und Brieferzeugung deshalb an, statt Briefe mit totem Link zu drucken. Abhilfe nur im
+Netlify-Konto (Kontingent/Tarif), nicht im Code.

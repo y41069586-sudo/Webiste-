@@ -13,7 +13,12 @@ import {
 import { Badge, Card, Notice, PageHeader, StatusBadge, Table, Td, btn } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
-import { bulkApproveAndSendLettersAction, createTestLetterAction, sendApprovedNowAction } from './actions';
+import {
+  bulkApproveAndSendLettersAction,
+  createTestLetterAction,
+  restoreStalledLettersAction,
+  sendApprovedNowAction,
+} from './actions';
 import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Briefe' };
@@ -25,7 +30,11 @@ const TABS: { key: string; label: string; statuses: LetterStatus[]; test?: boole
   { key: 'failed', label: 'Probleme', statuses: ['failed', 'cancelled'] },
 ];
 
-export default async function LettersPage({ searchParams }: { searchParams: Promise<{ tab?: string; sammel?: string }> }) {
+export default async function LettersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; sammel?: string; hinweis?: string }>;
+}) {
   await requireAdmin();
   const sp = await searchParams;
   const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0]!;
@@ -37,9 +46,11 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
       .select({
         letter: schema.letters,
         lead: { id: schema.leads.id, name: schema.leads.businessName, segment: schema.leads.segmentKey },
+        demoSlug: schema.demos.slug,
       })
       .from(schema.letters)
       .innerJoin(schema.leads, eq(schema.leads.id, schema.letters.leadId))
+      .leftJoin(schema.demos, eq(schema.demos.id, schema.letters.demoId))
       .where(inArray(schema.letters.status, tab.statuses))
       .orderBy(desc(schema.letters.createdAt))
       .limit(200),
@@ -92,6 +103,26 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
           </Notice>
         </div>
       ) : null}
+      {sp.hinweis ? (
+        <div className="mb-4">
+          <Notice>{sp.hinweis.slice(0, 600)}</Notice>
+        </div>
+      ) : null}
+      {tab.key === 'failed' && rows.length ? (
+        <Card title="Stornierte und zurückgestellte Briefe wiederherstellen">
+          <p className="mb-3 text-sm">
+            Stellt alle Briefe aus dieser Liste wieder her, die noch nie beim Briefdienst waren. Passt ein Brief noch zur
+            aktuellen Demo, wartet er sofort wieder auf deine Freigabe. Sonst wird er mit der aktuellen Demo und der aktuellen
+            Briefvorlage neu geschrieben. Es wird nichts verschickt: danach liest du die Briefe und gibst sie frei. Briefe, die
+            schon beim Briefdienst waren, und Betriebe mit Werbewiderspruch bleiben unberührt.
+          </p>
+          <form action={restoreStalledLettersAction}>
+            <SubmitButton type="submit" className={btn.primary} disabled={sw.killSwitch}>
+              Alle wiederherstellen
+            </SubmitButton>
+          </form>
+        </Card>
+      ) : null}
       {tab.key === 'review' && waiting ? (
         <Card title="Alle auf einmal">
           <p className="mb-3 text-sm">
@@ -133,8 +164,8 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
         ))}
       </nav>
       <Card>
-        <Table head={['Betrieb', 'Art', 'Stand', 'Datum']} empty="Keine Briefe in dieser Ansicht">
-          {rows.map(({ letter, lead }) => (
+        <Table head={['Betrieb', 'Art', 'Stand', 'Briefdienst', 'Zuletzt geändert']} empty="Keine Briefe in dieser Ansicht">
+          {rows.map(({ letter, lead, demoSlug }) => (
             <tr key={letter.id}>
               <Td>
                 <Link className="font-medium text-brand-700 hover:underline" href={`/admin/letters/${letter.id}`}>
@@ -145,10 +176,28 @@ export default async function LettersPage({ searchParams }: { searchParams: Prom
               <Td>
                 <StatusBadge status={letter.status} />
                 {letter.statusReason ? (
-                  <div className="max-w-xs text-xs text-red-700">{letter.statusReason.slice(0, 160)}</div>
+                  <div className="max-w-sm text-xs text-red-700">{letter.statusReason.slice(0, 320)}</div>
+                ) : null}
+                {demoSlug ? (
+                  <a className="text-xs text-brand-700 hover:underline" href={`/d/${demoSlug}`} target="_blank" rel="noreferrer">
+                    Demo ansehen
+                  </a>
                 ) : null}
               </Td>
-              <Td className="text-xs whitespace-nowrap">{dt(letter.createdAt)}</Td>
+              <Td className="text-xs">
+                {letter.providerLetterId ? (
+                  <>
+                    Auftrag {letter.providerLetterId}
+                    <br />
+                    {letter.sentAt ? `bestätigt ${dt(letter.sentAt)}` : 'übergeben, Bestätigung offen'}
+                  </>
+                ) : letter.status === 'queued' ? (
+                  'wird übergeben …'
+                ) : (
+                  'noch nicht übergeben'
+                )}
+              </Td>
+              <Td className="text-xs whitespace-nowrap">{dt(letter.updatedAt)}</Td>
             </tr>
           ))}
         </Table>

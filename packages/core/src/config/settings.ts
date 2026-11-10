@@ -301,6 +301,8 @@ export const appConfigSchema = z.object({
     truthCheckBlocklist: z.array(z.string()).default([]),
     /** Höchstens so viele Statistiken pro Brief (B4: 2) */
     maxStatistics: z.number().int().min(0).max(2).default(2),
+    /** Statistik-Fassung „Kunden, die Sie gerade verlieren könnten“ (mit Beleg und Fußnote). Standard aus: Vorlage 3 */
+    lossStatistic: z.boolean().default(false),
     /** Test-Empfänger für den allerersten echten Brief */
     testRecipient: z.object({
       name: z.string(),
@@ -875,6 +877,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     maxLettersPerLead: 3,
     truthCheckBlocklist: [],
     maxStatistics: 2,
+    lossStatistic: false,
     testRecipient: {
       name: '',
       street: '',

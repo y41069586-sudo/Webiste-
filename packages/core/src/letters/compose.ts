@@ -120,6 +120,11 @@ export function guaranteeSentence(cfg: AppConfig): string {
 }
 
 /** Reject old promises in stored variants, without silently replacing or activating an experiment. */
+function upperFirst(text: string): string {
+  const t = text.trim();
+  return t ? t.charAt(0).toLocaleUpperCase('de') + t.slice(1) : t;
+}
+
 export function letterTruthBlocklist(cfg: AppConfig): string[] {
   return [
     ...cfg.letter.truthCheckBlocklist,
@@ -129,8 +134,10 @@ export function letterTruthBlocklist(cfg: AppConfig): string[] {
           'Website ist schon fertig',
           'Sie ist fertig',
           '12 Monate Mindestlaufzeit',
-          'keine eigene Website',
-          'keine Website',
+          // Nur die Tatsachenbehauptung über den angeschriebenen Betrieb ist gesperrt („Sie haben keine Website“).
+          // Allgemeine Aussagen („findet jemand keine passende Website …“) sind zulässig (10.11.2026).
+          '\\b(?:Sie|Ihr Betrieb|Ihr Unternehmen|Ihre Firma)\\b[^.!?]{0,60}\\b(?:haben|besitzen|hat|besitzt|sind|ist)\\b[^.!?]{0,40}\\b(?:keine|ohne)\\s+(?:eigene\\s+)?(?:Website|Webseite|Homepage|Internetseite)',
+          '\\bIhre fehlende (?:Website|Webseite|Homepage|Internetseite)',
           'Website[^.]*haben Sie[^.]*nicht',
           'automatisch gelöscht',
           'nur noch kurz',
@@ -314,7 +321,14 @@ export function composeLetter(i: ComposeInput): LetterData {
             ...copy.intro.slice(1),
             copy.scan,
           ]
-        : [lowerFirstWord(copy.opening), ...copy.intro, ...(i.claimTexts ?? []), copy.scan];
+        : copy.core
+          ? [
+              // Standardvorlage 3: feste Kernbotschaft zuerst, danach der persönliche Teil in einem Absatz
+              lowerFirstWord(copy.core),
+              [upperFirst(copy.opening), ...copy.intro, ...(i.claimTexts ?? [])].join(' ').trim(),
+              copy.scan,
+            ]
+          : [lowerFirstWord(copy.opening), ...copy.intro, ...(i.claimTexts ?? []), copy.scan];
       data.qrCaption = copy.qrCaption;
       data.copyEvidence = {
         version: copy.version,

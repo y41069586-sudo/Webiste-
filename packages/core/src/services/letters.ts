@@ -1,5 +1,6 @@
 import { assertLetterLeadEligible } from '../letters/eligibility';
 import { assertLetterBinding } from '../letters/binding';
+import { HOLD_PREFIX, wasSubmitted } from '../letters/state';
 import { assessLetterQuality, type LetterQualityScores, type LetterQualityAssessment } from '../quality/letter';
 import { and, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm';
 import { usableClaims, type ClaimRow } from '../claims/library';
@@ -151,26 +152,72 @@ async function assignedThisWeek(db: DbOrTx, industry: Industry, now = new Date()
   return Object.fromEntries(res.filter((r) => r.variantId).map((r) => [r.variantId!, Number(r.n)]));
 }
 
-/** Brief freigeben (einzeln oder per Bulk). */
-export async function approveLetter(letterId: string, actor: string, scores?: Partial<LetterQualityScores>): Promise<boolean> {
+export interface ApproveOutcome {
+  ok: boolean;
+  /** Klartext-Grund, wenn die Freigabe nicht möglich war */
+  reason?: string;
+  /** true: Brief passte nicht mehr zur aktuellen Demo und wird automatisch neu erzeugt */
+  regenerating?: boolean;
+}
+
+/** Brief freigeben, mit nachvollziehbarem Grund bei Ablehnung (10.11.2026: keine stillen Fehlschläge mehr). */
+export async function approveLetterWithReason(
+  letterId: string,
+  actor: string,
+  scores?: Partial<LetterQualityScores>,
+): Promise<ApproveOutcome> {
   const db = getDb();
-  return db.transaction(async (tx) => {
+  let stale: { leadId: string; sequence: number; message: string } | null = null;
+  const outcome = await db.transaction(async (tx): Promise<ApproveOutcome> => {
     await tx.execute(sql`SELECT id FROM letters WHERE id=${letterId} FOR UPDATE`);
     const letter = await tx.query.letters.findFirst({ where: eq(letters.id, letterId) });
-    if (!letter || letter.status !== 'generated') return false;
+    if (!letter) return { ok: false, reason: 'Brief nicht gefunden.' };
+    if (letter.status !== 'generated')
+      return { ok: false, reason: `Brief ist im Status „${letter.status}“ und wartet nicht auf Freigabe.` };
     const cfg = await getConfig({ db: tx, fresh: true });
     const lead = await tx.query.leads.findFirst({ where: eq(leads.id, letter.leadId) });
-    if (!lead) return false;
+    if (!lead) return { ok: false, reason: 'Betrieb nicht mehr vorhanden.' };
     try {
       await assertLetterLeadEligible(tx, lead, cfg, { testLetter: letter.isTest });
+    } catch (error) {
+      return { ok: false, reason: error instanceof Error ? error.message : 'Betrieb nicht geeignet.' };
+    }
+    try {
       await assertLetterBinding(tx, letter, lead, cfg);
-    } catch {
-      return false;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Brief passt nicht mehr zur Demo.';
+      // Behebbar: Brief zurückstellen und mit der aktuellen Demo neu erzeugen (kein Storno)
+      if (!letter.isTest && letter.sequence >= 1) {
+        await tx
+          .update(letters)
+          .set({
+            status: 'failed',
+            statusReason:
+              `${HOLD_PREFIX}${message} Der Brief wird automatisch neu erzeugt und wartet danach wieder auf deine Freigabe.`.slice(
+                0,
+                1000,
+              ),
+            updatedAt: new Date(),
+          })
+          .where(eq(letters.id, letterId));
+        await audit(tx, {
+          entity: 'letter',
+          entityId: letterId,
+          action: 'hold',
+          actor,
+          context: { reason: message, regenerate: true },
+        });
+        stale = { leadId: letter.leadId, sequence: letter.sequence, message };
+        return { ok: false, reason: `${message} Der Brief wird gerade automatisch neu erzeugt.`, regenerating: true };
+      }
+      return { ok: false, reason: message };
     }
     // Kein Versand ohne bestandenen Wahrheits-Check (B5.4)
-    if ((letter.truthCheckJson as { passed?: boolean } | null)?.passed !== true) return false;
+    if ((letter.truthCheckJson as { passed?: boolean } | null)?.passed !== true)
+      return { ok: false, reason: 'Wahrheits-Check nicht bestanden. Brief neu schreiben lassen.' };
     const previous = letter.truthCheckJson?._quality as LetterQualityAssessment | undefined;
-    if (previous && (previous.version !== 1 || !Array.isArray(previous.dimensions))) return false;
+    if (previous && (previous.version !== 1 || !Array.isArray(previous.dimensions)))
+      return { ok: false, reason: 'Qualitätsdaten des Briefs sind veraltet. Brief neu schreiben lassen.' };
     const quality = previous
       ? assessLetterQuality(
           [{ passed: previous.dimensions.some((d) => d.key === 'technical' && d.score === 100) }],
@@ -178,7 +225,8 @@ export async function approveLetter(letterId: string, actor: string, scores?: Pa
           (await getConfig({ db: tx })).review.letterQualityMinimum,
         )
       : undefined;
-    if (quality && !quality.passed) return false;
+    if (quality && !quality.passed)
+      return { ok: false, reason: 'Bewertung fehlt oder liegt unter dem Mindestniveau („Sehr gut“ oder „Gut“ wählen).' };
     await tx
       .update(letters)
       .set({
@@ -192,8 +240,21 @@ export async function approveLetter(letterId: string, actor: string, scores?: Pa
     if (letter.sequence === 1 && !letter.isTest)
       await transitionLead(tx, letter.leadId, 'letter_approved', { actor, soft: true });
     await audit(tx, { entity: 'letter', entityId: letterId, action: 'approve', actor });
-    return true;
+    return { ok: true };
   });
+  const s = stale as { leadId: string; sequence: number; message: string } | null;
+  if (s)
+    await enqueue(
+      QUEUES.generateLetter,
+      { leadId: s.leadId, sequence: s.sequence as 1 | 2 | 3, triggeredBy: 'auto-hold', regenerate: true },
+      { singletonKey: `letter-hold:${letterId}` },
+    );
+  return outcome;
+}
+
+/** Brief freigeben (einzeln oder per Bulk). */
+export async function approveLetter(letterId: string, actor: string, scores?: Partial<LetterQualityScores>): Promise<boolean> {
+  return (await approveLetterWithReason(letterId, actor, scores)).ok;
 }
 
 export async function bulkApproveLetters(ids: string[], actor: string): Promise<number> {
@@ -233,6 +294,100 @@ export async function rejectLetter(letterId: string, actor: string, note: string
       { singletonKey: `letter:${leadId}:${sequence}:${Date.now()}` },
     );
   }
+}
+
+export interface RestoreOutcome {
+  letterId: string;
+  result: 'reinstated' | 'regenerating' | 'held';
+  reason?: string;
+}
+
+/**
+ * Intern stornierte oder zurückgestellte Briefe wiederherstellen (10.11.2026).
+ * - Wurde der Brief je an den Briefdienst übergeben (Auftragsnummer, Versandzeit), bleibt er zurückgehalten: erst den
+ *   Status beim Briefdienst klären. So entsteht nie ein Doppelversand.
+ * - Endgültige fachliche Sperren (Widerspruch, Sperrliste, gelöschter Betrieb) bleiben bestehen.
+ * - Passt der gespeicherte Brief noch exakt zur aktuellen Demo, geht er ohne KI-Kosten zurück auf „wartet auf Freigabe“.
+ * - Sonst wird er mit der aktuellen Demo und der aktuellen Vorlage neu erzeugt; der bisherige Datensatz bleibt bis zum
+ *   Erfolg erhalten und steht danach im Protokoll (audit_log: restore → generate mit replacedLetterId).
+ * Versendet wird nichts: nach der Wiederherstellung wartet der Brief auf die Freigabe des Betreibers.
+ */
+export async function restoreLetter(letterId: string, actor: string): Promise<RestoreOutcome> {
+  const db = getDb();
+  const letter = await db.query.letters.findFirst({ where: eq(letters.id, letterId) });
+  if (!letter) return { letterId, result: 'held', reason: 'Brief nicht gefunden' };
+  if (!['cancelled', 'failed'].includes(letter.status))
+    return { letterId, result: 'held', reason: `Status ${letter.status}: keine Wiederherstellung nötig` };
+  if (wasSubmitted(letter))
+    return {
+      letterId,
+      result: 'held',
+      reason: 'Bereits an den Briefdienst übergeben: Status dort prüfen, kein erneuter Versand',
+    };
+  if (letter.isTest) return { letterId, result: 'held', reason: 'Testbrief: bitte neu als Testbrief erzeugen' };
+  const cfg = await getConfig({ fresh: true });
+  const lead = await db.query.leads.findFirst({ where: eq(leads.id, letter.leadId) });
+  if (!lead) return { letterId, result: 'held', reason: 'Betrieb nicht mehr vorhanden' };
+  try {
+    await assertLetterLeadEligible(db, lead, cfg);
+  } catch (error) {
+    return { letterId, result: 'held', reason: error instanceof Error ? error.message : 'Betrieb nicht geeignet' };
+  }
+  const truthPassed = (letter.truthCheckJson as { passed?: boolean } | null)?.passed === true;
+  let bindingOk = false;
+  if (truthPassed) {
+    try {
+      await assertLetterBinding(db, letter, lead, cfg);
+      bindingOk = true;
+    } catch {
+      bindingOk = false;
+    }
+  }
+  if (bindingOk) {
+    const updated = await db
+      .update(letters)
+      .set({ status: 'generated', statusReason: null, approvedBy: null, approvedAt: null, updatedAt: new Date() })
+      .where(
+        and(eq(letters.id, letterId), inArray(letters.status, ['cancelled', 'failed']), sql`${letters.providerLetterId} IS NULL`),
+      )
+      .returning({ id: letters.id });
+    if (!updated.length) return { letterId, result: 'held', reason: 'Brief wurde gleichzeitig geändert' };
+    if (letter.sequence === 1) await transitionLead(db, letter.leadId, 'letter_generated', { actor, soft: true });
+    await audit(db, {
+      entity: 'letter',
+      entityId: letterId,
+      action: 'restore',
+      actor,
+      context: { mode: 'reinstated', from: letter.status, reason: letter.statusReason },
+    });
+    return { letterId, result: 'reinstated' };
+  }
+  if (letter.sequence < 1) return { letterId, result: 'held', reason: 'Unbekannte Brieffolge' };
+  await enqueue(
+    QUEUES.generateLetter,
+    { leadId: letter.leadId, sequence: letter.sequence as 1 | 2 | 3, triggeredBy: actor, regenerate: true },
+    { singletonKey: `letter-restore:${letterId}` },
+  );
+  await audit(db, {
+    entity: 'letter',
+    entityId: letterId,
+    action: 'restore',
+    actor,
+    context: { mode: 'regenerating', from: letter.status, reason: letter.statusReason },
+  });
+  return { letterId, result: 'regenerating' };
+}
+
+/** Alle intern stornierten und zurückgestellten Briefe wiederherstellen (ohne Versand). */
+export async function restoreStalledLetters(actor: string): Promise<RestoreOutcome[]> {
+  const rows = await getDb()
+    .select({ id: letters.id })
+    .from(letters)
+    .where(and(inArray(letters.status, ['cancelled', 'failed']), eq(letters.isTest, false)))
+    .limit(500);
+  const out: RestoreOutcome[] = [];
+  for (const r of rows) out.push(await restoreLetter(r.id, actor));
+  return out;
 }
 
 /** Offene Briefe (für Dashboard-Zähler). */

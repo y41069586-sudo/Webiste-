@@ -378,16 +378,22 @@ describe('V4-Einladung passt für jede Branche auf eine Seite (fester Text, lang
                     copy: {
                       ...base,
                       subject: filler('Ihre Website-Idee für den Betrieb am Westfalenpark', 118),
+                      // Standardvorlage 3: Kernbotschaft (base.core) steht fest davor, der KI-Teil hat das kleinere Budget
                       opening:
                         mode === 'ki'
-                          ? filler('ich habe für Ihren Betrieb eine eigene Website gebaut', L.body / 2)
-                          : `${filler('mir ist aufgefallen, dass Ihr Eintrag neue Öffnungszeiten am Samstag nennt', L.observation)} ${filler('deshalb habe ich für Ihren Betrieb eine eigene Website gebaut', (L.total - L.observation) / 2 - 1)}`,
+                          ? filler(
+                              'Genau deshalb habe ich für Ihren Betrieb eine unverbindliche Website-Vorschau gebaut',
+                              L.coreBody / 2,
+                            )
+                          : `${filler('mir ist aufgefallen, dass Ihr Eintrag neue Öffnungszeiten am Samstag nennt', L.observation)} ${filler('Genau deshalb habe ich für Ihren Betrieb eine Website-Vorschau gebaut', (L.coreTotal - L.observation) / 2 - 1)}`,
                       intro: [
-                        filler(
-                          'Wer in Dortmund nach Ihnen sucht, sieht dort Ihr Angebot',
-                          mode === 'ki' ? L.body / 2 : (L.total - L.observation) / 2 - 1,
-                        ),
-                        ...(base.research ? [base.research] : []),
+                        [
+                          filler(
+                            'Im Entwurf sehen Interessierte Ihr Angebot',
+                            mode === 'ki' ? L.coreBody / 2 : (L.coreTotal - L.observation) / 2 - 1,
+                          ),
+                          ...(base.research ? [base.research] : []),
+                        ].join(' '),
                       ],
                     },
                     contextHash: invitationContextHash(context, sequence),
@@ -425,7 +431,22 @@ describe('V4-Einladung passt für jede Branche auf eine Seite (fester Text, lang
               await htmlToPdf(html),
             );
           if (domIssues.length) failures.push(`${label}: ${JSON.stringify(domIssues)}`);
-          const check = await validateLetterPdf(await htmlToPdf(html), {
+          const finalPdf = await htmlToPdf(html);
+          // Standardvorlage 3: die Kernbotschaft steht nach dem Einpassen wirklich im fertigen PDF (nicht nur im Code)
+          if (sequence === 1 && !loss) {
+            const { hasCoreMessage } = await import('../src/render/letter');
+            const { pdfTextItems } = await import('../src/render/pdf');
+            if (!hasCoreMessage(data)) failures.push(`${label}: Kernbotschaft fehlt nach dem Einpassen`);
+            const text = (await pdfTextItems(finalPdf)).items
+              .map((i) => i.str)
+              .join(' ')
+              .replace(/\s+/g, ' ');
+            if (!/keine passende Website/.test(text) || !/verloren gehen/.test(text))
+              failures.push(`${label}: Kernbotschaft fehlt im PDF-Text`);
+            if (process.env.LETTER_SAMPLE_DIR && (mode === 'fakten' || mode === 'ki') && arm === 'A')
+              (await import('node:fs')).writeFileSync(`${process.env.LETTER_SAMPLE_DIR}/${b.key}-${mode}.pdf`, finalPdf);
+          }
+          const check = await validateLetterPdf(finalPdf, {
             recipientLines: data.recipientLines,
             position: 'left',
             expectedPages: 1,

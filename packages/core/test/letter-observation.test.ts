@@ -30,7 +30,9 @@ const context: VerifiedLetterContext = {
 describe('Persönlicher Einstieg aus belegter Beobachtung', () => {
   it('beginnt Brief 1 mit der belegten Beobachtung und behält den Recherchehinweis', () => {
     const copy = previewInvitationCopy(context, 1);
-    expect(copy.opening).toMatch(/^mir ist aufgefallen: Sie bieten seit Kurzem auch Fassadenarbeiten an\. Deshalb habe ich/);
+    expect(copy.opening).toMatch(
+      /^mir ist aufgefallen: Sie bieten seit Kurzem auch Fassadenarbeiten an\. Genau deshalb habe ich/,
+    );
     expect(copy.research).toContain('keinen eigenen Webauftritt');
     expect(copy.sources.map((s) => s.text)).toContain(observation.text);
   });

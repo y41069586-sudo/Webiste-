@@ -10,7 +10,14 @@ export const LETTER_WRITER_TOOL = 'schreibe_persoenliche_vorschau_einladung';
  * Längenbudget der KI-Fassung, gemessen am ungünstigsten Brief (langer Name, Recherchehinweis, lange Absenderdaten):
  * so passt jede gültige Fassung nach dem Einpassen auf die erste Seite (Test „V4-Einladung passt für jede Branche“).
  */
-export const LETTER_TEXT_LIMITS = { observation: 150, body: 420, total: 440, lossBody: 260 } as const;
+export const LETTER_TEXT_LIMITS = {
+  observation: 150,
+  body: 420,
+  total: 440,
+  lossBody: 260,
+  coreBody: 300,
+  coreTotal: 360,
+} as const;
 export const LETTER_REVIEW_TOOL = 'pruefe_brief_fakten_und_demo';
 const DraftSchema = z
   .object({
@@ -59,21 +66,22 @@ Nicht jede Einleitung beginnt mit "wir haben". Nutzen und Entwurf können in unt
 stehen. Kein abgehacktes "Leistung – eine Website könnte ...", keine austauschbaren Qualitätsfloskeln.
 Kurze Sätze, respektvolles Sie, insgesamt höchstens ${LETTER_TEXT_LIMITS.body} Zeichen für opening + benefit
 (mit observation zusammen höchstens ${LETTER_TEXT_LIMITS.total} Zeichen).
-Aufbau mit Wirkung, aber ehrlich: (1) Einstieg = Vorleistung und Eigentum: Es wurde bereits eine eigene Website
-für diesen Betrieb gebaut, mit seinem Namen, seiner Adresse und seinen Kontaktdaten. (2) Nutzen = Blick der
-Kundschaft vor Ort ("Wer in {Stadt} … sucht, …") mit genau einer konkreten Handlung (anrufen, anfragen,
-Termin anfragen). Keine Superlative, keine Übertreibung, kein Druck.
+Erstbrief (sequence 1): Den ersten Absatz setzt ausschließlich das System, wörtlich und fest: Wer online nach einem
+Betrieb wie diesem sucht, möchte sich zuerst ein Bild machen; findet er keine passende Website, schaut er sich womöglich
+beim nächsten Anbieter um; so können Anfragen verloren gehen. Wiederhole oder variiere diesen Gedanken NICHT (kein
+"verlieren", "verloren", "entgehen", kein erneutes "wer … sucht"). Dein Text schließt direkt daran an:
+(1) opening beginnt mit "Genau deshalb habe ich" und sagt in einem Satz, dass für diesen Betrieb eine unverbindliche
+Website-Vorschau gebaut wurde, mit seinem Namen, seiner Adresse und seinen Kontaktdaten. (2) benefit beschreibt, was
+Interessierte im Entwurf auf einen Blick finden, mit genau einer konkreten Handlung (anrufen, anfragen, Termin
+anfragen). opening und benefit im Erstbrief zusammen höchstens ${LETTER_TEXT_LIMITS.coreBody} Zeichen.
+Mit observation im Erstbrief: observation, opening und benefit zusammen höchstens ${LETTER_TEXT_LIMITS.coreTotal} Zeichen.
+Keine Superlative, keine Übertreibung, kein Druck.
 Persönliche Beobachtung: NUR wenn das Feld observation geliefert wird. Dann schreibst du im Feld observation
 genau einen Satz, der mit "Mir ist aufgefallen" beginnt und diese Beobachtung mit ihren Kernbegriffen
 wiedergibt – nichts hinzufügen, nicht bewerten ("toll", "beeindruckend" usw. verboten), nicht übertreiben.
-Dann beginnt opening mit "Deshalb habe ich …". Ohne observation bleibt das Feld leer und das Wort
+Auch dann beginnt opening mit "Genau deshalb habe ich …". Ohne observation bleibt das Feld leer und das Wort
 "aufgefallen" kommt nirgends vor.
-Pflicht-Gedanke in jedem Brief (ohne Zahlen): Wer in der Stadt einen Betrieb wie diesen braucht, sucht zuerst im Netz;
-findet er keinen Webauftritt, fragt er womöglich bei anderen an; ein Auftrag, der so anderswo landet, kann entgehen. Das alles
-nur als Möglichkeit formulieren.
-Erlaubt und erwünscht ist die Möglichkeitsform über die Kundschaft, z. B. "Leute finden Sie vielleicht nicht, wenn sie
-suchen" oder "manche wollen womöglich gerade einen Termin buchen, ohne eine Website von Ihnen zu sehen". Niemals als Tatsache
-behaupten, dass Kunden oder Umsatz tatsächlich verloren gehen.
+Niemals als Tatsache behaupten, dass Kunden, Anfragen oder Umsatz tatsächlich verloren gehen.
 Beschreibe im Indikativ, was der Entwurf tatsächlich zeigt ("Im Entwurf sehen Interessierte …"), nicht im
 Konjunktiv ("könnte …"). Steht der Firmenname im Betreff, wiederhole ihn im Einstieg nicht. Der Einstieg sagt
 in einem Satz, was vorbereitet wurde; der Nutzen beschreibt aus Sicht der Kundschaft des Betriebs, was sie dort
@@ -81,6 +89,7 @@ auf einen Blick findet. Konkrete Tätigkeitswörter statt Floskeln.
 Keine Anrede, Grußformel, Preise, Rabatte, Tarife, Garantien oder rechtlichen Text selbst schreiben.
 Keine Zahlen außerhalb des Firmennamens oder wörtlicher belegter Angaben, keine Links oder Kontaktdaten.
 Der Firmenname muss im Betreff oder Einstieg wörtlich vorkommen. Für lange Namen kurzen Betreff wählen.
+Ausnahme Erstbrief: dort setzt das System den Betreff mit dem Firmennamen; nenne den Namen im Text nicht noch einmal.
 Mindestens eine ausgewählte kurze Faktenphrase natürlich und wörtlich in opening oder benefit einbinden.
 factIds bezeichnen nur tatsächlich genutzte mitgelieferte Fakten. Keine Behauptung über fehlende Websites:
 diesen separaten Recherchehinweis fügt ausschließlich das geprüfte System hinzu.
@@ -118,6 +127,8 @@ export function invitationDraftIssues(
   facts: { id: string; text: string }[],
   observation?: { text: string },
   loss = false,
+  /** Standardvorlage 3: Kernbotschaft steht fest davor, KI-Teil ist kürzer und wiederholt sie nicht */
+  core = false,
 ) {
   const parsed = DraftSchema.safeParse(raw);
   if (!parsed.success) return ['Ungültige Textstruktur oder nicht eingehaltene Textlänge.'];
@@ -127,11 +138,13 @@ export function invitationDraftIssues(
   const body = [d.opening, d.benefit].join(' ');
   const issues: string[] = [];
   // Verlustbrief trägt zusätzlich Recherchesatz, Beleg und Fußnote: kleineres Budget
-  const bodyLimit = loss ? LETTER_TEXT_LIMITS.lossBody : LETTER_TEXT_LIMITS.body;
+  const bodyLimit = loss ? LETTER_TEXT_LIMITS.lossBody : core ? LETTER_TEXT_LIMITS.coreBody : LETTER_TEXT_LIMITS.body;
   if (body.length > bodyLimit) issues.push(`Einstieg und Nutzen zusammen kürzer als ${bodyLimit} Zeichen schreiben.`);
-  else if (noticed.length + 1 + body.length > LETTER_TEXT_LIMITS.total)
-    issues.push(`Beobachtung, Einstieg und Nutzen zusammen kürzer als ${LETTER_TEXT_LIMITS.total} Zeichen schreiben.`);
-  if (!`${d.subject} ${d.opening}`.includes(context.businessName)) issues.push('Wörtlicher Firmenname fehlt.');
+  else if (noticed.length + 1 + body.length > (core ? LETTER_TEXT_LIMITS.coreTotal : LETTER_TEXT_LIMITS.total))
+    issues.push(
+      `Beobachtung, Einstieg und Nutzen zusammen kürzer als ${core ? LETTER_TEXT_LIMITS.coreTotal : LETTER_TEXT_LIMITS.total} Zeichen schreiben.`,
+    );
+  if (!core && !`${d.subject} ${d.opening}`.includes(context.businessName)) issues.push('Wörtlicher Firmenname fehlt.');
   if (/[<>{}*\r\n]|https?:|www\./i.test(text)) issues.push('Keine Links, Markup oder Platzhalter verwenden.');
   if (/€|\beuro\b|\beur\b|\btarif|\bpreis|Care\+|\d+\s*[,.]-|\bab\s+\d/i.test(text))
     issues.push('Keine Preise oder Tarifdetails im Brief.');
@@ -142,6 +155,8 @@ export function invitationDraftIssues(
     /keine(?:n)? (?:eigene[nr]? )?(?:Website|Webauftritt)|keinen eigenen Webauftritt|bei (?:unserer|meiner) Recherche/i.test(text)
   )
     issues.push('Recherchebehauptungen nur über den separaten geprüften Recherchehinweis.');
+  if (core && /verlier|verloren|entgeh/i.test(text))
+    issues.push('Den Gedanken vom möglichen Verlust nicht wiederholen; ihn setzt das System im ersten Absatz.');
   const selected = facts.filter((f) => d.factIds.includes(f.id));
   if (d.factIds.some((id) => !facts.some((f) => f.id === id))) issues.push('Unbekannte Faktenreferenz.');
   if (facts.length && !selected.length) issues.push('Mindestens einen belegten Betriebsbezug verwenden.');
@@ -258,7 +273,7 @@ export async function writePreviewInvitation(
         maxTokens: 3000,
         effort: 'medium',
       });
-      reasons = invitationDraftIssues(draft, input.context, facts, base.observation, base.loss);
+      reasons = invitationDraftIssues(draft, input.context, facts, base.observation, base.loss, Boolean(base.core));
       if (reasons.length) continue;
       // A source fact alone is not proof that the promised preview actually shows it.
       // Keep this binding deterministic instead of trusting an approving model response alone.
@@ -334,9 +349,10 @@ passed nur bei keinen Befunden, sonst kurze konkrete Reparaturhinweise in issues
         reviewReasons: [],
         copy: {
           ...base,
-          subject: draft.subject,
+          // Standardvorlage 3: Betreff und Kernbotschaft (base.core) bleiben fest; die KI liefert den persönlichen Teil
+          subject: base.core ? base.subject : draft.subject,
           opening: noticed ? `${noticed.charAt(0).toLowerCase()}${noticed.slice(1)} ${draft.opening}` : draft.opening,
-          intro: [draft.benefit, ...(research ? [research] : [])],
+          intro: [[draft.benefit, ...(research ? [research] : [])].join(' ')],
           qrCaption: draft.qrCaption,
           sources: [
             ...facts.filter((f) => draft.factIds.includes(f.id)).map(({ text, source }) => ({ text, source })),

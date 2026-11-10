@@ -7,6 +7,7 @@ import { businessHash, normalizeBusinessName, businessPhoneKey } from '../leads/
 import { isSuppressed } from '../services/suppression';
 import { assertAcquisitionEligible } from '../services/lead-research';
 import { dataSourceText } from './notices';
+import { LetterFinalBlockError } from './state';
 
 /** Re-run locally before rendering, approving and sending; no source refresh/API calls. */
 export async function assertLetterLeadEligible(
@@ -16,7 +17,7 @@ export async function assertLetterLeadEligible(
   opts: { testLetter?: boolean } = {},
 ): Promise<void> {
   if (lead.anonymizedAt || ['suppressed', 'rejected', 'expired'].includes(lead.status))
-    throw new Error('Betrieb gesperrt oder nicht mehr geeignet.');
+    throw new LetterFinalBlockError('Betrieb gesperrt oder nicht mehr geeignet.');
   if (
     !lead.businessName.trim() ||
     !lead.street?.trim() ||
@@ -26,7 +27,8 @@ export async function assertLetterLeadEligible(
     lead.country !== 'DE'
   )
     throw new Error('Zustellanschrift unvollständig; manuelle Prüfung erforderlich.');
-  if (await isSuppressed(db, { name: lead.businessName, ...lead })) throw new Error('Sperrlisteneintrag: kein weiterer Brief.');
+  if (await isSuppressed(db, { name: lead.businessName, ...lead }))
+    throw new LetterFinalBlockError('Sperrlisteneintrag: kein weiterer Brief.');
   if (!lead.sourceId?.trim() || !['osm', 'google_places', 'mock', 'public_profile'].includes(lead.source))
     throw new Error('Datenquelle nicht nachvollziehbar.');
   if (lead.source === 'public_profile') dataSourceText(lead.source, lead.sourceId);

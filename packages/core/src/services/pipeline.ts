@@ -187,6 +187,9 @@ export async function pipelineTick(): Promise<PipelineTickResult> {
             .from(letters)
             .where(and(eq(letters.leadId, leads.id), eq(letters.sequence, 1))),
         ),
+        // 10.11.2026: kein Dauerlauf. Scheitert die Brieferzeugung für einen Betrieb zweimal binnen 6 Stunden
+        // (auch „nicht wiederholbar“ gestoppt), wartet er auf die nächste Runde oder einen manuellen Anstoß.
+        sql`(SELECT count(*) FROM pgboss.job j WHERE j.name = 'generate-letter' AND (j.state = 'failed' OR (j.state = 'completed' AND j.output->>'stopped' = 'NonRetryableError')) AND j.data->>'leadId' = ${leads.id}::text AND j.created_on > now() - interval '6 hours') < 2`,
       ),
     )
     .limit(200);

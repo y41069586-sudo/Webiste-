@@ -1,5 +1,8 @@
 import { assertLetterLeadEligible } from '../letters/eligibility';
 import { assertLetterBinding } from '../letters/binding';
+import { HOLD_PREFIX, LetterFinalBlockError } from '../letters/state';
+import { enqueue, QUEUES } from '../queue';
+import { publicSiteReachable, SITE_DOWN_MESSAGE } from './site-health';
 import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { getEnv } from '../config/env';
 import { effectiveSwitches, getConfig } from '../config/service';
@@ -89,73 +92,86 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     throw new SendBlockedError('Versand pausiert (Sicherheitsnetz) – Lead-Qualität prüfen und unter Einstellungen freigeben.');
   }
   const lead = await db.query.leads.findFirst({ where: eq(leads.id, letter.leadId) });
-  if (!lead || lead.anonymizedAt || lead.status === 'suppressed') {
-    await db.update(letters).set({ status: 'cancelled', statusReason: 'Lead gesperrt/gelöscht' }).where(eq(letters.id, letterId));
-    return { state: 'skipped', reason: 'Lead gesperrt' };
-  }
-  try {
-    await assertLetterLeadEligible(db, lead, cfg, { testLetter: letter.isTest });
-    await assertLetterBinding(db, letter, lead, cfg);
-  } catch (error) {
+  // Endgültig (fachlich): Widerspruch, Sperrliste, gelöschter Betrieb. Nur das rechtfertigt „storniert“.
+  const cancelFinal = async (reason: string) => {
     await db
       .update(letters)
-      .set({ status: 'cancelled', statusReason: error instanceof Error ? error.message : 'Briefzuordnung nicht bestanden' })
-      .where(eq(letters.id, letterId));
-    return { state: 'skipped', reason: 'Sperrliste, Eignung oder Briefzuordnung geändert' };
-  }
-  // Wahrheits-Check (B5.4): kein Versand ohne passed; verwendete Claims müssen noch gültig sein
-  if ((letter.truthCheckJson as { passed?: boolean } | null)?.passed !== true) {
-    await db
-      .update(letters)
-      .set({ status: 'failed', statusReason: 'Wahrheits-Check fehlt oder nicht bestanden – bitte neu erzeugen' })
-      .where(eq(letters.id, letterId));
-    return { state: 'skipped', reason: 'Wahrheits-Check' };
-  }
-  const staleClaims = await db.execute<{ claim_id: string }>(
-    sql`SELECT u.claim_id FROM claim_usages u JOIN claims c ON c.id = u.claim_id
-        WHERE u.letter_id = ${letterId} AND (c.status <> 'approved' OR c.expires_at <= now())`,
-  );
-  if (staleClaims.rows.length) {
+      .set({ status: 'cancelled', statusReason: reason, updatedAt: new Date() })
+      .where(and(eq(letters.id, letterId), eq(letters.status, 'approved')));
+    await audit(db, { entity: 'letter', entityId: letterId, action: 'cancel', actor, context: { reason, final: true } });
+  };
+  // Behebbar (technisch): Brief zurückstellen statt stornieren; auf Wunsch mit der aktuellen Demo neu erzeugen.
+  const hold = async (reason: string, regenerate: boolean): Promise<SendResult> => {
     await db
       .update(letters)
       .set({
         status: 'failed',
-        statusReason: `Claim inzwischen gesperrt/abgelaufen (${staleClaims.rows.map((r) => r.claim_id).join(', ')}) – bitte neu erzeugen`,
+        statusReason:
+          `${HOLD_PREFIX}${reason}${regenerate ? ' Der Brief wird automatisch neu erzeugt und wartet danach wieder auf deine Freigabe.' : ''}`.slice(
+            0,
+            1000,
+          ),
+        updatedAt: new Date(),
       })
-      .where(eq(letters.id, letterId));
-    return { state: 'skipped', reason: 'Claim gesperrt' };
+      .where(and(eq(letters.id, letterId), eq(letters.status, 'approved')));
+    await audit(db, { entity: 'letter', entityId: letterId, action: 'hold', actor, context: { reason, regenerate } });
+    if (regenerate && !letter.isTest && letter.sequence >= 1)
+      await enqueue(
+        QUEUES.generateLetter,
+        { leadId: letter.leadId, sequence: letter.sequence as 1 | 2 | 3, triggeredBy: 'auto-hold', regenerate: true },
+        { singletonKey: `letter-hold:${letterId}` },
+      ).catch((err) =>
+        logger.warn({ letterId, err: err instanceof Error ? err.message : String(err) }, 'Neuerzeugung nicht eingereiht'),
+      );
+    return { state: 'skipped', reason };
+  };
+  if (!lead || lead.anonymizedAt || lead.status === 'suppressed') {
+    await cancelFinal('Betrieb gesperrt oder gelöscht (Werbewiderspruch/Sperrliste)');
+    return { state: 'skipped', reason: 'Lead gesperrt' };
   }
+  try {
+    await assertLetterLeadEligible(db, lead, cfg, { testLetter: letter.isTest });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Eignung nicht bestanden';
+    if (error instanceof LetterFinalBlockError) {
+      await cancelFinal(message);
+      return { state: 'skipped', reason: 'Sperrliste oder Betrieb nicht mehr geeignet' };
+    }
+    return hold(message, false);
+  }
+  try {
+    await assertLetterBinding(db, letter, lead, cfg);
+  } catch (error) {
+    return hold(error instanceof Error ? error.message : 'Briefzuordnung nicht bestanden.', true);
+  }
+  // Wahrheits-Check (B5.4): kein Versand ohne passed; verwendete Claims müssen noch gültig sein
+  if ((letter.truthCheckJson as { passed?: boolean } | null)?.passed !== true)
+    return hold('Wahrheits-Check fehlt oder nicht bestanden.', true);
+  const staleClaims = await db.execute<{ claim_id: string }>(
+    sql`SELECT u.claim_id FROM claim_usages u JOIN claims c ON c.id = u.claim_id
+        WHERE u.letter_id = ${letterId} AND (c.status <> 'approved' OR c.expires_at <= now())`,
+  );
+  if (staleClaims.rows.length)
+    return hold(`Beleg inzwischen gesperrt oder abgelaufen (${staleClaims.rows.map((r) => r.claim_id).join(', ')}).`, true);
   if (!letter.isTest) {
     const currentDemo = await currentDemoForLead(db, letter.leadId);
     const demo = letter.demoId ? await db.query.demos.findFirst({ where: eq(demos.id, letter.demoId) }) : null;
     const acceptedTechnical =
       (demo?.qaResultJson as { acceptedTechnical?: boolean } | null | undefined)?.acceptedTechnical === true;
-    if (
-      !demo ||
-      currentDemo?.id !== demo.id ||
-      (!acceptedTechnical && demo.qaResultJson?.passed === false) ||
-      (!acceptedTechnical && demo.qaResultJson?.quality?.passed === false) ||
-      demo.status !== 'published' ||
-      (demo.expiresAt && demo.expiresAt < addDays(new Date(), 7))
-    ) {
-      await db
-        .update(letters)
-        .set({
-          status: 'cancelled',
-          statusReason: 'Demo ersetzt, Qualitätsprüfung offen/fehlgeschlagen oder nicht mehr lange genug online',
-        })
-        .where(eq(letters.id, letterId));
-      return { state: 'skipped', reason: 'Demo nicht verfügbar' };
-    }
+    if (!demo || currentDemo?.id !== demo.id)
+      return hold('Die Demo wurde seit der Brieferstellung ersetzt.', Boolean(currentDemo));
+    if (demo.status !== 'published') return hold('Die Demo ist nicht mehr veröffentlicht. Demo zuerst wieder freigeben.', false);
+    if (!acceptedTechnical && (demo.qaResultJson?.passed === false || demo.qaResultJson?.quality?.passed === false))
+      return hold(
+        'Die Demo-Prüfung ist offen. Demo unter „Demos“ freigeben (bei Bedarf „Technische Befunde trotzdem freigeben“), danach den Brief wiederherstellen.',
+        false,
+      );
+    if (demo.expiresAt && demo.expiresAt < addDays(new Date(), 7))
+      return hold('Die Demo ist nicht mehr lange genug online.', true);
     // Das im Brief genannte „online bis …“ muss nach der Zustellung noch mindestens eine Woche gelten
     const delivery = addBusinessDays(new Date(), getEnv().DELIVERY_BUSINESS_DAYS);
-    if (letter.statedExpiresAt && letter.statedExpiresAt < addDays(delivery, 7)) {
-      await db
-        .update(letters)
-        .set({ status: 'failed', statusReason: 'Ablaufdatum im Brief liegt zu nah – bitte neu erzeugen' })
-        .where(eq(letters.id, letterId));
-      return { state: 'skipped', reason: 'Brief veraltet' };
-    }
+    if (letter.statedExpiresAt && letter.statedExpiresAt < addDays(delivery, 7))
+      return hold('Das im Brief genannte Ablaufdatum liegt zu nah.', true);
   }
   const provider = getProviders().mail;
   const gate = realLettersGate(
@@ -189,6 +205,9 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     return { state: 'dry_run', estimateCents: letter.estimatedCostCents ?? cfg.costs.letterEstimateCents };
   }
 
+  // Kein Brief mit totem QR-Code: die öffentliche Seite muss jetzt erreichbar sein (Status bleibt „freigegeben“).
+  if (!(await publicSiteReachable())) throw new SendBlockedError(`Versand angehalten. ${SITE_DOWN_MESSAGE}`);
+
   const estimate =
     (await provider.estimateCost(pdf, base).catch(() => null)) ?? letter.estimatedCostCents ?? cfg.costs.letterEstimateCents;
   const reservationKey = `letter:${letterId}`;
@@ -199,6 +218,17 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     leadId: lead.id,
     ref: letterId,
   });
+
+  // Übergabe atomar beanspruchen: zwei gleichzeitige Läufe können denselben Brief nie doppelt einreichen.
+  const claimed = await db
+    .update(letters)
+    .set({ status: 'queued', statusReason: 'Wird an den Briefdienst übergeben …', updatedAt: new Date() })
+    .where(and(eq(letters.id, letterId), eq(letters.status, 'approved'), sql`${letters.providerLetterId} IS NULL`))
+    .returning({ id: letters.id });
+  if (!claimed.length) {
+    await releaseReservation(db, reservationKey);
+    return { state: 'skipped', reason: 'Wird bereits übergeben oder ist schon übermittelt' };
+  }
 
   try {
     const recipient = letter.isTest
@@ -269,13 +299,16 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     return { state: 'sent', providerLetterId: res.providerLetterId, costCents: cost };
   } catch (err) {
     await releaseReservation(db, reservationKey);
+    // Technischer Fehler bei der Übergabe: zurück auf „freigegeben“, der Auftrag wird mit demselben
+    // Idempotenz-Schlüssel wiederholt (kein Doppeldruck). Nie „storniert“.
     await db
       .update(letters)
       .set({
-        statusReason: `Versandfehler: ${err instanceof Error ? err.message.slice(0, 300) : String(err)}`,
+        status: 'approved',
+        statusReason: `Übergabe an den Briefdienst fehlgeschlagen, wird wiederholt: ${err instanceof Error ? err.message.slice(0, 300) : String(err)}`,
         updatedAt: new Date(),
       })
-      .where(eq(letters.id, letterId));
+      .where(and(eq(letters.id, letterId), eq(letters.status, 'queued'), sql`${letters.providerLetterId} IS NULL`));
     throw err;
   }
 }
@@ -493,6 +526,27 @@ export async function syncLetterStatuses(actor = 'job:sync-letter-status'): Prom
     .where(and(inArray(letters.status, ['queued', 'sent']), isNotNull(letters.providerLetterId)))
     .limit(500);
   let changed = 0;
+  // Abgebrochene Übergabe (Worker-Neustart zwischen Beanspruchen und Antwort): zurück auf „freigegeben“.
+  // Die Wiederholung nutzt denselben Idempotenz-Schlüssel, der Briefdienst druckt nicht doppelt.
+  const stuck = await db
+    .update(letters)
+    .set({
+      status: 'approved',
+      statusReason: 'Übergabe an den Briefdienst wurde unterbrochen und wird wiederholt (kein Doppeldruck).',
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(letters.status, 'queued'),
+        sql`${letters.providerLetterId} IS NULL`,
+        sql`${letters.updatedAt} < now() - interval '15 minutes'`,
+      ),
+    )
+    .returning({ id: letters.id });
+  for (const s of stuck) {
+    changed++;
+    await audit(db, { entity: 'letter', entityId: s.id, action: 'handover_recovered', actor });
+  }
   for (const l of open) {
     try {
       if (l.provider === provider.name) {

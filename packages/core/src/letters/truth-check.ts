@@ -18,6 +18,8 @@ export const TRUTH_CHECK_VERSION = 1;
 export interface TruthViolation {
   rule: 'number' | 'blocklist' | 'claim' | 'placeholder' | 'footnote' | 'sources_page' | 'statistics' | 'llm';
   detail: string;
+  /** Wörtlich gefundene Textstelle (Sperrliste, Zahl) – für die automatische Korrektur */
+  match?: string;
 }
 
 export interface ClaimForCheck {
@@ -48,6 +50,8 @@ export interface TruthCheckInput {
   /** zusätzliche Sperrmuster aus der Config (Regex) */
   extraBlocklist?: string[];
   maxStatistics?: number;
+  /** Feste, freigegebene Vorlagentexte (z. B. Kernbotschaft): von der KI-Prüfung ausgenommen */
+  fixedTexts?: string[];
   now?: Date;
 }
 
@@ -103,7 +107,7 @@ export function checkLetterTruth(input: TruthCheckInput): TruthCheckResult {
   const extra = (input.extraBlocklist ?? []).map((p) => ({ pattern: new RegExp(p, 'i'), label: `„${p}“` }));
   for (const b of [...DEFAULT_BLOCKLIST, ...extra]) {
     const m = body.match(b.pattern);
-    if (m) violations.push({ rule: 'blocklist', detail: `${b.label}: „${m[0]}“` });
+    if (m) violations.push({ rule: 'blocklist', detail: `${b.label}: „${m[0]}“`, match: m[0] });
   }
 
   // Unaufgelöste Platzhalter ({CLAIM:…} außerhalb der Claim-Slots, Tippfehler in {…})
@@ -146,7 +150,7 @@ export function checkLetterTruth(input: TruthCheckInput): TruthCheckResult {
   for (const n of numbers) {
     const at = residual.indexOf(n);
     const ctx = residual.slice(Math.max(0, at - 30), at + n.length + 30).trim();
-    violations.push({ rule: 'number', detail: `Zahl ohne Claim: „${n}“ (… ${ctx} …)` });
+    violations.push({ rule: 'number', detail: `Zahl ohne Claim: „${n}“ (… ${ctx} …)`, match: n });
   }
 
   // 4) Fußnoten und Quellenseite
@@ -176,14 +180,21 @@ export const TRUTH_TOOL_NAME = 'pruefe_wirkungsaussagen';
 
 export const TRUTH_SYSTEM_PROMPT = `Du prüfst deutsche Werbebriefe auf irreführende Werbung (§ 5 UWG).
 Belegte Aussagen sind im Text mit [[BELEG]]…[[/BELEG]] markiert und gelten als geprüft.
-Frage: Enthält der Brief außerhalb der markierten Belege eine Aussage über Wirkung, Umsatz, Erfolg,
-mehr Kunden, mehr Anfragen oder mehr Buchungen – oder eine Tatsachenbehauptung mit Zahl –, die nicht
-wörtlich aus einem Beleg stammt? Allgemeine Beschreibungen des Angebots (was die Website enthält, Preise,
-Garantie, Ablaufdatum) sind keine Wirkungsaussagen.
-Ausdrücklich erlaubt: eine als Möglichkeit formulierte Aussage ("könnte", "womöglich", "vielleicht"), dass
-Interessierte den Betrieb ohne Website womöglich nicht finden oder woanders anfragen. Sie ist keine unbelegte
-Wirkungsaussage, solange sie nicht behauptet, dass tatsächlich Umsatz, Kunden oder Anfragen verloren gehen,
-und sie nicht über den Inhalt des Belegs hinausgeht. Antworte nur über das Werkzeug.`;
+Text zwischen [[VORLAGE]]…[[/VORLAGE]] ist fester, freigegebener Vorlagentext und wird nicht geprüft.
+Unterscheide drei Arten von Aussagen außerhalb der Belege:
+A) Beschreibung des Angebots und des Entwurfs (was die Website zeigt, Ablauf, Preise, Garantie, Ablaufdatum) sowie
+   mitgelieferte Betriebsangaben: zulässig, nicht melden.
+B) Allgemeine Aussage über ein mögliches Risiko oder einen möglichen Nutzen, erkennbar als Möglichkeit formuliert
+   ("kann", "können", "könnte", "womöglich", "möglicherweise", "vielleicht"): zulässig, nicht melden. Beispiele:
+   "Findet er dazu keine passende Website, schaut er sich womöglich beim nächsten Anbieter um."
+   "So können Anfragen verloren gehen, ohne dass Sie es bemerken."
+   "Ohne eigene Website könnten Ihnen potenzielle Kunden entgehen."
+   Auch eine allgemeine Beschreibung, dass Interessierte online suchen und sich vorab informieren möchten, ist zulässig.
+C) Konkrete Behauptung als Tatsache oder Versprechen: tatsächlicher Verlust oder Gewinn von Kunden, Anfragen oder
+   Umsatz beim angeschriebenen Betrieb ("Sie verlieren Kunden", "Ihnen entgehen jeden Monat Aufträge"), jede Zahl,
+   Quote oder Häufigkeit ohne Beleg, garantierte Wirkung ("bringt Ihnen mehr Kunden"). Nur das meldest du.
+Melde ausschließlich Aussagen der Art C, wörtlich zitiert. Im Zweifel zwischen B und C entscheidet die Formulierung:
+steht die Aussage in der Möglichkeitsform und nennt keine Zahl, ist sie B. Antworte nur über das Werkzeug.`;
 
 export const TRUTH_TOOL_SCHEMA = {
   type: 'object',
@@ -205,9 +216,16 @@ export interface TruthLlmAnswer {
 }
 
 /** Brieftext für die LLM-Prüfung, Belege markiert. */
-export function markedBody(input: Pick<TruthCheckInput, 'letter' | 'claimSpans'>): string {
+export function markedBody(input: Pick<TruthCheckInput, 'letter' | 'claimSpans' | 'fixedTexts'>): string {
   let body = letterBodyText(input.letter);
   for (const s of input.claimSpans) body = body.split(plain(s.text)).join(`[[BELEG]]${plain(s.text)}[[/BELEG]]`);
+  // Groß-/Kleinschreibung des ersten Buchstabens kann je nach Position im Brief abweichen
+  for (const t of input.fixedTexts ?? []) {
+    const p = plain(t);
+    const at = body.toLocaleLowerCase('de').indexOf(p.toLocaleLowerCase('de'));
+    if (p && at >= 0)
+      body = `${body.slice(0, at)}[[VORLAGE]]${body.slice(at, at + p.length)}[[/VORLAGE]]${body.slice(at + p.length)}`;
+  }
   return body;
 }
 
@@ -216,7 +234,7 @@ const EFFECT =
 
 // Deterministischer Ersatz ohne API-Key (Entwicklung, Tests, DRY_RUN): sucht Wirkungsaussagen außerhalb der Belege
 registerMockStructured(TRUTH_TOOL_NAME, (req) => {
-  const outside = req.prompt.replace(/\[\[BELEG\]\][\s\S]*?\[\[\/BELEG\]\]/g, ' ');
+  const outside = req.prompt.replace(/\[\[(BELEG|VORLAGE)\]\][\s\S]*?\[\[\/\1\]\]/g, ' ');
   const sentences = outside.split(/(?<=[.!?])\s+/).filter((s) => EFFECT.test(s));
   return { unbacked_effect_claim: sentences.length > 0, statements: sentences.map((s) => s.trim()) } satisfies TruthLlmAnswer;
 });

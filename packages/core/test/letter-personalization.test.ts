@@ -33,7 +33,10 @@ it('keeps verified recipient facts and resolves branch context through the exist
   expect(letter.subject).toContain('Gärten & Co');
   expect(letter.greeting).toBe('Guten Tag, liebes Team von Gärten & Co,');
   // Branchenbezug über den Nutzen-Satz des Garten-Profils (statt des maschinell wirkenden Branchennamens)
-  expect(letter.intro.join(' ')).toContain('Arbeiten im Grünen');
+  // Standardvorlage 3: feste Kernbotschaft als erster Absatz, danach der persönliche Teil
+  expect(letter.intro[0]).toMatch(/^wer in Teststadt online nach einem Betrieb wie Ihrem sucht/);
+  expect(letter.intro.join(' ')).toMatch(/keine passende Website.*womöglich.*So können Anfragen verloren gehen/);
+  expect(letter.intro[1]).toMatch(/^Genau deshalb habe ich für Ihren Betrieb eine unverbindliche Website-Vorschau gebaut/);
   expect(letter.intro.join(' ')).not.toContain('greift die Branche');
   expect(letter.copyEvidence?.level).toBe('basic');
   expect(JSON.stringify(letter)).not.toMatch(/\{branch_benefit\}|Malerleistungen|Gesichtsbehandlungen/);

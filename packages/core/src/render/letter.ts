@@ -5,6 +5,9 @@ import { LOSS_LETTER_VERSION, lossClaimRendering, pickLossClaim } from '../lette
 import { leadResearch, researchLetterFacts } from '../services/lead-research';
 import { researchContentHash } from '../leads/acquisition';
 import { letterDemoBinding, recipientFingerprint } from '../letters/binding';
+import { LetterCheckUnavailableError, REPLACEABLE_LETTER_STATUSES, wasSubmitted } from '../letters/state';
+import { CORE_MESSAGE_PATTERN, coreSalesMessage, shortCoreMessage } from '../letters/personalization';
+import { publicSiteReachable, SITE_DOWN_MESSAGE } from '../services/site-health';
 import { sha256 } from '../util/crypto';
 import { assessLetterQuality } from '../quality/letter';
 import { and, eq, inArray, isNull, lt, sql } from 'drizzle-orm';
@@ -123,6 +126,14 @@ export async function fitLetterLayout(
         : dropFromIntro(' Bei unserer dokumentierten Suche haben wir keinen eigenen Webauftritt von Ihnen gefunden.'),
     () => (loss ? dropLossDetail() : dropFromIntro(' – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.', '.')),
     () => (data.postscript = undefined),
+    // Standardvorlage 3: Zwischenfrage der Kernbotschaft weglassen; Risiko-Satz und Folge bleiben wörtlich stehen
+    () => {
+      if (data.intro) data.intro = data.intro.map((p) => (hasCoreMessage({ intro: [p] }) ? shortCoreMessage(p) : p));
+    },
+    // Letzter Schritt: nur die erste belegte Angabe im persönlichen Teil behalten
+    () => {
+      if (data.intro) data.intro = data.intro.map((p) => p.replace(/(\*\*[^*]+?) und [^*]+(\*\*)/, '$1$2'));
+    },
   ]) {
     if (!data.previewInvitation || !domIssues.some((i) => i.check === 'ueberlappung')) break;
     shorten();
@@ -147,12 +158,18 @@ export function stripFlaggedSentences(data: ReturnType<typeof composeLetter>, st
     });
     return kept.join(' ');
   };
-  if (data.intro) data.intro = data.intro.map(clean).filter(Boolean);
+  // Die feste Kernbotschaft der Standardvorlage wird nie automatisch entfernt
+  if (data.intro) data.intro = data.intro.map((p) => (hasCoreMessage({ intro: [p] }) ? p : clean(p))).filter(Boolean);
   data.offer = clean(data.offer);
   data.noAction = clean(data.noAction);
   data.qrCaption = clean(data.qrCaption);
   if (data.postscript) data.postscript = clean(data.postscript) || undefined;
   return changed;
+}
+
+/** Kernbotschaft im fertigen Brieftext vorhanden? (Standardvorlage 3) */
+export function hasCoreMessage(data: { intro?: string[] }): boolean {
+  return CORE_MESSAGE_PATTERN.test((data.intro ?? []).join(' ').replace(/\*\*/g, ''));
 }
 
 export interface GenerateLetterOptions {
@@ -203,7 +220,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   const existing = await db.query.letters.findFirst({ where: and(eq(letters.leadId, leadId), eq(letters.sequence, seqDb)) });
   if (existing) {
     // Storniert (Demo ersetzt u. ä.) darf auf ausdrückliche Neuerzeugung ersetzt werden
-    const replaceable = ['generated', 'failed', 'approved', 'cancelled'].includes(existing.status);
+    // Nie ersetzen, was je an den Briefdienst übergeben wurde (Schutz vor Doppelversand und doppelten Kosten)
+    const replaceable = REPLACEABLE_LETTER_STATUSES.includes(existing.status) && !wasSubmitted(existing);
     if (!(opts.regenerate || opts.test) || !replaceable) {
       return {
         letterId: existing.id,
@@ -218,6 +236,8 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
   if (!opts.test && sequence === 1 && !allowed.includes(lead.status))
     throw new Error(`Lead im Status ${lead.status} – kein Erstbrief`);
 
+  // Vor jedem KI-Aufruf: ohne erreichbare Website kein Brief (QR-Code und Demo-Link würden ins Leere führen)
+  if (!sw.dryRun && !(await publicSiteReachable())) throw new LetterCheckUnavailableError('site', SITE_DOWN_MESSAGE);
   const demo = await currentDemoForLead(db, leadId);
   if (!demo) throw new Error('Keine veröffentlichte Demo für den Lead');
   // Technische Befunde gelten als bewusst freigegeben, wenn der Betreiber das bestätigt hat (acceptedTechnical)
@@ -351,7 +371,10 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     if (!demoHtml?.length) throw Error('Ausgelieferte Demo fehlt; kein persönlicher Brief ohne Abgleich.');
     // „Kunden, die Sie gerade verlieren könnten“: nur Erstbrief ohne Slot-Belege, mit freigegebenem Branchenbeleg
     // 08.11.2026: auch bei Textbausteinen (Handwerk u. a.) zulassen; deren Beleg ist derselbe freigegebene Claim
-    lossClaim = sequence === 1 && !opts.test ? await pickLossClaim(db, lead.industry ?? null) : null;
+    // 10.11.2026: Standardvorlage 3 trägt die Kernbotschaft (mögliches Risiko) fest in jedem Erstbrief, ohne Statistik
+    // und ohne Fußnote. Die Statistik-Fassung bleibt im Code, ist aber abgeschaltet (cfg.letter.lossStatistic).
+    lossClaim =
+      sequence === 1 && !opts.test && cfg.letter.lossStatistic === true ? await pickLossClaim(db, lead.industry ?? null) : null;
     composeInput.invitationCopy = await writePreviewInvitation({
       context: composeInput.personalization,
       sequence,
@@ -397,20 +420,30 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
         sourcesLabel,
         extraBlocklist: letterTruthBlocklist(cfg),
         maxStatistics: cfg.letter.maxStatistics,
+        // Fester, versionierter Vorlagentext: nicht Gegenstand der KI-Prüfung (Sperrliste und Zahlenprüfung gelten weiter)
+        fixedTexts:
+          sequence === 1 && !opts.test
+            ? [
+                coreSalesMessage(composeInput.branchLabel ?? '', recipient.city),
+                shortCoreMessage(coreSalesMessage(composeInput.branchLabel ?? '', recipient.city)),
+              ]
+            : [],
       },
       { leadId, checkSourcesPage: !sw.dryRun, idempotencyKey: `truth:${leadId}:${seqDb}:${Date.now()}` },
     );
   let truth: TruthCheckResult = await runTruth();
   // 07.11.2026: Beanstandet nur die Wirkungsprüfung einzelne Sätze, diese Sätze entfernen und genau einmal neu prüfen,
   // statt den ganzen Brief zu sperren (Betreiber: „Briefe scheitern“). Pflichttexte (Datenschutz, Widerspruch) bleiben.
-  const flagged = truth.violations.filter((v) => v.rule === 'llm' && /Unbelegte Wirkungsaussage/.test(v.detail));
+  // 10.11.2026: dasselbe für Treffer der Sperrliste und unbelegte Zahlen (Satz mit der Fundstelle entfernen).
+  const flagged = truth.violations.filter(
+    (v) =>
+      (v.rule === 'llm' && /Unbelegte Wirkungsaussage/.test(v.detail)) ||
+      ((v.rule === 'blocklist' || v.rule === 'number') && v.match),
+  );
   if (!truth.passed && flagged.length && flagged.length === truth.violations.length) {
-    const statements = [
-      ...flagged
-        .map((v) => v.detail)
-        .join(' ')
-        .matchAll(/„([^“]{8,})“/g),
-    ].map((m) => m[1]!);
+    const statements = flagged.flatMap((v) =>
+      v.rule === 'llm' ? [...v.detail.matchAll(/„([^“]{8,})“/g)].map((m) => m[1]!) : [v.match!],
+    );
     if (stripFlaggedSentences(data, statements)) {
       ({ html, domIssues } = await fitLetterLayout(data, cfg));
       pdf = await htmlToPdf(html);
@@ -424,6 +457,11 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       issues = [...domIssues, ...pdfCheck.issues];
       truth = await runTruth();
     }
+  }
+  // Die Kernbotschaft muss im fertigen Erstbrief stehen (nicht nur in der Vorlage): sonst kein freigabefähiger Brief.
+  if (cfg.offers.activeVersion === 'v4' && sequence === 1 && data.copyEvidence && !lossSpan && !hasCoreMessage(data)) {
+    truth.passed = false;
+    truth.violations.push({ rule: 'placeholder', detail: 'Kernbotschaft der Standardvorlage fehlt im Brieftext' });
   }
   const truthIssues = truth.violations.map((v) => `wahrheits_check/${v.rule}: ${v.detail}`);
 
@@ -475,7 +513,10 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       if (JSON.stringify(latestBinding) !== JSON.stringify(binding))
         throw new Error('Demo oder Bild während der Erstellung geändert.');
       const previous = await tx.query.letters.findFirst({ where: and(eq(letters.leadId, leadId), eq(letters.sequence, seqDb)) });
-      if (previous?.id !== existing?.id || (previous && !['generated', 'failed', 'approved'].includes(previous.status)))
+      if (
+        previous?.id !== existing?.id ||
+        (previous && (!REPLACEABLE_LETTER_STATUSES.includes(previous.status) || wasSubmitted(previous)))
+      )
         throw new Error('Brief parallel geändert oder bereits zum Versand übernommen.');
       if (previous) await tx.delete(letters).where(eq(letters.id, previous.id));
       await tx.insert(letters).values({

@@ -122,7 +122,41 @@ export function personalizedLetterCopy(context: VerifiedLetterContext, variant =
 }
 
 /** New campaign copy is a source-bound invitation, not a priced offer. */
-export const PREVIEW_LETTER_VERSION = 'personal-preview-2';
+/**
+ * Standard-Briefvorlage, Version 3 (10.11.2026). Der erste Absatz jedes Erstbriefs ist die feste Kernbotschaft
+ * (`coreSalesMessage`): ein mögliches Risiko, keine Behauptung über den Betrieb, keine Zahl. Das System setzt sie
+ * wörtlich; KI-Text ergänzt nur den persönlichen Teil danach. Änderungen am Wortlaut erhöhen die Version.
+ */
+export const PREVIEW_LETTER_VERSION = 'seitenwerk-standard-3';
+/** Prüfmuster: steht die Kernbotschaft im fertigen Brief? */
+export const CORE_MESSAGE_PATTERN = /keine passende Website[^.]{0,120}womöglich[^.]{0,80}\.\s+So können [^.]{0,40}verloren gehen/;
+
+/** Kernbotschaft in der Sprache der Branche. Immer Möglichkeitsform, nie eine Aussage über den Betrieb selbst. */
+export function coreSalesMessage(branchLabel: string, city: string): string {
+  const place = city && city.length <= 32 ? ` in ${city}` : '';
+  const b = branchLabel.toLocaleLowerCase('de');
+  const tail = 'ohne dass Sie es bemerken.';
+  if (/restaurant|café|cafe|bistro|gastronom|imbiss|pizzeria|bar\b|kneipe|bäcker|eis/.test(b))
+    return `wer${place} online nach einem Lokal wie Ihrem sucht, möchte vorher wissen: Was gibt es, und wann ist geöffnet? Findet er dazu keine passende Website, entscheidet er sich womöglich für ein anderes Lokal. So können Gäste verloren gehen, ${tail}`;
+  if (/fris[öe]|friseur|haar|barber|barbier|kosmetik|nagel|nail|beauty|massage|studio/.test(b))
+    return `wer${place} online nach einem Termin sucht, möchte vorher sehen: Was wird angeboten, und wie erreicht man Sie? Findet er dazu keine passende Website, bucht er womöglich bei einem anderen Anbieter. So können Terminanfragen verloren gehen, ${tail}`;
+  if (/handel|laden|boutique|blumen|buch|mode|geschäft|shop/.test(b))
+    return `wer${place} online nach einem Geschäft wie Ihrem sucht, möchte vorher wissen: Was gibt es dort, und wann ist geöffnet? Findet er dazu keine passende Website, kauft er womöglich bei einem anderen Anbieter. So können Kunden verloren gehen, ${tail}`;
+  return `wer${place} online nach einem Betrieb wie Ihrem sucht, möchte sich zuerst ein Bild machen: Was wird angeboten, und wie erreicht man Sie? Findet er dazu keine passende Website, schaut er sich womöglich beim nächsten Anbieter um. So können Anfragen verloren gehen, ${tail}`;
+}
+/** Kürzere Fassung der Kernbotschaft (nur bei Platzmangel): ohne Zwischenfrage, gleicher Kern. */
+export function shortCoreMessage(core: string): string {
+  return core.replace(
+    /sucht, (?:möchte|möchten) [^:]{0,60}: [^?]{0,80}\? Findet er dazu keine passende Website, (\S+) er /,
+    'sucht und dort keine passende Website findet, $1 ',
+  );
+}
+/** Fester Anschluss an die Kernbotschaft (auch Rückfall, wenn kein KI-Text vorliegt). */
+export const CORE_BRIDGE =
+  'Genau deshalb habe ich für Ihren Betrieb eine unverbindliche Website-Vorschau gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.';
+export function standardSubject(businessName: string): string {
+  return businessName.length <= 52 ? `Eine neue Website-Idee für ${businessName}` : 'Eine neue Website-Idee für Ihren Betrieb';
+}
 export const PREVIEW_ORDER_NOTICE =
   '**Ohne Verkaufsgespräch:** Ich rufe Sie nicht an. Ansehen kostet nichts; passt etwas nicht, ändere ich den Entwurf vorher ohne Kosten. Online geht er erst nach Ihrer Freigabe. Die Umsetzung ist kostenpflichtig – Festpreis und Vertragsbedingungen stehen vor jeder Bestellung in der Vorschau. Unabhängiger, nicht beauftragter Entwurf.';
 
@@ -399,10 +433,9 @@ export function previewInvitationCopy(
       : sequence === 2
         ? 'hier finden Sie die Vorschau für Ihren Betrieb noch einmal – zum Ansehen, wann es für Sie passt.'
         : noticed
-          ? `${noticed} Deshalb habe ich für Ihren Betrieb${place} eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.`
-          : variant === 'B'
-            ? `für Ihren Betrieb${place} habe ich eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.`
-            : 'ich habe für Ihren Betrieb eine eigene Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihren Kontaktdaten.';
+          ? `${noticed} ${CORE_BRIDGE}`
+          : CORE_BRIDGE;
+  void variant;
   const personal = detail
     ? variant === 'B'
       ? `Gerade bei Themen wie ${detail} ist ein klarer Überblick hilfreich.`
@@ -412,7 +445,7 @@ export function previewInvitationCopy(
   const humanTitle = profile.title.replace(/^Ihre Website-Vorschau (?:für (.+?) )?ist online$/, (_m, topic?: string) =>
     topic ? `Eine Website für ${topic} – zum Ansehen bereit` : 'Eine Website für Ihren Betrieb – zum Ansehen bereit',
   );
-  const headline = context.businessName.length < 58 ? `${context.businessName}: ${humanTitle}` : humanTitle;
+  void humanTitle;
   // Lokaler Bezug im Nutzen-Satz („wer in Dortmund …“); ohne kurzen Ortsnamen neutral
   const benefit = profile.benefit.replace(' in {ort}', place).replace(/^(Eine|Wer|Neue|Der)\b/, (w) => w.toLowerCase());
   const base = {
@@ -424,14 +457,25 @@ export function previewInvitationCopy(
         ? `Der überarbeitete Website-Entwurf für ${context.businessName}`
         : sequence === 2
           ? `Ihre persönliche Website-Vorschau zum Wiederansehen`
-          : headline,
+          : standardSubject(context.businessName),
+    /** Feste Kernbotschaft (nur Erstbrief): erster Absatz, wörtlich vom System */
+    core: sequence === 1 ? coreSalesMessage(context.branchLabel, context.city) : undefined,
     opening,
     // Recherchehinweis im selben Absatz wie der Nutzen: ein Gedanke, und der Brief bleibt einseitig
-    intro: [
-      detail
-        ? `**${detail}** – ${benefit}${research ? ` ${research}` : ''}`
-        : `${personal} ${benefit.charAt(0).toUpperCase()}${benefit.slice(1)}`.trim(),
-    ],
+    intro:
+      sequence === 1
+        ? [
+            `${
+              detail
+                ? `Im Entwurf sehen Interessierte **${detail}** und erreichen Sie mit einem Fingertipp.`
+                : 'So sehen Sie direkt, wie sich Ihr Betrieb mit einer modernen Website zeigen könnte.'
+            }${research ? ` ${research}` : ''}`,
+          ]
+        : [
+            detail
+              ? `**${detail}** – ${benefit}${research ? ` ${research}` : ''}`
+              : `${personal} ${benefit.charAt(0).toUpperCase()}${benefit.slice(1)}`.trim(),
+          ],
     scan: '**QR-Code mit der Handykamera scannen und kostenlos ansehen:** Ihre Website ist schon online, aber nur über Ihren persönlichen Link erreichbar. Ein Blick dauert keine Minute.',
     qrCaption: profile.caption,
     next: PREVIEW_ORDER_NOTICE,
@@ -453,6 +497,7 @@ export function previewInvitationCopy(
   return {
     ...base,
     version: LOSS_LETTER_VERSION,
+    core: undefined,
     subject: lossSubject(context.businessName),
     opening: `${lossHook(context.branchLabel, context.city)} ${research}`,
     intro: [

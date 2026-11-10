@@ -297,7 +297,7 @@ describe('Slot-Briefe im echten Ablauf', () => {
     const sent = await sendLetter(letter.id, 'admin:test');
     expect(sent.state).toBe('skipped');
     expect((await db.query.letters.findFirst({ where: eq(letters.id, letter.id) }))!.statusReason).toMatch(
-      /Claim inzwischen gesperrt/,
+      /Zurückgestellt: Beleg inzwischen gesperrt/,
     );
   }, 120_000);
 
@@ -321,14 +321,15 @@ describe('Slot-Briefe im echten Ablauf', () => {
       .onConflictDoNothing();
     await updateConfig({ letter: { maxStatistics: 2 } }, 'test');
     const previous = await db.query.letters.findFirst({ where: eq(letters.leadId, leadId) });
-    await expect(generateLetter(leadId, 1, { actor: 'job:test', regenerate: true })).rejects.toThrow(
-      /bisheriger Brief bleibt erhalten/,
-    );
-    const retained = await db.query.letters.findFirst({ where: eq(letters.leadId, leadId) });
-    expect(retained?.id).toBe(previous?.id);
-    expect(retained?.pdfStorageKey).toBe(previous?.pdfStorageKey);
-    // Existing claim was blocked in the preceding case; neither bad replacement nor old row is approvable.
-    expect(await approveLetter(retained!.id, 'admin:test')).toBe(false);
+    // 10.11.2026: automatische Korrektur statt Abbruch. Der Satz mit dem unbelegten Versprechen wird entfernt, der Brief
+    // danach erneut geprüft. Das Versprechen selbst erreicht nie einen freigabefähigen Brief.
+    const res = await generateLetter(leadId, 1, { actor: 'job:test', regenerate: true });
+    expect(res.status).toBe('generated');
+    expect(res.truthCheck?.passed).toBe(true);
+    expect(JSON.stringify(res.truthCheck)).not.toMatch(/5-mal mehr Umsatz/);
+    const replaced = await db.query.letters.findFirst({ where: eq(letters.leadId, leadId) });
+    expect(replaced?.id).not.toBe(previous?.id);
+    expect(replaced?.status).toBe('generated');
     await db.delete(variants).where(eq(variants.name, 'TEST_FALSCH'));
   }, 120_000);
 });

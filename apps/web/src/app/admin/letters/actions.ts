@@ -6,6 +6,7 @@ import {
   LETTER_QUALITY_DIMENSIONS,
   type LetterQualityScores,
   approveLetter,
+  approveLetterWithReason,
   audit,
   bulkApproveLetters,
   enqueue,
@@ -13,6 +14,7 @@ import {
   getDb,
   QUEUES,
   rejectLetter,
+  restoreStalledLetters,
   schema,
   submitLxpTestJob,
 } from '@wbm/core';
@@ -28,7 +30,7 @@ export async function approveLetterAction(form: FormData): Promise<void> {
   const simple = form.get('simple') === '1';
   const flow = form.get('flow') === '1';
   const rating = simple && form.get('read') === 'on' ? (RATING_SCORES[String(form.get('rating') ?? '')] ?? NaN) : NaN;
-  const ok = await approveLetter(
+  const res = await approveLetterWithReason(
     String(form.get('id')),
     actorOf(s),
     Object.fromEntries(
@@ -38,14 +40,15 @@ export async function approveLetterAction(form: FormData): Promise<void> {
       ]),
     ) as LetterQualityScores,
   );
-  if (!ok)
+  if (!res.ok) {
+    // Neuerzeugung läuft: zurück zur Übersicht, der neue Brief erscheint unter „Warten auf dich“
+    if (res.regenerating) redirect(`/admin/letters?tab=review&hinweis=${encodeURIComponent(res.reason ?? '')}`);
     redirect(
       `/admin/letters/${encodeURIComponent(String(form.get('id')))}?${flow ? 'flow=1&' : ''}hinweis=${encodeURIComponent(
-        simple
-          ? 'Noch nicht freigegeben: Haken setzen und „Sehr gut“ oder „Gut“ wählen. Passt der Brief nicht, lass ihn neu schreiben.'
-          : 'Freigabe nicht möglich. Wahrheitsprüfung und vollständige Qualitätsbewertung müssen bestanden sein.',
+        `Noch nicht freigegeben: ${res.reason ?? (simple ? 'Haken setzen und „Sehr gut“ oder „Gut“ wählen.' : 'Prüfung nicht bestanden.')}`,
       )}`,
     );
+  }
   revalidatePath('/admin/letters');
   if (flow) redirect('/admin/ablauf/naechster-brief');
 }
@@ -130,4 +133,22 @@ export async function bulkApproveAndSendLettersAction(form: FormData): Promise<v
   if (freigegeben > 0) await enqueue(QUEUES.sendApprovedLetters, { triggeredBy: actorOf(s) }, { singletonKey: 'send-approved' });
   revalidatePath('/admin/letters');
   redirect(`/admin/letters?tab=approved&sammel=${freigegeben}von${rows.length}`);
+}
+
+/**
+ * Intern stornierte und zurückgestellte Briefe wiederherstellen (10.11.2026). Versendet nichts: wiederhergestellte
+ * Briefe warten wieder auf deine Freigabe. Bereits an den Briefdienst übergebene Briefe bleiben zurückgehalten.
+ */
+export async function restoreStalledLettersAction(): Promise<void> {
+  const s = await requireAdmin();
+  const res = await restoreStalledLetters(actorOf(s));
+  const n = (r: string) => res.filter((x) => x.result === r).length;
+  const held = res.filter((x) => x.result === 'held');
+  const grund = held[0]?.reason ? ` Erster Grund: ${held[0].reason}` : '';
+  revalidatePath('/admin/letters');
+  redirect(
+    `/admin/letters?tab=failed&hinweis=${encodeURIComponent(
+      `${n('reinstated')} sofort wiederhergestellt, ${n('regenerating')} werden neu erzeugt, ${held.length} zurückgehalten.${grund} Wiederhergestellte Briefe warten unter „Warten auf dich“ auf deine Freigabe.`,
+    )}`,
+  );
 }

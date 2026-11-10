@@ -40,7 +40,9 @@ it('uses the budgeted writer and a separate grounding review, with traceable bus
   });
   expect(requests.map((r) => r.toolName)).toEqual([LETTER_WRITER_TOOL, LETTER_REVIEW_TOOL]);
   expect(JSON.parse(requests[0]!.prompt).facts).toEqual([{ id: 'F1', text: 'Photovoltaik' }]);
-  expect(result.copy.subject).toBe(draft.subject);
+  // Standardvorlage 3: Betreff setzt das System
+  expect(result.copy.subject).toBe('Eine neue Website-Idee für Elektro Testlicht');
+  expect(result.copy.core).toMatch(/keine passende Website/);
   expect(result.copy.intro).toEqual([draft.benefit]);
   expect(result.copy.sources).toEqual([{ text: 'Photovoltaik', source: 'fixture:reviewed-service' }]);
   expect(result).toMatchObject({ engine: 'llm', attempts: 1, reviewReasons: [] });
@@ -163,7 +165,9 @@ it('changes the semantic focus for photovoltaic specialists versus installations
   );
   expect(solar.copy.profile).toBe('electric-solar');
   expect(classic.copy.profile).toBe('electric');
-  expect(solar.copy.subject).not.toBe(classic.copy.subject);
+  // Standardvorlage 3: Betreff ist fest; der Schwerpunkt unterscheidet sich im persönlichen Teil
+  expect(solar.copy.subject).toBe(classic.copy.subject);
+  expect(solar.copy.intro.join(' ')).not.toBe(classic.copy.intro.join(' '));
 });
 it('refuses using the same authored text for a different source packet in composition', async () => {
   const written = await writePreviewInvitation(packet, { mock: true, call: async <T>() => draft as T });

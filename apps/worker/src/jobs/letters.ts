@@ -1,4 +1,4 @@
-import { enqueue, QUEUES } from '@wbm/core';
+import { enqueue, getDb, LetterCheckUnavailableError, QUEUES, raiseAlert } from '@wbm/core';
 import { generateLetter } from '@wbm/core/render';
 import { defineJob, NonRetryableError } from '../runtime';
 
@@ -21,7 +21,23 @@ defineJob(
         );
       return { letterId: res.letterId, status: res.status, issues: res.issues.length };
     } catch (err) {
-      if (err instanceof Error && /Status|Widerspr|gelöscht|unvollständig|Keine veröffentlichte/.test(err.message)) {
+      // Technisch nicht verfügbar (Website, Quellenseite, KI-Prüfung): kein Urteil über den Brief. Einmal melden,
+      // dann mit Wartezeit wiederholen (pg-boss: steigende Abstände). Der bisherige Brief bleibt unverändert.
+      if (err instanceof LetterCheckUnavailableError) {
+        await raiseAlert(getDb(), {
+          level: 'warn',
+          code: `letter_check_unavailable:${err.check}`,
+          message: `Brieferzeugung wartet: ${err.message}`,
+        }).catch(() => undefined);
+        throw err;
+      }
+      // Fachliche Gründe: Wiederholen ändert nichts und kostet nur KI-Aufrufe
+      if (
+        err instanceof Error &&
+        /Status|Widerspr|gelöscht|unvollständig|Keine veröffentlichte|nicht technisch und gestalterisch|Neu-Erzeugung nicht bestanden|Sperrliste|gesperrt|nicht mehr geeignet|Eigene Website vorhanden|Betriebsdublette|Betriebsrecherche seit|Folgebrief benötigt|Dritter Brief/.test(
+          err.message,
+        )
+      ) {
         throw new NonRetryableError(err.message);
       }
       throw err;
