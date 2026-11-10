@@ -271,7 +271,6 @@ describe('Wahrheitscheck: Risikoformulierung, konkrete Behauptung, technischer A
     for (const branch of ['Malerbetrieb', 'Dachdecker', 'Elektrobetrieb', 'Restaurant', 'Friseursalon', 'Blumengeschäft']) {
       const core = coreSalesMessage(branch, 'Dortmund');
       expect(core).toMatch(CORE_MESSAGE_PATTERN);
-      expect(core).toMatch(/womöglich/);
       expect(core).not.toMatch(/\d/);
       const input = { ...base([core]), fixedTexts: [core] };
       expect(checkLetterTruth(input).violations).toEqual([]);
@@ -356,7 +355,7 @@ describe('Standard-Briefvorlage 3', () => {
         expiresLabel: '10. Dezember 2026',
       });
       expect(letter.subject).toBe(`Eine neue Website-Idee für ${name}`);
-      expect(letter.intro[0]).toMatch(/^wer in Dortmund online nach einem Betrieb wie Ihrem sucht/);
+      expect(letter.intro[0]).toMatch(/^Wenn potenzielle (Kunden|Gäste) in Dortmund online nach /);
       expect(letter.intro.join(' ')).toMatch(CORE_MESSAGE_PATTERN);
       expect(letter.intro[1]).toMatch(/^Genau deshalb habe ich für Ihren Betrieb eine unverbindliche Website-Vorschau gebaut/);
       expect(letter.intro.at(-1)).toMatch(/QR-Code mit der Handykamera scannen/);

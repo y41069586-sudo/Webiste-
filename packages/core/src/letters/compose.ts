@@ -324,7 +324,7 @@ export function composeLetter(i: ComposeInput): LetterData {
         : copy.core
           ? [
               // Standardvorlage 3: feste Kernbotschaft zuerst, danach der persönliche Teil in einem Absatz
-              lowerFirstWord(copy.core),
+              copy.core,
               [upperFirst(copy.opening), ...copy.intro, ...(i.claimTexts ?? [])].join(' ').trim(),
               copy.scan,
             ]

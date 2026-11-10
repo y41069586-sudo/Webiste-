@@ -129,27 +129,31 @@ export function personalizedLetterCopy(context: VerifiedLetterContext, variant =
  */
 export const PREVIEW_LETTER_VERSION = 'seitenwerk-standard-3';
 /** Prüfmuster: steht die Kernbotschaft im fertigen Brief? */
-export const CORE_MESSAGE_PATTERN = /keine passende Website[^.]{0,120}womöglich[^.]{0,80}\.\s+So können [^.]{0,40}verloren gehen/;
+export const CORE_MESSAGE_PATTERN =
+  /keine passende Website finden, könnten sie sich[^.]{0,80}entscheiden\.\s+Dadurch können[^.]{0,60}verloren gehen\./;
 
-/** Kernbotschaft in der Sprache der Branche. Immer Möglichkeitsform, nie eine Aussage über den Betrieb selbst. */
+/**
+ * Kernbotschaft nach dem Wortlaut des Betreibers (10.11.2026): „Wenn potenzielle Kunden online nach einem Betrieb suchen
+ * und keine passende Website finden, könnten sie sich für einen anderen Anbieter entscheiden. Dadurch können wertvolle
+ * Kundenanfragen verloren gehen.“ Je Branche nur Begriffe getauscht (Kunden/Gäste, Betrieb/Lokal, Anfragen). Immer
+ * Möglichkeitsform, keine Zahl, keine Behauptung über den angeschriebenen Betrieb.
+ */
 export function coreSalesMessage(branchLabel: string, city: string): string {
   const place = city && city.length <= 32 ? ` in ${city}` : '';
   const b = branchLabel.toLocaleLowerCase('de');
-  const tail = 'ohne dass Sie es bemerken.';
+  const tail = (who: string, other: string, lost: string) =>
+    `Wenn potenzielle ${who}${place} online nach ${other.split('|')[0]} suchen und keine passende Website finden, könnten sie sich für ${other.split('|')[1]} entscheiden. Dadurch können wertvolle ${lost} verloren gehen.`;
   if (/restaurant|café|cafe|bistro|gastronom|imbiss|pizzeria|bar\b|kneipe|bäcker|eis/.test(b))
-    return `wer${place} online nach einem Lokal wie Ihrem sucht, möchte vorher wissen: Was gibt es, und wann ist geöffnet? Findet er dazu keine passende Website, entscheidet er sich womöglich für ein anderes Lokal. So können Gäste verloren gehen, ${tail}`;
+    return tail('Gäste', 'einem Lokal wie Ihrem|ein anderes Lokal', 'Reservierungen und Besuche');
   if (/fris[öe]|friseur|haar|barber|barbier|kosmetik|nagel|nail|beauty|massage|studio/.test(b))
-    return `wer${place} online nach einem Termin sucht, möchte vorher sehen: Was wird angeboten, und wie erreicht man Sie? Findet er dazu keine passende Website, bucht er womöglich bei einem anderen Anbieter. So können Terminanfragen verloren gehen, ${tail}`;
+    return tail('Kunden', 'einem Termin bei einem Betrieb wie Ihrem|einen anderen Anbieter', 'Terminanfragen');
   if (/handel|laden|boutique|blumen|buch|mode|geschäft|shop/.test(b))
-    return `wer${place} online nach einem Geschäft wie Ihrem sucht, möchte vorher wissen: Was gibt es dort, und wann ist geöffnet? Findet er dazu keine passende Website, kauft er womöglich bei einem anderen Anbieter. So können Kunden verloren gehen, ${tail}`;
-  return `wer${place} online nach einem Betrieb wie Ihrem sucht, möchte sich zuerst ein Bild machen: Was wird angeboten, und wie erreicht man Sie? Findet er dazu keine passende Website, schaut er sich womöglich beim nächsten Anbieter um. So können Anfragen verloren gehen, ${tail}`;
+    return tail('Kunden', 'einem Geschäft wie Ihrem|ein anderes Geschäft', 'Kunden und Einkäufe');
+  return tail('Kunden', 'einem Betrieb wie Ihrem|einen anderen Anbieter', 'Kundenanfragen');
 }
-/** Kürzere Fassung der Kernbotschaft (nur bei Platzmangel): ohne Zwischenfrage, gleicher Kern. */
+/** Früher kürzere Fassung bei Platzmangel; die Kernbotschaft ist inzwischen kurz genug und bleibt unverändert. */
 export function shortCoreMessage(core: string): string {
-  return core.replace(
-    /sucht, (?:möchte|möchten) [^:]{0,60}: [^?]{0,80}\? Findet er dazu keine passende Website, (\S+) er /,
-    'sucht und dort keine passende Website findet, $1 ',
-  );
+  return core;
 }
 /** Fester Anschluss an die Kernbotschaft (auch Rückfall, wenn kein KI-Text vorliegt). */
 export const CORE_BRIDGE =

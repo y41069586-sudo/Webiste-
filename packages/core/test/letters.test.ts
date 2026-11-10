@@ -441,7 +441,7 @@ describe('V4-Einladung passt für jede Branche auf eine Seite (fester Text, lang
               .map((i) => i.str)
               .join(' ')
               .replace(/\s+/g, ' ');
-            if (!/keine passende Website/.test(text) || !/verloren gehen/.test(text))
+            if (!/keine passende Website finden/.test(text) || !/verloren gehen/.test(text))
               failures.push(`${label}: Kernbotschaft fehlt im PDF-Text`);
             if (process.env.LETTER_SAMPLE_DIR && (mode === 'fakten' || mode === 'ki') && arm === 'A')
               (await import('node:fs')).writeFileSync(`${process.env.LETTER_SAMPLE_DIR}/${b.key}-${mode}.pdf`, finalPdf);

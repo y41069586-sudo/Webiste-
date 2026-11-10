@@ -56,7 +56,12 @@ it('rejects a false demo feature reported by the grounding review and repairs on
       prompts.push(r.prompt);
       if (r.toolName === LETTER_WRITER_TOOL) {
         attempts++;
-        return (attempts === 1 ? { ...draft, benefit: draft.benefit + ' Ihr Online-Shop nimmt Aufträge an.' } : draft) as T;
+        // Kurz genug für das Längenbudget der Vorlage 3, damit erst die Faktenprüfung ablehnt
+        return (
+          attempts === 1
+            ? { ...draft, benefit: 'Photovoltaik steht im Entwurf im Mittelpunkt. Ihr Online-Shop nimmt Aufträge an.' }
+            : draft
+        ) as T;
       }
       return (
         attempts === 1

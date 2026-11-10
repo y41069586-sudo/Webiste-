@@ -15,8 +15,8 @@ export const LETTER_TEXT_LIMITS = {
   body: 420,
   total: 440,
   lossBody: 260,
-  coreBody: 300,
-  coreTotal: 360,
+  coreBody: 260,
+  coreTotal: 320,
 } as const;
 export const LETTER_REVIEW_TOOL = 'pruefe_brief_fakten_und_demo';
 const DraftSchema = z
