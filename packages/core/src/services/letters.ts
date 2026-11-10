@@ -1,6 +1,7 @@
 import { assertLetterLeadEligible } from '../letters/eligibility';
 import { assertLetterBinding } from '../letters/binding';
 import { wasSubmitted } from '../letters/state';
+import { changeLetterStatus, handoverAttempted, HANDOVER_UNCLEAR } from './letter-status';
 import { assessLetterQuality, type LetterQualityScores, type LetterQualityAssessment } from '../quality/letter';
 import { and, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm';
 import { usableClaims, type ClaimRow } from '../claims/library';
@@ -333,14 +334,15 @@ export async function restoreLetter(letterId: string, actor: string): Promise<Re
     }
   }
   if (bindingOk) {
-    const updated = await db
-      .update(letters)
-      .set({ status: 'generated', statusReason: null, approvedBy: null, approvedAt: null, updatedAt: new Date() })
-      .where(
-        and(eq(letters.id, letterId), inArray(letters.status, ['cancelled', 'failed']), sql`${letters.providerLetterId} IS NULL`),
-      )
-      .returning({ id: letters.id });
-    if (!updated.length) return { letterId, result: 'held', reason: 'Brief wurde gleichzeitig geändert' };
+    const updated = await changeLetterStatus(
+      db,
+      letterId,
+      ['cancelled', 'failed'],
+      'generated',
+      { statusReason: null, approvedBy: null, approvedAt: null },
+      { requireNoProviderId: true },
+    );
+    if (!updated) return { letterId, result: 'held', reason: 'Brief wurde gleichzeitig geändert' };
     if (letter.sequence === 1) await transitionLead(db, letter.leadId, 'letter_generated', { actor, soft: true });
     await audit(db, {
       entity: 'letter',
@@ -352,6 +354,8 @@ export async function restoreLetter(letterId: string, actor: string): Promise<Re
     return { letterId, result: 'reinstated' };
   }
   if (letter.sequence < 1) return { letterId, result: 'held', reason: 'Unbekannte Brieffolge' };
+  // Neuerzeugung vergibt eine neue Brief-ID (neuer Idempotenz-Schlüssel): war die Übergabe schon begonnen, erst klären
+  if (await handoverAttempted(db, letterId)) return { letterId, result: 'held', reason: HANDOVER_UNCLEAR };
   await enqueue(
     QUEUES.generateLetter,
     { leadId: letter.leadId, sequence: letter.sequence as 1 | 2 | 3, triggeredBy: actor, regenerate: true },

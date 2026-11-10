@@ -8,6 +8,7 @@ import { letterDemoBinding, recipientFingerprint } from '../letters/binding';
 import { LetterCheckUnavailableError, REPLACEABLE_LETTER_STATUSES, wasSubmitted } from '../letters/state';
 import { CORE_MESSAGE_PATTERN, coreSalesMessage, shortCoreMessage } from '../letters/personalization';
 import { publicSiteReachable, SITE_DOWN_MESSAGE } from '../services/site-health';
+import { handoverAttempted, HANDOVER_UNCLEAR } from '../services/letter-status';
 import { sha256 } from '../util/crypto';
 import { assessLetterQuality } from '../quality/letter';
 import { and, eq, inArray, isNull, lt, sql } from 'drizzle-orm';
@@ -222,6 +223,10 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     // Storniert (Demo ersetzt u. ä.) darf auf ausdrückliche Neuerzeugung ersetzt werden
     // Nie ersetzen, was je an den Briefdienst übergeben wurde (Schutz vor Doppelversand und doppelten Kosten)
     const replaceable = REPLACEABLE_LETTER_STATUSES.includes(existing.status) && !wasSubmitted(existing);
+    // Auch nie ersetzen, wenn die Übergabe begonnen, aber nie bestätigt wurde: die neue Brief-ID bekäme einen neuen
+    // Idempotenz-Schlüssel und könnte denselben Brief ein zweites Mal einliefern
+    if (replaceable && (await handoverAttempted(db, existing.id)))
+      throw new Error(`Neu-Erzeugung nicht bestanden; bisheriger Brief bleibt erhalten. Grund: ${HANDOVER_UNCLEAR}`);
     if (!(opts.regenerate || opts.test) || !replaceable) {
       return {
         letterId: existing.id,

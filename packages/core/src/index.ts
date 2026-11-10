@@ -44,6 +44,7 @@ export * from './services/tracking';
 export * from './services/pipeline';
 export * from './services/letters';
 export * from './letters/state';
+export { changeLetterStatus, handoverAttempted, HANDOVER_UNCLEAR } from './services/letter-status';
 export { publicSiteReachable, setSiteProbeForTests, SITE_DOWN_MESSAGE } from './services/site-health';
 export { coreSalesMessage, CORE_MESSAGE_PATTERN, PREVIEW_LETTER_VERSION, standardSubject } from './letters/personalization';
 export { domainCandidates, suggestDomain, isValidDeLabel } from './letters/domain';

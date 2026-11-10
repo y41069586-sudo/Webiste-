@@ -5,7 +5,7 @@ import { getDb, getProviders, schema, type LetterQualityAssessment, type TruthCh
 import { Badge, Card, Notice, btn, input } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { dt, eur } from '@/lib/format';
-import { approveLetterAction, lxpTestJobAction, rejectLetterAction } from '../actions';
+import { approveLetterAction, lxpTestJobAction, rejectLetterAction, restoreLetterAction } from '../actions';
 import { SubmitButton } from '@/components/admin/submit-button';
 
 export const metadata = { title: 'Brief' };
@@ -40,8 +40,11 @@ export default async function LetterDetail({
     sent: 'Verschickt',
     delivered: 'Zugestellt',
     rejected: 'Verworfen',
-    failed: 'Fehler beim Versand',
+    failed: 'Zurückgestellt oder fehlgeschlagen (Grund unten)',
+    cancelled: 'Storniert (nur bei Widerspruch, Sperre, abgelaufener Demo oder durch dich)',
+    queued: 'Wird an easyNova übergeben',
   };
+  const shipped = Boolean(letter.providerLetterId);
   const canDecide = letter.status === 'generated' && truth?.passed;
   return (
     <>
@@ -141,6 +144,24 @@ export default async function LetterDetail({
             </details>
           ) : null}
           {letter.statusReason ? <Notice kind="warn">{letter.statusReason}</Notice> : null}
+          {['cancelled', 'failed'].includes(letter.status) && !letter.isTest ? (
+            <div className="check-card">
+              <p className="check-q">Brief wiederherstellen</p>
+              <p className="check-note">
+                {shipped
+                  ? `Dieser Brief hat bei easyNova die Auftragsnummer ${letter.providerLetterId} und bleibt unverändert. Nichts wird erneut eingereicht.`
+                  : 'Dieser Brief war nie bei easyNova. Wiederherstellen legt ihn zurück zu „Warten auf dich“ (oder schreibt ihn mit der aktuellen Demo neu). Verschickt wird erst nach deiner Freigabe.'}
+              </p>
+              {!shipped ? (
+                <form action={restoreLetterAction}>
+                  <input type="hidden" name="id" value={letter.id} />
+                  <SubmitButton className="ui-btn ui-btn-primary check-go" type="submit">
+                    Wiederherstellen
+                  </SubmitButton>
+                </form>
+              ) : null}
+            </div>
+          ) : null}
           <details className="admin-details dcheck-more">
             <summary>Technische Details</summary>
             <div className="mt-3 space-y-4">
@@ -216,11 +237,16 @@ export default async function LetterDetail({
               </Card>
               <Card title="Verlauf">
                 <ul className="space-y-1 text-xs">
-                  {log.map((l) => (
-                    <li key={l.id}>
-                      {dt(l.createdAt)} · <span className="font-mono">{l.action}</span> · {l.actor}
-                    </li>
-                  ))}
+                  {log.map((l) => {
+                    const ctx = (l.contextJson ?? {}) as { reason?: string; mode?: string; from?: string; provider?: string };
+                    return (
+                      <li key={l.id}>
+                        {dt(l.createdAt)} · <span className="font-mono">{l.action}</span> · {l.actor}
+                        {ctx.reason ? <div className="text-slate-600">Grund: {String(ctx.reason).slice(0, 240)}</div> : null}
+                        {ctx.mode ? <div className="text-slate-600">Art: {ctx.mode}</div> : null}
+                      </li>
+                    );
+                  })}
                 </ul>
               </Card>
             </div>

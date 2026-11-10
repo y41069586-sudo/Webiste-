@@ -14,6 +14,7 @@ import {
   getDb,
   QUEUES,
   rejectLetter,
+  restoreLetter,
   restoreStalledLetters,
   schema,
   submitLxpTestJob,
@@ -151,4 +152,19 @@ export async function restoreStalledLettersAction(): Promise<void> {
       `${n('reinstated')} sofort wiederhergestellt, ${n('regenerating')} werden neu erzeugt, ${held.length} zurückgehalten.${grund} Wiederhergestellte Briefe warten unter „Warten auf dich“ auf deine Freigabe.`,
     )}`,
   );
+}
+
+/** Einen einzelnen stornierten oder zurückgestellten Brief wiederherstellen (versendet nichts). */
+export async function restoreLetterAction(form: FormData): Promise<void> {
+  const s = await requireAdmin();
+  const id = String(form.get('id'));
+  const res = await restoreLetter(id, actorOf(s));
+  const text =
+    res.result === 'reinstated'
+      ? 'Wiederhergestellt: Der Brief wartet unter „Warten auf dich“ auf deine Freigabe.'
+      : res.result === 'regenerating'
+        ? 'Der Brief wird mit der aktuellen Demo und Vorlage neu geschrieben und wartet danach auf deine Freigabe.'
+        : `Zurückgehalten: ${res.reason ?? 'unbekannter Grund'}`;
+  revalidatePath('/admin/letters');
+  redirect(`/admin/letters/${encodeURIComponent(id)}?hinweis=${encodeURIComponent(text)}`);
 }

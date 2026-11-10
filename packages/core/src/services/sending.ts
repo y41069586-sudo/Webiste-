@@ -1,6 +1,7 @@
 import { assertLetterLeadEligible } from '../letters/eligibility';
 import { assertLetterBinding } from '../letters/binding';
 import { HOLD_PREFIX, LetterFinalBlockError } from '../letters/state';
+import { changeLetterStatus } from './letter-status';
 import { enqueue, QUEUES } from '../queue';
 import { publicSiteReachable, SITE_DOWN_MESSAGE } from './site-health';
 import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
@@ -94,26 +95,18 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
   const lead = await db.query.leads.findFirst({ where: eq(leads.id, letter.leadId) });
   // Endgültig (fachlich): Widerspruch, Sperrliste, gelöschter Betrieb. Nur das rechtfertigt „storniert“.
   const cancelFinal = async (reason: string) => {
-    await db
-      .update(letters)
-      .set({ status: 'cancelled', statusReason: reason, updatedAt: new Date() })
-      .where(and(eq(letters.id, letterId), eq(letters.status, 'approved')));
+    await changeLetterStatus(db, letterId, ['approved'], 'cancelled', { statusReason: reason });
     await audit(db, { entity: 'letter', entityId: letterId, action: 'cancel', actor, context: { reason, final: true } });
   };
   // Behebbar (technisch): Brief zurückstellen statt stornieren; auf Wunsch mit der aktuellen Demo neu erzeugen.
   const hold = async (reason: string, regenerate: boolean): Promise<SendResult> => {
-    await db
-      .update(letters)
-      .set({
-        status: 'failed',
-        statusReason:
-          `${HOLD_PREFIX}${reason}${regenerate ? ' Der Brief wird automatisch neu erzeugt und wartet danach wieder auf deine Freigabe.' : ''}`.slice(
-            0,
-            1000,
-          ),
-        updatedAt: new Date(),
-      })
-      .where(and(eq(letters.id, letterId), eq(letters.status, 'approved')));
+    await changeLetterStatus(db, letterId, ['approved'], 'failed', {
+      statusReason:
+        `${HOLD_PREFIX}${reason}${regenerate ? ' Der Brief wird automatisch neu erzeugt und wartet danach wieder auf deine Freigabe.' : ''}`.slice(
+          0,
+          1000,
+        ),
+    });
     await audit(db, { entity: 'letter', entityId: letterId, action: 'hold', actor, context: { reason, regenerate } });
     if (regenerate && !letter.isTest && letter.sequence >= 1)
       await enqueue(
@@ -220,12 +213,24 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
   });
 
   // Übergabe atomar beanspruchen: zwei gleichzeitige Läufe können denselben Brief nie doppelt einreichen.
-  const claimed = await db
-    .update(letters)
-    .set({ status: 'queued', statusReason: 'Wird an den Briefdienst übergeben …', updatedAt: new Date() })
-    .where(and(eq(letters.id, letterId), eq(letters.status, 'approved'), sql`${letters.providerLetterId} IS NULL`))
-    .returning({ id: letters.id });
-  if (!claimed.length) {
+  const claimed = await changeLetterStatus(
+    db,
+    letterId,
+    ['approved'],
+    'queued',
+    { statusReason: 'Wird an den Briefdienst übergeben …' },
+    { requireNoProviderId: true },
+  );
+  // Nachweis, dass eine Übergabe begonnen wurde (auch wenn die Antwort des Briefdienstes nie ankommt)
+  if (claimed)
+    await audit(db, {
+      entity: 'letter',
+      entityId: letterId,
+      action: 'handover_started',
+      actor,
+      context: { provider: provider.name },
+    });
+  if (!claimed) {
     await releaseReservation(db, reservationKey);
     return { state: 'skipped', reason: 'Wird bereits übergeben oder ist schon übermittelt' };
   }
@@ -301,14 +306,16 @@ export async function sendLetter(letterId: string, actor: string): Promise<SendR
     await releaseReservation(db, reservationKey);
     // Technischer Fehler bei der Übergabe: zurück auf „freigegeben“, der Auftrag wird mit demselben
     // Idempotenz-Schlüssel wiederholt (kein Doppeldruck). Nie „storniert“.
-    await db
-      .update(letters)
-      .set({
-        status: 'approved',
+    await changeLetterStatus(
+      db,
+      letterId,
+      ['queued'],
+      'approved',
+      {
         statusReason: `Übergabe an den Briefdienst fehlgeschlagen, wird wiederholt: ${err instanceof Error ? err.message.slice(0, 300) : String(err)}`,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(letters.id, letterId), eq(letters.status, 'queued'), sql`${letters.providerLetterId} IS NULL`));
+      },
+      { requireNoProviderId: true },
+    );
     throw err;
   }
 }

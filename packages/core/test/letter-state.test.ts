@@ -12,6 +12,8 @@ import { checkLetterTruth, markedBody } from '../src/letters/truth-check';
 import { getProviders } from '../src/providers';
 import { stopBoss } from '../src/queue';
 import { restoreLetter } from '../src/services/letters';
+import { changeLetterStatus } from '../src/services/letter-status';
+import { handleScan } from '../src/services/tracking';
 import { SendBlockedError, sendLetter, syncLetterStatuses } from '../src/services/sending';
 import { setSiteProbeForTests } from '../src/services/site-health';
 import { runTruthCheck } from '../src/services/truth-check';
@@ -242,6 +244,56 @@ describe('Wiederherstellung intern stornierter Briefe', () => {
     const res = await restoreLetter(letter.id, 'admin:test');
     expect(res.result).toBe('held');
     expect((await statusOf(letter.id)).status).toBe('cancelled');
+  });
+});
+
+describe('Statuszentrale, unklare Übergabe und QR-Zuordnung', () => {
+  beforeEach(async () => {
+    await resetDb();
+    process.env.DRY_RUN = 'false';
+    resetEnvCache();
+    await updateConfig(
+      { ...OPERATOR_TEST_CONFIG, switches: { dryRun: false, killSwitch: false }, budget: { weeklyBudgetCents: 1000 } },
+      'test',
+    );
+  });
+  afterAll(async () => {
+    delete process.env.DRY_RUN;
+    resetEnvCache();
+    await stopBoss();
+  });
+
+  it('changeLetterStatus lehnt unzulässige Wechsel ab und schreibt nur aus dem erwarteten Ausgangsstatus', async () => {
+    const { letter } = await seed('approved');
+    await expect(changeLetterStatus(getDb(), letter.id, ['sent' as never], 'generated')).rejects.toThrow(/Unzulässiger/);
+    expect(await changeLetterStatus(getDb(), letter.id, ['generated'], 'approved')).toBe(false); // falscher Ausgang
+    expect(await changeLetterStatus(getDb(), letter.id, ['approved'], 'queued', {}, { requireNoProviderId: true })).toBe(true);
+    expect((await statusOf(letter.id)).status).toBe('queued');
+  });
+
+  it('Brief mit begonnener, aber unbestätigter Übergabe wird nicht neu erzeugt, sondern zur Prüfung zurückgehalten', async () => {
+    const { letter } = await seed('cancelled');
+    // Wahrheitscheck nicht bestanden → Wiederherstellung würde neu erzeugen (neue Brief-ID), das ist hier gesperrt
+    await getDb()
+      .update(letters)
+      .set({ truthCheckJson: { passed: false } })
+      .where(eq(letters.id, letter.id));
+    await getDb()
+      .insert(auditLog)
+      .values({ entity: 'letter', entityId: letter.id, action: 'handover_started', actor: 'test', contextJson: {} });
+    // Binding unvollständig → würde neu erzeugt werden, ist aber wegen der begonnenen Übergabe gesperrt
+    const res = await restoreLetter(letter.id, 'admin:test');
+    expect(res.result).toBe('held');
+    expect(res.reason).toMatch(/easyNova-Portal/);
+    expect((await statusOf(letter.id)).status).toBe('cancelled');
+  });
+
+  it('der QR-Code eines versandten Briefs führt zur Demo, die im Brief gebunden ist', async () => {
+    const { lead, demo, letter } = await seed('approved');
+    const sent = await sendLetter(letter.id, 'test');
+    expect(sent.state).toBe('sent');
+    const scan = await handleScan(lead.trackToken, { ua: 'test', ipHash: 'test-hash', isBot: true, audience: 'test' });
+    expect('redirect' in scan && scan.redirect).toContain(`/d/${demo.slug}`);
   });
 });
 
