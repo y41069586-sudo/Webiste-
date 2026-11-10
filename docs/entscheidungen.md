@@ -1551,3 +1551,14 @@ Bildstrecke aus denselben drei Bildslots. Neu (nur für neue Entwürfe, bestehen
   Bildstrecke. Die Seite lebt von Typografie, Weißraum und Farbflächen.
 - Durchgesetzt nicht nur im Prompt: `authoredCompleteness` meldet mehrfach genutzte Slots und Bilder in den Leistungen; der Bau
   bessert dann einmal nach. Die Mindestzahl der Bilder in der Bildstrecke berücksichtigt das Einstiegsbild.
+
+## 10.11.2026 – Doppelt veröffentlichte Demos
+
+Befund: 6 Betriebe hatten je zwei Demos gleichzeitig online (3 vom 08.11., 3 vom 10.11.). Ursache: Die Sammelfreigabe gab
+alle wartenden Demos frei, auch die ältere Fassung eines Betriebs, für den der automatische Neubau schon eine neuere erzeugt
+hatte; `publishDemo` verwarf nur ältere unveröffentlichte Demos, nicht eine bereits veröffentlichte. Doppelte Briefe gab es
+nicht (je Betrieb und Folge genau ein übergebener Brief, keine Auftragsnummer doppelt, keine Anschrift doppelt).
+Behoben: Veröffentlichen ersetzt jede andere veröffentlichte und jede ältere freigegebene Demo desselben Betriebs (Ablaufdatum
+nie vor dem der ersetzten, Protokoll `replace`); die Sammelfreigabe nimmt je Betrieb nur die neueste wartende Demo. Bereinigung:
+die 6 älteren Doppel ohne Brief offline genommen (Protokoll, Akteur `operator:delegiert-an-claude`); danach zeigt jeder
+versendete Brief auf seine aktuelle Demo.

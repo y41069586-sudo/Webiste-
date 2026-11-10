@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { eq, inArray } from 'drizzle-orm';
+import { desc, eq, inArray } from 'drizzle-orm';
 import {
   approveDemo,
   demoRevisionKey,
@@ -123,10 +123,15 @@ export async function bulkApproveDemosAction(form: FormData): Promise<void> {
   const s = await requireAdmin();
   const rating = RATING_SCORES[String(form.get('rating') ?? '')];
   if (!rating || form.get('ok') !== 'on') redirect('/admin/demos?tab=review&sammel=nichts');
-  const rows = await getDb()
-    .select({ id: schema.demos.id })
+  // 10.11.2026: je Betrieb nur die neueste wartende Demo freigeben. Gibt es mehrere (z. B. nach automatischem
+  // Neubau), würden sonst zwei Demos desselben Betriebs online gehen.
+  const candidates = await getDb()
+    .select({ id: schema.demos.id, leadId: schema.demos.leadId })
     .from(schema.demos)
-    .where(inArray(schema.demos.status, ['pending_review', 'qa_failed']));
+    .where(inArray(schema.demos.status, ['pending_review', 'qa_failed']))
+    .orderBy(desc(schema.demos.createdAt));
+  const seen = new Set<string>();
+  const rows = candidates.filter((r) => (seen.has(r.leadId) ? false : (seen.add(r.leadId), true)));
   let freigegeben = 0;
   for (const row of rows) {
     try {

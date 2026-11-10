@@ -1,5 +1,5 @@
 import { assessDemoQuality, type ManualQualityScores } from '../quality/demo';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, lt, or, sql } from 'drizzle-orm';
 import { effectiveSwitches, getConfig } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
 import { demos, leads } from '../db/schema';
@@ -228,6 +228,26 @@ export async function publishDemo(demoId: string, actor: string, now = new Date(
           sql`${demos.id} <> ${demoId}`,
         ),
       );
+    // 10.11.2026: Je Betrieb ist genau eine Demo online. Eine bisher veröffentlichte oder freigegebene Demo wird durch die
+    // neue ersetzt (QR-Code und Kurz-URL zeigen ohnehin immer auf die aktuelle). Ein im Brief zugesagtes „online bis …“
+    // gilt für die neue Demo weiter: ihr Ablauf wird nie vor den der ersetzten gesetzt.
+    const replaced = await tx
+      .update(demos)
+      .set({ status: 'rejected', reviewNote: 'ersetzt durch neuere veröffentlichte Demo', updatedAt: now })
+      .where(
+        and(
+          eq(demos.leadId, demo.leadId),
+          sql`${demos.id} <> ${demoId}`,
+          // jede andere veröffentlichte Demo; freigegebene nur, wenn sie älter sind (eine neuere bleibt zur Veröffentlichung)
+          or(eq(demos.status, 'published'), and(eq(demos.status, 'approved'), lt(demos.createdAt, demo.createdAt))),
+        ),
+      )
+      .returning({ id: demos.id, expiresAt: demos.expiresAt });
+    const keepUntil = replaced.reduce<Date | null>((m, r) => (r.expiresAt && (!m || r.expiresAt > m) ? r.expiresAt : m), null);
+    if (keepUntil && keepUntil > addDays(now, cfg.timing.demoExpiryDays))
+      await tx.update(demos).set({ expiresAt: keepUntil }).where(eq(demos.id, demoId));
+    for (const r of replaced)
+      await audit(tx, { entity: 'demo', entityId: r.id, action: 'replace', actor, context: { by: demoId } });
     await transitionLead(tx, demo.leadId, 'demo_published', {
       actor,
       soft: true,
