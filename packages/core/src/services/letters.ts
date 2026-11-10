@@ -1,6 +1,7 @@
 import { assertLetterLeadEligible } from '../letters/eligibility';
 import { assertLetterBinding } from '../letters/binding';
 import { wasSubmitted } from '../letters/state';
+import { PREVIEW_LETTER_VERSION } from '../letters/personalization';
 import { changeLetterStatus, handoverAttempted, HANDOVER_UNCLEAR } from './letter-status';
 import { assessLetterQuality, type LetterQualityScores, type LetterQualityAssessment } from '../quality/letter';
 import { and, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm';
@@ -333,7 +334,11 @@ export async function restoreLetter(letterId: string, actor: string): Promise<Re
       bindingOk = false;
     }
   }
-  if (bindingOk) {
+  // Nur ein Brief in der aktuellen Vorlage (mit Kernbotschaft) kommt unverändert zurück. Ältere Texte werden mit der
+  // aktuellen Demo und Vorlage neu geschrieben, damit nicht der alte Wortlaut wieder zur Freigabe ansteht.
+  const currentTemplate =
+    (letter.truthCheckJson as { _copy?: { version?: string } } | null)?._copy?.version === PREVIEW_LETTER_VERSION;
+  if (bindingOk && currentTemplate) {
     const updated = await changeLetterStatus(
       db,
       letterId,

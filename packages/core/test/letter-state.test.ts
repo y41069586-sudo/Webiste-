@@ -218,9 +218,26 @@ describe('Wiederherstellung intern stornierter Briefe', () => {
     await stopBoss();
   });
 
-  it('nie übergebener, noch passender Brief wartet wieder auf Freigabe; Verlauf steht im Protokoll', async () => {
+  it('Brief mit alter Vorlage wird mit der aktuellen Vorlage neu geschrieben statt unverändert zurückzukommen', async () => {
     const { letter } = await seed('cancelled');
-    await getDb().update(letters).set({ statusReason: 'Demo ersetzt, Qualitätsprüfung offen' }).where(eq(letters.id, letter.id));
+    await getDb()
+      .update(letters)
+      .set({ truthCheckJson: { passed: true, _copy: { version: 'kunden-verlieren-1' } } })
+      .where(eq(letters.id, letter.id));
+    const res = await restoreLetter(letter.id, 'admin:test');
+    expect(res.result).toBe('regenerating');
+    expect((await statusOf(letter.id)).status).toBe('cancelled'); // bleibt bis der neue Brief fertig ist erhalten
+  });
+
+  it('nie übergebener Brief in aktueller Vorlage wartet wieder auf Freigabe; Verlauf steht im Protokoll', async () => {
+    const { letter } = await seed('cancelled');
+    await getDb()
+      .update(letters)
+      .set({
+        statusReason: 'Demo ersetzt, Qualitätsprüfung offen',
+        truthCheckJson: { passed: true, _copy: { version: PREVIEW_LETTER_VERSION } },
+      })
+      .where(eq(letters.id, letter.id));
     const res = await restoreLetter(letter.id, 'admin:test');
     expect(res.result).toBe('reinstated');
     const after = await statusOf(letter.id);
