@@ -165,7 +165,12 @@ describe('V4 actual generation, reviewed facts and immutable print assignment', 
     await getDb()
       .update(variants)
       .set({
-        content: { ...v4LetterVariant('handwerk', 'A'), hook: 'Garantiert mehr Umsatz.' } as unknown as Record<string, unknown>,
+        // Betreff lässt sich nicht automatisch korrigieren (Sätze im Fließtext schon): der Brief bleibt unverändert erhalten
+        content: {
+          ...v4LetterVariant('handwerk', 'A'),
+          subject: 'Garantiert mehr Umsatz für Ihren Betrieb',
+          hook: 'Garantiert mehr Umsatz.',
+        } as unknown as Record<string, unknown>,
       })
       .where(eq(variants.id, variantId));
     await expect(generateLetter(lead.id, 1, { actor: 'test', regenerate: true })).rejects.toThrow(/bisheriger Brief/);

@@ -37,7 +37,9 @@ it('changes the meaning, headline and benefit for distinct verified offers withi
   const b = previewInvitationCopy({ ...c, details: [{ text: 'Fassaden', source: 'fixture:review', verified: true }] });
   const d = previewInvitationCopy({ ...c, details: [{ text: 'Lackierarbeiten', source: 'fixture:review', verified: true }] });
   expect(new Set([a.profile, b.profile, d.profile]).size).toBe(3);
-  expect(new Set([a.subject, b.subject, d.subject]).size).toBe(3);
+  // Standardvorlage 3: fester Betreff; der Unterschied liegt im persönlichen Teil und im Profil
+  expect(new Set([a.subject, b.subject, d.subject]).size).toBe(1);
+  expect(new Set([a.intro.join(), b.intro.join(), d.intro.join()]).size).toBe(3);
   expect(a.intro.join()).toContain('Kalkfarben');
   expect(b.intro.join()).not.toContain('Kalkfarben');
   expect(a.intro).not.toEqual(b.intro);

@@ -1,6 +1,6 @@
 import { assertLetterLeadEligible } from '../letters/eligibility';
 import { assertLetterBinding } from '../letters/binding';
-import { HOLD_PREFIX, wasSubmitted } from '../letters/state';
+import { wasSubmitted } from '../letters/state';
 import { assessLetterQuality, type LetterQualityScores, type LetterQualityAssessment } from '../quality/letter';
 import { and, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm';
 import { usableClaims, type ClaimRow } from '../claims/library';
@@ -152,6 +152,9 @@ async function assignedThisWeek(db: DbOrTx, industry: Industry, now = new Date()
   return Object.fromEntries(res.filter((r) => r.variantId).map((r) => [r.variantId!, Number(r.n)]));
 }
 
+/** Meldungen der Zuordnungsprüfung, die einen veralteten (nicht beschädigten) Brief eindeutig belegen */
+const STALE_BINDING = /seit der QA geändert|Betriebsdaten seit der Demo|erneute QA|Demo erneut prüfen|ersetzt|Zuordnung/i;
+
 export interface ApproveOutcome {
   ok: boolean;
   /** Klartext-Grund, wenn die Freigabe nicht möglich war */
@@ -186,29 +189,15 @@ export async function approveLetterWithReason(
       await assertLetterBinding(tx, letter, lead, cfg);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Brief passt nicht mehr zur Demo.';
-      // Behebbar: Brief zurückstellen und mit der aktuellen Demo neu erzeugen (kein Storno)
-      if (!letter.isTest && letter.sequence >= 1) {
-        await tx
-          .update(letters)
-          .set({
-            status: 'failed',
-            statusReason:
-              `${HOLD_PREFIX}${message} Der Brief wird automatisch neu erzeugt und wartet danach wieder auf deine Freigabe.`.slice(
-                0,
-                1000,
-              ),
-            updatedAt: new Date(),
-          })
-          .where(eq(letters.id, letterId));
-        await audit(tx, {
-          entity: 'letter',
-          entityId: letterId,
-          action: 'hold',
-          actor,
-          context: { reason: message, regenerate: true },
-        });
+      // Eindeutig veraltet (Demo/Betriebsdaten seit der Brieferzeugung geändert): neu erzeugen lassen. Der bisherige Brief
+      // bleibt unverändert, bis der neue fertig und geprüft ist. Technische Lesefehler lösen nichts aus.
+      if (!letter.isTest && letter.sequence >= 1 && STALE_BINDING.test(message)) {
         stale = { leadId: letter.leadId, sequence: letter.sequence, message };
-        return { ok: false, reason: `${message} Der Brief wird gerade automatisch neu erzeugt.`, regenerating: true };
+        return {
+          ok: false,
+          reason: `${message} Der Brief wird automatisch mit der aktuellen Demo neu erzeugt.`,
+          regenerating: true,
+        };
       }
       return { ok: false, reason: message };
     }
