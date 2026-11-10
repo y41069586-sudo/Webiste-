@@ -97,7 +97,10 @@ export async function authorStudioContent(
       const raw = await llmStructured<SiteContent>({
         tier: 'creative',
         system: DEMO_SYSTEM_PROMPT,
-        prompt: buildDemoPrompt(facts, seed + attempt, feedback) + '\n\n' + studioImplementationBrief(studioPlan),
+        prompt:
+          buildDemoPrompt(facts, seed + attempt, feedback) +
+          '\n\n' +
+          studioImplementationBrief(studioPlan, { branchKey: input.branchKey, branchLabel: input.branchLabel }),
         images,
         toolName: DEMO_TOOL_NAME,
         toolDescription: 'Gibt individuelle Seitengestaltung (HTML/CSS) und geprüfte Texte zurück.',

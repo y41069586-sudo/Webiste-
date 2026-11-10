@@ -1493,3 +1493,19 @@ fertigen PDF-Text aller Branchen im ungünstigsten Layoutfall.
 Quellenseite) antwortet am 10.11. mit HTTP 503 `usage_exceeded`. Solange das Netlify-Kontingent erschöpft ist, ist jeder QR-Code
 tot. Der neue Schutz hält Versand und Brieferzeugung deshalb an, statt Briefe mit totem Link zu drucken. Abhilfe nur im
 Netlify-Konto (Kontingent/Tarif), nicht im Code.
+
+## 10.11.2026 – Demo-Design: Gewerk-Richtungen und Handwerksmaßstab für die KI-Gestaltung
+
+Betreiber: Demos sollen sofort professionell wirken und je Gewerk erkennbar anders aussehen. Die Demos entstehen als frei
+gestaltetes HTML/CSS durch die KI (Gestaltungsstudio), nicht aus Vorlagen. Deshalb setzt die Verbesserung dort an:
+`demos/trade-design.ts` liefert je Gewerk (Dachdecker/Zimmerer, Elektro/Solar, Fliesen/Boden/Stuck, Sanitär/Heizung, Maler,
+Garten- und Landschaftsbau) eine visuelle Ausgangsrichtung (Charakter, Farbwelt, ein wiederkehrendes Zierelement, Bildregie,
+Schrift) und einen gemeinsamen Handwerksmaßstab (Größenskala, Abstandsstufen, Einstieg, Kacheln, Schaltflächen, Kontaktband,
+Mobil). Beides geht in den Konzept- und den Umsetzungs-Prompt. Es ist reine Gestaltungsvorgabe: ausdrücklich keine
+Zertifikate, Jahreszahlen, Referenzen, Kundenstimmen oder Teams. Die bisherigen Regeln (minimalistisch, wenig Text, Prüfmaßstäbe
+der Demo-QA, feste Reihenfolge) bleiben unverändert.
+
+Grenzen, ehrlich benannt: Die CSS-Prüfung erlaubt nur `@media` und `@supports`, also keine `@keyframes`; „subtile Animation“ heißt
+deshalb Übergänge (Hover/Fokus). Inline-SVG-Icons lässt die HTML-Prüfung nicht zu. Die Wirkung auf echte Demos ist erst nach einem
+Neubau sichtbar; ein Neubau kostet KI-Budget (Sonnet) und wurde nicht ohne deine Freigabe ausgelöst. Bestehende Demos werden nicht
+automatisch umgebaut; Neubau je Demo über „Ablehnen mit Wunsch / Neu bauen“ erzeugt eine neue Demo-Adresse (`/d/{slug}`); QR-Code und Kurz-URL der Briefe bleiben gültig, weil sie über den Lead-Token immer zur aktuellen veröffentlichten Demo leiten (`handleScan`). Die Adresse in einem bereits versendeten Brief ist also der QR-Code, nicht der Slug.
