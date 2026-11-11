@@ -3,7 +3,8 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { getDb } from '../src/db/client';
 import { demos, leads, outboundEmails } from '../src/db/schema';
 import { stopBoss } from '../src/queue';
-import { handleScan } from '../src/services/tracking';
+import { updateConfig } from '../src/config/service';
+import { handleOptOut, handleScan } from '../src/services/tracking';
 import { randomToken } from '../src/util/crypto';
 import { addDays } from '../src/util/time';
 import { resetDb } from './helpers';
@@ -65,5 +66,17 @@ describe('Sofort-Hinweis bei Interesse (11.11.2026)', () => {
     await handleScan(lead.trackToken, { ua: 'x', ipHash: 't', isBot: false, audience: 'test' });
     expect(await adminMails()).toHaveLength(0);
     expect((await getDb().query.leads.findFirst({ where: eq(leads.id, lead.id) }))?.id).toBe(lead.id);
+  });
+
+  it('Kunden-Aktivität geht an das eigene Aktivitäts-Postfach, „Kein Interesse“ wird ebenfalls gemeldet', async () => {
+    await updateConfig({ sender: { activityEmail: 'aktiv@example.net' } }, 'test');
+    const lead = await seed();
+    const req = { ua: 'mobile/safari', ipHash: 'h1', isBot: false };
+    await handleScan(lead.trackToken, req);
+    const demo = await getDb().query.demos.findFirst({ where: eq(demos.leadId, lead.id) });
+    await handleOptOut(demo!.slug, req);
+    const mails = await adminMails();
+    expect(mails.map((m) => m.toEmail)).toEqual(['aktiv@example.net', 'aktiv@example.net']);
+    expect(mails.map((m) => m.subject).join(' ')).toMatch(/„Kein Interesse“ geklickt: Scan Beispiel GmbH/);
   });
 });

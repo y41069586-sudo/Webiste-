@@ -30,6 +30,7 @@ import {
 import type { ObjectionCategory, SupportClass } from '../types';
 import { formatDateLongDe, formatEuro } from '../util/time';
 import { appUrl } from '../config/env';
+import { notifyInterest } from './tracking';
 import { audit } from './audit';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { llmStructured } from './llm';
@@ -286,6 +287,14 @@ export async function processSupportMessage(id: string): Promise<{ status: strin
   if (c.class === 'spam') {
     await db.update(supportMessages).set({ status: 'ignored', updatedAt: new Date() }).where(eq(supportMessages.id, id));
     return { status: 'ignored', class: c.class };
+  }
+  if (msg.channel !== 'form') {
+    await notifyInterest(msg.leadId, 'message', undefined, {
+      name: c.company_name || undefined,
+      ref: msg.id,
+      detail: `Art: ${c.class}. Betreff: ${(msg.subject ?? '–').slice(0, 150)}`,
+      link: appUrl(`/admin/support/${id}`),
+    });
   }
 
   if (c.class === 'opt_out' && !isCustomer) {

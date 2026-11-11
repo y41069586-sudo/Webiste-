@@ -83,7 +83,7 @@ export default async function PreviewPage({
       </p>
       {sp.aenderung === 'admin' ? (
         <div role="status" className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-          Danke! Ihr Wunsch liegt bei uns, wir melden uns persönlich.
+          Danke! Ihr Wunsch liegt bei uns, wir melden uns persönlich per E-Mail. Bitte schauen Sie auch in Ihrem Spam-Ordner nach.
         </div>
       ) : null}
       {ctx.openRequest?.status === 'needs_admin' ? (

@@ -42,7 +42,7 @@ export function PreviewActions({
         <p className="mt-1 text-sm text-slate-600">
           {roundsLeft > 0
             ? `Noch ${roundsLeft} von ${roundsIncluded} Änderungsrunden inklusive. Beschreiben Sie alle Wünsche auf einmal.`
-            : 'Die inklusiven Änderungsrunden sind aufgebraucht. Wir prüfen Ihren Wunsch persönlich und melden uns.'}
+            : 'Die inklusiven Änderungsrunden sind aufgebraucht. Wir prüfen Ihren Wunsch persönlich und melden uns per E-Mail – bitte schauen Sie auch in Ihrem Spam-Ordner nach.'}
         </p>
         <label htmlFor="aenderung" className="mt-3 mb-1 block text-sm font-medium">
           Was soll geändert werden?

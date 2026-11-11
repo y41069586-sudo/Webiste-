@@ -50,7 +50,7 @@ export default async function SuccessPage({
               Die Zahlung ist eingegangen{res.invoiceNumber ? ` (Rechnung ${res.invoiceNumber})` : ''}.{' '}
               {mockEmail
                 ? 'Der E-Mail-Versand ist noch nicht freigeschaltet. Rechnung und Bestätigung werden nur im Testpostausgang abgelegt; es wird keine E-Mail zugestellt.'
-                : 'Rechnung und Bestellbestätigung kommen in den nächsten Minuten per E-Mail.'}
+                : 'Rechnung und Bestellbestätigung kommen in den nächsten Minuten per E-Mail. Bitte schauen Sie auch in Ihrem Spam-Ordner nach, falls sie nicht im Posteingang ankommen.'}
             </p>
             <h2 className="mt-6 mb-2 text-lg font-semibold">
               {prepared ? 'Ihre Einrichtung wurde übernommen' : 'Nächster Schritt: Ihre Angaben'}
@@ -72,15 +72,16 @@ export default async function SuccessPage({
             <h1 className="mb-3 text-2xl font-semibold">Danke – Ihre Zahlung wird bearbeitet</h1>
             <p className="text-slate-700">
               Die endgültige Bestätigung des Zahlungsanbieters steht noch aus. Bitte bestellen Sie nicht erneut. Sobald die
-              Zahlung eingegangen ist, schicken wir Ihnen Rechnung und den Link für Ihre Angaben per E-Mail.
+              Zahlung eingegangen ist, schicken wir Ihnen Rechnung und den Link für Ihre Angaben per E-Mail. Bitte schauen Sie
+              auch in Ihrem Spam-Ordner nach.
             </p>
           </>
         ) : (
           <>
             <h1 className="mb-3 text-2xl font-semibold">Zahlung noch nicht bestätigt</h1>
             <p className="text-slate-700">
-              Wir konnten die Zahlung gerade noch nicht bestätigen. Wenn Sie bezahlt haben, erhalten Sie in Kürze eine E-Mail.
-              Andernfalls können Sie die Bestellung{' '}
+              Wir konnten die Zahlung gerade noch nicht bestätigen. Wenn Sie bezahlt haben, erhalten Sie in Kürze eine E-Mail
+              (bitte schauen Sie auch in Ihrem Spam-Ordner nach). Andernfalls können Sie die Bestellung{' '}
               <a href={`/checkout/${slug}`} className="text-brand-700 underline">
                 prüfen
               </a>

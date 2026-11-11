@@ -27,7 +27,7 @@ import { setSiteMaintenance } from './maintenance';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
-import type { RequestMeta } from './tracking';
+import { notifyInterest, type RequestMeta } from './tracking';
 
 export type Site = typeof sites.$inferSelect;
 type Customer = typeof customers.$inferSelect;
@@ -293,6 +293,11 @@ export async function saveOnboarding(
       actor: opts.actor ?? 'public:onboarding',
     });
   });
+  await notifyInterest(ctx.customer.leadId, 'onboarding_submitted', undefined, {
+    name: ctx.customer.company,
+    ref: ctx.site.id,
+    link: appUrl(`/admin/customers/${ctx.customer.id}`),
+  });
   if (opts.enqueueBuild !== false)
     await enqueue(QUEUES.buildSite, { siteId: ctx.site.id }, { singletonKey: `build-${ctx.site.id}` });
   return { ok: true, submitted: true };
@@ -440,6 +445,11 @@ export async function approvePreview(
     actor: opts.actor ?? 'public:preview',
     context: { version: ctx.site.version },
   });
+  await notifyInterest(ctx.customer.leadId, 'preview_approved', undefined, {
+    name: ctx.customer.company,
+    ref: `${ctx.site.id}:${ctx.site.version}`,
+    link: appUrl(`/admin/customers/${ctx.customer.id}`),
+  });
   if (opts.enqueueDeploy !== false)
     await enqueue(QUEUES.deploySite, { siteId: ctx.site.id }, { singletonKey: `deploy-${ctx.site.id}` });
   return { ok: true };
@@ -485,6 +495,12 @@ export async function requestChanges(token: string, text: string): Promise<Chang
       { siteId: ctx.site.id, changeRequestId: cr!.id },
       { singletonKey: `build-${ctx.site.id}-${cr!.id}` },
     );
+    await notifyInterest(ctx.customer.leadId, 'change_request', undefined, {
+      name: ctx.customer.company,
+      ref: cr!.id,
+      detail: `Wunsch (inklusive Runde, wird automatisch umgesetzt): ${t.slice(0, 400)}`,
+      link: appUrl(`/admin/customers/${ctx.customer.id}`),
+    });
     return { ok: true, mode: 'round' };
   }
   await notifyAdmin({
@@ -492,6 +508,7 @@ export async function requestChanges(token: string, text: string): Promise<Chang
     title: 'Änderungswunsch außerhalb der inklusiven Runden',
     lines: [`Kunde: ${ctx.customer.company}`, `Wunsch: ${t.slice(0, 500)}`],
     link: appUrl(`/admin/customers/${ctx.customer.id}`),
+    activity: true,
   });
   return { ok: true, mode: 'admin' };
 }

@@ -1576,3 +1576,17 @@ letzten 10 Tage waren Fehler-Sammelmeldungen (vor allem dead_letter aus der inzw
 `notifyInterest` schickt sofort eine Mail beim ersten echten Scan je Betrieb, beim ersten Klick auf „Übernehmen“ und bei jeder
 Frage bzw. jedem Änderungswunsch (Bots und Testaufrufe ausgenommen). Kaufweg geprüft: Live-Preise in Stripe aktiv und gleich
 dem Katalog, Webhook aktiv; keine echte Testzahlung ausgelöst.
+
+## 11.11.2026 – Kunden-Aktivität an eigenes Postfach, Spam-Hinweis
+
+Betreiber: Betreiber-Mails gingen an `support@seitenwerk.world` (Resend-Empfang, kein Postfach mit Push). Neu ist die Einstellung
+`sender.activityEmail` (Admin → Einstellungen → Absender). Ist sie gesetzt, gehen nur Hinweise auf Aktionen von Betrieben und
+Kunden dorthin; alle anderen Betreiber-Mails bleiben bei ADMIN_EMAIL. Auf ausdrücklichen Wunsch des Betreibers auf sein privates
+Postfach gesetzt (audit_log, Akteur `operator:delegiert-an-claude`).
+
+Gemeldet werden: erster Scan, erster Klick auf „Übernehmen“, „Kein Interesse“, Frage und Änderungswunsch auf der Demo (mit Text),
+Bestellung begonnen, Bestellung bezahlt, Angaben eingereicht, Vorschau freigegeben, Änderungswunsch zur Vorschau (inklusive Runde
+und darüber hinaus) und jede echte eingehende Mail (ohne Spam, ohne eigene Systemmails). Schlüssel weiter `admin:interest:*`.
+
+Wo Kunden eine Mail von uns erwarten (Danke-Seite der Demo-Frage, Checkout-Erfolg und -Warten, Vorschau-Änderungswunsch), steht
+jetzt „Bitte schauen Sie auch in Ihrem Spam-Ordner nach“, weil die Spam-Einstufung eigener Mails ein offenes Risiko ist.

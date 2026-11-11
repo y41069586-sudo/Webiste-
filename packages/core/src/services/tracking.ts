@@ -108,37 +108,78 @@ export async function observedTransit(db: DbOrTx = getDb()): Promise<{ samples: 
 }
 
 /** QR-Scan: Event + Weiterleitung zur aktuellen Demo. */
+export type InterestKind =
+  | 'scan'
+  | 'cta_click'
+  | 'question'
+  | 'wish'
+  | 'opt_out'
+  | 'checkout_started'
+  | 'order_paid'
+  | 'onboarding_submitted'
+  | 'preview_approved'
+  | 'change_request'
+  | 'message';
+
+const INTEREST_TEXT: Record<InterestKind, { title: string; hint: string; once: boolean }> = {
+  scan: {
+    title: 'QR-Code gescannt',
+    hint: 'Der Betrieb hat seine Demo geöffnet. Meldet er sich, bitte schnell antworten.',
+    once: true,
+  },
+  cta_click: { title: '„Übernehmen“ geklickt', hint: 'Der Betrieb hat den Kaufweg geöffnet.', once: true },
+  question: { title: 'Frage zur Demo', hint: 'Bitte möglichst schnell antworten (Admin → Support).', once: false },
+  wish: { title: 'Änderungswunsch vor dem Kauf', hint: 'Demo anpassen und antworten (Admin → Support).', once: false },
+  opt_out: {
+    title: '„Kein Interesse“ geklickt',
+    hint: 'Der Betrieb ist gesperrt und wird nicht mehr angeschrieben.',
+    once: true,
+  },
+  checkout_started: { title: 'Bestellung begonnen', hint: 'Der Betrieb ist in der Zahlung. Noch nicht bezahlt.', once: true },
+  order_paid: {
+    title: 'Neue Bestellung bezahlt',
+    hint: 'Admin → Bestellungen. Rechnung und Einrichtungs-Link gehen automatisch raus.',
+    once: true,
+  },
+  onboarding_submitted: { title: 'Angaben für die Website eingereicht', hint: 'Die Website wird jetzt gebaut.', once: true },
+  preview_approved: { title: 'Vorschau freigegeben', hint: 'Der Kunde hat seine Website freigegeben.', once: true },
+  change_request: { title: 'Änderungswunsch eingegangen', hint: 'Admin → Kunden.', once: false },
+  message: { title: 'Neue Nachricht', hint: 'Admin → Support.', once: false },
+};
+
 /**
- * Sofort-Hinweis an den Betreiber bei echtem Interesse (11.11.2026): erster Scan, Klick auf „Übernehmen“, Frage oder
- * Änderungswunsch. Vorher kamen nur Fehlermeldungen per Mail; Interessenten blieben unbemerkt. Je Betrieb und Art höchstens
- * eine Mail (Idempotenz über den Schlüssel). Testaufrufe des Betreibers und Bots lösen nichts aus. Fehler nur geloggt.
+ * Sofort-Hinweis an den Betreiber bei jeder Aktion eines Betriebs oder Kunden (11.11.2026): Scan, Klick auf „Übernehmen“,
+ * Frage, Änderungswunsch, Kein Interesse, Bestellung, Angaben, Freigabe, Nachricht. Geht an das Aktivitäts-Postfach
+ * (Einstellungen → Absender), damit die Mail-App sofort meldet. Einmalige Ereignisse höchstens eine Mail je Betrieb
+ * (Idempotenz über den Schlüssel `interest:…`). Testaufrufe des Betreibers und Bots lösen nichts aus. Fehler nur geloggt.
  */
 export async function notifyInterest(
-  leadId: string,
-  kind: 'scan' | 'cta_click' | 'question' | 'wish',
+  leadId: string | null,
+  kind: InterestKind,
   req?: RequestMeta,
+  extra: { name?: string; city?: string; detail?: string; ref?: string; link?: string } = {},
 ): Promise<void> {
   if (req?.isBot || req?.audience) return;
   try {
-    const lead = await getDb().query.leads.findFirst({ where: eq(leads.id, leadId) });
-    if (!lead) return;
-    const title = {
-      scan: `QR-Code gescannt: ${lead.businessName}`,
-      cta_click: `„Übernehmen“ geklickt: ${lead.businessName}`,
-      question: `Frage zur Demo: ${lead.businessName}`,
-      wish: `Änderungswunsch vor dem Kauf: ${lead.businessName}`,
-    }[kind];
-    const hint = {
-      scan: 'Der Betrieb hat seine Demo geöffnet. Jetzt ist ein guter Zeitpunkt, falls er sich meldet, schnell zu antworten.',
-      cta_click: 'Der Betrieb hat den Kaufweg geöffnet. Prüfe im Admin, ob eine Einrichtung begonnen wurde.',
-      question: 'Bitte möglichst schnell antworten (Admin → Support).',
-      wish: 'Demo anpassen und antworten (Admin → Support).',
-    }[kind];
+    const lead = leadId ? await getDb().query.leads.findFirst({ where: eq(leads.id, leadId) }) : undefined;
+    const name = extra.name || lead?.businessName || 'Unbekannt';
+    const city = extra.city ?? lead?.city ?? '';
+    const t = INTEREST_TEXT[kind];
+    const ref = extra.ref ?? leadId ?? name;
     await notifyAdmin({
-      key: `interest:${kind}:${leadId}${kind === 'question' || kind === 'wish' ? `:${Date.now()}` : ''}`,
-      title,
-      lines: [`${lead.businessName}, ${lead.city}`, hint],
-      link: appUrl(kind === 'question' || kind === 'wish' ? '/admin/support' : `/admin/leads/${leadId}`),
+      key: `interest:${kind}:${ref}${t.once || extra.ref ? '' : `:${Date.now()}`}`,
+      title: `${t.title}: ${name}`,
+      lines: [[name, city].filter(Boolean).join(', '), ...(extra.detail ? [extra.detail] : []), t.hint],
+      link:
+        extra.link ??
+        appUrl(
+          kind === 'question' || kind === 'wish' || kind === 'message'
+            ? '/admin/support'
+            : leadId
+              ? `/admin/leads/${leadId}`
+              : '/admin',
+        ),
+      activity: true,
     });
   } catch {
     // Benachrichtigung ist ein Zusatz; der eigentliche Vorgang darf nie daran scheitern
@@ -173,10 +214,12 @@ export async function handleOptOut(slug: string, req: RequestMeta): Promise<bool
   const db = getDb();
   const demo = await db.query.demos.findFirst({ where: eq(demos.slug, slug) });
   if (!demo) return false;
+  const lead = await db.query.leads.findFirst({ where: eq(leads.id, demo.leadId) });
   await db.transaction(async (tx) => {
     await tx.insert(events).values({ leadId: demo.leadId, type: 'opt_out', metaJson: { ua: req.ua } });
     await optOutLead(tx, demo.leadId, 'public:kein-interesse', 'kein_interesse_demo');
   });
+  await notifyInterest(null, 'opt_out', req, { name: lead?.businessName, city: lead?.city, ref: demo.leadId });
   return true;
 }
 
@@ -247,7 +290,9 @@ export async function handleDemoQuestion(slug: string, input: QuestionInput, req
         : {}),
     })
     .returning({ id: supportMessages.id });
-  await notifyInterest(leadId, input.kind === 'wish' ? 'wish' : 'question', req);
+  await notifyInterest(leadId, input.kind === 'wish' ? 'wish' : 'question', req, {
+    detail: `${input.name.trim().slice(0, 80)} schreibt: „${input.message.trim().slice(0, 400)}“`,
+  });
   await recordEvent(db, {
     leadId,
     type: 'question_sent',

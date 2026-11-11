@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { desc, eq, inArray } from 'drizzle-orm';
+import { desc, inArray } from 'drizzle-orm';
 import {
   approveDemo,
   demoRevisionKey,

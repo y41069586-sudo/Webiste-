@@ -74,6 +74,11 @@ export const appConfigSchema = z.object({
     photoUrl: z.string().default(''),
     /** Kurzvorstellung (zwei Sätze, keine erfundenen Referenzen) */
     intro: z.string().max(400).default(''),
+    /**
+     * Postfach nur für Hinweise auf Kundenaktivität (Scan, Klick, Frage, Kauf, Änderungswunsch, Nachricht), z. B. ein
+     * privates Postfach mit Push in der Mail-App. Leer = wie alle anderen Betreiber-Mails an ADMIN_EMAIL (11.11.2026).
+     */
+    activityEmail: z.union([z.email(), z.literal('')]).default(''),
   }),
   offers: z
     .object({
@@ -592,6 +597,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     bankName: '',
     whatsappNumber: '',
     photoUrl: '',
+    activityEmail: '',
     intro: '',
   },
   pricing: {

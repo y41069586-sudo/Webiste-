@@ -31,7 +31,7 @@ export default async function CheckoutPage({
   const text =
     ctx.state === 'ordered'
       ? ctx.paymentState === 'processing'
-        ? 'Ihre Zahlung wird noch bestätigt. Bitte bestellen Sie nicht erneut. Nach bestätigtem Zahlungseingang erhalten Sie Rechnung und den Link für Ihre Angaben per E-Mail.'
+        ? 'Ihre Zahlung wird noch bestätigt. Bitte bestellen Sie nicht erneut. Nach bestätigtem Zahlungseingang erhalten Sie Rechnung und den Link für Ihre Angaben per E-Mail. Bitte schauen Sie auch in Ihrem Spam-Ordner nach.'
         : 'Die Bestellung ist bezahlt. Den Link für Ihre Angaben finden Sie in Ihrer Bestellbestätigung. Bei ausbleibender E-Mail helfen wir Ihnen schriftlich weiter.'
       : ctx.state === 'disabled'
         ? `${ctx.reason} Schreiben Sie uns gern an ${cfg.sender.email || 'den Kontaktbereich von SeitenWerk'}.`

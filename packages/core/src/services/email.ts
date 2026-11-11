@@ -128,12 +128,31 @@ export function adminRecipient(cfg: { sender: { email: string } }): string {
   return /@example\.(com|org|net)$/i.test(env) ? cfg.sender.email : env;
 }
 
-/** Kurze Benachrichtigung an den Betreiber (ADMIN_EMAIL). Fehler werden nur geloggt. */
-export async function notifyAdmin(input: { key: string; title: string; lines: string[]; link?: string }): Promise<void> {
+/** Empfänger für Hinweise auf Kundenaktivität: eigenes Postfach aus den Einstellungen, sonst wie alle Betreiber-Mails. */
+export function activityRecipient(cfg: { sender: { email: string; activityEmail?: string } }): string {
+  return cfg.sender.activityEmail?.trim() || adminRecipient(cfg);
+}
+
+/**
+ * Kurze Benachrichtigung an den Betreiber (ADMIN_EMAIL). `activity`: Hinweis auf eine Aktion eines Betriebs oder Kunden,
+ * geht an das Aktivitäts-Postfach. Fehler werden nur geloggt.
+ */
+export async function notifyAdmin(input: {
+  key: string;
+  title: string;
+  lines: string[];
+  link?: string;
+  activity?: boolean;
+}): Promise<void> {
   try {
     const cfg = await getConfig();
     const content = adminNotificationEmail(cfg, input);
-    await sendTransactionalEmail({ ...content, kind: 'admin', idempotencyKey: `admin:${input.key}`, to: adminRecipient(cfg) });
+    await sendTransactionalEmail({
+      ...content,
+      kind: 'admin',
+      idempotencyKey: `admin:${input.key}`,
+      to: input.activity ? activityRecipient(cfg) : adminRecipient(cfg),
+    });
   } catch (err) {
     logger.warn({ key: input.key, ...errInfo(err) }, 'Admin-Benachrichtigung fehlgeschlagen');
   }

@@ -9,10 +9,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   if (new URL(req.url).searchParams.get('wunsch') === '1')
     return simplePage(
       'Danke für Ihren Wunsch',
-      `<p>Ich passe Ihren Entwurf kostenlos an und schreibe Ihnen per E-Mail, sobald der neue Stand online ist – unter demselben Link.</p>${back}`,
+      `<p>Ich passe Ihren Entwurf kostenlos an und schreibe Ihnen per E-Mail, sobald der neue Stand online ist – unter demselben Link.</p><p><strong>Bitte schauen Sie auch in Ihrem Spam-Ordner nach</strong>, falls meine E-Mail nicht im Posteingang ankommt.</p>${back}`,
     );
   return simplePage(
     'Danke für Ihre Nachricht',
-    `<p>Wir haben Ihre Frage erhalten und melden uns per E-Mail bei Ihnen.</p>${back}`,
+    `<p>Wir haben Ihre Frage erhalten und melden uns per E-Mail bei Ihnen.</p><p><strong>Bitte schauen Sie auch in Ihrem Spam-Ordner nach</strong>, falls unsere Antwort nicht im Posteingang ankommt.</p>${back}`,
   );
 }

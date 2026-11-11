@@ -29,7 +29,7 @@ import { guaranteeEndFor } from './guarantee';
 import { goLiveBlockers } from './readiness';
 import { applyRecurringEvent, applyRecurringRefund } from './recurring';
 import { applySubscriptionEvent } from './renewals';
-import { findPublicDemo, recordEvent, type RequestMeta } from './tracking';
+import { findPublicDemo, notifyInterest, recordEvent, type RequestMeta } from './tracking';
 
 export type Order = typeof orders.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
@@ -305,6 +305,12 @@ export async function startCheckout(
       context: { leadId: lead.id, amountCents: amounts.grossCents, plan },
     });
   });
+  await notifyInterest(
+    lead.id,
+    'checkout_started',
+    { ...meta, isBot: false },
+    { detail: `Gewählt: ${formatEuro(amounts.grossCents)} (${plan})` },
+  );
 
   try {
     const minutes = cfg.checkout.sessionMinutes;
@@ -471,6 +477,12 @@ async function startHostedCheckoutLocked(
       context: { leadId: lead.id, amountCents: amounts.grossCents, plan, hosted: true },
     });
   });
+  await notifyInterest(
+    lead.id,
+    'checkout_started',
+    { ...meta, isBot: false },
+    { detail: `Gewählt: ${formatEuro(amounts.grossCents)} (${plan})` },
+  );
 
   try {
     const minutes = cfg.checkout.sessionMinutes;
@@ -802,6 +814,7 @@ async function afterPaid(orderId: string, customerId: string): Promise<void> {
       `Domain-Wunsch: ${order?.domainWish ?? '–'}`,
     ],
     link: appUrl(`/admin/orders/${orderId}`),
+    activity: true,
   });
 }
 

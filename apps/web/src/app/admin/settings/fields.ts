@@ -40,6 +40,11 @@ export const SECTIONS: SectionDef[] = [
       { path: 'sender.city', label: 'Ort', type: 'text' },
       { path: 'sender.email', label: 'E-Mail', type: 'email' },
       { path: 'sender.phone', label: 'Telefon (nur intern – wird nirgends veröffentlicht)', type: 'text' },
+      {
+        path: 'sender.activityEmail',
+        label: 'Postfach für Kunden-Aktivität (Scan, Klick, Frage, Kauf, Nachricht) – leer = wie alle Betreiber-Mails',
+        type: 'text',
+      },
       { path: 'sender.website', label: 'Website (ohne https://)', type: 'text' },
       { path: 'sender.taxNumber', label: 'Steuernummer (Rechnung)', type: 'text' },
       { path: 'sender.vatId', label: 'USt-IdNr. (optional)', type: 'text' },

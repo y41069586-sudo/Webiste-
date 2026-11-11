@@ -90,7 +90,7 @@ export function testAuthoredDesign(
   result: Pick<SiteContent, 'hero_headline' | 'hero_subline' | 'cta_text' | 'services'>,
   opts: { verified: boolean; images: { slot: number; alt: string }[] },
 ): NonNullable<SiteContent['design']> {
-  const { verified, images } = opts;
+  const { images } = opts;
   const faq = MOCK_FAQ;
   return {
     concept: 'Fiktiver isolierter Testentwurf, kein Produktionsdesign.',
