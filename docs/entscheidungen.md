@@ -1606,3 +1606,7 @@ der Betreiber bekommt je Eintragung und Bestätigung einen Hinweis an das Aktivi
 E-Mail-Erinnerungen laufen jetzt auch, wenn Folgebriefe aus sind (`followupEnabled=false`), weil sie nichts kosten und
 nur an Betriebe gehen, die uns selbst geschrieben bzw. sich eingetragen haben. Datenschutzerklärung (Entwurf) um einen
 Satz ergänzt. Keine Rechtsfreigabe durch KI; vor breiterem Einsatz rechtlich prüfen lassen.
+
+Ergänzung (11.11.2026, Betreiber „Sag da auch Spam-Hinweis“): Jede Kunden-Mail aus `renderEmail` endet jetzt mit
+`SPAM_HINT` („Falls diese Nachricht im Spam-Ordner lag, bitte als „Kein Spam“ markieren …“), auch Support-Antworten,
+Bestellbestätigung, Vorschau-, Link- und Erinnerungs-Mails. Ausgenommen sind nur Betreiber-Hinweise (`noSpamHint`).

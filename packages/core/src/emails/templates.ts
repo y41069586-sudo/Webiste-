@@ -26,17 +26,22 @@ function signatureText(cfg: AppConfig): string {
   return ['Viele Grüße', s.name, '', '--', s.company, `${s.street}, ${s.postalCode} ${s.city}`, s.email, s.website].join('\n');
 }
 
+export const SPAM_HINT =
+  'Damit unsere E-Mails sicher bei Ihnen ankommen: Falls diese Nachricht im Spam-Ordner lag, markieren Sie sie bitte als „Kein Spam“ und schauen Sie bei unseren nächsten E-Mails auch dort nach.';
+
 export function renderEmail(
   cfg: AppConfig,
-  input: { subject: string; name?: string | null; blocks: Block[]; noGreeting?: boolean },
+  input: { subject: string; name?: string | null; blocks: Block[]; noGreeting?: boolean; noSpamHint?: boolean },
 ): EmailContent {
+  // 11.11.2026 (Betreiber): eigene Mails landen teils im Spam; jede Kunden-Mail bittet darum, uns als „Kein Spam“ zu markieren
+  const blocks: Block[] = input.noSpamHint ? input.blocks : [...input.blocks, { small: SPAM_HINT }];
   const parts: string[] = [];
   const htmlParts: string[] = [];
   if (!input.noGreeting) {
     parts.push(greeting(input.name));
     htmlParts.push(`<p>${esc(greeting(input.name))}</p>`);
   }
-  for (const b of input.blocks) {
+  for (const b of blocks) {
     if (typeof b === 'string') {
       parts.push(b);
       htmlParts.push(`<p>${esc(b).replace(/\n/g, '<br>')}</p>`);
@@ -330,6 +335,7 @@ export function adminNotificationEmail(cfg: AppConfig, d: { title: string; lines
   return renderEmail(cfg, {
     subject: `[Website-Brief] ${d.title}`,
     noGreeting: true,
+    noSpamHint: true,
     blocks: [...d.lines, ...(d.link ? [{ button: { href: d.link, label: 'Im Dashboard öffnen' } }] : [])],
   });
 }
