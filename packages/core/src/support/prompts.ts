@@ -98,6 +98,9 @@ export function isAutomated(from: string, subject: string, headers: Record<strin
   // Newsletter und Verteiler (RFC 2369/2919): Abmeldelink oder Listenkennung im Kopf
   if (h['list-unsubscribe'] || h['list-id'] || h['precedence'] === 'list') return true;
   if (/mailer-daemon|postmaster|no-?reply|donotreply/i.test(from)) return true;
+  // 11.11.2026: eigene Betreiber-Meldungen („[Website-Brief] …“) landeten im Support-Postfach als Kundennachrichten
+  // (190 Stück in 10 Tagen) und hätten echte Antworten von Betrieben verdeckt
+  if (/^\[website-brief\]/i.test(subject.trim())) return true;
   return /^(automatische antwort|abwesenheit|out of office|autoreply|auto:|undeliver|unzustellbar|delivery status notification)/i.test(
     subject.trim(),
   );

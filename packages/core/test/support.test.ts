@@ -96,6 +96,9 @@ describe('Support: Eingang und Erkennung', () => {
 
   it('automatische Nachrichten und Zitate', () => {
     expect(isAutomated('mailer-daemon@x.de', 'Undeliverable')).toBe(true);
+    // eigene Betreiber-Meldungen nie als Kundennachricht (11.11.2026)
+    expect(isAutomated('support@seitenwerk.world', '[Website-Brief] 3 neue Meldungen (3 Fehler)')).toBe(true);
+    expect(isAutomated('kunde@betrieb.de', 'Frage zu meinem Website-Entwurf')).toBe(false);
     expect(isAutomated('a@b.de', 'Automatische Antwort: Urlaub')).toBe(true);
     expect(isAutomated('a@b.de', 'Frage', { 'Auto-Submitted': 'auto-replied' })).toBe(true);
     expect(isAutomated('news@e-recht24.de', 'Mehr als Rechtstexte', { 'List-Unsubscribe': '<https://x/abmelden>' })).toBe(true);
