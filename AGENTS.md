@@ -1216,3 +1216,13 @@ gesperrt; keinen physischen Versand oder kompletten bezahlten Go-Live behaupten.
 
 - Worker baut mit `selfTest: true`: Entwurf vor dem Speichern im Browser testen, Befunde in genau einen Nachbesserungsversuch. Endprüfung baut bei Gestaltungs-/Technik-/Textbefunden höchstens einmal mit den Befunden neu (`qaRetry`). Gates bleiben: durchgefallene Demos sind nicht freigebbar, manuelle Freigabe bleibt Pflicht.
 - Pipeline überspringt Betriebe mit ≥ 2 gescheiterten Bau-Aufträgen in 24 h (Kostenbremse). Details: `docs/entscheidungen.md` (07.11.2026 – Fehler beim Bau beheben).
+
+## 11.11.2026 – Netlify-Credits sparen (verbindlich)
+
+Netlify-Gratistarif: 300 Credits/Monat, harte Grenze; jede Produktionsveröffentlichung kostet 15 Credits, und jeder Push
+auf den Arbeitsbranch löst einen Netlify-Build aus. Am 10.11. war das Kontingent durch viele Pushes und Einzel-Deploys
+erschöpft, die Seite (auch alle QR-Ziele) lieferte 503 „usage_exceeded“. Deshalb:
+- Jeder Commit, der gepusht wird, trägt `[skip ci] [skip netlify]` in der Nachricht.
+- Netlify nur gezielt veröffentlichen, wenn sich etwas an `apps/web` oder an Code ändert, den die Seite nutzt, und gebündelt
+  (höchstens einmal am Tag, außer bei Ausfällen). Reine Worker-Änderungen brauchen keinen Netlify-Deploy.
+- Keine Dauerabfragen im Admin ohne laufenden Vorgang.

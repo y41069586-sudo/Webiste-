@@ -77,7 +77,7 @@ export function SearchLive({ initial, stop }: { initial: LeadSearchStatus; stop:
   const wasRunning = useRef(initial.active + initial.waiting > 0);
   const running = status.active + status.waiting > 0;
 
-  // Abfragen: alle 1,5 s während der Suche, sonst alle 15 s (falls woanders gestartet)
+  // Abfragen nur während einer laufenden Suche (Netlify-Credits sparen)
   useEffect(() => {
     let stop = false;
     let timer: ReturnType<typeof setTimeout>;
@@ -95,9 +95,11 @@ export function SearchLive({ initial, stop }: { initial: LeadSearchStatus; stop:
       } catch {
         // Netzwerk kurz weg: beim nächsten Takt erneut
       }
-      if (!stop) timer = setTimeout(load, wasRunning.current ? 1500 : 15000);
+      // 11.11.2026 (Netlify-Credits): nur während einer laufenden Suche abfragen, alle 4 s, und nie im Hintergrund-Tab.
+      // Ohne laufende Suche keine Dauerabfrage mehr (vorher alle 15 s, auch bei offenem Tab über Stunden).
+      if (!stop && wasRunning.current) timer = setTimeout(load, document.hidden ? 30000 : 4000);
     };
-    timer = setTimeout(load, running ? 1500 : 15000);
+    if (running) timer = setTimeout(load, 4000);
     return () => {
       stop = true;
       clearTimeout(timer);
