@@ -1610,3 +1610,21 @@ Satz ergänzt. Keine Rechtsfreigabe durch KI; vor breiterem Einsatz rechtlich pr
 Ergänzung (11.11.2026, Betreiber „Sag da auch Spam-Hinweis“): Jede Kunden-Mail aus `renderEmail` endet jetzt mit
 `SPAM_HINT` („Falls diese Nachricht im Spam-Ordner lag, bitte als „Kein Spam“ markieren …“), auch Support-Antworten,
 Bestellbestätigung, Vorschau-, Link- und Erinnerungs-Mails. Ausgenommen sind nur Betreiber-Hinweise (`noSpamHint`).
+
+## 11.11.2026 – Supabase-Kontingent überschritten, Umzug in eine neue kostenlose Organisation
+
+Supabase meldete 12,91 GB Egress bei 5,5 GB Free-Kontingent, Sperre ab 14.11.2026 (402 für alle Projekte der
+Organisation). Ursache laut Logs: die tägliche Sicherung (`seitenwerk-backup.timer`, 02:15 UTC) lädt jede Nacht alle
+Storage-Objekte (~360 MB) herunter und prüft die verschlüsselte Kopie, die im selben Bucket unter `backups/` liegt, durch
+erneutes Herunterladen. Das war ein Planungsfehler: „off-server“ war derselbe Supabase-Bucket. Sofortmaßnahme: Timer aus
+(`systemctl disable --now seitenwerk-backup.timer`). Eine Projektübertragung in eine neue Free-Organisation ist während
+der Schonfrist gesperrt; Betreiber wählte den kostenlosen Umzug statt Pro.
+
+`infra/vps/move-supabase.sh` (+ `.py`, `packages/core/scripts/copy-storage.ts`): fragt neue Verbindung, S3-Schlüssel und
+Netlify-Token unsichtbar ab, hält den Worker an, legt die Backend-Rolle mit unverändertem Passwort an, kopiert public,
+drizzle und pgboss per pg_dump/pg_restore, vergleicht Zeilenzahlen (Abweichungen nur in events, rate_limits, audit_log,
+webhook_events, settings und pgboss toleriert), kopiert Storage ohne `backups/`, setzt dann zuerst die Netlify-Variablen,
+danach `.env.worker` (Sicherungskopie `.env.worker.vor-supabase-umzug`) und den Sicherungszugang, und startet den Worker.
+Altes Projekt bleibt unverändert. Die Netlify-Werte wirken erst nach einer Veröffentlichung.
+
+Offen: Sicherung neu gestalten (nur Datenbank, wöchentlich, Ziel außerhalb von Supabase), bevor der Timer wieder läuft.
