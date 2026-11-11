@@ -1,4 +1,5 @@
 import { esc } from '@wbm/core';
+import { EMAIL_CAPTURE_STYLE, emailCaptureCompact } from './email-capture';
 
 /**
  * Willkommenshinweis nach dem Scan (06.11.2026, Betreiber: „da können Sachen nicht stimmen … sie sollen ganz sicher
@@ -17,7 +18,7 @@ export function welcomeDialog(businessName: string, slug: string, expiresLabel: 
 .sw-welcome-btn{display:block;width:100%;min-height:52px;margin:6px 0 10px;border:0;border-radius:14px;background:#0f172a;color:#fff;font:inherit;font-size:17px;font-weight:650;cursor:pointer}
 .sw-welcome-btn:focus-visible{outline:3px solid #60a5fa;outline-offset:2px}
 .sw-welcome-small{margin:0!important;font-size:13px!important;color:#64748b!important;text-align:center}
-.sw-welcome-small a{color:#64748b}</style>
+.sw-welcome-small a{color:#64748b}</style>${EMAIL_CAPTURE_STYLE}
 <dialog open class="sw-welcome" aria-labelledby="sw-welcome-title"><div class="sw-welcome-card">
 <p class="sw-welcome-eyebrow">Schön, dass Sie reinschauen</p>
 <h2 id="sw-welcome-title">Ihr Website-Entwurf für ${esc(businessName)}</h2>
@@ -25,6 +26,7 @@ export function welcomeDialog(businessName: string, slug: string, expiresLabel: 
 <ul><li>Name, Kontakt und Öffnungszeiten</li><li>Leistungen, Texte und Fotos</li><li>Farben und Gestaltung nach Ihren Wünschen</li></ul>
 <p><strong>Vor der Bestellung</strong> tragen Sie Ihre richtigen Angaben selbst ein und schreiben Ihre Wünsche dazu – kostenlos und unverbindlich. Online geht die Seite erst nach Ihrer Freigabe.${komplett ? ' Im Tarif Komplett zahlen Sie bei der Bestellung nichts, die erste Monatsgebühr erst 7 Tage danach.' : ''}</p>
 <form method="dialog"><button class="sw-welcome-btn" type="submit" autofocus>Entwurf ansehen</button></form>
+${emailCaptureCompact(slug)}
 <p class="sw-welcome-small">Unverbindlich · online bis ${esc(expiresLabel)} · <a href="/d/${esc(slug)}/kein-interesse">Kein Interesse</a></p>
 </div></dialog>`;
 }

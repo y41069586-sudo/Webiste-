@@ -119,7 +119,8 @@ export type InterestKind =
   | 'onboarding_submitted'
   | 'preview_approved'
   | 'change_request'
-  | 'message';
+  | 'message'
+  | 'email_optin';
 
 const INTEREST_TEXT: Record<InterestKind, { title: string; hint: string; once: boolean }> = {
   scan: {
@@ -145,6 +146,11 @@ const INTEREST_TEXT: Record<InterestKind, { title: string; hint: string; once: b
   preview_approved: { title: 'Vorschau freigegeben', hint: 'Der Kunde hat seine Website freigegeben.', once: true },
   change_request: { title: 'Änderungswunsch eingegangen', hint: 'Admin → Kunden.', once: false },
   message: { title: 'Neue Nachricht', hint: 'Admin → Support.', once: false },
+  email_optin: {
+    title: 'E-Mail hinterlassen',
+    hint: 'Der Betrieb hat sich den Link per E-Mail schicken lassen. Antworten nur über Admin → Support.',
+    once: false,
+  },
 };
 
 /**

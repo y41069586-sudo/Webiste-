@@ -16,6 +16,7 @@ import {
 import { requestMetaFrom } from '@/lib/request';
 import { simplePage } from '@/lib/public-page';
 import { welcomeDialog } from '@/lib/welcome-dialog';
+import { emailCaptureSection } from '@/lib/email-capture';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,6 +95,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     .replace('Nach der Einmalzahlung ergänzen Sie Ihre Angaben.', 'Ihre vor der Zahlung gespeicherten Angaben werden übernommen.')
     .replaceAll(EXPIRES_PLACEHOLDER, label)
     .replace('<h2 id="uebernehmen-titel"', `${notice}<h2 id="uebernehmen-titel"`)
+    // E-Mail-Eintragung mit Häkchen vor den Preisen (11.11.2026), auch für bereits gebaute Demos
+    .replace('<section id="uebernehmen"', `${emailCaptureSection(slug, label)}<section id="uebernehmen"`)
     .replace(/<body([^>]*)>/, (m) =>
       query.get('start') === '1'
         ? `${m}${welcomeDialog(found.lead.businessName, slug, found.demo.expiresAt ? formatDateDe(found.demo.expiresAt) : 'auf Weiteres', fullCfg.offers.komplettEnabled === true)}`

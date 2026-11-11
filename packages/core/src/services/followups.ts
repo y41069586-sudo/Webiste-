@@ -11,6 +11,7 @@ import { addDays, formatDateLongDe } from '../util/time';
 import { audit } from './audit';
 import { currentDemoForLead } from './demo-review';
 import { sendTransactionalEmail } from './email';
+import { sendOptinFollowups, unconfirmedOptinSql } from './email-optin';
 import { isEmailSuppressed } from './suppression';
 import { refreshLeadData } from './lead-finder';
 import { bestTemplateForBranch } from './template-stats';
@@ -40,7 +41,13 @@ export async function scheduleFollowups(now = new Date()): Promise<FollowupSumma
   const cfg = await getConfig({ fresh: true });
   const sw = effectiveSwitches(cfg);
   const out: FollowupSummary = { second: 0, third: 0, improving: 0, reminders: 0, queued: 0 };
-  if (!sw.followupEnabled || sw.killSwitch) return out;
+  if (sw.killSwitch) return out;
+  // 11.11.2026: E-Mail-Erinnerungen an Betriebe, die uns selbst ihre Adresse gegeben haben, kosten nichts und laufen
+  // auch, solange Folgebriefe ausgeschaltet sind.
+  if (!sw.followupEnabled) {
+    out.reminders = (await sendDemoReminders(now)) + (await sendOptinFollowups(now));
+    return out;
+  }
   const max = cfg.letter.maxLettersPerLead;
 
   // 2) Kein Scan nach Zustellung
@@ -168,7 +175,7 @@ export async function scheduleFollowups(now = new Date()): Promise<FollowupSumma
     }
   }
 
-  out.reminders = await sendDemoReminders(now);
+  out.reminders = (await sendDemoReminders(now)) + (await sendOptinFollowups(now));
   out.queued = out.second + out.third;
   return out;
 }
@@ -224,6 +231,8 @@ async function sendDemoReminders(now: Date): Promise<number> {
         ),
         // Opt-out-Nachrichten und Spam lösen nie eine Erinnerung aus
         sql`coalesce(${supportMessages.classification}, '') NOT IN ('opt_out', 'spam', 'beschwerde')`,
+        // „Link per E-Mail“ ohne Bestätigung: keine Erinnerung (Double-Opt-in)
+        sql`NOT ${unconfirmedOptinSql}`,
       ),
     )
     .orderBy(supportMessages.createdAt)

@@ -41,6 +41,7 @@ export {
 } from './demos/content';
 export { libraryContent, CONTENT_LIBRARY } from './demos/library';
 export * from './services/tracking';
+export * from './services/email-optin';
 export * from './services/pipeline';
 export * from './services/letters';
 export * from './letters/state';

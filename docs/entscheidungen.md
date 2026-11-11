@@ -1590,3 +1590,19 @@ und darüber hinaus) und jede echte eingehende Mail (ohne Spam, ohne eigene Syst
 
 Wo Kunden eine Mail von uns erwarten (Danke-Seite der Demo-Frage, Checkout-Erfolg und -Warten, Vorschau-Änderungswunsch), steht
 jetzt „Bitte schauen Sie auch in Ihrem Spam-Ordner nach“, weil die Spam-Einstufung eigener Mails ein offenes Risiko ist.
+
+## 11.11.2026 – „Link per E-Mail zuschicken“ mit Häkchen (Double-Opt-in)
+
+Betreiber: Betriebe nach dem Scan per E-Mail im Gespräch halten, ohne Kalt-Mails (§ 7 UWG). Neu auf jeder Demo (beim
+Ausliefern eingefügt, also auch für die 58 versendeten): Abschnitt „Link per E-Mail zuschicken“ vor den Preisen und
+aufklappbar im Willkommenshinweis nach dem Scan. E-Mail-Adresse plus nicht vorausgewähltes Häkchen (Einwilligungstext
+`OPTIN_CONSENT_TEXT`), Honeypot, Zeitfalle, Ratenlimit. Sofort geht nur der angeforderte Link raus; darin der Knopf
+„Ja, Erinnerungen erhalten“ (Bestätigungsseite mit Knopf, damit Link-Scanner nichts auslösen). Erst nach Bestätigung
+höchstens zwei Erinnerungen: Nachfrage 3 Tage nach Bestätigung (kostenlose Anpassung) und die bestehende Erinnerung
+7 Tage vor Ablauf. Abmeldung über den bestehenden Abmeldelink. Nachweis im audit_log (`optin_requested`,
+`optin_confirmed`). Die Anfrage liegt als Support-Nachricht vor (Antwort über Admin → Support, ohne KI-Bearbeitung);
+der Betreiber bekommt je Eintragung und Bestätigung einen Hinweis an das Aktivitäts-Postfach.
+
+E-Mail-Erinnerungen laufen jetzt auch, wenn Folgebriefe aus sind (`followupEnabled=false`), weil sie nichts kosten und
+nur an Betriebe gehen, die uns selbst geschrieben bzw. sich eingetragen haben. Datenschutzerklärung (Entwurf) um einen
+Satz ergänzt. Keine Rechtsfreigabe durch KI; vor breiterem Einsatz rechtlich prüfen lassen.

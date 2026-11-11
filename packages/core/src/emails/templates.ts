@@ -251,6 +251,42 @@ export function demoReminderEmail(
   });
 }
 
+/** Angeforderter Link zur Demo („Link per E-Mail zuschicken“) mit Bestätigung für Erinnerungen (Double-Opt-in). */
+export function optinLinkEmail(
+  cfg: AppConfig,
+  d: { businessName: string; demoUrl: string; expiresLabel: string; confirmUrl: string; unsubscribeUrl: string },
+): EmailContent {
+  return renderEmail(cfg, {
+    subject: `Ihr Website-Entwurf für ${d.businessName}`,
+    blocks: [
+      `wie gewünscht hier der Link zu Ihrem Website-Entwurf. Er ist bis ${d.expiresLabel} online.`,
+      { button: { href: d.demoUrl, label: 'Entwurf ansehen' } },
+      'Vor einer Bestellung passe ich Texte, Leistungen, Fotos und Farben kostenlos an Ihre Wünsche an. Schreiben Sie mir dazu einfach über das Formular auf der Seite oder antworten Sie auf diese E-Mail.',
+      `Möchten Sie bis ${d.expiresLabel} höchstens zweimal kurz daran erinnert werden? Dann bestätigen Sie bitte hier:`,
+      { button: { href: d.confirmUrl, label: 'Ja, Erinnerungen erhalten' } },
+      'Ohne Bestätigung schreiben wir Ihnen nicht erneut, außer Sie melden sich bei uns.',
+      { small: `Keine E-Mails mehr erhalten: ${d.unsubscribeUrl}` },
+    ],
+  });
+}
+
+/** Einzige Nachfrage nach bestätigter Anmeldung: kostenlose Anpassung anbieten. */
+export function optinFollowupEmail(
+  cfg: AppConfig,
+  d: { demoUrl: string; wishUrl: string; expiresLabel: string; unsubscribeUrl: string },
+): EmailContent {
+  return renderEmail(cfg, {
+    subject: 'Passt Ihr Website-Entwurf so?',
+    blocks: [
+      `vor ein paar Tagen haben Sie sich den Link zu Ihrem Website-Entwurf schicken lassen. Er ist noch bis ${d.expiresLabel} online.`,
+      'Falls noch etwas nicht stimmt, zum Beispiel Leistungen, Texte, Fotos oder Farben, passe ich das vor einer Bestellung kostenlos an. Ein kurzer Satz genügt.',
+      { button: { href: d.wishUrl, label: 'Wunsch schicken' } },
+      { button: { href: d.demoUrl, label: 'Entwurf ansehen' } },
+      { small: `Keine E-Mails mehr erhalten: ${d.unsubscribeUrl}` },
+    ],
+  });
+}
+
 export function refundEmail(cfg: AppConfig, d: { name: string; amount: string; cancellationNumber: string }): EmailContent {
   return renderEmail(cfg, {
     subject: `Erstattung Ihrer Zahlung (Stornorechnung ${d.cancellationNumber})`,
