@@ -1,5 +1,6 @@
 import { and, eq, gte, sql } from 'drizzle-orm';
-import { demoUrl } from '../config/env';
+import { appUrl, demoUrl } from '../config/env';
+import { notifyAdmin } from './email';
 import { getDb, type DbOrTx } from '../db/client';
 import { demos, events, leads, supportMessages } from '../db/schema';
 import { enqueue, QUEUES } from '../queue';
@@ -107,6 +108,43 @@ export async function observedTransit(db: DbOrTx = getDb()): Promise<{ samples: 
 }
 
 /** QR-Scan: Event + Weiterleitung zur aktuellen Demo. */
+/**
+ * Sofort-Hinweis an den Betreiber bei echtem Interesse (11.11.2026): erster Scan, Klick auf „Übernehmen“, Frage oder
+ * Änderungswunsch. Vorher kamen nur Fehlermeldungen per Mail; Interessenten blieben unbemerkt. Je Betrieb und Art höchstens
+ * eine Mail (Idempotenz über den Schlüssel). Testaufrufe des Betreibers und Bots lösen nichts aus. Fehler nur geloggt.
+ */
+export async function notifyInterest(
+  leadId: string,
+  kind: 'scan' | 'cta_click' | 'question' | 'wish',
+  req?: RequestMeta,
+): Promise<void> {
+  if (req?.isBot || req?.audience) return;
+  try {
+    const lead = await getDb().query.leads.findFirst({ where: eq(leads.id, leadId) });
+    if (!lead) return;
+    const title = {
+      scan: `QR-Code gescannt: ${lead.businessName}`,
+      cta_click: `„Übernehmen“ geklickt: ${lead.businessName}`,
+      question: `Frage zur Demo: ${lead.businessName}`,
+      wish: `Änderungswunsch vor dem Kauf: ${lead.businessName}`,
+    }[kind];
+    const hint = {
+      scan: 'Der Betrieb hat seine Demo geöffnet. Jetzt ist ein guter Zeitpunkt, falls er sich meldet, schnell zu antworten.',
+      cta_click: 'Der Betrieb hat den Kaufweg geöffnet. Prüfe im Admin, ob eine Einrichtung begonnen wurde.',
+      question: 'Bitte möglichst schnell antworten (Admin → Support).',
+      wish: 'Demo anpassen und antworten (Admin → Support).',
+    }[kind];
+    await notifyAdmin({
+      key: `interest:${kind}:${leadId}${kind === 'question' || kind === 'wish' ? `:${Date.now()}` : ''}`,
+      title,
+      lines: [`${lead.businessName}, ${lead.city}`, hint],
+      link: appUrl(kind === 'question' || kind === 'wish' ? '/admin/support' : `/admin/leads/${leadId}`),
+    });
+  } catch {
+    // Benachrichtigung ist ein Zusatz; der eigentliche Vorgang darf nie daran scheitern
+  }
+}
+
 export async function handleScan(
   token: string,
   req: RequestMeta,
@@ -119,11 +157,14 @@ export async function handleScan(
   if (!lead) return { notFound: true };
   const demo = await currentDemoForLead(db, lead.id);
   if (!demo || (demo.expiresAt && demo.expiresAt < new Date()) || lead.status === 'suppressed') return { gone: true };
+  let fresh = false;
   await db.transaction(async (tx) => {
     if (await recordEvent(tx, { leadId: lead.id, type: 'scan', meta: { via }, req, dedupeDaily: true })) {
+      fresh = true;
       await correctDeliveryEstimate(tx, lead.id, new Date());
     }
   });
+  if (fresh) await notifyInterest(lead.id, 'scan', req);
   // ?start=1: Willkommenshinweis „Entwurf – alles noch änderbar“ beim ersten Aufruf über QR/Kurz-URL
   return { redirect: demoUrl(`/d/${demo.slug}?start=1`) };
 }
@@ -206,6 +247,7 @@ export async function handleDemoQuestion(slug: string, input: QuestionInput, req
         : {}),
     })
     .returning({ id: supportMessages.id });
+  await notifyInterest(leadId, input.kind === 'wish' ? 'wish' : 'question', req);
   await recordEvent(db, {
     leadId,
     type: 'question_sent',

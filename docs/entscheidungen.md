@@ -1562,3 +1562,17 @@ Behoben: Veröffentlichen ersetzt jede andere veröffentlichte und jede ältere 
 nie vor dem der ersetzten, Protokoll `replace`); die Sammelfreigabe nimmt je Betrieb nur die neueste wartende Demo. Bereinigung:
 die 6 älteren Doppel ohne Brief offline genommen (Protokoll, Akteur `operator:delegiert-an-claude`); danach zeigt jeder
 versendete Brief auf seine aktuelle Demo.
+
+## 11.11.2026 – Kosten pausiert, Sofort-Hinweis bei Interesse
+
+Betreiber: knappes Restbudget, keine weiteren Ausgaben vor den ersten Signalen. In der Konfiguration (protokolliert, Akteur
+`operator:delegiert-an-claude`, vorher/nachher im audit_log): KI-Prüfung gefundener Betriebe aus (`research.autoAi`),
+Brief-Wochenbudget 0 € (damit auch keine neuen Demo-Bauten, weil deren Kapazität am Briefbudget hängt), KI-Wochenbudget 10 €,
+automatischer Versand aus (`autoSend`). Wöchentliche Lead-Suche war bereits aus. Zurücknehmen: dieselben Werte in den
+Einstellungen wieder setzen (vorher: autoAi an, 60 €, 100 €, autoSend an).
+
+Befund: Bei Scan, Klick auf „Übernehmen“ und Frage über die Demo bekam der Betreiber keine Mail; die rund 190 Admin-Mails der
+letzten 10 Tage waren Fehler-Sammelmeldungen (vor allem dead_letter aus der inzwischen gestoppten Brief-Schleife). Neu:
+`notifyInterest` schickt sofort eine Mail beim ersten echten Scan je Betrieb, beim ersten Klick auf „Übernehmen“ und bei jeder
+Frage bzw. jedem Änderungswunsch (Bots und Testaufrufe ausgenommen). Kaufweg geprüft: Live-Preise in Stripe aktiv und gleich
+dem Katalog, Webhook aktiv; keine echte Testzahlung ausgelöst.

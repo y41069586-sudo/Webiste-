@@ -4,6 +4,7 @@ import {
   findPublicDemo,
   getCheckoutContext,
   getDb,
+  notifyInterest,
   recordEvent,
   setupCookieName,
   SETUP_TTL_SECONDS,
@@ -20,7 +21,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const found = await findPublicDemo(slug);
   if (found.state !== 'ok') return Response.redirect(appUrl(`/d/${slug}`), 302);
   const meta = requestMetaFrom(req.headers);
-  await recordEvent(getDb(), { leadId: found.lead.id, type: 'cta_click', req: meta });
+  if (await recordEvent(getDb(), { leadId: found.lead.id, type: 'cta_click', req: meta }))
+    await notifyInterest(found.lead.id, 'cta_click', meta);
   const jar = await cookies();
   const token = await beginCheckoutDraft(slug, jar.get(setupCookieName(slug))?.value ?? '', meta);
   if (!token && (await getCheckoutContext(slug)).state === 'ordered') return Response.redirect(appUrl(`/checkout/${slug}`), 303);
