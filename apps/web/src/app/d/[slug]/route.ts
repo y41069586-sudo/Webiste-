@@ -17,6 +17,7 @@ import { requestMetaFrom } from '@/lib/request';
 import { simplePage } from '@/lib/public-page';
 import { welcomeDialog } from '@/lib/welcome-dialog';
 import { emailCaptureSection } from '@/lib/email-capture';
+import { FALLBACK_HEADERS, fallbackSnapshot, withTimeout } from '@/lib/demo-fallback';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,16 +58,33 @@ function refreshOfferSection(page: string, slug: string, cfg: Awaited<ReturnType
   return fresh ? page.slice(0, start) + fresh + page.slice(end + '</section>'.length) : page;
 }
 
+/** Notbetrieb: Datenbank oder Speicher nicht erreichbar → gespeicherte Kopie (nur Demos der versendeten Briefe). */
+export async function GET(req: Request, ctx: { params: Promise<{ slug: string }> }) {
+  const { slug } = await ctx.params;
+  try {
+    const res = await withTimeout(serveDemo(req, slug), 9000);
+    if (res.status !== 503) return res;
+  } catch {
+    // weiter mit der Kopie
+  }
+  const copy = await fallbackSnapshot(req, slug);
+  if (copy) return new Response(copy, { status: 200, headers: FALLBACK_HEADERS });
+  return simplePage(
+    'Nicht verfügbar',
+    '<p>Der Entwurf ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.</p>',
+    503,
+  );
+}
+
 /** Demo-Auslieferung: nur veröffentlichte, nicht abgelaufene Entwürfe; sonst 410. */
-export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+async function serveDemo(req: Request, slug: string): Promise<Response> {
   const found = await findPublicDemo(slug);
   if (found.state === 'not_found') return simplePage('Seite nicht gefunden', '<p>Dieser Link ist ungültig.</p>', 404);
   if (found.state === 'gone') {
     const cfg = publicOperatorSettings(await getConfig(), DEFAULT_CONFIG.sender);
     return simplePage(
       'Dieser Entwurf ist nicht mehr verfügbar',
-      `<p>Der Website-Entwurf ist abgelaufen oder wurde gelöscht.</p><p class="muted">Fragen? <a href="mailto:${esc(cfg.sender.email)}">${esc(cfg.sender.email)}</a></p>`,
+      `<p>Der Website-Entwurf ist abgelaufen oder wurde gelöscht.</p><p>Sie möchten ihn trotzdem sehen oder eine Website für Ihren Betrieb? Schreiben Sie einfach an <a href="mailto:${esc(cfg.sender.email)}">${esc(cfg.sender.email)}</a> – ich stelle den Entwurf gern kostenlos und unverbindlich wieder bereit.</p>`,
       410,
     );
   }

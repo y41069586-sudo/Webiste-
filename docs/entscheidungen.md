@@ -1628,3 +1628,18 @@ danach `.env.worker` (Sicherungskopie `.env.worker.vor-supabase-umzug`) und den 
 Altes Projekt bleibt unverändert. Die Netlify-Werte wirken erst nach einer Veröffentlichung.
 
 Offen: Sicherung neu gestalten (nur Datenbank, wöchentlich, Ziel außerhalb von Supabase), bevor der Timer wieder läuft.
+
+## 13.11.2026 – Notbetrieb für QR-Codes und Demos bei Supabase-Sperre
+
+Falls der Supabase-Umzug nicht rechtzeitig klappt (Sperre ab 14.11.: 402 bzw. hängende Verbindungen), sollen die
+58 versendeten Briefe nicht ins Leere führen. `/q/{token}` und `/{kurzcode}` fallen bei Datenbankfehler oder
+Zeitüberschreitung (7 s) auf eine Zuordnung aus `apps/web/src/lib/demo-fallback-map.json` zurück (nur gekürzte
+SHA-256-Werte von Token und Kurzcode → Slug, keine Namen) und leiten auf eine statische Kopie `/notfall/<slug>.html` um.
+`/d/{slug}` liefert bei Fehler, 503 oder Zeitüberschreitung (9 s) dieselbe Kopie. Jeder Scan im Notbetrieb wird direkt über
+Resend gemeldet (`ACTIVITY_EMAIL`, sonst `ADMIN_EMAIL`), ohne Datenbank. In der Kopie sind Kauf, Frageformular,
+„Link per E-Mail“ und „Kein Interesse“ durch E-Mail-Kontakt ersetzt, Skripte entfernt.
+
+Die Kopien liegen nicht im Repository (`.gitignore`, ~1 MB je Demo). Vor jeder Netlify-Veröffentlichung im Export
+erzeugen: `node infra/netlify/snapshot-demos.mjs <export>/apps/web/public/notfall` (Abruf als Bot, zählt nichts).
+Fehlen die Kopien, verhält sich alles wie bisher (Hinweisseite 503). Ablaufseiten (/q, /d) bieten jetzt freundlich an,
+den Entwurf auf Anfrage kostenlos wieder bereitzustellen.
