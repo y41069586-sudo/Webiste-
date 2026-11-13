@@ -1,0 +1,96 @@
+# Wie und wann kleine Betriebe (B2B) Werbepost öffnen und darauf reagieren: Timing, Wochentag, Tageszeit, Gatekeeper
+
+Kontext: 58 Briefe mit QR-Code zu Demo-Websites, zugestellt 12.–16.11.2026 (Do 12., Fr 13., Sa 14., Mo 16.) an Handwerksbetriebe in Deutschland.
+
+Wichtigster Vorbehalt vorweg: Es gibt **keine** veröffentlichte Messung (weder in DE noch in UK/US), die gezielt erfasst, wann kleine, inhabergeführte Betriebe Werbepost am Arbeitsplatz öffnen, wie lange sie liegt oder wie oft sie wieder in die Hand genommen wird. Die besten belastbaren Zeitdaten (JICMAIL) stammen aus einem **britischen Haushalts**-Panel. B2B-spezifische Aussagen kommen überwiegend aus Blogs von Anbietern (Vendor) und nennen keine Methode. Alles Folgende ist entsprechend gekennzeichnet.
+
+## 1. Deutsche Post / Dialogmarketing / Vögele: Öffnungsquote, Lesezeitpunkt, Aufbewahrung im B2B (Deutschland)
+
+### Takeaway
+Deutsche Quellen liefern für B2B **keine** Öffnungsquote, keinen Lesezeitpunkt und keine Aufbewahrungsdauer. Belegt sind nur die Vögele-Faustregel (Entscheidung „lesen oder Papierkorb“ in etwa 20 Sekunden, Praxisliteratur ohne neuere empirische Prüfung), der Rat, Ferien und Feiertage zu meiden, sowie eine CMC-Konversionsrate aus nur zwei B2B-Teilnehmern.
+
+### Cited Findings
+- [DE, Deutsche Post, Unterrichtsmaterial 2020/2025, Quelle dort: Siegfried Vögele Institut] Ein Werbebrief durchläuft einen „Kurz-Dialog (20 Sekunden)“. Erkennt der Empfänger in dieser Zeit keinen Vorteil, bricht er den „stummen Dialog“ ab und wirft das Mailing in den Papierkorb. „Die ersten Sekunden entscheiden also über Erfolg oder Misserfolg eines Werbebriefs.“ — [Deutsche Post, Themenheft Werbebriefsendung 10/2025 (PDF)](https://www.deutschepost.de/dam/jcr:7a909b24-3aa2-4659-bb4e-f83655a0f72b/dp-post-und-schule-themenheft-werbebriefsendung-102025.pdf)
+- [DE, Deutsche Post] Zum Zeitpunkt: „Ferien und Feiertage sollten bei der Aussendung vermieden werden, da viele verreist oder anderweitig beschäftigt sind.“ Einen Wochentag oder eine Tageszeit nennt das Heft nicht. — [Deutsche Post, Themenheft Werbebriefsendung 10/2025](https://www.deutschepost.de/dam/jcr:7a909b24-3aa2-4659-bb4e-f83655a0f72b/dp-post-und-schule-themenheft-werbebriefsendung-102025.pdf)
+- [DE, Praxisliteratur] Die Dialogmethode beruht auf Augenkamera-Tests aus den späten 1970er-Jahren (Buch 1984). Ihre Wirksamkeit bei heutiger Informationsflut wird in der Sekundärliteratur kritisch hinterfragt. Eine unabhängige Bestätigung der 20-Sekunden-Zahl wurde nicht gefunden. — [SOFII, Secrets of direct mail 1 (Vögele)](https://sofii.org/article/secrets-of-direct-mail-1-professor-siegfried-vogele); [Horizont, 10 Jahre Siegfried Vögele Institut](https://www.horizont.net/marketing/nachrichten/-10-Jahre-Siegfried-Voegele-Institut-Verfechter-des-klassischen-Werbebriefs-108045)
+- [DE, CMC/Deutsche Post 2025, Herstellerstudie] B2B-Teil der CMC Print-Mailing-Studie 2025: Konversionsrate 2,8 % und RoAS 935 % bei nur **zwei** B2B-Teilnehmern, laut Studie selbst „nicht repräsentativ“. Der Brief werde „direkt geöffnet“, unabhängig von der Gestaltung des Umschlags. Angaben zum Zeitpunkt fehlen. — [DHL Group, Pressemitteilung CMC Print-Mailing-Studie 2025](https://group.dhl.com/de/presse/pressemitteilungen/2025/cmc-print-mailing-studie-2025.html); [Horizont zur CMC-Studie 2025](https://www.horizont.net/marketing/nachrichten/cmc-print-mailing-studie-2025-print-mailings-wirken-auch-in-wirtschaftlich-schwierigen-zeiten-227589)
+- [DE, Deutsche Post] Der Dialogmarketing-Monitor befragt Marketing-Entscheider auf der **Absenderseite** (Werbeausgaben) und nicht, wie Empfänger mit Post umgehen. In den Ausschnitten finden sich keine Öffnungs- oder Lesequoten. — [Dialogmarketing-Monitor 2024 (PDF)](https://alles-ueber-mailings.deutschepost.de/dam/jcr:ea7972b2-77bf-4b8c-80d3-ba5c14a62ba2/dp-dmm-2024.pdf); [Horizont zum Dialogmarketing-Monitor 2026](https://www.horizont.net/marketing/nachrichten/dialogmarketing-monitor-2026-sparen-ja-beeinflussung-nein-was-konsumentinnen-heute-wirklich-von-werbung-erwarten-236052)
+
+### Inferences
+- Die einzige belastbare deutsche „Zeit“-Aussage betrifft die ersten Sekunden beim Sichten, nicht die Tage bis zum Lesen. Die Entscheidung über Weglegen, Wegwerfen oder Lesen fällt also sehr früh. Was dann mit einem „weggelegten“ Brief passiert, ist für Deutschland nicht gemessen.
+- Ob die CMC-Aussage „direkt geöffnet“ auf Handwerksbetriebe übertragbar ist, lässt sich bei n = 2 Absendern nicht beurteilen.
+
+### Gaps
+- Für Deutschland fehlen Öffnungsquote, Lesezeitpunkt (am Zustelltag oder später), Aufbewahrungsdauer und Häufigkeit des Wiederaufnehmens bei B2B-Werbebriefen. Die Volltexte des Dialogmarketing-Monitors und der CMC-Studien konnten nicht nach Empfängerdaten durchsucht werden, die Ausschnitte enthalten keine.
+- Eine Studie des Collaborative Marketing Club (CMC) zu Lesezeitpunkt oder Wochentag wurde nicht gefunden. Die CMC-Studien messen Konversion und RoAS, nicht das Timing.
+
+## 2. JICMAIL / Royal Mail MarketReach: Lebensdauer, Interaktionshäufigkeit, Wochentag (UK, Haushalte, nicht B2B-Büro)
+
+### Takeaway
+JICMAIL (UK-Haushaltspanel, Tagebuch über 28 Tage) misst für adressierte Werbepost („Direct Mail“) eine Lebensdauer von etwa **7 Tagen** und rund **4,4 Interaktionen**. Bei „Business Mail“ sind es etwa **8,6–8,9 Tage** und **4,8 Interaktionen**. Post, die am Samstag zugestellt wird, wird nur leicht häufiger geöffnet und genutzt. Eine Messung für Büros oder Betriebe gibt es bei JICMAIL nicht.
+
+### Cited Findings
+- [UK, JICMAIL Q4 2024, Haushaltspanel] Kennzahlen je Sendung: **Business Mail** 4,8 Interaktionen, Reichweite 1,17 Personen, Lebensdauer 8,6 Tage, 191 s Aufmerksamkeit. **Direct Mail** 4,4 Interaktionen, 1,13 Personen, **7,0 Tage**, 133 s. Teiladressierte Post 3,8 / 1,09 / 6,2 Tage / 80 s. Postwurf 3,1 / 1,06 / 5,7 Tage / 56 s. Leserate 77 % aller Post („gelesen oder angesehen“, Höchstwert seit Beginn der Messung vor 8 Jahren). 15 % der Post lösten ein Gespräch aus, 6 % einen Kauf (davon die Hälfte online). — [Whistl: JICMAIL Business Mail Read Rates Reach All-Time High (03/2025)](https://www.whistl.co.uk/insights/jicmail-business-mail-read-rates-reach-all-time-high)
+- [UK, JICMAIL, laut Suchausschnitten der Whistl-Seiten, nicht einzeln geöffnet] Business Mail in Q3 2024: 4,86 Interaktionen (+3,1 % zum Vorjahr). In Q1 2025: 4,83 Interaktionen, 8,9 Tage Lebensdauer, Direct Mail 4,43. — [Whistl: Business Mail engagement climbs in third quarter](https://www.whistl.co.uk/insights/jicmail-business-mail-engagement-climbs-third-quarter); [Whistl: Business mail demonstrates growing impact on digital behaviours](https://www.whistl.co.uk/insights/jicmail-business-mail-demonstrates-growing-impact-digital-behaviours)
+- [UK, JICMAIL-Definitionen] „Lifespan“ ist die durchschnittliche Zahl der Tage zwischen der **ersten Interaktion** und dem Wegwerfen oder Ablegen, gedeckelt auf 28 Tage. „Frequency“ zählt Interaktionen über vier Wochen (Öffnen, Lesen, Ablegen usw.). Jede zugestellte Sendung startet mit 1. „Item reach“ startet mit 1, weil angenommen wird, dass der „household co-ordinator“ die Post sortiert. Die Seite definiert „Business Mail“ nicht. — [JICMAIL: Useful definitions](https://www.jicmail.org.uk/about-jicmail/useful-definitions/)
+- [UK, JICMAIL laut Software Bureau, Artikel vom 24.01.2024, Datenzeitraum nicht genannt] Am **Samstag** zugestellte Post wird „statistisch wahrscheinlicher“ geöffnet und gelesen als an jedem anderen Tag (ohne Prozentzahl). Empfänger handeln danach 2 % häufiger, sprechen 2 % häufiger darüber und reagieren 1 % häufiger online. Interaktionshäufigkeit am Samstag 4,52, Mittel an Werktagen 4,37. Der Artikel selbst nennt den Unterschied „nicht riesig“. — [The Software Bureau: Ditching Saturday (and Monday and Friday) post…](https://www.thesoftwarebureau.com/ditching-saturday-and-monday-and-friday-post-could-irrevocably-damage-the-direct-mail-industry/)
+- [UK, JICMAIL laut Agentur PSE, Seite nicht abrufbar, nur Suchausschnitt] Interaktionen mit Post von Finanz- und Versorgungsunternehmen erreichen ihren Höhepunkt **früh in der Woche**. Post von TV- und Telekom-Anbietern wirkt am besten donnerstags und freitags. — [PSE: 7 Insights into Business Mail with JICMAIL](https://pse.agency/7-insights-into-business-mail-with-jicmail/)
+- [UK, JICMAIL] Das einzige gefundene Pilotprojekt jenseits des Standardpanels (mit ISBA Origin, Q4 2024) erfasst ebenfalls **Haushalte** (50 Panel-Haushalte), keine Arbeitsplätze. Ein B2B- oder Büro-Panel von JICMAIL wurde nicht gefunden. — [DMA: JICMAIL and Origin conduct mail measurement pilot study](https://dma.org.uk/article/jicmail-and-origin-conduct-mail-measurement-pilot-study)
+- [UK, Royal Mail, Herstellerangabe] „99 % der Business Mail“ erhalten irgendeine Form von Aufmerksamkeit, 43 % lösen eine kommerzielle Handlung aus (laut Suchausschnitt der Royal-Mail-Seite). — [Royal Mail: Business Mail](https://www.royalmail.com/business/mail/business-mail)
+- [UK, Marketreach/Accenture 2022, über 6.000 Verbraucher] 85 % öffnen „Customer Mail“, 65 % bewahren sie auf. 88 % lesen ihre Customer Mail ganz oder größtenteils (E-Mail 76 %). — [Two Sides Nordics: Research report released by Royal Mail Marketreach on Customer Mail](https://nordics.twosides.info/NORD/research-report-released-by-royal-mail-marketreach-on-customer-mail/)
+- [UK, WARC/Marketreach, ca. 2023, Verbraucher] Über 80 % der Sendungen im Umschlag werden geöffnet, 58 % werden zum späteren Nachschlagen aufbewahrt. — [Mediaweek: Revelations from new WARC & Royal Mail Marketreach study](https://www.mediaweek.com.au/warc-marketreach-study-commercial-mail)
+- [UK, Royal Mail „The Private Life of Mail“, 2013/14, Verbraucher, älter als 2015] 64 % hatten am Befragungstag eine Sendung geöffnet, ca. 66 % bewahren nützliche Post auf. — [Royal Mail: The Private Life of Mail (PDF)](https://www.royalmailwholesale.com/mint-project/uploads/423811624.pdf)
+- [UK, Marketreach 2016, KMU-Befragung] 71 % der befragten KMU-Entscheider wünschen sich Marketing, das Kunden „zum späteren Nachschlagen behalten können“. Das beschreibt eine Absenderhaltung, nicht ihr eigenes Verhalten als Empfänger. — [Bdaily: How to attract new customers with smart marketing (Marketreach)](https://bdaily.co.uk/articles/2016/10/12/how-to-attract-new-customers-with-smart-marketing)
+
+### Inferences
+- Übertragen auf einen Handwerksbetrieb ist ein Zeitfenster von etwa **1 bis 1,5 Wochen** nach dem ersten Kontakt plausibel, in dem ein aufbewahrter Werbebrief mehrfach wieder in die Hand genommen wird (UK-Haushalt: Direct Mail rund 7 Tage, rund 4,4 Kontakte). Das ist eine Analogie von UK-Haushalten auf deutsche Betriebe, keine Messung.
+- Die Lebensdauer zählt ab der **ersten** Interaktion. Die Zeit zwischen Zustellung und erstem Öffnen ist in diesen Kennzahlen nicht enthalten. Wie viel Post am Zustelltag selbst geöffnet wird, geht aus den gefundenen JICMAIL-Daten nicht hervor.
+- Der Samstagseffekt ist gering (4,52 zu 4,37). Für deutsche Betriebe, die samstags oft geschlossen haben, lässt er sich nicht übertragen. Bei den 58 Briefen dürfte Post vom Samstag erst am Montag gesichtet werden (Inferenz).
+- „Business Mail“ meint bei JICMAIL sehr wahrscheinlich Kundenpost von Unternehmen an Haushalte (Rechnungen, Kontoauszüge), nicht B2B-Werbung. Die Definitionsseite bestätigt das nicht ausdrücklich, deshalb ist das eine Inferenz. Die höhere Lebensdauer dieser Kategorie ist also kein B2B-Wert.
+
+### Gaps
+- Kein Anteil „am Zustelltag geöffnet“ aus JICMAIL gefunden. Er wäre wohl nur in den Rohdaten oder im JICMAIL-Planungstool verfügbar.
+- Keine B2B- oder Arbeitsplatz-Studie von Royal Mail MarketReach mit Öffnungs-, Aufbewahrungs- oder Timingwerten gefunden. Die Seite „The Decision Maker“ meint Verbraucher bei großen Kaufentscheidungen, nicht Firmenentscheider ([Marketreach: The Decision Maker](https://marketreach.co.uk/resources/the-decision-maker)).
+- Keine JICMAIL-Daten zur **Tageszeit**.
+
+## 3. B2B-Direktmarketing in US/UK: Gatekeeper, wer öffnet die Post, wie lange sie liegt
+
+### Takeaway
+Für „Business-Post liegt X Tage“ oder „der Inhaber sichtet die Post wöchentlich“ wurden **keine** belastbaren Zahlen gefunden. Es gibt nur Anbieter-Aussagen (B2B-Leserate ca. 66 %, Gatekeeper durch Assistenzen) ohne Methode. Für das deutsche Handwerk gibt es Belege, dass die Büroarbeit häufig bei der (Ehe-)Partnerin liegt oder vom Inhaber abends erledigt wird. Diese Person ist damit der faktische Gatekeeper der Post.
+
+### Cited Findings
+- [US, Vendor-Blog, ohne Methode] B2B-Direktmarketing wird oft von Assistenzen vorsortiert und erreicht den eigentlichen Empfänger häufig nicht. Durchschnittliche Antwortquote 4,4 % (Hauslisten höher). — [FirstSales.io: B2B direct mail outbound (Vendor)](https://firstsales.io/raw/b2b-direct-mail-outbound.md)
+- [US, Fachmagazin, Schätzung ohne Methode] B2B-Direktmarketing wird schätzungsweise zu rund 66 % gelesen. — [In-Plant Impressions: Value of A/B testing printed direct mail](https://inplantimpressions.com/article/value-a-b-testing-printed-direct-mail-promotions/6)
+- [US, USPS Household Diary Study 2007/2009, Haushalte, älter als 2015] Werbepost: 2007 wurden 41,9 % gelesen, 6,0 % „beiseitegelegt“ (2009: 44,8 % / 6,1 %, Extraktion unsauber). Von früheren Kunden wurden 7,9 % beiseitegelegt, von unbekannten Absendern 3,8 %. — [USPS Household Diary Study 2007, Tabelle](https://about.usps.com/studying-americans-mail-use/household-diary/2007/appendix%20a3%20tables-files/sheet037.htm); [USPS HDS 2009, Tabelle](https://about.usps.com/studying-americans-mail-use/household-diary/2009/appendix%20a3%20tables-files/sheet036.htm)
+- [US, Stamps.com-Umfrage 2025, 200 Inhaber, betrifft ausgehende Post] 68 % der Inhaber kleiner Betriebe unterbrechen regelmäßig wichtige Arbeit für Postaufgaben. — [AOL: The 20-minute problem](https://www.aol.com/articles/20-minute-problem-small-business-203015655.html)
+- [DE, BV UFH / Deutsches Handwerksinstitut, Bericht 30.01.2018] Rund 280.000 Unternehmerfrauen arbeiten in deutschen Handwerksbetrieben. Die typische Unternehmerfrau erledigt mehr Büro- als Handwerksarbeit, am meisten Buchhaltung und Finanzen (Ø 10,2 Std./Woche). 46 % arbeiten im Ausbaugewerbe, davon 34 % in Sanitär-Heizung-Klima. 43 % haben den Betrieb mit dem Partner gegründet. — [Deutsche Handwerks Zeitung: Studie zu mitarbeitenden Ehefrauen im Handwerk](https://www.deutsche-handwerks-zeitung.de/?p=93027)
+- [DE, älter: sbz 1999 und BWP 1998] In rund 70 % der deutschen Handwerksbetriebe ist die Ehefrau des Meisters für den kaufmännischen Bereich zuständig (1999). „Büro und Organisation“ ist mit 25 % die häufigste Tätigkeit der Meisterfrauen (1998). Beide Werte sind veraltet und nicht direkt vergleichbar. — [sbz-online (PDF)](https://www.sbz-online.de/sites/default/files/ulmer/de-sbz/document/file_149552.pdf); [BWP-Zeitschrift (PDF)](https://www.bwp-zeitschrift.de/dienst/publikationen/download/15873)
+- [DE/AT, plancraft-Umfrage 2026, 1.026 Betriebe, Software-Anbieter] 42 % der Befragten verbringen mehr als die Hälfte ihrer Arbeitszeit mit Büroarbeit statt auf der Baustelle. — [Handwerksblatt: Umfrage von plancraft](https://www.handwerksblatt.de/betriebsfuehrung/umfrage-von-plancraft-jeder-dritte-handwerker-nutzt-bereits-taeglich-ki)
+- [DE, Blog, qualitativ] In vielen kleinen Betrieben ist der Inhaber tagsüber auf der Baustelle und erledigt Angebote, Rechnungen und Schriftverkehr **abends**. Das ist eine Beschreibung, keine Messung. — [Skill Sprinters: KI im Handwerk / plancraft 2026](https://skill-sprinters.de/blog/news/ki-handwerk-fachkraeftemangel-plancraft-2026/); [Skill Sprinters: Handwerksbarometer 2026](https://skill-sprinters.de/blog/news/handwerksbarometer-2026-ki-handwerk-jobsicherheit/)
+
+### Inferences
+- Bei kleinen Handwerksbetrieben ist der wahrscheinliche „Gatekeeper“ keine angestellte Assistenz, sondern die mitarbeitende Partnerin oder Bürokraft. Ist der Inhaber Solo-Betrieb, sichtet er die Post selbst, oft abends. Der Brief wird also eher am Abend oder gesammelt gelesen als sofort bei Zustellung, und häufig von einer zweiten Person, die ihn weitergibt. Das ist eine Inferenz aus den Arbeitsteilungsdaten, keine Messung des Postverhaltens.
+- Ein QR-Scan kann deshalb verzögert und an einem anderen Ort (zu Hause, abends) stattfinden. Der Scan kann auch durch die Partnerin statt den Inhaber erfolgen.
+
+### Gaps
+- Keine Zahl dazu, wie lange Business-Post im Betrieb liegt oder wie oft der Inhaber sie sichtet (täglich oder wöchentlich), weder für DE noch für US/UK.
+- Kein Anteil der Werbebriefe, die von Personal oder Partner geöffnet und aussortiert werden, bevor der Inhaber sie sieht.
+- Keine Daten von DMA/ANA oder Canada Post zum B2B-Empfang wurden gefunden. Die oft zitierte ANA-Zahl „90 % Öffnung“ ließ sich nicht verifizieren und ist nicht B2B-spezifisch.
+
+## 4. QR-Scans nach Tageszeit und Wochentag bei Geschäftsempfängern
+
+### Takeaway
+Es gibt keine unabhängigen, briefspezifischen oder B2B-spezifischen Daten zur Scan-Uhrzeit. Ein Anbieter mit großem Datenbestand meldet über alle Einsatzzwecke hinweg den Dienstag als stärksten und den Sonntag als schwächsten Tag, mit rund 17 % mehr Scans an Werktagen als am Wochenende. Angaben zur Uhrzeit sind nur Faustregeln von Anbietern.
+
+### Cited Findings
+- [global, Vendor QRStuff, saisonale Werte 2024–2025 gepoolt, ohne Länder- oder Kanalaufteilung] Der stärkste Scan-Tag ist der Dienstag (Index 1,10), der schwächste der Sonntag (0,85). An Werktagen wird im Schnitt 17,3 % mehr gescannt als am Wochenende. Es gibt keine Daten zur Tageszeit und keine speziellen Angaben zu Print oder Post. — [QRStuff: QR code statistics (Vendor)](https://www.qrstuff.com/scan-report/qr-code-statistics/)
+- [Vendor, Faustregel ohne Messdaten] „Professionelle“ QR-Codes haben ihre Spitze in der Wochenmitte, Codes für Verbraucher am Wochenende. Der Einsatzort ist wichtiger als der Kalender. — [Linkbreakers: QR code scan timing patterns (Vendor)](https://linkbreakers.com/help/article/qr-code-scan-timing-patterns-day-time-seasonal)
+- [Vendor, Faustregel] Ein QR-Code auf einer Verpackung wird eher abends gescannt (Auspacken zu Hause), ein Tischaufsteller zu den Essenszeiten. Das sind Heuristiken, keine Messwerte. — [U2L.ai: QR code analytics guide 2026 (Vendor)](https://u2l.ai/blog/qr-code-analytics-guide)
+
+### Inferences
+- Die Scan-Uhrzeit dürfte davon abhängen, **wo und wann der Brief gelesen wird**: Liest der Inhaber abends, entstehen die Scans abends. Die eigene Scan-Statistik (Wochentag, Stunde, Tage seit geschätzter Zustellung) aus den 58 Briefen ist deshalb aussagekräftiger als jeder Benchmark. Wegen der kleinen Fallzahl lassen sich aber nur grobe Muster erkennen.
+- Für die Zustellung Do 12. bis Mo 16.11.2026: Briefe vom Donnerstag und Freitag könnten noch vor dem Wochenende oder am Wochenende zu Hause gesichtet werden. Briefe vom Samstag und Montag liegen wohl ab Montag auf dem Tisch. Mit Nachzüglern ist mindestens bis Ende der Woche ab dem 23.11. zu rechnen (Analogie zur JICMAIL-Lebensdauer von etwa 7 bis 9 Tagen, nicht für DE oder B2B gemessen).
+
+### Gaps
+- Keine Stundenverteilung von QR-Scans aus Werbebriefen, weder in DE noch für B2B.
+- Keine Daten zum Abstand zwischen Zustellung und Scan bei Geschäftsempfängern.
