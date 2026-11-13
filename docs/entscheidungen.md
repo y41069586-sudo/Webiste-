@@ -1643,3 +1643,14 @@ Die Kopien liegen nicht im Repository (`.gitignore`, ~1 MB je Demo). Vor jeder N
 erzeugen: `node infra/netlify/snapshot-demos.mjs <export>/apps/web/public/notfall` (Abruf als Bot, zählt nichts).
 Fehlen die Kopien, verhält sich alles wie bisher (Hinweisseite 503). Ablaufseiten (/q, /d) bieten jetzt freundlich an,
 den Entwurf auf Anfrage kostenlos wieder bereitzustellen.
+
+## 13.11.2026 – Echter Testbrief an den Betreiber
+
+Auf ausdrücklichen Wunsch des Betreibers („Schick einen echten Brief an meine Adresse“) wurde ein Testbrief an die
+hinterlegte Testanschrift erzeugt, vom Betreiber im Admin freigegeben und an easyNova übergeben (81 Cent, geschätzte
+Zustellung 18.11.). Das Brief-Wochenbudget (seit 11.11. auf 0 € als Kostenpause) wurde dafür kurz auf 19,00 € gesetzt
+(17,82 € in dieser Woche schon gebucht, also Platz für genau einen Brief) und direkt danach wieder auf 0 €. Beide
+Änderungen stehen im audit_log (operator:delegiert-an-claude). Der erste Versuch scheiterte vorher einmal an der
+Erreichbarkeitsprüfung der öffentlichen Seite (kurzer Aussetzer, von außen erreichbar). Der QR-Code im Testbrief führt
+zur Demo von Heeren Sanitär (neueste veröffentlichte Demo); ein Scan des Betreibers wird dort gezählt und danach wieder
+entfernt.
