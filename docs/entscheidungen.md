@@ -1684,3 +1684,10 @@ Weitere Befunde derselben Prüfung, nicht geändert (Betreiberentscheidung):
   IONOS Design-Service 45–85 €/Monat + 199–399 €; xictron Website-Abo 129–449 €/Monat + 490–2.490 €, 24 Monate.
   Basis (825 € im ersten Jahr) liegt im üblichen Rahmen, Komplett (2.148 € in 12 Monaten) deutlich über den
   Abo-Anbietern für kleine Betriebe.
+
+Nachtrag 13.11.2026, 19:13 Uhr: Veröffentlicht nach ausdrücklichem „Veröffentlichen“ des Betreibers (Deploy
+`6af7524e8724bb4b107d4635`, ready, 58 Notfall-Kopien). Live-Prüfung als Handy-Besucher: Schnellbestellung zeigt Basis
+und Komplett mit den Serverpreisen; Klick auf „Basis bestellen“ führt in rund 8 Sekunden auf eine echte
+Stripe-Bezahlseite (Live-Sitzung, 597,00 €, kein Testmodus). Nicht bezahlt. Damit ist erstmals belegt, dass im
+Live-Modus eine Bezahlsitzung entsteht. Die Testspuren (Klick, begonnene Bestellung, Meldungs-Mails beim Betrieb Heeren)
+werden nach Bestätigung des Betreibers aus der Datenbank entfernt.
