@@ -2,7 +2,7 @@
 
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { checkoutPreparedDraft, saveCheckoutDraft, setupCookieName } from '@wbm/core';
+import { checkoutPreparedDraft, saveCheckoutDraft, setupCookieName, startHostedCheckout } from '@wbm/core';
 import { onboardingFromForm } from '@/lib/onboarding-form-data';
 import { requestMetaFrom } from '@/lib/request';
 import type { OnboardingState } from '../../onboarding/[token]/actions';
@@ -32,4 +32,18 @@ export async function paySetup(slug: string, _prev: { error?: string }, form: Fo
   );
   if (result?.ok) redirect(result.url);
   return { error: result?.error ?? 'Der Entwurf ist abgelaufen. Bitte beginnen Sie erneut über Ihre Demo.' };
+}
+
+/**
+ * Schnellbestellung (13.11.2026): Tarif wählen und direkt zur Bezahlseite des Zahlungsanbieters. Firmenname, Name,
+ * E-Mail, Rechnungsadresse, Wunschdomain, Unternehmer-Bestätigung und AGB-Zustimmung erfasst die Bezahlseite; die
+ * Angaben für die Website (Impressum, Texte, Fotos, Datenschutzerklärung) folgen nach der Zahlung über den Link aus der
+ * Bestellbestätigung. Nur dieser ausdrückliche POST erzeugt eine Bezahlsitzung; Preise kommen ausschließlich vom Server.
+ */
+export async function quickOrder(slug: string, _prev: { error?: string }, form: FormData): Promise<{ error?: string }> {
+  const meta = requestMetaFrom(await headers());
+  if (meta.isBot) return { error: 'Die Bestellung ist gerade nicht möglich. Bitte versuchen Sie es erneut.' };
+  const result = await startHostedCheckout(slug, String(form.get('plan') ?? ''), meta);
+  if (result.ok) redirect(result.url);
+  return { error: result.error };
 }

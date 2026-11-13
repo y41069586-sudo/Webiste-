@@ -1654,3 +1654,33 @@ Zustellung 18.11.). Das Brief-Wochenbudget (seit 11.11. auf 0 € als Kostenpaus
 Erreichbarkeitsprüfung der öffentlichen Seite (kurzer Aussetzer, von außen erreichbar). Der QR-Code im Testbrief führt
 zur Demo von Heeren Sanitär (neueste veröffentlichte Demo); ein Scan des Betreibers wird dort gezählt und danach wieder
 entfernt.
+
+## 13.11.2026 – Schnellbestellung neben der Einrichtung vor der Zahlung
+
+Befund (Live-Prüfung als Handy-Besucher): Nach „Website übernehmen“ verlangt die Einrichtung vor der Zahlung rund 45
+Felder, darunter Rechtsform, Inhaber, einen selbst geschriebenen „Über uns“-Text (Demos liefern seit 05.11. keinen mehr)
+und eine eigene Datenschutzerklärung mit mindestens 400 Zeichen. Ohne diese Angaben gibt es keinen Weg zur Zahlung. Für
+einen Betrieb, der den QR-Code am Handy scannt, ist das die größte Hürde im Kaufweg. Daten dazu gibt es nicht (bisher
+kein echter Klick auf „Übernehmen“); die Einschätzung beruht auf der Prüfung des Ablaufs.
+
+Entscheidung: Die Einrichtung vor der Zahlung (Betreiberauftrag 31.10.) bleibt unverändert bestehen. Zusätzlich steht
+oben auf `/einrichten/[slug]` der schnelle Weg „Jetzt bestellen, Angaben später ergänzen“: je angebotenem Tarif ein Knopf
+mit Preis, Laufzeit und heute fälligem Betrag (dieselben serverseitigen Werte wie auf der Prüfseite), der per POST den
+bereits vorhandenen, getesteten gehosteten Checkout (`startHostedCheckout`) startet. Firmenname, Ansprechperson, E-Mail,
+Rechnungsadresse, Wunschdomain, Unternehmer-Bestätigung und AGB-Zustimmung erfasst die Bezahlseite; die Website-Angaben
+folgen nach der Zahlung über das bestehende Onboarding. Keine Preis-, Laufzeit- oder AGB-Änderung, keine Vorauswahl,
+GET erzeugt weiterhin keine Bezahlsitzung, Bots werden abgewiesen.
+
+Tests: neuer Browsertest `apps/web/e2e/quick-order.spec.ts` (390 px, Mock-Zahlung, bis ins Onboarding). Die zwei
+bestehenden Tests in `checkout.spec.ts` waren seit dem Wegfall des vorbereiteten „Über uns“-Texts rot; der Testhelfer
+füllt das Feld jetzt aus. `E2E_ACCEPT_TECHNICAL=1` lässt den Test-Seed in Umgebungen ohne Design-Studio-Laufzeit den
+technischen Befund annehmen (nur Testskript). Offen: echte Stripe-Live-Sitzung nach der Veröffentlichung einmal bis zur
+Bezahlseite prüfen (ohne Zahlung).
+
+Weitere Befunde derselben Prüfung, nicht geändert (Betreiberentscheidung):
+- `seitenwerk.world` (Startseite, `apps/launch`) nennt „597 € + 19 € oder 99 € im Monat“ (Care+) und „keine
+  Mindestlaufzeit“; Brief und Demo bieten Basis und Komplett (179 €/Monat, 12 Monate). Care+ ist dort nicht bestellbar.
+- Wettbewerb (Preislisten abgerufen 13.11.2026): Websitebutler 39,99–99,99 €/Monat + 299 € Einrichtung, 12/24 Monate;
+  IONOS Design-Service 45–85 €/Monat + 199–399 €; xictron Website-Abo 129–449 €/Monat + 490–2.490 €, 24 Monate.
+  Basis (825 € im ersten Jahr) liegt im üblichen Rahmen, Komplett (2.148 € in 12 Monaten) deutlich über den
+  Abo-Anbietern für kleine Betriebe.

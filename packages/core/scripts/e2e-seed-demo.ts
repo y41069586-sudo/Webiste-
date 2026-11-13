@@ -101,6 +101,8 @@ async function main(): Promise<void> {
   if (process.env.E2E_DEMO_PENDING !== '1') {
     await approveDemo(demoId, 'e2e', {
       manual: true,
+      // Nur lokale Testumgebungen ohne Design-Studio-Laufzeit: technischen Befund wie der Betreiber im Admin annehmen
+      ...(process.env.E2E_ACCEPT_TECHNICAL === '1' ? { acceptTechnical: true } : {}),
       review: {
         facts: true,
         desktop: true,
