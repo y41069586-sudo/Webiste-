@@ -1715,3 +1715,11 @@ Umgesetzt:
 
 Größter verbleibender Hebel: Funktionsregion auf Frankfurt (`fra`) oder Irland (`dub`) stellen. Laut Netlify nur in
 Pro-/Enterprise-Tarifen (Cloud compute → Functions → Region, danach neu veröffentlichen). Betreiberentscheidung.
+
+Nachtrag 14.11.2026, 20:42 Uhr: Veröffentlicht nach „Veröffentlich“ des Betreibers (Deploy `6af8b94a09764a5b3e491c93`).
+Betreiber: „beide Pakete sind 597 19 und 597 99“. Befund: Die gedruckten Briefe nennen Basis 19 €/Monat oder Care+
+99 €/Monat (`v4PriceText()` ohne Komplett, Briefvorlage „Basis … oder Care+ …“), Demo und Kaufweg boten aber Basis oder
+Komplett (179 €/Monat). `offers.komplettEnabled` daher auf `false` gesetzt (audit_log, operator:delegiert-an-claude); Demo,
+Einrichtung und Bezahlseite zeigen jetzt Basis und Care+ wie im Brief. Live geprüft: Demo 0,4–2,0 s, QR-Weiterleitung
+0,6–0,9 s, „Übernehmen“ bis zur Auswahl 3,6 s (weiter durch Funktionsregion Ohio begrenzt). Die Notfall-Kopien dieses
+Deploys enthalten noch Komplett; sie werden beim nächsten Veröffentlichen neu erzeugt.
