@@ -1741,3 +1741,16 @@ eu-central-1). Behoben: gleicher Standard wie die App, Fehlermeldung nennt jetzt
 Neu: `NEU_LEEREN=1` leert vor einem weiteren Versuch nur das NEUE Projekt (Tabellen, Sichten, Typen, Sequenzen,
 Funktionen in public sowie die Schemas pgboss/drizzle; Erweiterungsobjekte bleiben), weil der Schritt 1/6 sonst wegen
 der schon kopierten Tabellen abbricht. Lokal gegen eine Testdatenbank geprüft.
+
+## 15.11.2026, 00:07 – Supabase-Umzug, zweiter Versuch: alter Speicher gesperrt (HTTP 402)
+
+Zweiter Lauf mit `NEU_LEEREN=1`: neues Projekt geleert, Datenbank erneut vollständig kopiert (47 Tabellen, keine
+kritische Abweichung), Abbruch bei „Dateien im alten Projekt auflisten“ mit HTTP 402. Supabase hat den Dateispeicher der
+alten Organisation wegen des überschrittenen Kontingents gesperrt; `/api/health` meldet `storage:false`, Demos laufen im
+Notbetrieb (Kopie nach rund 10 s). Datenbankzugriff funktioniert weiter.
+
+Änderung: `copy-storage.ts` nimmt die Dateien jetzt aus den lokalen nächtlichen Sicherungen auf dem Server
+(`/opt/seitenwerk-backups/scheduled-*/acceptance-*/storage`, manifest.json + Dateien; älteste zuerst, neuere
+überschreiben) und ergänzt nur, falls der alte Speicher antwortet. Am Ende Abgleich gegen die Datenbank: Anzahl fehlender
+benötigter Dateien und fehlender Demo-Seiten (nur Zahlen). Der Kopierlauf läuft als root, weil die Sicherungen root
+gehören. Nicht kopierbare Dateien führen zum Abbruch vor der Umstellung; fehlende Demo-Seiten werden gemeldet.

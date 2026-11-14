@@ -94,8 +94,20 @@ python3 infra/vps/move-supabase.py compare "$work/old.txt" "$work/new.txt"
 
 echo '5/6 Dateien kopieren (dauert einige Minuten) …'
 while IFS='=' read -r k v; do case "$k" in NEW_S3_*) export "$k=$v" ;; esac; done <"$state"
-"${compose[@]}" run --rm -T --no-deps \
-  -e NEW_S3_ENDPOINT -e NEW_S3_REGION -e NEW_S3_ACCESS_KEY_ID -e NEW_S3_SECRET_ACCESS_KEY \
+# 15.11.2026: Alter Speicher gesperrt (HTTP 402) → Dateien aus den lokalen nächtlichen Sicherungen (älteste zuerst)
+backups=${BACKUP_ROOT:-/opt/seitenwerk-backups}
+OLD_BACKUP_DIRS=''
+if [ -d "$backups" ]; then
+  while IFS= read -r d; do
+    [ -s "$d/manifest.json" ] && OLD_BACKUP_DIRS="${OLD_BACKUP_DIRS:+$OLD_BACKUP_DIRS:}/backups/${d#"$backups"/}"
+  done < <(find "$backups" -mindepth 3 -maxdepth 3 -type d -name storage -path '*/scheduled-*/acceptance-*/storage' -printf '%T@ %p\n' 2>/dev/null | sort -n | cut -d' ' -f2-)
+fi
+export OLD_BACKUP_DIRS
+echo "  Gefundene lokale Sicherungen: $(printf '%s' "$OLD_BACKUP_DIRS" | tr ':' '\n' | grep -c . || true)"
+# Als root lesen: die Sicherungen gehören root (Rechte 700/600), wie beim nächtlichen Offsite-Upload
+"${compose[@]}" run --rm -T --no-deps --user 0:0 \
+  -e NEW_S3_ENDPOINT -e NEW_S3_REGION -e NEW_S3_ACCESS_KEY_ID -e NEW_S3_SECRET_ACCESS_KEY -e OLD_BACKUP_DIRS \
+  -v "$backups:/backups:ro" \
   -v "$PWD/packages/core/scripts:/repo/packages/core/scripts:ro" \
   --entrypoint node worker --import tsx /repo/packages/core/scripts/copy-storage.ts
 
