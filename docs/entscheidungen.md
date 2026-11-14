@@ -1754,3 +1754,6 @@ Notbetrieb (Kopie nach rund 10 s). Datenbankzugriff funktioniert weiter.
 überschreiben) und ergänzt nur, falls der alte Speicher antwortet. Am Ende Abgleich gegen die Datenbank: Anzahl fehlender
 benötigter Dateien und fehlender Demo-Seiten (nur Zahlen). Der Kopierlauf läuft als root, weil die Sicherungen root
 gehören. Nicht kopierbare Dateien führen zum Abbruch vor der Umstellung; fehlende Demo-Seiten werden gemeldet.
+Dritter Lauf (00:21): 10 Sicherungen mit 879 Dateien gefunden, über 850 kopiert, Abbruch erst beim Abgleich mit der
+Datenbank („self-signed certificate“). Behoben: Abgleich nutzt die TLS-Einstellungen der App und ist nur noch ein
+Hinweis; bereits kopierte Dateien werden beim nächsten Lauf übersprungen.

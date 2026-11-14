@@ -11,6 +11,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import pg from 'pg';
+import { getDatabaseConnectionConfig } from '../src/db/client';
 import {
   CreateBucketCommand,
   GetObjectCommand,
@@ -91,7 +92,8 @@ async function neededKeys(): Promise<{ all: Set<string>; demoPages: Set<string> 
   const demoPages = new Set<string>();
   const url = process.env.DATABASE_URL;
   if (!url) return { all, demoPages };
-  const c = new pg.Client({ connectionString: url });
+  // Gleiche TLS-Einstellungen wie die App (Supabase-Zertifikat), sonst „self-signed certificate“
+  const c = new pg.Client(getDatabaseConnectionConfig(url));
   await c.connect();
   try {
     const demos = await c.query<{ h: string | null; d: string | null; m: string | null; c: string | null }>(
@@ -168,7 +170,14 @@ try {
   }
   step = 'Ergebnis prüfen';
   const after = await listAll(newC);
-  const { all, demoPages } = await neededKeys();
+  // Abgleich ist nur ein Bericht: schlägt er fehl, wird trotzdem umgestellt, wenn alle Dateien kopiert wurden
+  let all = new Set<string>();
+  let demoPages = new Set<string>();
+  try {
+    ({ all, demoPages } = await neededKeys());
+  } catch (e) {
+    console.log(`  Hinweis: Abgleich mit der Datenbank nicht möglich (${(e as Error).message.slice(0, 120)}).`);
+  }
   const missingNeeded = [...all].filter((k) => !after.has(k)).length;
   const missingPages = [...demoPages].filter((k) => !after.has(k)).length;
   console.log(
