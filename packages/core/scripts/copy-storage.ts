@@ -21,8 +21,19 @@ const client = (endpoint: string, region: string, id: string, secret: string) =>
   new S3Client({ endpoint, region, forcePathStyle: true, credentials: { accessKeyId: id, secretAccessKey: secret } });
 
 const bucket = need('S3_BUCKET');
-const oldC = client(need('S3_ENDPOINT'), need('S3_REGION'), need('S3_ACCESS_KEY_ID'), need('S3_SECRET_ACCESS_KEY'));
-const newC = client(need('NEW_S3_ENDPOINT'), need('NEW_S3_REGION'), need('NEW_S3_ACCESS_KEY_ID'), need('NEW_S3_SECRET_ACCESS_KEY'));
+// Wie die App: ohne S3_REGION gilt eu-central-1 (14.11.2026: erster Lauf brach hier mit „S3_REGION fehlt“ ab)
+const oldC = client(
+  need('S3_ENDPOINT'),
+  process.env.S3_REGION || 'eu-central-1',
+  need('S3_ACCESS_KEY_ID'),
+  need('S3_SECRET_ACCESS_KEY'),
+);
+const newC = client(
+  need('NEW_S3_ENDPOINT'),
+  need('NEW_S3_REGION'),
+  need('NEW_S3_ACCESS_KEY_ID'),
+  need('NEW_S3_SECRET_ACCESS_KEY'),
+);
 
 async function listAll(c: S3Client): Promise<Map<string, number>> {
   const out = new Map<string, number>();
@@ -35,23 +46,26 @@ async function listAll(c: S3Client): Promise<Map<string, number>> {
   return out;
 }
 
+let step = 'Start';
 try {
+  step = 'Bucket im neuen Projekt prüfen/anlegen';
   try {
     await newC.send(new HeadBucketCommand({ Bucket: bucket }));
   } catch {
     await newC.send(new CreateBucketCommand({ Bucket: bucket }));
   }
+  step = 'Dateien im alten Projekt auflisten';
   const src = [...(await listAll(oldC))].filter(([k]) => !k.startsWith('backups/'));
+  step = 'Dateien im neuen Projekt auflisten';
   const done = await listAll(newC);
+  step = 'Dateien kopieren';
   let copied = 0;
   let bytes = 0;
   for (const [key, size] of src) {
     if (done.get(key) === size) continue; // bereits kopiert (Wiederholung nach Abbruch)
     const res = await oldC.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
     const body = Buffer.from((await res.Body?.transformToByteArray()) ?? new Uint8Array());
-    await newC.send(
-      new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: res.ContentType ?? undefined }),
-    );
+    await newC.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: res.ContentType ?? undefined }));
     copied++;
     bytes += body.length;
     if (copied % 50 === 0) console.log(`… ${copied} Dateien kopiert`);
@@ -61,6 +75,11 @@ try {
   console.log(JSON.stringify({ quelle: src.length, kopiert: copied, mb: Math.round(bytes / 1e6), fehlend: missing }));
   process.exit(missing === 0 ? 0 : 1);
 } catch (err) {
-  console.error(`Storage-Kopie fehlgeschlagen: ${(err as { name?: string }).name ?? 'Fehler'}`);
+  // Nur Name, HTTP-Status und Fehlertext ohne Schlüssel (Schlüssel stehen nie in diesen Texten)
+  const e = err as { name?: string; message?: string; $metadata?: { httpStatusCode?: number } };
+  const msg = (e.message ?? '').replace(/[A-Za-z0-9/+=]{32,}/g, '…').slice(0, 200);
+  console.error(
+    `Storage-Kopie fehlgeschlagen bei „${step}“: ${e.name ?? 'Fehler'}${e.$metadata?.httpStatusCode ? ` (HTTP ${e.$metadata.httpStatusCode})` : ''}${msg ? ` – ${msg}` : ''}`,
+  );
   process.exit(1);
 }

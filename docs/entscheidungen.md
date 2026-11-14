@@ -1730,3 +1730,14 @@ nennen Basis oder Care+ (99 €/Monat); wer nach Care+ fragt, sollte die Antwort
 angeboten werden. Rückläufer: Der echte Brief an „Magho“ (Dortmund, gedruckt 09.11.) kam am 14.11. als unzustellbar an
 die Absenderadresse zurück (Recherche hatte den Betrieb am 07.11. zweimal als vermutlich geschlossen eingestuft). Der
 Scan um 19:26 Uhr war der Betreiber mit diesem Brief.
+
+## 14.11.2026, 23:56 – Supabase-Umzug, erster Versuch
+
+Betreiber hat `move-supabase.sh` ausgeführt: Angaben geprüft, Datenbank kopiert (47 Tabellen, keine kritische
+Abweichung; „permission denied for schema pgboss“-Meldungen beim Einspielen, Zeilenzahlen trotzdem gleich), dann Abbruch
+bei der Dateikopie mit „Storage-Kopie fehlgeschlagen: Error“. Nichts umgestellt, Worker läuft weiter mit dem alten Projekt.
+Wahrscheinliche Ursache: `copy-storage.ts` verlangte `S3_REGION`, die in `.env.worker` fehlen kann (die App nutzt dann
+eu-central-1). Behoben: gleicher Standard wie die App, Fehlermeldung nennt jetzt Schritt, HTTP-Status und Fehlertext.
+Neu: `NEU_LEEREN=1` leert vor einem weiteren Versuch nur das NEUE Projekt (Tabellen, Sichten, Typen, Sequenzen,
+Funktionen in public sowie die Schemas pgboss/drizzle; Erweiterungsobjekte bleiben), weil der Schritt 1/6 sonst wegen
+der schon kopierten Tabellen abbricht. Lokal gegen eine Testdatenbank geprüft.

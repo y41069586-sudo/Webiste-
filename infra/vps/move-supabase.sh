@@ -29,8 +29,48 @@ psql_new() { docker run --rm -i --env-file "$state" "$img" sh -c 'psql "$NEW_PG_
 psql_old() { docker run --rm -i --env-file "$state" "$img" sh -c 'psql "$OLD_PG_URL" -XqAt -v ON_ERROR_STOP=1'; }
 
 echo '1/6 Neues Projekt prüfen …'
+if [ "${NEU_LEEREN:-0}" = 1 ]; then
+  # Wiederholung nach abgebrochenem Lauf (14.11.2026): nur im NEUEN Projekt (prepare prüft NEW_REF != OLD_REF)
+  # die beim letzten Versuch kopierten Tabellen, Typen, Sequenzen und Funktionen entfernen.
+  echo '  Neues Projekt wird für einen frischen Versuch geleert (das alte Projekt bleibt unberührt) …'
+  psql_new <<'SQL'
+DO $$ DECLARE r record; BEGIN
+  FOR r IN SELECT nspname FROM pg_namespace WHERE nspname IN ('pgboss','drizzle') LOOP
+    EXECUTE format('DROP SCHEMA %I CASCADE', r.nspname);
+  END LOOP;
+  FOR r IN SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+           WHERE n.nspname = 'public' AND c.relkind = 'm' LOOP
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS public.%I CASCADE', r.relname);
+  END LOOP;
+  FOR r IN SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+           WHERE n.nspname = 'public' AND c.relkind = 'v' LOOP
+    EXECUTE format('DROP VIEW IF EXISTS public.%I CASCADE', r.relname);
+  END LOOP;
+  FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' LOOP
+    EXECUTE format('DROP TABLE IF EXISTS public.%I CASCADE', r.tablename);
+  END LOOP;
+  FOR r IN SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public' LOOP
+    EXECUTE format('DROP SEQUENCE IF EXISTS public.%I CASCADE', r.sequence_name);
+  END LOOP;
+  FOR r IN SELECT t.typname FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
+           WHERE n.nspname = 'public' AND t.typtype IN ('e', 'd')
+             AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.objid = t.oid AND d.deptype = 'e') LOOP
+    EXECUTE format('DROP TYPE IF EXISTS public.%I CASCADE', r.typname);
+  END LOOP;
+  FOR r IN SELECT p.oid::regprocedure AS f FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+           WHERE n.nspname = 'public'
+             AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.objid = p.oid AND d.deptype = 'e') LOOP
+    EXECUTE 'DROP FUNCTION IF EXISTS ' || r.f || ' CASCADE';
+  END LOOP;
+END $$;
+SQL
+fi
 n=$(echo "select count(*) from pg_tables where schemaname in ('public','pgboss','drizzle');" | psql_new)
-[ "$n" = 0 ] || { echo "Abbruch: Das neue Projekt enthält schon $n Tabellen." >&2; exit 1; }
+[ "$n" = 0 ] || {
+  echo "Abbruch: Das neue Projekt enthält schon $n Tabellen (z. B. von einem früheren Versuch)." >&2
+  echo 'Für einen frischen Versuch: NEU_LEEREN=1 bash infra/vps/move-supabase.sh' >&2
+  exit 1
+}
 
 echo '2/6 Worker anhalten …'
 "${compose[@]}" stop worker >/dev/null
