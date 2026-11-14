@@ -3,6 +3,7 @@ export * from './config/env';
 export * from './config/settings';
 export * from './config/service';
 export { publicOperatorSettings } from './config/operator';
+export { runInBackground, setBackgroundRunner } from './util/background';
 export * from './db/client';
 export * as schema from './db/schema';
 export { runMigrations } from './db/migrate';

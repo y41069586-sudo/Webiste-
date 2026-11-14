@@ -1,6 +1,7 @@
 import { and, eq, gte, sql } from 'drizzle-orm';
 import { appUrl, demoUrl } from '../config/env';
 import { notifyAdmin } from './email';
+import { runInBackground } from '../util/background';
 import { getDb, type DbOrTx } from '../db/client';
 import { demos, events, leads, supportMessages } from '../db/schema';
 import { enqueue, QUEUES } from '../queue';
@@ -166,6 +167,15 @@ export async function notifyInterest(
   extra: { name?: string; city?: string; detail?: string; ref?: string; link?: string } = {},
 ): Promise<void> {
   if (req?.isBot || req?.audience) return;
+  // Nach der Antwort an den Besucher senden (Tempo); ohne Runner wie bisher sofort
+  await runInBackground(() => sendInterestNotice(leadId, kind, extra));
+}
+
+async function sendInterestNotice(
+  leadId: string | null,
+  kind: InterestKind,
+  extra: { name?: string; city?: string; detail?: string; ref?: string; link?: string },
+): Promise<void> {
   try {
     const lead = leadId ? await getDb().query.leads.findFirst({ where: eq(leads.id, leadId) }) : undefined;
     const name = extra.name || lead?.businessName || 'Unbekannt';

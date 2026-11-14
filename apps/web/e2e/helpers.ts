@@ -106,7 +106,12 @@ export async function prepareWebsiteBeforePayment(
   o: { name?: string; email?: string; domain?: string; plan?: string } = {},
 ): Promise<void> {
   const { expect } = await import('@playwright/test');
+  // Dev-Server: erst nach dem Laden der Skripte ausfüllen (sonst Absenden vor der Hydrierung)
+  await page.waitForLoadState('networkidle');
   if (!new URL(page.url()).pathname.endsWith('/pruefen')) {
+    // Seit 14.11.2026 erst den Weg wählen: Angaben jetzt oder nach der Zahlung
+    const choose = page.locator('summary', { hasText: 'Angaben jetzt eintragen' });
+    if ((await choose.count()) && !(await page.locator('details[data-weg="angaben"][open]').count())) await choose.click();
     await expect(page.getByRole('heading', { name: 'Machen Sie Ihre Website zu Ihrer.' })).toBeVisible();
     const fill = (name: string, value: string) => page.locator(`[name="${name}"]`).fill(value);
     // Demos enthalten seit 05.11.2026 keinen vorbereiteten „Über uns“-Text mehr; das Formular verlangt ihn weiterhin

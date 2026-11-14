@@ -1691,3 +1691,27 @@ und Komplett mit den Serverpreisen; Klick auf „Basis bestellen“ führt in ru
 Stripe-Bezahlseite (Live-Sitzung, 597,00 €, kein Testmodus). Nicht bezahlt. Damit ist erstmals belegt, dass im
 Live-Modus eine Bezahlsitzung entsteht. Die Testspuren (Klick, begonnene Bestellung, Meldungs-Mails beim Betrieb Heeren)
 werden nach Bestätigung des Betreibers aus der Datenbank entfernt.
+
+## 14.11.2026 – Testbrief angekommen; Tempo und Auswahl „Angaben jetzt oder nach der Zahlung“
+
+Der echte Testbrief an den Betreiber (übergeben 13.11.) ist am 14.11. angekommen; Brief, QR-Code und Demo funktionieren.
+Rückmeldung des Betreibers: Demo und jeder Klick laden zu lange; die Tarifknöpfe sind überladen; vor der Einrichtung soll
+die Wahl stehen, ob die Angaben jetzt oder nach der Zahlung kommen, mit ungefährer Dauer.
+
+Ursache Tempo (gemessen/abgeleitet): Die Netlify-Funktion läuft in Ohio (`cmh`), Datenbank und Speicher in Irland
+(`eu-west-1`). Jeder Klick macht mehrere Datenbankabfragen über den Atlantik; Scan, „Übernehmen“ und Bestellung warteten
+zusätzlich auf den Versand der Benachrichtigungs-Mail; jede Demo-Ansicht lud rund 600 KB HTML aus dem Speicher.
+
+Umgesetzt:
+- `runInBackground` (core) + `src/instrumentation.ts` (web): Benachrichtigungen laufen über `after()` erst nach der
+  Antwort; ohne Runner (Worker, Tests) unverändert sofort.
+- `/d/[slug]`: HTML, Einstellungen und Aufrufzählung parallel; Demo-HTML bis 5 Minuten im Speicher der Funktion
+  (Schlüssel inkl. Änderungszeitpunkt der Demo).
+- `/einrichten/[slug]`: zuerst „Wie möchten Sie weitermachen?“ mit „Angaben nach der Zahlung (ca. 2 Minuten)“ und
+  „Angaben jetzt eintragen (ca. 15 Minuten)“ als native Aufklapper (funktionieren vor dem Laden der Skripte). Schlanke
+  Tarifknöpfe (Name, Preis groß, eine Zeile). Wer schon etwas eingetragen hat, sieht das Formular gleich offen
+  (`touched` im Entwurf). Preise, Laufzeiten, AGB unverändert; keine Vorauswahl.
+- Tests: `quick-order.spec.ts`, `checkout.spec.ts` (3/3 grün), Core-Tests zu Entwürfen und Benachrichtigungen grün.
+
+Größter verbleibender Hebel: Funktionsregion auf Frankfurt (`fra`) oder Irland (`dub`) stellen. Laut Netlify nur in
+Pro-/Enterprise-Tarifen (Cloud compute → Functions → Region, danach neu veröffentlichen). Betreiberentscheidung.

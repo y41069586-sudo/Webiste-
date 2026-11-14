@@ -17,17 +17,19 @@ test('Schnellbestellung am Handy: ohne Formular zur Bezahlseite, Angaben danach'
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(`/d/${demo.slug}/uebernehmen?plan=basis`);
   await expect(page).toHaveURL(new RegExp(`/einrichten/${demo.slug}`));
-  const quick = page.locator('section[aria-labelledby="schnell"]');
-  await expect(quick.getByRole('heading', { name: 'Jetzt bestellen, Angaben später ergänzen' })).toBeVisible();
-  // Preis, heutiger Betrag und Laufzeit stehen auf jedem Knopf; keine Vorauswahl, kein Formularzwang
-  const basis = quick.getByRole('button', { name: /SeitenWerk Basis bestellen/ });
-  await expect(basis).toContainText('597,00 € einmalig');
-  await expect(basis).toContainText(/19,00\s*€\/Monat ab Go-Live/);
-  await expect(basis).toContainText('Heute fällig: 597,00 €');
+  // Erst der Weg mit Dauer, keine Vorauswahl, noch kein Formular sichtbar
+  await expect(page.getByRole('heading', { name: 'Wie möchten Sie weitermachen?' })).toBeVisible();
+  await expect(page.locator('summary', { hasText: 'Angaben nach der Zahlung' })).toContainText('ca. 2 Minuten');
+  await expect(page.locator('summary', { hasText: 'Angaben jetzt eintragen' })).toContainText('ca. 15 Minuten');
+  await expect(page.getByRole('heading', { name: 'Machen Sie Ihre Website zu Ihrer.' })).toBeHidden();
+  if (out) await page.screenshot({ path: path.join(out, 'quick-0-wahl-390.png') });
+  await page.locator('summary', { hasText: 'Angaben nach der Zahlung' }).click();
+  // Schlanke Tarifknöpfe: Name, Preis, eine Zeile
+  const basis = page.getByRole('button', { name: /Basis/ });
+  await expect(basis).toContainText(/597\s€ einmalig/);
+  await expect(basis).toContainText(/\+ 19\s€\/Monat ab Go-Live/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   if (out) await page.screenshot({ path: path.join(out, 'quick-1-einrichten-390.png') });
-  // Das ausführliche Formular bleibt als zweiter Weg erhalten
-  await expect(page.getByRole('heading', { name: 'Machen Sie Ihre Website zu Ihrer.' })).toBeVisible();
   await basis.click();
   await expect(page.getByRole('heading', { name: 'Testzahlung' })).toBeVisible();
   if (out) await page.screenshot({ path: path.join(out, 'quick-2-bezahlseite-390.png'), fullPage: true });

@@ -35,6 +35,8 @@ export interface CheckoutDraft {
   /** Includes replaced uploads, retained until no pending order or site references them. */
   uploadKeys: string[];
   orderId?: string;
+  /** Schon etwas eingetragen oder hochgeladen (14.11.2026): Formular beim Wiederkommen gleich offen zeigen */
+  touched?: boolean;
 }
 export function setupFingerprint(data: OnboardingData, assetKeys: Record<string, string>): string {
   return sha256(JSON.stringify({ data, assetKeys }));
@@ -100,7 +102,7 @@ export async function saveCheckoutDraft(slug: string, token: string, raw: Onboar
     const data = normalizeOnboarding(raw, d.data);
     await db
       .update(settings)
-      .set({ value: { ...d, data, orderId: undefined }, updatedAt: new Date() })
+      .set({ value: { ...d, data, orderId: undefined, touched: true }, updatedAt: new Date() })
       .where(eq(settings.key, draftKey(token)));
     const fieldErrors = submit ? onboardingErrors(data) : null;
     return fieldErrors
@@ -124,7 +126,10 @@ export async function uploadCheckoutDraft(slug: string, token: string, kind: 'lo
     const assetKeys = { ...d.assetKeys, [id]: key };
     await db
       .update(settings)
-      .set({ value: { ...d, assetKeys, uploadKeys: [...d.uploadKeys, key], orderId: undefined }, updatedAt: new Date() })
+      .set({
+        value: { ...d, assetKeys, uploadKeys: [...d.uploadKeys, key], orderId: undefined, touched: true },
+        updatedAt: new Date(),
+      })
       .where(eq(settings.key, draftKey(token)));
     return { id, ids: Object.keys(assetKeys) };
   });

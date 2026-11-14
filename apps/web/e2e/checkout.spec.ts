@@ -17,6 +17,9 @@ test('Mobile Demo → private Einrichtung mit Logo → Zusammenfassung → Zahlu
   await page.goto(`/d/${demo.slug}`);
   await page.locator('.sw-demo-buy').click();
   await expect(page).toHaveURL(new RegExp(`/einrichten/${demo.slug}$`));
+  // Seit 14.11.2026: zuerst den Weg wählen (Angaben jetzt oder nach der Zahlung)
+  await page.locator('summary', { hasText: 'Angaben jetzt eintragen' }).click();
+  await expect(page.locator('details[data-weg="angaben"]')).toHaveAttribute('open', '');
   await expect(page.getByRole('heading', { name: 'Machen Sie Ihre Website zu Ihrer.' })).toBeVisible();
   await expect(page.getByText(/Erst danach prüfen Sie den Tarif/)).toBeVisible();
   await page.locator('[name="texts.wishes"]').fill('Bitte die Überschrift im persönlichen Gespräch abstimmen.');
