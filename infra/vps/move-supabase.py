@@ -189,6 +189,9 @@ def apply(state: str) -> None:
     }
     # 1) Netlify zuerst prüfen und vorbereiten (Fehler hier lässt den Server unverändert)
     token, account = s['NETLIFY_TOKEN'], s['NETLIFY_ACCOUNT']
+    # 15.11.2026: Geheim markierte Netlify-Werte gibt die API nicht heraus. Dann den gleichnamigen Wert des Workers
+    # nehmen (gleiche Datenbankrolle, gleiches Passwort) und auf das neue Projekt umschreiben.
+    worker_env = read_env(WORKER_ENV)
     updates = []
     for item in netlify(token, 'GET', f'/accounts/{account}/env?site_id={NETLIFY_SITE}') or []:
         k = item.get('key', '')
@@ -197,10 +200,16 @@ def apply(state: str) -> None:
             for v in item.get('values', []):
                 val = v.get('value', '')
                 if k in URL_KEYS and old not in val:
-                    fail(f'Netlify-Wert {k} nicht lesbar (geheim markiert?).')
+                    fallback = worker_env.get(k) or (worker_env.get('DATABASE_URL') if k == 'QUEUE_DATABASE_URL' else '')
+                    if not fallback or old not in fallback:
+                        fail(f'Netlify-Wert {k} nicht lesbar und auf dem Server nicht vorhanden. Es wurde nichts umgestellt.')
+                    val = fallback
                 nv = swap_url(val, old, new, host) if k in URL_KEYS else new_s3[k]
                 values.append({kk: vv for kk, vv in v.items() if kk in ('context', 'context_parameter')} | {'value': nv})
-            updates.append((k, {'key': k, 'scopes': item.get('scopes', ['builds', 'functions', 'runtime']), 'values': values}))
+            body = {'key': k, 'scopes': item.get('scopes', ['builds', 'functions', 'runtime']), 'values': values}
+            if item.get('is_secret'):
+                body['is_secret'] = True
+            updates.append((k, body))
     if not any(k == 'DATABASE_URL' for k, _ in updates):
         fail('DATABASE_URL in Netlify nicht gefunden.')
     # Netlify zuerst setzen: wirkt erst mit der nächsten Veröffentlichung, ein Fehler hier lässt den Server unverändert

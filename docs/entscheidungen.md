@@ -1757,3 +1757,7 @@ gehören. Nicht kopierbare Dateien führen zum Abbruch vor der Umstellung; fehle
 Dritter Lauf (00:21): 10 Sicherungen mit 879 Dateien gefunden, über 850 kopiert, Abbruch erst beim Abgleich mit der
 Datenbank („self-signed certificate“). Behoben: Abgleich nutzt die TLS-Einstellungen der App und ist nur noch ein
 Hinweis; bereits kopierte Dateien werden beim nächsten Lauf übersprungen.
+Vierter Lauf (00:36): Datenbank und alle Dateien vollständig im neuen Projekt (keine fehlende Demo-Seite, 1 von 300
+benötigten Dateien fehlt), Abbruch bei 6/6, weil Netlify den geheim markierten Wert `DATABASE_URL` nicht herausgibt.
+Nichts umgestellt. Behoben: Für nicht lesbare Netlify-Werte wird der gleichnamige Wert aus `.env.worker` (gleiche Rolle,
+gleiches Passwort) auf das neue Projekt umgeschrieben; die Geheim-Markierung bleibt erhalten. Lokal simuliert.
