@@ -1723,3 +1723,10 @@ Komplett (179 €/Monat). `offers.komplettEnabled` daher auf `false` gesetzt (au
 Einrichtung und Bezahlseite zeigen jetzt Basis und Care+ wie im Brief. Live geprüft: Demo 0,4–2,0 s, QR-Weiterleitung
 0,6–0,9 s, „Übernehmen“ bis zur Auswahl 3,6 s (weiter durch Funktionsregion Ohio begrenzt). Die Notfall-Kopien dieses
 Deploys enthalten noch Komplett; sie werden beim nächsten Veröffentlichen neu erzeugt.
+
+Nachtrag 14.11.2026, später: Betreiber „Mach 597 und 179 wieder zurück“ → `offers.komplettEnabled` wieder `true`
+(audit_log). Live geprüft: Demo zeigt wieder Basis und Komplett. Hinweis an den Betreiber: Die bereits gedruckten Briefe
+nennen Basis oder Care+ (99 €/Monat); wer nach Care+ fragt, sollte die Antwort bekommen, dass Basis und Komplett
+angeboten werden. Rückläufer: Der echte Brief an „Magho“ (Dortmund, gedruckt 09.11.) kam am 14.11. als unzustellbar an
+die Absenderadresse zurück (Recherche hatte den Betrieb am 07.11. zweimal als vermutlich geschlossen eingestuft). Der
+Scan um 19:26 Uhr war der Betreiber mit diesem Brief.
