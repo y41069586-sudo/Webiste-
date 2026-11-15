@@ -1761,3 +1761,15 @@ Vierter Lauf (00:36): Datenbank und alle Dateien vollständig im neuen Projekt (
 benötigten Dateien fehlt), Abbruch bei 6/6, weil Netlify den geheim markierten Wert `DATABASE_URL` nicht herausgibt.
 Nichts umgestellt. Behoben: Für nicht lesbare Netlify-Werte wird der gleichnamige Wert aus `.env.worker` (gleiche Rolle,
 gleiches Passwort) auf das neue Projekt umgeschrieben; die Geheim-Markierung bleibt erhalten. Lokal simuliert.
+
+## 15.11.2026 – Supabase-Umzug abgeschlossen
+
+Fünfter Lauf erfolgreich: Datenbank und Dateien im neuen Projekt „seitenwerk“ (Organisation „Website Sale“, West EU),
+Worker, Sicherungszugang und Netlify umgestellt, Website neu veröffentlicht (Deploy `6af99262b531edbfe1bde4b6`, mit den
+Notfall-Kopien vom 14.11.). Danach war die Aufgabenwarteschlange nicht lesbar, weil pg_restore als `postgres` die
+pgboss-Objekte nicht der Backend-Rolle zuordnen konnte („permission denied for schema pgboss“). Behoben vom Betreiber im
+SQL-Editor des neuen Projekts (Mitgliedschaft mit SET, Eigentümer von Schema, Tabellen, Sequenzen und Funktionen auf
+`seitenwerk_admin_backend`), danach Worker-Neustart. `/api/health`: db, storage und Warteschlange ok, Worker-Herzschlag
+39 s; Demos laden ohne Notbetrieb in 0,7–1,4 s. Offen: Die nächtliche Sicherung bleibt aus; der Supabase-Connector dieser
+Sitzung sieht nur die alte Organisation, Datenbankabfragen durch Claude brauchen Zugriff auf „Website Sale“.
+Für künftige Umzüge gehört der pgboss-Eigentümerwechsel in `move-supabase.sh`.
