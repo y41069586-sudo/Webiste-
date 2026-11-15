@@ -1,0 +1,102 @@
+# Follow-up playbooks after a direct-mail response (scan/visit) that did not convert
+
+Scope note: Research done on 15.11.2026. Sources are labelled [VENDOR] when they come from a seller of mail or retargeting services, [US] when the data is from the US, and [DE] when from Germany. Most quantitative evidence on "triggered mail" comes from e-commerce (cart and browse abandoners). It is not from service sellers to SMBs, so any transfer to a demo-website seller is an inference. The project's own legal frame (CLAUDE.md: letters only, no cold e-mail, calls, SMS or WhatsApp; e-mail only to people who gave their address) is treated as a given here. It is not re-researched.
+
+## 1. What lift do triggered follow-up letters (sent after a web visit/scan) achieve vs. untriggered mail?
+
+### Takeaway
+No independent, peer-reviewed study gives a clean "triggered vs. untriggered letter" lift. What exists is vendor case studies with holdout groups (US/Canada, about +34 % to +43 % conversion vs. holdout, +37 % sales uplift) and German Deutsche Post/CMC best cases (21.1 % conversion within 4 weeks for cart-abandoner letters, no control group stated). These show that mail to people who have already engaged converts far better than cold mail. The lift figures themselves are self-reported and not comparable with each other.
+
+### Cited Findings
+- [DE][VENDOR: Deutsche Post best case] Seventyseven/Styleboom (agency SmartCom, Programmatic Printing). Trigger: a cart was abandoned and not reactivated **after two days**, then a personalised print mailing was sent. The letter showed **the exact items left in the cart**, plus "next best offers" from a recommendation engine and a flyer with 8 further recommendations. Offer: an incentive based on customer value (10 %, 20 % or free shipping). Volume was 500–2,500 letters a day for one year. Results: **21.1 % conversion within 4 weeks**, 47.5 % reactivation of customers inactive for 12+ months, and 74 % lower cost per order vs. online ads. **The page names no control group.** Article dated 11.11.2025. — [Deutsche Post: Best Case Seventyseven](https://www.deutschepost.de/de/p/print-mailing/insights/best-cases/seventyseven.html)
+- [DE][VENDOR-sponsored study] CMC Print-Mailing-Studie 2026 (Deutsche Post + Collaborative Marketing Club, published May 2026). 35 online shops sent 858,490 mailings to **existing customers** (not trigger-based). Results: average CVR **4.0 %**, **8.5 %** of recipients visited the shop after receiving it, basket +24.8 %, ROAS 961 %. **46 % of orders came only from week 5 after dispatch onwards**, and 54 % within the first 28 days. — [Druckmarkt Schweiz 149, June 2026, p. 26–27 (PDF)](https://www.druckmarkt.com/archiv/ch/149/26_Da_war_doch_noch_etwas.pdf); [DHL Group press release 06.05.2026 (PDF)](https://group.dhl.com/content/dam/deutschepostdhl/de/media-relations/press-releases/2026/pm-cmc-print-mailing-studie-20260506.pdf)
+- [DE] CMC Print-Mailing-Studie 2025: 1,157,674 mailings from 43 shops, average CVR 4.1 %, basket +13 %. Its theme was voucher limitations (limited quantity or period). — [Horizont, CMC 2025](https://www.horizont.net/marketing/nachrichten/cmc-print-mailing-studie-2025-print-mailings-wirken-auch-in-wirtschaftlich-schwierigen-zeiten-227589); [DP CMC Studie 2025 PDF](https://www.deutschepost.de/dam/jcr:b79358de-8e32-4a36-aac1-4e977c875197/DP-CMC-PRINT-Mailing-Studie_2025.pdf)
+- [DE] CMC 2024: **limited vouchers clearly speed up sales**. — [Horizont, CMC 2024](https://www.horizont.net/marketing/nachrichten/cmc-print-mailing-studie-2024-wie-limitationen-die-performance-von-gutscheinen-beeinflussen-221678)
+- [DE] CMC 2023: mailings to existing customers converted at 5.4 %, and "response amplifiers" (vouchers, **QR codes**, scratch fields, stickers) raised CVR by **up to 33 %**. — [Deutsche Post: CMC-Studie 2023 – Wie Responseverstärker wirken](https://www.deutschepost.de/de/p/print-mailing/insights/studien/cmc-printmailing-studie-2023-bestandskunden.html)
+- [US][VENDOR: LeadPost/Reach Dynamics, reported via search summary] A vision insurer (VSP) held back **65 % of non-converting site visitors as a 30-day control** and mailed a postcard to the other 35 %. Reported conversion rate lift: **+43 %**. No year given. — [Reach Dynamics / LeadPost, direct mail retargeting](https://www.reachdynamics.com/?p=6116) (the tag page now redirects to leadpost.com, and the fetched redirect page no longer contains the VSP case, so this could not be verified in full text)
+- [US][VENDOR: PebblePost] Parachute: **+34 % conversion rate vs. holdout**. Caution: the case page says this used "Lookalikes", i.e. **prospects who had not interacted yet**. It is *not* a visit-triggered mailing. No date. — [casestudies.com: Parachute / PebblePost](https://www.casestudies.com/company/pebblepost/case-study/parachute-boosts-conversion-rate-by-34-with-pebblepost)
+- [CA][Canada Post] Benefit Cosmetics: programmatic mail to past website visitors gave a **+37 % uplift in sales** of the promoted products vs. control (Incite 2024, issue 01). Wayfair Canada: +90 % vs. a *demographic look-alike* group. That was not a randomised holdout, so the lift is overstated. — [Canada Post Incite 2024 Datagram (PDF)](https://origin-www.canadapost.ca/cpc/doc/en/n/incite-2024-issue-01-datagram.pdf); [Canada Post: Wayfair Canada](https://www.canadapost.ca/blogs/business/marketing/how-wayfair-canada-reached-active-online-shoppers-with-direct-mail/)
+- [US][VENDOR] LeadPost car-dealer case: postcards showed **the vehicles the visitor had viewed**. The campaign produced 7 sales, 4 of them for the exact vehicle shown, at $34 cost per car sold. No control and no date. — [LeadPost: Direct mail retargeting](https://leadpost.com/direct-mail-retargeting/)
+- [US][VENDOR] NaviStone retargeting cases report 2.5 % (Gathr Outdoors) and 5 % (Design Toscano) response rates to website-visitor mail. No dates were visible in the search results. — [casestudies.com: Gathr Outdoors / NaviStone](https://www.casestudies.com/company/navistone/case-study/246c-gathr-outdoors-converts-their-website-visitors-into-paying-customers-sees-25-response-rate); [casestudies.com: Design Toscano / NaviStone](https://www.casestudies.com/company/navistone/case-study/194c-design-toscano-sees-5-response-rate-from-direct-mail-retargeting)
+- [Method] For triggered mail (browse abandonment), a **random suppression holdout** is the right control. With small volumes the holdouts are underpowered: a 5 % holdout on 1,000 pieces gives only 50 control records. — [directmail.io: Holdout Cell Playbook](https://directmail.io/blog/direct-mail-roi-holdout-cell-attribution-methodology)
+- [US][VENDOR] Lob State of Direct Mail 2025 (survey of marketers): 84 % say direct mail has the best ROI, and 86 % agree it works best integrated with digital. No triggered-mail response figure was found in the public summary. — [Lob 2025 report](https://www.lob.com/state-of-direct-mail/2025-report); [Lob press release, June 2025](https://www.lob.com/press-release/lob-report-shows-direct-mail-breaks-through-digital-noise)
+- [DE][VENDOR: Optilyz] Optilyz/Publicare whitepaper (2021) lists cart abandoners and lead activation as use cases but gives no uplift numbers. A HelloFresh testimonial ("conversion rates doubled", ROI 230 %) is general print mailing, not a trigger case, and has no control. — [Publicare/Optilyz whitepaper 2021 (PDF)](https://publicare.de/wp-content/uploads/2021/04/Directmail_Crosschannel_CRM_Marketing_Whitepaper-2021.pdf)
+
+### Inferences
+- Across all cases, the consistent pattern is that mail which **shows the exact thing the person looked at** (cart items, the viewed car) performs strongly. For this project, the closest equivalent is a follow-up letter that shows a screenshot of *their own* demo page, plus their business name and domain suggestion.
+- The CMC finding that 46 % of orders arrive from week 5 onwards suggests that physical mail keeps working for a long time. A non-converting scan in week 1 is therefore not a lost lead, and the demo should stay reachable long enough. This is an inference from shop-customer data. It may not transfer to B2B service purchases.
+- Realistic expectation: a triggered letter to warm scanners likely beats an untriggered second letter by tens of percent relative, not by multiples. However, the evidence is entirely vendor-reported and e-commerce based.
+
+### Gaps
+- No German study was found that measures triggered letters after a **QR scan** vs. a non-triggered remailing with a randomised control. The CMC studies cover existing customers of online shops.
+- No data was found for **B2B/SMB service** offers (websites, SaaS) triggered by a demo visit.
+- The full text of the VSP +43 % case could not be verified (the page has moved).
+
+## 2. Optimal timing of the second letter after a scan/visit, and content patterns that work
+
+### Takeaway
+Trigger-mail practice in e-commerce waits **about 2 days** after the non-conversion and then mails within days (vendor guidance: "typically within a week"). For classic re-mails, the old practitioner evidence suggests a gap of **about 2–4 weeks**, a second wave that typically yields **roughly 40–75 % of the first wave's response**, and a clear benefit from a deadline. Effective content shows the specific item viewed, gives one clear next step, and states a real deadline or limitation.
+
+### Cited Findings
+- [DE] Seventyseven: letter triggered when the cart was **not reactivated after 2 days**; content = the abandoned items plus personalised recommendations plus an incentive. — [Deutsche Post best case, 11.11.2025](https://www.deutschepost.de/de/p/print-mailing/insights/best-cases/seventyseven.html)
+- [US][VENDOR] Retargeting mail should go out within a specific window after the online visit, "typically within a week". — [LeadPost](https://leadpost.com/direct-mail-retargeting/)
+- [US] MarketingSherpa (Anne Holland, 20.08.2007). Two B2B clients mailed the same offer to the same list twice, **3–4 weeks apart**: wave 1 had 1.90 % response, wave 2 had **1.46 %**, much closer than expected. The author recommends getting the follow-up into the mailbox **within three weeks**. Older practice was that when waves landed within about 10 days of each other, wave 2 dropped to 25–30 % of wave 1, while wave 1 itself rose (attributed to a reminder effect, which is anecdotal). — [MarketingSherpa blog](https://sherpablog.marketingsherpa.com/marketing/blog-30099/)
+- [US] Bob Bly rule of thumb: re-mailing the identical piece to the same list **8–10 weeks** later typically brings **40–60 %** of the original response. A remail with a new framing (e.g. "second notice", deadline) can work well. Undated old column. — [Bly: Mailing the same piece twice](https://www.bly.com/Pages/early/ETRCOL4.htm)
+- [US] Fundraising heuristic: a re-mail loses about 50 % of response per wave. — [NonProfit PRO: direct mail frequency](https://nonprofitpro.com/aggregatedcontent/direct-mail-frequency-many-times-mail-offer)
+- [US][VENDOR: Century Direct, undated] A financial-services renewal with a deadline. First mailing: 15,059 pieces at 6.22 % response. Second mailing, **about 2 weeks later**, to 4,301 of them: 14.93 %. Responses still arrived **after 4+ months**. The vendor's "139.9 % increase" compares rates across different audiences (the second wave probably went to a subset), so it is **not a clean lift**. — [Century Direct: Adding a 2nd direct mail effort (and a deadline)](https://www.centurydirect.net/?p=1516)
+- [DE] Survey methodology (Kunz 2010, N=3,555, postal survey in Südbaden): the response-raising effect of reminders is "consistent and numerous" in the literature, with diminishing (curvilinear) returns per reminder. Reminders especially reach groups that do not respond to the first contact. — [Kunz 2010, mda/SSOAR](https://www.ssoar.info/ssoar/handle/document/21014)
+- [DE] CMC 2024: limited vouchers (quantity or time limits) speed up purchases. — [Horizont, CMC 2024](https://www.horizont.net/marketing/nachrichten/cmc-print-mailing-studie-2024-wie-limitationen-die-performance-von-gutscheinen-beeinflussen-221678)
+- [DE] CMC 2026: high discounts raise CVR but **did not always pay off**. With top customers, lower voucher values achieved a higher ROAS than higher ones. — [Druckmarkt Schweiz 149, June 2026](https://www.druckmarkt.com/archiv/ch/149/26_Da_war_doch_noch_etwas.pdf)
+
+### Inferences
+- For this project's "scanned, not bought" segment, the evidence fits this sequence. Wait about 2–7 days after the last demo visit, to give a self-initiated purchase a chance. Then send a triggered letter showing a screenshot of **their** demo, with one action (QR to the take-over or checkout page) and a real end date. CLAUDE.md §5.7 currently uses "≥ 2 visits or CTA click, no purchase after 7 days" for letter 3. That is consistent with the 2-to-7-day window in the trigger cases.
+- Deadline: the CMC limitation results and the Century Direct case support a **real** deadline (e.g. "demo online until {date}"). Under § 5 UWG it must be true, and the project already enforces this via `stated_expires_at`.
+- Offer changes: the CMC 2026 result (bigger discounts do not necessarily pay) argues for a **non-price sweetener** rather than a discount. Examples would be a free change round, "pay only after go-live", or "we reserve your domain until {date}". This is an inference; no study was found that tested these specific offers for website sellers.
+- Number of letters: diminishing returns of about 25–75 % per additional wave make the project's cap of **3 letters per lead** look reasonable. The second and third letters should go only to engaged leads (triggered), not to everyone.
+
+### Gaps
+- No recent (2020–2026) controlled study was found on the optimal day count for a second *letter* after a *QR scan*. The timing data is either e-commerce trigger practice (2 days) or old remailing heuristics (2–10 weeks).
+- No source was found that tests "show their own page" vs. a generic follow-up for service offers.
+
+## 3. Sellers of pre-built demo websites / SaaS to SMBs: what they do after a visit, and results
+
+### Takeaway
+Practitioner guidance for demo-first website selling is consistent: **persist over several contacts** and lead with the already-built demo. It almost always assumes e-mail and phone follow-up, which is not allowed here without consent. **No source reported measured conversion numbers** for post-visit follow-ups by demo-website sellers.
+
+### Cited Findings
+- A dev.to post (26.04.2026) describes a demo-first tool workflow: find businesses with weak or missing websites, generate a live demo, use it in outreach with the pitch "I made you a quick demo. Want to see it?", then track the lead in a pipeline. **No results and no post-visit process are described.** — [dev.to: demo-first sales tool](https://dev.to/adam_nottea_2d91a1a1d503e/how-i-built-a-demo-first-sales-tool-for-freelance-web-designers-1ahb)
+- Practitioner guides (via search summary): "the majority of sales are won after 5 contacts" and "48 % of salespeople don't make a single follow-up" (both repeated heuristics with no primary study cited). They recommend a CRM with reminders, mixing e-mail and phone, and offering a free mockup. — [Ark's Newsletter: How to sell websites to local businesses 2025](https://ark.beehiiv.com/p/how-to-sell-websites-to-local-businesses-in-2025-a-modern-money-making-blueprint); [Lindo.ai guide](https://lindo.ai/guides/how-to-sell-websites-to-local-businesses); [SiteSwan](https://siteswan.com/the-best-way-to-sell-websites-to-small-businesses) — all [VENDOR] for website-builder tools
+- [VENDOR] Vendasta's guide for selling website services to local businesses recommends an e-mail pitch followed by a phone call. — [Vendasta blog](https://www.vendasta.com/blog/sell-website-services-local-businesses/)
+
+### Inferences
+- Of the typical tactics, the ones compatible with a letter-only, inbound-only rule set are:
+  - a letter "your draft is saved until {date}"
+  - an improved demo (letter 3 in the project)
+  - a free change round before purchase
+  - pay-after-go-live
+  - a domain reservation until a date
+  - a visible callback/WhatsApp link that the **prospect** uses to contact the seller
+- The "5+ contacts" heuristic is from phone/e-mail selling. With physical mail at about €1+ per letter, the project's limit of 3 letters is a cost-driven constraint. The contact count cannot be copied over from those channels.
+
+### Gaps
+- No Reddit or Indie Hackers thread with numbers on post-demo-visit conversion was found in this search round. A search on r/webdev or r/freelance threads might yield anecdotes.
+- No published results were found for "we saved your draft" or "reservation" letters from website sellers.
+
+## 4. Speed-to-lead research and how it applies when only visitor-initiated contact is allowed
+
+### Takeaway
+The classic speed-to-lead studies (MIT/InsideSales 2007; HBR 2011) show that contact odds fall sharply within minutes to hours, and that most firms respond far too slowly. Newer audits (RevenueHero 2024) still find that most B2B firms never answer inbound demo requests. All of this applies to **inbound** requests: the seller calls back someone who asked. Under this project's rules, speed-to-lead therefore applies only to inquiries the prospect initiates (form, WhatsApp, e-mail, checkout questions). It does not apply to outbound follow-up after a mere scan.
+
+### Cited Findings
+- [US] Oldroyd, McElheran & Elkington, "The Short Life of Online Sales Leads", HBR 89(3), p. 28, March 2011. They audited 2,241 US companies by submitting web leads. Per secondary summaries, 23 % never responded and 24 % took longer than 24 h. The companion data covered 1.25 million leads at 29 B2C and 13 B2B companies, and firms contacting within 1 hour were far more likely to qualify the lead (the "7×" and "60×" figures circulate mainly in vendor material, so verify them against the original). The HBR full text is paywalled and was not verified. — [BYU ScholarsArchive record](https://scholarsarchive.byu.edu/facpub/9711); [HBR (paywall)](https://hbr.org/2011/03/the-short-life-of-online-sales-leads); [SmartCompany summary, 04.07.2011](https://www.smartcompany.com.au/marketing/20110704-are-you-letting-online-leads-go-cold/)
+- [US] Lead Response Management Study (Oldroyd/MIT with InsideSales, data 2004–2007). The odds of **contacting** a lead are about **100×** higher when called within 5 min vs. 30 min, and the odds of **qualifying** are about **21×** higher. These are odds ratios, not percentages. Sample descriptions vary between sources (about 15,000 leads and 100,000 dials across 6 companies is commonly cited). — [MIT study PDF (hosted by Mortech)](https://www.mortech.com/hs-fs/hub/25649/file-13535879-pdf/docs/mit_study.pdf); [InsideSales resources](https://resources.insidesales.com/?p=31467)
+- [US][VENDOR] RevenueHero (report dated 20.03.2024): demo requests were submitted to 1,000 B2B SaaS companies, and **only 365 replied** (about 63.5 % no reply). The average hours could not be verified. The often-quoted "42 hours average" comes from a 2018 Drift study of 433 companies. — [RevenueHero: Lead response times report](https://www.revenuehero.io/resources/lead-response-times-report)
+
+### Inferences
+- With outbound calls, SMS and cold e-mail excluded (§ 7 UWG, per CLAUDE.md), the speed-to-lead lesson becomes about making **inbound** contact instant and easy. Respond to demo-form, WhatsApp and e-mail inquiries within minutes during business hours, perhaps with an immediate auto-confirmation plus a fast personal answer. Put a "Frage per WhatsApp" link and a callback-request form (consent given by the prospect) on the demo, so that the prospect can trigger a call legally.
+- The scan itself is the "lead moment", but because no outbound contact is allowed, the substitute for speed is **on-page conversion at the moment of the scan**. That means a clear price, an immediate checkout, low-risk offers (guarantee, pay after go-live), and a visible way to ask a question. The triggered letter comes next, a few days later.
+- The 2011 and 2007 studies are US, phone-centric and old. Treat them as directional evidence only.
+
+### Gaps
+- No study was found on speed-to-lead specifically for **direct-mail-originated** web leads, or for German SMB buyers.
+- No data was found on how fast German small businesses expect a reply to a WhatsApp or form inquiry.
