@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Brief-Entwurf V5.6</title>
+<style>
+@font-face { font-family: 'Hand'; src: url({{HANDFONT}}) format('woff2'); font-weight: 600; font-display: block; }
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --navy: #1d4e89; --ink: #141b24; --text: #27303b; --muted: #5a6573; --line: #d9e0e8; --soft: #f2f5f9; }
+html, body { width: 210mm; }
+body { font-family: Inter, Arial, Helvetica, sans-serif; color: var(--text); font-size: 10pt; line-height: 1.4;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.page { position: relative; width: 210mm; height: 297mm; overflow: hidden; }
+.abs { position: absolute; }
+
+/* Kopf */
+.brand { left: 20mm; top: 11mm; display: flex; align-items: center; gap: 2.2mm; font-weight: 700; font-size: 11pt; color: var(--navy); }
+.brand img { width: 6mm; height: 6mm; }
+.lh { left: 117mm; top: 10.5mm; width: 78mm; text-align: right; font-size: 8.2pt; line-height: 1.42; color: var(--muted); }
+.lh b { color: var(--ink); font-size: 9.6pt; }
+.rule { left: 117mm; top: 29mm; width: 78mm; height: 0; border-top: 0.3mm solid var(--line); }
+
+/* Betreff rechts neben der Anschrift (über dem ersten Falz) */
+.subj { left: 117mm; top: 33mm; width: 78mm; }
+.subj .h { font-size: 16pt; font-weight: 800; line-height: 1.13; letter-spacing: -0.012em; color: var(--ink); }
+.subj .h span { color: var(--navy); }
+.subj .calm { font-size: 8.6pt; line-height: 1.4; color: var(--text); margin-top: 2.4mm; }
+.subj .calm b { color: var(--ink); }
+.subj .date { font-size: 8.2pt; color: var(--muted); margin-top: 2.2mm; }
+
+/* Fensterzone (links): Rücksendeangabe 46,5 mm, Anschrift ab 69 mm */
+.ret { left: 22mm; top: 46.5mm; width: 86mm; font-size: 6.6pt; color: var(--muted); border-bottom: 0.2mm solid #9aa4b1; padding-bottom: 0.4mm; white-space: nowrap; }
+.addr { left: 23mm; top: 69mm; width: 84mm; font-size: 10pt; line-height: 4.2mm; color: var(--ink); }
+
+/* Inhalt */
+.body { left: 20mm; right: 15mm; top: 93mm; }
+.greet { color: var(--ink); }
+.lead { margin-top: 1.2mm; }
+.lead b { color: var(--ink); }
+
+/* Bildbühne: weiche Fläche mit Laptop + Handy, daneben der QR-Kasten */
+.stage { display: flex; gap: 5mm; margin-top: 3.2mm; align-items: stretch; }
+.show { position: relative; flex: 1 1 auto; background: var(--soft); border-radius: 3.5mm; overflow: hidden; }
+.show .tag { position: absolute; left: 4mm; top: 3.4mm; font-size: 6.8pt; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.laptop { position: absolute; left: 9mm; top: 10mm; width: 85mm; }
+.laptop .screen { border: 1.5mm solid #111820; border-bottom-width: 2.1mm; border-radius: 2.4mm 2.4mm 0 0; overflow: hidden; background: #111820; }
+.laptop .screen img { display: block; width: 100%; }
+.laptop .base { height: 3mm; margin: 0 -5mm; background: linear-gradient(#dfe3e9, #b3bbc5); border-radius: 0 0 3mm 3mm; position: relative; box-shadow: 0 1.4mm 2.6mm rgba(16,23,32,0.16); }
+.laptop .base::after { content: ''; position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 16mm; height: 1.1mm; background: #9aa3af; border-radius: 0 0 1.5mm 1.5mm; }
+.phone { position: absolute; left: 86mm; top: 9.5mm; width: 23mm; border-radius: 3.8mm; background: #111820; padding: 1mm; box-shadow: 0 1.6mm 4mm rgba(16,23,32,0.30); }
+.phone .scr { border-radius: 2.9mm; overflow: hidden; position: relative; }
+.phone .scr img { display: block; width: 100%; }
+.phone .notch { position: absolute; top: 0.8mm; left: 50%; transform: translateX(-50%); width: 6.5mm; height: 1.6mm; border-radius: 1mm; background: #111820; }
+.qr { flex: 0 0 52mm; border: 0.6mm solid var(--navy); border-radius: 3.5mm; background: #fff; padding: 2.6mm 3mm 2.4mm;
+  display: flex; flex-direction: column; align-items: center; text-align: center; }
+.qr .go { font-size: 11pt; font-weight: 800; color: var(--navy); }
+.qr img { width: 40mm; height: 40mm; margin: 1.4mm 0 1.2mm; }
+.qr .hint { font-size: 7.4pt; color: var(--text); line-height: 1.28; }
+.qr .url { font-size: 7.4pt; font-weight: 700; color: var(--ink); margin-top: 0.8mm; }
+
+/* Drei Schritte */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; margin-top: 3.6mm; }
+.step { border-top: 0.6mm solid var(--navy); padding-top: 2mm; }
+.step .t { display: flex; align-items: center; gap: 1.8mm; font-weight: 800; color: var(--ink); font-size: 10pt; }
+.step .n { width: 5mm; height: 5mm; border-radius: 50%; background: var(--navy); color: #fff; font-size: 7.5pt; line-height: 5mm; text-align: center; flex: 0 0 auto; }
+.step p { font-size: 8.6pt; line-height: 1.36; margin-top: 1mm; color: var(--text); }
+.step .nw { white-space: nowrap; font-size: 8pt; }
+
+.txt { margin-top: 3.2mm; }
+.txt p + p { margin-top: 2mm; }
+.txt b { color: var(--ink); }
+.until { border-left: 1mm solid var(--navy); background: var(--soft); border-radius: 0 2mm 2mm 0; padding: 2mm 3.5mm; }
+.until b { color: var(--navy); }
+
+.sign { display: flex; gap: 6mm; margin-top: 2.4mm; align-items: flex-start; }
+.sign .name { flex: 0 0 60mm; }
+.sign .hand { font-family: 'Hand', cursive; font-weight: 600; font-size: 18pt; color: var(--navy); line-height: 0.95; display: block; margin: 0.6mm 0 0.3mm; }
+.sign .typed { font-size: 8.6pt; color: var(--muted); }
+.sign .ps { flex: 1; border-left: 0.6mm solid var(--navy); padding-left: 3.5mm; font-size: 9.6pt; }
+
+.legal { left: 20mm; right: 15mm; bottom: 8mm; font-size: 6pt; line-height: 1.3; color: var(--muted); border-top: 0.25mm solid var(--line); padding-top: 1.6mm; }
+.legal p + p { margin-top: 0.9mm; }
+.legal b { color: var(--text); }
+</style>
+</head>
+<body>
+<section class="page">
+
+  <div class="abs brand"><img src="{{LOGO}}" alt="">SeitenWerk</div>
+  <div class="abs lh"><b>Doaa Attia</b><br>Websites für Handwerksbetriebe<br>Fürstenzell bei Passau<br>support@seitenwerk.world · seitenwerk.world</div>
+  <div class="abs rule"></div>
+
+  <div class="abs subj">
+    <div class="h">Ich habe für <span>Dachdeckerbetrieb Müller</span> schon eine Website gebaut – als Entwurf zum Ansehen.</div>
+    <div class="calm"><b>Ansehen kostet nichts und verpflichtet zu nichts.</b> Wenn Sie die Website behalten möchten, ist die Übernahme kostenpflichtig. Preis und Bedingungen sehen Sie vorher.</div>
+    <div class="date">17. November 2026</div>
+  </div>
+
+  <div class="abs ret">Doaa Attia · Wilhelm-Diess-Weg 3a · 94081 Fürstenzell</div>
+  <div class="abs addr">
+    An das Team von<br>
+    Dachdeckerbetrieb Müller<br>
+    Jobs-Böse-Straße 7<br>
+    37085 Göttingen
+  </div>
+
+  <div class="abs body">
+    <p class="greet">Guten Tag an das Team von Dachdeckerbetrieb Müller,</p>
+    <p class="lead">ich habe ohne Auftrag einen Entwurf für Ihre Website gebaut – mit Ihrem Namen, Ihrer Adresse und Ihrer Telefonnummer <b style="white-space:nowrap">0551 793785</b>. Ich schreibe Ihnen, weil ich im Netz keine eigene Website von Ihnen gefunden habe. <b>Ansehen geht in einer Minute mit dem Code rechts.</b></p>
+
+    <div class="stage">
+      <div class="show">
+        <div class="tag">Entwurf · Startseite Dachdeckerbetrieb Müller</div>
+        <div class="laptop"><div class="screen"><img src="{{DESK}}" alt="Entwurf am Computer"></div><div class="base"></div></div>
+        <div class="phone"><div class="scr"><img src="{{MOB}}" alt="Entwurf auf dem Handy"><div class="notch"></div></div></div>
+      </div>
+      <div class="qr">
+        <div class="go">Entwurf ansehen</div>
+        <img src="{{QR}}" alt="QR-Code zum Entwurf">
+        <div class="hint">Handykamera auf den Code halten.<br>Ohne Anmeldung, eine Minute.</div>
+        <div class="url">seitenwerk.world/k7m2xq</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step"><div class="t"><span class="n">1</span>Ansehen</div><p>Code scannen, Entwurf in Ruhe anschauen. Kostenlos, ohne Anmeldung.</p></div>
+      <div class="step"><div class="t"><span class="n">2</span>Anpassen</div><p>Was nicht passt, ändere ich vor dem Kauf – auch das kostet nichts.</p></div>
+      <div class="step"><div class="t"><span class="n">3</span>Übernehmen</div><p>Kostenpflichtig, Preis sehen Sie vorher. Online erst nach Ihrer Freigabe.</p></div>
+    </div>
+
+    <div class="txt">
+      <p><b>Warum ich zuerst baue:</b> Eine Website beurteilt man am besten, wenn man sie sieht – in Ruhe und ohne Gespräch. Die Bilder sind Beispielbilder, bei Google ist der Entwurf nicht zu finden.</p>
+      <p class="until"><b>Der Entwurf ist bis Donnerstag, 17. Dezember, online.</b> Danach nehme ich ihn vom Netz. Wenn Sie nichts tun, entstehen Ihnen keine Kosten.</p>
+      <p>Niemand ruft Sie an, niemand kommt vorbei. Fragen gern per E-Mail an support@seitenwerk.world. Kein Interesse? Eine kurze E-Mail genügt, dann kommt keine Post mehr.</p>
+    </div>
+
+    <div class="sign">
+      <div class="name">Freundliche Grüße<span class="hand">Doaa Attia</span><span class="typed">Doaa Attia · SeitenWerk</span></div>
+      <div class="ps"><b>P. S.</b> Ansehen dauert eine Minute. Der Entwurf ist bis 17. Dezember online – danach ist er weg.</div>
+    </div>
+  </div>
+
+  <div class="abs legal">
+    <p>Unverbindlicher, nicht beauftragter Entwurf von SeitenWerk. <b>Datenschutz (Art. 14 DSGVO):</b> Verantwortlich: Doaa Attia, SeitenWerk, Wilhelm-Diess-Weg 3a, 94081 Fürstenzell, support@seitenwerk.world. Ihre Firmenanschrift stammt aus öffentlichen Firmeneinträgen (OpenStreetMap, © OpenStreetMap-Mitwirkende, ODbL) und wird für diese Briefwerbung genutzt (höchstens 3 Briefe; Art. 6 Abs. 1 lit. f DSGVO, berechtigtes Interesse an Direktwerbung). Empfänger: Druck- und Versanddienstleister, Hosting-Anbieter. Ohne Reaktion löschen wir die Daten spätestens 6 Monate nach dem letzten Brief. Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung und Beschwerde bei einer Aufsichtsbehörde. Mehr: seitenwerk.world/datenschutz</p>
+    <p><b>Widerspruch (Art. 21 DSGVO):</b> Sie können dieser Werbung jederzeit widersprechen – per E-Mail an widerspruch@seitenwerk.world oder mit „Kein Interesse“ in der Vorschau. Dann bekommen Sie keine Post mehr von uns.</p>
+  </div>
+
+</section>
+</body>
+</html>
