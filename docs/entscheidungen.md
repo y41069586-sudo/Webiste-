@@ -1805,5 +1805,8 @@ Betreiber: „Veröffentlichen einbauen“ nach den Berichten `reports/Oberes Dr
 **Kurz-Links:** Die Landingpage `seitenwerk.world` leitet `/q/*`, `/quellen` und `/{kurzcode}` per 302 an die App weiter
 (vorhandene Seiten haben Vorrang). Upload-Deploy `6afaed5b4559d4f12e955068` ist bereit, aber noch nicht veröffentlicht
 (die Seite schaltet neue Deploys nicht automatisch live). Erst danach `TRACK_DOMAIN=seitenwerk.world` im Worker setzen.
+Nachtrag 16.11.: Betreiber hat den Deploy veröffentlicht; geprüft: `/q/…`, `/quellen`, `/{kurzcode}` leiten per 302 an
+die App, `/agb/`, `/datenschutz/` und `/` liefern 200, die Telefonnummer steht nicht mehr auf der Datenschutzseite.
+Befehl für den Worker (`TRACK_DOMAIN=seitenwerk.world` in `.env.worker`, Update auf `3c3e4ca…`) an den Betreiber gegeben.
 Mit diesem Deploy verschwindet auch die private Telefonnummer von der Datenschutzseite der Landingpage (der Bau nimmt die
 öffentlichen Einstellungen jetzt aus `LAUNCH_CONFIG_JSON`, weil das alte Supabase-Projekt HTTP 402 meldet).
