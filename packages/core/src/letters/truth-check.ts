@@ -104,6 +104,7 @@ export function letterBodyText(l: TruthCheckInput['letter']): string {
         l.standard4.tag,
         l.standard4.qrHint,
         l.standard4.until,
+        l.standard4.subline ?? '',
         ...l.standard4.steps.flatMap((s) => [s.title, s.text]),
       ]
     : [];

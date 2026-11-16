@@ -311,8 +311,9 @@ export const appConfigSchema = z.object({
     /**
      * Briefdesign für Erstbriefe im V4-Angebot (16.11.2026): „standard-4“ = Betreff neben der Anschrift, Bildbühne mit
      * Laptop und Handy, drei Schritte, feste geprüfte Texte ohne KI-Formulierung; „standard-3“ = bisherige Vorlage.
+     * 16.11.2026: „standard-5“ = Entwurf Version 8 (Name zuerst, Grund als Einstieg, dunkle Bühne, Kalenderblatt).
      */
-    design: z.enum(['standard-3', 'standard-4']).default('standard-4'),
+    design: z.enum(['standard-3', 'standard-4', 'standard-5']).default('standard-5'),
     /** Test-Empfänger für den allerersten echten Brief */
     testRecipient: z.object({
       name: z.string(),
@@ -889,7 +890,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     truthCheckBlocklist: [],
     maxStatistics: 2,
     lossStatistic: false,
-    design: 'standard-4',
+    design: 'standard-5',
     testRecipient: {
       name: '',
       street: '',

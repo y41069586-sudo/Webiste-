@@ -1810,3 +1810,12 @@ die App, `/agb/`, `/datenschutz/` und `/` liefern 200, die Telefonnummer steht n
 Befehl für den Worker (`TRACK_DOMAIN=seitenwerk.world` in `.env.worker`, Update auf `3c3e4ca…`) an den Betreiber gegeben.
 Mit diesem Deploy verschwindet auch die private Telefonnummer von der Datenschutzseite der Landingpage (der Bau nimmt die
 öffentlichen Einstellungen jetzt aus `LAUNCH_CONFIG_JSON`, weil das alte Supabase-Projekt HTTP 402 meldet).
+
+**Briefvorlage 5** (16.11.2026, Betreiber „Version 8 einbauen“; neuer Standard `letter.design = 'standard-5'`):
+Entwurf Version 8 aus `reports/brief-v5/`. Betreff mit dem Betriebsnamen zuerst („Dachdecker Müller, ich habe Ihre
+Website schon gebaut – als Entwurf.“), Unterzeile „Ein Scan, und Sie sehen sie.“, Einstieg mit dem belegten Grund,
+dunkle Bildbühne mit Pfeil zum QR-Code („Hier scannen“), drei Schritte, Frist mit Kalenderblatt („bis 17. Dezember
+online … Danach nehme ich ihn vom Netz“), P. S. „Wenn Sie nicht scannen, erfahren Sie nie …“. Kostenhinweis, Pflichttexte
+(8 pt), Fensterzone, Wahrheits-Check und Belegregeln wie Vorlage 4. Die Frist ohne Jahr ist als Platzhalter zugelassen.
+Zurückschalten: Einstellungen → Briefdesign `standard-4` oder `standard-3`. Ein A/B-Vergleich 4 gegen 5 wäre bei
+40 Briefen statistisch nicht aussagekräftig; deshalb vorerst nur Vorlage 5.

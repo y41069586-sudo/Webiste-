@@ -27,6 +27,8 @@ export interface Standard4Input {
   listedWithoutWebsite?: boolean;
   mobileDataUri?: string | null;
   expiresLabel: string;
+  /** „standard-5“ = Entwurf Version 8 (Name zuerst, dunkle Bühne, Kalenderblatt); Standard: Vorlage 4 */
+  style?: 'standard-4' | 'standard-5';
 }
 
 /** „Müller“ allein wirkt im Betreff wie ein Personenname: einzelne Wörter bekommen die Branche davor. */
@@ -64,8 +66,77 @@ export const STANDARD4_CALM =
 export const STANDARD4_WHY =
   '**Warum ich zuerst baue:** Eine Website beurteilt man am besten, wenn man sie sieht – in Ruhe und ohne Gespräch. Die Bilder sind Beispielbilder, bei Google ist der Entwurf nicht zu finden.';
 
+export const STANDARD5_VERSION = 'seitenwerk-standard-5';
+
+const MONTHS = ['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'];
+const MONTH_NAMES = [
+  'Januar',
+  'Februar',
+  'März',
+  'April',
+  'Mai',
+  'Juni',
+  'Juli',
+  'August',
+  'September',
+  'Oktober',
+  'November',
+  'Dezember',
+];
+
+/** Kalenderblatt aus „17. Dezember 2026“; ohne erkennbares Datum kein Blatt. */
+export function calendarLeaf(expiresLabel: string): { month: string; day: string } | undefined {
+  const m = /^(\d{1,2})\.\s+([A-Za-zÄÖÜäöü]+)/.exec(expiresLabel.trim());
+  const idx = m ? MONTH_NAMES.indexOf(m[2]!) : -1;
+  return m && idx >= 0 ? { day: m[1]!, month: MONTHS[idx]! } : undefined;
+}
+
+/** „17. Dezember 2026“ → „17. Dezember“ (im Jahr des Briefs eindeutig). */
+function shortDate(expiresLabel: string): string {
+  return expiresLabel.replace(/\s+\d{4}$/, '').trim();
+}
+
+/** Vorlage 5 (Entwurf Version 8): Einstieg mit dem Grund, Name zuerst im Betreff, Kalenderblatt. */
+function applyStandard5(data: LetterData, i: Standard4Input): void {
+  applyStandard4(data, { ...i, style: 'standard-4' });
+  const s = data.standard4!;
+  const phone = i.recipientPhone?.trim();
+  const reason = standard4Reason(i);
+  const who = `mit Ihrem Namen, Ihrer Adresse${phone ? ` und Ihrer Telefonnummer **${phone}**` : ''}`;
+  const opening = reason.includes('im Netz')
+    ? 'ich habe im Netz keine eigene Website von Ihnen gefunden. Also habe ich eine gebaut,'
+    : reason
+      ? 'in öffentlichen Firmeneinträgen ist zu Ihrem Betrieb keine Website hinterlegt. Also habe ich eine gebaut,'
+      : 'ich habe für Ihren Betrieb eine Website gebaut,';
+  data.subject = `${s.displayName}, ich habe Ihre Website schon gebaut – als Entwurf.`;
+  data.intro = [`${opening} ohne Auftrag und bevor Sie mich kennen: ${who}. **Sie ist online und wartet nur auf Ihren Blick.**`];
+  data.qrCaption = 'Hier scannen';
+  data.offer = '';
+  data.postscript =
+    '**P. S.** Wenn Sie nicht scannen, erfahren Sie nie, wie Ihr Betrieb im Internet aussehen könnte. **Ein Blick dauert eine Minute.**';
+  const leaf = calendarLeaf(i.expiresLabel);
+  data.standard4 = {
+    ...s,
+    style: 'standard-5',
+    headlineBefore: '',
+    headlineAfter: 'ich habe Ihre Website schon gebaut – als Entwurf.',
+    subline: 'Ein Scan, und Sie sehen sie.',
+    tag: 'Entwurf · Ausschnitt der Startseite',
+    qrHint: 'Handykamera draufhalten. Eine Minute.',
+    until: `**Ihr Entwurf ist bis ${shortDate(i.expiresLabel)} online.** Danach nehme ich ihn vom Netz – mit allem, was ich für Sie gebaut habe. Die Bilder darin sind Beispielbilder, bei Google ist er nicht zu finden.`,
+    ...(leaf ? { leaf } : {}),
+  };
+  data.copyEvidence = {
+    ...data.copyEvidence!,
+    version: STANDARD5_VERSION,
+    profile: 'standard-5',
+    reviewReasons: ['Standardvorlage 5: feste Texte; Entwurf, Screenshots und Anschrift vor der Freigabe ansehen.'],
+  };
+}
+
 /** Füllt die Felder der Vorlage 4 in `data` (Fließtext bleibt in den geprüften Standardfeldern). */
 export function applyStandard4(data: LetterData, i: Standard4Input): void {
+  if (i.style === 'standard-5') return applyStandard5(data, i);
   const sourceName = i.personalization?.businessName ?? i.businessName;
   const displayName = standard4DisplayName(sourceName, i.branchLabel ?? i.personalization?.branchLabel);
   const phone = i.recipientPhone?.trim();
@@ -132,6 +203,7 @@ export function standard4FixedTexts(data: LetterData): string[] {
     data.postscript ?? '',
     s.calm,
     s.until,
+    s.subline ?? '',
     ...s.steps.map((st) => st.text),
   ].filter(Boolean);
 }

@@ -32,7 +32,8 @@ const img = (p?: string) => (p ? `data:image/jpeg;base64,${readFileSync(p).toStr
 
 const cfg = structuredClone(DEFAULT_CONFIG);
 cfg.offers.activeVersion = 'v4';
-cfg.letter.design = 'standard-4';
+// Design wählbar: LETTER_DESIGN=standard-4 oder standard-5 (Standard)
+cfg.letter.design = process.env.LETTER_DESIGN === 'standard-4' ? 'standard-4' : 'standard-5';
 cfg.sender = {
   ...cfg.sender,
   name: 'Doaa Attia',
@@ -49,7 +50,7 @@ const input: ComposeInput = {
   variant: v4LetterVariant('handwerk', 'A'),
   cfg,
   sequence: 1,
-  design: 'standard-4',
+  design: cfg.letter.design,
   recipient: { businessName: 'Müller', street: 'Jobs-Böse-Straße', houseNumber: '7', postalCode: '37085', city: 'Göttingen' },
   branchLabel: 'Dachdecker',
   industry: 'handwerk',

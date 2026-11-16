@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { boldMd, esc } from './html';
 import { renderStandard4Html } from './letter-standard4';
+import { renderStandard5Html } from './letter-standard5';
 
 /**
  * Brief-Layout (A4, DIN 5008 Form B, Fensterumschlag links) nach den Flächen, die easyNova für dieses Konto meldet
@@ -137,6 +138,11 @@ export interface LetterStandard4 {
   senderTagline: string;
   /** Kurzer Hinweis vor dem Datenschutztext */
   legalPrefix: string;
+  /** Vorlage 5 (Entwurf Version 8): Name zuerst, Unterzeile, dunkle Bühne, Kalenderblatt */
+  style?: 'standard-4' | 'standard-5';
+  subline?: string;
+  /** Kalenderblatt zur Frist, z. B. { month: 'DEZ', day: '17' } */
+  leaf?: { month: string; day: string };
 }
 
 let fontCss: string | undefined;
@@ -156,6 +162,7 @@ export function embeddedFontCss(): string {
 }
 
 export function renderLetterHtml(d: LetterData): string {
+  if (d.standard4?.style === 'standard-5') return renderStandard5Html(d, d.standard4);
   if (d.standard4) return renderStandard4Html(d, d.standard4);
   const estimatedHeight =
     Math.ceil(d.subject.length / 72) * 5.4 +

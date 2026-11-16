@@ -239,9 +239,9 @@ export const SECTIONS: SectionDef[] = [
       { path: 'letter.includeScreenshotPage', label: 'Seite 2 mit Screenshots', type: 'bool' },
       {
         path: 'letter.design',
-        label: 'Briefdesign Erstbrief (standard-4 = neu, standard-3 = bisher)',
+        label: 'Briefdesign Erstbrief (standard-5 = Version 8, standard-4, standard-3 = alt)',
         type: 'text',
-        hint: 'standard-4 oder standard-3',
+        hint: 'standard-5, standard-4 oder standard-3',
       },
       { path: 'letter.addressPosition', label: 'Anschriftenfeld (left = DE)', type: 'text' },
       { path: 'letter.maxLettersPerLead', label: 'Max. Sendungen pro Lead (1–3)', type: 'number' },

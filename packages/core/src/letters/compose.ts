@@ -102,7 +102,7 @@ export interface ComposeInput {
   /** Quellenangaben der eingesetzten Claims (Slot-Varianten) */
   footnotes?: string[];
   /** Briefdesign; „standard-4“ gilt nur für den V4-Erstbrief mit Anschriftenfeld links */
-  design?: 'standard-3' | 'standard-4';
+  design?: 'standard-3' | 'standard-4' | 'standard-5';
   /** Vorlage 4: Telefonnummer des Betriebs, nur wenn sie im ausgelieferten Entwurf steht */
   recipientPhone?: string | null;
   /** Vorlage 4: Handy-Ansicht des Entwurfs */
@@ -115,7 +115,7 @@ export interface ComposeInput {
 /** Vorlage 4 greift nur beim V4-Erstbrief mit Anschrift links (DIN 5008 / easyNova). */
 export function usesStandard4(i: Pick<ComposeInput, 'design' | 'cfg' | 'sequence'>): boolean {
   return (
-    i.design === 'standard-4' &&
+    (i.design === 'standard-4' || i.design === 'standard-5') &&
     i.cfg.offers.activeVersion === 'v4' &&
     (i.sequence ?? 1) === 1 &&
     i.cfg.letter.addressPosition === 'left'
@@ -238,6 +238,8 @@ export function placeholderValues(i: ComposeInput): string[] {
       i.cfg.sender.email,
       ...(usesStandard4(i) && i.recipientPhone?.trim() ? [i.recipientPhone.trim()] : []),
       ...(usesStandard4(i) && i.personalization ? [i.personalization.businessName] : []),
+      // Vorlage 5 nennt die Frist ohne Jahr („bis 17. Dezember online“)
+      ...(usesStandard4(i) ? [i.expiresLabel.replace(/\s+\d{4}$/, '')] : []),
       ...(i.personalization
         ? reviewedLetterDetails(i.personalization)
             .filter((f) => f.kind !== 'website_search')
@@ -387,6 +389,7 @@ export function composeLetter(i: ComposeInput): LetterData {
         listedWithoutWebsite: i.listedWithoutWebsite,
         mobileDataUri: i.mobileDataUri,
         expiresLabel: i.expiresLabel,
+        style: i.design === 'standard-5' ? 'standard-5' : 'standard-4',
       });
   }
   return data;

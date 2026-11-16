@@ -5,6 +5,8 @@ import { composeLetter, placeholderValues, letterTruthBlocklist, usesStandard4, 
 import { v4LetterVariant } from '../src/letters/conversion-v4';
 import {
   STANDARD4_VERSION,
+  STANDARD5_VERSION,
+  calendarLeaf,
   standard4DisplayName,
   standard4FixedTexts,
   standard4ObjectionNotice,
@@ -45,7 +47,7 @@ async function input(over: Partial<ComposeInput> = {}): Promise<ComposeInput> {
     variant: v4LetterVariant('handwerk', 'A'),
     cfg,
     sequence: 1,
-    design: cfg.letter.design,
+    design: 'standard-4',
     recipient: { businessName: 'Müller', street: 'Jobs-Böse-Straße', houseNumber: '7', postalCode: '37085', city: 'Göttingen' },
     branchLabel: 'Dachdecker',
     industry: 'handwerk',
@@ -75,7 +77,7 @@ afterAll(async () => {
 describe('Standardvorlage 4', () => {
   it('ist Standard für den V4-Erstbrief, nicht für Folgebriefe, Altangebot oder rechtes Anschriftenfeld', async () => {
     const i = await input();
-    expect(DEFAULT_CONFIG.letter.design).toBe('standard-4');
+    expect(DEFAULT_CONFIG.letter.design).toBe('standard-5');
     expect(usesStandard4(i)).toBe(true);
     expect(usesStandard4({ ...i, sequence: 2 })).toBe(false);
     expect(usesStandard4({ ...i, design: 'standard-3' })).toBe(false);
@@ -167,5 +169,50 @@ describe('Standardvorlage 4', () => {
     expect(text).toMatch(/Art\. 14 DSGVO/);
     expect(text).toMatch(/Art\. 21 DSGVO/);
     expect(text).not.toMatch(/Sperrhash/);
+  }, 60000);
+
+  it('Vorlage 5: Name zuerst, Grund als Einstieg, Kalenderblatt, ohne Preise, Wahrheits-Check bestanden', async () => {
+    const i = await input({ design: 'standard-5' });
+    expect(usesStandard4(i)).toBe(true);
+    const data = composeLetter(i);
+    expect(data.copyEvidence?.version).toBe(STANDARD5_VERSION);
+    expect(data.standard4?.style).toBe('standard-5');
+    expect(data.subject).toBe('Dachdecker Müller, ich habe Ihre Website schon gebaut – als Entwurf.');
+    expect(data.intro[0]).toMatch(
+      /^in öffentlichen Firmeneinträgen ist zu Ihrem Betrieb keine Website hinterlegt\. Also habe ich eine gebaut/,
+    );
+    expect(data.standard4!.calm).toMatch(/Übernahme kostenpflichtig/);
+    expect(data.standard4!.leaf).toEqual({ month: 'DEZ', day: '17' });
+    expect(data.standard4!.until).toContain('bis 17. Dezember online');
+    expect(letterBodyText(data)).not.toMatch(/€|\bEuro\b|Care\+|Basis|Komplett/);
+    const truth = checkLetterTruth({
+      letter: data,
+      claimSpans: [],
+      claims: [],
+      allowedClaimIds: [],
+      industry: 'handwerk',
+      placeholderValues: placeholderValues(i),
+      sourcesLabel: 'seitenwerk.world/quellen',
+      extraBlocklist: letterTruthBlocklist(i.cfg),
+    });
+    expect(truth.violations).toEqual([]);
+    expect(calendarLeaf('3. März 2027')).toEqual({ month: 'MÄR', day: '3' });
+    expect(calendarLeaf('irgendwann')).toBeUndefined();
+  });
+
+  it('Vorlage 5 passt mit echter Layoutprüfung auf eine Seite', async () => {
+    const i = await input({ design: 'standard-5' });
+    const data = composeLetter(i);
+    const { html, domIssues } = await fitLetterLayout(data, i.cfg);
+    expect(domIssues).toEqual([]);
+    expect(html).toContain('std5-page');
+    const pdf = await htmlToPdf(html);
+    const text = (await pdfTextItems(pdf)).items
+      .map((t) => t.str)
+      .join(' ')
+      .replace(/\s+/g, ' ');
+    expect(text).toMatch(/Übernahme kostenpflichtig/);
+    expect(text).toMatch(/Hier scannen/);
+    expect(text).toMatch(/Art\. 14 DSGVO/);
   }, 60000);
 });
