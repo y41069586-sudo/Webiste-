@@ -26,7 +26,15 @@ beforeEach(async () => {
   registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
   await resetDb();
   await resetVariants();
-  await updateConfig({ offers: { activeVersion: 'v4' }, targeting: { branches: DEFAULT_CONFIG.targeting.branches } }, 'test');
+  // Prüft Branchenprofile der KI-Formulierung (Standardvorlage 3); Vorlage 4 hat feste Texte
+  await updateConfig(
+    {
+      offers: { activeVersion: 'v4' },
+      letter: { design: 'standard-3' },
+      targeting: { branches: DEFAULT_CONFIG.targeting.branches },
+    },
+    'test',
+  );
   await getDb().update(variants).set({ active: false, status: 'paused' }).where(eq(variants.kind, 'letter'));
   await getDb().update(variants).set({ active: true, status: 'active' }).where(eq(variants.name, 'V4 handwerk A'));
 });

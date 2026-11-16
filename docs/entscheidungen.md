@@ -1773,3 +1773,37 @@ SQL-Editor des neuen Projekts (Mitgliedschaft mit SET, Eigentümer von Schema, T
 39 s; Demos laden ohne Notbetrieb in 0,7–1,4 s. Offen: Die nächtliche Sicherung bleibt aus; der Supabase-Connector dieser
 Sitzung sieht nur die alte Organisation, Datenbankabfragen durch Claude brauchen Zugriff auf „Website Sale“.
 Für künftige Umzüge gehört der pgboss-Eigentümerwechsel in `move-supabase.sh`.
+
+## 16.11.2026 – Briefvorlage 4, Kurz-Links über seitenwerk.world
+
+Betreiber: „Veröffentlichen einbauen“ nach den Berichten `reports/Oberes Drittel im Werbebrief.md` und
+`reports/Brief Version 4 Gesamtanalyse.md` (Entwürfe Version 1–6 in `reports/brief-v5/`).
+
+**Briefvorlage 4** (`letter.design = 'standard-4'`, Standard für den V4-Erstbrief mit Anschrift links):
+
+- Oberes Drittel: ruhiger Briefkopf der Betreiberin, rechts neben der Anschrift der Betreff „Ich habe für {Betrieb}
+  schon eine Website gebaut – als Entwurf zum Ansehen.“, direkt darunter „Ansehen kostet nichts … Übernahme
+  kostenpflichtig, Preis und Bedingungen sehen Sie vorher.“ Grund: Kosten nur im Kleingedruckten ist das Muster der
+  Formularfallen (IHK); § 5a UWG.
+- Bildbühne mit echtem Desktop- und Handy-Screenshot der Demo, QR-Kasten ≥ 40 mm, drei Schritte Ansehen → Anpassen →
+  Übernehmen, Begründung, „bis {statedExpiresAt} online“, Kontakt nur per E-Mail, Unterschrift, P. S.
+- Feste, geprüfte Texte (`packages/core/src/letters/standard4.ts`), keine KI-Formulierung je Brief, keine Preise.
+- Grund-Satz nur mit Beleg: Website-Recherche „nicht gefunden“ → „im Netz keine eigene Website gefunden“; sonst
+  Lead-Quelle ohne Website → „in öffentlichen Firmeneinträgen … keine Website hinterlegt“; ohne Beleg kein Grund-Satz.
+- Telefonnummer des Betriebs nur, wenn sie im ausgelieferten Demo-HTML steht. Einzelne Namen („Müller“) bekommen die
+  Branche davor („Dachdecker Müller“); die Anschrift bleibt unverändert.
+- Wahrheits-Check prüft auch Betreff-Zusatz, Schritte und Frist; die festen Texte sind für die KI-Prüfung als Vorlage
+  markiert, Sperrliste und Zahlenprüfung gelten weiter. Die Kernbotschaft der Vorlage 3 ist nur dort Pflicht.
+- Pflichtinformationen in 8 pt (neue Layoutprüfung `std4-page`, wie die V4-Angebotsseite), Art.-14-Hinweis in kürzerer
+  Form mit denselben Pflichtangaben, Widerspruch ohne „Sperrhash“. Keine juristische Freigabe behauptet.
+- Gedruckter gelber Klebezettel bewusst nicht: belegt ist nur der echte, handgeschriebene (Garner 2005, Irish Revenue
+  2013), für gedruckte Nachahmungen gibt es keinen Test. Unterschrift vorerst als Handschrift-Schrift (Caveat, OFL),
+  bis eine eingescannte echte Unterschrift vorliegt.
+- Zurückschalten: Einstellungen → `letter.design = standard-3`. Tests der Vorlage 3 setzen das ausdrücklich.
+- Muster ohne Datenbank: `pnpm --filter @wbm/core exec tsx scripts/letter-standard4-sample.ts <pdf> [desktop] [mobil]`.
+
+**Kurz-Links:** Die Landingpage `seitenwerk.world` leitet `/q/*`, `/quellen` und `/{kurzcode}` per 302 an die App weiter
+(vorhandene Seiten haben Vorrang). Upload-Deploy `6afaed5b4559d4f12e955068` ist bereit, aber noch nicht veröffentlicht
+(die Seite schaltet neue Deploys nicht automatisch live). Erst danach `TRACK_DOMAIN=seitenwerk.world` im Worker setzen.
+Mit diesem Deploy verschwindet auch die private Telefonnummer von der Datenschutzseite der Landingpage (der Bau nimmt die
+öffentlichen Einstellungen jetzt aus `LAUNCH_CONFIG_JSON`, weil das alte Supabase-Projekt HTTP 402 meldet).

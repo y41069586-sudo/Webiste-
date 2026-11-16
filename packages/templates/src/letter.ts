@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { boldMd, esc } from './html';
+import { renderStandard4Html } from './letter-standard4';
 
 /**
  * Brief-Layout (A4, DIN 5008 Form B, Fensterumschlag links) nach den Flächen, die easyNova für dieses Konto meldet
@@ -109,6 +110,33 @@ export interface LetterData {
   addressPosition: 'left' | 'right';
   /** Optionale Seite 2 mit großen Screenshots */
   screenshotPage?: { desktopDataUri: string; mobileDataUri: string } | null;
+  /**
+   * Standardvorlage 4 (16.11.2026, Betreiber „Einbauen“): Betreff rechts neben der Anschrift, Bildbühne mit Laptop und
+   * Handy, drei Schritte. Fließtext steht weiter in subject/greeting/intro/offer/noAction/postscript (Wahrheits-Check).
+   */
+  standard4?: LetterStandard4;
+}
+
+export interface LetterStandard4 {
+  /** Angezeigter Name des Betriebs, z. B. „Dachdecker Müller“ */
+  displayName: string;
+  /** Betreff in zwei Teilen um den hervorgehobenen Namen */
+  headlineBefore: string;
+  headlineAfter: string;
+  /** Beruhigender Satz unter dem Betreff (mit **fett**) */
+  calm: string;
+  /** Etikett über den Geräten, z. B. „Entwurf · Startseite Dachdecker Müller“ */
+  tag: string;
+  /** Handy-Ansicht der Demo; ohne sie zeigt die Bühne nur den Laptop */
+  mobileDataUri: string | null;
+  qrHint: string;
+  steps: { title: string; text: string }[];
+  /** Hinweis „bis … online“ (mit **fett**) */
+  until: string;
+  /** Zeile unter dem Namen im Briefkopf, z. B. „Websites für Handwerksbetriebe“ */
+  senderTagline: string;
+  /** Kurzer Hinweis vor dem Datenschutztext */
+  legalPrefix: string;
 }
 
 let fontCss: string | undefined;
@@ -128,6 +156,7 @@ export function embeddedFontCss(): string {
 }
 
 export function renderLetterHtml(d: LetterData): string {
+  if (d.standard4) return renderStandard4Html(d, d.standard4);
   const estimatedHeight =
     Math.ceil(d.subject.length / 72) * 5.4 +
     Math.ceil(d.intro.join(' ').length / 105) * 4.7 +

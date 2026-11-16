@@ -39,7 +39,8 @@ describe('Ablauf von Lead bis Zahlung (Mocks)', () => {
     clearDomainCache();
     setSiteProbeForTests(async () => true);
     // Demo und Brief entstehen im Testmodus wie in task2-letter; erst der Versand läuft mit DRY_RUN=false
-    await updateConfig({ offers: { activeVersion: 'v4' }, switches: { dryRun: true } }, 'test');
+    // Dieser Ablauf prüft ausdrücklich die Standardvorlage 3 (Kernbotschaft); Vorlage 4 hat eigene Tests
+    await updateConfig({ offers: { activeVersion: 'v4' }, letter: { design: 'standard-3' }, switches: { dryRun: true } }, 'test');
     await findLeads({ actor: 'test', cities: ['Dortmund'] });
     const lead = (
       await getDb()

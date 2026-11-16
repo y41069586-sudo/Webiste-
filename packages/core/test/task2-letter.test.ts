@@ -49,7 +49,8 @@ describe('V4 actual generation, reviewed facts and immutable print assignment', 
     registerMockStructured(QA_TOOL_NAME, () => studioQaFixture());
     await resetDb();
     await resetVariants();
-    await updateConfig({ offers: { activeVersion: 'v4' }, switches: { dryRun: true } }, 'test');
+    // Prüft die KI-Formulierung mit belegten Leistungen (Standardvorlage 3); Vorlage 4 hat feste Texte
+    await updateConfig({ offers: { activeVersion: 'v4' }, letter: { design: 'standard-3' }, switches: { dryRun: true } }, 'test');
     await findLeads({ actor: 'test', cities: ['Dortmund'] });
     lead = (
       await getDb()

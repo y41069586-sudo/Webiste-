@@ -140,6 +140,7 @@ export {
   returnAddressLine,
   type LetterData,
   type LetterSender,
+  type LetterStandard4,
 } from './letter';
 export {
   hasTaxNumber,

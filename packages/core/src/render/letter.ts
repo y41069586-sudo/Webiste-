@@ -25,9 +25,11 @@ import {
   placeholderValues,
   recipientLines,
   senderContactLine,
+  usesStandard4,
   type ComposeInput,
   type RecipientInput,
 } from '../letters/compose';
+import { standard4FixedTexts, standard4ObjectionNotice, standard4PrivacyNotice } from '../letters/standard4';
 import { renderSlots } from '../letters/slots';
 import type { TruthCheckResult } from '../letters/truth-check';
 import { getPlaybook } from '../playbooks';
@@ -106,6 +108,16 @@ export async function fitLetterLayout(
 ): Promise<{ html: string; domIssues: LayoutIssue[] }> {
   let html = renderLetterHtml(data);
   let domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
+  // Standardvorlage 4: erst enger setzen, dann das P. S. weglassen – nie Pflichttext, Schritte oder Kostenhinweis
+  if (data.standard4) {
+    for (const shorten of [() => (data.compact = true), () => (data.postscript = undefined)]) {
+      if (!domIssues.some((i) => i.check === 'ueberlappung')) break;
+      shorten();
+      html = renderLetterHtml(data);
+      domIssues = await validateLetterDom(html, cfg.letter.addressPosition);
+    }
+    return { html, domIssues };
+  }
   const dropFromIntro = (text: string, by = '') => {
     // als Satzteil (mit Leerzeichen davor) oder als eigener Absatz (KI-Fassung)
     if (data.intro)
@@ -362,7 +374,18 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     priceLabel: formatEuroShort(cfg.pricing.packageCents),
     screenshotPage,
     footnotes: slotRender?.footnotes,
+    design: cfg.letter.design,
+    industry: lead.industry ?? null,
+    listedWithoutWebsite: lead.hasWebsite === false,
   };
+  // Standardvorlage 4 (16.11.2026): feste geprüfte Texte, Bildbühne mit Desktop- und Handy-Ansicht der Demo
+  const std4 = usesStandard4(composeInput);
+  if (std4) {
+    composeInput.objectionNotice = standard4ObjectionNotice(getEnv().OPTOUT_EMAIL);
+    composeInput.privacyNotice = standard4PrivacyNotice(cfg, lead.source, appUrl('/datenschutz'), lead.sourceId);
+    const mobile = demo.screenshotMobileKey ? await storage.get(demo.screenshotMobileKey) : null;
+    composeInput.mobileDataUri = mobile?.length ? `data:image/jpeg;base64,${mobile.toString('base64')}` : null;
+  }
   let lossClaim: Awaited<ReturnType<typeof pickLossClaim>> = null;
   let lossSpan: { id: string; text: string } | null = null;
   if (cfg.offers.activeVersion === 'v4') {
@@ -378,17 +401,26 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     // 08.11.2026: auch bei Textbausteinen (Handwerk u. a.) zulassen; deren Beleg ist derselbe freigegebene Claim
     // 10.11.2026: Standardvorlage 3 trägt die Kernbotschaft (mögliches Risiko) fest in jedem Erstbrief, ohne Statistik
     // und ohne Fußnote. Die Statistik-Fassung bleibt im Code, ist aber abgeschaltet (cfg.letter.lossStatistic).
+    if (std4) {
+      const phone = lead.phone?.trim();
+      const digits = (v: string) => v.replace(/\D/g, '');
+      if (phone && digits(phone).length >= 6 && digits(demoHtml.toString('utf8')).includes(digits(phone)))
+        composeInput.recipientPhone = phone;
+    }
     lossClaim =
-      sequence === 1 && !opts.test && cfg.letter.lossStatistic === true ? await pickLossClaim(db, lead.industry ?? null) : null;
-    composeInput.invitationCopy = await writePreviewInvitation({
-      context: composeInput.personalization,
-      sequence,
-      variant: /Leistungen auf einen Blick/.test(composeInput.variant.subject) ? 'B' : 'A',
-      demoHtml: demoHtml.toString('utf8'),
-      leadId,
-      loss: Boolean(lossClaim),
-    });
-    if (lossClaim && composeInput.invitationCopy.copy.loss) {
+      !std4 && sequence === 1 && !opts.test && cfg.letter.lossStatistic === true
+        ? await pickLossClaim(db, lead.industry ?? null)
+        : null;
+    if (!std4)
+      composeInput.invitationCopy = await writePreviewInvitation({
+        context: composeInput.personalization,
+        sequence,
+        variant: /Leistungen auf einen Blick/.test(composeInput.variant.subject) ? 'B' : 'A',
+        demoHtml: demoHtml.toString('utf8'),
+        leadId,
+        loss: Boolean(lossClaim),
+      });
+    if (lossClaim && composeInput.invitationCopy?.copy.loss) {
       const r = lossClaimRendering(lossClaim, sourcesLabel);
       lossSpan = r.span;
       composeInput.lossLetter = true;
@@ -396,7 +428,7 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
       composeInput.footnotes = r.footnotes;
     } else lossClaim = null;
     // The new text must be based on the exact delivered document already attested by QA.
-    if (composeInput.invitationCopy.demoHash !== binding.htmlHash)
+    if (composeInput.invitationCopy && composeInput.invitationCopy.demoHash !== binding.htmlHash)
       throw Error('Demo während des Textabgleichs geändert; Brief erneut erstellen.');
   }
   const data = composeLetter(composeInput);
@@ -426,8 +458,9 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
         extraBlocklist: letterTruthBlocklist(cfg),
         maxStatistics: cfg.letter.maxStatistics,
         // Fester, versionierter Vorlagentext: nicht Gegenstand der KI-Prüfung (Sperrliste und Zahlenprüfung gelten weiter)
-        fixedTexts:
-          sequence === 1 && !opts.test
+        fixedTexts: data.standard4
+          ? standard4FixedTexts(data)
+          : sequence === 1 && !opts.test
             ? [
                 coreSalesMessage(composeInput.branchLabel ?? '', recipient.city),
                 shortCoreMessage(coreSalesMessage(composeInput.branchLabel ?? '', recipient.city)),
@@ -464,7 +497,14 @@ export async function generateLetter(leadId: string, sequence: 1 | 2 | 3, opts: 
     }
   }
   // Die Kernbotschaft muss im fertigen Erstbrief stehen (nicht nur in der Vorlage): sonst kein freigabefähiger Brief.
-  if (cfg.offers.activeVersion === 'v4' && sequence === 1 && data.copyEvidence && !lossSpan && !hasCoreMessage(data)) {
+  if (
+    cfg.offers.activeVersion === 'v4' &&
+    sequence === 1 &&
+    data.copyEvidence &&
+    !data.standard4 &&
+    !lossSpan &&
+    !hasCoreMessage(data)
+  ) {
     truth.passed = false;
     truth.violations.push({ rule: 'placeholder', detail: 'Kernbotschaft der Standardvorlage fehlt im Brieftext' });
   }

@@ -237,6 +237,12 @@ export const SECTIONS: SectionDef[] = [
         hint: 'z. B. cheap, fast',
       },
       { path: 'letter.includeScreenshotPage', label: 'Seite 2 mit Screenshots', type: 'bool' },
+      {
+        path: 'letter.design',
+        label: 'Briefdesign Erstbrief (standard-4 = neu, standard-3 = bisher)',
+        type: 'text',
+        hint: 'standard-4 oder standard-3',
+      },
       { path: 'letter.addressPosition', label: 'Anschriftenfeld (left = DE)', type: 'text' },
       { path: 'letter.maxLettersPerLead', label: 'Max. Sendungen pro Lead (1–3)', type: 'number' },
       { path: 'letter.testRecipient.name', label: 'Testbrief: Name', type: 'text' },

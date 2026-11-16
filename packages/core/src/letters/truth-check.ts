@@ -33,7 +33,10 @@ export interface ClaimForCheck {
 }
 
 export interface TruthCheckInput {
-  letter: Pick<LetterData, 'subject' | 'greeting' | 'intro' | 'offer' | 'noAction' | 'qrCaption' | 'closing' | 'postscript'> & {
+  letter: Pick<
+    LetterData,
+    'subject' | 'greeting' | 'intro' | 'offer' | 'noAction' | 'qrCaption' | 'closing' | 'postscript' | 'standard4'
+  > & {
     footnotes?: string[];
   };
   /** Eingesetzte Claim-Texte (inkl. Fußnotenziffer) */
@@ -94,7 +97,19 @@ function plain(s: string): string {
 }
 
 export function letterBodyText(l: TruthCheckInput['letter']): string {
-  return plain([l.subject, l.greeting, ...l.intro, l.offer, l.noAction, l.qrCaption, l.closing, l.postscript ?? ''].join('\n'));
+  // Standardvorlage 4: auch Betreff-Zusatz, Schritte und „online bis“ werden gedruckt und deshalb geprüft
+  const std4 = l.standard4
+    ? [
+        l.standard4.calm,
+        l.standard4.tag,
+        l.standard4.qrHint,
+        l.standard4.until,
+        ...l.standard4.steps.flatMap((s) => [s.title, s.text]),
+      ]
+    : [];
+  return plain(
+    [l.subject, l.greeting, ...l.intro, l.offer, l.noAction, l.qrCaption, l.closing, l.postscript ?? '', ...std4].join('\n'),
+  );
 }
 
 /** Deterministischer Teil (Schritte 1–4). */

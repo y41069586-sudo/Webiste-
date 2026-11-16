@@ -6,6 +6,7 @@ import {
   type VerifiedLetterContext,
 } from './personalization';
 import { DEFAULT_BLOCKLIST } from './truth-check';
+import { applyStandard4 } from './standard4';
 import { invitationContextHash, type WrittenInvitation } from './writer';
 import { v4PriceText } from '../services/offers-v4';
 import type { LetterData } from '@wbm/templates/letter-types';
@@ -100,6 +101,25 @@ export interface ComposeInput {
   screenshotPage?: LetterData['screenshotPage'];
   /** Quellenangaben der eingesetzten Claims (Slot-Varianten) */
   footnotes?: string[];
+  /** Briefdesign; „standard-4“ gilt nur für den V4-Erstbrief mit Anschriftenfeld links */
+  design?: 'standard-3' | 'standard-4';
+  /** Vorlage 4: Telefonnummer des Betriebs, nur wenn sie im ausgelieferten Entwurf steht */
+  recipientPhone?: string | null;
+  /** Vorlage 4: Handy-Ansicht des Entwurfs */
+  mobileDataUri?: string | null;
+  /** Vorlage 4: öffentlicher Firmeneintrag ohne verlinkte Website */
+  listedWithoutWebsite?: boolean;
+  industry?: string | null;
+}
+
+/** Vorlage 4 greift nur beim V4-Erstbrief mit Anschrift links (DIN 5008 / easyNova). */
+export function usesStandard4(i: Pick<ComposeInput, 'design' | 'cfg' | 'sequence'>): boolean {
+  return (
+    i.design === 'standard-4' &&
+    i.cfg.offers.activeVersion === 'v4' &&
+    (i.sequence ?? 1) === 1 &&
+    i.cfg.letter.addressPosition === 'left'
+  );
 }
 
 /** Beide Preisoptionen in einem Satzteil – die Mindestlaufzeit steht immer direkt neben der Monatsrate. */
@@ -216,6 +236,8 @@ export function placeholderValues(i: ComposeInput): string[] {
       i.recipient.city,
       i.expiresLabel,
       i.cfg.sender.email,
+      ...(usesStandard4(i) && i.recipientPhone?.trim() ? [i.recipientPhone.trim()] : []),
+      ...(usesStandard4(i) && i.personalization ? [i.personalization.businessName] : []),
       ...(i.personalization
         ? reviewedLetterDetails(i.personalization)
             .filter((f) => f.kind !== 'website_search')
@@ -354,6 +376,18 @@ export function composeLetter(i: ComposeInput): LetterData {
         data.postscript = undefined;
       }
     }
+    if (!unsafe && usesStandard4(i))
+      applyStandard4(data, {
+        cfg: i.cfg,
+        businessName: i.recipient.businessName,
+        branchLabel: i.branchLabel,
+        industry: i.industry,
+        personalization: i.personalization,
+        recipientPhone: i.recipientPhone,
+        listedWithoutWebsite: i.listedWithoutWebsite,
+        mobileDataUri: i.mobileDataUri,
+        expiresLabel: i.expiresLabel,
+      });
   }
   return data;
 }

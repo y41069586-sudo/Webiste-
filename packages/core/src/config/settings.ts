@@ -308,6 +308,11 @@ export const appConfigSchema = z.object({
     maxStatistics: z.number().int().min(0).max(2).default(2),
     /** Statistik-Fassung „Kunden, die Sie gerade verlieren könnten“ (mit Beleg und Fußnote). Standard aus: Vorlage 3 */
     lossStatistic: z.boolean().default(false),
+    /**
+     * Briefdesign für Erstbriefe im V4-Angebot (16.11.2026): „standard-4“ = Betreff neben der Anschrift, Bildbühne mit
+     * Laptop und Handy, drei Schritte, feste geprüfte Texte ohne KI-Formulierung; „standard-3“ = bisherige Vorlage.
+     */
+    design: z.enum(['standard-3', 'standard-4']).default('standard-4'),
     /** Test-Empfänger für den allerersten echten Brief */
     testRecipient: z.object({
       name: z.string(),
@@ -884,6 +889,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     truthCheckBlocklist: [],
     maxStatistics: 2,
     lossStatistic: false,
+    design: 'standard-4',
     testRecipient: {
       name: '',
       street: '',

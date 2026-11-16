@@ -203,6 +203,11 @@ export async function validateLetterDom(html: string, position: 'left' | 'right'
       for (const line of addr.children) {
         if (line.scrollWidth > line.clientWidth + 1) out.push({ check: 'anschrift-abgeschnitten', detail: 'Anschriftzeile passt nicht vollständig.' });
       }
+      // Standardvorlage 4: Pflichtinformationen mindestens 8 pt (wie die V4-Angebotsseite)
+      if (first.classList.contains('std4-page')) {
+        const font = parseFloat(getComputedStyle(document.getElementById('kleingedrucktes')).fontSize);
+        if (font < 10.6) out.push({ check: 'pflichttext-schrift', detail: 'Pflichtinformationen kleiner als 8 pt.' });
+      }
       if (first.classList.contains('v4-page')) {
         const font = parseFloat(getComputedStyle(document.getElementById('kleingedrucktes')).fontSize);
         const min = first.classList.contains('invitation-page') ? 11.9 : 10.6;
