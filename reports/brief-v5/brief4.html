@@ -45,24 +45,22 @@ h1 { font-size: 15pt; line-height: 1.08; letter-spacing: -0.015em; margin-top: 1
 .lead b { color: #101720; }
 
 /* Bild + QR */
-.hero { display: flex; gap: 4mm; margin-top: 3.2mm; align-items: stretch; }
-.shots { position: relative; flex: 1 1 auto; height: 61mm; }
-.laptop { position: absolute; left: 0; top: 2mm; width: 94mm; border-radius: 2mm; overflow: hidden;
-  border: 0.35mm solid #c9d1dc; background: #fff; box-shadow: 0 1.2mm 3mm rgba(16,23,32,0.18); }
-.laptop .bar { height: 3.6mm; background: #eef1f5; display: flex; align-items: center; gap: 1mm; padding-left: 2mm; }
-.laptop .bar i { width: 1.4mm; height: 1.4mm; border-radius: 50%; background: #c3cad4; display: block; }
-.laptop .bar span { margin-left: 3mm; font-size: 5.6pt; color: #4a5565; font-style: normal; font-weight: 600; }
-.laptop img { display: block; width: 100%; }
-.phone { position: absolute; left: 97.5mm; top: 0; width: 26mm; border-radius: 3mm; overflow: hidden;
-  border: 0.9mm solid #1a2029; background: #1a2029; box-shadow: 0 1.2mm 3mm rgba(16,23,32,0.25); }
-.phone img { display: block; width: 100%; border-radius: 2mm; }
-.note { position: absolute; left: 3mm; top: 37mm; width: 50mm; padding: 2.2mm 3mm 2.6mm; background: #fff27a;
-  transform: rotate(-3deg); box-shadow: 0 1mm 2.2mm rgba(16,23,32,0.28); font-family: 'Hand', cursive; font-weight: 600;
-  font-size: 13.5pt; line-height: 1.05; color: #1f2a5c; }
-.qrbox { flex: 0 0 47mm; border: 0.5mm solid #1d4e89; border-radius: 3mm; padding: 2mm 3mm; background: #f3f7fc;
+.hero { display: flex; gap: 7mm; margin-top: 4mm; align-items: center; }
+.shots { position: relative; flex: 0 0 115mm; height: 62mm; }
+.laptop { position: absolute; left: 5mm; top: 1mm; width: 96mm; }
+.laptop .screen { border: 1.6mm solid #111820; border-bottom-width: 2.2mm; border-radius: 2.6mm 2.6mm 0 0; overflow: hidden; background: #111820; }
+.laptop .screen img { display: block; width: 100%; }
+.laptop .base { height: 3.2mm; margin: 0 -5mm; background: linear-gradient(#d7dce3, #aeb6c1); border-radius: 0 0 3mm 3mm; position: relative; box-shadow: 0 1.4mm 2.4mm rgba(16,23,32,0.18); }
+.laptop .base::after { content: ''; position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 18mm; height: 1.2mm; background: #9aa3af; border-radius: 0 0 1.5mm 1.5mm; }
+.phone { position: absolute; left: 89mm; top: 6mm; width: 25mm; border-radius: 4mm; background: #111820; padding: 1.1mm;
+  box-shadow: 0 1.6mm 4mm rgba(16,23,32,0.32); }
+.phone .scr { border-radius: 3mm; overflow: hidden; position: relative; }
+.phone .scr img { display: block; width: 100%; }
+.phone .notch { position: absolute; top: 0.9mm; left: 50%; transform: translateX(-50%); width: 7mm; height: 1.7mm; border-radius: 1mm; background: #111820; }
+.qrbox { flex: 0 0 53mm; border: 0.6mm solid #1d4e89; border-radius: 3mm; padding: 2.6mm 3mm; background: #f3f7fc;
   display: flex; flex-direction: column; align-items: center; text-align: center; }
 .qrbox .go { font-size: 11pt; font-weight: 800; color: #1d4e89; }
-.qrbox img { width: 40mm; height: 40mm; margin: 1.2mm 0 1mm; background: #fff; padding: 1.4mm; }
+.qrbox img { width: 42mm; height: 42mm; margin: 1.6mm 0 1.2mm; background: #fff; padding: 1.4mm; }
 .qrbox .hint { font-size: 7.4pt; color: #2b333e; line-height: 1.25; }
 .qrbox .url { font-size: 7.2pt; font-weight: 700; color: #101720; margin-top: 0.6mm; }
 
@@ -133,10 +131,10 @@ h1 { font-size: 15pt; line-height: 1.08; letter-spacing: -0.015em; margin-top: 1
 
     <div class="hero">
       <div class="shots">
-        <div class="laptop"><div class="bar"><i></i><i></i><i></i><span>Ihre Website-Vorschau</span></div><img src="{{DESK}}" alt="Website am Computer"></div>
-        <div class="phone"><img src="{{MOB}}" alt="Website auf dem Handy"></div>
-              </div>
-      <div class="qrbox" style="align-self:flex-start">
+        <div class="laptop"><div class="screen"><img src="{{DESK}}" alt="Ihre Website am Computer"></div><div class="base"></div></div>
+        <div class="phone"><div class="scr"><img src="{{MOB}}" alt="Ihre Website auf dem Handy"><div class="notch"></div></div></div>
+      </div>
+      <div class="qrbox">
         <div class="go">Jetzt ansehen</div>
         <img src="{{QR}}" alt="QR-Code zur Website-Vorschau">
         <div class="hint">Handykamera auf den Code halten.<br>Unverbindlich, ohne Anmeldung.</div>

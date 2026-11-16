@@ -33,9 +33,15 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 async function loadConfig(): Promise<AppConfig> {
   const fallback = deepMerge(DEFAULT_CONFIG, { sender: OPERATOR_PROFILE });
   const url = process.env.SUPABASE_URL || project.url;
-  const response = await fetch(`${url}/functions/v1/seitenwerk-site-config`, { signal: AbortSignal.timeout(10000) });
-  if (!response.ok) throw new Error(`Website-Einstellungen nicht ladbar (HTTP ${response.status}).`);
-  const data = await response.json();
+  // 16.11.2026: Nach dem Supabase-Umzug antwortet das alte Projekt mit HTTP 402. LAUNCH_CONFIG_JSON (Datei mit den
+  // öffentlichen Einstellungen, z. B. aus der Live-Seite abgeleitet) ersetzt dann den Abruf; ohne beides bricht der Bau ab.
+  let data: unknown;
+  if (process.env.LAUNCH_CONFIG_JSON) data = JSON.parse(readFileSync(process.env.LAUNCH_CONFIG_JSON, 'utf8'));
+  else {
+    const response = await fetch(`${url}/functions/v1/seitenwerk-site-config`, { signal: AbortSignal.timeout(10000) });
+    if (!response.ok) throw new Error(`Website-Einstellungen nicht ladbar (HTTP ${response.status}).`);
+    data = await response.json();
+  }
   return publicOperatorSettings(
     appConfigSchema.parse(deepMerge(deepMerge(fallback, data), { offers: { activeVersion: 'v4' } })),
     DEFAULT_CONFIG.sender,
@@ -298,7 +304,12 @@ for (const pkg of new Set(FONTS.map(([p]) => p))) {
   if (existsSync(license)) cpSync(license, path.join(dist, 'fonts', `${pkg.split('/')[1]}-OFL.txt`));
 }
 
-// Alte Pfade der früheren Firmenwebsite auf seitenwerk.world auf die passenden Abschnitte umleiten
+// Alte Pfade der früheren Firmenwebsite auf seitenwerk.world auf die passenden Abschnitte umleiten.
+// 16.11.2026 (Recherche „Oberes Drittel im Werbebrief“): Kurz-Links und QR-Codes im Brief laufen über die eigene
+// Domain statt über …netlify.app. Brief-Wege (/q/…, /quellen, /{kurzcode}) gehen per 302 an die App; vorhandene
+// Seiten dieser Landingpage (/, /agb/, /datenschutz/ …) haben Vorrang, weil Netlify Weiterleitungen ohne „!“ nur
+// greift, wenn unter dem Pfad keine Datei liegt. Die Kurzcode-Regel steht deshalb ganz am Ende.
+const appOrigin = (process.env.LAUNCH_APP_ORIGIN || 'https://seitenwerkworld.netlify.app').replace(/\/+$/, '');
 writeFileSync(
   path.join(dist, '_redirects'),
   [
@@ -307,7 +318,9 @@ writeFileSync(
     '/so-funktionierts /#ablauf 301',
     '/kontakt /#anfrage 301',
     '/garantie /agb/ 301',
-    '/quellen / 301',
+    `/quellen ${appOrigin}/quellen 302`,
+    `/q/* ${appOrigin}/q/:splat 302`,
+    `/:code ${appOrigin}/:code 302`,
   ].join('\n') + '\n',
 );
 writeFileSync(path.join(dist, 'robots.txt'), indexable ? 'User-agent: *\nAllow: /\n' : 'User-agent: *\nDisallow: /\n');
