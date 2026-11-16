@@ -52,14 +52,17 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:var(--text);font-
 .lead strong{color:var(--ink)}
 .stage{position:relative;margin-top:${compact ? 2.6 : 3.4}mm;height:68.5mm;border-radius:3.5mm;overflow:hidden;background:#12305a}
 .stage .tag{position:absolute;left:6mm;top:4.2mm;font-size:6.6pt;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:#9fb6d6}
-.laptop{position:absolute;left:9mm;top:11mm;width:${s.mobileDataUri ? 84 : 92}mm}
-.laptop .screen{border:1.5mm solid #05090f;border-bottom-width:2.1mm;border-radius:2.4mm 2.4mm 0 0;overflow:hidden;background:#05090f;aspect-ratio:1.875}
-.laptop .screen img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
-.laptop .base{height:3mm;margin:0 -5mm;background:linear-gradient(#e6eaef,#aab3be);border-radius:0 0 3mm 3mm}
-.phone{position:absolute;left:86mm;top:9.5mm;width:22.5mm;border-radius:3.8mm;background:#05090f;padding:1mm}
-.phone .scr{border-radius:2.9mm;overflow:hidden;aspect-ratio:390/844}
+.laptop{position:absolute;left:9mm;top:12mm;width:${s.mobileDataUri ? 86 : 92}mm}
+.laptop .screen{position:relative;background:#1b1f24;border-radius:2.6mm 2.6mm 0.6mm 0.6mm;padding:1.6mm 1.6mm 2mm;box-shadow:0 0 0 0.25mm #4a5361 inset}
+.laptop .screen::before{content:'';position:absolute;top:0.55mm;left:50%;width:1mm;height:1mm;margin-left:-0.5mm;border-radius:50%;background:#3a414b}
+.laptop .view{overflow:hidden;border-radius:0.6mm;aspect-ratio:2;background:#fff}
+.laptop .view img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 6%}
+.laptop .base{position:relative;height:3.2mm;margin:0 -6mm;background:linear-gradient(#f1f3f6 0%,#c9cfd7 55%,#9aa3ae 100%);border-radius:0.4mm 0.4mm 4mm 4mm;box-shadow:0 1.6mm 3mm rgba(0,0,0,0.35)}
+.laptop .base::after{content:'';position:absolute;left:50%;top:0;width:15mm;height:1mm;margin-left:-7.5mm;background:#aab2bc;border-radius:0 0 1.4mm 1.4mm}
+.phone{position:absolute;left:82mm;top:19mm;width:21mm;border-radius:3.6mm;background:#1b1f24;padding:0.9mm;box-shadow:0 0 0 0.25mm #4a5361 inset,0 2mm 4mm rgba(0,0,0,0.45)}
+.phone .scr{border-radius:2.8mm;overflow:hidden;aspect-ratio:390/760}
 .phone .scr img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
-.arrow{position:absolute;left:109.5mm;top:28mm;width:9mm;height:9mm}
+.arrow{position:absolute;left:107mm;top:30mm;width:9mm;height:9mm}
 .qrbox{position:absolute;right:3.5mm;top:3.5mm;bottom:3.5mm;width:52mm;background:#fff;border-radius:3mm;padding:2.6mm 3mm 2mm;display:flex;flex-direction:column;align-items:center;text-align:center}
 .qrbox .go{font-size:12pt;font-weight:700;color:var(--navy);line-height:1.1}
 .qr{width:40.5mm;height:40.5mm;display:block;margin:1.3mm 0 1mm}
@@ -105,7 +108,7 @@ body{font-family:'LetterSans',Arial,Helvetica,sans-serif;color:var(--text);font-
     ${d.intro.map((p) => `<p class="lead">${boldMd(p)}</p>`).join('')}
     <div class="stage">
       <div class="tag">${esc(s.tag)}</div>
-      ${d.desktopScreenshotDataUri ? `<div class="laptop"><div class="screen"><img src="${esc(d.desktopScreenshotDataUri)}" alt="Entwurf am Computer"></div><div class="base"></div></div>` : ''}
+      ${d.desktopScreenshotDataUri ? `<div class="laptop"><div class="screen"><div class="view"><img src="${esc(d.desktopScreenshotDataUri)}" alt="Entwurf am Computer"></div></div><div class="base"></div></div>` : ''}
       ${s.mobileDataUri ? `<div class="phone"><div class="scr"><img src="${esc(s.mobileDataUri)}" alt="Entwurf auf dem Handy"></div></div>` : ''}
       <svg class="arrow" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 20h26M21 9l11 11-11 11" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div class="qrbox">
