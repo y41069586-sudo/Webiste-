@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Brief-Entwurf V5.3</title>
+<style>
+@font-face { font-family: 'Hand'; src: url({{HANDFONT}}) format('woff2'); font-weight: 600; font-display: block; }
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 210mm; }
+body { font-family: Inter, Arial, Helvetica, sans-serif; color: #1a2029; font-size: 9.6pt; line-height: 1.38;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.page { position: relative; width: 210mm; height: 297mm; overflow: hidden; }
+.abs { position: absolute; }
+
+/* Kopf */
+.head { left: 20mm; top: 11mm; display: flex; align-items: center; gap: 2.5mm; font-weight: 700; font-size: 13pt; color: #1d4e89; }
+.head img { width: 7.5mm; height: 7.5mm; }
+.from { left: 20mm; top: 21mm; font-size: 8.3pt; color: #4a5565; line-height: 1.45; }
+.from b { color: #1a2029; }
+
+/* Großes Handy oben rechts (außerhalb der Fensterzone x 19–108,5 / y 40–90) */
+.bigphone { left: 150mm; top: 12mm; width: 40mm; border-radius: 5.5mm; background: #111820; padding: 1.6mm;
+  box-shadow: 0 2mm 5mm rgba(16,23,32,0.30); }
+.bigphone .scr { border-radius: 4.2mm; overflow: hidden; position: relative; }
+.bigphone .scr img { display: block; width: 100%; }
+.bigphone .notch { position: absolute; top: 1.2mm; left: 50%; transform: translateX(-50%); width: 11mm; height: 2.6mm;
+  border-radius: 1.5mm; background: #111820; }
+.note { left: 112mm; top: 64mm; width: 41mm; padding: 2.2mm 3mm 2.6mm; background: #fff27a; transform: rotate(-4deg);
+  box-shadow: 0 1mm 2.2mm rgba(16,23,32,0.28); font-family: 'Hand', cursive; font-weight: 600; font-size: 13.5pt;
+  line-height: 1.05; color: #1f2a5c; }
+
+/* Fensterzone (links): Rücksendeangabe 46,5 mm, Anschrift ab 69 mm */
+.ret { left: 22mm; top: 46.5mm; width: 86mm; font-size: 6.6pt; color: #4a5565; border-bottom: 0.2mm solid #9aa4b1; padding-bottom: 0.4mm; white-space: nowrap; }
+.addr { left: 23mm; top: 69mm; width: 84mm; font-size: 10pt; line-height: 4.2mm; }
+
+/* Inhalt */
+.body { left: 20mm; right: 15mm; top: 96mm; }
+.kicker { font-size: 8.3pt; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #b8452f; }
+h1 { font-size: 22pt; line-height: 1.07; letter-spacing: -0.015em; margin-top: 1mm; color: #101720; }
+.lead { font-size: 10pt; margin-top: 1.8mm; color: #2b333e; }
+.lead b { color: #101720; }
+
+/* Großer Bildschirm + QR */
+.hero { display: flex; gap: 6mm; margin-top: 3.4mm; align-items: flex-start; }
+.laptop { flex: 0 0 113mm; }
+.laptop .screen { border: 1.6mm solid #111820; border-bottom-width: 2.2mm; border-radius: 2.6mm 2.6mm 0 0; overflow: hidden; background: #111820; }
+.laptop .screen img { display: block; width: 100%; }
+.laptop .base { height: 3.2mm; margin: 0 -5mm; background: linear-gradient(#d7dce3, #aeb6c1); border-radius: 0 0 3mm 3mm; position: relative; }
+.laptop .base::after { content: ''; position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 18mm; height: 1.2mm; background: #9aa3af; border-radius: 0 0 1.5mm 1.5mm; }
+.qrbox { flex: 1 1 auto; border: 0.6mm solid #1d4e89; border-radius: 3mm; padding: 2.4mm 3mm; background: #f3f7fc;
+  display: flex; flex-direction: column; align-items: center; text-align: center; }
+.qrbox .go { font-size: 11.5pt; font-weight: 800; color: #1d4e89; }
+.qrbox img { width: 41mm; height: 41mm; margin: 1.3mm 0 1mm; background: #fff; padding: 1.4mm; }
+.qrbox .hint { font-size: 7.4pt; color: #2b333e; line-height: 1.25; }
+.qrbox .url { font-size: 7.2pt; font-weight: 700; color: #101720; margin-top: 0.6mm; }
+
+.txt { margin-top: 3.4mm; font-size: 9.5pt; line-height: 1.36; }
+.txt p + p { margin-top: 1.8mm; }
+.story { border-left: 1mm solid #b8452f; padding-left: 3.5mm; font-style: italic; color: #2b333e; }
+.deadline { display: flex; align-items: center; gap: 3.5mm; background: #fff4ef; border: 0.35mm solid #e8b4a6; border-radius: 2mm; padding: 1.8mm 3.5mm; }
+.deadline .days { flex: 0 0 auto; text-align: center; color: #a33a24; font-weight: 800; line-height: 1; }
+.deadline .days .n { font-size: 17pt; display: block; }
+.deadline .days .u { font-size: 6.5pt; letter-spacing: 0.05em; text-transform: uppercase; }
+.deadline b { color: #a33a24; }
+.safe { color: #2b333e; }
+
+.sign { display: flex; gap: 6mm; margin-top: 2.8mm; align-items: flex-start; }
+.sign .name { flex: 0 0 60mm; }
+.sign .name .hand { font-family: 'Hand', cursive; font-weight: 600; font-size: 17pt; color: #1d4e89; line-height: 0.95; display: block; margin-top: 0.4mm; }
+.sign .ps { flex: 1; border-left: 0.6mm solid #1d4e89; padding-left: 3.5mm; font-size: 9.4pt; }
+
+.legal { left: 20mm; right: 15mm; bottom: 8mm; font-size: 6pt; line-height: 1.28; color: #4a5565;
+  border-top: 0.25mm solid #d5dbe3; padding-top: 1.6mm; }
+.legal p + p { margin-top: 0.9mm; }
+.legal b { color: #2b333e; }
+.legal .cost { font-size: 7pt; color: #2b333e; }
+</style>
+</head>
+<body>
+<section class="page">
+
+  <div class="abs head"><img src="{{LOGO}}" alt="">SeitenWerk</div>
+  <div class="abs from"><b>Doaa Attia</b> · support@seitenwerk.world · 17. November 2026</div>
+
+  <div class="abs bigphone"><div class="scr"><img src="{{MOB}}" alt="Ihre Website auf dem Handy"><div class="notch"></div></div></div>
+  <div class="abs note">Schauen Sie mal rein – ich glaube, sie gefällt Ihnen! – Doaa</div>
+
+  <div class="abs ret">Doaa Attia · Wilhelm-Diess-Weg 3a · 94081 Fürstenzell</div>
+  <div class="abs addr">
+    An das Team von<br>
+    Müller<br>
+    Jobs-Böse-Straße 7<br>
+    37085 Göttingen
+  </div>
+
+  <div class="abs body">
+    <div class="kicker">Persönlich · nur für Sie gebaut</div>
+    <h1>Dachdeckerbetrieb Müller,<br>Ihre Website ist fertig.</h1>
+    <p class="lead">Ich habe sie gebaut, bevor Sie mich kennen – mit Ihrem Namen, Ihrer Adresse und Ihrer Telefonnummer <b>0551 793785</b>. Sie ist schon online. Den Link gibt es nur in diesem Brief. Sogar Ihre eigene Adresse <b>dachdecker-mueller-goettingen.de</b> ist Stand heute noch frei.</p>
+
+    <div class="hero">
+      <div class="laptop"><div class="screen"><img src="{{DESK}}" alt="Ihre Website am Computer"></div><div class="base"></div></div>
+      <div class="qrbox">
+        <div class="go">Jetzt ansehen</div>
+        <img src="{{QR}}" alt="QR-Code zur Website-Vorschau">
+        <div class="hint">Handykamera auf den Code halten.<br>Kostenlos, ohne Anmeldung.</div>
+        <div class="url">seitenwerkworld.netlify.app/k7m2xq</div>
+      </div>
+    </div>
+
+    <div class="txt">
+      <p class="story">Stellen Sie sich vor: Heute Abend sitzt jemand in Göttingen auf dem Sofa, über ihm tropft es durchs Dach. Er sucht auf dem Handy einen Dachdecker, findet Ihren Namen – aber keine Website. Also ruft er den Nächsten an. Sie erfahren nie davon.</p>
+      <p class="deadline"><span class="days"><span class="n">14</span><span class="u">Tage</span></span><span><b>Am Freitag, 4. Dezember, wird Ihre Website gelöscht.</b> Danach ist sie weg – mit allem, was ich für Sie gebaut habe. Ob Sie sie nutzen, entscheiden Sie. Aber sehen sollten Sie sie vorher.</span></p>
+      <p class="safe"><b>Kein Anruf, kein Vertreter, keine Anmeldung.</b> Ansehen ist kostenlos und verpflichtet Sie zu nichts. <b>Kein Interesse?</b> Code scannen und mit einem Klick abmelden.</p>
+    </div>
+
+    <div class="sign">
+      <div class="name">Herzliche Grüße<span class="hand">Doaa Attia</span></div>
+      <div class="ps"><b>P. S.</b> Ein Scan, eine Minute. Sonst fragen Sie sich später, wie Ihre Website wohl ausgesehen hätte.</div>
+    </div>
+  </div>
+
+  <div class="abs legal">
+    <p class="cost"><b>Kostenpflichtig wird es nur, wenn Sie die Website übernehmen.</b> Preis und Bedingungen sehen Sie vorher in der Vorschau. Unverbindlicher, nicht beauftragter Entwurf von SeitenWerk.</p>
+    <p><b>Datenschutz (Art. 14 DSGVO):</b> Verantwortlich: Doaa Attia, SeitenWerk, Wilhelm-Diess-Weg 3a, 94081 Fürstenzell, support@seitenwerk.world. Ihre Firmenanschrift stammt aus öffentlichen Firmeneinträgen (OpenStreetMap, © OpenStreetMap-Mitwirkende, ODbL) und wird für diese Briefwerbung genutzt (höchstens 3 Briefe; Art. 6 Abs. 1 lit. f DSGVO, berechtigtes Interesse an Direktwerbung). Empfänger: Druck- und Versanddienstleister, Hosting-Anbieter. Ohne Reaktion löschen wir die Daten spätestens 6 Monate nach dem letzten Brief. Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung und Beschwerde bei einer Aufsichtsbehörde. Mehr: seitenwerk.world/datenschutz</p>
+    <p><b>Widerspruch (Art. 21 DSGVO):</b> Sie können dieser Werbung jederzeit widersprechen – per E-Mail an widerspruch@seitenwerk.world oder mit „Kein Interesse“ in der Vorschau. Dann bekommen Sie keine Post mehr von uns.</p>
+  </div>
+
+</section>
+</body>
+</html>
