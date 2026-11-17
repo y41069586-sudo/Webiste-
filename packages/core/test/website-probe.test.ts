@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { updateConfig } from '../src/config/service';
-import { matchBusiness, phoneDigits, probeOwnWebsite } from '../src/leads/website-probe';
+import { matchBusiness, phoneDigits, probeDomains, probeOwnWebsite } from '../src/leads/website-probe';
 import { findLeads } from '../src/services/lead-finder';
 import { resetDb } from './helpers';
 
@@ -53,13 +53,13 @@ describe('Website-Vorprüfung (ohne Netz)', () => {
     expect(other.result).toBe('none');
   });
 
-  it('Skripte zählen nicht, Fehler/Nicht-HTML werden übersprungen, höchstens 4 Abrufe, keine Wiederholung', async () => {
+  it('Skripte zählen nicht, Fehler/Nicht-HTML werden übersprungen, höchstens 6 Startseiten, keine Wiederholung', async () => {
     const calls: string[] = [];
     const res = await probeOwnWebsite(subject, {
       fetchImpl: fakeFetch({ 'malerbetrieb-kowalski.de': '<script>var t="0231 123456"</script><p>Baustelle</p>' }, calls),
     });
     expect(res.result).toBe('none');
-    expect(calls.length).toBeLessThanOrEqual(4);
+    expect(calls.length).toBeLessThanOrEqual(6);
     expect(new Set(calls).size).toBe(calls.length);
     expect(calls.every((u) => /^https:\/\/[a-z0-9-]+\.de\/$/.test(u))).toBe(true);
   });
@@ -121,5 +121,41 @@ describe('Lead-Finder: Vorprüfung mit Schalter und nie für Mock-Quellen', () =
     const s = await findLeads({ actor: 'job:test', branches: ['maler'] });
     expect(s.websiteProbes).toBe(0);
     expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('17.11.2026: findet die Website auch unter Gewerk-/Stadt-Varianten und über das Impressum', async () => {
+    const d = probeDomains({ businessName: 'Dachdeckerei Müller GmbH', city: 'Göttingen', branch: 'dachdecker' });
+    expect(d.length).toBeGreaterThan(15);
+    expect(d).toEqual(
+      expect.arrayContaining([
+        'mueller-dach.de',
+        'dach-mueller.de',
+        'muellergoettingen.de',
+        'muller-dach.de',
+        'dachdeckerei-muller.de',
+      ]),
+    );
+    expect(d).toContain(new URL('https://müller.de').hostname);
+    expect(d.some((x) => x.includes('gmbh'))).toBe(false);
+    expect(d.some((x) => x.startsWith('xn--'))).toBe(true);
+    expect(d.some((x) => x.endsWith('.com'))).toBe(true);
+    // Startseite ohne Kontaktdaten, Impressum mit Telefonnummer → Fund
+    const calls: string[] = [];
+    const home = '<h1>Ihr Dach in guten Händen</h1>' + '<p>Wir decken Dächer, reparieren und beraten.</p>'.repeat(6);
+    const fetchImpl = (async (input: string | URL | Request) => {
+      const url = String(input);
+      calls.push(url);
+      if (url === 'https://mueller-dach.de/') return new Response(home, { headers: { 'content-type': 'text/html' } });
+      if (url === 'https://mueller-dach.de/impressum')
+        return new Response('<p>Impressum – Tel. 0551 793785</p>', { headers: { 'content-type': 'text/html' } });
+      throw new TypeError('fetch failed');
+    }) as typeof fetch;
+    const res = await probeOwnWebsite(
+      { businessName: 'Dachdeckerei Müller GmbH', city: 'Göttingen', branch: 'dachdecker', phone: '0551 793785' },
+      { fetchImpl, resolveImpl: async (dom) => dom === 'mueller-dach.de' },
+    );
+    expect(res).toMatchObject({ result: 'found', url: 'https://mueller-dach.de/', matched: ['phone'] });
+    // DNS-Vorfilter: nur die existierende Domain wurde abgerufen
+    expect(calls).toEqual(['https://mueller-dach.de/', 'https://mueller-dach.de/impressum']);
   });
 });

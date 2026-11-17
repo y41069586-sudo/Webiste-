@@ -1869,3 +1869,10 @@ den öffentlichen Parquet-Dateien, Dortmund ≈ 43 000 Orte in ~8 s). Treffer pe
 zusammengeführt oder dauerhaft gespeichert außer dem Prüfergebnis (`sourceMeta.openData`). Abschaltbar:
 `OPEN_DATA_CHECK=false`; Fehler der Quelle stoppen die Suche nie. Foursquare OS Places (Token nötig) bewusst später.
 OSM-Auszug speichert jetzt die Lage je Ort (neue Indizes; ältere ohne Lage werden über PLZ/Telefon abgeglichen).
+
+## 17.11.2026 – Website-Vorprüfung ausgebaut
+
+Bisher höchstens 4 geratene .de-Domains. Jetzt bis zu 60 Varianten (Gewerk-Wörter je Branche, Stadt, Umlaut-Formen
+ae/a/IDN, .com/.eu für die besten drei), DNS-Vorfilter (nur existierende Domains werden abgerufen; ohne nutzbares DNS
+ohne Vorfilter), höchstens 6 Startseiten je Betrieb, bei echter Startseite ohne Kontaktdaten zusätzlich `/impressum`
+(Pflichtangaben). „Gefunden“ weiterhin nur mit Telefon oder PLZ + Straße auf der Seite.

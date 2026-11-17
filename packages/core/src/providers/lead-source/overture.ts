@@ -59,7 +59,7 @@ export async function fetchOverturePlaces(bbox: Bbox, release: string): Promise<
   try {
     // Anonymer Zugriff (leere Schlüssel), unabhängig von AWS-Variablen der Umgebung
     await c.run(
-      "INSTALL httpfs; LOAD httpfs; CREATE OR REPLACE SECRET overture (TYPE s3, KEY_ID '', SECRET '', REGION 'us-west-2');",
+      "SET extension_directory = '/tmp/duckdb_extensions'; SET home_directory = '/tmp'; INSTALL httpfs; LOAD httpfs; CREATE OR REPLACE SECRET overture (TYPE s3, KEY_ID '', SECRET '', REGION 'us-west-2');",
     );
     const r = await c.runAndReadAll(`
       SELECT names."primary" AS name,

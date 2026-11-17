@@ -1,3 +1,5 @@
+import { promises as dns } from 'node:dns';
+import { domainToASCII } from 'node:url';
 import { domainCandidates } from '../letters/domain';
 import { foldUmlauts, normalizeBusinessName } from './normalize';
 
@@ -36,10 +38,116 @@ export interface WebsiteProbeResult {
 
 export interface WebsiteProbeOptions {
   fetchImpl?: typeof fetch;
+  /** Gibt es die Domain im DNS? Standard: echte DNS-Abfrage; mit eigenem fetchImpl (Tests) ohne Vorfilter */
+  resolveImpl?: (domain: string) => Promise<boolean>;
   timeoutMs?: number;
   maxBytes?: number;
+  /** Höchstzahl erzeugter Domain-Varianten (Standard 60) */
   maxCandidates?: number;
+  /** Höchstzahl abgerufener Startseiten (Standard 6; Impressum-Seiten zusätzlich) */
+  maxFetches?: number;
   now?: () => Date;
+}
+
+/**
+ * Domain-Varianten (17.11.2026, Recherche „Leadauswahl drastisch verbessern“): bisher höchstens 4 geratene .de-Namen.
+ * Jetzt: Varianten mit Gewerk-Wörtern, Stadt, Umlaut-Schreibweisen (ae/a/IDN) und .com/.eu für die besten Namen.
+ * Ein DNS-Vorfilter sortiert nicht existierende Domains ohne Seitenabruf aus.
+ */
+const BRANCH_SYNONYMS: Record<string, string[]> = {
+  dachdecker: ['dach', 'dachdecker', 'dachdeckerei', 'bedachungen', 'dachbau'],
+  heizung: ['heizung', 'haustechnik', 'shk', 'heizungsbau', 'waermetechnik'],
+  sanitaer: ['sanitaer', 'haustechnik', 'shk', 'heizung', 'baeder'],
+  gartenbau: ['garten', 'gartenbau', 'galabau', 'gaerten', 'landschaftsbau'],
+  tischler: ['tischlerei', 'schreinerei', 'tischler', 'schreiner', 'holz'],
+  zimmerer: ['zimmerei', 'holzbau', 'zimmerer'],
+  maler: ['maler', 'malerbetrieb', 'malermeister', 'malerei'],
+  elektriker: ['elektro', 'elektrotechnik', 'elektriker'],
+  reinigung: ['reinigung', 'gebaeudereinigung', 'clean', 'service'],
+  fliesenleger: ['fliesen', 'fliesenleger'],
+  bodenleger: ['boden', 'bodenbelaege', 'bodenleger'],
+  parkettleger: ['parkett', 'boden'],
+  entruempelung: ['entruempelung', 'haushaltsaufloesung', 'raeumung', 'umzug'],
+  glaser: ['glas', 'glaserei'],
+  metallbau: ['metallbau', 'schlosserei', 'stahlbau'],
+  kosmetikstudio: ['kosmetik', 'beauty', 'studio'],
+  nagelstudio: ['nails', 'nagelstudio', 'nail', 'beauty'],
+  friseur: ['friseur', 'hair', 'haare', 'salon'],
+};
+
+const label = (parts: string[]) => parts.filter(Boolean).join('-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+const validLabel = (l: string) => l.length >= 3 && l.length <= 40 && /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(l);
+
+export function probeDomains(subject: Pick<WebsiteProbeSubject, 'businessName' | 'city' | 'branch'>, max = 60): string[] {
+  const out: string[] = [];
+  const push = (d: string | null | undefined) => {
+    if (d && !out.includes(d)) out.push(d);
+  };
+  for (const d of domainCandidates(subject.businessName, { city: subject.city, branch: subject.branch })) push(d);
+  const city = foldUmlauts(subject.city).replace(/[^a-z0-9]+/g, '');
+  const words = normalizeBusinessName(subject.businessName.replace(/['’`´]/g, ''))
+    .split(' ')
+    .filter((t) => t && !['und', 'der', 'die', 'das', 'von', 'inh'].includes(t));
+  const distinct = distinctiveTokens(subject.businessName, subject.city);
+  const syn = BRANCH_SYNONYMS[subject.branch] ?? [foldUmlauts(subject.branch).replace(/[^a-z0-9]+/g, '')];
+  const labels: string[] = [label(words), words.join('')];
+  for (const d of distinct) {
+    // Nachname allein nur, wenn selten genug (lang); „mueller.de“ gehört praktisch nie dem Betrieb
+    if (d.length >= 7) labels.push(d);
+    labels.push(label([d, city]), `${d}${city}`);
+    for (const w of syn) labels.push(label([w, d]), label([d, w]), `${d}${w}`, `${w}${d}`);
+  }
+  if (distinct.length >= 2) labels.push(label(distinct.slice(0, 2)), distinct.slice(0, 2).join(''));
+  for (const l of labels) if (validLabel(l)) push(`${l}.de`);
+  // Umlaute: „müller“ → auch „muller“ und die IDN-Form „müller“ (xn--…), jeweils ohne Rechtsform
+  if (/[äöüß]/i.test(subject.businessName)) {
+    const base = subject.businessName
+      .toLowerCase()
+      .replace(/\b(gmbh\s*&\s*co\.?\s*kg|gmbh|ug|e\.\s?k\.?|kg|ohg|gbr|ag|mbh|inh\.?)(?=\s|$|[^a-zäöüß])/g, ' ');
+    const plain = base.replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss');
+    const plainWords = plain.split(/[^a-z0-9]+/).filter(Boolean);
+    const rawWords = base.split(/[^a-z0-9äöüß]+/).filter(Boolean);
+    const plainDistinct = distinctiveTokens(plain, subject.city);
+    const variants = [
+      label(plainWords),
+      ...plainDistinct.flatMap((d) => syn.slice(0, 2).flatMap((w) => [label([d, w]), label([w, d])])),
+    ];
+    for (const l of variants) if (validLabel(l)) push(`${l}.de`);
+    for (const raw of [rawWords.join('-'), ...rawWords.filter((w) => /[äöüß]/.test(w) && w.length >= 4)]) {
+      const idn = domainToASCII(`${raw}.de`);
+      if (idn && idn !== `${raw}.de`) push(idn);
+    }
+  }
+  // Die besten drei Namen zusätzlich als .com/.eu
+  for (const d of out.filter((x) => x.endsWith('.de')).slice(0, 3)) {
+    push(d.replace(/\.de$/, '.com'));
+    push(d.replace(/\.de$/, '.eu'));
+  }
+  return out.slice(0, max);
+}
+
+let dnsWorks: Promise<boolean> | undefined;
+/** Funktioniert DNS hier überhaupt? (In abgeschotteten Umgebungen nur über einen Proxy – dann ohne Vorfilter.) */
+function dnsUsable(): Promise<boolean> {
+  dnsWorks ??= dnsLookup('example.com');
+  return dnsWorks;
+}
+
+async function dnsExists(domain: string): Promise<boolean> {
+  if (!(await dnsUsable())) return true;
+  return dnsLookup(domain);
+}
+
+async function dnsLookup(domain: string): Promise<boolean> {
+  try {
+    await Promise.race([
+      dns.lookup(domain),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('dns timeout')), 3000)),
+    ]);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 const USER_AGENT = 'SeitenWerk-Vorpruefung/1.0 (einmaliger Abruf der Startseite; keine Speicherung von Inhalten)';
@@ -181,23 +289,28 @@ async function readLimited(res: Response, maxBytes: number): Promise<string> {
 
 export async function probeOwnWebsite(subject: WebsiteProbeSubject, opts: WebsiteProbeOptions = {}): Promise<WebsiteProbeResult> {
   const fetchImpl = opts.fetchImpl ?? fetch;
+  const resolve = opts.resolveImpl ?? (opts.fetchImpl ? async () => true : dnsExists);
   const timeoutMs = opts.timeoutMs ?? 5000;
   const maxBytes = opts.maxBytes ?? 250_000;
+  const maxFetches = opts.maxFetches ?? 6;
   const emailDomain = subject.emailDomain?.toLowerCase().replace(/^www\./, '') ?? '';
   const ownDomain = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(emailDomain) && emailDomain !== 'freemail' ? emailDomain : null;
-  const named = domainCandidates(subject.businessName, { city: subject.city, branch: subject.branch })
-    .filter((d) => d !== ownDomain)
-    .slice(0, opts.maxCandidates ?? 4);
+  const named = probeDomains(subject, opts.maxCandidates ?? 60).filter((d) => d !== ownDomain);
   const candidates = ownDomain ? [ownDomain, ...named] : named;
   const checkedAt = (opts.now?.() ?? new Date()).toISOString();
   // Ohne Telefon, vollständige Anschrift und eigene E-Mail-Domain kann nichts belegt werden – dann gar nicht abrufen
   if (!phoneDigits(subject.phone) && !(subject.postalCode && subject.street) && !ownDomain)
     return { result: 'none', matched: [], candidates, checkedAt };
-  let possible: string | undefined;
-  for (const domain of candidates) {
-    const isOwn = domain === ownDomain;
-    if (!isOwn && !/^[a-z0-9-]+\.de$/.test(domain)) continue;
-    const url = `https://${domain}/`;
+  // DNS-Vorfilter: nur existierende Domains abrufen (parallel, je höchstens 3 s)
+  const alive: string[] = [];
+  for (let i = 0; i < candidates.length && alive.length < maxFetches; i += 10) {
+    const batch = candidates.slice(i, i + 10);
+    const ok = await Promise.all(batch.map((d) => resolve(d)));
+    batch.forEach((d, k) => {
+      if (ok[k] && alive.length < maxFetches) alive.push(d);
+    });
+  }
+  const get = async (url: string): Promise<{ text: string; url: string } | null> => {
     try {
       const res = await fetchImpl(url, {
         redirect: 'follow',
@@ -206,16 +319,29 @@ export async function probeOwnWebsite(subject: WebsiteProbeSubject, opts: Websit
       });
       if (!res.ok || !(res.headers.get('content-type') ?? '').includes('html')) {
         await res.body?.cancel().catch(() => undefined);
-        continue;
+        return null;
       }
-      const text = visible(await readLimited(res, maxBytes));
-      const matched = matchBusiness(text, subject);
-      if (matched.length) return { result: 'found', url: res.url || url, matched, candidates, checkedAt };
-      const real = text.trim().length >= 200 && !PARKED.test(text);
-      if (!possible && real && (isOwn || looksLikeBusiness(text, subject))) possible = res.url || url;
+      return { text: visible(await readLimited(res, maxBytes)), url: res.url || url };
     } catch {
       // DNS-/TLS-/Zeitfehler: Domain gilt als nicht belegt, keine Wiederholung
+      return null;
     }
+  };
+  let possible: string | undefined;
+  for (const domain of alive) {
+    const isOwn = domain === ownDomain;
+    const url = `https://${domain}/`;
+    const page = await get(url);
+    if (!page) continue;
+    let matched = matchBusiness(page.text, subject);
+    const real = page.text.trim().length >= 200 && !PARKED.test(page.text);
+    // Startseite echt, aber ohne Telefon/Anschrift: das Impressum enthält sie fast immer (Pflichtangaben)
+    if (!matched.length && real) {
+      const imp = await get(new URL('/impressum', page.url).toString());
+      if (imp) matched = matchBusiness(imp.text, subject);
+    }
+    if (matched.length) return { result: 'found', url: page.url, matched, candidates, checkedAt };
+    if (!possible && real && (isOwn || looksLikeBusiness(page.text, subject))) possible = page.url;
   }
   return possible
     ? { result: 'possible', url: possible, matched: [], candidates, checkedAt }
