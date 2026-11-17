@@ -13,6 +13,7 @@ import {
   applyMobileHeroLayer,
   v4TierLabel,
   demoCdnHeaders,
+  polishDemoForMobile,
 } from '@wbm/core';
 import { requestMetaFrom } from '@/lib/request';
 import { simplePage } from '@/lib/public-page';
@@ -129,7 +130,7 @@ async function serveDemo(req: Request, slug: string): Promise<Response> {
     ? `<p role="status" style="margin:1rem 0;padding:1rem;border:1px solid #94a3b8;border-radius:.75rem;background:white;color:#0f172a">Bezahlvorgang verlassen. Zuletzt gewählter Tarif: <strong>${v4TierLabel(selected)}</strong>. Sie können das Angebot hier noch einmal prüfen. Falls Sie bereits bezahlt haben, warten Sie bitte auf die Bestätigung.</p>`
     : '';
   // Handy-Einstieg mit Bild auch für vor dem 07.11.2026 gebaute Demos (idempotent)
-  const page = refreshOfferSection(applyMobileHeroLayer(html.toString('utf8')), slug, fullCfg)
+  const page = refreshOfferSection(polishDemoForMobile(applyMobileHeroLayer(html.toString('utf8'))), slug, fullCfg)
     // Kontakt nur per E-Mail (Betreiber, 06.11.2026): WhatsApp-Knöpfe aus bereits gebauten Demos entfernen
     .replace(/<a [^>]*href="[^"]*\/whatsapp"[^>]*>[^<]*WhatsApp[^<]*<\/a>/g, '')
     // Upgrade only our purchase toolbar in already stored demos; business content stays untouched.
