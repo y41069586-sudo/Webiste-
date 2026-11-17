@@ -110,6 +110,10 @@ export function prescreen(input: PrescreenInput, now = new Date()): PrescreenRes
   if (input.branchKey && WALK_IN.has(input.branchKey))
     add('laufkundschaft', -10, 'Lebt vor allem von Laufkundschaft – kauft seltener eine Website');
 
+  // Offene Firmendaten (Overture) bestätigen den Betrieb als geöffnet – zweite, unabhängige Quelle
+  if (meta.openData && meta.openData.status !== 'permanently_closed' && (meta.openData.confidence ?? 0) >= 0.75)
+    add('offene_daten', 8, `Auch in offenen Firmendaten als Betrieb geführt (Sicherheit ${meta.openData.confidence})`);
+
   if (input.socialOnly || (meta.socialLinks ?? 0) > 0)
     add('online_aktiv', 15, 'Online aktiv (Social/Portal), aber ohne eigene Website');
 

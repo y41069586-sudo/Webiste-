@@ -10,6 +10,10 @@ export interface OsmElement {
   tags?: Record<string, string>;
   /** Nur mit `out … meta`: Zeitpunkt der letzten Bearbeitung (Bearbeiter-Felder werden ignoriert) */
   timestamp?: string;
+  /** Lage: Knoten direkt, Wege/Relationen über `out center` bzw. den OSM-Auszug */
+  lat?: number;
+  lon?: number;
+  center?: { lat: number; lon: number };
 }
 
 /**
@@ -194,9 +198,12 @@ export function osmElementToPlace(el: OsmElement, fallbackCity: string): RawPlac
     t.opening_hours === 'closed'
       ? 'CLOSED_PERMANENTLY'
       : 'OPERATIONAL';
+  const lat = el.lat ?? el.center?.lat;
+  const lon = el.lon ?? el.center?.lon;
   return {
     source: 'osm',
     sourceId: `${el.type}/${el.id}`,
+    ...(typeof lat === 'number' && typeof lon === 'number' ? { location: { lat, lon } } : {}),
     name: name.trim(),
     street: t['addr:street']?.trim(),
     houseNumber: t['addr:housenumber']?.trim(),

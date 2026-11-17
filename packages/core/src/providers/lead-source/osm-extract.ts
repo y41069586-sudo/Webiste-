@@ -41,6 +41,9 @@ export interface ExtractPoi {
   tags: Record<string, string>;
   timestamp?: string;
   munis: number[];
+  /** Lage (WGS84, 5 Nachkommastellen) für den Abgleich mit offenen Firmendaten (Overture); ältere Indizes ohne */
+  lat?: number;
+  lon?: number;
 }
 
 export interface OsmExtractIndex {
@@ -201,7 +204,15 @@ export async function buildIndexFromGeoJsonSeq(file: string, tagPairs: string[],
     const inMunis = muniAreas.flatMap((a, i) => (inArea(point, a) ? [i] : []));
     if (!inMunis.length) continue;
     const ts = Number(p['@timestamp']);
-    pois.push({ type, id, tags, ...(ts > 0 ? { timestamp: new Date(ts * 1000).toISOString() } : {}), munis: inMunis });
+    pois.push({
+      type,
+      id,
+      tags,
+      ...(ts > 0 ? { timestamp: new Date(ts * 1000).toISOString() } : {}),
+      munis: inMunis,
+      lon: Math.round(point[0]! * 1e5) / 1e5,
+      lat: Math.round(point[1]! * 1e5) / 1e5,
+    });
   }
   return { version: 1, builtAt: now.toISOString(), tagPairs: [...tagPairs].sort(), munis, pois };
 }

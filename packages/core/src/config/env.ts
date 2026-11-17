@@ -115,6 +115,8 @@ const envSchema = z.object({
   ALERT_MAILS: bool(false),
   /** Worker hält die Serverfunktion warm (Minuten, 0 = aus; seit dem QR-Pförtner nicht mehr nötig) */
   KEEP_WARM_MINUTES: z.coerce.number().int().min(0).max(60).default(0),
+  /** Abgleich der Lead-Suche mit offenen Firmendaten (Overture Maps): Website/geschlossen erkennen */
+  OPEN_DATA_CHECK: bool(true),
   /** Vorab-Aufruf der QR-Ziele und Demos in den Netlify-Zwischenspeicher (Stunden, 0 = aus) */
   SCAN_WARMUP_HOURS: z.coerce.number().int().min(0).max(48).default(6),
   DELIVERY_BUSINESS_DAYS: z.coerce.number().int().min(1).max(10).default(3),

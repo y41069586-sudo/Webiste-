@@ -12,6 +12,8 @@ export interface RawPlace {
   source: LeadSourceKind;
   sourceId: string;
   name: string;
+  /** Lage (WGS84), falls die Quelle sie liefert – nur für den Abgleich mit offenen Firmendaten */
+  location?: { lat: number; lon: number };
   street?: string;
   houseNumber?: string;
   postalCode?: string;
@@ -47,6 +49,20 @@ export interface SourceMeta {
   emailDomain?: string;
   /** Anzahl angegebener Social-/Profil-Links */
   socialLinks?: number;
+  /** Abgleich mit offenen Firmendaten (Overture Maps), siehe leads/open-data-match.ts */
+  openData?: {
+    source: 'overture';
+    release: string;
+    /** Wahrscheinlichkeit laut Overture, dass es den Ort gibt (0–1) */
+    confidence?: number;
+    status?: 'open' | 'temporarily_closed' | 'permanently_closed';
+    /** Eigene Website laut Overture (keine Verzeichnis-/Profilseite) */
+    website?: string;
+    /** Nur Social-/Profil-Links */
+    socialOnly?: boolean;
+    /** Woran der Treffer erkannt wurde */
+    matchedBy: 'phone' | 'name_near' | 'name_address';
+  };
 }
 
 export interface LeadSearchQuery {

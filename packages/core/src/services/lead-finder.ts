@@ -20,6 +20,7 @@ import { assertBudgetAvailable, assertNotHalted, recordCost } from './budget';
 import { transitionLead } from './lead-state';
 import { isSuppressed } from './suppression';
 import { campaignBranches, campaignRank, assessAcquisition } from '../leads/acquisition';
+import { enrichWithOpenData } from './open-data-check';
 import { prescreen } from '../leads/prescreen';
 import { isBestLead } from '../leads/best-only';
 import { leadResearch } from './lead-research';
@@ -62,6 +63,8 @@ export interface FindLeadsSummary {
   /** Geeignet, aber unter der Mindestgrenze der Vorauswahl aussortiert */
   belowMin: number;
   minScore: number;
+  /** Abgleich mit offenen Firmendaten (Overture): Treffer, davon mit eigener Website bzw. geschlossen */
+  openData?: { release?: string; checked: number; matched: number; websites: number; closed: number; socialOnly: number };
   /** In der Verwaltung gestoppt, bevor alle Treffer geprüft waren */
   stopped?: boolean;
   errors: string[];
@@ -306,6 +309,15 @@ async function findLeadsRun(opts: FindLeadsOptions): Promise<FindLeadsSummary> {
     }
   }
   summary.found = candidates.length;
+  // Offene Firmendaten (Overture): eigene Website oder „dauerhaft geschlossen“ erkennen, bevor geprüft wird
+  if (src.primary.kind !== 'mock') {
+    const od = await enrichWithOpenData(candidates);
+    if (od.error) summary.errors.push(`Offene Firmendaten nicht verfügbar: ${od.error}`);
+    else if (od.checked) {
+      const { error: _e, ...rest } = od;
+      summary.openData = rest;
+    }
+  }
   // Vielversprechende Treffer zuerst: die begrenzte Website-Vorprüfung trifft so die Leads, die zuerst recherchiert werden
   const policy = cfg.targeting.acquisition;
   const early = (c: Candidate) =>

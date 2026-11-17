@@ -1857,3 +1857,15 @@ Lösung (Recherche: reports/QR Scan sofort ohne Kaltstart.md):
 - Worker: Vorab-Aufruf aller aktiven QR-Ziele und Demos alle `SCAN_WARMUP_HOURS` (Standard 6, Bot-Kennung, zählt nicht);
   `KEEP_WARM_MINUTES` jetzt Standard 0.
 Kosten: Edge zählt nur als Anfrage (2 Credits/10 000); Veröffentlichung 15 Credits.
+
+## 17.11.2026 – Abgleich mit offenen Firmendaten (Overture Maps)
+
+Recherche „Leadauswahl drastisch verbessern“: OSM erfasst kleine Handwerksbetriebe lückenhaft, ein fehlender
+Website-Eintrag beweist nichts, geschlossene Betriebe bleiben stehen (Rückläufer Krawczyk). Jede Lead-Suche gleicht ihre
+Treffer jetzt mit Overture Maps „places“ ab (Lizenz CDLA-Permissive-2.0/Apache-2.0, monatlich, anonym per DuckDB auf
+den öffentlichen Parquet-Dateien, Dortmund ≈ 43 000 Orte in ~8 s). Treffer per gleicher Telefonnummer, ähnlichem Namen
+≤ 150 m oder Name + PLZ + Straße. Folgen: eigene Website (keine Verzeichnis-/Profilseite) → `websiteUri` → Ausschluss;
+`permanently_closed` → Ausschluss; nur Profile → Social-Signal; Konfidenz ≥ 0,75 → +8 Punkte. Nichts wird
+zusammengeführt oder dauerhaft gespeichert außer dem Prüfergebnis (`sourceMeta.openData`). Abschaltbar:
+`OPEN_DATA_CHECK=false`; Fehler der Quelle stoppen die Suche nie. Foursquare OS Places (Token nötig) bewusst später.
+OSM-Auszug speichert jetzt die Lage je Ort (neue Indizes; ältere ohne Lage werden über PLZ/Telefon abgeglichen).
