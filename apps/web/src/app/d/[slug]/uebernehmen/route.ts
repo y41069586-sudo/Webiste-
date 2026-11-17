@@ -11,6 +11,7 @@ import {
 } from '@wbm/core';
 import { simplePage } from '@/lib/public-page';
 import { cookies } from 'next/headers';
+import { after } from 'next/server';
 import { requestMetaFrom } from '@/lib/request';
 
 export const dynamic = 'force-dynamic';
@@ -21,8 +22,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const found = await findPublicDemo(slug);
   if (found.state !== 'ok') return Response.redirect(appUrl(`/d/${slug}`), 302);
   const meta = requestMetaFrom(req.headers);
-  if (await recordEvent(getDb(), { leadId: found.lead.id, type: 'cta_click', req: meta }))
-    await notifyInterest(found.lead.id, 'cta_click', meta);
+  // Tempo (17.11.2026): Zählung und Benachrichtigungs-Mail erst nach der Antwort – der Betrieb wartet nicht darauf
+  const leadId = found.lead.id;
+  after(async () => {
+    if (await recordEvent(getDb(), { leadId, type: 'cta_click', req: meta }).catch(() => false))
+      await notifyInterest(leadId, 'cta_click', meta).catch(() => undefined);
+  });
   const jar = await cookies();
   const token = await beginCheckoutDraft(slug, jar.get(setupCookieName(slug))?.value ?? '', meta);
   if (!token && (await getCheckoutContext(slug)).state === 'ordered') return Response.redirect(appUrl(`/checkout/${slug}`), 303);

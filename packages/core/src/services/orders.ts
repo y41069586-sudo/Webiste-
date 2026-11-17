@@ -305,12 +305,13 @@ export async function startCheckout(
       context: { leadId: lead.id, amountCents: amounts.grossCents, plan },
     });
   });
-  await notifyInterest(
+  // Tempo (17.11.2026): Benachrichtigung parallel zur Stripe-Sitzung statt davor (Betrieb wartet auf die Weiterleitung)
+  const notified = notifyInterest(
     lead.id,
     'checkout_started',
     { ...meta, isBot: false },
     { detail: `Gewählt: ${formatEuro(amounts.grossCents)} (${plan})` },
-  );
+  ).catch(() => undefined);
 
   try {
     const minutes = cfg.checkout.sessionMinutes;
@@ -341,6 +342,7 @@ export async function startCheckout(
       paymentMethods: cfg.checkout.paymentMethods,
       ...(plan === 'monthly' ? { recurring: { interval: 'month' as const } } : {}),
     });
+    await notified;
     await db
       .update(orders)
       .set({
@@ -477,12 +479,13 @@ async function startHostedCheckoutLocked(
       context: { leadId: lead.id, amountCents: amounts.grossCents, plan, hosted: true },
     });
   });
-  await notifyInterest(
+  // Tempo (17.11.2026): Benachrichtigung parallel zur Stripe-Sitzung statt davor (Betrieb wartet auf die Weiterleitung)
+  const notified = notifyInterest(
     lead.id,
     'checkout_started',
     { ...meta, isBot: false },
     { detail: `Gewählt: ${formatEuro(amounts.grossCents)} (${plan})` },
-  );
+  ).catch(() => undefined);
 
   try {
     const minutes = cfg.checkout.sessionMinutes;
@@ -538,6 +541,7 @@ async function startHostedCheckoutLocked(
       paymentMethods: cfg.checkout.paymentMethods,
       ...(plan === 'monthly' ? { recurring: { interval: 'month' as const } } : {}),
     });
+    await notified;
     await db
       .update(orders)
       .set({

@@ -24,6 +24,8 @@ import { FALLBACK_HEADERS, fallbackSnapshot, withTimeout } from '@/lib/demo-fall
 export const dynamic = 'force-dynamic';
 
 const EXPIRES_PLACEHOLDER = '__WBM_EXPIRES_LABEL__';
+const WAKE_PIXEL =
+  '<img src="/q/warm" alt="" width="1" height="1" aria-hidden="true" loading="eager" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">';
 
 /**
  * Messung ohne Cookies (B6.1): Verweildauer, Scrolltiefe und angeklickte Abschnitte per sendBeacon an
@@ -42,7 +44,7 @@ const DEMO_HEADERS = {
   'cache-control': 'private, no-store',
   'x-robots-tag': 'noindex, nofollow, noarchive',
   'referrer-policy': 'no-referrer',
-  'content-security-policy': `default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; script-src 'sha256-${BEACON_HASH}'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`,
+  'content-security-policy': `default-src 'none'; style-src 'unsafe-inline'; img-src data: 'self'; font-src data:; script-src 'sha256-${BEACON_HASH}'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`,
 };
 
 /**
@@ -149,7 +151,11 @@ async function serveDemo(req: Request, slug: string): Promise<Response> {
         ? `${m}${welcomeDialog(found.lead.businessName, slug, found.demo.expiresAt ? formatDateDe(found.demo.expiresAt) : 'auf Weiteres', fullCfg.offers.komplettEnabled === true)}`
         : m,
     )
-    .replace('</body>', cfg.metrics.engagementBeacon ? `<script>${BEACON_SCRIPT}</script></body>` : '</body>');
+    .replace('</body>', cfg.metrics.engagementBeacon ? `<script>${BEACON_SCRIPT}</script></body>` : '</body>')
+    // Tempo (17.11.2026): Die Demo kommt aus dem Netlify-Zwischenspeicher, die Serverfunktion schläft dabei weiter.
+    // Ein unsichtbares Bild weckt sie, solange der Betrieb liest – „Übernehmen“ antwortet dann ohne Kaltstart.
+    // Gleiche Adresse, keine Kennung, nichts wird gespeichert (/q/warm antwortet ohne Datenbank mit 404).
+    .replace('</body>', `${WAKE_PIXEL}</body>`);
   // Netlify-Zwischenspeicher (17.11.2026): Scans öffnen die Demo sofort statt nach dem Kaltstart der Funktion.
   // Varianten nur nach start/plan/abgebrochen; Browser speichern weiterhin nicht.
   const cdn = demoCdnHeaders(slug, found.demo.expiresAt, { vary: 'query=start|plan|abgebrochen' });

@@ -35,11 +35,11 @@ export default async function SetupPage({
   const { slug } = await params;
   const { plan: preferred } = await searchParams;
   const token = (await cookies()).get(setupCookieName(slug))?.value ?? '';
-  const draft = await getCheckoutDraft(slug, token);
+  // Tempo (17.11.2026): die drei Abfragen gleichzeitig statt nacheinander (Funktion in den USA, Datenbank in Europa)
+  const [draft, fullCfg, ctx] = await Promise.all([getCheckoutDraft(slug, token), getConfig(), getCheckoutContext(slug)]);
   if (!draft) redirect(`/d/${slug}/uebernehmen`);
-  const cfg = publicOperatorSettings(await getConfig(), DEFAULT_CONFIG.sender);
+  const cfg = publicOperatorSettings(fullCfg, DEFAULT_CONFIG.sender);
   // Schnellbestellung: dieselben serverseitigen Preise und Laufzeiten wie auf der Prüfseite, nur für das aktive Angebot
-  const ctx = await getCheckoutContext(slug);
   const quick: QuickOption[] =
     ctx.state === 'ok' && ctx.cfg.offers.activeVersion === 'v4'
       ? v4OfferedTiers(ctx.cfg)
