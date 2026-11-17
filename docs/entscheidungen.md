@@ -1832,3 +1832,12 @@ Kosten: ~11 000 Funktionsaufrufe/Monat (im kostenlosen Netlify-Kontingent). Wirk
 Betreiberwunsch: keine Mails nur wegen Fehlern. `ALERT_MAILS` (Standard `false`) schaltet die Sammel-Mail
 „n neue Meldungen (n Fehler)“ ab; Meldungen werden weiter erfasst und stehen im Dashboard. Geschäftsmeldungen
 (Scan, Übernehmen, Bestellung, Zahlung, Sicherheitsnetze, Kundenanfragen) bleiben unverändert. Wieder an: `ALERT_MAILS=true`.
+
+## 17.11.2026 – Warmhalten günstiger; Netlify-Credits beachten
+
+Netlify-Team ist auf dem Free-Plan (`nf_team_dev`): 300 Credits/Monat als harte Grenze, danach werden alle
+Projekte pausiert (QR-Codes tot). Kosten: 15 Credits je Produktionsdeploy, 10 je GB-Stunde Rechenzeit
+(Serverfunktion hat 1 GB), 2 je 10 000 Anfragen. Die erste Warmhalte-Fassung (über TRACK_DOMAIN, mit DB-Abfrage,
+~1,7 s je Aufruf) hätte ~50 Credits/Monat gekostet. Jetzt: `{APP_URL}/q/warm` direkt, ohne DB-Abfrage.
+Erfassung abgebrochener Scans (Edge/Proxy vor der Serverfunktion) braucht einen Web-Deploy (15 Credits) –
+erst nach Blick auf den aktuellen Credit-Verbrauch und ausdrücklichem „Veröffentlichen“.

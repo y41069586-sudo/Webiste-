@@ -2,22 +2,23 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resetEnvCache } from '../src/config/env';
 import { KEEP_WARM_TOKEN, keepWarmUrl, pingKeepWarm } from '../src/services/keep-warm';
 
-const original = process.env.TRACK_DOMAIN;
+const original = process.env.APP_URL;
 afterEach(() => {
-  process.env.TRACK_DOMAIN = original;
+  if (original === undefined) delete process.env.APP_URL;
+  else process.env.APP_URL = original;
   resetEnvCache();
 });
 
 describe('Warmhalten der QR-Strecke', () => {
-  it('nutzt dieselbe Strecke wie der Brief, nur mit gültig geformtem, aber unbekanntem Token', () => {
-    expect(KEEP_WARM_TOKEN).toMatch(/^[A-Za-z0-9]{16,64}$/);
-    process.env.TRACK_DOMAIN = 'seitenwerk.world';
+  it('trifft die Scan-Funktion der Web-App direkt, mit absichtlich ungültigem Token (keine Datenbankabfrage)', () => {
+    expect(KEEP_WARM_TOKEN).not.toMatch(/^[A-Za-z0-9]{16,64}$/);
+    process.env.APP_URL = 'https://seitenwerkworld.netlify.app/';
     resetEnvCache();
-    expect(keepWarmUrl()).toBe(`https://seitenwerk.world/q/${KEEP_WARM_TOKEN}`);
+    expect(keepWarmUrl()).toBe(`https://seitenwerkworld.netlify.app/q/${KEEP_WARM_TOKEN}`);
   });
 
   it('weckt lokal nichts auf', async () => {
-    process.env.TRACK_DOMAIN = 'localhost:3000';
+    process.env.APP_URL = 'http://localhost:3000';
     resetEnvCache();
     expect(keepWarmUrl()).toBeNull();
     const f = vi.fn();
@@ -26,7 +27,7 @@ describe('Warmhalten der QR-Strecke', () => {
   });
 
   it('ruft mit Bot-Kennung auf und meldet den Status', async () => {
-    process.env.TRACK_DOMAIN = 'seitenwerk.world';
+    process.env.APP_URL = 'https://seitenwerkworld.netlify.app';
     resetEnvCache();
     const f = vi.fn(async () => new Response('nicht gefunden', { status: 404 }));
     const r = await pingKeepWarm(f as unknown as typeof fetch);

@@ -1,16 +1,17 @@
-import { getEnv, trackUrl } from '../config/env';
+import { appUrl, getEnv } from '../config/env';
 import { logger } from '../logger';
 
 /**
- * Warmhalten der QR-/Kurz-Link-Strecke (17.11.2026): Ohne Aufrufe schläft die Serverfunktion der Web-App ein,
- * der erste Scan danach brauchte ~12 s. Der Worker ruft deshalb regelmäßig einen ungültigen QR-Token über
- * dieselbe Strecke wie der Brief auf (TRACK_DOMAIN → Web-App → eine Datenbankabfrage → 404).
- * Zählt nie als Scan (kein Lead zum Token, Bot-Kennung), schreibt nichts, kostet nichts außer einem Funktionsaufruf.
+ * Warmhalten der QR-Strecke (17.11.2026): Ohne Aufrufe schläft die Serverfunktion der Web-App ein, der erste Scan
+ * danach brauchte ~11 s. Der Worker ruft deshalb regelmäßig /q/warm direkt auf der Web-App auf: dieselbe
+ * Serverfunktion wie ein Scan, aber der Token ist absichtlich zu kurz → 404 ohne Datenbankabfrage.
+ * Kosten (Netlify Free, Credits): Die erste Fassung (über TRACK_DOMAIN, mit Datenbankabfrage) lief ~1,7 s bei 1 GB
+ * ≈ 50 Credits/Monat; so nur Bruchteile einer Sekunde. Zählt nie als Scan (Token ungültig, Bot-Kennung).
  */
-export const KEEP_WARM_TOKEN = 'warmhaltenSeitenWerk0000';
+export const KEEP_WARM_TOKEN = 'warm';
 
 export function keepWarmUrl(): string | null {
-  const url = trackUrl(`/q/${KEEP_WARM_TOKEN}`);
+  const url = appUrl(`/q/${KEEP_WARM_TOKEN}`);
   // lokal/Tests: nichts aufwecken
   if (!url.startsWith('https://')) return null;
   return url;
