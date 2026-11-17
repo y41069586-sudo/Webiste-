@@ -1,5 +1,5 @@
 import { and, asc, inArray, isNull } from 'drizzle-orm';
-import { appUrl } from '../config/env';
+import { appUrl, getEnv } from '../config/env';
 import { getDb } from '../db/client';
 import { alerts } from '../db/schema';
 import { sha256 } from '../util/crypto';
@@ -7,6 +7,8 @@ import { notifyAdmin } from './email';
 
 /** Neue Warnungen/Fehler als Sammel-Mail an den Betreiber (alle 15 Minuten, jede Meldung einmal). */
 export async function sendAlertDigest(): Promise<number> {
+  // Betreiberwunsch 17.11.2026: keine Mails nur wegen Fehlern; Meldungen bleiben im Dashboard (ALERT_MAILS=true schaltet sie wieder ein)
+  if (!getEnv().ALERT_MAILS) return 0;
   const db = getDb();
   const open = await db
     .select()

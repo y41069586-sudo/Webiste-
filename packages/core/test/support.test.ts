@@ -1,3 +1,4 @@
+import { resetEnvCache } from '../src/config/env';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { updateConfig } from '../src/config/service';
@@ -197,15 +198,28 @@ describe('Support: Verarbeitung', () => {
     expect((await getDb().query.supportMessages.findFirst({ where: eq(supportMessages.id, x.id) }))!.status).toBe('ignored');
   });
 
-  it('Warnungen gehen gesammelt einmal per Mail raus', async () => {
+  it('Warnungen gehen nur mit ALERT_MAILS=true gesammelt einmal per Mail raus (Standard: keine Fehler-Mails)', async () => {
     const db = getDb();
     await db.insert(alerts).values([
       { level: 'warn', code: 'a', message: 'Budget fast erreicht' },
       { level: 'error', code: 'b', message: 'Versand fehlgeschlagen' },
       { level: 'info', code: 'c', message: 'Info' },
     ]);
-    expect(await sendAlertDigest()).toBe(2);
-    expect(await sendAlertDigest()).toBe(0);
-    expect((await db.select().from(outboundEmails).where(eq(outboundEmails.kind, 'admin'))).length).toBe(1);
+    const before = process.env.ALERT_MAILS;
+    try {
+      delete process.env.ALERT_MAILS;
+      resetEnvCache();
+      expect(await sendAlertDigest()).toBe(0);
+      expect((await db.select().from(outboundEmails).where(eq(outboundEmails.kind, 'admin'))).length).toBe(0);
+      process.env.ALERT_MAILS = 'true';
+      resetEnvCache();
+      expect(await sendAlertDigest()).toBe(2);
+      expect(await sendAlertDigest()).toBe(0);
+      expect((await db.select().from(outboundEmails).where(eq(outboundEmails.kind, 'admin'))).length).toBe(1);
+    } finally {
+      if (before === undefined) delete process.env.ALERT_MAILS;
+      else process.env.ALERT_MAILS = before;
+      resetEnvCache();
+    }
   });
 });

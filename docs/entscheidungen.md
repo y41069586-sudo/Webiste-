@@ -1826,3 +1826,9 @@ Test der Kurz-Links: erster Aufruf nach Ruhepause ~11,7 s (eingeschlafene Server
 Der Worker ruft jetzt alle `KEEP_WARM_MINUTES` (Standard 4, 0 = aus) `{TRACK_DOMAIN}/q/warmhaltenSeitenWerk0000`
 mit Bot-Kennung auf: gleiche Strecke wie der Brief, unbekannter Token → 404, kein Scan, keine Schreibzugriffe.
 Kosten: ~11 000 Funktionsaufrufe/Monat (im kostenlosen Netlify-Kontingent). Wirksam nach Worker-Update.
+
+## 17.11.2026 – Keine Fehler-Sammelmails mehr
+
+Betreiberwunsch: keine Mails nur wegen Fehlern. `ALERT_MAILS` (Standard `false`) schaltet die Sammel-Mail
+„n neue Meldungen (n Fehler)“ ab; Meldungen werden weiter erfasst und stehen im Dashboard. Geschäftsmeldungen
+(Scan, Übernehmen, Bestellung, Zahlung, Sicherheitsnetze, Kundenanfragen) bleiben unverändert. Wieder an: `ALERT_MAILS=true`.

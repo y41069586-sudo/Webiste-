@@ -111,6 +111,8 @@ const envSchema = z.object({
 
   // Lernsystem und Versandlaufzeit (Update 2, A6/B6)
   /** Geschätzte Zustellung = Versand + so viele Werktage */
+  /** Sammel-Mails über Fehler/Warnungen (17.11.2026 auf Betreiberwunsch aus; Meldungen bleiben im Dashboard) */
+  ALERT_MAILS: bool(false),
   /** Worker hält die Kurz-Link-/QR-Strecke warm (Minuten, 0 = aus) */
   KEEP_WARM_MINUTES: z.coerce.number().int().min(0).max(60).default(4),
   DELIVERY_BUSINESS_DAYS: z.coerce.number().int().min(1).max(10).default(3),
