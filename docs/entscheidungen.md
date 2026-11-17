@@ -1819,3 +1819,10 @@ online … Danach nehme ich ihn vom Netz“), P. S. „Wenn Sie nicht scannen, e
 (8 pt), Fensterzone, Wahrheits-Check und Belegregeln wie Vorlage 4. Die Frist ohne Jahr ist als Platzhalter zugelassen.
 Zurückschalten: Einstellungen → Briefdesign `standard-4` oder `standard-3`. Ein A/B-Vergleich 4 gegen 5 wäre bei
 40 Briefen statistisch nicht aussagekräftig; deshalb vorerst nur Vorlage 5.
+
+## 17.11.2026 – QR-Strecke warm halten
+
+Test der Kurz-Links: erster Aufruf nach Ruhepause ~11,7 s (eingeschlafene Serverfunktion), danach 1,5–2,2 s.
+Der Worker ruft jetzt alle `KEEP_WARM_MINUTES` (Standard 4, 0 = aus) `{TRACK_DOMAIN}/q/warmhaltenSeitenWerk0000`
+mit Bot-Kennung auf: gleiche Strecke wie der Brief, unbekannter Token → 404, kein Scan, keine Schreibzugriffe.
+Kosten: ~11 000 Funktionsaufrufe/Monat (im kostenlosen Netlify-Kontingent). Wirksam nach Worker-Update.

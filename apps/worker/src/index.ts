@@ -10,6 +10,7 @@ import {
   pingDb,
   runMigrations,
   seedDefaults,
+  startKeepWarm,
   stopBoss,
   QUEUES,
 } from '@wbm/core';
@@ -53,6 +54,8 @@ async function main(): Promise<void> {
     { queue: QUEUES.alertMails, cron: '*/15 * * * *' },
     { queue: QUEUES.imapPoll, cron: '*/5 * * * *', enabled: () => Boolean(env.IMAP_HOST && env.IMAP_USER) },
   ]);
+  // QR-/Kurz-Link-Strecke wach halten, damit der erste Scan nicht ~12 s lädt (KEEP_WARM_MINUTES, 0 = aus)
+  const stopKeepWarm = startKeepWarm();
   logger.info({ dryRun: env.DRY_RUN }, 'Worker gestartet');
 
   let stopping = false;
@@ -80,6 +83,7 @@ async function main(): Promise<void> {
   const shutdown = async (signal: string) => {
     if (stopping) return;
     stopping = true;
+    stopKeepWarm();
     logger.info({ signal }, 'Worker wird beendet …');
     await stopBoss().catch(() => undefined);
     await closeBrowser().catch(() => undefined);
