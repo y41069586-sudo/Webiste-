@@ -61,7 +61,7 @@ export const STANDARD4_STEPS: LetterStandard4['steps'] = [
 ];
 
 export const STANDARD4_CALM =
-  '**Ansehen kostet nichts und verpflichtet zu nichts.** Wenn Sie die Website behalten möchten, ist die Übernahme kostenpflichtig. Preis und Bedingungen sehen Sie vorher.';
+  '**Ansehen kostet nichts und verpflichtet zu nichts.** Wenn Sie die Website behalten möchten, ist die Übernahme kostenpflichtig. Preis und Bedingungen stehen vorher auf der Seite.';
 
 export const STANDARD4_WHY =
   '**Warum ich zuerst baue:** Eine Website beurteilt man am besten, wenn man sie sieht – in Ruhe und ohne Gespräch. Die Bilder sind Beispielbilder, bei Google ist der Entwurf nicht zu finden.';
@@ -110,7 +110,8 @@ function applyStandard5(data: LetterData, i: Standard4Input): void {
       : 'ich habe für Ihren Betrieb eine Website gebaut,';
   data.subject = `${s.displayName}, ich habe Ihre Website schon gebaut – als Entwurf.`;
   data.intro = [`${opening} ohne Auftrag und bevor Sie mich kennen: ${who}. **Sie ist online und wartet nur auf Ihren Blick.**`];
-  data.qrCaption = 'Hier scannen';
+  // Nutzen statt Befehl auf der QR-Karte (Stannp-Test: Nutzen-/Neugier-Satz deutlich vor rein sachlichem Aufruf)
+  data.qrCaption = 'Ihre Website ansehen';
   data.offer = '';
   data.postscript =
     '**P. S.** Wenn Sie nicht scannen, erfahren Sie nie, wie Ihr Betrieb im Internet aussehen könnte. **Ein Blick dauert eine Minute.**';

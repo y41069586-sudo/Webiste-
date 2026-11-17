@@ -212,7 +212,7 @@ describe('Standardvorlage 4', () => {
       .join(' ')
       .replace(/\s+/g, ' ');
     expect(text).toMatch(/Übernahme kostenpflichtig/);
-    expect(text).toMatch(/Hier scannen/);
+    expect(text).toMatch(/Ihre Website ansehen/);
     expect(text).toMatch(/Art\. 14 DSGVO/);
   }, 60000);
 });
