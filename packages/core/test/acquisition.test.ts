@@ -61,31 +61,33 @@ function fixture(branch = 'maler') {
 }
 it('uses the explicitly ordered target sectors, keeping the same templates and inactive choices respected', () => {
   expect(
-    ['maler', 'reinigung', 'fliesenleger', 'gartenbau', 'bodenleger', 'parkettleger', 'entruempelung', 'dachdecker'].map((b) =>
+    ['dachdecker', 'heizung', 'sanitaer', 'gartenbau', 'tischler', 'entruempelung', 'reinigung', 'maler'].map((b) =>
       campaignRank(b),
     ),
   ).toEqual([1, 2, 3, 4, 4, 4, 4, 4]);
   expect(campaignRank('restaurant')).toBeNull();
   expect(campaignBranches(DEFAULT_CONFIG.targeting.branches, ACQUISITION_POLICY).map((b) => b.key)).toEqual([
+    // Recherche 17.11.2026: teure Gewerke zuerst
+    'dachdecker',
+    'heizung',
+    'sanitaer',
     'maler',
-    'reinigung',
-    'fliesenleger',
     'elektriker',
     'gartenbau',
-    'sanitaer',
+    'reinigung',
+    'fliesenleger',
     'bodenleger',
     'parkettleger',
     'entruempelung',
     'tischler',
     'zimmerer',
-    'dachdecker',
-    'heizung',
     'glaser',
-    // Beauty als dritte Stufe nach allem Handwerk
+    // Beauty als dritte Stufe nach allem Handwerk (Neugründungen; Friseure mit Stammkunden nicht mehr)
+    'nagelstudio',
     'kosmetikstudio',
-    'friseur',
   ]);
-  expect(campaignRank('friseur')).toBe(5);
+  expect(campaignRank('kosmetikstudio')).toBe(5);
+  expect(campaignRank('friseur')).toBeNull();
   // Ältere gespeicherte Konfiguration ohne die neueren Kampagnenbranchen: fehlend ≠ abgeschaltet
   const legacy = DEFAULT_CONFIG.targeting.branches.filter((b) => ['maler', 'restaurant'].includes(b.key));
   expect(campaignBranches(legacy, ACQUISITION_POLICY, DEFAULT_CONFIG.targeting.branches).map((b) => b.key)).toContain(
@@ -277,13 +279,13 @@ it('prioritizes the best available sector before a higher-scoring secondary lead
       [
         { branch: 'gartenbau', score: 100 },
         { branch: 'reinigung', score: 90 },
-        { branch: 'maler', score: 85 },
+        { branch: 'dachdecker', score: 85 },
       ],
       ACQUISITION_POLICY,
     ),
-  ).toEqual([{ branch: 'maler', score: 85 }]);
-  expect(preferredCampaignTier([{ branch: 'fliesenleger' }, { branch: 'reinigung' }], ACQUISITION_POLICY)).toEqual([
-    { branch: 'reinigung' },
+  ).toEqual([{ branch: 'dachdecker', score: 85 }]);
+  expect(preferredCampaignTier([{ branch: 'sanitaer' }, { branch: 'heizung' }], ACQUISITION_POLICY)).toEqual([
+    { branch: 'heizung' },
   ]);
 });
 it('preserves unchanged demo content when only intent/date evidence is reviewed again', () => {
