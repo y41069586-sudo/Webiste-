@@ -11,6 +11,7 @@ import {
   runMigrations,
   seedDefaults,
   startKeepWarm,
+  startScanWarmup,
   stopBoss,
   QUEUES,
 } from '@wbm/core';
@@ -56,6 +57,8 @@ async function main(): Promise<void> {
   ]);
   // QR-/Kurz-Link-Strecke wach halten, damit der erste Scan nicht ~12 s lädt (KEEP_WARM_MINUTES, 0 = aus)
   const stopKeepWarm = startKeepWarm();
+  // QR-Ziele und Demos regelmäßig in den Netlify-Zwischenspeicher laden (SCAN_WARMUP_HOURS, 0 = aus)
+  const stopScanWarmup = startScanWarmup();
   logger.info({ dryRun: env.DRY_RUN }, 'Worker gestartet');
 
   let stopping = false;
@@ -84,6 +87,7 @@ async function main(): Promise<void> {
     if (stopping) return;
     stopping = true;
     stopKeepWarm();
+    stopScanWarmup();
     logger.info({ signal }, 'Worker wird beendet …');
     await stopBoss().catch(() => undefined);
     await closeBrowser().catch(() => undefined);

@@ -1,4 +1,4 @@
-import { demoUrl, esc, handleOptOut } from '@wbm/core';
+import { demoUrl, esc, handleOptOut, purgeDemoCache } from '@wbm/core';
 import { requestMetaFrom } from '@/lib/request';
 import { simplePage } from '@/lib/public-page';
 
@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   await handleOptOut(slug, requestMetaFrom(req.headers));
+  // Demo und QR-Ziel sofort aus dem Netlify-Zwischenspeicher nehmen (sonst bis zu einen Tag sichtbar)
+  await purgeDemoCache(slug);
   return new Response(null, { status: 303, headers: { location: demoUrl('/abgemeldet'), 'cache-control': 'no-store' } });
 }
 

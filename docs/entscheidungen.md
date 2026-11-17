@@ -1841,3 +1841,19 @@ Projekte pausiert (QR-Codes tot). Kosten: 15 Credits je Produktionsdeploy, 10 je
 ~1,7 s je Aufruf) hätte ~50 Credits/Monat gekostet. Jetzt: `{APP_URL}/q/warm` direkt, ohne DB-Abfrage.
 Erfassung abgebrochener Scans (Edge/Proxy vor der Serverfunktion) braucht einen Web-Deploy (15 Credits) –
 erst nach Blick auf den aktuellen Credit-Verbrauch und ausdrücklichem „Veröffentlichen“.
+
+## 17.11.2026 – QR-Pförtner: Scans öffnen ohne Kaltstart
+
+Problem: Die Next-Serverfunktion (1 GB, Ohio) schläft ohne Aufrufe ein; der erste Scan wartete 9–11 s, abgebrochene
+Scans wurden nie gezählt. Warmhalten kostete ~40 Credits/Monat und verhinderte Kaltstarts nicht zuverlässig.
+Lösung (Recherche: reports/QR Scan sofort ohne Kaltstart.md):
+- Edge Function `apps/web/netlify/edge-functions/qr-pfoertner.ts` auf `/q/{token}` und `/{kurzcode}`: Ziel über
+  `/qz/{t|k}/{id}` (Netlify-Zwischenspeicher, durable) → sofort 302 auf `/d/{slug}?start=1`; der Scan wird im
+  Hintergrund über die bisherige Route gezählt (Kennzeichen `x-sw-zaehlen`), Benachrichtigung unverändert.
+  Fehler/Bots/unbekannte Ziele → bisherige Route (`onError: bypass`).
+- `/d/{slug}`: `Netlify-CDN-Cache-Control: public, durable, s-maxage=1 Tag, stale-while-revalidate=bis Ablauf`,
+  Tag/ID `demo-{slug}`, Vary nur `start|plan|abgebrochen`. Browser speichern weiter nicht. „Kein Interesse“ löscht
+  den Eintrag sofort (Netlify-Purge-API). Folge: wiederholte Aufrufe ohne QR werden nicht mehr als `demo_view` gezählt.
+- Worker: Vorab-Aufruf aller aktiven QR-Ziele und Demos alle `SCAN_WARMUP_HOURS` (Standard 6, Bot-Kennung, zählt nicht);
+  `KEEP_WARM_MINUTES` jetzt Standard 0.
+Kosten: Edge zählt nur als Anfrage (2 Credits/10 000); Veröffentlichung 15 Credits.

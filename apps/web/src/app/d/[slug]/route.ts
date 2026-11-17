@@ -12,6 +12,7 @@ import {
   demoOfferSectionHtml,
   applyMobileHeroLayer,
   v4TierLabel,
+  demoCdnHeaders,
 } from '@wbm/core';
 import { requestMetaFrom } from '@/lib/request';
 import { simplePage } from '@/lib/public-page';
@@ -148,5 +149,8 @@ async function serveDemo(req: Request, slug: string): Promise<Response> {
         : m,
     )
     .replace('</body>', cfg.metrics.engagementBeacon ? `<script>${BEACON_SCRIPT}</script></body>` : '</body>');
-  return new Response(page, { status: 200, headers: DEMO_HEADERS });
+  // Netlify-Zwischenspeicher (17.11.2026): Scans öffnen die Demo sofort statt nach dem Kaltstart der Funktion.
+  // Varianten nur nach start/plan/abgebrochen; Browser speichern weiterhin nicht.
+  const cdn = demoCdnHeaders(slug, found.demo.expiresAt, { vary: 'query=start|plan|abgebrochen' });
+  return new Response(page, { status: 200, headers: { ...DEMO_HEADERS, ...cdn } });
 }

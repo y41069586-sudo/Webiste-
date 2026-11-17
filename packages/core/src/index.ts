@@ -89,6 +89,7 @@ export * from './services/optimizer';
 export * from './services/retention';
 export * from './services/monitoring';
 export * from './services/keep-warm';
+export * from './services/scan-fast';
 export * from './claims/library';
 export * from './playbooks';
 export * from './letters/slots';

@@ -113,8 +113,10 @@ const envSchema = z.object({
   /** Geschätzte Zustellung = Versand + so viele Werktage */
   /** Sammel-Mails über Fehler/Warnungen (17.11.2026 auf Betreiberwunsch aus; Meldungen bleiben im Dashboard) */
   ALERT_MAILS: bool(false),
-  /** Worker hält die Kurz-Link-/QR-Strecke warm (Minuten, 0 = aus) */
-  KEEP_WARM_MINUTES: z.coerce.number().int().min(0).max(60).default(4),
+  /** Worker hält die Serverfunktion warm (Minuten, 0 = aus; seit dem QR-Pförtner nicht mehr nötig) */
+  KEEP_WARM_MINUTES: z.coerce.number().int().min(0).max(60).default(0),
+  /** Vorab-Aufruf der QR-Ziele und Demos in den Netlify-Zwischenspeicher (Stunden, 0 = aus) */
+  SCAN_WARMUP_HOURS: z.coerce.number().int().min(0).max(48).default(6),
   DELIVERY_BUSINESS_DAYS: z.coerce.number().int().min(1).max(10).default(3),
   /** Mindestanzahl zugestellter Briefe je Variante, bevor ein Gewinner ausgerufen wird */
   MIN_LETTERS_PER_ARM: z.coerce.number().int().min(1).default(100),
