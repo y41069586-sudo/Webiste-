@@ -58,11 +58,30 @@ describe('Automatische Vorauswahl', () => {
         campaignRank: 1,
         socialOnly: true,
         probe: 'none',
+        branchKey: 'dachdecker',
       },
       now,
     );
     expect(r.tier).toBe('top');
     expect(r.score).toBe(100);
+  });
+
+  it('Recherche 17.11.2026: Vor-Ort-Prüfung zählt mehr als Bearbeitung, teure Gewerke vor Laufkundschaft', () => {
+    const at = (meta: Record<string, string>, branchKey: string) =>
+      prescreen({ place: { ...base, phone: '0231 1', sourceMeta: meta }, campaignRank: null, socialOnly: false, branchKey }, now);
+    const recentEdit = new Date(now.getTime() - 60 * 86_400_000).toISOString();
+    const checked = at({ checkedOn: recentEdit.slice(0, 10) }, 'maler');
+    const edited = at({ lastEditedAt: recentEdit }, 'maler');
+    expect(checked.score).toBeGreaterThan(edited.score);
+    const dach = at({ lastEditedAt: recentEdit }, 'dachdecker');
+    const cafe = at({ lastEditedAt: recentEdit }, 'cafe');
+    expect(dach.score).toBeGreaterThan(edited.score);
+    expect(cafe.score).toBeLessThan(edited.score);
+    expect(cafe.reasons.map((r) => r.criterion)).toContain('laufkundschaft');
+    // Gastronomie/Beauty: 4 Jahre ohne Änderung gilt schon als veraltet, Handwerk noch nicht
+    const fourYears = new Date(now.getTime() - 4 * 365 * 86_400_000).toISOString();
+    expect(at({ lastEditedAt: fourYears }, 'restaurant').reasons.map((r) => r.criterion)).toContain('veraltet');
+    expect(at({ lastEditedAt: fourYears }, 'maler').reasons.map((r) => r.criterion)).not.toContain('veraltet');
   });
 
   it('veraltete Einträge und mögliche eigene Websites rutschen nach hinten', () => {

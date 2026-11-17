@@ -313,6 +313,7 @@ async function findLeadsRun(opts: FindLeadsOptions): Promise<FindLeadsSummary> {
       place: c.place,
       campaignRank: campaignRank(c.branch.key, policy),
       socialOnly: classifyWebsite(c.place.websiteUri, cfg.filters.socialDomains).socialOnly,
+      branchKey: c.branch.key,
     }).score;
   if (policy.websiteProbe && src.primary.kind !== 'mock') candidates.sort((a, b) => early(b) - early(a));
   const chains = await chainNames(db, candidates, cfg.targeting.chainMinCities);
@@ -500,6 +501,7 @@ async function findLeadsRun(opts: FindLeadsOptions): Promise<FindLeadsSummary> {
       campaignRank: campaignRank(branch.key, policy),
       socialOnly: result.website.socialOnly,
       probe: probeOutcome,
+      branchKey: branch.key,
     });
     // Mindestgrenze der Vorauswahl (nicht für Offline-Mock-Daten). Seit 04.11.2026 nur noch für Betriebe ohne
     // Telefonnummer: Alle anderen prüft die KI (Betreiber: „er soll alle prüfen, die er gesucht hat“). Die Vorauswahl

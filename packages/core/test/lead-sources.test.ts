@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CONFIG } from '../src/config/settings';
-import { buildOverpassQuery, osmElementToPlace } from '../src/providers/lead-source/overpass';
+import { buildOverpassQuery, osmElementToPlace, osmSourceMeta } from '../src/providers/lead-source/overpass';
 import { googlePlaceToRaw } from '../src/providers/lead-source/google-places';
 
 describe('Overpass (OSM)', () => {
@@ -99,5 +99,14 @@ describe('Adress-Anreicherung', () => {
       m.get('node/2'),
     );
     expect(b).toMatchObject({ street: 'Hohe Straße', houseNumber: '1', postalCode: '44139' });
+  });
+});
+
+describe('OSM: Ketten und geschlossene Betriebe (17.11.2026)', () => {
+  it('Marken-Tags kennzeichnen eine Filiale, leerstehende Läden gelten als geschlossen', () => {
+    expect(osmSourceMeta({ type: 'node', id: 1, tags: { name: 'X', 'brand:wikidata': 'Q1' } } as never).branded).toBe(true);
+    expect(osmSourceMeta({ type: 'node', id: 2, tags: { name: 'Y' } } as never).branded).toBeUndefined();
+    const vacant = osmElementToPlace({ type: 'node', id: 3, tags: { name: 'Z', shop: 'vacant' } } as never, 'Dortmund');
+    expect(vacant?.businessStatus).toBe('CLOSED_PERMANENTLY');
   });
 });

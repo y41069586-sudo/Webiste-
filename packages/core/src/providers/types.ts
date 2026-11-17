@@ -41,6 +41,8 @@ export interface SourceMeta {
   checkedOn?: string;
   /** Angegebener Beginn der Geschäftstätigkeit (start_date), ISO-Datum oder Jahr */
   startDate?: string;
+  /** OSM-Marken-Tags (brand, brand:wikidata) vorhanden – Filiale einer Kette */
+  branded?: boolean;
   /** Domain einer angegebenen geschäftlichen E-Mail-Adresse (keine Adresse selbst) */
   emailDomain?: string;
   /** Anzahl angegebener Social-/Profil-Links */

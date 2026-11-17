@@ -7,27 +7,32 @@ import type { PriorityReason } from './priority-v4';
 export const acquisitionPolicySchema = z
   .object({
     enabled: z.boolean().default(true),
-    primary: z.array(z.string()).default(['maler', 'reinigung', 'fliesenleger']),
+    /**
+     * Recherche 17.11.2026 (reports/Beste Zielbetriebe für Websitebriefe.md): zuerst Gewerke mit teuren Aufträgen,
+     * bei denen Kunden vorher online vergleichen (Dach, Heizung, Sanitär); danach Garten, Tischler, Entrümpelung,
+     * Reinigung und der Ausbau. Annahme, keine gemessene Kaufquote.
+     */
+    primary: z.array(z.string()).default(['dachdecker', 'heizung', 'sanitaer']),
     secondary: z
       .array(z.string())
       .default([
         'gartenbau',
+        'tischler',
+        'entruempelung',
+        'reinigung',
+        'zimmerer',
+        'maler',
+        'fliesenleger',
         'bodenleger',
         'parkettleger',
-        'entruempelung',
-        'sanitaer',
         'elektriker',
-        'tischler',
-        'zimmerer',
-        'dachdecker',
-        'heizung',
         'glaser',
       ]),
     /**
      * Dritte Stufe (28.10.2026): Beauty. Viele Salons arbeiten mit Instagram und Buchungsportalen und brauchen eine
      * eigene Website seltener – deshalb nach allen Handwerksbranchen, aber mit großem Pool.
      */
-    tertiary: z.array(z.string()).default(['friseur', 'kosmetikstudio']),
+    tertiary: z.array(z.string()).default(['kosmetikstudio', 'nagelstudio']),
     evidenceMaxDays: z.number().int().min(1).max(90).default(30),
     demandMaxDays: z.number().int().min(1).max(180).default(90),
     /** Betreiberentscheidung 03.11.2026: datierte Aktivität (Beiträge, Bewertungen, Arbeitsbilder) zählt bis 12 Monate */

@@ -172,6 +172,8 @@ export function osmSourceMeta(el: OsmElement): SourceMeta {
     ...(osmDate(t.start_date) ? { startDate: osmDate(t.start_date) } : {}),
     ...(domain ? { emailDomain: FREEMAIL.has(domain) ? 'freemail' : domain } : {}),
     ...(socialLinks ? { socialLinks } : {}),
+    // Marken-Tags = Filiale/Franchise (Kette) → wird in der Qualifizierung ausgeschlossen
+    ...(t.brand || t['brand:wikidata'] || t['brand:wikipedia'] ? { branded: true } : {}),
   };
 }
 
@@ -183,7 +185,13 @@ export function osmElementToPlace(el: OsmElement, fallbackCity: string): RawPlac
   const website = t.website ?? t['contact:website'] ?? t.url ?? t['contact:url'];
   const social = t['contact:instagram'] ?? t['contact:facebook'] ?? t['contact:tiktok'];
   const status =
-    t['disused:shop'] || t['disused:craft'] || t['abandoned:shop'] || t.opening_hours === 'closed'
+    t['disused:shop'] ||
+    t['disused:craft'] ||
+    t['disused:amenity'] ||
+    t['abandoned:shop'] ||
+    t['abandoned:craft'] ||
+    t.shop === 'vacant' ||
+    t.opening_hours === 'closed'
       ? 'CLOSED_PERMANENTLY'
       : 'OPERATIONAL';
   return {

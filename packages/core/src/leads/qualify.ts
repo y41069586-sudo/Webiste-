@@ -162,7 +162,8 @@ export function qualify(input: QualifyInput): QualifyResult {
   if (place.city && foldUmlauts(place.city).trim() !== foldUmlauts(input.city).trim()) reasons.push('outside_city');
   if (input.isSuppressed) reasons.push('suppressed');
   if (input.recentlyContacted) reasons.push('recently_contacted');
-  if (input.chainByFrequency || matchesChainName(place.name, cfg.targeting.chainNames)) reasons.push('chain');
+  if (input.chainByFrequency || place.sourceMeta?.branded || matchesChainName(place.name, cfg.targeting.chainNames))
+    reasons.push('chain');
   if (input.isDuplicate) reasons.push('duplicate');
   if (input.excludedIndustry) reasons.push('excluded_industry');
   const priority = priorityV4(

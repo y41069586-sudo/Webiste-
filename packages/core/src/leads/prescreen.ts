@@ -24,7 +24,31 @@ export interface PrescreenInput {
   socialOnly: boolean;
   /** Ergebnis der automatischen Website-Vorprüfung, falls gelaufen */
   probe?: 'found' | 'possible' | 'none';
+  /** Branchenschlüssel (z. B. 'dachdecker') für Auftragswert und Laufkundschaft */
+  branchKey?: string;
 }
+
+/**
+ * Recherche 17.11.2026 (reports/Beste Zielbetriebe für Websitebriefe.md): Kunden vergleichen vor allem bei teuren
+ * Aufträgen online (Dach, Heizung/Sanitär, Garten, Tischler, Entrümpelung). Laufkundschaft (Café) kauft selten.
+ * Gewichte sind begründete Annahmen, keine gemessenen Kaufquoten – nach den ersten Rückläufen anpassen.
+ */
+const HIGH_VALUE = new Set(['dachdecker', 'heizung', 'sanitaer', 'gartenbau', 'tischler', 'zimmerer', 'entruempelung']);
+const MID_VALUE = new Set([
+  'reinigung',
+  'maler',
+  'elektriker',
+  'fliesenleger',
+  'bodenleger',
+  'parkettleger',
+  'metallbau',
+  'glaser',
+  'stuckateur',
+  'maurer',
+]);
+const WALK_IN = new Set(['cafe']);
+/** Gastronomie und Beauty schließen öfter – alte Einträge dort früher als veraltet werten */
+const SHORT_LIVED = new Set(['cafe', 'restaurant', 'friseur', 'nagelstudio', 'kosmetikstudio']);
 
 export interface PrescreenResult {
   score: number;
@@ -60,17 +84,31 @@ export function prescreen(input: PrescreenInput, now = new Date()): PrescreenRes
   if (place.phone) add('telefon', 15, 'Geschäftliche Telefonnummer in der Quelle');
   if (place.openingHours?.days.length) add('oeffnungszeiten', 10, 'Öffnungszeiten in der Quelle gepflegt');
 
-  // Aktivität: jüngste Prüfung bzw. Bearbeitung des Eintrags. Alte, nie geprüfte Einträge sind oft geschlossene Betriebe.
-  const touched = [parseDay(meta.checkedOn), parseDay(meta.lastEditedAt)]
-    .filter((d): d is Date => d !== null && d <= now)
-    .sort((a, b) => b.getTime() - a.getTime())[0];
-  const touchedMonths = touched ? monthsBetween(touched, now) : null;
-  if (touchedMonths !== null && touchedMonths <= 24)
-    add('aktivitaet', 20, `Eintrag vor ${Math.max(0, Math.round(touchedMonths))} Monaten geprüft/bearbeitet`);
-  else if (touchedMonths !== null && touchedMonths <= 60)
-    add('aktivitaet', 8, `Eintrag vor ${Math.round(touchedMonths)} Monaten geprüft/bearbeitet`);
+  // Aktivität: Eine Vor-Ort-Prüfung (check_date) belegt den Betrieb am stärksten, eine bloße Bearbeitung schwächer
+  // (auch Bots bearbeiten). Alte, nie geprüfte Einträge sind oft geschlossene Betriebe → Rückläufer.
+  const checked = parseDay(meta.checkedOn);
+  const edited = parseDay(meta.lastEditedAt);
+  const checkedMonths = checked && checked <= now ? monthsBetween(checked, now) : null;
+  const editedMonths = edited && edited <= now ? monthsBetween(edited, now) : null;
+  const touchedMonths = [checkedMonths, editedMonths].filter((m): m is number => m !== null).sort((a, b) => a - b)[0] ?? null;
+  const staleAfter = input.branchKey && SHORT_LIVED.has(input.branchKey) ? 36 : 60;
+  if (checkedMonths !== null && checkedMonths <= 12)
+    add('aktivitaet', 25, `Vor Ort geprüft vor ${Math.max(0, Math.round(checkedMonths))} Monaten`);
+  else if (checkedMonths !== null && checkedMonths <= 24)
+    add('aktivitaet', 15, `Vor Ort geprüft vor ${Math.round(checkedMonths)} Monaten`);
+  else if (editedMonths !== null && editedMonths <= 24)
+    add('aktivitaet', 12, `Eintrag vor ${Math.max(0, Math.round(editedMonths))} Monaten bearbeitet`);
+  else if (touchedMonths !== null && touchedMonths <= staleAfter)
+    add('aktivitaet', 6, `Eintrag vor ${Math.round(touchedMonths)} Monaten geprüft/bearbeitet`);
   else if (touchedMonths !== null)
-    add('veraltet', -15, `Eintrag seit ${Math.round(touchedMonths / 12)} Jahren unverändert – Betrieb evtl. geschlossen`);
+    add('veraltet', -20, `Eintrag seit ${Math.round(touchedMonths / 12)} Jahren unverändert – Betrieb evtl. geschlossen`);
+
+  if (input.branchKey && HIGH_VALUE.has(input.branchKey))
+    add('auftragswert', 10, 'Teure Aufträge – Kunden vergleichen vorher online');
+  else if (input.branchKey && MID_VALUE.has(input.branchKey))
+    add('auftragswert', 5, 'Mittlere Auftragswerte – Website hilft beim Vergleich');
+  if (input.branchKey && WALK_IN.has(input.branchKey))
+    add('laufkundschaft', -10, 'Lebt vor allem von Laufkundschaft – kauft seltener eine Website');
 
   if (input.socialOnly || (meta.socialLinks ?? 0) > 0)
     add('online_aktiv', 15, 'Online aktiv (Social/Portal), aber ohne eigene Website');
@@ -83,8 +121,10 @@ export function prescreen(input: PrescreenInput, now = new Date()): PrescreenRes
   const start = parseDay(meta.startDate);
   if (start && start <= now) {
     const age = monthsBetween(start, now);
-    if (age >= 6 && age <= 36) add('jung', 15, `Laut Eintrag seit ${Math.round(age)} Monaten tätig`);
-    else if (age < 6) add('jung', 8, 'Laut Eintrag erst vor wenigen Monaten gestartet');
+    // 6–24 Monate: braucht Sichtbarkeit und hat die riskante Anfangszeit hinter sich
+    if (age >= 6 && age <= 24) add('jung', 15, `Laut Eintrag seit ${Math.round(age)} Monaten tätig`);
+    else if (age > 24 && age <= 36) add('jung', 8, `Laut Eintrag seit ${Math.round(age)} Monaten tätig`);
+    else if (age < 6) add('jung', 5, 'Laut Eintrag erst vor wenigen Monaten gestartet');
   }
 
   if (input.probe === 'possible')
