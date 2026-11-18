@@ -1905,3 +1905,8 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   `KEEP_WARM_MINUTES=5` setzt (Handbuch). Schätzung 5–20 Credits/Monat (5 040 Aufrufe; 0,2–1,3 s je Aufruf bei 1 GB,
   10 Credits/GB-Stunde, 2 Credits/10 000 Anfragen). Ohne Wecker bleibt der Kaltstart bei frühem Klick möglich.
 - Betreiberwunsch 18.11.2026: Wecker rund um die Uhr (`KEEP_WARM_HOURS=0-24`, `KEEP_WARM_MINUTES=5`), Schätzung 7–33 Credits/Monat.
+- 18.11.2026 nach dem Deploy `6afe0e6f`: kurz 500er auf „Übernehmen“/Einrichtung, Protokoll `EMAXCONNSESSION … pool_size: 15`.
+  Die Web-App hängt seit dem Supabase-Umzug wieder am Session-Pooler (Port 5432), obwohl am 24.10. bewusst auf den
+  Transaction-Pooler (6543) umgestellt worden war (`docs/admin-zugang.md`). Code: Verbindungspool in Serverfunktionen
+  auf 3 Verbindungen und 5 s Leerlauf begrenzt. Offen (Betreiberentscheidung, braucht Deploy): DATABASE_URL in Netlify
+  wieder auf Port 6543. Gemessen danach (warm): Übernehmen 0,68 s, Einrichtungsseite 0,72 s (vorher je ~1,2 s).

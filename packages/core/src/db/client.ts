@@ -58,10 +58,13 @@ export function getDatabaseConnectionConfig(url = getEnv().DATABASE_URL): Pick<p
 
 export function getPool(): pg.Pool {
   if (!g.__wbmPool) {
+    const serverless = Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY);
     g.__wbmPool = new pg.Pool({
       ...getDatabaseConnectionConfig(),
-      max: Number(process.env.DB_POOL_MAX ?? 10),
-      idleTimeoutMillis: 30_000,
+      // Serverfunktionen (Netlify/AWS Lambda): wenige Verbindungen je Instanz und schnell wieder freigeben. Eingefrorene
+      // Instanzen halten ihre Verbindungen offen; im Session-Pooler (max. 15) führte das am 18.11.2026 zu 500ern.
+      max: Number(process.env.DB_POOL_MAX ?? (serverless ? 3 : 10)),
+      idleTimeoutMillis: serverless ? 5_000 : 30_000,
       application_name: process.env.APP_NAME ?? 'wbm',
     });
     g.__wbmPool.on('error', (err) => {
