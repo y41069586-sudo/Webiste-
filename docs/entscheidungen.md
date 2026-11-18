@@ -1910,3 +1910,7 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   Transaction-Pooler (6543) umgestellt worden war (`docs/admin-zugang.md`). Code: Verbindungspool in Serverfunktionen
   auf 3 Verbindungen und 5 s Leerlauf begrenzt. Offen (Betreiberentscheidung, braucht Deploy): DATABASE_URL in Netlify
   wieder auf Port 6543. Gemessen danach (warm): Übernehmen 0,68 s, Einrichtungsseite 0,72 s (vorher je ~1,2 s).
+- Umsetzung (Betreiber: „Mach“): `DATABASE_URL` ist in Netlify als Geheimnis gespeichert und nicht lesbar. Statt sie neu
+  einzugeben, leitet der Code Serverfunktionen (Netlify/Lambda) bei Supabase-Pooler-Host und Port 5432 automatisch auf
+  Port 6543 (Transaction-Pooler, gleiche Zugangsdaten; `serverlessPoolerUrl`). Worker unverändert im Session-Modus.
+  Abschaltbar mit `DB_SERVERLESS_TRANSACTION_POOLER=false` in Netlify. In Netlify ist `DB_POOL_MAX=2` gesetzt.

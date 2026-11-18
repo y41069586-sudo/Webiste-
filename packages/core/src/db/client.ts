@@ -40,8 +40,31 @@ interface DbGlobal {
 const g = globalThis as unknown as DbGlobal;
 
 /** Shared TLS settings for application queries and the pg-boss connection. */
+/** Läuft in einer Serverfunktion (Netlify/AWS Lambda), nicht im langlebigen Worker. */
+export function isServerless(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.AWS_LAMBDA_FUNCTION_NAME || env.NETLIFY);
+}
+
+/**
+ * Serverfunktionen über den Transaction-Pooler (Port 6543) statt den Session-Pooler (5432) von Supabase leiten
+ * (18.11.2026): Viele kurzlebige, teils eingefrorene Instanzen halten Verbindungen offen; der Session-Pooler erlaubt nur
+ * 15 und lieferte dann `EMAXCONNSESSION` (500er beim Kauf). Gleicher Host, gleiche Zugangsdaten. Abschaltbar mit
+ * `DB_SERVERLESS_TRANSACTION_POOLER=false`. Der Worker (Migrationen, Queue, Backups) bleibt im Session-Modus.
+ */
+export function serverlessPoolerUrl(url: string, env: NodeJS.ProcessEnv = process.env): string {
+  if (!isServerless(env) || env.DB_SERVERLESS_TRANSACTION_POOLER === 'false') return url;
+  try {
+    const u = new URL(url);
+    if (!u.hostname.endsWith('.pooler.supabase.com') || (u.port || '5432') !== '5432') return url;
+    u.port = '6543';
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 export function getDatabaseConnectionConfig(url = getEnv().DATABASE_URL): Pick<pg.PoolConfig, 'connectionString' | 'ssl'> {
-  let connectionString = url;
+  let connectionString = serverlessPoolerUrl(url);
   const host = new URL(connectionString).hostname;
   const isSupabase = /^(?:db\.[a-z0-9]+\.supabase\.co|[a-z0-9-]+\.pooler\.supabase\.com)$/.test(host);
   const ca = process.env.DATABASE_SSL_CA?.replace(/\\n/g, '\n') ?? (isSupabase ? SUPABASE_ROOT_CA : undefined);
@@ -58,7 +81,7 @@ export function getDatabaseConnectionConfig(url = getEnv().DATABASE_URL): Pick<p
 
 export function getPool(): pg.Pool {
   if (!g.__wbmPool) {
-    const serverless = Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY);
+    const serverless = isServerless();
     g.__wbmPool = new pg.Pool({
       ...getDatabaseConnectionConfig(),
       // Serverfunktionen (Netlify/AWS Lambda): wenige Verbindungen je Instanz und schnell wieder freigeben. Eingefrorene
