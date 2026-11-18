@@ -1904,4 +1904,4 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
 - Warmhalten mit Tagesfenster `KEEP_WARM_HOURS` (Standard 7–21 Uhr deutscher Zeit). Bleibt aus, bis der Betreiber
   `KEEP_WARM_MINUTES=5` setzt (Handbuch). Schätzung 5–20 Credits/Monat (5 040 Aufrufe; 0,2–1,3 s je Aufruf bei 1 GB,
   10 Credits/GB-Stunde, 2 Credits/10 000 Anfragen). Ohne Wecker bleibt der Kaltstart bei frühem Klick möglich.
-
+- Betreiberwunsch 18.11.2026: Wecker rund um die Uhr (`KEEP_WARM_HOURS=0-24`, `KEEP_WARM_MINUTES=5`), Schätzung 7–33 Credits/Monat.
