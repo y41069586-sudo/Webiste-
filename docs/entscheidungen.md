@@ -1914,3 +1914,6 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   einzugeben, leitet der Code Serverfunktionen (Netlify/Lambda) bei Supabase-Pooler-Host und Port 5432 automatisch auf
   Port 6543 (Transaction-Pooler, gleiche Zugangsdaten; `serverlessPoolerUrl`). Worker unverändert im Session-Modus.
   Abschaltbar mit `DB_SERVERLESS_TRANSACTION_POOLER=false` in Netlify. In Netlify ist `DB_POOL_MAX=2` gesetzt.
+- Nach Deploy `6afe2d1f` (Transaction-Pooler aktiv, keine Fehler): Übernehmen ~0,68 s, Einrichtung ~1,25 s mit 4 s Pause,
+  0,6 s ohne Pause. Ursache: 5 s Leerlauf-Grenze erzwang Neuverbindung. Leerlauf in Serverfunktionen jetzt 120 s.
+

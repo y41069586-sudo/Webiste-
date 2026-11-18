@@ -84,10 +84,11 @@ export function getPool(): pg.Pool {
     const serverless = isServerless();
     g.__wbmPool = new pg.Pool({
       ...getDatabaseConnectionConfig(),
-      // Serverfunktionen (Netlify/AWS Lambda): wenige Verbindungen je Instanz und schnell wieder freigeben. Eingefrorene
-      // Instanzen halten ihre Verbindungen offen; im Session-Pooler (max. 15) führte das am 18.11.2026 zu 500ern.
+      // Serverfunktionen (Netlify/AWS Lambda): wenige Verbindungen je Instanz (laufen über den Transaction-Pooler, siehe
+      // serverlessPoolerUrl). Verbindungen offen lassen: ein Neuaufbau kostet von den USA nach Frankfurt ~0,5 s, und ein
+      // Kunde liest zwischen zwei Klicks meist länger als ein paar Sekunden (Messung 18.11.2026: 5 s → +0,5 s je Schritt).
       max: Number(process.env.DB_POOL_MAX ?? (serverless ? 3 : 10)),
-      idleTimeoutMillis: serverless ? 5_000 : 30_000,
+      idleTimeoutMillis: serverless ? 120_000 : 30_000,
       application_name: process.env.APP_NAME ?? 'wbm',
     });
     g.__wbmPool.on('error', (err) => {
