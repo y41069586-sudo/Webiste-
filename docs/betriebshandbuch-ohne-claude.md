@@ -96,7 +96,8 @@ Verbinden mit `77.237.235.161`, dann:
 | Worker neu starten | `sudo docker restart $(sudo docker ps -q --filter label=com.docker.compose.service=worker)` |
 | Letzte Meldungen ansehen | `sudo docker logs --tail 50 $(sudo docker ps -q --filter label=com.docker.compose.service=worker)` |
 | Auf eine neue Version aktualisieren | `cd /opt/seitenwerk && sudo RELEASE=<Commit> bash infra/vps/update-worker.sh` |
-| Wecker wieder an (nur im Notfall, kostet Credits) | `cd /opt/seitenwerk && echo "KEEP_WARM_MINUTES=4" >> .env.worker`, danach mit dem Update-Befehl (gleicher Commit) neu starten |
+| Wecker an (nur tagsüber 7–21 Uhr, ca. 5–20 Credits im Monat; damit „Übernehmen“ nicht 9 s schläft) | `cd /opt/seitenwerk && grep -q KEEP_WARM_MINUTES .env.worker \|\| echo "KEEP_WARM_MINUTES=5" \| sudo tee -a .env.worker`, danach mit dem Update-Befehl neu starten |
+| Wecker wieder aus | in `.env.worker` die Zeile `KEEP_WARM_MINUTES=5` löschen (oder auf `0` setzen), danach Update-Befehl |
 
 Ohne Claude brauchst du normalerweise **keinen** dieser Befehle. Ändere nichts an `.env.worker`, außer dieses Handbuch
 sagt es.

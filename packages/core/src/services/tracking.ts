@@ -82,10 +82,17 @@ export type DemoLookup =
 /** Veröffentlichte, nicht abgelaufene Demo per Slug. */
 export async function findPublicDemo(slug: string, now = new Date(), db: DbOrTx = getDb()): Promise<DemoLookup> {
   if (!/^[A-Za-z0-9]{20,64}$/.test(slug)) return { state: 'not_found' };
-  const demo = await db.query.demos.findFirst({ where: eq(demos.slug, slug) });
+  // Tempo (18.11.2026): Demo und Betrieb in einer Abfrage (Funktion in den USA, Datenbank in Frankfurt: ~0,1 s je Abfrage)
+  const [row] = await db
+    .select({ demo: demos, lead: leads })
+    .from(demos)
+    .leftJoin(leads, eq(leads.id, demos.leadId))
+    .where(eq(demos.slug, slug))
+    .limit(1);
+  const demo = row?.demo;
   if (!demo) return { state: 'not_found' };
   if (demo.status !== 'published' || demo.deletedAt || (demo.expiresAt && demo.expiresAt < now)) return { state: 'gone' };
-  const lead = await db.query.leads.findFirst({ where: eq(leads.id, demo.leadId) });
+  const lead = row.lead;
   if (!lead || lead.status === 'suppressed') return { state: 'gone' };
   return { state: 'ok', demo, lead };
 }

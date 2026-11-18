@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resetEnvCache } from '../src/config/env';
-import { KEEP_WARM_TOKEN, keepWarmUrl, pingKeepWarm } from '../src/services/keep-warm';
+import { KEEP_WARM_TOKEN, keepWarmActiveAt, keepWarmUrl, pingKeepWarm } from '../src/services/keep-warm';
 
 const original = process.env.APP_URL;
 afterEach(() => {
@@ -34,5 +34,17 @@ describe('Warmhalten der QR-Strecke', () => {
     expect(r?.status).toBe(404);
     const [, init] = f.mock.calls[0] as unknown as [string, RequestInit];
     expect(String((init.headers as Record<string, string>)['user-agent'])).toMatch(/bot/);
+  });
+
+  it('weckt nur im Tagesfenster (deutsche Zeit, auch über die Zeitumstellung)', () => {
+    // Winter: UTC+1 → 06:30 UTC = 7:30 Uhr
+    expect(keepWarmActiveAt(new Date('2026-11-18T06:30:00Z'), '7-21')).toBe(true);
+    expect(keepWarmActiveAt(new Date('2026-11-18T05:30:00Z'), '7-21')).toBe(false);
+    expect(keepWarmActiveAt(new Date('2026-11-18T19:59:00Z'), '7-21')).toBe(true);
+    expect(keepWarmActiveAt(new Date('2026-11-18T20:00:00Z'), '7-21')).toBe(false);
+    // Sommer: UTC+2 → 05:30 UTC = 7:30 Uhr
+    expect(keepWarmActiveAt(new Date('2026-07-01T05:30:00Z'), '7-21')).toBe(true);
+    expect(keepWarmActiveAt(new Date('2026-11-18T02:00:00Z'), '0-24')).toBe(true);
+    expect(keepWarmActiveAt(new Date('2026-11-18T23:30:00Z'), '22-6')).toBe(true);
   });
 });

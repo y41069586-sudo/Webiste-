@@ -1885,3 +1885,23 @@ Bei sicherem Treffer (gleiche Telefonnummer oder gleicher Name ≤ 150 m) und pa
 Angaben ergänzt, vorhandene nie überschrieben (`sourceMeta.openData.addressFilled`). Handprüfung vor dem Brief bleibt.
 OSM-Auszug-Index Version 2 (mit Lage je Ort) – wird bei der nächsten Suche einmal neu gebaut. Aussortierte Leads werden
 bei einer erneuten Suche derselben Städte neu bewertet.
+
+## 18.11.2026 – „Übernehmen“ und Tarifwahl schneller
+
+Messung (Netlify-Protokoll, Test des Betreibers 18:37 UTC): Scan 1,6 s, Demo 0,6 s, „Übernehmen“ **9,3 s** (Kaltstart einer
+zweiten Serverinstanz: Klick 4 s nach dem Scan, die erste Instanz startete noch für die Scan-Zählung), Einrichtungsseite
+2,0 s, Tarifwahl **2,9 s**. Ursache der warmen Zeiten: Die Serverfunktion läuft in Ohio (Netlify-Standard, Regionwahl erst
+im Pro-Tarif), die Datenbank in Frankfurt, jede Abfrage kostet ~0,1 s – und die Tarifwahl machte 22 Abfragen nacheinander
+vor der Weiterleitung zu Stripe.
+
+Umgesetzt (gezählt mit Abfrage-Zähler im Test):
+- Demo + Betrieb in einer Abfrage (`findPublicDemo`), bezahlte Bestellung + Einstellungen gleichzeitig (`getCheckoutContext`).
+- Tarifwahl: Demo suchen und Betrieb sperren in einer Abfrage, beide Ratenbegrenzungen in einer (`rateLimitMany`),
+  offene Bestellungen nur einmal laden; Zählung `checkout_started`, Protokoll und Benachrichtigung nach Commit und
+  Antwort (`runInBackground`). Vor der Weiterleitung jetzt 10 statt 22 Abfragen.
+- „Übernehmen“: Bestellkontext nur einmal laden (4 statt 8 Wartezeiten), Einrichtungsseite 2 statt 4.
+  Klick auf „Übernehmen“ bei abgeschalteter Bestellung wird nicht mehr als `cta_click` gezählt (Randfall).
+- Warmhalten mit Tagesfenster `KEEP_WARM_HOURS` (Standard 7–21 Uhr deutscher Zeit). Bleibt aus, bis der Betreiber
+  `KEEP_WARM_MINUTES=5` setzt (Handbuch). Schätzung 5–20 Credits/Monat (5 040 Aufrufe; 0,2–1,3 s je Aufruf bei 1 GB,
+  10 Credits/GB-Stunde, 2 Credits/10 000 Anfragen). Ohne Wecker bleibt der Kaltstart bei frühem Klick möglich.
+

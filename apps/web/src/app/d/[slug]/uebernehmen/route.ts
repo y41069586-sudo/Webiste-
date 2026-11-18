@@ -1,7 +1,6 @@
 import {
   appUrl,
   beginCheckoutDraft,
-  findPublicDemo,
   getCheckoutContext,
   getDb,
   notifyInterest,
@@ -19,18 +18,22 @@ export const dynamic = 'force-dynamic';
 /** Neutral entry starts an unpaid private setup; GET never creates a Stripe session. */
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const found = await findPublicDemo(slug);
-  if (found.state !== 'ok') return Response.redirect(appUrl(`/d/${slug}`), 302);
+  // Tempo (18.11.2026): Demo, Betrieb, Bestellung und Einstellungen nur einmal laden (vorher doppelt, je ~0,1 s)
+  const ctx = await getCheckoutContext(slug);
+  if (ctx.state === 'ordered') return Response.redirect(appUrl(`/checkout/${slug}`), 303);
+  if (ctx.state === 'not_found' || ctx.state === 'gone') return Response.redirect(appUrl(`/d/${slug}`), 302);
   const meta = requestMetaFrom(req.headers);
   // Tempo (17.11.2026): Zählung und Benachrichtigungs-Mail erst nach der Antwort – der Betrieb wartet nicht darauf
-  const leadId = found.lead.id;
-  after(async () => {
-    if (await recordEvent(getDb(), { leadId, type: 'cta_click', req: meta }).catch(() => false))
-      await notifyInterest(leadId, 'cta_click', meta).catch(() => undefined);
-  });
+  if (ctx.state === 'ok') {
+    const leadId = ctx.lead.id;
+    after(async () => {
+      if (await recordEvent(getDb(), { leadId, type: 'cta_click', req: meta }).catch(() => false))
+        await notifyInterest(leadId, 'cta_click', meta).catch(() => undefined);
+    });
+  }
   const jar = await cookies();
-  const token = await beginCheckoutDraft(slug, jar.get(setupCookieName(slug))?.value ?? '', meta);
-  if (!token && (await getCheckoutContext(slug)).state === 'ordered') return Response.redirect(appUrl(`/checkout/${slug}`), 303);
+  const token =
+    ctx.state === 'ok' ? await beginCheckoutDraft(slug, jar.get(setupCookieName(slug))?.value ?? '', meta, ctx) : null;
   if (!token)
     return simplePage(
       'Einrichtung derzeit nicht verfügbar',

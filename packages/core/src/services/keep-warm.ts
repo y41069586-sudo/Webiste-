@@ -30,12 +30,34 @@ export async function pingKeepWarm(fetchFn: typeof fetch = fetch): Promise<{ sta
   return { status: res.status, ms: Date.now() - started };
 }
 
+/** Stunde in deutscher Zeit (0–23). */
+function berlinHour(d: Date): number {
+  const part = new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Europe/Berlin' })
+    .formatToParts(d)
+    .find((p) => p.type === 'hour');
+  return Number(part?.value ?? d.getUTCHours());
+}
+
+/**
+ * Liegt der Zeitpunkt im Warmhalte-Fenster (18.11.2026: nur tagsüber, spart nachts Credits)? „7-21“ heißt 7:00 bis
+ * 20:59 Uhr deutscher Zeit; „0-24“ heißt immer.
+ */
+export function keepWarmActiveAt(d: Date, hours: string): boolean {
+  const m = /^(\d{1,2})-(\d{1,2})$/.exec(hours);
+  if (!m) return true;
+  const from = Number(m[1]);
+  const to = Number(m[2]);
+  const h = berlinHour(d);
+  return from <= to ? h >= from && h < to : h >= from || h < to;
+}
+
 /** Startet den Takt; gibt eine Stopp-Funktion zurück. Fehler werden nur protokolliert. */
 export function startKeepWarm(fetchFn: typeof fetch = fetch): () => void {
-  const minutes = getEnv().KEEP_WARM_MINUTES;
+  const { KEEP_WARM_MINUTES: minutes, KEEP_WARM_HOURS: hours } = getEnv();
   if (!minutes || !keepWarmUrl()) return () => undefined;
   let slowLogged = false;
-  const tick = () =>
+  const tick = () => {
+    if (!keepWarmActiveAt(new Date(), hours)) return;
     void pingKeepWarm(fetchFn)
       .then((r) => {
         if (!r) return;
@@ -47,9 +69,10 @@ export function startKeepWarm(fetchFn: typeof fetch = fetch): () => void {
         }
       })
       .catch((err) => logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'Warmhalten fehlgeschlagen'));
+  };
   tick();
   const timer = setInterval(tick, minutes * 60_000);
   timer.unref();
-  logger.info({ minutes }, 'Warmhalten der QR-Strecke aktiv');
+  logger.info({ minutes, hours }, 'Warmhalten der QR-Strecke aktiv');
   return () => clearInterval(timer);
 }

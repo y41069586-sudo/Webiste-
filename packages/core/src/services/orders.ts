@@ -24,7 +24,8 @@ import { checkDomain } from './domains';
 import { completePreparedOnboarding } from './sites';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { transitionLead } from './lead-state';
-import { rateLimit } from './rate-limit';
+import { rateLimit, rateLimitMany } from './rate-limit';
+import { runInBackground } from '../util/background';
 import { guaranteeEndFor } from './guarantee';
 import { goLiveBlockers } from './readiness';
 import { applyRecurringEvent, applyRecurringRefund } from './recurring';
@@ -108,15 +109,18 @@ export async function getCheckoutContext(slug: string, db: DbOrTx = getDb()): Pr
     // Bereits gekaufte Demos bleiben für den Käufer erreichbar
     return found.state === 'gone' ? await orderedOrGone(slug, db) : found;
   }
-  const paid = await db.query.orders.findFirst({
-    where: and(eq(orders.leadId, found.lead.id), inArray(orders.status, ['paid', 'processing'])),
-  });
+  // Tempo (18.11.2026): bezahlte Bestellung und Einstellungen gleichzeitig laden statt nacheinander
+  const [paid, cfg] = await Promise.all([
+    db.query.orders.findFirst({
+      where: and(eq(orders.leadId, found.lead.id), inArray(orders.status, ['paid', 'processing'])),
+    }),
+    getConfig({ db, fresh: true }),
+  ]);
   // Kein Onboarding-Link hier: der Demo-Link ist halböffentlich, der Link geht nur per E-Mail an den Käufer
   if (paid) return { state: 'ordered', paymentState: paid.status === 'paid' ? 'paid' : 'processing' };
   if (!avail.ok) return { state: 'disabled', reason: avail.reason };
   if (avail.mode === 'live' && found.lead.source === 'mock')
     return { state: 'disabled', reason: 'Dies ist eine Testvorschau. Dafür ist keine kostenpflichtige Bestellung möglich.' };
-  const cfg = await getConfig({ db, fresh: true });
   if (avail.mode === 'live' && effectiveSwitches(cfg).dryRun)
     return { state: 'disabled', reason: 'Online-Bestellungen sind im Testmodus noch nicht freigeschaltet.' };
   // Echte Zahlungen erst, wenn Absenderdaten, Rechtstexte und AGB vollständig sind
@@ -376,14 +380,20 @@ export async function startCheckout(
  */
 export async function startHostedCheckout(slug: string, planRaw: string, meta: RequestMeta): Promise<StartCheckoutResult> {
   const db = getDb();
-  const demo = await db.query.demos.findFirst({ where: eq(demos.slug, slug) });
-  if (!demo) return { ok: false, error: 'Dieser Entwurf ist nicht mehr verfügbar.' };
   // Eine Verbindung für Sperre UND alle Queries verwenden (kein Pool-Deadlock bei Doppelklicks).
   // Bestehende Lead-Zeile statt neuer Lock-Tabelle; fachlichen Zustand erst danach erneut lesen.
-  return db.transaction(async (tx) => {
-    await tx.execute(sql`SELECT id FROM leads WHERE id = ${demo.leadId} FOR UPDATE`);
+  // Tempo (18.11.2026): Demo suchen und Betrieb sperren in einer Abfrage.
+  const run = await db.transaction(async (tx) => {
+    const locked = await tx.execute(
+      sql`SELECT l.id FROM leads l JOIN demos d ON d.lead_id = l.id WHERE d.slug = ${slug} LIMIT 1 FOR UPDATE OF l`,
+    );
+    if (!locked.rows.length) return { result: { ok: false, error: 'Dieser Entwurf ist nicht mehr verfügbar.' } as StartCheckoutResult };
     return startHostedCheckoutLocked(slug, planRaw, meta, tx);
   });
+  // Zählung, Protokoll und Benachrichtigung erst nach dem Commit und nach der Antwort (Betrieb wartet nicht darauf)
+  const after = run.after;
+  if (after) await runInBackground(after);
+  return run.result;
 }
 
 async function startHostedCheckoutLocked(
@@ -391,7 +401,19 @@ async function startHostedCheckoutLocked(
   planRaw: string,
   meta: RequestMeta,
   db: DbOrTx,
-): Promise<StartCheckoutResult> {
+): Promise<{ result: StartCheckoutResult; after?: () => Promise<void> }> {
+  const r = await startHostedCheckoutInner(slug, planRaw, meta, db);
+  if (!r.ok) return { result: r };
+  const result: StartCheckoutResult = { ok: true, url: r.url, orderId: r.orderId };
+  return 'started' in r && r.started ? { result, after: r.started } : { result };
+}
+
+async function startHostedCheckoutInner(
+  slug: string,
+  planRaw: string,
+  meta: RequestMeta,
+  db: DbOrTx,
+): Promise<StartCheckoutResult | { ok: true; url: string; orderId: string; started: () => Promise<void> }> {
   const ctx = await getCheckoutContext(slug, db);
   if (ctx.state === 'ordered') return { ok: false, error: 'Für diesen Entwurf liegt bereits eine Bestellung vor.' };
   if (ctx.state === 'disabled') return { ok: false, error: ctx.reason };
@@ -409,28 +431,34 @@ async function startHostedCheckoutLocked(
     };
   if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
     return { ok: false, error: 'Die monatliche Zahlung ist derzeit nicht verfügbar.' };
-  const rl = await rateLimit(db, `checkout:${meta.ipHash}`, 10, 3600);
-  const rlLead = await rateLimit(db, `checkout-lead:${lead.id}`, 20, 86400);
-  if (!rl.allowed || !rlLead.allowed)
+  // Tempo (18.11.2026): beide Missbrauchsbremsen in einer Abfrage
+  const [rl, rlLead] = await rateLimitMany(db, [
+    { key: `checkout:${meta.ipHash}`, limit: 10, windowSeconds: 3600 },
+    { key: `checkout-lead:${lead.id}`, limit: 20, windowSeconds: 86400 },
+  ]);
+  if (!rl!.allowed || !rlLead!.allowed)
     return { ok: false, error: 'Zu viele Versuche. Bitte versuchen Sie es in einer Stunde erneut.' };
   const amounts = planAmounts(cfg, plan);
 
-  // Zurück-Taste / Doppelklick: offene Session desselben Plans wiederverwenden
-  const reusable = await db.query.orders.findFirst({
-    where: and(
-      eq(orders.leadId, lead.id),
-      eq(orders.status, 'pending'),
-      eq(orders.provider, getProviders().payment.name),
-      eq(orders.paymentMode, paymentModeAtCheckout()),
-      eq(orders.plan, plan),
-      eq(orders.customerEmail, ''),
-      eq(orders.amountCents, amounts.grossCents),
-      gt(orders.checkoutExpiresAt, new Date(Date.now() + 10 * 60 * 1000)),
-    ),
-    orderBy: desc(orders.createdAt),
-  });
+  // Zurück-Taste / Doppelklick: offene Session desselben Plans wiederverwenden (offene Bestellungen nur einmal laden)
+  const open = await db
+    .select()
+    .from(orders)
+    .where(and(eq(orders.leadId, lead.id), eq(orders.status, 'pending')))
+    .orderBy(desc(orders.createdAt));
+  const reuseUntil = Date.now() + 10 * 60 * 1000;
+  const reusable = open.find(
+    (o) =>
+      o.provider === getProviders().payment.name &&
+      o.paymentMode === paymentModeAtCheckout() &&
+      o.plan === plan &&
+      o.customerEmail === '' &&
+      o.amountCents === amounts.grossCents &&
+      !!o.checkoutExpiresAt &&
+      o.checkoutExpiresAt.getTime() > reuseUntil,
+  );
   if (reusable?.checkoutUrl) return { ok: true, url: reusable.checkoutUrl, orderId: reusable.id };
-  await cancelOpenOrders(lead.id, 'neuer Checkout', db);
+  await cancelOpenOrders(lead.id, 'neuer Checkout', db, open);
 
   const avail = checkoutAvailability();
   const [order] = await db
@@ -464,28 +492,35 @@ async function startHostedCheckoutLocked(
     })
     .returning();
   if (!order) throw new Error('Bestellung konnte nicht angelegt werden');
-  await db.transaction(async (tx) => {
-    await recordEvent(tx, {
-      leadId: lead.id,
-      type: 'checkout_started',
-      meta: { orderId: order.id, mode: avail.ok ? avail.mode : 'n/a', plan, hosted: true },
-      req: { ...meta, isBot: false },
-    });
-    await audit(tx, {
-      entity: 'order',
-      entityId: order.id,
-      action: 'checkout_started',
-      actor: 'public:checkout',
-      context: { leadId: lead.id, amountCents: amounts.grossCents, plan, hosted: true },
-    });
-  });
-  // Tempo (17.11.2026): Benachrichtigung parallel zur Stripe-Sitzung statt davor (Betrieb wartet auf die Weiterleitung)
-  const notified = notifyInterest(
-    lead.id,
-    'checkout_started',
-    { ...meta, isBot: false },
-    { detail: `Gewählt: ${formatEuro(amounts.grossCents)} (${plan})` },
-  ).catch(() => undefined);
+  // Tempo (18.11.2026): Zählung, Protokoll und Benachrichtigung nach dem Commit und nach der Antwort (vorher 8 Abfragen
+  // vor der Weiterleitung). Die Bestellung selbst ist oben schon gespeichert.
+  const started = async () => {
+    try {
+      await getDb().transaction(async (tx) => {
+        await recordEvent(tx, {
+          leadId: lead.id,
+          type: 'checkout_started',
+          meta: { orderId: order.id, mode: avail.ok ? avail.mode : 'n/a', plan, hosted: true },
+          req: { ...meta, isBot: false },
+        });
+        await audit(tx, {
+          entity: 'order',
+          entityId: order.id,
+          action: 'checkout_started',
+          actor: 'public:checkout',
+          context: { leadId: lead.id, amountCents: amounts.grossCents, plan, hosted: true },
+        });
+      });
+    } catch (err) {
+      logger.warn({ orderId: order.id, ...errInfo(err) }, 'Bestellbeginn konnte nicht gezählt werden');
+    }
+    await notifyInterest(
+      lead.id,
+      'checkout_started',
+      { ...meta, isBot: false },
+      { detail: `Gewählt: ${formatEuro(amounts.grossCents)} (${plan})` },
+    ).catch(() => undefined);
+  };
 
   try {
     const minutes = cfg.checkout.sessionMinutes;
@@ -541,7 +576,6 @@ async function startHostedCheckoutLocked(
       paymentMethods: cfg.checkout.paymentMethods,
       ...(plan === 'monthly' ? { recurring: { interval: 'month' as const } } : {}),
     });
-    await notified;
     await db
       .update(orders)
       .set({
@@ -551,7 +585,7 @@ async function startHostedCheckoutLocked(
         updatedAt: new Date(),
       })
       .where(eq(orders.id, order.id));
-    return { ok: true, url: session.url, orderId: order.id };
+    return { ok: true, url: session.url, orderId: order.id, started };
   } catch (err) {
     logger.error({ orderId: order.id, ...errInfo(err) }, 'Checkout-Session fehlgeschlagen');
     await db.update(orders).set({ status: 'failed', updatedAt: new Date() }).where(eq(orders.id, order.id));
@@ -636,11 +670,19 @@ export async function applyCollectedCustomer(orderId: string, c: CollectedCustom
 }
 
 /** Offene Bestellungen eines Leads beenden (Session beim Anbieter ablaufen lassen). */
-export async function cancelOpenOrders(leadId: string, reason: string, db: DbOrTx = getDb()): Promise<number> {
-  const open = await db
-    .select()
-    .from(orders)
-    .where(and(eq(orders.leadId, leadId), eq(orders.status, 'pending')));
+export async function cancelOpenOrders(
+  leadId: string,
+  reason: string,
+  db: DbOrTx = getDb(),
+  /** schon geladene offene Bestellungen dieses Betriebs (spart eine Abfrage) */
+  preloaded?: (typeof orders.$inferSelect)[],
+): Promise<number> {
+  const open =
+    preloaded?.filter((o) => o.leadId === leadId && o.status === 'pending') ??
+    (await db
+      .select()
+      .from(orders)
+      .where(and(eq(orders.leadId, leadId), eq(orders.status, 'pending'))));
   const p = getProviders().payment;
   for (const o of open) {
     if (o.stripeSessionId && p.expireSession && o.provider === p.name && o.paymentMode === paymentModeAtCheckout()) {

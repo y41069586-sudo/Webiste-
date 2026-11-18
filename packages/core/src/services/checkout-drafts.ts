@@ -5,7 +5,7 @@ import { orders, settings, sites } from '../db/schema';
 import { getProviders } from '../providers';
 import { normalizeOnboarding, onboardingErrors, type OnboardingData } from '../sites/onboarding-data';
 import { randomToken, sha256 } from '../util/crypto';
-import { getCheckoutContext, startCheckout, type CheckoutInput } from './orders';
+import { getCheckoutContext, startCheckout, type CheckoutContext, type CheckoutInput } from './orders';
 import { imageType, MAX_PHOTOS, onboardingDefaults } from './sites';
 import { rateLimit } from './rate-limit';
 import { findPublicDemo, type RequestMeta } from './tracking';
@@ -51,9 +51,15 @@ export async function getCheckoutDraft(slug: string, token: string, db: DbOrTx =
   return found.state === 'ok' && found.demo.id === d.demoId && found.lead.id === d.leadId ? d : null;
 }
 
-export async function beginCheckoutDraft(slug: string, token: string, meta: RequestMeta): Promise<string | null> {
+export async function beginCheckoutDraft(
+  slug: string,
+  token: string,
+  meta: RequestMeta,
+  /** schon geladener Bestellkontext derselben Anfrage (Tempo: spart drei Abfragen) */
+  preloaded?: CheckoutContext,
+): Promise<string | null> {
   if (meta.isBot) return null;
-  const ctx = await getCheckoutContext(slug);
+  const ctx = preloaded ?? (await getCheckoutContext(slug));
   if (ctx.state !== 'ok') return null;
   if (await getCheckoutDraft(slug, token)) return token;
   if (!(await rateLimit(getDb(), `setup-create:${meta.ipHash}`, 12, 3600)).allowed) return null;
