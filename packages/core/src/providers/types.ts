@@ -62,6 +62,8 @@ export interface SourceMeta {
     socialOnly?: boolean;
     /** Woran der Treffer erkannt wurde */
     matchedBy: 'phone' | 'name_near' | 'name_address';
+    /** Straße/Hausnummer/PLZ aus den offenen Daten ergänzt – vor dem Brief von Hand prüfen */
+    addressFilled?: boolean;
   };
 }
 

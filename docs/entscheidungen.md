@@ -1876,3 +1876,12 @@ Bisher höchstens 4 geratene .de-Domains. Jetzt bis zu 60 Varianten (Gewerk-Wör
 ae/a/IDN, .com/.eu für die besten drei), DNS-Vorfilter (nur existierende Domains werden abgerufen; ohne nutzbares DNS
 ohne Vorfilter), höchstens 6 Startseiten je Betrieb, bei echter Startseite ohne Kontaktdaten zusätzlich `/impressum`
 (Pflichtangaben). „Gefunden“ weiterhin nur mit Telefon oder PLZ + Straße auf der Seite.
+
+## 18.11.2026 – Fehlende Anschriften aus offenen Daten ergänzen
+
+Auswertung der Lead-Suche: 2 124 Treffer, nur 59 geeignet; 1 208 mit Website (richtig), **864 „Postanschrift
+unvollständig“**, 273 unter der Mindestpunktzahl. Overture führt zu vielen Betrieben Straße, Hausnummer und PLZ.
+Bei sicherem Treffer (gleiche Telefonnummer oder gleicher Name ≤ 150 m) und passender PLZ/Straße werden fehlende
+Angaben ergänzt, vorhandene nie überschrieben (`sourceMeta.openData.addressFilled`). Handprüfung vor dem Brief bleibt.
+OSM-Auszug-Index Version 2 (mit Lage je Ort) – wird bei der nächsten Suche einmal neu gebaut. Aussortierte Leads werden
+bei einer erneuten Suche derselben Städte neu bewertet.

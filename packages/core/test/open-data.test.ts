@@ -6,6 +6,8 @@ import {
   openDataSignal,
   ownWebsite,
   comparablePhone,
+  openAddressFill,
+  splitStreet,
   type OpenPlace,
 } from '../src/leads/open-data-match';
 import { enrichWithOpenData } from '../src/services/open-data-check';
@@ -106,5 +108,33 @@ describe('Offene Firmendaten (Overture) – Abgleich', () => {
       fetchPlaces: async () => [],
     });
     expect(broken.error).toBe('offline');
+  });
+});
+
+describe('Offene Firmendaten – fehlende Anschrift ergänzen (17.11.2026)', () => {
+  it('trennt Straße und Hausnummer', () => {
+    expect(splitStreet('Konrad-Adenauer-Straße 17A')).toEqual({ street: 'Konrad-Adenauer-Straße', houseNumber: '17A' });
+    expect(splitStreet('Hochstr. 22')).toEqual({ street: 'Hochstr.', houseNumber: '22' });
+    expect(splitStreet('Am Markt 3-5')).toEqual({ street: 'Am Markt', houseNumber: '3-5' });
+    expect(splitStreet('Industriegebiet Nord')).toBeNull();
+  });
+
+  it('ergänzt nur bei sicherem Treffer, passender PLZ und ohne vorhandene Angaben zu überschreiben', () => {
+    const noAddr = osm({ street: undefined, houseNumber: undefined, postalCode: undefined });
+    const m = matchOpenPlace(noAddr, [open()])!;
+    expect(openAddressFill(noAddr, m)).toEqual({ street: 'Konrad-Adenauer-Straße', houseNumber: '17A', postalCode: '58452' });
+    const filled = applyOpenData(noAddr, openDataSignal(m, 'r'), openAddressFill(noAddr, m));
+    expect(filled.street).toBe('Konrad-Adenauer-Straße');
+    expect(filled.sourceMeta?.openData?.addressFilled).toBe(true);
+    // Straße vorhanden, nur Hausnummer fehlt: Straße bleibt, Hausnummer kommt dazu
+    const noNumber = osm({ houseNumber: undefined });
+    expect(openAddressFill(noNumber, matchOpenPlace(noNumber, [open()])!)?.houseNumber).toBe('17A');
+    // andere PLZ oder andere Straße → nichts ergänzen
+    const otherPc = osm({ houseNumber: undefined, postalCode: '44137' });
+    expect(openAddressFill(otherPc, { place: open(), matchedBy: 'name_near' })).toBeNull();
+    const otherStreet = osm({ houseNumber: undefined, street: 'Bahnhofstraße' });
+    expect(openAddressFill(otherStreet, { place: open(), matchedBy: 'name_near' })).toBeNull();
+    // Anschrift vollständig → nichts tun
+    expect(openAddressFill(osm({ houseNumber: '17A' }), { place: open(), matchedBy: 'name_near' })).toBeNull();
   });
 });

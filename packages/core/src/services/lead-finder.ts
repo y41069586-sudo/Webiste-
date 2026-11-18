@@ -64,7 +64,15 @@ export interface FindLeadsSummary {
   belowMin: number;
   minScore: number;
   /** Abgleich mit offenen Firmendaten (Overture): Treffer, davon mit eigener Website bzw. geschlossen */
-  openData?: { release?: string; checked: number; matched: number; websites: number; closed: number; socialOnly: number };
+  openData?: {
+    release?: string;
+    checked: number;
+    matched: number;
+    websites: number;
+    closed: number;
+    socialOnly: number;
+    addressFilled: number;
+  };
   /** In der Verwaltung gestoppt, bevor alle Treffer geprüft waren */
   stopped?: boolean;
   errors: string[];

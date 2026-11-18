@@ -151,17 +151,61 @@ export function openDataSignal(match: OpenMatch, release: string): NonNullable<S
   };
 }
 
+/** „Konrad-Adenauer-Straße 17A“ → Straße + Hausnummer; null, wenn keine Hausnummer erkennbar ist. */
+export function splitStreet(freeform: string | null | undefined): { street: string; houseNumber: string } | null {
+  const m = /^\s*(.*?[a-zäöüß.])\s+(\d{1,4}\s?[a-zA-Z]?(?:\s?[-/]\s?\d{1,4}\s?[a-zA-Z]?)?)\s*$/i.exec(freeform ?? '');
+  if (!m || m[1]!.length < 3) return null;
+  return { street: m[1]!.trim(), houseNumber: m[2]!.replace(/\s+/g, '') };
+}
+
+/**
+ * Fehlende Anschrift aus den offenen Daten ergänzen (17.11.2026: 864 von 2 124 Treffern scheiterten an
+ * „Postanschrift unvollständig“). Nur bei sicherem Treffer (gleiche Telefonnummer oder gleicher Name ≤ 150 m),
+ * nur wenn PLZ fünfstellig ist und die Hausnummer erkennbar. Vorhandene Angaben werden nie überschrieben.
+ */
+export function openAddressFill(
+  place: RawPlace,
+  match: OpenMatch,
+): { street: string; houseNumber: string; postalCode: string } | null {
+  if (match.matchedBy === 'name_address') return null;
+  if (place.street?.trim() && place.houseNumber?.trim() && place.postalCode?.trim()) return null;
+  const parts = splitStreet(match.place.street);
+  const pc = match.place.postcode?.trim() ?? '';
+  if (!parts || !/^\d{5}$/.test(pc)) return null;
+  if (place.postalCode && place.postalCode.trim() !== pc) return null;
+  if (
+    place.street &&
+    foldUmlauts(place.street)
+      .replace(/[^a-z]/g, '')
+      .slice(0, 6) !==
+      foldUmlauts(parts.street)
+        .replace(/[^a-z]/g, '')
+        .slice(0, 6)
+  )
+    return null;
+  return {
+    street: place.street?.trim() || parts.street,
+    houseNumber: place.houseNumber?.trim() || parts.houseNumber,
+    postalCode: pc,
+  };
+}
+
 /**
  * Wendet das Signal auf den Treffer an: eigene Website → `websiteUri` (Qualifizierung schließt aus),
  * dauerhaft geschlossen → `businessStatus` (schließt aus), nur Profile → Social-Signal. Gibt den neuen Ort zurück.
  */
-export function applyOpenData(place: RawPlace, signal: NonNullable<SourceMeta['openData']>): RawPlace {
-  const meta: SourceMeta = { ...(place.sourceMeta ?? {}), openData: signal };
+export function applyOpenData(
+  place: RawPlace,
+  signal: NonNullable<SourceMeta['openData']>,
+  address?: { street: string; houseNumber: string; postalCode: string } | null,
+): RawPlace {
+  const meta: SourceMeta = { ...(place.sourceMeta ?? {}), openData: address ? { ...signal, addressFilled: true } : signal };
   if (signal.socialOnly) meta.socialLinks = Math.max(1, meta.socialLinks ?? 0);
   return {
     ...place,
     sourceMeta: meta,
     ...(signal.website && !place.websiteUri ? { websiteUri: signal.website } : {}),
     ...(signal.status === 'permanently_closed' ? { businessStatus: 'CLOSED_PERMANENTLY' } : {}),
+    ...(address ?? {}),
   };
 }

@@ -1,6 +1,13 @@
 import { getEnv } from '../config/env';
 import { logger } from '../logger';
-import { applyOpenData, comparablePhone, matchOpenPlace, openDataSignal, type OpenPlace } from '../leads/open-data-match';
+import {
+  applyOpenData,
+  comparablePhone,
+  matchOpenPlace,
+  openAddressFill,
+  openDataSignal,
+  type OpenPlace,
+} from '../leads/open-data-match';
 import type { RawPlace } from '../providers/types';
 import { bboxesFor, fetchOverturePlaces, latestOvertureRelease, type Bbox } from '../providers/lead-source/overture';
 
@@ -11,6 +18,8 @@ export interface OpenDataCheckResult {
   websites: number;
   closed: number;
   socialOnly: number;
+  /** Fehlende Anschrift aus offenen Daten ergänzt */
+  addressFilled: number;
   error?: string;
 }
 
@@ -35,7 +44,7 @@ export async function enrichWithOpenData<T extends { place: RawPlace }>(
   candidates: T[],
   deps: OpenDataDeps = DEFAULT_DEPS,
 ): Promise<OpenDataCheckResult> {
-  const result: OpenDataCheckResult = { checked: 0, matched: 0, websites: 0, closed: 0, socialOnly: 0 };
+  const result: OpenDataCheckResult = { checked: 0, matched: 0, websites: 0, closed: 0, socialOnly: 0, addressFilled: 0 };
   if (!getEnv().OPEN_DATA_CHECK || !candidates.length) return result;
   const located = candidates.filter((c) => c.place.location);
   if (!located.length) return result;
@@ -75,7 +84,9 @@ export async function enrichWithOpenData<T extends { place: RawPlace }>(
       const m = matchOpenPlace(c.place, [...pool]);
       if (!m) continue;
       const signal = openDataSignal(m, release);
-      c.place = applyOpenData(c.place, signal);
+      const address = openAddressFill(c.place, m);
+      c.place = applyOpenData(c.place, signal, address);
+      if (address) result.addressFilled++;
       result.matched++;
       if (signal.website) result.websites++;
       if (signal.status === 'permanently_closed') result.closed++;

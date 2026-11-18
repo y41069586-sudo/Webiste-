@@ -47,7 +47,8 @@ export interface ExtractPoi {
 }
 
 export interface OsmExtractIndex {
-  version: 1;
+  /** 2 (17.11.2026): mit Lage je Ort für den Abgleich mit offenen Firmendaten; ältere Indizes werden neu gebaut */
+  version: 2;
   builtAt: string;
   /** Gefilterte Tag-Paare (key=value), aus denen der Index gebaut wurde */
   tagPairs: string[];
@@ -214,7 +215,7 @@ export async function buildIndexFromGeoJsonSeq(file: string, tagPairs: string[],
       lat: Math.round(point[1]! * 1e5) / 1e5,
     });
   }
-  return { version: 1, builtAt: now.toISOString(), tagPairs: [...tagPairs].sort(), munis, pois };
+  return { version: 2, builtAt: now.toISOString(), tagPairs: [...tagPairs].sort(), munis, pois };
 }
 
 /** Suche im Index – gleiche Warnungen wie die Overpass-Suche. */
@@ -299,7 +300,7 @@ export class OsmExtractLeadSource implements LeadSource {
     if (!this.index) {
       try {
         const disk = JSON.parse(await fs.readFile(this.indexFile, 'utf8')) as OsmExtractIndex;
-        if (disk.version === 1) this.index = disk;
+        if (disk.version === 2) this.index = disk;
       } catch {
         // noch kein Index auf der Platte
       }
