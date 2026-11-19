@@ -148,12 +148,15 @@ export interface FactEntry {
   value: string;
   status: FactStatus;
   source: string;
+  /** Prüfdatum (JJJJ-MM-TT) der Quelle; null bei fehlenden Angaben */
+  checkedAt: string | null;
 }
 
 /** Betriebsdaten mit Status und Quelle (intern; öffentlich nur „bestätigt“). */
 export function normalizedFacts(f: ContentFacts): FactEntry[] {
   const lead = 'Lead-Datensatz (öffentliche Verzeichnisdaten)';
-  return [
+  const at = f.factsCheckedAt?.slice(0, 10) ?? null;
+  const rows: Omit<FactEntry, 'checkedAt'>[] = [
     { field: 'Firmenname', value: f.name, status: 'bestätigt', source: lead },
     { field: 'Gewerk', value: f.branchLabel, status: 'bestätigt', source: lead },
     { field: 'Ort', value: `${f.postalCode} ${f.city}`.trim(), status: 'bestätigt', source: lead },
@@ -175,6 +178,7 @@ export function normalizedFacts(f: ContentFacts): FactEntry[] {
     { field: 'Logo/eigene Fotos', value: 'keine freigegebenen', status: 'fehlend', source: '—' },
     { field: 'Qualifikationen/Historie', value: 'unbekannt', status: 'fehlend', source: '—' },
   ];
+  return rows.map((r) => ({ ...r, checkedAt: r.status === 'fehlend' ? null : at }));
 }
 
 export interface DesignBrief {
@@ -264,7 +268,7 @@ export function buildDesignBrief(f: ContentFacts, opts: { hasPhotos: boolean; di
 /** Kontextblock für jeden designrelevanten Aufruf: Betriebsdaten mit Status, Briefing, Referenzen. */
 export function designContext(f: ContentFacts, brief: DesignBrief): string {
   const facts = normalizedFacts(f)
-    .map((x) => `- ${x.field}: ${x.value} [${x.status}; Quelle: ${x.source}]`)
+    .map((x) => `- ${x.field}: ${x.value} [${x.status}; Quelle: ${x.source}${x.checkedAt ? `; geprüft ${x.checkedAt}` : ''}]`)
     .join('\n');
   const refs = brief.references
     .map((r) => `- ${r.url} (nicht abgerufen, nur kuratierte Beschreibung): übernehmen „${r.principle}“; Nutzen: ${r.benefit}; nicht übernehmen: ${r.avoid}`)

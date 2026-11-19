@@ -81,7 +81,7 @@ Keiner der Testbetriebe hat Bewertungen.
   - `templates`: 206/206 grün, darunter 9 neue Praxis-Tests.
   - `core/test/design-policy.test.ts`: 9/9 grün.
   - Barrierefreiheits-Tests (axe): 210/210 grün.
-  - Gesamte Core-Suite: 1135 von 1141 grün. Die 6 roten Tests (`backup-fingerprint`, `share-studio-preview`, `studio-preview-runtime`) sind auf dem Stand vor dieser Änderung ebenso rot; sie brauchen einen Chromium unter `/usr/bin/chromium` bzw. Root-Dateirechte und betreffen diese Arbeit nicht.
+  - Gesamte Core-Suite: 1135 von 1141 grün (nach dem zweiten Durchgang 1141 von 1147). Die 6 roten Tests (`backup-fingerprint`, `share-studio-preview`, `studio-preview-runtime`) sind auf dem Stand vor dieser Änderung ebenso rot; sie brauchen einen Chromium unter `/usr/bin/chromium` bzw. Root-Dateirechte und betreffen diese Arbeit nicht.
 - **Lighthouse (Labor, Handy-Profil, gedrosselt, 7 Live-Varianten ohne Banner):** `npx tsx scripts/praxis-preview.mts <ordner> --lighthouse`
 
 | Testbetrieb | Leistung | Barrierefreiheit | Best Practices | SEO | LCP | CLS | TBT |
@@ -100,11 +100,38 @@ Keiner der Testbetriebe hat Bewertungen.
   - Felddaten (LCP, INP, CLS im 75. Perzentil) gibt es noch **nicht**; sie entstehen erst mit echtem Verkehr.
   - Barrierefreiheit 96 statt 100: Der Einzelbefund ist noch nicht ausgewertet; axe meldet keine Verstöße.
 
+## 3a. Nachtrag 19.11.2026 (zweiter Durchgang): geschlossene Lücken
+
+| Lücke | Umsetzung | Status |
+|---|---|---|
+| Nur eine Korrektur nach der Bewertung | Praxis-Demos: bis zu `DESIGN_BUDGET.maxCorrections` (2) gezielte Neubauten mit den Befunden der Bewertung (`qaRound` im Auftrag, `_meta.qaRetry` pro Demo); danach `qa_failed` mit Meldung „REVIEW_REQUIRED“ statt stiller Freigabe. Andere Vorlagen unverändert eine Runde. | umgesetzt, Pipeline-Tests grün |
+| Allgemeines Formular auf der Kunden-Website | Praxis-Vorlage baut das echte Formular selbst, je Anlass: Rückruf = Name + Telefon (Pflicht), Wunschzeit und Anliegen optional; geplante Arbeit = Leistung, PLZ, Name, E-Mail **oder** Telefon (eins genügt, serverseitig geprüft), Beschreibung. Sichtbare Labels, passende Eingabetypen und Autofill, Honeypot, Einwilligung, Hinweis „keine feste Buchung“. Server (`handleSiteForm`): E-Mail nicht mehr Pflicht, wenn Telefon da ist; Rückruf ohne Nachricht erlaubt; Leistung und PLZ in der Weiterleitung; ohne E-Mail geht „Antworten“ nie an SeitenWerk. Doppeltes Absenden: bestehende serverseitige Entprellung. Fehlerseite verweist auf die Zurück-Taste (Eingaben bleiben erhalten). | umgesetzt, getestet (Vorlage + Server) |
+| Identität | Akzentfarbe je Betrieb stabil aus 3 geprüften Varianten je Richtung (alle ≥ 4,5:1); Logo im Kopf, wenn vorhanden – im Entwurf nur mit bestätigten Rechten. Eine Farbableitung aus dem Logo selbst gibt es nicht (keine Logos in den Lead-Daten). | umgesetzt, getestet |
+| Ladezeit der Demo | Gespeicherte Demos behalten ihre Bilder eingebettet (Notfall-Kopie bleibt vollständig). Beim Ausliefern werden große, nachgelagerte Bilder (`loading="lazy"`) zu eigenen Adressen `/d/{slug}/bild/{hash}` (Netlify-Zwischenspeicher, gleicher Cache-Tag wie die Demo). Das Hauptbild bleibt eingebettet. | umgesetzt, getestet, gemessen |
+| Prüfdatum je Angabe | `normalizedFacts` führt pro Angabe `checkedAt` (Recherche-Zeitpunkt, sonst letzter Datenabgleich); im Modellkontext als „geprüft JJJJ-MM-TT“. | umgesetzt, getestet |
+| Messung auf der Betriebs-Website | Neues Ereignis `site_inquiry`, wenn eine Anfrage serverseitig angenommen und weitergeleitet wurde: nur Art und Kontaktweg, keine Namen, Nummern, PLZ oder Inhalte; Abnahmetests zählen nicht. | umgesetzt, getestet |
+| Barrierefreiheit 96 | Ursache: Kontrast eines Hinweistextes im alten Live-Formular. Mit dem neuen Formular 100 auf allen Seiten. | behoben, gemessen |
+
+**Messung nach dem zweiten Durchgang** (Labor, Handy-Profil, gedrosselt; `npx tsx scripts/praxis-preview.mts <ordner> --lighthouse`):
+
+| Testbetrieb | Live: Leistung / Barrierefreiheit / LCP | Demo wie ausgeliefert: Leistung / LCP (vorher) |
+|---|---|---|
+| Dachdecker | 100 / 100 / 1,13 s | 98 / 1,99 s (2,54 s) |
+| Elektriker | 100 / 100 / 0,99 s | 100 / 1,48 s (1,52 s) |
+| Sanitär/Heizung | 100 / 100 / 0,99 s | 99 / 1,76 s (1,76 s) |
+| Maler | 100 / 100 / 0,98 s | 97 / 2,07 s (3,73 s) |
+| Fliesenleger | 100 / 100 / 0,97 s | 97 / 2,07 s (3,43 s) |
+| GaLa-Bau | 100 / 100 / 0,97 s | 99 / 1,78 s (3,29 s) |
+| Schornsteinfeger (ohne Bilder) | 100 / 100 / 0,97 s | 100 / 1,16 s (1,17 s) |
+
+CLS überall ≤ 0,026, TBT ≤ 3 ms. Demos haben absichtlich SEO 66 (noindex). Browser-Prüfung: 14 Seiten (Demo und Live) × 5 Breiten = 70 Messungen, 0 Probleme.
+
 ## 4. Noch offen
 
 - **Echter Modelllauf des neuen Pfads:** Er braucht den aktualisierten Worker auf dem VPS (dort liegt der API-Schlüssel). Danach sechs Test-Leads bauen lassen und Texte, Bewertungspunkte und Kosten prüfen.
 - **Bewertungs-Schwelle kalibrieren:** Die Schwelle 85 ist eine Heuristik. Sie wird mit den ersten echten guten und schlechten Beispielen kalibriert.
 - **Referenzen:** Abruf und Screenshots der Referenzseiten für ein bildfähiges Modell sind nicht eingebaut. Die Domain-Allowlist (`referenceUrlAllowed`) steht bereit.
 - **Kfz-Werkstätten:** Es gibt keine Kfz-Fotos in der Bildbibliothek; die Seite wird dann typografisch. Für Werkstätten wäre eine lizenzierte Bildstrecke nötig.
-- **Ereignisse auf Betriebs-Websites:** Kontaktklick, Formular begonnen, Anfrage gespeichert und Buchung sind noch nicht getrennt erfasst. Für die Demo-Seite (angesehen, Angebot geöffnet, Checkout, Kauf) gibt es die Ereignisse schon.
+- **Kontaktklick und „Formular begonnen“ auf Betriebs-Websites:** bewusst nicht gebaut. Das bräuchte ein Skript auf der Kundenseite und einen Hinweis in der Datenschutzerklärung des Kunden (§ 25 TDDDG ist für das Mess-Skript noch offen). Erfasst wird die serverseitig angenommene Anfrage (`site_inquiry`). Ein Telefonklick wäre ohnehin kein belegter Anruf.
+- **Logo-Farben:** Es gibt keine automatische Farbableitung aus einem Logo; die Akzentfarbe kommt aus geprüften Varianten.
 - **Direktbuchung:** bewusst nicht eingebaut. Ohne echte Verfügbarkeit wird keine Buchung vorgetäuscht.

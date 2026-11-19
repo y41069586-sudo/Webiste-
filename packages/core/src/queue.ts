@@ -59,6 +59,8 @@ export interface QueuePayloads {
     templateId?: string;
     /** Befunde der KI-Prüfung des vorigen Entwurfs (einmaliger automatischer Neubau) */
     qaFeedback?: string[];
+    /** Nummer der Korrekturrunde nach der Prüfung (1 = erste) */
+    qaRound?: number;
   };
   'qa-demo': { demoId: string };
   'publish-demo': { demoId: string };

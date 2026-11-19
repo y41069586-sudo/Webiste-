@@ -34,7 +34,7 @@ import { audit } from '../services/audit';
 import { raiseAlert } from '../services/budget';
 import { approveDemo, requiresManualReview } from '../services/demo-review';
 import { llmStructured } from '../services/llm';
-import { buildDesignBrief, type DesignBrief } from '../demos/design-policy';
+import { buildDesignBrief, DESIGN_BUDGET, type DesignBrief } from '../demos/design-policy';
 import { reviewPraxisDemo } from '../demos/praxis-author';
 import { enqueue, QUEUES } from '../queue';
 import { browserChecks, lighthouseCheck, validateHtml } from './qa';
@@ -484,8 +484,12 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
     !checks.some(
       (c) => !c.passed && (c.name === 'research_binding' || c.name === 'qa-runtime' || /^Fehler:/.test(c.details ?? '')),
     );
-  if (opts.enqueueRebuild !== false && !passed && decide && repairable && !meta?.qaRetry && rebuildFeedback.length) {
-    // Einmal automatisch neu bauen lassen (mit den Befunden), statt liegen zu bleiben
+  // Praxis-Vorlage: bis zu DESIGN_BUDGET.maxCorrections gezielte Korrekturrunden (Designrichtlinie), sonst eine.
+  // Danach bleibt die Demo im Prüfstatus (qa_failed + Meldung) statt still freigegeben zu werden.
+  const round = meta?.qaRetry ?? 0;
+  const maxRounds = praxis ? DESIGN_BUDGET.maxCorrections : 1;
+  if (opts.enqueueRebuild !== false && !passed && decide && repairable && round < maxRounds && rebuildFeedback.length) {
+    // Automatisch neu bauen lassen (mit den Befunden), statt liegen zu bleiben
     await enqueue(
       QUEUES.buildDemo,
       {
@@ -494,10 +498,11 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
         templateId: demo.templateId,
         ...(current?.reviewNote ? { reviewNote: current.reviewNote } : {}),
         qaFeedback: rebuildFeedback,
+        qaRound: round + 1,
       },
       { singletonKey: `demo-rebuild:${demoId}` },
     );
-    await audit(db, { entity: 'demo', entityId: demoId, action: 'qa_auto_rebuild', actor, context: { failed: failedNames } });
+    await audit(db, { entity: 'demo', entityId: demoId, action: 'qa_auto_rebuild', actor, context: { failed: failedNames, round: round + 1, maxRounds } });
   } else if (!passed && decide) {
     await raiseAlert(db, {
       level: 'warn',
@@ -505,8 +510,8 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
       message: `Demo-QA fehlgeschlagen (${checks
         .filter((c) => !c.passed)
         .map((c) => c.name)
-        .join(', ')}).`,
-      context: { demoId, leadId: lead.id },
+        .join(', ')}). REVIEW_REQUIRED: Prüfung durch den Betreiber nötig${round ? ` (nach ${round} Korrekturrunde${round === 1 ? '' : 'n'})` : ''}.`,
+      context: { demoId, leadId: lead.id, reviewRequired: true, rounds: round },
     });
   } else if (decide && !manual) {
     // Automatische Freigabe (nur nach den ersten N manuellen Prüfungen und mit AUTO_APPROVE_DEMOS)

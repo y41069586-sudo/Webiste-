@@ -41,6 +41,41 @@ describe('Praxis-Vorlage (Designrichtlinie 2026-11-19)', () => {
     expect(html).not.toContain('Symbolbild');
   });
 
+  it('Live-Formular je Anlass: Rückruf = Name + Telefon Pflicht, sonst keine Pflicht für E-Mail UND Telefon', () => {
+    const call = renderSite(live('praxis-service'));
+    const form = call.match(/<form id="frage"[\s\S]*?<\/form>/)![0];
+    expect(form).toContain('action="/api/forms/x"');
+    expect(form).toMatch(/name="phone"[^>]*required/);
+    expect(form).toMatch(/name="name"[^>]*required/);
+    expect(form).not.toMatch(/name="email"/);
+    expect(form).toContain('value="Rückruf anfragen"');
+    expect(form).toMatch(/name="consent" type="checkbox" required/);
+    expect(form).toContain('name="website"'); // Honeypot
+    const project = renderSite(live('praxis-projekt')).match(/<form id="frage"[\s\S]*?<\/form>/)![0];
+    expect(project).not.toMatch(/name="email"[^>]*required/);
+    expect(project).not.toMatch(/name="phone"[^>]*required/);
+    expect(project).toContain('name="leistung"');
+    expect(project).toContain('name="plz"');
+    expect(project).toContain('value="Besichtigung anfragen"');
+    expect(project).toContain('keine feste Buchung');
+    // jedes Feld hat ein sichtbares Label
+    for (const id of project.match(/id="pf-[a-z]+"/g)!) expect(project).toContain(`for="${id.slice(4, -1)}"`);
+  });
+
+  it('Eigene Note je Betrieb: Akzentfarbe stabil je Name, nicht für alle gleich; Logo nur mit Rechten', () => {
+    const accents = new Set(
+      ['Testbetrieb A', 'Testbetrieb B', 'Testbetrieb C', 'Testbetrieb D', 'Testbetrieb E', 'Testbetrieb F'].map((name) => {
+        const input = demoInput('praxis-projekt', 'anthrazit');
+        return renderSite({ ...input, facts: { ...input.facts, name } }).match(/--ac:(#[0-9a-f]{6})/)![1];
+      }),
+    );
+    expect(accents.size).toBeGreaterThan(1);
+    const input = demoInput('praxis-projekt', 'anthrazit');
+    const logo = { ...input.facts, logoSrc: 'data:image/png;base64,AAAA' };
+    expect(renderSite({ ...input, facts: logo })).not.toContain('class="pw-logo"');
+    expect(renderSite({ ...input, facts: { ...logo, logoRightsConfirmed: true } })).toContain('class="pw-logo"');
+  });
+
   it('Richtungen unterscheiden sich in Komposition und Hauptaktion', () => {
     const a = renderSite(demoInput('praxis-projekt', 'anthrazit'));
     const b = renderSite(demoInput('praxis-raeume', 'anthrazit'));

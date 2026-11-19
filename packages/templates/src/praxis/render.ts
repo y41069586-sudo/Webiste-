@@ -7,6 +7,7 @@ import { purgeCss } from '../kits/purge';
 import { locationText, locationPurpose } from '../authored/location';
 import {
   PRAXIS_DIRECTIONS,
+  praxisAccentFor,
   praxisKeyOf,
   praxisTemplateId,
   type PraxisDirection,
@@ -91,7 +92,8 @@ function renderPraxis(ctx: RenderContext, key: PraxisDirectionKey): string {
     ['#anfrage', 'Kontakt'],
   ] as [string, string][];
   const navLinks = nav.map(([h, l]) => `<a href="${h}">${l}</a>`).join('');
-  const header = `<header class="pw-head"><div class="pw-wrap pw-head-in"><a class="pw-brand" href="#start"><span>${esc(f.name)}</span><small>${esc(where)}</small></a><nav class="pw-nav" aria-label="Seitennavigation">${navLinks}</nav>${call ? `<a class="pw-headcall" href="${esc(call.href)}">${esc(call.label)}</a>` : ''}<details class="pw-menu"><summary aria-label="Menü öffnen"><svg class="pw-burger" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Menü</span></summary><nav aria-label="Menü">${navLinks}${call ? `<a href="${esc(call.href)}">Anrufen: ${esc(call.label)}</a>` : ''}</nav></details></div></header>`;
+  const logo = (!draft || f.logoRightsConfirmed) && f.logoSrc ? `<img class="pw-logo" src="${esc(f.logoSrc)}" alt="" height="40">` : '';
+  const header = `<header class="pw-head"><div class="pw-wrap pw-head-in"><a class="pw-brand" href="#start">${logo}<span class="pw-brand-t"><span>${esc(f.name)}</span><small>${esc(where)}</small></span></a><nav class="pw-nav" aria-label="Seitennavigation">${navLinks}</nav>${call ? `<a class="pw-headcall" href="${esc(call.href)}">${esc(call.label)}</a>` : ''}<details class="pw-menu"><summary aria-label="Menü öffnen"><svg class="pw-burger" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Menü</span></summary><nav aria-label="Menü">${navLinks}${call ? `<a href="${esc(call.href)}">Anrufen: ${esc(call.label)}</a>` : ''}</nav></details></div></header>`;
 
   const heroText = `<p class="pw-kicker">${esc(where)}</p><h1>${esc(c.hero_headline)}</h1><p class="pw-sub">${esc(c.hero_subline)}</p><div class="pw-actions">${primary}</div>`;
   let heroHtml: string;
@@ -136,39 +138,35 @@ function renderPraxis(ctx: RenderContext, key: PraxisDirectionKey): string {
   };
 
   const req = d.request;
-  const field = (label: string, input: string, hint = '') =>
-    `<label class="pw-field"><span>${label}${hint ? ` <small>${hint}</small>` : ''}</span>${input}</label>`;
+  // Ein Formularaufbau für Demo (gesperrte Vorschau) und Live-Seite (echtes Ziel). Nur nötige Angaben:
+  // Rückruf = Name + Telefon; geplante Arbeit = Name + eine Kontaktmöglichkeit (E-Mail ODER Telefon, serverseitig geprüft).
+  const live = p.liveForm;
+  const need = (on: boolean) => (live && on ? ' required' : '');
+  const field = (id: string, label: string, input: string, hint = '') =>
+    `<div class="pw-field"><label for="pf-${id}">${label}${hint ? ` <small>${hint}</small>` : ''}</label>${input}</div>`;
   const svcOptions = c.services.map((s) => `<option>${esc(s.title)}</option>`).join('');
   const fields =
     req === 'rueckruf'
-      ? field('Name', '<input type="text" name="name" autocomplete="name">') +
-        field('Telefon', '<input type="tel" name="phone" autocomplete="tel" inputmode="tel">') +
-        field('Wann passt ein Rückruf?', '<input type="text" name="wunsch" placeholder="z. B. werktags ab 16 Uhr">', 'optional, kein fester Termin') +
-        field('Worum geht es?', '<textarea name="message" rows="3"></textarea>')
-      : field('Leistung', `<select name="anliegen"><option value="">Bitte wählen</option>${svcOptions}<option>Etwas anderes</option></select>`) +
-        field('PLZ des Einsatzorts', '<input type="text" name="plz" inputmode="numeric" autocomplete="postal-code">') +
-        field('Name', '<input type="text" name="name" autocomplete="name">') +
-        field('E-Mail oder Telefon', '<input type="text" name="contact" autocomplete="email">', 'eins genügt') +
+      ? field('name', 'Name', `<input id="pf-name" type="text" name="name" autocomplete="name" maxlength="120"${need(true)}>`) +
+        field('phone', 'Telefon', `<input id="pf-phone" type="tel" name="phone" autocomplete="tel" inputmode="tel" maxlength="40"${need(true)}>`) +
+        field('wunsch', 'Wann passt ein Rückruf?', '<input id="pf-wunsch" type="text" name="wunsch" maxlength="300" placeholder="z. B. werktags ab 16 Uhr">', 'optional, kein fester Termin') +
+        field('message', 'Worum geht es?', '<textarea id="pf-message" name="message" rows="3" maxlength="4000"></textarea>', 'optional')
+      : field('leistung', 'Leistung', `<select id="pf-leistung" name="leistung"><option value="">Bitte wählen</option>${svcOptions}<option>Etwas anderes</option></select>`) +
+        field('plz', 'PLZ des Einsatzorts', '<input id="pf-plz" type="text" name="plz" inputmode="numeric" autocomplete="postal-code" maxlength="10">') +
+        field('name', 'Name', `<input id="pf-name" type="text" name="name" autocomplete="name" maxlength="120"${need(true)}>`) +
+        `<div class="pw-pair">${field('email', 'E-Mail', '<input id="pf-email" type="email" name="email" autocomplete="email" maxlength="200">')}${field('phone', 'Telefon', '<input id="pf-phone" type="tel" name="phone" autocomplete="tel" inputmode="tel" maxlength="40">')}</div><p class="pw-hint">E-Mail oder Telefon genügt.</p>` +
         (req === 'besichtigung' || req === 'gartenprojekt'
-          ? field('Wunschzeitraum für einen Termin', '<input type="text" name="wunsch" placeholder="z. B. ab Mitte nächsten Monats">', 'optional, wird abgestimmt')
+          ? field('wunsch', 'Wunschzeitraum für einen Termin', '<input id="pf-wunsch" type="text" name="wunsch" maxlength="300" placeholder="z. B. ab Mitte nächsten Monats">', 'optional, wird abgestimmt')
           : '') +
-        field('Kurze Beschreibung', '<textarea name="message" rows="4"></textarea>');
-  const form = draft
-    ? `<form class="pw-form" action="#" method="post" onsubmit="return false" aria-describedby="pw-form-note"><p id="pw-form-note" class="pw-preview"><strong>Vorschau:</strong> Im Entwurf wird nichts versendet und kein Termin reserviert. Nach der Übernahme kommen Anfragen direkt beim Betrieb an.</p><fieldset disabled><legend class="sr-only">${REQUEST_TITLE[req]} (Vorschau)</legend>${fields}<button class="pw-btn pw-btn-main" type="submit">${req === 'rueckruf' ? 'Rückruf anfragen' : 'Anfrage senden'}</button></fieldset></form>`
-    : p.contactSection({
-        sectionClass: 'pw-live-form',
-        cardClass: 'pw-live-card',
-        titleClass: 'pw-h3',
-        buttonClass: 'pw-btn pw-btn-main',
-        inputClass: 'pw-input',
-        mutedClass: 'pw-note',
-        iconClass: 'pw-svg',
-        keepInline: true,
-      });
+        field('message', 'Kurze Beschreibung', `<textarea id="pf-message" name="message" rows="4" maxlength="4000"${need(true)}></textarea>`);
+  const submit = req === 'rueckruf' ? 'Rückruf anfragen' : 'Anfrage senden';
+  const form = live
+    ? `<form id="frage" class="pw-form" method="post" action="${esc(live.action)}" accept-charset="utf-8"><fieldset><legend class="sr-only">${REQUEST_TITLE[req]}</legend>${fields}<input type="hidden" name="anliegen" value="${esc(d.primaryLabel)}"><div class="pw-hp" aria-hidden="true"><label for="pf-website">Website</label><input id="pf-website" name="website" type="text" tabindex="-1" autocomplete="off"></div><div class="pw-consent"><input id="pf-consent" name="consent" type="checkbox" required><label for="pf-consent">Ich bin einverstanden, dass meine Angaben zur Beantwortung meiner Anfrage verarbeitet werden. Hinweise in der <a href="${esc(live.privacyPath)}">Datenschutzerklärung</a>.</label></div><button class="pw-btn pw-btn-main" type="submit">${submit}</button><p class="pw-hint">Das ist eine Anfrage, keine feste Buchung. Der Betrieb meldet sich zur Abstimmung.</p></fieldset></form>`
+    : `<form class="pw-form" action="#" method="post" onsubmit="return false" aria-describedby="pw-form-note"><p id="pw-form-note" class="pw-preview"><strong>Vorschau:</strong> Im Entwurf wird nichts versendet und kein Termin reserviert. Nach der Übernahme kommen Anfragen direkt beim Betrieb an.</p><fieldset disabled><legend class="sr-only">${REQUEST_TITLE[req]} (Vorschau)</legend>${fields}<button class="pw-btn pw-btn-main" type="submit">${submit}</button></fieldset></form>`;
   const kontakt = `<section id="anfrage" class="pw-sec pw-contact"><div class="pw-wrap pw-contact-grid"><div><h2>${REQUEST_TITLE[req]}</h2><p class="pw-lead">Ihre Anfrage geht direkt an ${esc(f.name)}. Danach meldet sich der Betrieb bei Ihnen, um Details und einen Termin abzustimmen.</p>${call ? `<p class="pw-bigtel"><a href="${esc(call.href)}">${esc(call.label)}</a></p>` : ''}<p>${p.addressLines}<br><a href="${esc(p.mapsHref)}" target="_blank" rel="noopener noreferrer">Route planen</a></p>${hours ? `<h3 class="pw-h3">Öffnungszeiten</h3><div class="pw-hours">${hours}</div>` : ''}</div>${form}</div></section>`;
 
   const body = `${header}<main id="inhalt">${heroHtml}${d.order.map((k) => blocks[k]).join('')}${kontakt}</main>${p.footer({ className: 'pw-footer', linkClass: 'underline' })}`;
-  const k = d.colors;
+  const k = { ...d.colors, accent: praxisAccentFor(f.name, d) };
   const css = praxisCss(d, k);
   const shell = documentShell(p, `pw pw-${key}`, body);
   const html = shell.replace('</head>', `<style>${kitFontCss([d.display, d.text])}${css}</style></head>`);
@@ -199,7 +197,10 @@ html body.pw h3,html body.pw .pw-h3{font-size:1.12rem;line-height:1.3;margin:0 0
 .pw-head{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--ln)}
 .pw-head-in{display:flex;align-items:center;gap:var(--s3);min-height:68px}
 .pw-brand{display:flex;flex-direction:column;text-decoration:none;font-family:${display};font-weight:${Math.min(d.weight, 800)};font-size:1.08rem;line-height:1.2;margin-right:auto;min-width:0}
-.pw-brand span{overflow-wrap:anywhere}
+.pw-brand{flex-direction:row;align-items:center;gap:12px}
+.pw-brand-t{display:flex;flex-direction:column;min-width:0}
+.pw-brand-t>span{overflow-wrap:anywhere}
+.pw-logo{height:40px;width:auto;max-width:120px;object-fit:contain;flex:none}
 .pw-brand small{font-family:${text};font-weight:400;font-size:.82rem;color:var(--mu)}
 .pw-nav{display:flex;gap:var(--s3);font-size:.95rem}
 .pw-nav a,.pw-menu nav a{text-decoration:none;padding:10px 0;transition:color var(--t-fast) var(--ease)}
@@ -290,11 +291,15 @@ html body.pw .pw-contact .pw-muted,html body.pw .pw-contact .pw-hlabel{color:rgb
 .pw-form fieldset{border:0;margin:0;padding:0;display:grid;gap:var(--s2)}
 .pw-preview{background:var(--sf);border-left:3px solid var(--ac);padding:12px 14px;font-size:.92rem;margin-bottom:var(--s3)}
 .pw-field{display:grid;gap:6px;font-weight:600;font-size:.95rem}
+.pw-pair{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.pw-hint{font-size:.9rem;color:var(--mu);margin:-4px 0 0}
+.pw-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.pw-consent{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;font-size:.92rem}
+.pw-consent input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--ac)}
+html body.pw .pw-form a{color:var(--ink);text-decoration:underline}
 .pw-field small{font-weight:400;color:var(--mu)}
 .pw-field input,.pw-field select,.pw-field textarea{font:inherit;font-weight:400;color:var(--ink);background:#fff;border:1.5px solid var(--ln);border-radius:var(--r);padding:12px 14px;min-height:48px;width:100%}
 .pw-form .pw-btn{width:100%;margin-top:var(--s1)}
-.pw-live-card{background:var(--bg);color:var(--ink);padding:var(--s4);border-radius:var(--r)}
-html body.pw .pw-live-card a,html body.pw .pw-live-card h3{color:var(--ink)}
 @media (max-width:900px){
 .pw-nav,.pw-headcall{display:none}.pw-menu{display:block}
 .pw-split-grid,.pw-edit-grid,.pw-wide-copy,.pw-contact-grid{grid-template-columns:1fr;gap:var(--s4)}
@@ -307,7 +312,8 @@ html body.pw .pw-live-card a,html body.pw .pw-live-card h3{color:var(--ink)}
 .pw-svcs{grid-template-columns:1fr}
 .pw-sec{padding:var(--s5) 0}
 .pw-gal-3,.pw-gal-2{grid-template-columns:1fr;grid-template-rows:auto}.pw-gal-3 .pw-fig:first-child{grid-row:auto}
-.pw-form,.pw-live-card{padding:var(--s3)}
+.pw-form{padding:var(--s3)}
+.pw-pair{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:no-preference){@supports (animation-timeline:view()){.rv{animation:pw-in linear both;animation-timeline:view();animation-range:entry 0% entry 35%}}}
 @keyframes pw-in{from{transform:translateY(12px)}to{transform:none}}

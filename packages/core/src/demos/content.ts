@@ -16,6 +16,8 @@ import type { BranchGroup } from '../types';
 
 /** Fakten, die das Modell kennen darf (alle aus den Lead-Daten, nichts erfunden). */
 export interface ContentFacts {
+  /** Prüfdatum der Betriebsdaten (Recherche bzw. letzter Datenabgleich), ISO */
+  factsCheckedAt?: string;
   name: string;
   branchLabel: string;
   branchKey: string;

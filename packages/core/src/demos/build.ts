@@ -73,6 +73,7 @@ export function leadContentFacts(lead: Lead, cfg: AppConfig, research?: LeadRese
   const branch = cfg.targeting.branches.find((b) => b.key === lead.branch);
   const details = researchLetterFacts(research ?? null);
   return {
+    factsCheckedAt: research?.checkedAt ?? (lead.updatedAt ? new Date(lead.updatedAt).toISOString() : undefined),
     name: lead.businessName,
     branchLabel: branch?.label ?? lead.branch,
     branchKey: lead.branch,
@@ -263,6 +264,8 @@ export async function buildDemo(
     templateId?: string;
     /** Befunde der KI-Prüfung des vorigen Entwurfs (automatischer Neubau, höchstens einmal) */
     qaFeedback?: string[];
+    /** Korrekturrunde nach der Prüfung (Praxis: bis DESIGN_BUDGET.maxCorrections), Standard 1 */
+    qaRound?: number;
     /** Controlled CLI runs QA themselves; default keeps the existing queue automation. */
     enqueueQa?: boolean;
     /** Technischer Selbsttest im Browser vor dem Speichern (Worker: an), mit einer Nachbesserung bei Befunden */
@@ -428,7 +431,7 @@ export async function buildDemo(
               studio: { version: STUDIO_VERSION, plan: generated.studioPlan },
               ...(brief ? { designBrief: brief } : {}),
               ...(praxisBrief ? { design: designMeta(praxisBrief), praxisBrief } : {}),
-              ...(opts.qaFeedback?.length ? { qaRetry: 1 } : {}),
+              ...(opts.qaFeedback?.length ? { qaRetry: Math.max(1, opts.qaRound ?? 1) } : {}),
               ...(generated.precheckOpen?.length ? { precheckOpen: generated.precheckOpen.map((v) => v.field) } : {}),
               ...(wish ? { operatorWish: { note: wish.note, fromDemo: wish.demoId } } : {}),
             },

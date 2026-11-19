@@ -15,6 +15,8 @@ export interface SharedParts {
   top: string;
   isDemo: boolean;
   isLive: boolean;
+  /** Ziel des echten Formulars (nur Live-Seite), für Vorlagen mit eigenem Formularaufbau */
+  liveForm: { action: string; privacyPath: string } | null;
   /** Hinweis „Beispiel-Leistungen“ (nur Demo) */
   servicesNote(cls?: string): string;
   callHref: string | null;
@@ -921,6 +923,7 @@ ${jsonLd}
     contactHub,
     isDemo,
     isLive,
+    liveForm: isLive && live ? { action: live.formAction, privacyPath: live.privacyPath } : null,
     servicesNote,
     callHref,
     phoneLabel,

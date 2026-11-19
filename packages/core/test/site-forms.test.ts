@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { resetEnvCache } from '../src/config/env';
 import { updateConfig } from '../src/config/service';
 import { getDb } from '../src/db/client';
-import { customers, leads, orders, outboundEmails, sites } from '../src/db/schema';
+import { customers, events, leads, orders, outboundEmails, sites } from '../src/db/schema';
 import { getProviders, resetProviders, setProviders } from '../src/providers';
 import type { OutgoingEmail } from '../src/providers/types';
 import { handleSiteForm, siteFormInput, testSiteFormToOwnInbox } from '../src/services/sites';
@@ -296,4 +296,34 @@ it('refuses the own-inbox acceptance if any stored recipient is external or the 
   await getDb().update(orders).set({ paymentMode: 'live' }).where(eq(orders.id, order.id));
   await expect(testSiteFormToOwnInbox('test:forms')).rejects.toThrow(/eigene festgelegte/);
   expect(transport).not.toHaveBeenCalled();
+});
+
+it.each([
+  { email: '', phone: '' },
+  { email: '', phone: '12' },
+  { requestType: 'Rückruf anfragen', phone: '', message: '' },
+])('Designrichtlinie: ohne nutzbare Kontaktmöglichkeit keine Weiterleitung, case %#', async (invalid) => {
+  const { site } = await fixture();
+  expect(await handleSiteForm(site.formKey, { ...input, ...invalid }, meta)).toMatchObject({ ok: false, reason: 'invalid' });
+  expect(sent).toHaveLength(0);
+});
+
+it('Designrichtlinie: Rückruf nur mit Name und Telefon, Antwort nicht an SeitenWerk; Ereignis ohne Inhalte', async () => {
+  const { site } = await fixture();
+  const res = await handleSiteForm(
+    site.formKey,
+    { ...input, email: '', message: '', wish: 'werktags ab 16 Uhr', requestType: 'Rückruf anfragen', service: 'Dachreparatur', postalCode: '44135' },
+    meta,
+  );
+  expect(res.ok).toBe(true);
+  expect(sent).toHaveLength(1);
+  expect(sent[0]!.subject).toContain('Rückruf anfragen');
+  expect(sent[0]!.text).toContain('E-Mail: keine angegeben');
+  expect(sent[0]!.text).toContain('Leistung: Dachreparatur');
+  expect(sent[0]!.text).toContain('PLZ Einsatzort: 44135');
+  expect(sent[0]!.replyTo).toBe(site.formTargetEmail);
+  const rows = await getDb().select().from(events).where(eq(events.type, 'site_inquiry'));
+  expect(rows).toHaveLength(1);
+  expect(JSON.stringify(rows[0]!.metaJson)).not.toMatch(/Testbesucherin|0123|44135|Dachreparatur/);
+  expect(rows[0]!.metaJson).toMatchObject({ request: 'Rückruf anfragen', contactWay: 'phone' });
 });

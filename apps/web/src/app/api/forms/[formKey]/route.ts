@@ -31,7 +31,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ formKey
     const msg =
       res.reason === 'rate_limited'
         ? 'Sie haben in kurzer Zeit mehrere Nachrichten gesendet. Bitte versuchen Sie es später erneut.'
-        : 'Bitte füllen Sie Name, E-Mail und Nachricht aus und bestätigen Sie den Datenschutzhinweis.';
+        : 'Bitte geben Sie Ihren Namen und eine Kontaktmöglichkeit (E-Mail oder Telefon) an, beschreiben Sie kurz Ihr Anliegen und bestätigen Sie den Datenschutzhinweis. Mit der Zurück-Taste Ihres Browsers bleiben Ihre Eingaben erhalten.';
     return simplePage('Nachricht nicht gesendet', `<p>${msg}</p>${back}`, res.reason === 'rate_limited' ? 429 : 400);
   } catch (err) {
     logger.error({ errorClass: err instanceof Error ? err.name : 'Error' }, 'Kontaktformular fehlgeschlagen');

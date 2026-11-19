@@ -16,6 +16,7 @@ defineJob(
             reviewNote: data.reviewNote,
             templateId: data.templateId,
             qaFeedback: data.qaFeedback,
+            qaRound: data.qaRound,
             selfTest: true,
           }),
         signal,

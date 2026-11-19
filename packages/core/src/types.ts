@@ -75,6 +75,8 @@ export const EVENT_TYPES = [
   'checkout_abandoned',
   'complaint',
   'undeliverable',
+  // Betriebs-Website (19.11.2026): Anfrage serverseitig angenommen und weitergeleitet (keine Formularinhalte im Ereignis)
+  'site_inquiry',
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 

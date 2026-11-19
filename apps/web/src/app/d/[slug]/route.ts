@@ -5,7 +5,6 @@ import {
   getConfig,
   DEFAULT_CONFIG,
   publicOperatorSettings,
-  getProviders,
   recordEvent,
   getDb,
   esc,
@@ -14,7 +13,9 @@ import {
   v4TierLabel,
   demoCdnHeaders,
   polishDemoForMobile,
+  offloadLazyDemoImages,
 } from '@wbm/core';
+import { cachedDemoHtml } from '@/lib/demo-html';
 import { requestMetaFrom } from '@/lib/request';
 import { simplePage } from '@/lib/public-page';
 import { welcomeDialog } from '@/lib/welcome-dialog';
@@ -80,25 +81,6 @@ export async function GET(req: Request, ctx: { params: Promise<{ slug: string }>
   );
 }
 
-/**
- * Demo-HTML kurz im Speicher der laufenden Funktion halten (14.11.2026, Tempo): Der Speicher liegt in Irland, die Funktion
- * in den USA; jeder Abruf kostete rund 600 KB über den Atlantik. Schlüssel enthält den Änderungszeitpunkt der Demo, damit
- * ein Neubau sofort sichtbar ist; höchstens 5 Minuten und 20 Einträge.
- */
-const HTML_CACHE = new Map<string, { at: number; html: Buffer }>();
-async function cachedDemoHtml(key: string, updatedAt: Date | null | undefined): Promise<Buffer | null> {
-  if (!key) return null;
-  const k = `${key}|${updatedAt ? new Date(updatedAt).getTime() : 0}`;
-  const hit = HTML_CACHE.get(k);
-  if (hit && Date.now() - hit.at < 5 * 60_000) return hit.html;
-  const html = await getProviders().storage.get(key);
-  if (html) {
-    if (HTML_CACHE.size >= 20) HTML_CACHE.delete(HTML_CACHE.keys().next().value!);
-    HTML_CACHE.set(k, { at: Date.now(), html });
-  }
-  return html;
-}
-
 /** Demo-Auslieferung: nur veröffentlichte, nicht abgelaufene Entwürfe; sonst 410. */
 async function serveDemo(req: Request, slug: string): Promise<Response> {
   const found = await findPublicDemo(slug);
@@ -161,5 +143,8 @@ async function serveDemo(req: Request, slug: string): Promise<Response> {
   // Netlify-Zwischenspeicher (17.11.2026): Scans öffnen die Demo sofort statt nach dem Kaltstart der Funktion.
   // Varianten nur nach start/plan/abgebrochen; Browser speichern weiterhin nicht.
   const cdn = demoCdnHeaders(slug, found.demo.expiresAt, { vary: 'query=start|plan|abgebrochen' });
-  return new Response(page, { status: 200, headers: { ...DEMO_HEADERS, ...cdn } });
+  // Tempo (19.11.2026): nachgelagerte Bilder als eigene Dateien statt im HTML; die Notfall-Kopie bleibt vollständig
+  const snapshot = /seitenwerk-notfall-snapshot-bot/.test(req.headers.get('user-agent') ?? '');
+  const out = snapshot ? page : offloadLazyDemoImages(page, (id) => `/d/${slug}/bild/${id}`).html;
+  return new Response(out, { status: 200, headers: { ...DEMO_HEADERS, ...cdn } });
 }

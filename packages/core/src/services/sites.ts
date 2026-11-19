@@ -27,7 +27,7 @@ import { setSiteMaintenance } from './maintenance';
 import { notifyAdmin, sendTransactionalEmail } from './email';
 import { transitionLead } from './lead-state';
 import { rateLimit } from './rate-limit';
-import { notifyInterest, type RequestMeta } from './tracking';
+import { notifyInterest, recordEvent, type RequestMeta } from './tracking';
 
 export type Site = typeof sites.$inferSelect;
 type Customer = typeof customers.$inferSelect;
@@ -526,6 +526,9 @@ export interface SiteFormInput {
   /** Optional branch-specific request fields; never a recipient supplied by the visitor. */
   requestType?: string;
   wish?: string;
+  /** Gewählte Leistung und PLZ des Einsatzorts (Praxis-Formular), beide optional */
+  service?: string;
+  postalCode?: string;
 }
 
 export type SiteFormResult =
@@ -540,6 +543,10 @@ const SITE_REQUEST_TITLES = new Set([
   'Reservierungsanfrage',
   'Probestunde anfragen',
   'Vorab reservieren',
+  'Rückruf anfragen',
+  'Besichtigung anfragen',
+  'Beratung anfragen',
+  'Gartenprojekt besprechen',
 ]);
 
 /** The HTTP form and the protected acceptance check use the same field mapping. */
@@ -554,6 +561,8 @@ export function siteFormInput(form: FormData): SiteFormInput {
     honeypot: field('website'),
     requestType: field('anliegen'),
     wish: field('wunsch'),
+    service: field('leistung'),
+    postalCode: field('plz'),
   };
 }
 
@@ -600,15 +609,23 @@ export async function handleSiteForm(
   // Honeypot / Link-Spam: gleiche Antwort wie Erfolg, aber nichts senden
   const links = (input.message.match(/https?:\/\//g) ?? []).length;
   if (input.honeypot.trim() || links > 2) return { ok: true, redirect: thanks };
+  // Nur nötige Angaben: eine Kontaktmöglichkeit genügt (E-Mail ODER Telefon); ein Rückruf braucht keine Nachricht.
+  const mail = input.email.trim();
+  const phoneDigits = input.phone.replace(/\D/g, '').length;
+  const callback = input.requestType === 'Rückruf anfragen';
   if (
     !input.consent ||
     input.name.trim().length < 2 ||
     input.name.trim().length > 120 ||
-    !MAIL_RE.test(input.email.trim()) ||
-    input.email.trim().length > 254 ||
-    input.message.trim().length < 5 ||
+    (mail && (!MAIL_RE.test(mail) || mail.length > 254)) ||
+    (!mail && phoneDigits < 6) ||
+    (callback && phoneDigits < 6) ||
+    input.phone.length > 40 ||
+    (!callback && input.message.trim().length < 5) ||
     input.message.length > 4000 ||
-    (input.wish?.length ?? 0) > 300
+    (input.wish?.length ?? 0) > 300 ||
+    (input.service?.length ?? 0) > 120 ||
+    (input.postalCode?.length ?? 0) > 10
   ) {
     return { ok: false, reason: 'invalid', back: base };
   }
@@ -620,21 +637,27 @@ export async function handleSiteForm(
   const name = input.name.trim().replace(/[\r\n]/g, ' ');
   const request = SITE_REQUEST_TITLES.has(input.requestType ?? '') ? input.requestType! : 'Kontaktanfrage';
   const wish = input.wish?.trim().replace(/[\r\n]/g, ' ') ?? '';
+  const service = input.service?.trim().replace(/[\r\n]/g, ' ') ?? '';
+  const plz = input.postalCode?.trim().replace(/[\r\n]/g, ' ') ?? '';
   const text = [
     ...(acceptance ? ['GEKENNZEICHNETER TEST – fiktive Anfrage, kein echter Termin und keine Kundenkontaktaufnahme.', ''] : []),
     `${request} über die Website von ${customer.company}${customer.domain ? ` (${customer.domain})` : ''}:`,
     '',
     `Name: ${name}`,
-    `E-Mail: ${input.email.trim()}`,
+    mail ? `E-Mail: ${mail}` : 'E-Mail: keine angegeben – bitte telefonisch melden',
     ...(input.phone.trim() ? [`Telefon: ${input.phone.trim().slice(0, 40)}`] : []),
+    ...(service ? [`Leistung: ${service}`] : []),
+    ...(plz ? [`PLZ Einsatzort: ${plz}`] : []),
     ...(wish ? [`Wunsch: ${wish}`] : []),
     '',
-    input.message.trim(),
+    input.message.trim() || '(keine Nachricht)',
     '',
     'Dies ist eine Anfrage, keine bestätigte Buchung. Stimmen Sie einen gewünschten Termin direkt mit der anfragenden Person ab.',
     '',
     '—',
-    'Antworten Sie direkt auf diese E-Mail, um der Person zu antworten. Der Nachrichtentext wird in SeitenWerk nicht dauerhaft gespeichert.',
+    mail
+      ? 'Antworten Sie direkt auf diese E-Mail, um der Person zu antworten. Der Nachrichtentext wird in SeitenWerk nicht dauerhaft gespeichert.'
+      : 'Die Person hat nur eine Telefonnummer angegeben. Der Nachrichtentext wird in SeitenWerk nicht dauerhaft gespeichert.',
   ].join('\n');
   // A retry retains its key; the same legitimate request is allowed again in a later ten-minute window.
   // Include recipient and all contact/request fields so distinct people or destinations do not collapse.
@@ -646,6 +669,8 @@ export async function handleSiteForm(
       input.phone.trim(),
       request,
       wish,
+      service,
+      plz,
       input.message.trim(),
     ]),
   );
@@ -658,7 +683,8 @@ export async function handleSiteForm(
         kind: acceptance ? 'acceptance_site_form' : 'site_form',
         idempotencyKey,
         to: site.formTargetEmail,
-        replyTo: input.email.trim(),
+        // Ohne E-Mail der anfragenden Person nie an SeitenWerk antworten lassen
+        replyTo: mail || site.formTargetEmail,
         subject: `${acceptance ? '[TEST] ' : ''}${request} von ${name}`,
         text,
         html: '',
@@ -672,6 +698,17 @@ export async function handleSiteForm(
       'Kontaktformular: Weiterleitung fehlgeschlagen',
     );
     throw err;
+  }
+  // Messung (Designrichtlinie 19.11.2026): nur dass eine Anfrage angenommen wurde, Art und Kontaktweg – keine Inhalte,
+  // keine Namen, keine Adressen. Abnahmetests zählen nicht.
+  if (!acceptance && customer.leadId) {
+    await recordEvent(db, {
+      leadId: customer.leadId,
+      type: 'site_inquiry',
+      meta: { siteId: site.id, request, contactWay: mail ? 'email' : 'phone' },
+    }).catch((err) =>
+      logger.warn({ siteId: site.id, errorClass: err instanceof Error ? err.name : 'Error' }, 'Anfrage-Ereignis nicht gespeichert'),
+    );
   }
   return { ok: true, redirect: thanks };
 }

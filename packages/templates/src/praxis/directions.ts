@@ -23,6 +23,8 @@ export interface PraxisDirection {
   weight: number;
   stretch?: number;
   colors: { base: string; surface: string; ink: string; muted: string; line: string; accent: string; onAccent: string };
+  /** Weitere Akzentfarben (alle ≥ 4,5:1 zu Weiß und zum Grund); Auswahl stabil je Betrieb, damit nicht jede Demo gleich aussieht */
+  accents: string[];
 }
 
 export const PRAXIS_DIRECTIONS: Record<PraxisDirectionKey, PraxisDirection> = {
@@ -46,6 +48,7 @@ export const PRAXIS_DIRECTIONS: Record<PraxisDirectionKey, PraxisDirection> = {
       accent: '#0b57d0',
       onAccent: '#ffffff',
     },
+    accents: ['#0b57d0', '#b3261e', '#0f6b4f'],
   },
   projekt: {
     key: 'projekt',
@@ -67,6 +70,7 @@ export const PRAXIS_DIRECTIONS: Record<PraxisDirectionKey, PraxisDirection> = {
       accent: '#9a3f0e',
       onAccent: '#ffffff',
     },
+    accents: ['#9a3f0e', '#8a1c1c', '#1f4e79'],
   },
   raeume: {
     key: 'raeume',
@@ -88,6 +92,7 @@ export const PRAXIS_DIRECTIONS: Record<PraxisDirectionKey, PraxisDirection> = {
       accent: '#1f4f4a',
       onAccent: '#ffffff',
     },
+    accents: ['#1f4f4a', '#6b3e26', '#2f4858'],
   },
   garten: {
     key: 'garten',
@@ -109,6 +114,7 @@ export const PRAXIS_DIRECTIONS: Record<PraxisDirectionKey, PraxisDirection> = {
       accent: '#2d5f34',
       onAccent: '#ffffff',
     },
+    accents: ['#2d5f34', '#5b6b1e', '#7a4b1c'],
   },
 };
 
@@ -126,3 +132,10 @@ export const praxisTemplateId = (key: PraxisDirectionKey) => `praxis-${key}`;
 export const isPraxisTemplate = (id: string) => id.startsWith('praxis-');
 export const praxisKeyOf = (id: string): PraxisDirectionKey =>
   (['service', 'projekt', 'raeume', 'garten'] as const).find((k) => id === `praxis-${k}`) ?? 'service';
+
+/** Stabile Akzentwahl je Betrieb (gleicher Name → gleiche Farbe auch bei Neubau). */
+export function praxisAccentFor(name: string, d: PraxisDirection): string {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return d.accents[h % d.accents.length] ?? d.colors.accent;
+}

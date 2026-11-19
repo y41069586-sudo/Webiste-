@@ -7,6 +7,7 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { DEFAULT_CONFIG } from '../src/config/settings';
 import { renderDemoHtml } from '../src/demos/build';
 import { lighthouseCheck } from '../src/render/qa';
+import { findDemoImage, offloadLazyDemoImages } from '../src/services/demo-images';
 import { praxisDirectionFor, praxisTemplateId, renderSite } from '@wbm/templates';
 import type { BusinessFacts, SiteContent } from '@wbm/templates/types';
 
@@ -150,12 +151,23 @@ for (const c of cases) {
   const html = renderDemoHtml({ templateId: praxisTemplateId(key), palette: 'anthrazit', content: c.content, facts, slug: `test${c.slug.replace(/-/g, '')}xxxxxxxxxxxxxxxxxx`.slice(0, 24), cfg: DEFAULT_CONFIG });
   writeFileSync(`${out}/${c.slug}.html`, html);
   console.log(c.slug, key, Math.round(html.length / 1024) + ' KB');
+  const liveHtml = renderSite({
+    templateId: praxisTemplateId(key), palette: 'anthrazit', mode: 'live', content: c.content, facts,
+    live: { formAction: '/api/forms/qa', imprintPath: 'impressum.html', privacyPath: 'datenschutz.html', canonicalUrl: 'http://127.0.0.1/' },
+  });
+  writeFileSync(`${out}/${c.slug}.live.html`, liveHtml);
   if (process.argv.includes('--lighthouse')) {
-    const liveHtml = renderSite({
-      templateId: praxisTemplateId(key), palette: 'anthrazit', mode: 'live', content: c.content, facts,
-      live: { formAction: '/api/forms/qa', imprintPath: 'impressum.html', privacyPath: 'datenschutz.html', canonicalUrl: 'http://127.0.0.1/' },
+    // Demo wie ausgeliefert: nachgelagerte Bilder als eigene Dateien (wie /d/{slug}/bild/{id})
+    const off = offloadLazyDemoImages(html, (id) => `/bild/${id}`);
+    const assets = off.ids.map((id) => {
+      const img = findDemoImage(html, id)!;
+      return { path: `bild/${id}`, content: img.bytes, contentType: img.mime };
     });
-    const lh = await lighthouseCheck(liveHtml);
-    console.log(`  lighthouse ${lh.passed ? 'bestanden' : 'NICHT bestanden'}: ${lh.details}`);
+    for (const [label, page, files] of [['live', liveHtml, []], ['demo', off.html, assets]] as const) {
+      const lh = await lighthouseCheck(page, 0.9, [...files]);
+      const m = JSON.parse(lh.details?.match(/"metrics":(\{[^}]*\})/)?.[1] ?? '{}') as Record<string, number>;
+      const scores = lh.details?.split('; diagnostics')[0];
+      console.log(`  ${label}: ${lh.passed ? 'bestanden' : 'NICHT bestanden'} | ${scores} | LCP ${Math.round(m['largest-contentful-paint'] ?? 0)} ms, CLS ${(m['cumulative-layout-shift'] ?? 0).toFixed(3)}, TBT ${Math.round(m['total-blocking-time'] ?? 0)} ms`);
+    }
   }
 }
