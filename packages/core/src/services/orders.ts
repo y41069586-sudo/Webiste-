@@ -378,7 +378,18 @@ export async function startCheckout(
  * Firmenname, Name, E-Mail, Rechnungsadresse, Telefon, Wunschdomain, Bestätigung „Unternehmer“ und
  * AGB-Zustimmung erfasst der Anbieter; übernommen werden sie vor der Verbuchung (applyCollectedCustomer).
  */
-export async function startHostedCheckout(slug: string, planRaw: string, meta: RequestMeta): Promise<StartCheckoutResult> {
+/** Auf unserer Seite bestätigt (19.11.2026): bei Komplett Pflicht, weil Stripe im Modus „setup“ keine eigenen Felder erlaubt. */
+export interface HostedConsent {
+  b2b: boolean;
+  terms: boolean;
+}
+
+export async function startHostedCheckout(
+  slug: string,
+  planRaw: string,
+  meta: RequestMeta,
+  consent?: HostedConsent,
+): Promise<StartCheckoutResult> {
   const db = getDb();
   // Eine Verbindung für Sperre UND alle Queries verwenden (kein Pool-Deadlock bei Doppelklicks).
   // Bestehende Lead-Zeile statt neuer Lock-Tabelle; fachlichen Zustand erst danach erneut lesen.
@@ -388,7 +399,7 @@ export async function startHostedCheckout(slug: string, planRaw: string, meta: R
       sql`SELECT l.id FROM leads l JOIN demos d ON d.lead_id = l.id WHERE d.slug = ${slug} LIMIT 1 FOR UPDATE OF l`,
     );
     if (!locked.rows.length) return { result: { ok: false, error: 'Dieser Entwurf ist nicht mehr verfügbar.' } as StartCheckoutResult };
-    return startHostedCheckoutLocked(slug, planRaw, meta, tx);
+    return startHostedCheckoutLocked(slug, planRaw, meta, tx, consent);
   });
   // Zählung, Protokoll und Benachrichtigung erst nach dem Commit und nach der Antwort (Betrieb wartet nicht darauf)
   const after = run.after;
@@ -401,8 +412,9 @@ async function startHostedCheckoutLocked(
   planRaw: string,
   meta: RequestMeta,
   db: DbOrTx,
+  consent?: HostedConsent,
 ): Promise<{ result: StartCheckoutResult; after?: () => Promise<void> }> {
-  const r = await startHostedCheckoutInner(slug, planRaw, meta, db);
+  const r = await startHostedCheckoutInner(slug, planRaw, meta, db, consent);
   if (!r.ok) return { result: r };
   const result: StartCheckoutResult = { ok: true, url: r.url, orderId: r.orderId };
   return 'started' in r && r.started ? { result, after: r.started } : { result };
@@ -413,6 +425,7 @@ async function startHostedCheckoutInner(
   planRaw: string,
   meta: RequestMeta,
   db: DbOrTx,
+  consent?: HostedConsent,
 ): Promise<StartCheckoutResult | { ok: true; url: string; orderId: string; started: () => Promise<void> }> {
   const ctx = await getCheckoutContext(slug, db);
   if (ctx.state === 'ordered') return { ok: false, error: 'Für diesen Entwurf liegt bereits eine Bestellung vor.' };
@@ -429,6 +442,8 @@ async function startHostedCheckoutInner(
       ok: false,
       error: 'Der Tarif Komplett ist gerade nicht bestellbar. Bitte Basis wählen oder uns per E-Mail schreiben.',
     };
+  if (plan === 'komplett' && !(consent?.b2b && consent?.terms))
+    return { ok: false, error: 'Bitte bestätigen Sie, dass Sie für Ihr Unternehmen bestellen, und die AGB.' };
   if (plan === 'monthly' && !cfg.pricing.monthlyEnabled)
     return { ok: false, error: 'Die monatliche Zahlung ist derzeit nicht verfügbar.' };
   // Tempo (18.11.2026): beide Missbrauchsbremsen in einer Abfrage
@@ -461,6 +476,7 @@ async function startHostedCheckoutInner(
   await cancelOpenOrders(lead.id, 'neuer Checkout', db, open);
 
   const avail = checkoutAvailability();
+  const consentedAt = consent?.b2b && consent?.terms ? new Date() : null;
   const [order] = await db
     .insert(orders)
     .values({
@@ -469,7 +485,9 @@ async function startHostedCheckoutInner(
       provider: getProviders().payment.name,
       paymentMode: paymentModeAtCheckout(),
       plan,
-      offerSnapshot: isV4Tier(plan) ? v4Offer(plan, null, cfg.offers.billingMode ?? 'saved_mandate') : null,
+      offerSnapshot: isV4Tier(plan)
+        ? v4Offer(plan, consentedAt ? consentedAt.toISOString() : null, cfg.offers.billingMode ?? 'saved_mandate')
+        : null,
       amountCents: amounts.grossCents,
       netCents: amounts.netCents,
       vatCents: amounts.vatCents,
@@ -487,7 +505,8 @@ async function startHostedCheckoutInner(
         country: 'DE',
       },
       domainWish: null,
-      b2bConfirmed: false,
+      b2bConfirmed: consent?.b2b === true,
+      ...(consentedAt ? { termsAcceptedAt: consentedAt } : {}),
       termsVersion: cfg.legal.termsVersion,
     })
     .returning();
@@ -613,8 +632,9 @@ export async function applyCollectedCustomer(orderId: string, c: CollectedCustom
   if (!order || order.status === 'paid' || order.status === 'refunded') return;
   const cfg = await getConfig();
   const f = c.customFields;
-  const b2b = f[CHECKOUT_FIELDS.b2b] === 'ja';
-  const terms = f[CHECKOUT_FIELDS.terms] === 'ja';
+  // Bei Komplett (Stripe-Modus „setup“) gibt es keine eigenen Felder: die vorher auf unserer Seite erteilte Bestätigung gilt
+  const b2b = f[CHECKOUT_FIELDS.b2b] === 'ja' || order.b2bConfirmed === true;
+  const terms = f[CHECKOUT_FIELDS.terms] === 'ja' || Boolean(order.termsAcceptedAt);
   let domainWish: string | null = order.domainWish;
   let domainNote: string | null = null;
   const wish = f[CHECKOUT_FIELDS.domain]?.trim();

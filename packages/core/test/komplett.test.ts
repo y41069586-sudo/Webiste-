@@ -12,7 +12,7 @@ import { startHostedCheckout } from '../src/services/orders';
 import { KOMPLETT_AGB_MARKER, komplettTermsCurrent, v4CheckoutTerms, v4Offer, v4OfferedTiers } from '../src/services/offers-v4';
 import { getProviders } from '../src/providers';
 import { resetDb } from './helpers';
-import { buy, live } from './v4-helpers';
+import { buy, live, seedV4Demo } from './v4-helpers';
 
 describe('Tarif „Komplett“: 0 € Einrichtung, 179 €/Monat, erste Abbuchung 7 Tage nach der Bestellung, 12 Monate', () => {
   beforeEach(async () => {
@@ -114,5 +114,14 @@ describe('Tarif „Komplett“: 0 € Einrichtung, 179 €/Monat, erste Abbuchun
     await expect(buy('komplett')).rejects.toThrow(/angebotenen Tarife/);
     void startHostedCheckout;
     void customers;
+  });
+
+  it('Komplett nur mit Bestätigung „Unternehmer“ und AGB auf unserer Seite (Stripe-Setup erlaubt keine eigenen Felder)', async () => {
+    const slug = await seedV4Demo();
+    const r = await startHostedCheckout(slug, 'komplett', { ua: 't', ipHash: 'k', isBot: false });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/Unternehmen.*AGB/);
+    const ok = await startHostedCheckout(slug, 'komplett', { ua: 't', ipHash: 'k', isBot: false }, { b2b: true, terms: true });
+    expect(ok.ok).toBe(true);
   });
 });

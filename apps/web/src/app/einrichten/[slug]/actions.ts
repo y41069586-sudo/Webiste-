@@ -43,7 +43,10 @@ export async function paySetup(slug: string, _prev: { error?: string }, form: Fo
 export async function quickOrder(slug: string, _prev: { error?: string }, form: FormData): Promise<{ error?: string }> {
   const meta = requestMetaFrom(await headers());
   if (meta.isBot) return { error: 'Die Bestellung ist gerade nicht möglich. Bitte versuchen Sie es erneut.' };
-  const result = await startHostedCheckout(slug, String(form.get('plan') ?? ''), meta);
+  const result = await startHostedCheckout(slug, String(form.get('plan') ?? ''), meta, {
+    b2b: form.get('b2b') === 'on',
+    terms: form.get('terms') === 'on',
+  });
   if (result.ok) redirect(result.url);
   return { error: result.error };
 }

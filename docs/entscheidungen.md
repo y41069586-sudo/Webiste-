@@ -1953,3 +1953,10 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   `/einrichten` 8,9 s mit Kaltstart. Ursache: `after()` (Klick zählen + Mail) hielt die einzige warme Instanz noch
   beschäftigt, als der Browser der 303-Weiterleitung folgte → zweite, kalte Instanz. Jetzt zählt/meldet die
   Einrichtungsseite den Klick nach ihrer Antwort (`?klick=1`); der Kunde liest dort, bevor er weiterklickt.
+- 19.11.2026 Betreiber: „179-€-Tarif lädt Stripe nicht“. Live nachgestellt (Setup-Sitzung, sofort beendet, nichts
+  abgebucht): Stripe lehnt ab mit „custom_fields is not supported when mode=setup“ – Komplett war seit Einführung
+  (06.11.) nie bestellbar (Sandbox-Katalog ohne Komplett-Preis, Tests nur mit Mock). Fix: im Setup-Modus keine eigenen
+  Felder; „Ich bestelle für mein Unternehmen“ + AGB werden auf unserer Tarifseite bestätigt (Pflicht bei Komplett,
+  `startHostedCheckout(…, consent)`), beim Anlegen gespeichert (`b2bConfirmed`, `termsAcceptedAt`, `consentAt`);
+  `applyCollectedCustomer` behält diese Zustimmung, wenn Stripe keine Felder liefert. Wunschdomain im Onboarding.
+  Live-Nachtest ohne eigene Felder: Sitzung wird erstellt.

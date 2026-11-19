@@ -303,8 +303,12 @@ export class StripePayment implements PaymentProvider {
     // Preis muss im Katalog der gewählten Umgebung freigegeben sein, bevor jemand bestellen kann
     stripeV4Price('komplett', this.testMode, v4Offer('komplett').monthlyCents, 'eur', this.cfg.allowLive);
     const minutes = Math.min(24 * 60, Math.max(30, input.expiresInMinutes ?? 60));
-    const { phone_number_collection: _phone, ...collect } = collectionParams(input);
+    // Stripe erlaubt im Modus „setup“ weder Telefonfeld noch eigene Felder (live geprüft 19.11.2026: „custom_fields is not
+    // supported when mode=setup“). Unternehmer- und AGB-Bestätigung erfasst unsere Seite vor der Weiterleitung, die
+    // Wunschdomain kommt im Onboarding.
+    const { phone_number_collection: _phone, custom_fields: _fields, ...collect } = collectionParams(input);
     void _phone;
+    void _fields;
     const session = await this.stripe.checkout.sessions.create(
       {
         mode: 'setup',

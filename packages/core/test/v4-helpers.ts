@@ -9,6 +9,12 @@ import { getProviders } from '../src/providers';
 import type { MockPayment } from '../src/providers/mock/payment';
 const meta = { ua: 'fixture/browser', ipHash: 'v4-fixture', isBot: false };
 export async function buy(tier: 'basis' | 'care_plus' | 'komplett') {
+  const slug = await seedV4Demo();
+  return buyFor(slug, tier);
+}
+
+/** Testbetrieb mit veröffentlichter Demo; gibt den Slug zurück. */
+export async function seedV4Demo(): Promise<string> {
   const db = getDb();
   const [lead] = await db
     .insert(leads)
@@ -39,10 +45,18 @@ export async function buy(tier: 'basis' | 'care_plus' | 'komplett') {
       expiresAt: addDays(new Date(), 30),
     })
     .returning();
-  const result = await startHostedCheckout(demo!.slug, tier, meta);
+  return demo!.slug;
+}
+
+async function buyFor(slug: string, tier: 'basis' | 'care_plus' | 'komplett') {
+  const db = getDb();
+  // Unternehmer- und AGB-Bestätigung auf unserer Seite (bei Komplett Pflicht, Stripe-Modus „setup“ ohne eigene Felder)
+  const result = await startHostedCheckout(slug, tier, meta, { b2b: true, terms: true });
   if (!result.ok) throw new Error(result.error);
   const pending = (await db.query.orders.findFirst({ where: eq(orders.id, result.orderId) }))!;
-  expect(pending.offerSnapshot?.consentAt).toBeNull();
+  // Zustimmung kommt jetzt schon von unserer Seite (vor Stripe) und wird beim Anlegen gespeichert
+  expect(pending.offerSnapshot?.consentAt).toBeTruthy();
+  expect(pending.b2bConfirmed).toBe(true);
   await simulateMockPayment(pending.stripeSessionId!, 'paid', {
     businessName: 'Testbetrieb',
     name: 'Erika Beispiel',

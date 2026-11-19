@@ -27,6 +27,28 @@ export function TariffPicker({ slug, options, preferred }: { slug: string; optio
   const sorted = [...options].sort((a, b) => Number(b.plan === preferred) - Number(a.plan === preferred));
   return (
     <form action={action}>
+      {/* 19.11.2026: Bestätigung hier statt bei Stripe – im Komplett-Tarif (nur Zahlungsmittel hinterlegen) erlaubt
+          Stripe keine eigenen Felder. Gilt für alle Tarife gleich, damit nichts doppelt oder verschieden ist. */}
+      <div className="card-site mb-5 space-y-3 p-5 text-sm">
+        <label className="flex items-start gap-3">
+          <input type="checkbox" name="b2b" required className="accent-brand-600 mt-0.5 h-5 w-5 shrink-0" />
+          <span>Ich bestelle für mein Unternehmen.</span>
+        </label>
+        <label className="flex items-start gap-3">
+          <input type="checkbox" name="terms" required className="accent-brand-600 mt-0.5 h-5 w-5 shrink-0" />
+          <span>
+            Ich akzeptiere die{' '}
+            <a href="/agb" target="_blank" rel="noopener noreferrer" className="underline">
+              AGB
+            </a>{' '}
+            einschließlich Preis und Laufzeit des gewählten Tarifs. Die{' '}
+            <a href="/datenschutz" target="_blank" rel="noopener noreferrer" className="underline">
+              Datenschutzhinweise
+            </a>{' '}
+            habe ich zur Kenntnis genommen.
+          </span>
+        </label>
+      </div>
       <div className={`grid gap-4 ${sorted.length > 1 ? 'sm:grid-cols-2' : ''}`}>
         {sorted.map((o) => (
           <div
