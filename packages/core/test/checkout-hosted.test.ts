@@ -156,7 +156,7 @@ describe('Checkout über die Bezahlseite des Anbieters (Stripe)', () => {
       });
       const r = results[0]!;
       if (!r.ok) throw new Error(r.error);
-      expect(await simulateMockPayment(sessionOf(r.url), 'cancel')).toContain(`?abgebrochen=1&plan=${plan}#uebernehmen`);
+      expect(await simulateMockPayment(sessionOf(r.url), 'cancel')).toContain(`?weg=danach&abgebrochen=1&plan=${plan}`);
     },
   );
 

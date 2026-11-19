@@ -88,7 +88,8 @@ export async function startBillingV4(orderId: string, actor = 'job:go-live') {
       actor,
       context: { subscriptionId: sub.id, status: sub.status },
     });
-    if (sub.status !== 'active')
+    // Komplett: in den ersten 7 Tagen „trialing“ (noch keine Abbuchung) – das ist richtig, keine Warnung
+    if (sub.status !== 'active' && sub.status !== 'trialing')
       await raiseAlert(tx, {
         level: 'warn',
         code: `v4_billing_action_${order.id}`,

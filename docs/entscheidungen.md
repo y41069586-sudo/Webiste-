@@ -1960,3 +1960,17 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   `startHostedCheckout(…, consent)`), beim Anlegen gespeichert (`b2bConfirmed`, `termsAcceptedAt`, `consentAt`);
   `applyCollectedCustomer` behält diese Zustimmung, wenn Stripe keine Felder liefert. Wunschdomain im Onboarding.
   Live-Nachtest ohne eigene Felder: Sitzung wird erstellt.
+
+## 19.11.2026 – Demo ohne Tarife, Komplett als Abo-Checkout, sanfteres Laden
+
+- **Demo:** Unten keine Preiskarten/Tarif-FAQ mehr (Betreiber: Tarife nur nach „Website übernehmen“). V4-Abschnitt
+  `#uebernehmen` zeigt nur Einladung, einen Knopf „Website übernehmen“, Zusagen ohne Preisangaben und den
+  Vertrauensblock (Impressum-Link bleibt). Knopf „Preise und Leistungen“ in der Leiste entfällt, auch in bereits
+  gebauten Demos (beim Ausliefern entfernt). Stripe-Abbruch führt zurück zur Tarifwahl (`/einrichten/{slug}?weg=danach`).
+- **Komplett bei Stripe:** statt Modus „setup“ (zeigte keinen Preis) ein Abo-Checkout: „heute 0 €, dann 179 €/Monat
+  ab {Bestellung + 7 Tage}“ über `billing_cycle_anchor` (kein Testzeitraum, sonst zeigt Stripe „kostenlos testen“).
+  Gleiche Felder wie Basis. `startSavedSubscription` übernimmt das Abo (prüft Sitzung, `metadata.orderId`), legt kein
+  zweites an. Ältere Setup-Sitzungen laufen über den bisherigen Weg. 0-€-Startrechnung erzeugt keine Rechnung.
+- **Hinweis Währung:** Stripe „Adaptive Pricing“ zeigt Besuchern aus dem Ausland ihre Währung (Test aus den USA: $);
+  in Deutschland erscheint EUR. Abschalten nur im Stripe-Dashboard.
+- **Laden:** `loading.tsx` für `/einrichten/[slug]` und `/pruefen` – Gerüst erscheint sofort beim Klick.

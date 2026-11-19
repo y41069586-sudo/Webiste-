@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import { createHash } from 'node:crypto';
 import { stripeV4Price } from '../../config/stripe-v4-prices';
-import { isV4Tier, v4Offer, v4CheckoutTerms, v4TierLabel, type V4Tier } from '../../services/offers-v4';
+import { KOMPLETT_TERMS, isV4Tier, v4Offer, v4CheckoutTerms, v4TierLabel, type V4Tier } from '../../services/offers-v4';
 import { CHECKOUT_FIELDS } from '../types';
 import type {
   CheckoutSession,
@@ -294,34 +294,42 @@ export class StripePayment implements PaymentProvider {
   }
 
   /**
-   * „Komplett“: Checkout im Modus „setup“ – Stripe legt den Kunden an und speichert Karte oder SEPA-Mandat,
-   * abgebucht wird nichts. Das Abo entsteht erst nach bestätigtem Go-Live (startSavedSubscription).
-   * Telefonnummer gibt es im Setup-Modus nicht (Stripe), sie kommt aus dem Onboarding.
+   * „Komplett“: Checkout als Abo (heute 0 €, erste Abbuchung 7 Tage nach Bestellung), dieselben Felder wie Basis.
+   * startSavedSubscription übernimmt dieses Abo nach dem Checkout (ältere Setup-Sitzungen: Abo wird dort angelegt).
    */
   private async createKomplettSetupSession(input: CheckoutSessionInput): Promise<CheckoutSession> {
     if (input.amountCents !== 0 || input.recurring) throw new Error('Komplett-Bestellung darf bei Bestellung nichts abbuchen.');
-    // Preis muss im Katalog der gewählten Umgebung freigegeben sein, bevor jemand bestellen kann
-    stripeV4Price('komplett', this.testMode, v4Offer('komplett').monthlyCents, 'eur', this.cfg.allowLive);
+    // 19.11.2026 (Betreiber: „soll wie ein Kauf aussehen“): statt Modus „setup“ (zeigt keinen Preis, erlaubt keine
+    // eigenen Felder) ein Abo mit Stichtag 7 Tage nach Bestellung. Stripe zeigt Produkt, „heute 0 €“ und den Monatspreis.
+    // Mindestlaufzeit (12 Monate ab erster Abbuchung) regelt unsere Kündigungslogik wie bisher.
+    const price = stripeV4Price('komplett', this.testMode, v4Offer('komplett').monthlyCents, 'eur', this.cfg.allowLive);
     const minutes = Math.min(24 * 60, Math.max(30, input.expiresInMinutes ?? 60));
-    // Stripe erlaubt im Modus „setup“ weder Telefonfeld noch eigene Felder (live geprüft 19.11.2026: „custom_fields is not
-    // supported when mode=setup“). Unternehmer- und AGB-Bestätigung erfasst unsere Seite vor der Weiterleitung, die
-    // Wunschdomain kommt im Onboarding.
-    const { phone_number_collection: _phone, custom_fields: _fields, ...collect } = collectionParams(input);
-    void _phone;
-    void _fields;
     const session = await this.stripe.checkout.sessions.create(
       {
-        mode: 'setup',
+        mode: 'subscription',
         locale: 'de',
-        currency: 'eur',
-        customer_creation: 'always',
         allowed_payment_method_types: input.paymentMethods ?? DEFAULT_PAYMENT_METHODS,
         client_reference_id: input.orderId,
         integration_identifier: v4IntegrationLabel(input.idempotencyKey),
         ...(input.customerEmail ? { customer_email: input.customerEmail } : {}),
-        ...collect,
+        line_items: [{ price, quantity: 1 }],
+        payment_method_collection: 'always',
+        ...collectionParams(input),
         metadata: input.metadata,
-        setup_intent_data: { description: input.productName.slice(0, 500), metadata: input.metadata },
+        subscription_data: {
+          // Kein „Testzeitraum“ (Stripe würde „7 Tage kostenlos testen“ anzeigen – falscher Eindruck bei 12 Monaten
+          // Laufzeit): fester Abrechnungsstichtag 7 Tage nach Bestellung, bis dahin keine anteilige Abbuchung.
+          billing_cycle_anchor: Math.floor(Date.now() / 1000) + KOMPLETT_TERMS.billingDelayDays * 86400,
+          proration_behavior: 'none',
+          description: input.productName.slice(0, 500),
+          metadata: {
+            kind: 'subscription',
+            offerVersion: 'v4',
+            tier: 'komplett',
+            orderId: input.orderId,
+            minTermMonths: String(KOMPLETT_TERMS.minTermMonths),
+          },
+        },
         success_url: input.successUrl,
         cancel_url: input.cancelUrl,
         expires_at: Math.floor(Date.now() / 1000) + minutes * 60,
@@ -441,6 +449,19 @@ export class StripePayment implements PaymentProvider {
       expand: komplett ? ['setup_intent.payment_method'] : ['payment_intent.payment_method'],
     });
     if (session.metadata?.orderId !== input.orderId) throw new Error('Bestellung ist falsch zugeordnet.');
+    // Komplett seit 19.11.2026: das Abo (Stichtag 7 Tage nach Bestellung) entsteht schon im Checkout – nur übernehmen
+    if (komplett && session.mode === 'subscription') {
+      const subId = idOf(session.subscription);
+      if (session.status !== 'complete' || !subId) throw new Error('Komplett-Abo ist nicht bestätigt.');
+      let sub = await this.stripe.subscriptions.retrieve(subId, { expand: ['latest_invoice'] });
+      if (sub.metadata.orderId !== input.orderId) throw new Error('Abo ist falsch zugeordnet.');
+      if (sub.metadata.customerId !== input.customerId)
+        sub = await this.stripe.subscriptions.update(subId, {
+          metadata: { customerId: input.customerId },
+          expand: ['latest_invoice'],
+        });
+      return this.subscriptionInfo(sub);
+    }
     const customer = idOf(session.customer);
     let method: Stripe.PaymentMethod | null = null;
     if (komplett) {

@@ -46,7 +46,6 @@ describe('Individuelles HTML/CSS statt Layoutvorgabe', () => {
       '590 €',
       '49 €',
       '12 Monate Mindestlaufzeit',
-      'href="#uebernehmen"',
       'hat diese Seite nicht beauftragt',
       'Kein Interesse',
     ])

@@ -40,10 +40,10 @@ export default async function SetupPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ plan?: string; weg?: string; klick?: string }>;
+  searchParams: Promise<{ plan?: string; weg?: string; klick?: string; abgebrochen?: string }>;
 }) {
   const { slug } = await params;
-  const { plan: preferred, weg: wegParam, klick } = await searchParams;
+  const { plan: preferred, weg: wegParam, klick, abgebrochen } = await searchParams;
   const token = (await cookies()).get(setupCookieName(slug))?.value ?? '';
   // Tempo (17.11.2026): die drei Abfragen gleichzeitig statt nacheinander (Funktion in den USA, Datenbank in Europa)
   const [draft, fullCfg, ctx] = await Promise.all([getCheckoutDraft(slug, token), getConfig(), getCheckoutContext(slug)]);
@@ -135,7 +135,7 @@ export default async function SetupPage({
           </Link>
         </div>
         <p className="mt-8 text-sm text-slate-500">
-          <Link href={`/d/${slug}#uebernehmen`} className="underline-offset-4 hover:text-slate-900 hover:underline">
+          <Link href={`/d/${slug}`} className="underline-offset-4 hover:text-slate-900 hover:underline">
             ← Zurück zur Website
           </Link>
         </p>
@@ -153,6 +153,11 @@ export default async function SetupPage({
           lead="Nach der Zahlung bekommen Sie per E-Mail den Link für Ihre Angaben."
           back={{ href: back(), label: 'Anderen Weg wählen' }}
         />
+        {abgebrochen ? (
+          <p role="status" className="mb-5 rounded-lg bg-amber-50 p-4 text-sm">
+            Die Bezahlung wurde abgebrochen, es wurde nichts abgebucht. Sie können hier einfach erneut wählen.
+          </p>
+        ) : null}
         <TariffPicker slug={slug} options={quick} preferred={preferred} />
       </PublicShell>
     );

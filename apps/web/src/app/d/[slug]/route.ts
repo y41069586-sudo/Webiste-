@@ -138,8 +138,10 @@ async function serveDemo(req: Request, slug: string): Promise<Response> {
     // Upgrade only our purchase toolbar in already stored demos; business content stays untouched.
     .replace(
       /<a href="#uebernehmen" class="sw-demo-buy">[^<]*<\/a>/,
-      `<a href="/d/${slug}/uebernehmen" class="sw-demo-buy">Website übernehmen</a><a href="#uebernehmen" class="sw-demo-ask">Preise und Leistungen</a>`,
+      `<a href="/d/${slug}/uebernehmen" class="sw-demo-buy">Website übernehmen</a>`,
     )
+    // 19.11.2026: keine Preise mehr auf der Demo – der Knopf „Preise und Leistungen“ entfällt auch in gebauten Demos
+    .replaceAll('<a href="#uebernehmen" class="sw-demo-ask">Preise und Leistungen</a>', '')
     .replace('In Ruhe ansehen, direkt übernehmen.', 'Erst einrichten, dann kostenpflichtig bestellen.')
     .replace('Nach der Einmalzahlung ergänzen Sie Ihre Angaben.', 'Ihre vor der Zahlung gespeicherten Angaben werden übernommen.')
     .replaceAll(EXPIRES_PLACEHOLDER, label)

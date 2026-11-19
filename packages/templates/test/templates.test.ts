@@ -43,10 +43,9 @@ describe('Templates', () => {
         expect(html).toContain('<meta name="robots" content="noindex, nofollow, noarchive">');
         expect(html).toContain('Unverbindlicher Website-Entwurf');
         expect(html).toContain('Website übernehmen');
-        expect(html).toContain('Preise und Leistungen');
+        expect(html).not.toContain('Preise und Leistungen'); // 19.11.2026: Preise erst nach „Website übernehmen“
         expect(html).toContain('Erst einrichten, dann kostenpflichtig bestellen.');
         expect(html).toContain(`href="${demoInput(t.id, palette, t.group).demo!.checkoutUrl}" class="sw-demo-buy"`);
-        expect(html).toContain('href="#uebernehmen"');
         expect(html).toContain('Frage per WhatsApp');
         expect(html).toContain('https://wa.me/491701234567?text=');
         // Zwei gleichwertige Karten, Mindestlaufzeit neben den 49 €, Folgepreis sichtbar

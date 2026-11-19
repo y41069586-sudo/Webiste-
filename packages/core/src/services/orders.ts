@@ -158,7 +158,8 @@ async function orderedOrGone(slug: string, db: DbOrTx): Promise<CheckoutContext>
 }
 
 function checkoutCancelUrl(slug: string, plan: string): string {
-  return appUrl(`/d/${slug}?abgebrochen=1&plan=${encodeURIComponent(plan)}#uebernehmen`);
+  // 19.11.2026: zurück zur Tarifwahl (auf der Demo stehen keine Preise mehr)
+  return appUrl(`/einrichten/${slug}?weg=danach&abgebrochen=1&plan=${encodeURIComponent(plan)}`);
 }
 
 export type StartCheckoutResult =

@@ -4,7 +4,7 @@ import { StripePayment } from '../src/providers/payment/stripe';
 import { stripeV4Price } from '../src/config/stripe-v4-prices';
 
 /** Echte Stripe-Aufrufe (Live-Katalog, gefälschter HTTP-Client): Setup-Checkout und verzögerter Abostart. */
-function harness() {
+function harness(sessionMode: 'setup' | 'subscription' = 'setup') {
   const calls: { path: string; method: string; body: URLSearchParams }[] = [];
   const now = Math.floor(Date.now() / 1000);
   const p = new StripePayment({
@@ -22,8 +22,9 @@ function harness() {
       else if (u.pathname.startsWith('/v1/checkout/sessions/'))
         result = {
           id: 'cs_live_fixture',
-          mode: 'setup',
+          mode: sessionMode,
           status: 'complete',
+          subscription: sessionMode === 'subscription' ? 'sub_fixture' : null,
           metadata: { orderId: 'order_fixture' },
           customer: 'cus_fixture',
           setup_intent: {
@@ -36,9 +37,9 @@ function harness() {
       else
         result = {
           id: 'sub_fixture',
-          status: 'trialing',
+          status: 'active',
           customer: 'cus_fixture',
-          metadata: {},
+          metadata: sessionMode === 'subscription' ? { orderId: 'order_fixture' } : {},
           items: {
             data: [
               {
@@ -59,7 +60,7 @@ function harness() {
 }
 
 describe('Komplett über Stripe (Live-Katalog, ohne Netz)', () => {
-  it('Checkout im Modus setup: nichts abbuchen, keine Telefonabfrage, Bedingungen sichtbar', async () => {
+  it('Checkout als Abo: heute 0 €, Stichtag 7 Tage nach Bestellung, kein Testzeitraum, Bedingungen sichtbar', async () => {
     const { p, calls } = harness();
     await p.createCheckoutSession({
       orderId: 'order_fixture',
@@ -74,11 +75,14 @@ describe('Komplett über Stripe (Live-Katalog, ohne Netz)', () => {
       collect: { termsUrl: 'https://app.example/agb', termsVersion: '1', recurringTerms: true, submitNote: 'x' },
     });
     const b = calls.find((c) => c.path === '/v1/checkout/sessions' && c.method === 'POST')!.body;
-    expect(b.get('mode')).toBe('setup');
-    expect(b.get('currency')).toBe('eur');
-    expect(b.get('customer_creation')).toBe('always');
-    expect([...b.keys()].some((k) => k.startsWith('line_items'))).toBe(false);
-    expect([...b.keys()].some((k) => k.startsWith('phone_number_collection'))).toBe(false);
+    expect(b.get('mode')).toBe('subscription');
+    expect(b.get('line_items[0][price]')).toBe(stripeV4Price('komplett', false, 17900, 'eur', true));
+    expect(b.get('subscription_data[trial_period_days]')).toBeNull();
+    const anchor = Number(b.get('subscription_data[billing_cycle_anchor]'));
+    expect(Math.abs(anchor - (Math.floor(Date.now() / 1000) + 7 * 86400))).toBeLessThan(60);
+    expect(b.get('subscription_data[proration_behavior]')).toBe('none');
+    expect(b.get('subscription_data[metadata][orderId]')).toBe('order_fixture');
+    expect([...b.keys()].some((k) => k.startsWith('custom_fields'))).toBe(true); // wie Basis: Wunschdomain usw.
     expect(b.get('custom_text[submit][message]')).toMatch(/nichts abgebucht/);
     await expect(
       p.createCheckoutSession({
@@ -115,6 +119,36 @@ describe('Komplett über Stripe (Live-Katalog, ohne Netz)', () => {
     expect(create.get('default_payment_method')).toBe('pm_fixture');
     expect(Number(create.get('trial_end'))).toBe(Math.floor(firstChargeAt.getTime() / 1000));
     expect(create.get('metadata[minTermMonths]')).toBe('12');
+  });
+
+  it('Abo aus dem Checkout (seit 19.11.2026) wird übernommen, kein zweites Abo', async () => {
+    const { p, calls } = harness('subscription');
+    const sub = await p.startSavedSubscription({
+      orderId: 'order_fixture',
+      customerId: 'c1',
+      setupSessionId: 'cs_live_fixture',
+      tier: 'komplett',
+      amountCents: 17900,
+      liveAt: new Date(),
+      firstChargeAt: new Date(Date.now() + 7 * 86_400_000),
+      minTermMonths: 12,
+      idempotencyKey: 'v4-order-order_fixture',
+    });
+    expect(sub.id).toBe('sub_fixture');
+    expect(calls.some((c) => c.path === '/v1/subscriptions' && c.method === 'POST')).toBe(false);
+    const upd = calls.find((c) => c.path === '/v1/subscriptions/sub_fixture' && c.method === 'POST')!.body;
+    expect(upd.get('metadata[customerId]')).toBe('c1');
+    await expect(
+      p.startSavedSubscription({
+        orderId: 'anderer',
+        customerId: 'c1',
+        setupSessionId: 'cs_live_fixture',
+        tier: 'komplett',
+        amountCents: 17900,
+        liveAt: new Date(),
+        idempotencyKey: 'x',
+      }),
+    ).rejects.toThrow(/falsch zugeordnet/);
   });
 
   it('Kündigung in der Mindestlaufzeit setzt cancel_at auf deren Ende', async () => {
