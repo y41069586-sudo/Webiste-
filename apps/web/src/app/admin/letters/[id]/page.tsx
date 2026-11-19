@@ -143,7 +143,13 @@ export default async function LetterDetail({
               </form>
             </details>
           ) : null}
-          {letter.statusReason ? <Notice kind="warn">{letter.statusReason}</Notice> : null}
+          {letter.statusReason ? (
+            ['failed', 'cancelled'].includes(letter.status) ? (
+              <Notice kind="warn">{letter.statusReason}</Notice>
+            ) : (
+              <Notice kind="info">Prüfhinweis (kein Fehler): {letter.statusReason}</Notice>
+            )
+          ) : null}
           {['cancelled', 'failed'].includes(letter.status) && !letter.isTest ? (
             <div className="check-card">
               <p className="check-q">Brief wiederherstellen</p>

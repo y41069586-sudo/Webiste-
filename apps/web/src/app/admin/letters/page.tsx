@@ -175,8 +175,13 @@ export default async function LettersPage({
               <Td>{letter.isTest ? 'Testbrief' : (letter.sequence ?? 1) > 1 ? 'Erinnerung' : 'Erster Brief'}</Td>
               <Td>
                 <StatusBadge status={letter.status} />
+                {/* Rot nur bei echten Fehlern; sonst sind es Prüfhinweise (z. B. „Standardvorlage 5 …“), kein Problem */}
                 {letter.statusReason ? (
-                  <div className="max-w-sm text-xs text-red-700">{letter.statusReason.slice(0, 320)}</div>
+                  ['failed', 'cancelled'].includes(letter.status) ? (
+                    <div className="max-w-sm text-xs text-red-700">{letter.statusReason.slice(0, 320)}</div>
+                  ) : (
+                    <div className="max-w-sm text-xs text-slate-500">Prüfhinweis: {letter.statusReason.slice(0, 200)}</div>
+                  )
                 ) : null}
                 {demoSlug ? (
                   <a className="text-xs text-brand-700 hover:underline" href={`/d/${demoSlug}`} target="_blank" rel="noreferrer">

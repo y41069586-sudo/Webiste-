@@ -1931,3 +1931,9 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   Müller; Status zurück auf `letter_sent`, je ein `audit_log`-Eintrag `test_events_removed` mit vorherigem Status und
   Anzahl. Eigene Test-Betriebe (Krawczyk, Uluca) unverändert. Abgelaufene Bestellungen (4×, nie bezahlt) bleiben als
   Verlauf. Funnel-Sichten neu berechnet: 0 echte Scans.
+- 19.11.2026 Betreiber: „Briefe haben immer roten Fehlertext“. Ursache: Admin-Briefliste zeigte `statusReason` immer rot;
+  bei bestandenen Briefen steht dort nur der Prüfhinweis (`reviewReasons`, z. B. „Standardvorlage 5: feste Texte …“,
+  „Zwei Textversuche nicht bestanden; Ersatzfassung individuell prüfen“ – 32 von 59 Briefen nutzten die geprüfte
+  Ersatzfassung). Jetzt rot nur bei `failed`/`cancelled`, sonst grau „Prüfhinweis“ (Liste und Detailseite).
+  Die 6-stündliche Meldung „Öffentliche Website nicht erreichbar“ kam vom Kaltstart (Prüfabruf /quellen, 2 × 6 s
+  Zeitlimit) und sollte mit dem Wecker (jede Minute) verschwinden.
