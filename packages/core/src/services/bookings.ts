@@ -253,6 +253,7 @@ export async function requestBooking(
     input.name.trim().length > 120 ||
     !MAIL_RE.test(email) ||
     email.length > 254 ||
+    input.phone.replace(/\D/g, '').length < 6 ||
     input.phone.length > 40 ||
     input.message.trim().length < 3 ||
     input.message.length > 2000 ||
@@ -293,7 +294,7 @@ export async function requestBooking(
           endsAt: end,
           visitorName: clean(input.name, 120),
           visitorEmail: email,
-          visitorPhone: clean(input.phone, 40) || null,
+          visitorPhone: clean(input.phone, 40),
           message: input.message.trim().slice(0, 2000) || null,
           businessTokenHash: sha256(businessToken),
           visitorTokenHash: sha256(visitorToken),

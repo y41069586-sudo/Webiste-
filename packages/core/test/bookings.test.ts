@@ -201,6 +201,8 @@ describe('Buchung, Bestätigung, Absage', () => {
     expect(await requestBooking(site.formKey, input(slot, { email: '' }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
     expect(await requestBooking(site.formKey, input(slot, { consent: false }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
     expect(await requestBooking(site.formKey, input(slot, { message: '  ' }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
+    expect(await requestBooking(site.formKey, input(slot, { phone: '' }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
+    expect(await requestBooking(site.formKey, input(slot, { phone: '12' }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
     expect(sent).toHaveLength(0);
   });
 

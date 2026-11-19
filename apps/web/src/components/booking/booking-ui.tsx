@@ -28,6 +28,15 @@ export function Card({ children }: { children: ReactNode }) {
   return <section className="rounded-lg border border-[#e2e2df] bg-white p-5 sm:p-7">{children}</section>;
 }
 
+const BOOKING_CSS = `
+html{scroll-behavior:smooth}
+.bk-next{position:sticky;bottom:16px;z-index:5;display:flex;align-items:center;justify-content:center;gap:10px;margin:12px auto 0;width:max-content;max-width:100%;min-height:48px;padding:12px 22px;border-radius:999px;background:#1b1c1e;color:#fff;font-weight:600;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.18);opacity:0;transform:translateY(10px);pointer-events:none;visibility:hidden;transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s}
+.bk-form:has(input[name=start]:checked) .bk-next{opacity:1;transform:none;pointer-events:auto;visibility:visible;transition:opacity .25s ease,transform .25s ease}
+.bk-arrow{display:inline-block;animation:bk-bob 1.6s ease-in-out infinite}
+@keyframes bk-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.bk-next{transition:none}.bk-arrow{animation:none}}
+`;
+
 const input =
   'block w-full rounded-md border border-[#8a8a84] bg-white px-3 py-3 text-base text-[#1b1c1e] focus:border-[#1b1c1e] focus:outline-none focus:ring-2 focus:ring-[#1b1c1e]/20 disabled:bg-[#f1f1ee]';
 
@@ -50,7 +59,9 @@ export function BookingForm({
 }) {
   // Vorschau: alles bedienbar (Zeit wählen, Felder ausfüllen), nur Absenden ist gesperrt
   return (
-    <form method="post" action={action} acceptCharset="utf-8" className="space-y-7">
+    <form method="post" action={action} acceptCharset="utf-8" className="bk-form space-y-7">
+      {/* Nach der Zeitwahl erscheint unten ein Pfeil, der sanft zu den Angaben scrollt (nur CSS, kein JavaScript) */}
+      <style>{BOOKING_CSS}</style>
       {error ? (
         <p role="alert" className="rounded-md border border-[#b3261e] bg-[#fdf1f0] px-4 py-3 text-[#7a1712]">
           {error}
@@ -86,9 +97,13 @@ export function BookingForm({
             ))}
           </div>
         )}
+        <a href="#angaben" className="bk-next" aria-label="Weiter zu Ihren Angaben">
+          Weiter zu Ihren Angaben
+          <span aria-hidden="true" className="bk-arrow">↓</span>
+        </a>
       </fieldset>
 
-      <fieldset className="space-y-4">
+      <fieldset id="angaben" className="scroll-mt-4 space-y-4">
         <legend className="mb-2 text-lg font-semibold">2. Ihre Angaben</legend>
         {services.length ? (
           <div>
@@ -117,9 +132,21 @@ export function BookingForm({
         </div>
         <div>
           <label htmlFor="b-phone" className="mb-1 block font-medium">
-            Telefon <span className="font-normal text-[#55554f]">(optional)</span>
+            Telefon
           </label>
-          <input id="b-phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" maxLength={40} className={input} />
+          <input
+            id="b-phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            inputMode="tel"
+            required
+            minLength={6}
+            maxLength={40}
+            title="Bitte eine Telefonnummer mit mindestens 6 Ziffern angeben."
+            className={input}
+          />
+          <p className="mt-1 text-sm text-[#55554f]">Für Rückfragen zum Termin.</p>
         </div>
         <div>
           <label htmlFor="b-message" className="mb-1 block font-medium">
