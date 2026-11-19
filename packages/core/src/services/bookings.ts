@@ -254,6 +254,7 @@ export async function requestBooking(
     !MAIL_RE.test(email) ||
     email.length > 254 ||
     input.phone.length > 40 ||
+    input.message.trim().length < 3 ||
     input.message.length > 2000 ||
     input.service.length > 120 ||
     (input.message.match(/https?:\/\//g) ?? []).length > 2 ||
@@ -380,7 +381,9 @@ export async function bookingForVisitor(token: string): Promise<BookingView | nu
   return viewFor(await getDb().query.bookings.findFirst({ where: eq(bookings.visitorTokenHash, sha256(token)) }));
 }
 
-export type DecisionResult = { ok: true; status: BookingStatus } | { ok: false; reason: 'not_found' | 'not_open' | 'expired' | 'past' };
+export type DecisionResult =
+  | { ok: true; status: BookingStatus }
+  | { ok: false; reason: 'not_found' | 'not_open' | 'expired' | 'past' | 'reason_required' };
 
 /**
  * Entscheidung des Betriebs (Bestätigen / Ablehnen / bestätigten Termin absagen). Nur per POST aus der Aktionsseite,
@@ -401,6 +404,8 @@ export async function decideBooking(
   if (action === 'cancel' ? cur.status !== 'confirmed' : cur.status !== 'requested') return { ok: false, reason: 'not_open' };
   if (cur.startsAt <= now) return { ok: false, reason: 'past' };
   if (action !== 'cancel' && cur.requestExpiresAt < now) return { ok: false, reason: 'expired' };
+  // Ablehnen und Absagen nur mit Grund (Betreiber, 19.11.2026): der Besucher erfährt, warum
+  if (action !== 'confirm' && clean(note, 500).length < 3) return { ok: false, reason: 'reason_required' };
   const db = getDb();
   const [row] = await db
     .update(bookings)

@@ -200,6 +200,7 @@ describe('Buchung, Bestätigung, Absage', () => {
     const slot = berlinToUtc(2026, 11, 24, 10, 0);
     expect(await requestBooking(site.formKey, input(slot, { email: '' }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
     expect(await requestBooking(site.formKey, input(slot, { consent: false }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
+    expect(await requestBooking(site.formKey, input(slot, { message: '  ' }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
     expect(sent).toHaveLength(0);
   });
 
@@ -234,6 +235,8 @@ describe('Buchung, Bestätigung, Absage', () => {
     await requestBooking(site.formKey, input(slot), meta, { now: NOW });
     const token = tokenFrom(sent[0]!, '/termin/aktion');
     sent.length = 0;
+    expect(await decideBooking(token, 'decline', '', { now: NOW })).toEqual({ ok: false, reason: 'reason_required' });
+    expect(sent).toHaveLength(0);
     expect(await decideBooking(token, 'decline', 'Gern Donnerstag', { now: NOW })).toEqual({ ok: true, status: 'declined' });
     expect(sent[0]!.subject).toContain('abgesagt');
     expect(sent[0]!.text).toContain('Gern Donnerstag');

@@ -48,7 +48,7 @@ export function BookingForm({
   preview?: boolean;
   error?: string | null;
 }) {
-  const dis = preview;
+  // Vorschau: alles bedienbar (Zeit wählen, Felder ausfüllen), nur Absenden ist gesperrt
   return (
     <form method="post" action={action} acceptCharset="utf-8" className="space-y-7">
       {error ? (
@@ -56,7 +56,7 @@ export function BookingForm({
           {error}
         </p>
       ) : null}
-      <fieldset className="space-y-3" disabled={dis}>
+      <fieldset className="space-y-3">
         <legend className="mb-2 text-lg font-semibold">1. Zeit wählen</legend>
         <p className="text-sm text-[#55554f]">Termine dauern etwa {slotMinutes} Minuten. Angezeigt werden nur freie Zeiten.</p>
         {days.length === 0 ? (
@@ -64,18 +64,20 @@ export function BookingForm({
         ) : (
           <div className="divide-y divide-[#e2e2df] rounded-md border border-[#e2e2df]">
             {days.map((d, i) => (
-              <details key={d.date} open={i === 0} className="group">
-                <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between px-4 py-3 font-medium">
+              // name: nur ein Tag gleichzeitig aufgeklappt (exklusives Akkordeon); die Uhrzeit ist ein Radio-Knopf → immer genau eine Auswahl
+              <details key={d.date} name="tag" open={i === 0} className="group">
+                <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-medium group-has-[:checked]:bg-[#f1f1ee]">
                   <span>{d.label}</span>
-                  <span className="text-sm text-[#55554f]">{d.slots.length} frei</span>
+                  <span className="text-sm text-[#55554f] group-has-[:checked]:hidden">{d.slots.length} frei</span>
+                  <span className="hidden rounded bg-[#1b1c1e] px-2 py-0.5 text-sm text-white group-has-[:checked]:inline">✓ gewählt</span>
                 </summary>
                 <div className="flex flex-wrap gap-2 px-4 pb-4">
-                  {d.slots.map((s, j) => (
+                  {d.slots.map((s) => (
                     <label
                       key={s.start}
                       className="cursor-pointer rounded-md border border-[#8a8a84] px-4 py-2.5 text-base has-[:checked]:border-[#1b1c1e] has-[:checked]:bg-[#1b1c1e] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#1b1c1e]/40"
                     >
-                      <input type="radio" name="start" value={s.start} required className="sr-only" defaultChecked={preview && i === 0 && j === 0} />
+                      <input type="radio" name="start" value={s.start} required className="sr-only" />
                       {s.label} Uhr
                     </label>
                   ))}
@@ -86,7 +88,7 @@ export function BookingForm({
         )}
       </fieldset>
 
-      <fieldset className="space-y-4" disabled={dis}>
+      <fieldset className="space-y-4">
         <legend className="mb-2 text-lg font-semibold">2. Ihre Angaben</legend>
         {services.length ? (
           <div>
@@ -121,9 +123,18 @@ export function BookingForm({
         </div>
         <div>
           <label htmlFor="b-message" className="mb-1 block font-medium">
-            Worum geht es? <span className="font-normal text-[#55554f]">(optional)</span>
+            Grund des Termins
           </label>
-          <textarea id="b-message" name="message" rows={3} maxLength={2000} className={input} />
+          <textarea
+            id="b-message"
+            name="message"
+            rows={3}
+            minLength={3}
+            maxLength={2000}
+            required
+            className={input}
+            placeholder="z. B. Ziegel nach Sturm locker, Besichtigung für neues Dach"
+          />
         </div>
         <div className="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
           <label htmlFor="b-website">Website</label>
@@ -146,11 +157,12 @@ export function BookingForm({
       <div className="space-y-2">
         <button
           type="submit"
-          disabled={dis}
+          disabled={preview}
           className="min-h-12 w-full rounded-md bg-[#1b1c1e] px-6 py-3 text-base font-semibold text-white hover:bg-[#33342f] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
           Termin anfragen
         </button>
+        {preview ? <p className="text-sm font-medium">Vorschau: Absenden ist im Entwurf gesperrt.</p> : null}
         <p className="text-sm text-[#55554f]">
           Der Termin ist erst verbindlich, wenn der Betrieb ihn bestätigt. Sie erhalten dazu eine E-Mail.
         </p>

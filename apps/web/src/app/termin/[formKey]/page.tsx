@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Termin anfragen', robots: { index: f
 
 const ERRORS: Record<string, string> = {
   taken: 'Diese Zeit wurde gerade vergeben. Bitte wählen Sie eine andere Zeit.',
-  invalid: 'Bitte wählen Sie eine Zeit, geben Sie Name und E-Mail an und bestätigen Sie den Datenschutzhinweis.',
+  invalid: 'Bitte wählen Sie eine Zeit, geben Sie Name, E-Mail und den Grund des Termins an und bestätigen Sie den Datenschutzhinweis.',
   rate_limited: 'Sie haben in kurzer Zeit mehrere Anfragen gesendet. Bitte versuchen Sie es später erneut.',
   unavailable: 'Die Anfrage konnte gerade nicht zugestellt werden. Bitte versuchen Sie es später erneut oder rufen Sie den Betrieb an.',
 };

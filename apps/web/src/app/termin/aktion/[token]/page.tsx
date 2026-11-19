@@ -22,6 +22,7 @@ const FAIL: Record<string, string> = {
   expired: 'Die Anfrage ist verfallen (48 Stunden ohne Entscheidung). Die Person wurde informiert.',
   past: 'Der Termin liegt in der Vergangenheit.',
   not_found: 'Diese Anfrage gibt es nicht (mehr).',
+  reason_required: 'Bitte geben Sie einen Grund an – die Person erhält ihn mit der Absage.',
 };
 
 const btn = 'min-h-12 rounded-md px-6 py-3 text-base font-semibold';
@@ -96,16 +97,16 @@ export default async function BookingAction({
             </form>
             <form method="post" action={action} className="space-y-3 rounded-md border border-[#e2e2df] p-4">
               <input type="hidden" name="a" value="decline" />
-              <label htmlFor="n-no" className="block font-medium">Grund oder Alternative <span className="font-normal text-[#55554f]">(optional)</span></label>
-              <textarea id="n-no" name="note" rows={2} maxLength={500} className={input} placeholder="z. B. Gern am Donnerstag ab 14 Uhr" />
+              <label htmlFor="n-no" className="block font-medium">Grund oder Alternative</label>
+              <textarea id="n-no" name="note" rows={2} minLength={3} maxLength={500} required className={input} placeholder="z. B. Gern am Donnerstag ab 14 Uhr" />
               <button type="submit" className={`${btn} w-full border-[1.5px] border-[#1b1c1e] bg-white text-[#1b1c1e] hover:bg-[#f1f1ee]`}>Ablehnen</button>
             </form>
           </div>
         ) : b.status === 'confirmed' ? (
           <form method="post" action={action} className="space-y-3 rounded-md border border-[#e2e2df] p-4">
             <input type="hidden" name="a" value="cancel" />
-            <label htmlFor="n-c" className="block font-medium">Termin doch absagen? Grund <span className="font-normal text-[#55554f]">(optional)</span></label>
-            <textarea id="n-c" name="note" rows={2} maxLength={500} className={input} />
+            <label htmlFor="n-c" className="block font-medium">Termin doch absagen? Grund</label>
+            <textarea id="n-c" name="note" rows={2} minLength={3} maxLength={500} required className={input} />
             <button type="submit" className={`${btn} border-[1.5px] border-[#b3261e] bg-white text-[#b3261e] hover:bg-[#fdf1f0]`}>Termin absagen</button>
           </form>
         ) : null}
