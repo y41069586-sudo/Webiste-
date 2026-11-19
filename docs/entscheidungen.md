@@ -1917,3 +1917,6 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
 - Nach Deploy `6afe2d1f` (Transaction-Pooler aktiv, keine Fehler): Übernehmen ~0,68 s, Einrichtung ~1,25 s mit 4 s Pause,
   0,6 s ohne Pause. Ursache: 5 s Leerlauf-Grenze erzwang Neuverbindung. Leerlauf in Serverfunktionen jetzt 120 s.
 
+- 19.11.2026 Spar-Wecker: Betreiber stellt Wecker auf jede Minute rund um die Uhr. Gemessen: Weckruf auf /q/warm
+  (404-Seite) ~0,5 s je Aufruf ≈ 70 Credits/Monat. Neu: eigene Route `/wach` ohne Datenbank und ohne Seitenaufbau
+  (204, nie gecacht); Worker und Demo-Weckpixel nutzen sie. Erwartung 15–25 Credits/Monat, nach Deploy nachmessen.

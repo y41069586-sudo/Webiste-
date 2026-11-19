@@ -3,15 +3,17 @@ import { logger } from '../logger';
 
 /**
  * Warmhalten der QR-Strecke (17.11.2026): Ohne Aufrufe schläft die Serverfunktion der Web-App ein, der erste Scan
- * danach brauchte ~11 s. Der Worker ruft deshalb regelmäßig /q/warm direkt auf der Web-App auf: dieselbe
+ * danach brauchte ~11 s. Der Worker ruft deshalb regelmäßig /wach (früher /q/warm) direkt auf der Web-App auf: dieselbe
  * Serverfunktion wie ein Scan, aber der Token ist absichtlich zu kurz → 404 ohne Datenbankabfrage.
  * Kosten (Netlify Free, Credits): Die erste Fassung (über TRACK_DOMAIN, mit Datenbankabfrage) lief ~1,7 s bei 1 GB
  * ≈ 50 Credits/Monat; so nur Bruchteile einer Sekunde. Zählt nie als Scan (Token ungültig, Bot-Kennung).
  */
 export const KEEP_WARM_TOKEN = 'warm';
+/** Spar-Wecker (19.11.2026): eigene Adresse ohne Datenbank und ohne Seitenaufbau, antwortet sofort mit 204. */
+export const KEEP_WARM_PATH = '/wach';
 
 export function keepWarmUrl(): string | null {
-  const url = appUrl(`/q/${KEEP_WARM_TOKEN}`);
+  const url = appUrl(KEEP_WARM_PATH);
   // lokal/Tests: nichts aufwecken
   if (!url.startsWith('https://')) return null;
   return url;
@@ -61,7 +63,7 @@ export function startKeepWarm(fetchFn: typeof fetch = fetch): () => void {
     void pingKeepWarm(fetchFn)
       .then((r) => {
         if (!r) return;
-        // 404 ist das erwartete Ergebnis (ungültiger Token); alles ab 500 heißt: Strecke kaputt
+        // 204 ist das erwartete Ergebnis (404 nur, solange die Web-App /wach noch nicht kennt); ab 500: kaputt
         if (r.status >= 500) logger.warn({ status: r.status, ms: r.ms }, 'Warmhalten: QR-Strecke antwortet mit Fehler');
         else if (r.ms > 8000 && !slowLogged) {
           slowLogged = true;

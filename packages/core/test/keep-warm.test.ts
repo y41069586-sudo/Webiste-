@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resetEnvCache } from '../src/config/env';
-import { KEEP_WARM_TOKEN, keepWarmActiveAt, keepWarmUrl, pingKeepWarm } from '../src/services/keep-warm';
+import { KEEP_WARM_PATH, KEEP_WARM_TOKEN, keepWarmActiveAt, keepWarmUrl, pingKeepWarm } from '../src/services/keep-warm';
 
 const original = process.env.APP_URL;
 afterEach(() => {
@@ -14,7 +14,8 @@ describe('Warmhalten der QR-Strecke', () => {
     expect(KEEP_WARM_TOKEN).not.toMatch(/^[A-Za-z0-9]{16,64}$/);
     process.env.APP_URL = 'https://seitenwerkworld.netlify.app/';
     resetEnvCache();
-    expect(keepWarmUrl()).toBe(`https://seitenwerkworld.netlify.app/q/${KEEP_WARM_TOKEN}`);
+    expect(KEEP_WARM_PATH).toBe('/wach');
+    expect(keepWarmUrl()).toBe('https://seitenwerkworld.netlify.app/wach');
   });
 
   it('weckt lokal nichts auf', async () => {

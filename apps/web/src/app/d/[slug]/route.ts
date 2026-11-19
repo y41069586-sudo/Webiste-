@@ -25,7 +25,7 @@ export const dynamic = 'force-dynamic';
 
 const EXPIRES_PLACEHOLDER = '__WBM_EXPIRES_LABEL__';
 const WAKE_PIXEL =
-  '<img src="/q/warm" alt="" width="1" height="1" aria-hidden="true" loading="eager" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">';
+  '<img src="/wach" alt="" width="1" height="1" aria-hidden="true" loading="eager" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">';
 
 /**
  * Messung ohne Cookies (B6.1): Verweildauer, Scrolltiefe und angeklickte Abschnitte per sendBeacon an
@@ -154,7 +154,7 @@ async function serveDemo(req: Request, slug: string): Promise<Response> {
     .replace('</body>', cfg.metrics.engagementBeacon ? `<script>${BEACON_SCRIPT}</script></body>` : '</body>')
     // Tempo (17.11.2026): Die Demo kommt aus dem Netlify-Zwischenspeicher, die Serverfunktion schläft dabei weiter.
     // Ein unsichtbares Bild weckt sie, solange der Betrieb liest – „Übernehmen“ antwortet dann ohne Kaltstart.
-    // Gleiche Adresse, keine Kennung, nichts wird gespeichert (/q/warm antwortet ohne Datenbank mit 404).
+    // Gleiche Adresse, keine Kennung, nichts wird gespeichert (/wach antwortet ohne Datenbank sofort mit 204).
     .replace('</body>', `${WAKE_PIXEL}</body>`);
   // Netlify-Zwischenspeicher (17.11.2026): Scans öffnen die Demo sofort statt nach dem Kaltstart der Funktion.
   // Varianten nur nach start/plan/abgebrochen; Browser speichern weiterhin nicht.
