@@ -65,7 +65,7 @@ export function SetupUploads({
     }
   }
   return (
-    <section className="mb-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="setup-images">
+    <section className="card-site mb-6 p-6 sm:p-7" aria-labelledby="setup-images">
       <h2 id="setup-images" className="text-lg font-semibold">
         Logo und eigene Fotos <span className="text-sm font-normal text-slate-500">(optional)</span>
       </h2>
@@ -77,7 +77,7 @@ export function SetupUploads({
         <label className="text-sm font-medium">
           Logo
           <input
-            className="mt-2 block w-full text-sm"
+            className="file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:px-4 file:py-2.5 file:font-semibold"
             type="file"
             accept="image/jpeg,image/png,image/webp"
             disabled={busy}
@@ -87,7 +87,7 @@ export function SetupUploads({
         <label className="text-sm font-medium">
           Fotos
           <input
-            className="mt-2 block w-full text-sm"
+            className="file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:px-4 file:py-2.5 file:font-semibold"
             type="file"
             multiple
             accept="image/jpeg,image/png,image/webp"

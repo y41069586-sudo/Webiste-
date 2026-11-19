@@ -17,10 +17,12 @@ import {
   v4TierLabel,
 } from '@wbm/core';
 import { PublicShell, PublicCard } from '@/components/public/shell';
+import { StepHeader } from '@/components/public/steps';
 import { PaymentForm } from './payment-form';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Angaben und Tarif prüfen', robots: { index: false, follow: false } };
-const euro = (c: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(c / 100);
+const euro = (c: number) =>
+  new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: c % 100 ? 2 : 0 }).format(c / 100);
 export default async function ReviewSetup({
   params,
   searchParams,
@@ -41,7 +43,7 @@ export default async function ReviewSetup({
     ctx.cfg.offers.activeVersion === 'v4'
       ? v4OfferedTiers(ctx.cfg).map((plan) => ({
           plan,
-          title: `SeitenWerk ${v4TierLabel(plan)}`,
+          title: v4TierLabel(plan),
           price:
             plan === 'komplett'
               ? `0 € Einrichtung · ${euro(v4Offer(plan).monthlyCents)}/Monat, erste Abbuchung 7 Tage nach der Bestellung · 12 Monate Mindestlaufzeit`
@@ -68,12 +70,13 @@ export default async function ReviewSetup({
         ];
   return (
     <PublicShell company={cfg.sender.company}>
-      <p className="text-sm font-medium text-slate-500">1. Einrichten · 2. Prüfen · 3. Zahlung</p>
-      <h1 className="mt-3 text-3xl font-semibold">Alles vorbereitet. Prüfen Sie Ihre Angaben.</h1>
-      <p className="mt-3 mb-6 text-slate-700">
-        Ihre Einrichtung bleibt gespeichert. Nach bestätigter Zahlung übernehmen wir diese Angaben in Ihre Website und bereiten
-        die Vorschau zur Freigabe vor.
-      </p>
+      <StepHeader
+        steps={['Angaben', 'Prüfen', 'Bezahlen']}
+        current={1}
+        title="Fast geschafft"
+        lead="Kurz prüfen, Tarif wählen, bezahlen. Online geht die Website erst nach Ihrer Freigabe."
+        back={{ href: `/einrichten/${slug}?weg=davor`, label: 'Angaben bearbeiten' }}
+      />
       {sp.abgebrochen ? (
         <p role="status" className="mb-5 rounded-lg bg-amber-50 p-4">
           Die Zahlung wurde verlassen. Ihre Einrichtung ist weiterhin gespeichert; es wird keine neue Zahlung ohne Ihre
@@ -81,17 +84,17 @@ export default async function ReviewSetup({
         </p>
       ) : null}
       <PublicCard>
-        <h2 className="text-lg font-semibold">Ihre Einrichtung</h2>
-        <dl className="mt-4 space-y-3 text-sm">
+        <h2 className="font-tight text-lg font-semibold tracking-[-0.02em]">Ihre Angaben</h2>
+        <dl className="mt-4 grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
           <div>
-            <dt className="font-medium">Betrieb</dt>
+            <dt className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Betrieb</dt>
             <dd>
               {data.business.name}, {data.business.street} {data.business.houseNumber}, {data.business.postalCode}{' '}
               {data.business.city}
             </dd>
           </div>
           <div>
-            <dt className="font-medium">Rechnung und Bestellbestätigung</dt>
+            <dt className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Rechnung und Bestellbestätigung</dt>
             <dd>
               {data.impressum.company} · {data.impressum.owner}
               <br />
@@ -101,18 +104,18 @@ export default async function ReviewSetup({
             </dd>
           </div>
           <div>
-            <dt className="font-medium">Kontakt- und Terminanfragen gehen an</dt>
+            <dt className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Kontakt- und Terminanfragen gehen an</dt>
             <dd>{data.formTargetEmail}</dd>
           </div>
           <div>
-            <dt className="font-medium">Wunschdomain</dt>
+            <dt className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Wunschdomain</dt>
             <dd>
-              {data.domain} (Verfügbarkeit wird vor der Zahlung geprüft; Registrierung nach Zahlung und den erforderlichen
-              Freigaben.)
+              {data.domain}
+              <span className="block text-xs text-slate-500">Registrierung erst nach Zahlung und Ihrer Freigabe.</span>
             </dd>
           </div>
           <div>
-            <dt className="font-medium">Inhalte</dt>
+            <dt className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Inhalte</dt>
             <dd>
               {data.texts.headline}
               <br />
@@ -120,7 +123,7 @@ export default async function ReviewSetup({
             </dd>
           </div>
           <div>
-            <dt className="font-medium">Logo und Fotos</dt>
+            <dt className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Logo und Fotos</dt>
             <dd>
               {d.assetKeys.logo ? 'Logo vorhanden' : 'Kein Logo hochgeladen'} ·{' '}
               {Object.keys(d.assetKeys).filter((k) => k.startsWith('photo:')).length} Fotos
@@ -139,9 +142,9 @@ export default async function ReviewSetup({
             ))}
           </div>
         ) : null}
-        <details className="mt-5">
-          <summary className="cursor-pointer text-sm font-medium underline">
-            Texte, Öffnungszeiten und rechtliche Angaben vollständig prüfen
+        <details className="mt-6 border-t border-slate-200 pt-4">
+          <summary className="text-brand-700 cursor-pointer text-sm font-semibold">
+            Alle Texte, Öffnungszeiten und rechtlichen Angaben anzeigen
           </summary>
           <div className="mt-4 space-y-4 whitespace-pre-wrap break-words text-sm">
             <p>
@@ -193,12 +196,11 @@ export default async function ReviewSetup({
         </details>
       </PublicCard>
       <PaymentForm slug={slug} fingerprint={setupFingerprint(data, d.assetKeys)} options={options} />
-      <p className="mt-6 text-sm text-slate-600">
-        Fragen zu Ihrer Einrichtung?{' '}
+      <p className="mt-6 text-sm text-slate-500">
+        Fragen?{' '}
         <a className="underline" href={`mailto:${cfg.sender.email}`}>
           {cfg.sender.email}
         </a>
-        . Die Veröffentlichung erfolgt erst nach Ihrer Freigabe. Der Monatstarif startet erst nach bestätigtem Go-Live.
       </p>
     </PublicShell>
   );

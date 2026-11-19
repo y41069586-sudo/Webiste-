@@ -614,7 +614,7 @@ export function OnboardingForm({ token, initial, photos, setupAction, externalPe
               : pending
                 ? 'Einen Moment …'
                 : setupAction
-                  ? 'Angaben übernehmen und weiter'
+                  ? 'Weiter: Tarif wählen und prüfen →'
                   : 'Angaben absenden – Vorschau erstellen'}
           </button>
         </div>

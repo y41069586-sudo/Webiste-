@@ -1943,3 +1943,9 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   dem Gruß). Nur Systemschriften (Georgia/Systemschrift) – keine Google Fonts (IP-Übertragung an Google), nur
   Inline-Styles und Tabellen, kein Tracking. Alle Kunden- und Betreiber-Mails mit eigener Überschrift.
   Vorschaubilder: `reports/mail-design/`.
+- 19.11.2026 Kauf-Strecke nach „Website übernehmen“ neu (Betreiber: „richtig clean“, „nicht beides verfügbar“):
+  `/einrichten/{slug}` zeigt erst nur die Wahl (zwei Karten). `?weg=danach`: Tarifkarten → Stripe → Angaben per Mail.
+  `?weg=davor`: Formular → Prüfseite (Zusammenfassung, Tarif, Häkchen) → Stripe. Fortschrittsanzeige je Weg.
+  Eine begonnene Einrichtung (`draft.touched`) führt immer zum Weg „Angaben zuerst“, der andere Weg ist dann nicht
+  mehr erreichbar. „Empfohlen“ statt „Beliebt“ (keine belegten Verkaufszahlen, § 5 UWG). Mail-Knopf „Stand ansehen“.
+  Lokal mit Mock-Zahlung durchgeklickt: beide Wege enden auf der Bezahlseite. Bilder: `reports/kauf-strecke/`.

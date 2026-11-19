@@ -241,7 +241,7 @@ export function orderConfirmationEmail(
       {
         button: {
           href: d.onboardingUrl,
-          label: d.prepared ? 'Einrichtung ansehen' : 'Angaben eintragen',
+          label: d.prepared ? 'Stand ansehen' : 'Angaben eintragen',
         },
       },
       {
