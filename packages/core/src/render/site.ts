@@ -506,14 +506,19 @@ export type DeployResult = 'deployed' | 'awaiting_domain_approval' | 'skipped' |
 
 /** Real registrar writes require a paid live order; a preview approval or mock/test payment is insufficient. */
 function assertPaidLiveDomainOrder(order: typeof orders.$inferSelect | undefined) {
+  // Komplett (0 € Einrichtung): statt Einmalzahlung zählt das bestätigte Live-Abo aus dem Checkout (19.11.2026)
+  const komplettActive =
+    order?.plan === 'komplett' &&
+    order.amountCents === 0 &&
+    Boolean(order.stripeSubscriptionId?.startsWith('sub_')) &&
+    ['active', 'trialing'].includes(order.subscriptionStatus ?? '');
   if (
     !order ||
     order.provider !== 'stripe' ||
     order.paymentMode !== 'live' ||
     order.status !== 'paid' ||
     !order.paidAt ||
-    !order.stripePaymentIntent?.startsWith('pi_') ||
-    order.amountCents <= 0 ||
+    (!komplettActive && (!order.stripePaymentIntent?.startsWith('pi_') || order.amountCents <= 0)) ||
     order.refundedCents > 0 ||
     order.pendingRefundCents > 0 ||
     order.endedAt

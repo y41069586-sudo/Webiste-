@@ -1974,3 +1974,9 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
 - **Hinweis Währung:** Stripe „Adaptive Pricing“ zeigt Besuchern aus dem Ausland ihre Währung (Test aus den USA: $);
   in Deutschland erscheint EUR. Abschalten nur im Stripe-Dashboard.
 - **Laden:** `loading.tsx` für `/einrichten/[slug]` und `/pruefen` – Gerüst erscheint sofort beim Klick.
+- **Domainkauf bei Komplett:** Die Kaufsperre verlangte eine Einmalzahlung (PaymentIntent, Betrag > 0) – bei Komplett
+  (0 €) wäre der Domainkauf nach der Freigabe immer gescheitert. Jetzt reicht bei Komplett ein laufendes Live-Abo
+  (`sub_…`, Status active/trialing). Ohne laufendes Abo bleibt der Kauf gesperrt (Tests).
+- **Ablauf nach Zahlung geprüft:** Angaben → Claude überarbeitet Texte (bei Fehler Übernahme ohne KI) → Vorschau-Mail
+  → Freigabe durch Kunden → Betreiber bekommt Mail „Domainkauf freigeben“ → ein Klick: INWX registriert auf den Kunden,
+  DNS zu Netlify, Upload, Live-Check bis SSL steht → Übergabe-Mail. Einziger Handgriff des Betreibers: der Klick.

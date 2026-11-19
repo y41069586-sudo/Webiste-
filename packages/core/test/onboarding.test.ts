@@ -664,6 +664,49 @@ describe('Onboarding → Vorschau → Freigabe → Veröffentlichung', () => {
     }
   });
 
+  it.each([
+    { sub: 'active', ok: true },
+    { sub: 'trialing', ok: true },
+    { sub: 'canceled', ok: false },
+    { sub: null, ok: false },
+  ])('Komplett (0 €, Live-Abo $sub): Domainkauf nur mit laufendem Abo', async ({ sub, ok }) => {
+    const { customer } = await paidCustomer(),
+      db = getDb();
+    await db
+      .update(orders)
+      .set({
+        provider: 'stripe',
+        paymentMode: 'live',
+        paidAt: new Date(),
+        plan: 'komplett',
+        amountCents: 0,
+        stripePaymentIntent: null,
+        stripeSubscriptionId: sub ? 'sub_live_fixture' : null,
+        subscriptionStatus: sub,
+      })
+      .where(eq(orders.id, customer.orderId));
+    await updateConfig({ switches: { autoRegisterDomains: true } }, 'test');
+    const site = await ensureSiteForCustomer(customer.id);
+    await db.update(sites).set({ status: 'approved', version: 1 }).where(eq(sites.id, site.id));
+    const original = getProviders(),
+      fakeRegistrar = Object.assign(new MockRegistrar(), { name: 'inwx' });
+    const register = vi.spyOn(fakeRegistrar, 'registerDomain');
+    setProviders({ registrar: fakeRegistrar });
+    try {
+      if (ok) {
+        expect(await deploySite(site.id)).toBe('deployed');
+        expect(register).toHaveBeenCalledTimes(1);
+      } else {
+        await expect(deploySite(site.id)).rejects.toThrow('bezahlte Live-Bestellung');
+        expect(register).not.toHaveBeenCalled();
+      }
+    } finally {
+      register.mockRestore();
+      setProviders(original);
+      await updateConfig({ switches: { autoRegisterDomains: false } }, 'test');
+    }
+  });
+
   it('Live-Check: Abstände wachsen bis 60 Minuten', () => {
     expect([0, 1, 2, 3, 4, 5, 6].map(liveCheckDelayMinutes)).toEqual([2, 4, 8, 16, 32, 60, 60]);
   });
