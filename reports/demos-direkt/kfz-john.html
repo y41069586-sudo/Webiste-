@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Kfz John – Meisterwerkstatt &amp; Abschleppdienst in Dortmund</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif'],display:['Sora','Inter','sans-serif']},colors:{ink:'#0b1324'}}}}</script>
+<style>
+:root{--a1:#f5b400;--a2:#ff7a00;--ink:#0b1324}
+html{scroll-behavior:smooth}body{font-family:Inter,system-ui,sans-serif;background:#fff;color:#0f172a;-webkit-font-smoothing:antialiased}
+.accent-text{color:var(--a1)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 1.35rem;border-radius:999px;font-weight:600;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+.btn-primary{color:#fff;background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 10px 30px -10px var(--a1)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px -10px var(--a1)}
+.btn-ghost{color:#fff;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.06);backdrop-filter:blur(8px)}
+.btn-ghost:hover{background:rgba(255,255,255,.14);transform:translateY(-2px)}
+section:not(.hero):not(.sub-hero):not(.final-cta):not(#bewertungen) .btn-ghost{color:var(--ink);border-color:#cbd5e1}
+.btn-arrow{transition:transform .2s ease}.btn:hover .btn-arrow{transform:translateX(4px)}
+.lbl{display:block;margin-bottom:.3rem;font-size:.78rem;font-weight:500;color:rgba(255,255,255,.75)}
+.fld{width:100%;border-radius:.8rem;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:.7rem .85rem;color:#fff;outline:none;transition:border .2s,background .2s}
+.fld::placeholder{color:rgba(255,255,255,.45)}.fld:focus{border-color:var(--a1);background:rgba(255,255,255,.12)}
+.fld option{color:#0f172a}
+.hero-bg{background:radial-gradient(1200px 600px at 85% 10%,color-mix(in srgb,var(--a1) 45%,transparent),transparent 60%),radial-gradient(900px 500px at 0% 100%,color-mix(in srgb,var(--a2) 35%,transparent),transparent 60%),linear-gradient(160deg,#14233f,#0b1324 65%)}
+.hero-bg::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(to bottom,#000,transparent 85%)}
+.card{border-radius:1.4rem;border:1px solid #e2e8f0;padding:1.75rem;background:#fff;transition:transform .25s ease,box-shadow .25s ease,border-color .25s}
+.card:hover{transform:translateY(-4px);box-shadow:0 24px 50px -24px rgba(15,23,42,.35);border-color:color-mix(in srgb,var(--a1) 40%,#e2e8f0)}
+.icon-badge{display:inline-flex;height:3rem;width:3rem;align-items:center;justify-content:center;border-radius:1rem;color:#fff;background:linear-gradient(135deg,var(--a1),var(--a2))}
+.step-num{display:inline-flex;height:2rem;width:2rem;align-items:center;justify-content:center;border-radius:999px;background:var(--ink);color:#fff;font-weight:600;font-size:.9rem}
+.tile-bg{background:linear-gradient(150deg,color-mix(in srgb,var(--a1) 70%,#000),var(--ink));transition:transform .6s ease}
+.tile-bg::before{content:"";position:absolute;inset:0;background:radial-gradient(400px 200px at calc(var(--h)*1%/3.6) 0%,rgba(255,255,255,.22),transparent 60%)}
+.tile:hover .tile-bg{transform:scale(1.06)}
+.about-img{background:radial-gradient(500px 300px at 30% 20%,color-mix(in srgb,var(--a1) 40%,transparent),transparent),linear-gradient(170deg,#334155,var(--ink))}
+.map-ph{background:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px) 0 0/40px 40px,linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px) 0 0/40px 40px,linear-gradient(135deg,#e2e8f0,#cbd5e1)}
+.final-cta{background:linear-gradient(120deg,var(--a2),var(--a1))}
+.final-cta .btn-ghost{background:rgba(0,0,0,.22);border-color:rgba(255,255,255,.55)}
+.final-cta .btn-primary{background:#fff;color:var(--ink);box-shadow:0 12px 30px -12px rgba(0,0,0,.4)}
+/* Animationen */
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.load-up{opacity:0;animation:up .8s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
+.reveal.in{opacity:1;transform:none}
+.view{animation:fadeView .45s ease}@keyframes fadeView{from{opacity:0}to{opacity:1}}
+/* Navigation */
+.nav{transition:background .3s,backdrop-filter .3s,box-shadow .3s}
+.nav.scrolled{background:color-mix(in srgb,var(--ink) 72%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 30px -12px rgba(0,0,0,.4)}
+.navlink{position:relative;color:rgba(255,255,255,.8);transition:color .2s}.navlink:hover{color:#fff}
+.navlink::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--a1),var(--a2));transform:scaleX(0);transition:transform .25s}.navlink:hover::after{transform:scaleX(1)}
+.tray{transform:translateX(100%);transition:transform .45s cubic-bezier(.7,0,.2,1)}
+.tray.open{transform:none}
+.tray a{opacity:0;transform:translateY(-14px);transition:opacity .35s,transform .35s}
+.tray.open a{opacity:1;transform:none}
+.scrim{opacity:0;pointer-events:none;transition:opacity .35s}.scrim.open{opacity:1;pointer-events:auto}
+.burger span{display:block;height:2px;width:22px;background:#fff;border-radius:2px;transition:transform .3s,opacity .3s}
+.burger.x span:nth-child(1){transform:translateY(6px) rotate(45deg)}.burger.x span:nth-child(2){opacity:0}.burger.x span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.load-up,.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<header class="fixed inset-x-0 top-0 z-50">
+  <div class="truncate bg-slate-950 px-4 py-1.5 text-center text-[11px] text-white/80 sm:text-xs">Unverbindlicher Entwurf von SeitenWerk – nicht vom Betrieb beauftragt</div>
+  <div class="nav" id="nav"><div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-5">
+    <a href="#home" class="flex items-center gap-2.5 font-display text-lg font-semibold text-white" aria-label="Kfz John – Startseite">
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold" style="background:linear-gradient(135deg,var(--a1),var(--a2))">KJ</span>
+      <span>Kfz John</span>
+    </a>
+    <nav class="hidden items-center gap-7 text-sm lg:flex" aria-label="Hauptnavigation">
+      <a class="navlink" href="#home">Start</a><a class="navlink" href="#ueber-uns">Über uns</a><a class="navlink" href="#arbeiten">Arbeiten</a><a class="navlink" href="#leistungen">Leistungen</a><a class="navlink" href="#bewertungen">Bewertungen</a><a class="navlink" href="#kontakt">Kontakt</a>
+      <a href="#/kontakt" class="btn btn-primary !py-2.5 text-sm">Anfragen</a>
+    </nav>
+    <button id="burger" class="burger flex flex-col gap-1 p-2 lg:hidden" aria-label="Menü öffnen" aria-expanded="false" aria-controls="tray"><span></span><span></span><span></span></button>
+  </div></div>
+</header>
+<div id="scrim" class="scrim fixed inset-0 z-[70] bg-slate-950/50 lg:hidden"></div>
+<aside id="tray" class="tray fixed inset-y-0 right-0 z-[80] flex w-[82%] max-w-sm flex-col bg-ink px-7 pb-8 pt-6 lg:hidden" aria-label="Menü">
+  <div class="flex items-center justify-between"><span class="font-display text-lg font-semibold text-white">Kfz John</span>
+  <button id="close" class="burger x flex flex-col gap-1 p-2" aria-label="Menü schließen"><span></span><span></span><span></span></button></div>
+  <nav class="mt-10 flex flex-col gap-1">
+    <a href="#home" class="trayl border-b border-white/10 py-4 font-display text-2xl text-white" style="transition-delay:0.12s">Start</a><a href="#ueber-uns" class="trayl border-b border-white/10 py-4 font-display text-2xl text-white" style="transition-delay:0.16999999999999998s">Über uns</a><a href="#arbeiten" class="trayl border-b border-white/10 py-4 font-display text-2xl text-white" style="transition-delay:0.22s">Arbeiten</a><a href="#leistungen" class="trayl border-b border-white/10 py-4 font-display text-2xl text-white" style="transition-delay:0.27s">Leistungen</a><a href="#bewertungen" class="trayl border-b border-white/10 py-4 font-display text-2xl text-white" style="transition-delay:0.32s">Bewertungen</a><a href="#kontakt" class="trayl border-b border-white/10 py-4 font-display text-2xl text-white" style="transition-delay:0.37s">Kontakt</a>
+  </nav>
+  <a href="#/kontakt" class="trayl btn btn-primary mt-auto justify-center" style="transition-delay:.45s">Hilfe anfragen</a>
+  <a href="tel:0230441211" class="trayl mt-4 text-center text-white/75" style="transition-delay:.5s">02304 41211</a>
+</aside>
+
+<main id="app">
+  <div data-view="home">
+  <section id="home" class="hero relative isolate overflow-hidden">
+    <div class="hero-bg absolute inset-0 -z-10" role="img" aria-label="Platzhalter für ein Foto der Werkstatt"></div>
+    <div class="mx-auto grid max-w-7xl gap-10 px-5 pb-16 pt-32 lg:grid-cols-[1.1fr_.9fr] lg:items-center lg:pb-24 lg:pt-40">
+      <div>
+        <p class="load-up inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-sm text-white/85 backdrop-blur-md"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> Seit 1976 in Dortmund-Lichtendorf</p>
+        <h1 class="load-up font-display mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl" style="--d:.08s">Liegen geblieben? <span style="background:linear-gradient(90deg,#ffd23f,#ff8a00);-webkit-background-clip:text;background-clip:text;color:transparent">Wir sind da.</span></h1>
+        <p class="load-up mt-5 max-w-xl text-lg text-white/80" style="--d:.16s">Kfz-Meisterwerkstatt, Pannen- und Abschleppdienst und Transporte – seit 1976 und in zweiter Generation für Sie in Dortmund.</p>
+        <div class="load-up mt-8 flex flex-wrap gap-3" style="--d:.24s"><a href="#/kontakt" class="btn btn-primary">Hilfe anfragen<span class="btn-arrow" aria-hidden="true">→</span></a><a href="#/arbeiten" class="btn btn-ghost">Unsere Arbeit ansehen<span class="btn-arrow" aria-hidden="true">→</span></a></div>
+        <div class="load-up mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/75" style="--d:.32s">
+          <span class="inline-flex items-center gap-2"><span class="text-amber-300" aria-hidden="true">★★★★★</span> <strong class="text-white">4,8</strong> bei 346 Google-Bewertungen</span>
+          <span class="inline-flex items-center gap-2"><svg class="h-4 w-4 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg> Seit 1976</span><span class="inline-flex items-center gap-2"><svg class="h-4 w-4 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg> Meisterbetrieb in 2. Generation</span>
+        </div>
+      </div>
+      <div class="load-up rounded-3xl border border-white/15 bg-white/5 p-5 shadow-2xl backdrop-blur-md sm:p-7" style="--d:.2s">
+        <p class="font-display text-xl font-semibold text-white">Werkstatt-Termin oder Hilfe anfragen</p>
+        <p class="mb-4 mt-1 text-sm text-white/70">Wir melden uns schnellstmöglich zurück.</p>
+        
+  <form class="demo-form space-y-3" data-form="hero" novalidate>
+    <div class="grid gap-3 sm:grid-cols-2">
+      <label class="block"><span class="lbl">Name</span><input name="name" class="fld" placeholder="Ihr Name" autocomplete="name"></label>
+      <label class="block"><span class="lbl">Telefon</span><input name="tel" class="fld" placeholder="Für Rückruf" autocomplete="tel"></label>
+    </div>
+    <label class="block"><span class="lbl">E-Mail</span><input name="mail" type="email" class="fld" placeholder="name@beispiel.de" autocomplete="email"></label>
+    <div class="grid gap-3 sm:grid-cols-3">
+      <label class="block"><span class="lbl">Anliegen</span><select name="art" class="fld"><option value="">Bitte wählen</option><option>Panne / Abschleppen</option><option>Werkstatt-Termin</option><option>Lackierung</option><option>Fahrzeugtransport</option><option>Sonstiges</option></select></label>
+      <label class="block"><span class="lbl">Kostenrahmen</span><select name="budget" class="fld"><option value="">Bitte wählen</option><option>Bitte Kostenvoranschlag</option><option>bis 300 €</option><option>300–1.000 €</option><option>über 1.000 €</option></select></label>
+      <label class="block"><span class="lbl">Wann?</span><select name="wann" class="fld"><option value="">Bitte wählen</option><option>Sofort – Notfall</option><option>Heute</option><option>Diese Woche</option><option>Flexibel</option></select></label>
+    </div>
+    <label class="block"><span class="lbl">Nachricht</span><textarea name="msg" rows="3" class="fld" placeholder="Wo stehen Sie, welches Fahrzeug, was ist passiert?"></textarea></label>
+    <button type="submit" class="btn btn-primary w-full justify-center">Anfrage senden<span class="btn-arrow" aria-hidden="true">→</span></button>
+    <p class="form-note hidden rounded-lg bg-white/10 p-3 text-sm text-white" role="status">Das ist ein Entwurf – Anfragen werden noch nicht versendet. Bitte rufen Sie direkt an: 02304 41211</p>
+  </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="leistungen" class="bg-white py-20 sm:py-28">
+    <div class="mx-auto max-w-7xl px-5">
+      
+    <p class="reveal text-sm font-semibold uppercase tracking-[.18em] accent-text">Leistungen</p>
+    <h2 class="reveal mt-3 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl text-ink">Werkstatt, Pannenhilfe, Transport</h2>
+    <p class="reveal mt-4 max-w-2xl text-lg text-slate-600">Alles, was Ihr Fahrzeug braucht – vom Abschleppen bis zur fertigen Reparatur, aus einer Hand.</p>
+      <div class="mt-12 grid gap-5 md:grid-cols-3">
+        
+        <article class="reveal card group" style="--d:0s">
+          <span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span>
+          <h3 class="mt-5 font-display text-xl font-semibold text-ink">Meisterwerkstatt</h3>
+          <p class="mt-2 text-slate-600">Reparatur und Wartung in der eigenen Kfz-Meisterwerkstatt.</p>
+        </article>
+        <article class="reveal card group" style="--d:0.08s">
+          <span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3zM14 10h4l3 3v2h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></span>
+          <h3 class="mt-5 font-display text-xl font-semibold text-ink">Pannen- &amp; Abschleppdienst</h3>
+          <p class="mt-2 text-slate-600">Schnelle Hilfe vor Ort, wenn Ihr Fahrzeug liegen bleibt.</p>
+        </article>
+        <article class="reveal card group" style="--d:0.16s">
+          <span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16V11l2-5h10l2 5v5M3 16h18v3H3z"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/></svg></span>
+          <h3 class="mt-5 font-display text-xl font-semibold text-ink">Transporte</h3>
+          <p class="mt-2 text-slate-600">Sicherer Transport Ihres Fahrzeugs dorthin, wo es hin muss.</p>
+        </article>
+      </div>
+      <div class="reveal mt-10"><a href="#/leistungen" class="btn btn-primary">Alle Leistungen ansehen<span class="btn-arrow" aria-hidden="true">→</span></a></div>
+    </div>
+  </section>
+
+  <section id="arbeiten" class="bg-slate-50 py-20 sm:py-28">
+    <div class="mx-auto max-w-7xl px-5">
+      
+    <p class="reveal text-sm font-semibold uppercase tracking-[.18em] accent-text">Unsere Arbeit</p>
+    <h2 class="reveal mt-3 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl text-ink">Einblicke in die Werkstatt</h2>
+    <p class="reveal mt-4 max-w-2xl text-lg text-slate-600">Hier zeigen wir später echte Fotos aus dem Alltag – Sie liefern die Bilder, wir setzen sie in Szene.</p>
+      <div class="mt-12 grid auto-rows-fr gap-4 sm:grid-cols-3">
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl sm:col-span-2 sm:row-span-2">
+      <div class="tile-bg absolute inset-0" style="--h:0"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 sm:min-h-[380px]">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3zM14 10h4l3 3v2h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Abschleppwagen</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure>
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl ">
+      <div class="tile-bg absolute inset-0" style="--h:37"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 ">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Meisterwerkstatt</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure>
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl ">
+      <div class="tile-bg absolute inset-0" style="--h:74"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 ">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 9h6v12H9zM10 9V6h4v3M18 4h.01M20 6h.01M18 8h.01"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Lackierung</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure>
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl ">
+      <div class="tile-bg absolute inset-0" style="--h:111"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 ">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16V11l2-5h10l2 5v5M3 16h18v3H3z"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Transporte</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure>
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl ">
+      <div class="tile-bg absolute inset-0" style="--h:148"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 ">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11V5a1.5 1.5 0 0 1 3 0v5M10 10V4a1.5 1.5 0 0 1 3 0v6M13 10V5a1.5 1.5 0 0 1 3 0v6M16 11V8a1.5 1.5 0 0 1 3 0v6c0 4-3 7-7 7s-5-2-7-5l-2-3a1.5 1.5 0 0 1 2.5-1.5L7 14"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Das Team</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure></div>
+      <div class="reveal mt-10"><a href="#/arbeiten" class="btn btn-primary">Mehr Arbeiten ansehen<span class="btn-arrow" aria-hidden="true">→</span></a></div>
+    </div>
+  </section>
+
+  <section id="ueber-uns" class="bg-white py-20 sm:py-28">
+    <div class="mx-auto grid max-w-7xl items-center gap-12 px-5 lg:grid-cols-2">
+      <div class="reveal relative">
+        <div class="about-img aspect-[4/5] w-full rounded-3xl" role="img" aria-label="Platzhalter für ein Teamfoto"></div>
+        <div class="absolute -bottom-6 left-6 right-6 rounded-2xl bg-ink p-5 text-white shadow-xl sm:left-auto sm:w-72">
+          <p class="font-display text-4xl font-semibold">4,8<span class="text-amber-300"> ★</span></p>
+          <p class="text-sm text-white/75">aus 346 Google-Bewertungen</p>
+        </div>
+      </div>
+      <div>
+        
+    <p class="reveal text-sm font-semibold uppercase tracking-[.18em] accent-text">Warum Kfz John</p>
+    <h2 class="reveal mt-3 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl text-ink">Familienbetrieb mit fast 50 Jahren Erfahrung</h2>
+    <p class="reveal mt-4 max-w-2xl text-lg text-slate-600">Seit 1976 am Standort Dortmund-Lichtendorf, heute in zweiter Generation geführt – und von 346 Google-Bewertungen mit 4,8 Sternen bestätigt.</p>
+        <ul class="mt-8 space-y-5">
+          <li class="reveal flex gap-4" style="--d:0s"><span class="icon-badge shrink-0"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span><strong class="block font-display text-lg text-ink">Erfahrung seit 1976</strong><span class="text-slate-600">Ein Standort, eine Familie, fast fünf Jahrzehnte Kfz-Handwerk.</span></span></li><li class="reveal flex gap-4" style="--d:0.08s"><span class="icon-badge shrink-0"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><span><strong class="block font-display text-lg text-ink">Schnell vor Ort</strong><span class="text-slate-600">Wenn es darauf ankommt, sind wir zügig bei Ihnen.</span></span></li><li class="reveal flex gap-4" style="--d:0.16s"><span class="icon-badge shrink-0"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span><span><strong class="block font-display text-lg text-ink">Klar &amp; transparent</strong><span class="text-slate-600">Verständliche Abwicklung ohne böse Überraschungen.</span></span></li>
+        </ul>
+        <div class="reveal mt-10"><a href="#/bewertungen" class="btn btn-primary">Was Kunden sagen<span class="btn-arrow" aria-hidden="true">→</span></a></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="bewertungen" class="bg-ink py-20 text-white sm:py-24">
+    <div class="mx-auto max-w-7xl px-5">
+      
+    <p class="reveal text-sm font-semibold uppercase tracking-[.18em] text-white/70">Bewertungen</p>
+    <h2 class="reveal mt-3 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl text-white">4,8 von 5 Sternen bei 346 Google-Bewertungen</h2>
+    <p class="reveal mt-4 max-w-2xl text-lg text-white/75">Das heben Kundinnen und Kunden in ihren Bewertungen besonders hervor:</p>
+      <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="reveal rounded-2xl border border-white/10 bg-white/5 p-5" style="--d:0s"><svg class="h-6 w-6 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><p class="mt-3 font-medium">Schnelle Hilfe vor Ort</p></div><div class="reveal rounded-2xl border border-white/10 bg-white/5 p-5" style="--d:0.06s"><svg class="h-6 w-6 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11V5a1.5 1.5 0 0 1 3 0v5M10 10V4a1.5 1.5 0 0 1 3 0v6M13 10V5a1.5 1.5 0 0 1 3 0v6M16 11V8a1.5 1.5 0 0 1 3 0v6c0 4-3 7-7 7s-5-2-7-5l-2-3a1.5 1.5 0 0 1 2.5-1.5L7 14"/></svg><p class="mt-3 font-medium">Freundliches, hilfsbereites Team</p></div><div class="reveal rounded-2xl border border-white/10 bg-white/5 p-5" style="--d:0.12s"><svg class="h-6 w-6 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg><p class="mt-3 font-medium">Klare, transparente Abwicklung</p></div><div class="reveal rounded-2xl border border-white/10 bg-white/5 p-5" style="--d:0.18s"><svg class="h-6 w-6 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16V11l2-5h10l2 5v5M3 16h18v3H3z"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/></svg><p class="mt-3 font-medium">Sorgfältig – mit Extras wie Ersatzwagen oder Taxi</p></div>
+      </div>
+      <p class="reveal mt-4 text-xs text-white/50">Zusammenfassung öffentlicher Google-Bewertungen, Stand November 2026. Keine wörtlichen Zitate.</p>
+      <div class="reveal mt-8"><a href="#/bewertungen" class="btn btn-primary">Zu den Bewertungen<span class="btn-arrow" aria-hidden="true">→</span></a></div>
+    </div>
+  </section>
+
+  <section id="kontakt" class="bg-white py-20 sm:py-28">
+    <div class="mx-auto grid max-w-7xl gap-10 px-5 lg:grid-cols-2">
+      <div>
+        
+    <p class="reveal text-sm font-semibold uppercase tracking-[.18em] accent-text">Kontakt</p>
+    <h2 class="reveal mt-3 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl text-ink">Panne? Einfach anrufen.</h2>
+    <p class="reveal mt-4 max-w-2xl text-lg text-slate-600">Für Werkstatt-Termine und Anfragen nutzen Sie gern auch das Formular.</p>
+        <ul class="reveal mt-8 space-y-4 text-lg">
+          <li class="flex items-center gap-3"><svg class="h-5 w-5 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><a class="font-semibold text-ink hover:underline" href="tel:0230441211">02304 41211</a></li>
+          <li class="flex items-center gap-3"><svg class="h-5 w-5 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span class="text-slate-700">Römerstraße 60, 44289 Dortmund</span></li>
+          <li class="flex items-center gap-3"><svg class="h-5 w-5 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="text-slate-700">Zeiten bitte telefonisch erfragen</span></li>
+        </ul>
+        <div class="reveal mt-8"><a href="#/kontakt" class="btn btn-primary">Zur Kontaktseite<span class="btn-arrow" aria-hidden="true">→</span></a></div>
+      </div>
+      <div class="reveal map-ph flex min-h-[280px] items-end rounded-3xl p-6"><p class="rounded-xl bg-white/90 px-4 py-3 text-sm text-slate-700 shadow"><svg class="mr-1 inline h-4 w-4 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> Römerstraße 60, 44289 Dortmund · Kartenansicht folgt</p></div>
+    </div>
+  </section>
+
+  <section class="final-cta relative overflow-hidden py-20 sm:py-28">
+    <div class="mx-auto max-w-4xl px-5 text-center">
+      <h2 class="reveal font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">Fast 50 Jahre Erfahrung. <br class="hidden sm:block">Ein Anruf genügt.</h2>
+      <p class="reveal mx-auto mt-4 max-w-xl text-lg text-white/85">Ob Panne, Reparatur oder Transport – wir kümmern uns.</p>
+      <div class="reveal mt-8 flex flex-wrap justify-center gap-3"><a href="#/kontakt" class="btn btn-primary">Hilfe anfragen<span class="btn-arrow" aria-hidden="true">→</span></a><a href="tel:0230441211" class="btn btn-ghost"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg> 02304 41211</a></div>
+    </div>
+  </section></div>
+  <div data-view="leistungen" hidden>
+  <section class="sub-hero relative isolate overflow-hidden">
+    <div class="hero-bg absolute inset-0 -z-10"></div>
+    <div class="mx-auto max-w-7xl px-5 pb-14 pt-32 sm:pb-20 sm:pt-40">
+      <a href="#home" class="load-up inline-flex items-center gap-2 text-sm text-white/70 hover:text-white">← Zur Startseite</a>
+      <p class="load-up mt-6 text-sm font-semibold uppercase tracking-[.18em] text-white/70" style="--d:.05s">Leistungen</p>
+      <h1 class="load-up font-display mt-3 text-4xl font-semibold tracking-tight text-white sm:text-5xl" style="--d:.1s">Werkstatt, Pannenhilfe, Transport</h1>
+      <p class="load-up mt-4 max-w-2xl text-lg text-white/80" style="--d:.15s">Alles, was Ihr Fahrzeug braucht – vom Abschleppen bis zur fertigen Reparatur, aus einer Hand.</p>
+    </div>
+  </section>
+    <section class="bg-white py-16 sm:py-24"><div class="mx-auto max-w-7xl px-5">
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3"><article class="reveal card" style="--d:0s"><span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3zM14 10h4l3 3v2h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></span><h2 class="mt-5 font-display text-xl font-semibold text-ink">Abschleppdienst</h2><p class="mt-2 text-slate-600">Wir holen Ihr Fahrzeug sicher ab – direkt in unsere Werkstatt.</p></article><article class="reveal card" style="--d:0.06s"><span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><h2 class="mt-5 font-display text-xl font-semibold text-ink">Pannenhilfe</h2><p class="mt-2 text-slate-600">Starthilfe und Hilfe vor Ort, wenn möglich direkt an der Straße.</p></article><article class="reveal card" style="--d:0.12s"><span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span><h2 class="mt-5 font-display text-xl font-semibold text-ink">Reparatur &amp; Wartung</h2><p class="mt-2 text-slate-600">Kfz-Meisterwerkstatt für Reparaturen, Inspektion und Wartung.</p></article><article class="reveal card" style="--d:0s"><span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 9h6v12H9zM10 9V6h4v3M18 4h.01M20 6h.01M18 8h.01"/></svg></span><h2 class="mt-5 font-display text-xl font-semibold text-ink">Lackierung</h2><p class="mt-2 text-slate-600">Lackschäden fachgerecht beheben.</p></article><article class="reveal card" style="--d:0.06s"><span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16V11l2-5h10l2 5v5M3 16h18v3H3z"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/></svg></span><h2 class="mt-5 font-display text-xl font-semibold text-ink">Fahrzeugtransporte</h2><p class="mt-2 text-slate-600">Überführung und Transport von Fahrzeugen.</p></article><article class="reveal card" style="--d:0.12s"><span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span><h2 class="mt-5 font-display text-xl font-semibold text-ink">Abwicklung</h2><p class="mt-2 text-slate-600">Klare, transparente Abläufe – Sie wissen immer, woran Sie sind.</p></article></div>
+      <p class="reveal mt-6 text-sm text-slate-500">Leistungen laut eigenen und öffentlichen Angaben; der genaue Umfang wird mit dem Betrieb abgestimmt.</p>
+      <h2 class="reveal mt-16 font-display text-2xl font-semibold text-ink">So läuft es ab</h2>
+      <ol class="mt-6 grid gap-4 md:grid-cols-4"><li class="reveal rounded-2xl border border-slate-200 p-5" style="--d:0s"><span class="step-num">1</span><strong class="mt-3 block font-display text-lg text-ink">Anrufen</strong><span class="text-slate-600">02304 41211 – wir nehmen Ihre Lage auf.</span></li><li class="reveal rounded-2xl border border-slate-200 p-5" style="--d:0.06s"><span class="step-num">2</span><strong class="mt-3 block font-display text-lg text-ink">Hilfe vor Ort</strong><span class="text-slate-600">Pannenhilfe oder Abschleppen.</span></li><li class="reveal rounded-2xl border border-slate-200 p-5" style="--d:0.12s"><span class="step-num">3</span><strong class="mt-3 block font-display text-lg text-ink">Werkstatt</strong><span class="text-slate-600">Diagnose und Reparatur im Meisterbetrieb.</span></li><li class="reveal rounded-2xl border border-slate-200 p-5" style="--d:0.18s"><span class="step-num">4</span><strong class="mt-3 block font-display text-lg text-ink">Weiterfahren</strong><span class="text-slate-600">Fahrzeug fertig – und Sie wieder mobil.</span></li></ol>
+      <div class="reveal mt-10"><a href="#/kontakt" class="btn btn-primary">Hilfe anfragen<span class="btn-arrow" aria-hidden="true">→</span></a></div>
+    </div></section></div>
+<div data-view="arbeiten" hidden>
+  <section class="sub-hero relative isolate overflow-hidden">
+    <div class="hero-bg absolute inset-0 -z-10"></div>
+    <div class="mx-auto max-w-7xl px-5 pb-14 pt-32 sm:pb-20 sm:pt-40">
+      <a href="#home" class="load-up inline-flex items-center gap-2 text-sm text-white/70 hover:text-white">← Zur Startseite</a>
+      <p class="load-up mt-6 text-sm font-semibold uppercase tracking-[.18em] text-white/70" style="--d:.05s">Unsere Arbeit</p>
+      <h1 class="load-up font-display mt-3 text-4xl font-semibold tracking-tight text-white sm:text-5xl" style="--d:.1s">Einblicke in die Werkstatt</h1>
+      <p class="load-up mt-4 max-w-2xl text-lg text-white/80" style="--d:.15s">Platzhalter: Hier erscheinen Ihre eigenen Fotos – vorher/nachher, Werkstatt, Team.</p>
+    </div>
+  </section>
+    <section class="bg-slate-50 py-16 sm:py-24"><div class="mx-auto max-w-7xl px-5">
+      <div class="grid auto-rows-fr gap-4 sm:grid-cols-3">
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl sm:col-span-2 sm:row-span-2">
+      <div class="tile-bg absolute inset-0" style="--h:0"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 sm:min-h-[380px]">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v8H3zM14 10h4l3 3v2h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Abschleppwagen</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure>
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl ">
+      <div class="tile-bg absolute inset-0" style="--h:37"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 ">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Meisterwerkstatt</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure>
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl ">
+      <div class="tile-bg absolute inset-0" style="--h:74"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 ">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 9h6v12H9zM10 9V6h4v3M18 4h.01M20 6h.01M18 8h.01"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Lackierung</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure>
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl ">
+      <div class="tile-bg absolute inset-0" style="--h:111"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 ">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16V11l2-5h10l2 5v5M3 16h18v3H3z"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Transporte</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure>
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl ">
+      <div class="tile-bg absolute inset-0" style="--h:148"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 ">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11V5a1.5 1.5 0 0 1 3 0v5M10 10V4a1.5 1.5 0 0 1 3 0v6M13 10V5a1.5 1.5 0 0 1 3 0v6M16 11V8a1.5 1.5 0 0 1 3 0v6c0 4-3 7-7 7s-5-2-7-5l-2-3a1.5 1.5 0 0 1 2.5-1.5L7 14"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Das Team</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure>
+    <figure class="reveal tile group relative overflow-hidden rounded-2xl ">
+      <div class="tile-bg absolute inset-0" style="--h:185"></div>
+      <div class="relative flex h-full min-h-[180px] flex-col justify-end p-5 ">
+        <span class="mb-auto inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <figcaption class="text-white"><strong class="block font-display text-lg">Seit 1976</strong><span class="text-sm text-white/75">Platzhalter – hier kommen Ihre eigenen Fotos</span></figcaption>
+      </div>
+    </figure></div>
+      <div class="reveal mt-10"><a href="#/kontakt" class="btn btn-primary">Hilfe anfragen<span class="btn-arrow" aria-hidden="true">→</span></a></div>
+    </div></section></div>
+<div data-view="bewertungen" hidden>
+  <section class="sub-hero relative isolate overflow-hidden">
+    <div class="hero-bg absolute inset-0 -z-10"></div>
+    <div class="mx-auto max-w-7xl px-5 pb-14 pt-32 sm:pb-20 sm:pt-40">
+      <a href="#home" class="load-up inline-flex items-center gap-2 text-sm text-white/70 hover:text-white">← Zur Startseite</a>
+      <p class="load-up mt-6 text-sm font-semibold uppercase tracking-[.18em] text-white/70" style="--d:.05s">Bewertungen</p>
+      <h1 class="load-up font-display mt-3 text-4xl font-semibold tracking-tight text-white sm:text-5xl" style="--d:.1s">4,8 ★ bei 346 Google-Bewertungen</h1>
+      <p class="load-up mt-4 max-w-2xl text-lg text-white/80" style="--d:.15s">Was Kundinnen und Kunden in ihren Bewertungen immer wieder hervorheben.</p>
+    </div>
+  </section>
+    <section class="bg-white py-16 sm:py-24"><div class="mx-auto max-w-5xl px-5">
+      <div class="grid gap-4 sm:grid-cols-2"><div class="reveal card" style="--d:0s"><span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><p class="mt-4 font-display text-lg text-ink">Schnelle Hilfe vor Ort</p></div><div class="reveal card" style="--d:0.06s"><span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11V5a1.5 1.5 0 0 1 3 0v5M10 10V4a1.5 1.5 0 0 1 3 0v6M13 10V5a1.5 1.5 0 0 1 3 0v6M16 11V8a1.5 1.5 0 0 1 3 0v6c0 4-3 7-7 7s-5-2-7-5l-2-3a1.5 1.5 0 0 1 2.5-1.5L7 14"/></svg></span><p class="mt-4 font-display text-lg text-ink">Freundliches, hilfsbereites Team</p></div><div class="reveal card" style="--d:0.12s"><span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span><p class="mt-4 font-display text-lg text-ink">Klare, transparente Abwicklung</p></div><div class="reveal card" style="--d:0.18s"><span class="icon-badge"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16V11l2-5h10l2 5v5M3 16h18v3H3z"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/></svg></span><p class="mt-4 font-display text-lg text-ink">Sorgfältig – mit Extras wie Ersatzwagen oder Taxi</p></div></div>
+      <p class="reveal mt-6 text-sm text-slate-500">Zusammenfassung öffentlicher Google-Bewertungen, Stand November 2026. In der fertigen Website können ausgewählte Bewertungen mit Ihrer Zustimmung eingebunden werden.</p>
+      <div class="reveal mt-10"><a href="#/kontakt" class="btn btn-primary">Hilfe anfragen<span class="btn-arrow" aria-hidden="true">→</span></a></div>
+    </div></section></div>
+<div data-view="kontakt" hidden>
+  <section class="sub-hero relative isolate overflow-hidden">
+    <div class="hero-bg absolute inset-0 -z-10"></div>
+    <div class="mx-auto max-w-7xl px-5 pb-14 pt-32 sm:pb-20 sm:pt-40">
+      <a href="#home" class="load-up inline-flex items-center gap-2 text-sm text-white/70 hover:text-white">← Zur Startseite</a>
+      <p class="load-up mt-6 text-sm font-semibold uppercase tracking-[.18em] text-white/70" style="--d:.05s">Kontakt</p>
+      <h1 class="load-up font-display mt-3 text-4xl font-semibold tracking-tight text-white sm:text-5xl" style="--d:.1s">Panne? Einfach anrufen.</h1>
+      <p class="load-up mt-4 max-w-2xl text-lg text-white/80" style="--d:.15s">Für Werkstatt-Termine und Anfragen nutzen Sie gern auch das Formular.</p>
+    </div>
+  </section>
+    <section class="bg-ink py-16 sm:py-24"><div class="mx-auto grid max-w-7xl gap-10 px-5 lg:grid-cols-[.8fr_1.2fr]">
+      <ul class="reveal space-y-5 text-lg text-white">
+        <li class="flex items-center gap-3"><svg class="h-5 w-5 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><a class="font-semibold hover:underline" href="tel:0230441211">02304 41211</a></li>
+        <li class="flex items-center gap-3"><svg class="h-5 w-5 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span>Römerstraße 60, 44289 Dortmund</span></li>
+        <li class="flex items-center gap-3"><svg class="h-5 w-5 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Zeiten bitte telefonisch erfragen</span></li>
+        <li class="text-base text-white/70">Einsatzgebiet: Dortmund und Umgebung</li>
+      </ul>
+      <div class="reveal rounded-3xl border border-white/15 bg-white/5 p-6 backdrop-blur-md">
+  <form class="demo-form space-y-3" data-form="kontakt" novalidate>
+    <div class="grid gap-3 sm:grid-cols-2">
+      <label class="block"><span class="lbl">Name</span><input name="name" class="fld" placeholder="Ihr Name" autocomplete="name"></label>
+      <label class="block"><span class="lbl">Telefon</span><input name="tel" class="fld" placeholder="Für Rückruf" autocomplete="tel"></label>
+    </div>
+    <label class="block"><span class="lbl">E-Mail</span><input name="mail" type="email" class="fld" placeholder="name@beispiel.de" autocomplete="email"></label>
+    <div class="grid gap-3 sm:grid-cols-3">
+      <label class="block"><span class="lbl">Anliegen</span><select name="art" class="fld"><option value="">Bitte wählen</option><option>Panne / Abschleppen</option><option>Werkstatt-Termin</option><option>Lackierung</option><option>Fahrzeugtransport</option><option>Sonstiges</option></select></label>
+      <label class="block"><span class="lbl">Kostenrahmen</span><select name="budget" class="fld"><option value="">Bitte wählen</option><option>Bitte Kostenvoranschlag</option><option>bis 300 €</option><option>300–1.000 €</option><option>über 1.000 €</option></select></label>
+      <label class="block"><span class="lbl">Wann?</span><select name="wann" class="fld"><option value="">Bitte wählen</option><option>Sofort – Notfall</option><option>Heute</option><option>Diese Woche</option><option>Flexibel</option></select></label>
+    </div>
+    <label class="block"><span class="lbl">Nachricht</span><textarea name="msg" rows="3" class="fld" placeholder="Wo stehen Sie, welches Fahrzeug, was ist passiert?"></textarea></label>
+    <button type="submit" class="btn btn-primary w-full justify-center">Anfrage senden<span class="btn-arrow" aria-hidden="true">→</span></button>
+    <p class="form-note hidden rounded-lg bg-white/10 p-3 text-sm text-white" role="status">Das ist ein Entwurf – Anfragen werden noch nicht versendet. Bitte rufen Sie direkt an: 02304 41211</p>
+  </form></div>
+    </div></section></div>
+<div data-view="datenschutz" hidden>
+  <section class="sub-hero relative isolate overflow-hidden">
+    <div class="hero-bg absolute inset-0 -z-10"></div>
+    <div class="mx-auto max-w-7xl px-5 pb-14 pt-32 sm:pb-20 sm:pt-40">
+      <a href="#home" class="load-up inline-flex items-center gap-2 text-sm text-white/70 hover:text-white">← Zur Startseite</a>
+      <p class="load-up mt-6 text-sm font-semibold uppercase tracking-[.18em] text-white/70" style="--d:.05s">Rechtliches</p>
+      <h1 class="load-up font-display mt-3 text-4xl font-semibold tracking-tight text-white sm:text-5xl" style="--d:.1s">Datenschutzerklärung</h1>
+      <p class="load-up mt-4 max-w-2xl text-lg text-white/80" style="--d:.15s">Kurz und verständlich: welche Daten wir verarbeiten und warum.</p>
+    </div>
+  </section>
+    <section class="bg-white py-16 sm:py-24"><div class="mx-auto max-w-3xl px-5 text-slate-700">
+      <p class="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Platzhalter-Text für den Entwurf. Vor der Veröffentlichung wird er durch Ihre geprüfte Datenschutzerklärung ersetzt.</p>
+      <h2 class="mt-10 font-display text-xl font-semibold text-ink">Verantwortlicher</h2><ul class="mt-3 list-disc space-y-1.5 pl-5"><li>Kfz John, Römerstraße 60, 44289 Dortmund</li><li>Telefon: 02304 41211</li></ul><h2 class="mt-10 font-display text-xl font-semibold text-ink">Welche Daten wir erheben</h2><ul class="mt-3 list-disc space-y-1.5 pl-5"><li>Angaben aus dem Kontaktformular (Name, E-Mail, Telefon, Anliegen, Nachricht)</li><li>Technisch notwendige Server-Logdaten (z. B. Zeitpunkt, Browsertyp), ohne Profilbildung</li></ul><h2 class="mt-10 font-display text-xl font-semibold text-ink">Wofür wir sie nutzen</h2><ul class="mt-3 list-disc space-y-1.5 pl-5"><li>Bearbeitung Ihrer Anfrage und Terminabsprache</li><li>Sicherer und stabiler Betrieb der Website</li></ul><h2 class="mt-10 font-display text-xl font-semibold text-ink">Wie lange wir sie speichern</h2><ul class="mt-3 list-disc space-y-1.5 pl-5"><li>Anfragen: bis zur Erledigung, danach Löschung, soweit keine gesetzliche Aufbewahrungspflicht besteht</li><li>Server-Logs: höchstens 14 Tage</li></ul><h2 class="mt-10 font-display text-xl font-semibold text-ink">Weitergabe an Dritte</h2><ul class="mt-3 list-disc space-y-1.5 pl-5"><li>Keine Weitergabe zu Werbezwecken</li><li>Nur an technische Dienstleister (Hosting, E-Mail) auf Grundlage eines Auftragsverarbeitungsvertrags</li></ul><h2 class="mt-10 font-display text-xl font-semibold text-ink">Sicherheit</h2><ul class="mt-3 list-disc space-y-1.5 pl-5"><li>Verschlüsselte Übertragung (HTTPS)</li><li>Zugriff nur für berechtigte Personen</li></ul><h2 class="mt-10 font-display text-xl font-semibold text-ink">Ihre Rechte</h2><ul class="mt-3 list-disc space-y-1.5 pl-5"><li>Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung</li><li>Widerspruch und Datenübertragbarkeit</li><li>Beschwerde bei einer Datenschutz-Aufsichtsbehörde</li></ul>
+      <p class="mt-10 text-sm text-slate-500">Zuletzt aktualisiert: November 2026.</p>
+    </div></section></div>
+</main>
+
+<footer class="bg-slate-950 text-white/75">
+  <div class="mx-auto grid max-w-7xl gap-10 px-5 py-14 md:grid-cols-4">
+    <div class="md:col-span-2">
+      <p class="flex items-center gap-2.5 font-display text-lg font-semibold text-white"><span class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold" style="background:linear-gradient(135deg,var(--a1),var(--a2))">KJ</span>Kfz John</p>
+      <p class="mt-3 max-w-sm">Kfz-Meisterwerkstatt, Pannen- und Abschleppdienst in Dortmund-Lichtendorf – seit 1976.</p>
+      
+    </div>
+    <div><p class="font-semibold text-white">Schnellzugriff</p><ul class="mt-3 space-y-2 text-sm">
+      <li><a class="hover:text-white" href="#/leistungen">Leistungen</a></li><li><a class="hover:text-white" href="#/arbeiten">Unsere Arbeit</a></li><li><a class="hover:text-white" href="#/bewertungen">Bewertungen</a></li><li><a class="hover:text-white" href="#/kontakt">Kontakt</a></li><li><a class="hover:text-white" href="#/datenschutz">Datenschutz</a></li><li><span class="text-white/40">Impressum (folgt)</span></li></ul></div>
+    <div><p class="font-semibold text-white">Kontakt</p><ul class="mt-3 space-y-2 text-sm">
+      <li><a class="hover:text-white" href="tel:0230441211">02304 41211</a></li><li>Römerstraße 60, 44289 Dortmund</li><li>Einsatzgebiet: Dortmund und Umgebung</li></ul></div>
+  </div>
+  <div class="border-t border-white/10 px-5 py-5 text-center text-sm">© 2026 Kfz John</div>
+</footer>
+
+<script>
+(function(){
+  var nav=document.getElementById('nav'),tray=document.getElementById('tray'),scrim=document.getElementById('scrim'),burger=document.getElementById('burger');
+  function onScroll(){nav.classList.toggle('scrolled',window.scrollY>20)}window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  function setTray(o){tray.classList.toggle('open',o);scrim.classList.toggle('open',o);burger.classList.toggle('x',o);burger.setAttribute('aria-expanded',o);document.body.style.overflow=o?'hidden':''}
+  burger.onclick=function(){setTray(true)};document.getElementById('close').onclick=function(){setTray(false)};scrim.onclick=function(){setTray(false)};
+  tray.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){setTray(false)})});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+  function observe(root){root.querySelectorAll('.reveal:not(.in)').forEach(function(el){io.observe(el)})}
+  function show(view){document.querySelectorAll('[data-view]').forEach(function(v){var on=v.dataset.view===view;v.hidden=!on;if(on){v.classList.remove('view');void v.offsetWidth;v.classList.add('view');v.querySelectorAll('.load-up').forEach(function(x){x.style.animation='none';void x.offsetWidth;x.style.animation=''});observe(v)}})}
+  function route(){var h=location.hash||'#home';if(h.indexOf('#/')===0){var v=h.slice(2);if(!document.querySelector('[data-view="'+v+'"]'))v='home';show(v);window.scrollTo({top:0,behavior:'instant'})}else{var cur=document.querySelector('[data-view]:not([hidden])');if(!cur||cur.dataset.view!=='home')show('home');var t=document.getElementById(h.slice(1));if(t)setTimeout(function(){t.scrollIntoView({behavior:'smooth'})},cur&&cur.dataset.view!=='home'?60:0)}}
+  window.addEventListener('hashchange',route);route();
+  document.querySelectorAll('.demo-form').forEach(function(f){f.addEventListener('submit',function(e){e.preventDefault();f.querySelector('.form-note').classList.remove('hidden')})});
+})();
+</script>
+</body>
+</html>
