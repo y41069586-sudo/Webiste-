@@ -2,15 +2,11 @@ import {
   appUrl,
   beginCheckoutDraft,
   getCheckoutContext,
-  getDb,
-  notifyInterest,
-  recordEvent,
   setupCookieName,
   SETUP_TTL_SECONDS,
 } from '@wbm/core';
 import { simplePage } from '@/lib/public-page';
 import { cookies } from 'next/headers';
-import { after } from 'next/server';
 import { requestMetaFrom } from '@/lib/request';
 
 export const dynamic = 'force-dynamic';
@@ -23,14 +19,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   if (ctx.state === 'ordered') return Response.redirect(appUrl(`/checkout/${slug}`), 303);
   if (ctx.state === 'not_found' || ctx.state === 'gone') return Response.redirect(appUrl(`/d/${slug}`), 302);
   const meta = requestMetaFrom(req.headers);
-  // Tempo (17.11.2026): Zählung und Benachrichtigungs-Mail erst nach der Antwort – der Betrieb wartet nicht darauf
-  if (ctx.state === 'ok') {
-    const leadId = ctx.lead.id;
-    after(async () => {
-      if (await recordEvent(getDb(), { leadId, type: 'cta_click', req: meta }).catch(() => false))
-        await notifyInterest(leadId, 'cta_click', meta).catch(() => undefined);
-    });
-  }
+  // Tempo (19.11.2026): Zählung und Mail NICHT hier per after() – sonst ist diese Serverinstanz noch beschäftigt, wenn
+  // der Browser Millisekunden später /einrichten lädt, und Netlify startet eine zweite, kalte Instanz (gemessen 8,9 s).
+  // Die Einrichtungsseite erledigt das nach ihrer Antwort (?klick=1); dort liest der Kunde erst, bevor er weiterklickt.
   const jar = await cookies();
   const token =
     ctx.state === 'ok' ? await beginCheckoutDraft(slug, jar.get(setupCookieName(slug))?.value ?? '', meta, ctx) : null;
@@ -47,5 +38,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     path: '/',
     maxAge: SETUP_TTL_SECONDS,
   });
-  return new Response(null, { status: 303, headers: { location: appUrl(`/einrichten/${slug}`), 'cache-control': 'no-store' } });
+  return new Response(null, {
+    status: 303,
+    headers: { location: appUrl(`/einrichten/${slug}?klick=1`), 'cache-control': 'no-store' },
+  });
 }

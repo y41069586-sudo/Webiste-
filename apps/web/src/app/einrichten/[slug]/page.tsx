@@ -1,13 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
+import { after } from 'next/server';
 import { redirect } from 'next/navigation';
 import {
   DEFAULT_CONFIG,
   getCheckoutContext,
   getCheckoutDraft,
   getConfig,
+  getDb,
   komplettTermsCurrent,
+  notifyInterest,
+  recordEvent,
   planAmounts,
   publicOperatorSettings,
   setupCookieName,
@@ -16,6 +20,7 @@ import {
   v4TierLabel,
 } from '@wbm/core';
 import { PublicShell } from '@/components/public/shell';
+import { requestMetaFrom } from '@/lib/request';
 import { StepHeader } from '@/components/public/steps';
 import { TariffPicker, type QuickOption } from './quick-order';
 import { SetupEditor } from './uploads';
@@ -35,14 +40,23 @@ export default async function SetupPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ plan?: string; weg?: string }>;
+  searchParams: Promise<{ plan?: string; weg?: string; klick?: string }>;
 }) {
   const { slug } = await params;
-  const { plan: preferred, weg: wegParam } = await searchParams;
+  const { plan: preferred, weg: wegParam, klick } = await searchParams;
   const token = (await cookies()).get(setupCookieName(slug))?.value ?? '';
   // Tempo (17.11.2026): die drei Abfragen gleichzeitig statt nacheinander (Funktion in den USA, Datenbank in Europa)
   const [draft, fullCfg, ctx] = await Promise.all([getCheckoutDraft(slug, token), getConfig(), getCheckoutContext(slug)]);
   if (!draft) redirect(`/d/${slug}/uebernehmen`);
+  // „Übernehmen“-Klick zählen und melden – nach der Antwort dieser Seite (siehe /d/[slug]/uebernehmen)
+  if (klick === '1' && ctx.state === 'ok') {
+    const leadId = ctx.lead.id;
+    const meta = requestMetaFrom(await headers());
+    after(async () => {
+      if (await recordEvent(getDb(), { leadId, type: 'cta_click', req: meta }).catch(() => false))
+        await notifyInterest(leadId, 'cta_click', meta).catch(() => undefined);
+    });
+  }
   const cfg = publicOperatorSettings(fullCfg, DEFAULT_CONFIG.sender);
   const rounds = ctx.state === 'ok' ? ctx.cfg.onboarding.includedChangeRounds : 2;
   // Schnellbestellung: dieselben serverseitigen Preise und Laufzeiten wie auf der Prüfseite, nur für das aktive Angebot

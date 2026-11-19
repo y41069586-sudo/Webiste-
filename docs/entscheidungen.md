@@ -1949,3 +1949,7 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   Eine begonnene Einrichtung (`draft.touched`) führt immer zum Weg „Angaben zuerst“, der andere Weg ist dann nicht
   mehr erreichbar. „Empfohlen“ statt „Beliebt“ (keine belegten Verkaufszahlen, § 5 UWG). Mail-Knopf „Stand ansehen“.
   Lokal mit Mock-Zahlung durchgeklickt: beide Wege enden auf der Bezahlseite. Bilder: `reports/kauf-strecke/`.
+- 19.11.2026 Betreiber: „Übernehmen hat wieder über 10 s gedauert“. Protokoll: `/uebernehmen` 1,4 s (warm), danach
+  `/einrichten` 8,9 s mit Kaltstart. Ursache: `after()` (Klick zählen + Mail) hielt die einzige warme Instanz noch
+  beschäftigt, als der Browser der 303-Weiterleitung folgte → zweite, kalte Instanz. Jetzt zählt/meldet die
+  Einrichtungsseite den Klick nach ihrer Antwort (`?klick=1`); der Kunde liest dort, bevor er weiterklickt.
