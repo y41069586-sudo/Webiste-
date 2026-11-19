@@ -1920,3 +1920,9 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
 - 19.11.2026 Spar-Wecker: Betreiber stellt Wecker auf jede Minute rund um die Uhr. Gemessen: Weckruf auf /q/warm
   (404-Seite) ~0,5 s je Aufruf ≈ 70 Credits/Monat. Neu: eigene Route `/wach` ohne Datenbank und ohne Seitenaufbau
   (204, nie gecacht); Worker und Demo-Weckpixel nutzen sie. Erwartung 15–25 Credits/Monat, nach Deploy nachmessen.
+- 19.11.2026 Gesamtcheck vor Abo-Ende: Job `refresh-funnel` schlug seit dem Supabase-Umzug alle 30 Min fehl
+  (`schema "seitenwerk_ops" does not exist`, 96 Dead-Letter-Meldungen). Migration 0019 (Schema, SECURITY-DEFINER-
+  Funktion, Grants) im neuen Projekt nachgezogen; Aufruf als `seitenwerk_admin_backend` geprüft (58 Briefergebnisse).
+  Alle Indizes aus den Migrationen vorhanden. Offen: letztes geprüftes Backup vom 03.11. (Timer auf dem VPS prüfen).
+  Eigene Messaufrufe vom 18./19.11. haben beim echten Lead „Kolle Inh. Magerhans“ 22 `cta_click`-Events
+  (ua `mobil/safari`) erzeugt; Löschung nur nach Freigabe. Keine zusätzlichen Mails ausgelöst.
