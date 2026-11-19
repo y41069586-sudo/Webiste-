@@ -3,6 +3,9 @@ import type { ImpressumData } from '../db/schema';
 import type { OpeningHours } from '../types';
 
 /** Reihenfolge im Formular: Montag … Sonntag (Tagesindex wie Google: 0 = Sonntag). */
+/** Wählbare Terminlängen der Online-Terminwahl */
+export const BOOKING_SLOT_MINUTES = [30, 45, 60, 90, 120] as const;
+
 export const WEEK_DAYS: { day: number; label: string }[] = [
   { day: 1, label: 'Montag' },
   { day: 2, label: 'Dienstag' },
@@ -39,7 +42,11 @@ export interface OnboardingDay {
 export interface OnboardingData {
   business: { name: string; phone: string; email: string; street: string; houseNumber: string; postalCode: string; city: string };
   texts: { headline: string; subline: string; about: string; services: { title: string; text: string }[]; wishes: string };
-  hours: { mode: 'fixed' | 'appointment'; days: OnboardingDay[] };
+  /**
+   * booking: Online-Terminwahl auf der Website (nur mit festen Öffnungszeiten; fehlt = an).
+   * slotMinutes: Länge eines Termins in Minuten (fehlt = 60).
+   */
+  hours: { mode: 'fixed' | 'appointment'; days: OnboardingDay[]; booking?: boolean; slotMinutes?: number };
   impressum: {
     company: string;
     legalForm: string;
@@ -113,7 +120,12 @@ export const onboardingSubmitSchema = z
         .max(6, 'Höchstens 6 Leistungen.'),
       wishes: opt(2000),
     }),
-    hours: z.object({ mode: z.enum(['fixed', 'appointment']), days: z.array(daySchema).length(7) }),
+    hours: z.object({
+      mode: z.enum(['fixed', 'appointment']),
+      days: z.array(daySchema).length(7),
+      booking: z.boolean().optional(),
+      slotMinutes: z.union([z.literal(30), z.literal(45), z.literal(60), z.literal(90), z.literal(120)]).optional(),
+    }),
     impressum: z
       .object({
         company: req('Bitte den Namen laut Gewerbeanmeldung bzw. Register angeben.', 120),
@@ -222,6 +234,8 @@ export function normalizeOnboarding(raw: Partial<Record<keyof OnboardingData, un
           close2: s(d.close2, 5),
         };
       }),
+      booking: h.booking !== false,
+      slotMinutes: BOOKING_SLOT_MINUTES.includes(Number(h.slotMinutes) as never) ? Number(h.slotMinutes) : 60,
     },
     impressum: {
       company: s(i.company, 120),

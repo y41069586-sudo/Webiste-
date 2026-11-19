@@ -17,6 +17,8 @@ export interface SharedParts {
   isLive: boolean;
   /** Ziel des echten Formulars (nur Live-Seite), für Vorlagen mit eigenem Formularaufbau */
   liveForm: { action: string; privacyPath: string } | null;
+  /** Online-Terminwahl: Live = echte Buchungsseite, Entwurf = gesperrte Vorschau; sonst null */
+  bookingHref: string | null;
   /** Hinweis „Beispiel-Leistungen“ (nur Demo) */
   servicesNote(cls?: string): string;
   callHref: string | null;
@@ -924,6 +926,7 @@ ${jsonLd}
     isDemo,
     isLive,
     liveForm: isLive && live ? { action: live.formAction, privacyPath: live.privacyPath } : null,
+    bookingHref: isLive ? (live?.bookingUrl ?? null) : isDemo && demo ? `/d/${demo.slug}/termin` : null,
     servicesNote,
     callHref,
     phoneLabel,

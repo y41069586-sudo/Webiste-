@@ -7,6 +7,9 @@ import { onboardingAction, type OnboardingState } from './actions';
 const inputCls =
   'block w-full rounded-lg border bg-white px-3 py-2.5 text-base shadow-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 focus:outline-none sm:text-sm';
 
+/** wie BOOKING_SLOT_MINUTES im Kern (hier lokal: Client-Komponente lädt keinen Servercode) */
+const BOOKING_SLOT_MINUTES = [30, 45, 60, 90, 120] as const;
+
 const DAYS: { day: number; label: string }[] = [
   { day: 1, label: 'Montag' },
   { day: 2, label: 'Dienstag' },
@@ -344,6 +347,34 @@ export function OnboardingForm({ token, initial, photos, setupAction, externalPe
               </fieldset>
             );
           })}
+        </div>
+        <div className={mode === 'fixed' ? 'space-y-3 rounded-lg border border-slate-200 p-3 text-sm' : 'hidden'}>
+          <label className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              name="hours.booking"
+              defaultChecked={v.hours.booking !== false}
+              className="mt-0.5 h-4 w-4 accent-brand-600"
+            />
+            <span>
+              <span className="font-medium">Online-Terminwahl auf der Website anbieten</span>
+              <span className="block text-slate-600">
+                Kunden sehen freie Zeiten innerhalb Ihrer Öffnungszeiten und fragen einen Termin an. Sie bekommen jede Anfrage per
+                E-Mail und bestätigen oder lehnen sie mit einem Klick ab. Erst Ihre Bestätigung macht den Termin verbindlich. Bitte
+                erwähnen Sie die Terminanfragen in Ihrer Datenschutzerklärung (Angaben werden 30 Tage nach dem Termin gelöscht).
+              </span>
+            </span>
+          </label>
+          <label className="flex flex-wrap items-center gap-2">
+            <span className="font-medium">Dauer eines Termins</span>
+            <select name="hours.slotMinutes" defaultValue={String(v.hours.slotMinutes ?? 60)} className={`${inputCls} w-36 border-slate-300`}>
+              {BOOKING_SLOT_MINUTES.map((m) => (
+                <option key={m} value={m}>
+                  {m} Minuten
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </Section>
 

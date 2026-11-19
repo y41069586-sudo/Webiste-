@@ -62,6 +62,16 @@ describe('Praxis-Vorlage (Designrichtlinie 2026-11-19)', () => {
     for (const id of project.match(/id="pf-[a-z]+"/g)!) expect(project).toContain(`for="${id.slice(4, -1)}"`);
   });
 
+  it('Terminwahl: Entwurf verlinkt die gesperrte Vorschau, Live nur mit echter Buchungsseite', () => {
+    const demo = renderSite(demoInput('praxis-projekt', 'anthrazit'));
+    expect(demo).toMatch(/href="\/d\/[^"]+\/termin"/);
+    expect(demo).toContain('Freie Termine ansehen');
+    expect(renderSite(live('praxis-projekt'))).not.toContain('Freie Termine ansehen');
+    const withBooking = live('praxis-projekt');
+    const html = renderSite({ ...withBooking, live: { ...withBooking.live, bookingUrl: 'https://app.test/termin/abc' } });
+    expect(html).toContain('href="https://app.test/termin/abc"');
+  });
+
   it('Eigene Note je Betrieb: Akzentfarbe stabil je Name, nicht für alle gleich; Logo nur mit Rechten', () => {
     const accents = new Set(
       ['Testbetrieb A', 'Testbetrieb B', 'Testbetrieb C', 'Testbetrieb D', 'Testbetrieb E', 'Testbetrieb F'].map((name) => {

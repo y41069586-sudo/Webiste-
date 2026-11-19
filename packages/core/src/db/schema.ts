@@ -549,6 +549,40 @@ export const sites = pgTable(
   (t) => [uniqueIndex('sites_customer_uidx').on(t.customerId), uniqueIndex('sites_form_key_uidx').on(t.formKey)],
 );
 
+export type BookingStatus = 'requested' | 'confirmed' | 'declined' | 'cancelled' | 'expired';
+
+/** Terminbuchung auf Kunden-Websites (Migration 0021): Anfrage mit fester Uhrzeit, Bestätigung per E-Mail-Link. */
+export const bookings = pgTable(
+  'bookings',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    siteId: uuid('site_id')
+      .notNull()
+      .references(() => sites.id, { onDelete: 'cascade' }),
+    status: text('status').$type<BookingStatus>().default('requested').notNull(),
+    service: text('service'),
+    startsAt: ts('starts_at').notNull(),
+    endsAt: ts('ends_at').notNull(),
+    visitorName: text('visitor_name'),
+    visitorEmail: text('visitor_email'),
+    visitorPhone: text('visitor_phone'),
+    message: text('message'),
+    businessTokenHash: text('business_token_hash').notNull(),
+    visitorTokenHash: text('visitor_token_hash').notNull(),
+    decisionNote: text('decision_note'),
+    decidedAt: ts('decided_at'),
+    requestExpiresAt: ts('request_expires_at').notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex('bookings_business_token_uidx').on(t.businessTokenHash),
+    uniqueIndex('bookings_visitor_token_uidx').on(t.visitorTokenHash),
+    uniqueIndex('bookings_active_slot_uidx').on(t.siteId, t.startsAt).where(sql`"status" IN ('requested','confirmed')`),
+    index('bookings_site_time_idx').on(t.siteId, t.startsAt),
+  ],
+);
+
 export const changeRequests = pgTable(
   'change_requests',
   {

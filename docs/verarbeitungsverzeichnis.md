@@ -90,6 +90,15 @@ Verlassen der Seite einmal per `sendBeacon` an die eigene Domain sendet – kein
 | Rolle       | Auftragsverarbeitung nach Art. 28 DSGVO für den Kunden → **AV-Vertrag mit jedem Kunden nötig** (Vorlage in die AGB/Onboarding aufnehmen) |
 | Speicherung | Inhalt wird nicht gespeichert, nur per E-Mail weitergeleitet; Versand-Metadaten (Empfänger, Betreff) bis 24 Monate                       |
 
+## 6a. Online-Terminanfragen auf den Kunden-Websites (wir als Auftragsverarbeiter des Kunden, seit 19.11.2026)
+
+- **Zweck:** Terminanfrage einer Person an den Betrieb; Bestätigung, Absage, Ablauf.
+- **Daten:** Name, E-Mail (Pflicht, für die Bestätigung), Telefon und Nachricht (freiwillig), gewählte Leistung und Uhrzeit.
+- **Speicherung:** Tabelle `bookings`, solange der Termin offen ist. Löschung 30 Tage nach dem Termin bzw. 30 Tage nach Absage/Ablauf (Lauf `booking-sweep`, halbstündlich). Unbestätigte Anfragen verfallen nach 48 Stunden.
+- **Empfänger:** der Betrieb (E-Mail an seine Formular-Adresse), die anfragende Person (Eingangs-, Bestätigungs- oder Absage-Mail), E-Mail-Dienst Resend.
+- **Messung:** nur der Schritt (angefragt/bestätigt/abgelehnt/abgesagt/verfallen) als Ereignis `site_booking`, ohne Namen, Kontakte oder Zeiten.
+- **Hinweis an den Kunden:** Er erwähnt die Terminanfragen in seiner Datenschutzerklärung (Hinweis im Einrichtungsformular). Links in E-Mails lösen nichts aus; Entscheidungen nur per Knopf.
+
 ## 7. Admin-Zugang und Protokollierung
 
 |            |                                                                                                             |

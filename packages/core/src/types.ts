@@ -77,6 +77,8 @@ export const EVENT_TYPES = [
   'undeliverable',
   // Betriebs-Website (19.11.2026): Anfrage serverseitig angenommen und weitergeleitet (keine Formularinhalte im Ereignis)
   'site_inquiry',
+  // Terminbuchung (19.11.2026): nur Schritt (angefragt/bestätigt/…), keine Namen, Kontakte oder Zeiten
+  'site_booking',
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 

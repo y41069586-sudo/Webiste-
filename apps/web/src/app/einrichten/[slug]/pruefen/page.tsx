@@ -185,6 +185,14 @@ export default async function ReviewSetup({
                         `${['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'][h.day]}: ${h.closed ? 'geschlossen' : `${h.open}–${h.close}${h.open2 ? `, ${h.open2}–${h.close2}` : ''}`}`,
                     )
                     .join('\n')}
+              {data.hours.mode === 'fixed' ? (
+                <>
+                  <br />
+                  {data.hours.booking !== false
+                    ? `Online-Terminwahl: an (${data.hours.slotMinutes ?? 60} Minuten je Termin, Bestätigung per E-Mail)`
+                    : 'Online-Terminwahl: aus'}
+                </>
+              ) : null}
             </p>
             <p>
               <strong>Impressumsangaben</strong>

@@ -53,6 +53,8 @@ async function main(): Promise<void> {
     // Lern-Agent (L6) nach dem Optimizer
     { queue: QUEUES.learningAgent, cron: '30 18 * * 0' },
     { queue: QUEUES.alertMails, cron: '*/15 * * * *' },
+    // Terminbuchung: Anfragen ohne Antwort nach 48 h schließen, alte Angaben löschen
+    { queue: QUEUES.bookingSweep, cron: '7,37 * * * *' },
     { queue: QUEUES.imapPoll, cron: '*/5 * * * *', enabled: () => Boolean(env.IMAP_HOST && env.IMAP_USER) },
   ]);
   // QR-/Kurz-Link-Strecke wach halten, damit der erste Scan nicht ~12 s lädt (KEEP_WARM_MINUTES, 0 = aus)

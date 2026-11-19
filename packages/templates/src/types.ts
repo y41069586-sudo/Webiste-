@@ -189,6 +189,8 @@ export interface DemoOptions {
 
 export interface LiveOptions {
   formAction: string;
+  /** Online-Terminwahl (nur wenn der Betrieb sie mit festen Öffnungszeiten nutzt) */
+  bookingUrl?: string;
   imprintPath: string;
   privacyPath: string;
   canonicalUrl?: string;

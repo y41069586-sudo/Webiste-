@@ -1,8 +1,11 @@
-import { maintainClaims, refreshFunnel, runRetention, runSafetyNets } from '@wbm/core';
+import { maintainClaims, refreshFunnel, runRetention, runSafetyNets, sweepBookings } from '@wbm/core';
 import { defineJob } from '../runtime';
 
 /** Nachts: Löschfristen umsetzen (Protokoll im Audit-Log). */
 defineJob('retention', async () => runRetention());
+
+/** Halbstündlich: unbeantwortete Terminanfragen nach 48 h schließen, Angaben alter Termine löschen. */
+defineJob('booking-sweep', async () => sweepBookings());
 
 /** Täglich: Claims-Datei abgleichen, abgelaufene Quellen sperren und melden. */
 defineJob('claims', async () => maintainClaims());

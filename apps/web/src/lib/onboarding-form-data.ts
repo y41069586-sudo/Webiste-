@@ -35,6 +35,8 @@ export function onboardingFromForm(f: FormData): OnboardingData {
         open2: str(f, `hours.${day}.open2`),
         close2: str(f, `hours.${day}.close2`),
       })),
+      booking: f.get('hours.booking') === 'on',
+      slotMinutes: Number(str(f, 'hours.slotMinutes')) || 60,
     },
     impressum: {
       company: str(f, 'impressum.company'),

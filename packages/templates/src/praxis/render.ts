@@ -163,7 +163,10 @@ function renderPraxis(ctx: RenderContext, key: PraxisDirectionKey): string {
   const form = live
     ? `<form id="frage" class="pw-form" method="post" action="${esc(live.action)}" accept-charset="utf-8"><fieldset><legend class="sr-only">${REQUEST_TITLE[req]}</legend>${fields}<input type="hidden" name="anliegen" value="${esc(d.primaryLabel)}"><div class="pw-hp" aria-hidden="true"><label for="pf-website">Website</label><input id="pf-website" name="website" type="text" tabindex="-1" autocomplete="off"></div><div class="pw-consent"><input id="pf-consent" name="consent" type="checkbox" required><label for="pf-consent">Ich bin einverstanden, dass meine Angaben zur Beantwortung meiner Anfrage verarbeitet werden. Hinweise in der <a href="${esc(live.privacyPath)}">Datenschutzerklärung</a>.</label></div><button class="pw-btn pw-btn-main" type="submit">${submit}</button><p class="pw-hint">Das ist eine Anfrage, keine feste Buchung. Der Betrieb meldet sich zur Abstimmung.</p></fieldset></form>`
     : `<form class="pw-form" action="#" method="post" onsubmit="return false" aria-describedby="pw-form-note"><p id="pw-form-note" class="pw-preview"><strong>Vorschau:</strong> Im Entwurf wird nichts versendet und kein Termin reserviert. Nach der Übernahme kommen Anfragen direkt beim Betrieb an.</p><fieldset disabled><legend class="sr-only">${REQUEST_TITLE[req]} (Vorschau)</legend>${fields}<button class="pw-btn pw-btn-main" type="submit">${submit}</button></fieldset></form>`;
-  const kontakt = `<section id="anfrage" class="pw-sec pw-contact"><div class="pw-wrap pw-contact-grid"><div><h2>${REQUEST_TITLE[req]}</h2><p class="pw-lead">Ihre Anfrage geht direkt an ${esc(f.name)}. Danach meldet sich der Betrieb bei Ihnen, um Details und einen Termin abzustimmen.</p>${call ? `<p class="pw-bigtel"><a href="${esc(call.href)}">${esc(call.label)}</a></p>` : ''}<p>${p.addressLines}<br><a href="${esc(p.mapsHref)}" target="_blank" rel="noopener noreferrer">Route planen</a></p>${hours ? `<h3 class="pw-h3">Öffnungszeiten</h3><div class="pw-hours">${hours}</div>` : ''}</div>${form}</div></section>`;
+  const booking = p.bookingHref
+    ? `<div class="pw-book"><h3 class="pw-h3">Lieber gleich eine Zeit wählen?</h3><p>Sie sehen freie Termine und fragen einen davon an. ${esc(f.name)} bestätigt per E-Mail.${draft ? ' <em>(Im Entwurf als Vorschau.)</em>' : ''}</p><a class="pw-btn pw-btn-book" href="${esc(p.bookingHref)}">Freie Termine ansehen${arrow}</a></div>`
+    : '';
+  const kontakt = `<section id="anfrage" class="pw-sec pw-contact"><div class="pw-wrap pw-contact-grid"><div><h2>${REQUEST_TITLE[req]}</h2><p class="pw-lead">Ihre Anfrage geht direkt an ${esc(f.name)}. Danach meldet sich der Betrieb bei Ihnen, um Details und einen Termin abzustimmen.</p>${call ? `<p class="pw-bigtel"><a href="${esc(call.href)}">${esc(call.label)}</a></p>` : ''}<p>${p.addressLines}<br><a href="${esc(p.mapsHref)}" target="_blank" rel="noopener noreferrer">Route planen</a></p>${hours ? `<h3 class="pw-h3">Öffnungszeiten</h3><div class="pw-hours">${hours}</div>` : ''}${booking}</div>${form}</div></section>`;
 
   const body = `${header}<main id="inhalt">${heroHtml}${d.order.map((k) => blocks[k]).join('')}${kontakt}</main>${p.footer({ className: 'pw-footer', linkClass: 'underline' })}`;
   const k = { ...d.colors, accent: praxisAccentFor(f.name, d) };
@@ -288,6 +291,10 @@ html body.pw .pw-contact h2,html body.pw .pw-contact h3,html body.pw .pw-contact
 .pw-hours dl{margin:0}.pw-hours dd{margin:0}
 html body.pw .pw-contact .pw-muted,html body.pw .pw-contact .pw-hlabel{color:rgba(255,255,255,.82)}
 .pw-form{background:var(--bg);color:var(--ink);padding:var(--s4);border-radius:var(--r)}
+.pw-book{margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid rgba(255,255,255,.28)}
+.pw-book p{opacity:.88}
+html body.pw .pw-contact .pw-btn-book{background:var(--bg);border-color:var(--bg);color:var(--ink)}
+html body.pw .pw-contact .pw-btn-book:hover{background:transparent;color:var(--bg)}
 .pw-form fieldset{border:0;margin:0;padding:0;display:grid;gap:var(--s2)}
 .pw-preview{background:var(--sf);border-left:3px solid var(--ac);padding:12px 14px;font-size:.92rem;margin-bottom:var(--s3)}
 .pw-field{display:grid;gap:6px;font-weight:600;font-size:.95rem}

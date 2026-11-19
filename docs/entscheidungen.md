@@ -1980,3 +1980,17 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
 - **Ablauf nach Zahlung geprüft:** Angaben → Claude überarbeitet Texte (bei Fehler Übernahme ohne KI) → Vorschau-Mail
   → Freigabe durch Kunden → Betreiber bekommt Mail „Domainkauf freigeben“ → ein Klick: INWX registriert auf den Kunden,
   DNS zu Netlify, Upload, Live-Check bis SSL steht → Übergabe-Mail. Einziger Handgriff des Betreibers: der Klick.
+
+## 19.11.2026 – Eigenes Buchungssystem für Kunden-Websites (Betreiberauftrag)
+
+- Besucher wählen auf einer Seite in unserer App (`/termin/{formKey}`, verlinkt mit „Freie Termine ansehen“) eine freie Zeit
+  aus den Öffnungszeiten (Raster = Termindauer 30–120 Min., frühestens morgen, höchstens 21 Tage). Die Anfrage reserviert die
+  Zeit 48 Stunden. Der Betrieb bekommt eine E-Mail mit Link zu „Bestätigen / Ablehnen“ (nur per Knopf/POST, damit
+  Link-Vorschauen nichts auslösen); „Anderen Termin vorschlagen“ = Antworten auf die E-Mail. Der Besucher bekommt Eingang,
+  Bestätigung (mit .ics) oder Absage; er kann über seinen Link absagen. Ohne Antwort verfällt die Anfrage nach 48 h.
+- Doppelbuchung ausgeschlossen: Sperre je Website + Überschneidungsprüfung + Teil-Eindeutigkeit (`bookings_active_slot_uidx`).
+- Nur mit festen Öffnungszeiten; der Kunde kann die Terminwahl im Einrichtungsformular ausschalten (Standard: an).
+- Demos zeigen die Terminwahl als gesperrte Vorschau (`/d/{slug}/termin`), nichts wird gebucht.
+- Tabelle `bookings` (Migration 0021, rein additiv, RLS an) am 19.11.2026 in Produktion angelegt.
+- Bewusst nicht: Kalender-Synchronisation mit Google/Outlook des Betriebs, SMS-Erinnerungen, Bezahlung bei Buchung.
+

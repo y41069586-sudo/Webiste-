@@ -1,3 +1,4 @@
+import { bookingConfigFor } from '../services/bookings';
 import { addDays as v4AddDays } from '../util/time';
 import { eq } from 'drizzle-orm';
 import {
@@ -241,6 +242,7 @@ function renderInput(ctx: Ctx, content: SiteContent, facts: BusinessFacts, mode:
     facts,
     live: {
       formAction: appUrl(`/api/forms/${ctx.site.formKey}`),
+      ...(bookingConfigFor(ctx.site) ? { bookingUrl: appUrl(`/termin/${ctx.site.formKey}`) } : {}),
       imprintPath: 'impressum.html',
       privacyPath: 'datenschutz.html',
       ...(domain ? { canonicalUrl: `https://${domain}/` } : {}),

@@ -36,6 +36,7 @@ export const QUEUES = {
   alertMails: 'alert-mails',
   pipelineTick: 'pipeline-tick',
   deadLetters: 'dead-letters',
+  bookingSweep: 'booking-sweep',
 } as const;
 
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
@@ -90,6 +91,7 @@ export interface QueuePayloads {
   'alert-mails': Record<string, never>;
   'pipeline-tick': Record<string, never>;
   'dead-letters': Record<string, unknown>;
+  'booking-sweep': Record<string, never>;
 }
 
 interface QueueDef {
@@ -117,6 +119,7 @@ export const QUEUE_DEFS: Partial<Record<QueueName, Partial<QueueDef>>> = {
   'deploy-site': { retryLimit: 3, retryDelay: 60, expireInSeconds: 30 * 60 },
   'pipeline-tick': { policy: 'singleton', retryLimit: 0 },
   'dead-letters': { retryLimit: 0 },
+  'booking-sweep': { policy: 'singleton', retryLimit: 1 },
 };
 
 interface BossGlobal {
