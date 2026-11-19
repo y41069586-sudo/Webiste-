@@ -78,8 +78,7 @@ function signatureText(cfg: AppConfig): string {
   return ['Viele Grüße', s.name, '', '--', s.company, `${s.street}, ${s.postalCode} ${s.city}`, s.email, s.website].join('\n');
 }
 
-export const SPAM_HINT =
-  'Damit unsere E-Mails sicher bei Ihnen ankommen: Falls diese Nachricht im Spam-Ordner lag, markieren Sie sie bitte als „Kein Spam“ und schauen Sie bei unseren nächsten E-Mails auch dort nach.';
+export const SPAM_HINT = 'Lag diese E-Mail im Spam? Bitte als „Kein Spam“ markieren, damit unsere nächsten Nachrichten ankommen.';
 
 export function renderEmail(
   cfg: AppConfig,
@@ -206,63 +205,53 @@ export function orderConfirmationEmail(
     v4?: { tier: 'basis' | 'care_plus' | 'komplett'; monthlyCents: number; billingMode?: 'saved_mandate' | 'manual_checkout' };
   },
 ): EmailContent {
+  // 19.11.2026 (Betreiber: „so viel Text“): kurz, aber alle Vertragsangaben (Preis, Start, Laufzeit, Garantie) bleiben
   const p = cfg.pricing;
-  const terms: Block[] = [];
   const komplett = d.v4?.tier === 'komplett';
-  const box = (t: string): Block => ({ box: t });
+  const terms: string[] = [];
   if (d.v4 && komplett)
-    terms.push(box(
-      `Ihr Tarif SeitenWerk Komplett: Es wurde nichts abgebucht. ${formatEuro(d.v4.monthlyCents)} pro Monat, die erste Abbuchung erfolgt 7 Tage nach Ihrer Bestellung über das bei Stripe gespeicherte Zahlungsmittel. Mindestlaufzeit 12 Monate ab der ersten Abbuchung, danach monatlich kündbar. Für jede Abbuchung erhalten Sie eine eigene Rechnung.`),
+    terms.push(
+      `SeitenWerk Komplett: heute 0 €. ${formatEuro(d.v4.monthlyCents)}/Monat, erste Abbuchung 7 Tage nach Bestellung über Ihr bei Stripe hinterlegtes Zahlungsmittel. 12 Monate Laufzeit ab der ersten Abbuchung, danach monatlich kündbar.`,
     );
   else if (d.v4)
-    terms.push(box(
-      `Einmalige Einrichtung: ${d.amount}. Ihr gewählter Tarif ${v4TierLabel(d.v4.tier)} kostet insgesamt ${formatEuro(d.v4.monthlyCents)} pro Monat. ${d.v4.billingMode === 'saved_mandate' ? 'Das Monatsabo startet automatisch nach bestätigtem Go-Live über das ausdrücklich vereinbarte, bei Stripe gespeicherte Zahlungsmittel.' : 'Das Monatsabo schließen Sie erst nach bestätigtem Go-Live gesondert ab.'} Keine Monatsabbuchung vor Go-Live und keine zwölfmonatige Mindestbindung.`),
+    terms.push(
+      `${v4TierLabel(d.v4.tier)}: ${d.amount} einmalig, danach ${formatEuro(d.v4.monthlyCents)}/Monat ab Go-Live${d.v4.billingMode === 'saved_mandate' ? ' (automatisch über Ihr bei Stripe hinterlegtes Zahlungsmittel)' : ' (das Abo schließen Sie nach Go-Live gesondert ab)'}. Keine Abbuchung vor Go-Live, monatlich kündbar.`,
     );
   if (d.monthlyMinTermEnds)
-    terms.push(box(
-      `Sie zahlen ${d.amount} pro Monat, die Mindestlaufzeit endet am ${d.monthlyMinTermEnds}. Danach kostet „${p.subscriptionName}“ automatisch nur noch ${formatEuro(p.subscriptionCents)} pro Monat und ist monatlich kündbar. Für jede Rate erhalten Sie eine eigene Rechnung.`),
+    terms.push(
+      `${d.amount}/Monat bis ${d.monthlyMinTermEnds} (Mindestlaufzeit), danach ${formatEuro(p.subscriptionCents)}/Monat, monatlich kündbar.`,
     );
   if (d.guaranteeUntil)
-    terms.push(box(
-      `Zufriedenheitsgarantie: Sind Sie nicht zufrieden, antworten Sie bis zum ${d.guaranteeUntil} auf diese E-Mail – Sie bekommen Ihr Geld zurück${d.monthlyMinTermEnds ? ' und der Vertrag endet' : ''}.`),
-    );
+    terms.push(`Nicht zufrieden? Bis ${d.guaranteeUntil} antworten – Sie bekommen Ihr Geld zurück.`);
   return renderEmail(cfg, {
     subject: komplett
       ? `Ihre Bestellung: SeitenWerk Komplett für ${d.company}`
       : `Ihre Bestellung: ${d.v4 ? `SeitenWerk ${v4TierLabel(d.v4.tier)} – Einrichtung` : d.monthlyMinTermEnds ? p.monthlyName : p.packageName} für ${d.company} (Rechnung ${d.invoiceNumber})`,
     heading: 'Danke für Ihre Bestellung',
-    preheader: d.prepared
-      ? 'Ihre Angaben sind übernommen – als Nächstes kommt Ihre Vorschau.'
-      : 'Nächster Schritt: Ihre Angaben für die Website eintragen (ca. 10 Minuten).',
+    preheader: d.prepared ? 'Als Nächstes kommt Ihre Vorschau.' : 'Nächster Schritt: Ihre Angaben eintragen (ca. 10 Minuten).',
     name: d.name,
     blocks: [
       komplett
-        ? 'vielen Dank für Ihre Bestellung – Ihr Zahlungsmittel ist hinterlegt. Bezahlt wird erst, wenn Ihre fertige Website online ist.'
-        : `vielen Dank für Ihre Bestellung – die Zahlung über ${d.amount} ist eingegangen. Die Rechnung ${d.invoiceNumber} finden Sie im Anhang.`,
-      ...terms,
+        ? 'Ihr Zahlungsmittel ist hinterlegt.'
+        : `Ihre Zahlung über ${d.amount} ist eingegangen. Die Rechnung ${d.invoiceNumber} liegt im Anhang.`,
+      ...(terms.length ? [{ box: terms.join('\n') }] : []),
       d.prepared
-        ? 'Ihre vor der Zahlung gespeicherte Einrichtung wurde übernommen: Betriebsdaten, Texte, Bilder, Anfrage-Empfänger und Wunschdomain. Wir bereiten die Vorschau vor; veröffentlicht wird erst nach Ihrer Freigabe.'
-        : 'Damit Ihre Website online gehen kann, brauchen wir noch ein paar Angaben von Ihnen: Impressum, gegebenenfalls Logo und Fotos, Ihre Leistungen und Öffnungszeiten. Das dauert etwa 10 Minuten.',
+        ? 'Ihre gespeicherten Angaben sind übernommen. Wir bereiten jetzt Ihre Vorschau vor.'
+        : 'Jetzt fehlen nur noch Ihre Angaben (Impressum, Leistungen, Öffnungszeiten). Dauer: etwa 10 Minuten.',
       {
         button: {
           href: d.onboardingUrl,
-          label: d.prepared ? 'Einrichtung und Vorschau ansehen' : 'Angaben für die Website eintragen',
+          label: d.prepared ? 'Einrichtung ansehen' : 'Angaben eintragen',
         },
       },
-      'So geht es weiter:',
       {
         steps: [
-          d.prepared
-            ? 'Ihre gespeicherten Angaben bilden die Grundlage für die Fertigstellung.'
-            : 'Sie tragen Ihre Angaben ein (der Link bleibt gültig, Sie können jederzeit weitermachen).',
-          'Wir passen die Website an und schicken Ihnen eine Vorschau.',
-          `Sie geben die Vorschau frei oder wünschen Änderungen (bis zu ${cfg.onboarding.includedChangeRounds} Runden inklusive).`,
-          d.domain
-            ? `Wir registrieren ${d.domain} auf Ihren Namen und schalten die Website live.`
-            : 'Wir registrieren Ihre Domain auf Ihren Namen und schalten die Website live.',
+          d.prepared ? 'Wir stellen die Website fertig' : 'Sie tragen Ihre Angaben ein',
+          `Sie prüfen die Vorschau (${cfg.onboarding.includedChangeRounds} Änderungsrunden inklusive)`,
+          d.domain ? `Wir schalten ${d.domain} live` : 'Wir schalten Ihre Website live',
         ],
       },
-      'Bei Fragen antworten Sie einfach auf diese E-Mail.',
+      'Fragen? Einfach auf diese E-Mail antworten.',
     ],
   });
 }
@@ -273,10 +262,9 @@ export function paymentFailedEmail(cfg: AppConfig, d: { name: string; retryUrl: 
     heading: 'Zahlung nicht abgeschlossen',
     name: d.name,
     blocks: [
-      'leider ist Ihre Zahlung für das Website-Paket nicht bei uns angekommen (zum Beispiel weil die Lastschrift zurückgegeben wurde). Es wurde nichts abgebucht, das Sie nicht zurückerhalten.',
-      'Wenn Sie die Website weiterhin möchten, können Sie die Bestellung hier erneut abschließen:',
-      { button: { href: d.retryUrl, label: 'Bestellung erneut abschließen' } },
-      'Haben Sie Fragen? Antworten Sie einfach auf diese E-Mail.',
+      'leider ist Ihre Zahlung nicht bei uns angekommen, zum Beispiel weil die Lastschrift zurückgegeben wurde. Sie verlieren dabei kein Geld.',
+      { button: { href: d.retryUrl, label: 'Erneut bestellen' } },
+      'Fragen? Einfach auf diese E-Mail antworten.',
     ],
   });
 }
@@ -290,10 +278,7 @@ export function recurringInvoiceEmail(
     subject: `Ihre Rechnung ${d.invoiceNumber}${d.domain ? ` für ${d.domain}` : ''}`,
     heading: 'Zahlung eingegangen',
     name: d.name,
-    blocks: [
-      `vielen Dank – die Zahlung über ${d.amount} für den Zeitraum ${d.period} ist eingegangen. Die Rechnung ${d.invoiceNumber} finden Sie im Anhang.`,
-      'Bei Fragen antworten Sie einfach auf diese E-Mail.',
-    ],
+    blocks: [`danke! ${d.amount} für ${d.period} sind eingegangen. Die Rechnung ${d.invoiceNumber} liegt im Anhang.`],
   });
 }
 
@@ -303,16 +288,12 @@ export function subscriptionPaymentFailedEmail(
   d: { name: string; amount: string; payUrl: string | null; final: boolean; domain: string | null },
 ): EmailContent {
   const blocks: Block[] = [
-    `leider konnte die Monatsrate über ${d.amount}${d.domain ? ` für ${d.domain}` : ''} nicht eingezogen werden – zum Beispiel weil die Karte abgelaufen ist oder die Lastschrift zurückgegeben wurde.`,
+    `die Monatsrate über ${d.amount}${d.domain ? ` für ${d.domain}` : ''} konnte nicht eingezogen werden.`,
     d.final
-      ? 'Wir haben es mehrmals versucht. Damit keine weiteren Kosten entstehen, ist Ihre Website vorübergehend pausiert. Sobald die Zahlung eingegangen ist, ist sie automatisch wieder online.'
-      : 'Wir versuchen es in den nächsten Tagen automatisch noch einmal. Ihre Website bleibt bis dahin online.',
+      ? 'Ihre Website ist deshalb vorübergehend pausiert. Sobald die Zahlung da ist, ist sie automatisch wieder online.'
+      : 'Wir versuchen es in den nächsten Tagen automatisch noch einmal. Ihre Website bleibt online.',
   ];
-  if (d.payUrl)
-    blocks.push('Sie können die Rate auch direkt bezahlen oder Ihr Zahlungsmittel aktualisieren:', {
-      button: { href: d.payUrl, label: 'Rate bezahlen' },
-    });
-  blocks.push('Haben Sie Fragen? Antworten Sie einfach auf diese E-Mail.');
+  if (d.payUrl) blocks.push({ button: { href: d.payUrl, label: 'Rate bezahlen' } });
   return renderEmail(cfg, {
     subject: d.final ? 'Ihre Website ist pausiert – Zahlung ausstehend' : 'Ihre Monatsrate konnte nicht eingezogen werden',
     heading: d.final ? 'Ihre Website ist pausiert' : 'Monatsrate nicht eingezogen',
@@ -327,15 +308,13 @@ export function dunningReminderEmail(
   d: { name: string; stage: 1 | 2; amount: string; domain: string | null; pauseOn: string | null; payUrl: string | null },
 ): EmailContent {
   const blocks: Block[] = [
-    d.stage === 1
-      ? `die Monatsrate über ${d.amount}${d.domain ? ` für ${d.domain}` : ''} konnte auch nach mehreren automatischen Versuchen nicht eingezogen werden.`
-      : `wir erinnern noch einmal an die offene Monatsrate über ${d.amount}${d.domain ? ` für ${d.domain}` : ''}.`,
+    `${d.stage === 1 ? 'die' : 'noch einmal zur'} offene${d.stage === 1 ? '' : 'n'} Monatsrate über ${d.amount}${d.domain ? ` für ${d.domain}` : ''}${d.stage === 1 ? ' konnte nicht eingezogen werden.' : '.'}`,
     d.pauseOn
-      ? `Bitte begleichen Sie die Rate bis zum ${d.pauseOn}. Ist sie bis dahin nicht eingegangen, müssen wir Ihre Website vorübergehend pausieren.`
-      : 'Bitte begleichen Sie die Rate so bald wie möglich.',
+      ? `Bitte bis ${d.pauseOn} bezahlen, sonst müssen wir Ihre Website vorübergehend pausieren.`
+      : 'Bitte bezahlen Sie die Rate so bald wie möglich.',
   ];
   if (d.payUrl) blocks.push({ button: { href: d.payUrl, label: 'Rate bezahlen' } });
-  blocks.push('Gibt es ein Problem mit der Zahlung? Antworten Sie einfach auf diese E-Mail – wir finden eine Lösung.');
+  blocks.push('Gibt es ein Problem? Einfach antworten, wir finden eine Lösung.');
   return renderEmail(cfg, {
     subject: d.stage === 1 ? 'Zahlungserinnerung: offene Monatsrate' : 'Zweite Zahlungserinnerung: offene Monatsrate',
     heading: 'Zahlungserinnerung',
@@ -354,12 +333,11 @@ export function guaranteeRefundEmail(
     heading: 'Rückabwicklung bestätigt',
     name: d.name,
     blocks: [
-      `schade, dass die Website nicht gepasst hat. Wie versprochen erstatten wir Ihnen ${d.amount}${d.monthly ? ' und haben den Vertrag beendet – es werden keine weiteren Raten abgebucht' : ''}. Die Stornorechnung folgt in einer separaten E-Mail.`,
-      'Die Website ist offline genommen.',
+      `wie versprochen erstatten wir Ihnen ${d.amount}${d.monthly ? ', der Vertrag ist beendet' : ''}. Die Website ist offline. Die Stornorechnung kommt separat.`,
       d.domainRegistered
-        ? `Die Domain ${d.domainRegistered} ist auf Ihren Namen registriert. Wir übertragen sie Ihnen gern kostenlos: Antworten Sie einfach auf diese E-Mail, dann schicken wir Ihnen den Auth-Code für den Umzug zu einem Anbieter Ihrer Wahl. Möchten Sie sie nicht behalten, verlängern wir sie nicht${d.domainExpires ? ` – sie läuft dann am ${d.domainExpires} aus` : ''}.`
-        : 'Eine Domain wurde noch nicht registriert, es bleibt also nichts zu tun.',
-      'Vielen Dank, dass Sie es ausprobiert haben.',
+        ? `Die Domain ${d.domainRegistered} gehört Ihnen. Möchten Sie sie behalten, antworten Sie einfach – wir schicken den Code für den Umzug. Sonst läuft sie${d.domainExpires ? ` am ${d.domainExpires}` : ''} aus.`
+        : 'Es wurde noch keine Domain registriert, Sie müssen nichts tun.',
+      'Danke, dass Sie es ausprobiert haben.',
     ],
   });
 }
@@ -375,10 +353,10 @@ export function demoReminderEmail(
     preheader: `Noch bis ${d.expiresLabel} ansehen.`,
     name: d.name ?? '',
     blocks: [
-      `vielen Dank für Ihre Nachricht zu Ihrem Website-Entwurf. Kurz zur Erinnerung: Der Entwurf ist noch bis ${d.expiresLabel} online, danach wird er automatisch gelöscht.`,
+      `kurze Erinnerung: Ihr Website-Entwurf ist noch bis ${d.expiresLabel} online.`,
       { button: { href: d.demoUrl, label: 'Entwurf ansehen' } },
-      'Haben Sie noch Fragen? Antworten Sie einfach auf diese E-Mail. Dies ist die einzige Erinnerung – wir schreiben Ihnen danach nicht mehr.',
-      { small: `Keine Erinnerungen mehr erhalten: ${d.unsubscribeUrl}` },
+      'Das ist die einzige Erinnerung, danach schreiben wir Ihnen nicht mehr.',
+      { small: `Keine Erinnerungen mehr: ${d.unsubscribeUrl}` },
     ],
   });
 }
@@ -391,15 +369,14 @@ export function optinLinkEmail(
   return renderEmail(cfg, {
     subject: `Ihr Website-Entwurf für ${d.businessName}`,
     heading: 'Ihr Website-Entwurf',
-    preheader: `Ihr Link zum Entwurf für ${d.businessName} – online bis ${d.expiresLabel}.`,
+    preheader: `Online bis ${d.expiresLabel}.`,
     blocks: [
-      `wie gewünscht hier der Link zu Ihrem Website-Entwurf. Er ist bis ${d.expiresLabel} online.`,
+      `hier ist Ihr Entwurf, online bis ${d.expiresLabel}.`,
       { button: { href: d.demoUrl, label: 'Entwurf ansehen' } },
-      'Vor einer Bestellung passe ich Texte, Leistungen, Fotos und Farben kostenlos an Ihre Wünsche an. Schreiben Sie mir dazu einfach über das Formular auf der Seite oder antworten Sie auf diese E-Mail.',
-      `Möchten Sie bis ${d.expiresLabel} höchstens zweimal kurz daran erinnert werden? Dann bestätigen Sie bitte hier:`,
-      { button: { href: d.confirmUrl, label: 'Ja, Erinnerungen erhalten', secondary: true } },
-      'Ohne Bestätigung schreiben wir Ihnen nicht erneut, außer Sie melden sich bei uns.',
-      { small: `Keine E-Mails mehr erhalten: ${d.unsubscribeUrl}` },
+      'Wünsche zu Texten, Fotos oder Farben passe ich vor einer Bestellung kostenlos an. Einfach antworten.',
+      'Möchten Sie bis dahin höchstens zweimal erinnert werden?',
+      { button: { href: d.confirmUrl, label: 'Ja, erinnern', secondary: true } },
+      { small: `Ohne Bestätigung schreiben wir Ihnen nicht erneut. Keine E-Mails mehr: ${d.unsubscribeUrl}` },
     ],
   });
 }
@@ -413,11 +390,10 @@ export function optinFollowupEmail(
     subject: 'Passt Ihr Website-Entwurf so?',
     heading: 'Passt Ihr Entwurf so?',
     blocks: [
-      `vor ein paar Tagen haben Sie sich den Link zu Ihrem Website-Entwurf schicken lassen. Er ist noch bis ${d.expiresLabel} online.`,
-      'Falls noch etwas nicht stimmt, zum Beispiel Leistungen, Texte, Fotos oder Farben, passe ich das vor einer Bestellung kostenlos an. Ein kurzer Satz genügt.',
+      `Ihr Entwurf ist noch bis ${d.expiresLabel} online. Soll noch etwas anders sein? Ein kurzer Satz genügt, ich passe es vor einer Bestellung kostenlos an.`,
       { button: { href: d.wishUrl, label: 'Wunsch schicken' } },
       { button: { href: d.demoUrl, label: 'Entwurf ansehen', secondary: true } },
-      { small: `Keine E-Mails mehr erhalten: ${d.unsubscribeUrl}` },
+      { small: `Keine E-Mails mehr: ${d.unsubscribeUrl}` },
     ],
   });
 }
@@ -428,8 +404,7 @@ export function refundEmail(cfg: AppConfig, d: { name: string; amount: string; c
     heading: 'Erstattung veranlasst',
     name: d.name,
     blocks: [
-      `wir haben ${d.amount} an Sie erstattet. Je nach Zahlungsart sehen Sie den Betrag in wenigen Tagen auf Ihrem Konto bzw. Ihrer Kartenabrechnung.`,
-      `Die Stornorechnung ${d.cancellationNumber} finden Sie im Anhang.`,
+      `wir haben ${d.amount} an Sie erstattet. Je nach Zahlungsart sehen Sie den Betrag in wenigen Tagen. Die Stornorechnung ${d.cancellationNumber} liegt im Anhang.`,
     ],
   });
 }
@@ -438,23 +413,18 @@ export function renewalReminderEmail(
   cfg: AppConfig,
   d: { name: string; domain: string | null; hostingUntil: string; subscriptionUrl: string | null },
 ): EmailContent {
-  const price = `${formatEuro(cfg.pricing.subscriptionCents)} pro Monat`;
-  const blocks: Block[] = [
-    `das im Website-Paket enthaltene Hosting für ${d.domain ?? 'Ihre Website'} läuft am ${d.hostingUntil} aus.`,
-  ];
+  const price = `${formatEuro(cfg.pricing.subscriptionCents)}/Monat`;
+  const blocks: Block[] = [`das Hosting für ${d.domain ?? 'Ihre Website'} ist bis ${d.hostingUntil} bezahlt.`];
   if (d.subscriptionUrl) {
-    blocks.push(
-      `Wenn Ihre Website danach online bleiben soll, können Sie „${cfg.pricing.subscriptionName}“ für ${price} buchen (monatlich kündbar). Hosting, SSL, Domain und kleine Textänderungen sind enthalten.`,
-      { button: { href: d.subscriptionUrl, label: `${cfg.pricing.subscriptionName} buchen` } },
-    );
+    blocks.push(`Soll Ihre Website online bleiben? „${cfg.pricing.subscriptionName}“ kostet ${price}, monatlich kündbar.`, {
+      button: { href: d.subscriptionUrl, label: `${cfg.pricing.subscriptionName} buchen` },
+    });
   } else {
     blocks.push(
-      `Wenn Ihre Website danach online bleiben soll, antworten Sie einfach auf diese E-Mail. Wir verlängern dann „${cfg.pricing.subscriptionName}“ für ${price} (monatlich kündbar).`,
+      `Soll Ihre Website online bleiben? Antworten Sie einfach, dann verlängern wir „${cfg.pricing.subscriptionName}“ für ${price} (monatlich kündbar).`,
     );
   }
-  blocks.push(
-    'Möchten Sie nicht verlängern, müssen Sie nichts tun. Die Domain gehört Ihnen – auf Wunsch geben wir sie für einen Umzug zu einem anderen Anbieter frei.',
-  );
+  blocks.push('Kein Interesse? Dann müssen Sie nichts tun. Die Domain gehört Ihnen.');
   return renderEmail(cfg, {
     subject: `Ihr Hosting für ${d.domain ?? 'Ihre Website'} läuft am ${d.hostingUntil} aus`,
     heading: 'Ihr Hosting läuft bald aus',
@@ -480,15 +450,13 @@ export function previewReadyEmail(
   return renderEmail(cfg, {
     subject: d.firstVersion ? 'Ihre Website-Vorschau ist fertig' : 'Ihre geänderte Website-Vorschau ist fertig',
     heading: d.firstVersion ? 'Ihre Vorschau ist fertig' : 'Ihre neue Vorschau ist fertig',
-    preheader: 'Ansehen, freigeben oder Änderungen wünschen – mit einem Klick.',
+    preheader: 'Ansehen und mit einem Klick freigeben.',
     name: d.name,
     blocks: [
-      d.firstVersion
-        ? 'Ihre Website ist fertig vorbereitet – mit Ihren Angaben, Texten und Bildern. Bitte schauen Sie sich die Vorschau in Ruhe an.'
-        : 'wir haben Ihre Änderungswünsche eingearbeitet. Bitte schauen Sie sich die neue Vorschau an.',
+      d.firstVersion ? 'Ihre Website ist fertig vorbereitet.' : 'Ihre Änderungswünsche sind eingearbeitet.',
       ...(d.summary ? [d.summary] : []),
       { button: { href: d.previewUrl, label: 'Vorschau ansehen' } },
-      `Passt alles, geben Sie die Seite mit einem Klick frei – dann registrieren wir Ihre Domain und schalten die Website live. Möchten Sie noch etwas ändern, beschreiben Sie es einfach auf der Vorschauseite (noch ${d.roundsLeft} Änderungsrunde${d.roundsLeft === 1 ? '' : 'n'} inklusive).`,
+      `Passt alles? Mit einem Klick freigeben, dann geht sie live. Sonst Änderungen direkt dort eintragen (noch ${d.roundsLeft} Runde${d.roundsLeft === 1 ? '' : 'n'} inklusive).`,
     ],
   });
 }
@@ -510,20 +478,16 @@ export function liveHandoverEmail(
     preheader: `Ab sofort erreichbar: ${d.domain ?? d.url}`,
     name: d.name,
     blocks: [
-      `Ihre Website ist ab sofort online: ${d.url}`,
       { button: { href: d.url, label: 'Website ansehen' } },
       {
         checks: [
-          d.domain
-            ? `Die Domain ${d.domain} ist auf Sie registriert und gehört Ihnen.`
-            : 'Ihre Website ist unter der oben genannten Adresse erreichbar.',
-          `Nachrichten aus dem Kontaktformular gehen an ${d.formTarget}.`,
+          d.domain ? `Die Domain ${d.domain} gehört Ihnen` : `Erreichbar unter ${d.url}`,
+          `Anfragen aus dem Formular gehen an ${d.formTarget}`,
           d.monthlyOffer
             ? d.monthlyOffer.automatic
-              ? `Ihr gewählter Monatstarif von insgesamt ${formatEuro(d.monthlyOffer.amountCents)} wird nach bestätigtem Go-Live über das vereinbarte Zahlungsmittel gestartet. Zahlungsstatus, Tarifwechsel und Kündigung finden Sie über den Verwaltungslink. Die Vorschauzeit bleibt unberechnet.`
-              : `Ihr Monatstarif kostet insgesamt ${formatEuro(d.monthlyOffer.amountCents)}. Bitte bestätigen Sie jetzt den separaten Aboabschluss; erst damit beginnt die monatliche Zahlung. Es gibt keine rückwirkende Abbuchung für die Vorschauzeit.`
-            : `Hosting und SSL-Verschlüsselung sind bis ${d.hostingUntil} enthalten. Wir erinnern Sie rechtzeitig vor Ablauf.`,
-          'Impressum und Datenschutzerklärung stammen aus Ihren Angaben – bitte halten Sie sie aktuell und geben Sie uns Bescheid, wenn sich etwas ändert.',
+              ? `Monatstarif ${formatEuro(d.monthlyOffer.amountCents)} startet jetzt automatisch`
+              : `Monatstarif ${formatEuro(d.monthlyOffer.amountCents)}: bitte unten bestätigen, erst dann wird abgebucht`
+            : `Hosting und SSL bis ${d.hostingUntil} inklusive`,
         ],
       },
       ...(d.monthlyOffer
@@ -537,8 +501,7 @@ export function liveHandoverEmail(
             },
           ]
         : []),
-      'Kleine Textänderungen oder neue Öffnungszeiten? Antworten Sie einfach auf diese E-Mail.',
-      'Vielen Dank für Ihr Vertrauen!',
+      'Änderungen am Impressum oder neue Öffnungszeiten? Einfach antworten. Danke für Ihr Vertrauen!',
     ],
   });
 }

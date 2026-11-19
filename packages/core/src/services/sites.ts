@@ -755,9 +755,9 @@ export async function sendOnboardingReminders(now = new Date()): Promise<number>
       heading: 'Fast fertig – nur noch Ihre Angaben',
       name: c.contactName,
       blocks: [
-        'Ihre Website ist fast fertig – es fehlen nur noch Ihre Angaben (Impressum, Leistungen, Öffnungszeiten). Das dauert etwa 10 Minuten, Sie können jederzeit zwischenspeichern.',
+        'es fehlen nur noch Ihre Angaben (Impressum, Leistungen, Öffnungszeiten). Dauer: etwa 10 Minuten.',
         { button: { href: appUrl(`/onboarding/${c.accessToken}`), label: 'Angaben eintragen' } },
-        'Brauchen Sie Hilfe? Antworten Sie einfach auf diese E-Mail.',
+        'Hilfe nötig? Einfach antworten.',
       ],
     });
     await sendTransactionalEmail({

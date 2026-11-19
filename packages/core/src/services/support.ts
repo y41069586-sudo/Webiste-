@@ -304,8 +304,8 @@ export async function processSupportMessage(id: string): Promise<{ status: strin
         subject: 'Bestätigung: Wir schreiben Ihnen nicht mehr',
         heading: 'Wir schreiben Ihnen nicht mehr',
         blocks: [
-          'vielen Dank für Ihre Nachricht. Wir haben Ihren Widerspruch umgesetzt: Sie erhalten von uns keine weitere Post, Ihr Website-Entwurf und die zugehörigen Daten werden gelöscht.',
-          'Damit wir Sie auch künftig nicht erneut anschreiben, speichern wir nur einen nicht rückrechenbaren Prüfwert (Hash) Ihres Betriebs.',
+          'erledigt: Sie bekommen keine Post mehr von uns. Ihr Website-Entwurf und Ihre Daten werden gelöscht.',
+          'Damit das so bleibt, speichern wir nur einen nicht rückrechenbaren Prüfwert (Hash) Ihres Betriebs.',
         ],
       });
       try {
