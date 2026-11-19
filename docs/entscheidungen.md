@@ -1937,3 +1937,9 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   Ersatzfassung). Jetzt rot nur bei `failed`/`cancelled`, sonst grau „Prüfhinweis“ (Liste und Detailseite).
   Die 6-stündliche Meldung „Öffentliche Website nicht erreichbar“ kam vom Kaltstart (Prüfabruf /quellen, 2 × 6 s
   Zeitlimit) und sollte mit dem Wecker (jede Minute) verschwinden.
+- 19.11.2026 Mail-Design „seitenwerkig“: gemeinsame Vorlage `renderEmail` neu (Nachtblau-Kopf mit Zeichen und
+  Wortmarke, weiße Karte, Serifen-Überschrift, blaue Knöpfe mit Pfeil, Zweitknopf hell, nummerierte Schritte,
+  Häkchen-Liste, hervorgehobener Kasten für Beträge/Laufzeiten, Vorschauzeile, Ersatzlinks und Spam-Hinweis klein unter
+  dem Gruß). Nur Systemschriften (Georgia/Systemschrift) – keine Google Fonts (IP-Übertragung an Google), nur
+  Inline-Styles und Tabellen, kein Tracking. Alle Kunden- und Betreiber-Mails mit eigener Überschrift.
+  Vorschaubilder: `reports/mail-design/`.

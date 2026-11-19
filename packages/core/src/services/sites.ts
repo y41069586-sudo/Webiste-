@@ -752,6 +752,7 @@ export async function sendOnboardingReminders(now = new Date()): Promise<number>
     if (c.onboardingRemindedAt || now.getTime() - c.createdAt.getTime() < 4 * 86400_000) continue;
     const mail = renderEmail(cfg, {
       subject: 'Erinnerung: Ihre Angaben für die Website',
+      heading: 'Fast fertig – nur noch Ihre Angaben',
       name: c.contactName,
       blocks: [
         'Ihre Website ist fast fertig – es fehlen nur noch Ihre Angaben (Impressum, Leistungen, Öffnungszeiten). Das dauert etwa 10 Minuten, Sie können jederzeit zwischenspeichern.',

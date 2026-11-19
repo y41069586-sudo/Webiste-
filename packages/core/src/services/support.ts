@@ -302,6 +302,7 @@ export async function processSupportMessage(id: string): Promise<{ status: strin
     if (msg.fromEmail && EMAIL_RE.test(msg.fromEmail)) {
       const mail = renderEmail(cfg, {
         subject: 'Bestätigung: Wir schreiben Ihnen nicht mehr',
+        heading: 'Wir schreiben Ihnen nicht mehr',
         blocks: [
           'vielen Dank für Ihre Nachricht. Wir haben Ihren Widerspruch umgesetzt: Sie erhalten von uns keine weitere Post, Ihr Website-Entwurf und die zugehörigen Daten werden gelöscht.',
           'Damit wir Sie auch künftig nicht erneut anschreiben, speichern wir nur einen nicht rückrechenbaren Prüfwert (Hash) Ihres Betriebs.',
