@@ -11,12 +11,13 @@ import {
   publicOperatorSettings,
   setupCookieName,
   setupFingerprint,
+  komplettTermsCurrent,
   v4CheckoutTerms,
   v4Offer,
   v4OfferedTiers,
   v4TierLabel,
 } from '@wbm/core';
-import { PublicShell, PublicCard } from '@/components/public/shell';
+import { PublicShell } from '@/components/public/shell';
 import { StepHeader } from '@/components/public/steps';
 import { PaymentForm } from './payment-form';
 export const dynamic = 'force-dynamic';
@@ -41,24 +42,21 @@ export default async function ReviewSetup({
   const data = d.data;
   const options =
     ctx.cfg.offers.activeVersion === 'v4'
-      ? v4OfferedTiers(ctx.cfg).map((plan) => ({
-          plan,
-          title: v4TierLabel(plan),
-          price:
-            plan === 'komplett'
-              ? `0 € Einrichtung · ${euro(v4Offer(plan).monthlyCents)}/Monat, erste Abbuchung 7 Tage nach der Bestellung · 12 Monate Mindestlaufzeit`
-              : `${euro(planAmounts(ctx.cfg, plan).grossCents)} einmalig + insgesamt ${euro(v4Offer(plan).monthlyCents)}/Monat ab Go-Live`,
-          terms: v4CheckoutTerms(plan, ctx.cfg.offers.billingMode ?? 'saved_mandate'),
-          // Klare Preiszusammenfassung: was heute fällig ist; Kaufmodell als „Empfohlen“ markiert, keine Vorauswahl
-          dueNow: plan === 'komplett' ? '0 € (nur Zahlungsmittel hinterlegen)' : euro(planAmounts(ctx.cfg, plan).grossCents),
-          recommended: plan === 'basis' && v4OfferedTiers(ctx.cfg).includes('komplett'),
-          includes:
-            plan === 'basis'
-              ? `Fertigstellung Ihrer Website, ${ctx.cfg.onboarding.includedChangeRounds} Änderungsrunden vor Go-Live, Standard-Domain im vereinbarten Kostenrahmen, Hosting, SSL und Basis-Support bei Betriebsstörungen.`
-              : plan === 'komplett'
-                ? `Alle Basis-Leistungen ohne Einrichtungsgebühr und zusätzlich bis zu ${v4Offer(plan).includedChangeMinutes} Minuten vereinbarte Änderungen pro Monat. Bei der Bestellung wird nichts abgebucht.`
-                : `Alle Basis-Leistungen und zusätzlich bis zu ${v4Offer(plan).includedChangeMinutes} Minuten vereinbarte Änderungen pro Monat. Care+ enthält die Basisgebühr vollständig.`,
-        }))
+      ? v4OfferedTiers(ctx.cfg)
+          .filter((plan) => plan !== 'komplett' || komplettTermsCurrent(ctx.cfg))
+          .map((plan) => ({
+            plan,
+            title: v4TierLabel(plan),
+            // 19.11.2026 (Betreiber: „so richtig viel“): heute fällig groß, darunter eine Zeile; Vertragstext eingeklappt
+            dueNow: plan === 'komplett' ? '0 €' : euro(planAmounts(ctx.cfg, plan).grossCents),
+            price:
+              plan === 'komplett'
+                ? `dann ${euro(v4Offer(plan).monthlyCents)}/Monat ab 7 Tagen nach Bestellung · 12 Monate Laufzeit`
+                : `dann ${euro(v4Offer(plan).monthlyCents)}/Monat ab Go-Live · monatlich kündbar`,
+            terms: v4CheckoutTerms(plan, ctx.cfg.offers.billingMode ?? 'saved_mandate'),
+            recommended: false,
+            includes: '',
+          }))
       : [
           {
             plan: 'one_time',
@@ -83,8 +81,17 @@ export default async function ReviewSetup({
           Bestätigung ausgelöst.
         </p>
       ) : null}
-      <PublicCard>
-        <h2 className="font-tight text-lg font-semibold tracking-[-0.02em]">Ihre Angaben</h2>
+      <PaymentForm slug={slug} fingerprint={setupFingerprint(data, d.assetKeys)} options={options}>
+      <details className="card-site group p-5">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-xs font-semibold tracking-wide text-slate-500 uppercase">Ihre Angaben</span>
+            <span className="mt-1 block font-semibold text-slate-900">{data.business.name}</span>
+            <span className="block text-sm text-slate-500">{data.domain}</span>
+          </span>
+          <span className="text-brand-700 shrink-0 text-sm font-semibold group-open:hidden">Ansehen</span>
+          <span className="text-brand-700 hidden shrink-0 text-sm font-semibold group-open:inline">Schließen</span>
+        </summary>
         <dl className="mt-4 grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Betrieb</dt>
@@ -194,8 +201,8 @@ export default async function ReviewSetup({
             </p>
           </div>
         </details>
-      </PublicCard>
-      <PaymentForm slug={slug} fingerprint={setupFingerprint(data, d.assetKeys)} options={options} />
+      </details>
+      </PaymentForm>
       <p className="mt-6 text-sm text-slate-500">
         Fragen?{' '}
         <a className="underline" href={`mailto:${cfg.sender.email}`}>
