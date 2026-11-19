@@ -8,7 +8,11 @@ export function queueRuntimeConfig() {
   const migrate = process.env.BOSS_MIGRATE === 'true' || (!production && process.env.BOSS_MIGRATE !== 'false');
   const supervise = process.env.BOSS_SUPERVISE ? process.env.BOSS_SUPERVISE === 'true' : worker || !production;
   const schedule = process.env.BOSS_SCHEDULE ? process.env.BOSS_SCHEDULE === 'true' : worker || !production;
-  const create = process.env.BOSS_CREATE_QUEUES === 'true' || (!production && process.env.BOSS_CREATE_QUEUES !== 'false');
+  // 19.11.2026: Der Worker legt fehlende Warteschlangen selbst an (vorher Absturzschleife, als „booking-sweep“ fehlte);
+  // die Web-App legt weiterhin nichts an.
+  const create =
+    process.env.BOSS_CREATE_QUEUES === 'true' ||
+    ((worker || !production) && process.env.BOSS_CREATE_QUEUES !== 'false');
   const url = process.env.QUEUE_DATABASE_URL || getEnv().DATABASE_URL;
   assertSameQueueDatabase(getEnv().DATABASE_URL, url);
   assertQueueConnection(url, { migrate, supervise, schedule });

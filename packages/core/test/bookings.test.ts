@@ -3,7 +3,8 @@ import { eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { resetEnvCache } from '../src/config/env';
 import { getDb } from '../src/db/client';
-import { bookings, customers, events, leads, orders, sites } from '../src/db/schema';
+import { bookings, customers, demos, events, leads, orders, sites } from '../src/db/schema';
+import { updateConfig } from '../src/config/service';
 import { resetProviders, setProviders } from '../src/providers';
 import type { OutgoingEmail } from '../src/providers/types';
 import {
@@ -16,6 +17,7 @@ import {
   icsFor,
   openSlots,
   requestBooking,
+  requestDemoTestBooking,
   sweepBookings,
   type BookingInput,
 } from '../src/services/bookings';
@@ -294,5 +296,69 @@ describe('Buchung, Bestätigung, Absage', () => {
     expect(ics).toContain('BEGIN:VEVENT');
     expect(ics).toContain('SUMMARY:Termin bei Test\\; Betrieb: Dach');
     expect(ics.split('\r\n').length).toBeGreaterThan(8);
+  });
+});
+
+describe('Testlauf über den Entwurf eines fiktiven Testbetriebs', () => {
+  async function demoFixture(source: 'mock' | 'osm') {
+    const db = getDb();
+    const [lead] = await db
+      .insert(leads)
+      .values({
+        source,
+        sourceId: randomUUID(),
+        businessName: 'FIKTIVER TEST Dachdeckerei',
+        branch: 'dachdecker',
+        branchGroup: 'handwerk',
+        city: 'Testort',
+        segmentKey: 'test',
+        trackToken: randomToken(24),
+      })
+      .returning();
+    const slug = randomToken(24);
+    await db.insert(demos).values({
+      leadId: lead!.id,
+      slug,
+      templateId: 'praxis-projekt',
+      palette: 'anthrazit',
+      status: 'published',
+      contentJson: {},
+      publishedAt: NOW,
+      expiresAt: new Date(NOW.getTime() + 20 * 86_400_000),
+    } as never);
+    return slug;
+  }
+
+  it('fiktiver Testbetrieb: Anfrage geht an die eigene SeitenWerk-Adresse, Bestätigung an den Tester, alles mit [TEST]', async () => {
+    await updateConfig({ sender: { email: 'betreiber@seitenwerk.test' } }, 'test:booking');
+    const slug = await demoFixture('mock');
+    // Termin innerhalb der Laufzeit der Demo; Beispielzeiten Mo–Fr 8–16 Uhr
+    const slot = berlinToUtc(2026, 11, 24, 9, 0);
+    const res = await requestDemoTestBooking(slug, input(slot, { email: 'tester@request.test' }), meta, { now: NOW });
+    expect(res.ok).toBe(true);
+    expect(sent.map((m) => m.to)).toEqual(['betreiber@seitenwerk.test', 'tester@request.test']);
+    expect(sent.every((m) => m.subject.startsWith('[TEST]'))).toBe(true);
+    expect(sent[0]!.text).toContain('TESTLAUF');
+    const token = tokenFrom(sent[0]!, '/termin/aktion');
+    sent.length = 0;
+    expect(await decideBooking(token, 'confirm', '', { now: NOW })).toEqual({ ok: true, status: 'confirmed' });
+    expect(sent[0]!.to).toBe('tester@request.test');
+    expect(sent[0]!.subject).toMatch(/^\[TEST\] Termin bestätigt/);
+    expect(sent[0]!.attachments?.[0]?.filename).toBe('termin.ics');
+    const row = (await getDb().select().from(bookings))[0]!;
+    expect(row.siteId).toBeNull();
+    expect(row.demoId).toBeTruthy();
+    // keine Messereignisse aus Testläufen
+    expect(await getDb().select().from(events).where(eq(events.type, 'site_booking'))).toHaveLength(0);
+  });
+
+  it('echter Betrieb (nicht fiktiv): keine Buchung, keine Mail', async () => {
+    await updateConfig({ sender: { email: 'betreiber@seitenwerk.test' } }, 'test:booking');
+    const slug = await demoFixture('osm');
+    expect(await requestDemoTestBooking(slug, input(berlinToUtc(2026, 11, 24, 9, 0)), meta, { now: NOW })).toEqual({
+      ok: false,
+      reason: 'not_found',
+    });
+    expect(sent).toHaveLength(0);
   });
 });

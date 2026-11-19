@@ -556,9 +556,9 @@ export const bookings = pgTable(
   'bookings',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    siteId: uuid('site_id')
-      .notNull()
-      .references(() => sites.id, { onDelete: 'cascade' }),
+    /** Kunden-Website (echte Buchung) – oder leer bei Testläufen über einen Entwurf (demoId) */
+    siteId: uuid('site_id').references(() => sites.id, { onDelete: 'cascade' }),
+    demoId: uuid('demo_id').references(() => demos.id, { onDelete: 'cascade' }),
     status: text('status').$type<BookingStatus>().default('requested').notNull(),
     service: text('service'),
     startsAt: ts('starts_at').notNull(),
@@ -579,6 +579,9 @@ export const bookings = pgTable(
     uniqueIndex('bookings_business_token_uidx').on(t.businessTokenHash),
     uniqueIndex('bookings_visitor_token_uidx').on(t.visitorTokenHash),
     uniqueIndex('bookings_active_slot_uidx').on(t.siteId, t.startsAt).where(sql`"status" IN ('requested','confirmed')`),
+    uniqueIndex('bookings_demo_slot_uidx')
+      .on(t.demoId, t.startsAt)
+      .where(sql`"status" IN ('requested','confirmed') AND "demo_id" IS NOT NULL`),
     index('bookings_site_time_idx').on(t.siteId, t.startsAt),
   ],
 );

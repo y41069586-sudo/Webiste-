@@ -2,20 +2,20 @@ import { and, eq, gt, inArray, lt, or, sql } from 'drizzle-orm';
 import { appUrl } from '../config/env';
 import { getConfig } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
-import { bookings, customers, orders, sites, type BookingStatus } from '../db/schema';
+import { bookings, customers, demos, leads, orders, sites, type BookingStatus } from '../db/schema';
 import { renderEmail, type EmailContent } from '../emails/templates';
 import { esc } from '../util/html';
 import { logger } from '../logger';
 import { getProviders } from '../providers';
 import type { EmailProvider } from '../providers/types';
-import { BOOKING_SLOT_MINUTES, type OnboardingData, type OnboardingDay } from '../sites/onboarding-data';
+import { BOOKING_SLOT_MINUTES, openingHoursToDays, type OnboardingData, type OnboardingDay } from '../sites/onboarding-data';
 import { randomToken, sha256 } from '../util/crypto';
 import { sendTransactionalEmail } from './email';
 
 /** Gestaltung des Betriebs für die Terminseiten (gleiche Farben/Schriften wie seine Website) */
 export { siteThemeFor, type SiteTheme } from '@wbm/templates';
 import { rateLimit } from './rate-limit';
-import { recordEvent, type RequestMeta } from './tracking';
+import { findPublicDemo, recordEvent, type RequestMeta } from './tracking';
 
 /**
  * Terminbuchung auf Kunden-Websites (19.11.2026, Betreiberauftrag):
@@ -154,13 +154,26 @@ export function openSlots(cfg: BookingConfig, busy: { startsAt: Date; endsAt: Da
   return out;
 }
 
-async function busyTimes(db: DbOrTx, siteId: string, now: Date) {
+/** Ziel einer Buchung: Kunden-Website (echt) oder Entwurf eines fiktiven Testbetriebs (Testlauf an den Betreiber). */
+interface BookingTarget {
+  siteId: string | null;
+  demoId: string | null;
+  company: string;
+  cfg: BookingConfig;
+  targetEmail: string;
+  customerId: string | null;
+  test: boolean;
+}
+
+const targetCond = (t: Pick<BookingTarget, 'siteId' | 'demoId'>) => (t.siteId ? eq(bookings.siteId, t.siteId) : eq(bookings.demoId, t.demoId!));
+
+async function busyTimes(db: DbOrTx, target: Pick<BookingTarget, 'siteId' | 'demoId'>, now: Date) {
   return db
     .select({ startsAt: bookings.startsAt, endsAt: bookings.endsAt })
     .from(bookings)
     .where(
       and(
-        eq(bookings.siteId, siteId),
+        targetCond(target),
         gt(bookings.endsAt, now),
         or(eq(bookings.status, 'confirmed'), and(eq(bookings.status, 'requested'), gt(bookings.requestExpiresAt, now))),
       ),
@@ -201,7 +214,63 @@ export async function findBookingSite(formKey: string, db: DbOrTx = getDb()): Pr
 }
 
 export async function bookingSlotsFor(b: PublicBookingSite, now = new Date()): Promise<SlotDay[]> {
-  return openSlots(b.cfg, await busyTimes(getDb(), b.site.id, now), now);
+  return openSlots(b.cfg, await busyTimes(getDb(), { siteId: b.site.id, demoId: null }, now), now);
+}
+
+export interface DemoTestBooking {
+  demoId: string;
+  company: string;
+  templateId: string;
+  services: string[];
+  cfg: BookingConfig;
+  /** Öffnungszeiten aus den öffentlichen Daten bekannt (sonst Beispielzeiten Mo–Fr 8–16 Uhr) */
+  knownHours: boolean;
+  targetEmail: string;
+}
+
+/**
+ * Testlauf (Betreiber, 19.11.2026): Nur Entwürfe fiktiver Testbetriebe (Lead-Quelle „mock“) nehmen echte Terminanfragen an.
+ * Die Mail „an den Betrieb“ geht an die eigene Absenderadresse von SeitenWerk – nie an einen echten Betrieb.
+ */
+export async function findDemoTestBooking(slug: string): Promise<DemoTestBooking | null> {
+  const found = await findPublicDemo(slug);
+  if (found.state !== 'ok' || found.lead.source !== 'mock') return null;
+  const own = (await getConfig()).sender.email.trim();
+  if (!MAIL_RE.test(own)) return null;
+  let days = openingHoursToDays(found.lead.openingHours);
+  const knownHours = days.some((d) => !d.closed);
+  if (!knownHours) days = days.map((d) => ({ ...d, closed: d.day === 0 || d.day === 6, open: '08:00', close: '16:00', open2: '', close2: '' }));
+  const content = found.demo.contentJson as { services?: { title?: string }[] } | null;
+  return {
+    demoId: found.demo.id,
+    company: found.lead.businessName,
+    templateId: found.demo.templateId,
+    services: (content?.services ?? []).map((x) => String(x.title ?? '').trim()).filter(Boolean).slice(0, 8),
+    cfg: { slotMinutes: 60, days },
+    knownHours,
+    targetEmail: own,
+  };
+}
+
+export async function demoTestSlots(t: DemoTestBooking, now = new Date()): Promise<SlotDay[]> {
+  return openSlots(t.cfg, await busyTimes(getDb(), { siteId: null, demoId: t.demoId }, now), now);
+}
+
+/** Testanfrage über den Entwurf eines fiktiven Testbetriebs (gleicher Ablauf wie echt, Mails mit [TEST]). */
+export async function requestDemoTestBooking(
+  slug: string,
+  input: BookingInput,
+  meta: RequestMeta,
+  opts: { now?: Date; provider?: EmailProvider } = {},
+): Promise<BookingRequestResult> {
+  const t = await findDemoTestBooking(slug);
+  if (!t) return { ok: false, reason: 'not_found' };
+  return createBooking(
+    { siteId: null, demoId: t.demoId, company: t.company, cfg: t.cfg, targetEmail: t.targetEmail, customerId: null, test: true },
+    input,
+    meta,
+    opts,
+  );
 }
 
 export interface BookingInput {
@@ -242,10 +311,33 @@ export async function requestBooking(
   meta: RequestMeta,
   opts: { now?: Date; provider?: EmailProvider } = {},
 ): Promise<BookingRequestResult> {
+  const b = await findBookingSite(formKey);
+  if (!b) return { ok: false, reason: 'not_found' };
+  return createBooking(
+    {
+      siteId: b.site.id,
+      demoId: null,
+      company: b.company,
+      cfg: b.cfg,
+      targetEmail: b.site.formTargetEmail!,
+      customerId: b.site.customerId,
+      test: false,
+    },
+    input,
+    meta,
+    opts,
+  );
+}
+
+async function createBooking(
+  b: BookingTarget,
+  input: BookingInput,
+  meta: RequestMeta,
+  opts: { now?: Date; provider?: EmailProvider },
+): Promise<BookingRequestResult> {
   const now = opts.now ?? new Date();
   const db = getDb();
-  const b = await findBookingSite(formKey, db);
-  if (!b) return { ok: false, reason: 'not_found' };
+  const key = b.siteId ?? `demo:${b.demoId}`;
   // Honeypot: wie Erfolg aussehen lassen, aber nichts tun
   if (input.honeypot.trim()) return { ok: false, reason: 'invalid' };
   const email = input.email.trim();
@@ -267,8 +359,8 @@ export async function requestBooking(
     return { ok: false, reason: 'invalid' };
   const provider = opts.provider ?? getProviders().email;
   if (provider.name === 'mock') return { ok: false, reason: 'unavailable' };
-  const r1 = await rateLimit(db, `booking:${b.site.id}:${meta.ipHash}`, 4, 3600);
-  const r2 = await rateLimit(db, `booking:${b.site.id}`, 60, 86_400);
+  const r1 = await rateLimit(db, `booking:${key}:${meta.ipHash}`, b.test ? 20 : 4, 3600);
+  const r2 = await rateLimit(db, `booking:${key}`, 60, 86_400);
   if (!r1.allowed || !r2.allowed) return { ok: false, reason: 'rate_limited' };
 
   const businessToken = randomToken(32);
@@ -277,20 +369,21 @@ export async function requestBooking(
   let bookingId: string;
   try {
     bookingId = await db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`booking:${b.site.id}`}))`);
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`booking:${key}`}))`);
       // Abgelaufene Anfragen freigeben, bevor die Zeit erneut geprüft wird
       await tx
         .update(bookings)
         .set({ status: 'expired', updatedAt: now })
-        .where(and(eq(bookings.siteId, b.site.id), eq(bookings.status, 'requested'), lt(bookings.requestExpiresAt, now)));
-      const free = openSlots(b.cfg, await busyTimes(tx, b.site.id, now), now).some((d) =>
+        .where(and(targetCond(b), eq(bookings.status, 'requested'), lt(bookings.requestExpiresAt, now)));
+      const free = openSlots(b.cfg, await busyTimes(tx, b, now), now).some((d) =>
         d.slots.some((s) => s.start === start.toISOString()),
       );
       if (!free) throw new SlotTakenError();
       const [row] = await tx
         .insert(bookings)
         .values({
-          siteId: b.site.id,
+          siteId: b.siteId,
+          demoId: b.demoId,
           status: 'requested',
           service: clean(input.service, 120) || null,
           startsAt: start,
@@ -317,17 +410,17 @@ export async function requestBooking(
       {
         kind: 'booking_request_business',
         idempotencyKey: `booking:${bookingId}:request:business`,
-        to: b.site.formTargetEmail!,
+        to: b.targetEmail,
         replyTo: email,
-        customerId: b.site.customerId,
-        ...businessRequestEmail(cfg, b.company, booking, businessToken),
+        customerId: b.customerId,
+        ...businessRequestEmail(cfg, b.company, booking, businessToken, b.test),
       },
       { provider },
     );
   } catch (err) {
     // Ohne Nachricht an den Betrieb keine offene Reservierung: Zeit sofort wieder freigeben
     await db.update(bookings).set({ status: 'cancelled', updatedAt: new Date() }).where(eq(bookings.id, bookingId));
-    logger.error({ siteId: b.site.id, errorClass: err instanceof Error ? err.name : 'Error' }, 'Terminanfrage: Betrieb nicht erreichbar');
+    logger.error({ target: key, errorClass: err instanceof Error ? err.name : 'Error' }, 'Terminanfrage: Betrieb nicht erreichbar');
     return { ok: false, reason: 'unavailable' };
   }
   await sendTransactionalEmail(
@@ -335,15 +428,15 @@ export async function requestBooking(
       kind: 'booking_request_visitor',
       idempotencyKey: `booking:${bookingId}:request:visitor`,
       to: email,
-      replyTo: b.site.formTargetEmail!,
-      customerId: b.site.customerId,
-      ...visitorEmail(b.company, booking, 'requested', visitorToken),
+      replyTo: b.targetEmail,
+      customerId: b.customerId,
+      ...visitorEmail(b.company, booking, 'requested', visitorToken, b.test),
     },
     { provider },
   ).catch((err) =>
-    logger.warn({ siteId: b.site.id, errorClass: err instanceof Error ? err.name : 'Error' }, 'Terminanfrage: Eingangsbestätigung fehlgeschlagen'),
+    logger.warn({ target: key, errorClass: err instanceof Error ? err.name : 'Error' }, 'Terminanfrage: Eingangsbestätigung fehlgeschlagen'),
   );
-  await bookingEvent(b.site.customerId, b.site.id, 'requested');
+  if (b.siteId && b.customerId) await bookingEvent(b.customerId, b.siteId, 'requested');
   return { ok: true, bookingId, startsAt: start };
 }
 
@@ -360,18 +453,27 @@ async function bookingEvent(customerId: string, siteId: string, step: 'requested
 export interface BookingView {
   booking: Booking;
   company: string;
-  siteId: string;
+  siteId: string | null;
   templateId: string;
+  /** Testlauf über einen Entwurf (Mails mit [TEST], Betriebs-Mail an SeitenWerk) */
+  test: boolean;
   formTargetEmail: string;
 }
 
 async function viewFor(booking: Booking | undefined): Promise<BookingView | null> {
   if (!booking) return null;
   const db = getDb();
+  if (!booking.siteId) {
+    const demo = booking.demoId ? await db.query.demos.findFirst({ where: eq(demos.id, booking.demoId) }) : null;
+    const lead = demo ? await db.query.leads.findFirst({ where: eq(leads.id, demo.leadId) }) : null;
+    const own = (await getConfig()).sender.email.trim();
+    if (!demo || !lead || lead.source !== 'mock' || !MAIL_RE.test(own)) return null;
+    return { booking, company: lead.businessName, siteId: null, templateId: demo.templateId, test: true, formTargetEmail: own };
+  }
   const site = await db.query.sites.findFirst({ where: eq(sites.id, booking.siteId) });
   const customer = site ? await db.query.customers.findFirst({ where: eq(customers.id, site.customerId) }) : null;
   if (!site || !customer || !site.formTargetEmail) return null;
-  return { booking, company: customer.company, siteId: site.id, templateId: site.templateId, formTargetEmail: site.formTargetEmail };
+  return { booking, company: customer.company, siteId: site.id, templateId: site.templateId, test: false, formTargetEmail: site.formTargetEmail };
 }
 
 const tokenOk = (t: string) => /^[A-Za-z0-9]{32}$/.test(t);
@@ -426,7 +528,7 @@ export async function decideBooking(
         to: row.visitorEmail,
         replyTo: view.formTargetEmail,
         customerId: null,
-        ...visitorEmail(view.company, row, target, null),
+        ...visitorEmail(view.company, row, target, null, view.test),
         ...(target === 'confirmed'
           ? { attachments: [{ filename: 'termin.ics', content: Buffer.from(icsFor(view.company, row)), contentType: 'text/calendar; charset=utf-8; method=PUBLISH' }] }
           : {}),
@@ -434,7 +536,7 @@ export async function decideBooking(
       { provider: opts.provider },
     );
   }
-  const site = await db.query.sites.findFirst({ where: eq(sites.id, view.siteId) });
+  const site = view.siteId ? await db.query.sites.findFirst({ where: eq(sites.id, view.siteId) }) : null;
   if (site) await bookingEvent(site.customerId, site.id, target === 'confirmed' ? 'confirmed' : target === 'declined' ? 'declined' : 'cancelled');
   return { ok: true, status: target };
 }
@@ -463,7 +565,7 @@ export async function cancelByVisitor(token: string, opts: { now?: Date; provide
       to: view.formTargetEmail,
       ...(row.visitorEmail ? { replyTo: row.visitorEmail } : {}),
       ...renderEmail(cfg, {
-        subject: `Termin abgesagt: ${formatBookingTime(row.startsAt)}`,
+        subject: `${view.test ? '[TEST] ' : ''}Termin abgesagt: ${formatBookingTime(row.startsAt)}`,
         heading: 'Termin vom Kunden abgesagt',
         noGreeting: true,
         noSpamHint: true,
@@ -475,7 +577,7 @@ export async function cancelByVisitor(token: string, opts: { now?: Date; provide
     },
     { provider: opts.provider },
   );
-  const site = await db.query.sites.findFirst({ where: eq(sites.id, view.siteId) });
+  const site = view.siteId ? await db.query.sites.findFirst({ where: eq(sites.id, view.siteId) }) : null;
   if (site) await bookingEvent(site.customerId, site.id, 'cancelled');
   return { ok: true, status: 'cancelled' };
 }
@@ -500,11 +602,11 @@ export async function sweepBookings(now = new Date(), opts: { provider?: EmailPr
         idempotencyKey: `booking:${row.id}:expired:visitor`,
         to: row.visitorEmail,
         replyTo: view.formTargetEmail,
-        ...visitorEmail(view.company, row, 'expired', null),
+        ...visitorEmail(view.company, row, 'expired', null, view.test),
       },
       { provider: opts.provider },
     ).catch(() => undefined);
-    const site = await db.query.sites.findFirst({ where: eq(sites.id, view.siteId) });
+    const site = view.siteId ? await db.query.sites.findFirst({ where: eq(sites.id, view.siteId) }) : null;
     if (site) await bookingEvent(site.customerId, site.id, 'expired');
   }
   const cutoff = new Date(now.getTime() - BOOKING_RULES.retentionDays * 86_400_000);
@@ -522,16 +624,17 @@ export async function sweepBookings(now = new Date(), opts: { provider?: EmailPr
 
 // ---------- E-Mails ----------
 
-function businessRequestEmail(cfg: Awaited<ReturnType<typeof getConfig>>, company: string, b: Booking, token: string): EmailContent {
+function businessRequestEmail(cfg: Awaited<ReturnType<typeof getConfig>>, company: string, b: Booking, token: string, test = false): EmailContent {
   const when = formatBookingTime(b.startsAt);
   const link = appUrl(`/termin/aktion/${token}`);
   return renderEmail(cfg, {
-    subject: `Neue Terminanfrage: ${when} Uhr – ${b.visitorName ?? ''}`.trim(),
+    subject: `${test ? '[TEST] ' : ''}Neue Terminanfrage: ${when} Uhr – ${b.visitorName ?? ''}`.trim(),
     heading: 'Neue Terminanfrage über Ihre Website',
     preheader: `${when} Uhr – bitte bestätigen oder ablehnen`,
     noGreeting: true,
     noSpamHint: true,
     blocks: [
+      ...(test ? [`TESTLAUF über den Entwurf „${company}“ (fiktiver Testbetrieb). So sieht die Mail aus, die ein Betrieb nach dem Kauf bekommt.`] : []),
       {
         box: [
           `Termin: ${when} Uhr (${Math.round((b.endsAt.getTime() - b.startsAt.getTime()) / 60_000)} Minuten)`,
@@ -550,7 +653,7 @@ function businessRequestEmail(cfg: Awaited<ReturnType<typeof getConfig>>, compan
   });
 }
 
-function visitorEmail(company: string, b: Booking, state: BookingStatus, cancelToken: string | null): EmailContent {
+function visitorEmail(company: string, b: Booking, state: BookingStatus, cancelToken: string | null, test = false): EmailContent {
   const when = formatBookingTime(b.startsAt);
   const name = b.visitorName ? `Guten Tag ${b.visitorName},` : 'Guten Tag,';
   const cancel = cancelToken ? appUrl(`/termin/absagen/${cancelToken}`) : null;
@@ -595,7 +698,7 @@ function visitorEmail(company: string, b: Booking, state: BookingStatus, cancelT
       ],
     },
   };
-  const c = t[state]!;
+  const c = { ...t[state]!, subject: `${test ? '[TEST] ' : ''}${t[state]!.subject}` };
   const footer = `Diese Nachricht wurde über die Website von ${company} versendet. Ihre Angaben werden nur für diesen Termin verwendet und spätestens ${BOOKING_RULES.retentionDays} Tage nach dem Termin gelöscht.`;
   const text = [name, '', ...c.lines, ...(cancel ? ['', `Termin absagen: ${cancel}`] : []), '', `Viele Grüße`, company, '', '--', footer].join('\n');
   const p = (s: string) => `<p style="margin:0 0 14px;font:16px/1.6 -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#1b1c1e">${esc(s)}</p>`;

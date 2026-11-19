@@ -17,6 +17,17 @@ describe('Queue-Betriebsgrenzen', () => {
     resetEnvCache();
     expect(queueRuntimeConfig()).toMatchObject({ migrate: false, supervise: false, schedule: false, create: false });
   });
+  it('Produktions-Worker legt fehlende Warteschlangen selbst an (keine Neustartschleife bei neuen Jobs)', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('SESSION_SECRET', 'fixture-seitenwerk-safe-session-secret-123');
+    vi.stubEnv('APP_NAME', 'wbm-worker');
+    for (const key of ['BOSS_MIGRATE', 'BOSS_SUPERVISE', 'BOSS_SCHEDULE', 'BOSS_CREATE_QUEUES']) vi.stubEnv(key, '');
+    resetEnvCache();
+    expect(queueRuntimeConfig()).toMatchObject({ migrate: false, schedule: true, create: true });
+    vi.stubEnv('BOSS_CREATE_QUEUES', 'false');
+    resetEnvCache();
+    expect(queueRuntimeConfig()).toMatchObject({ create: false });
+  });
   it('Supabase-Worker braucht Session/Direct; reiner Producer darf Transaction nutzen', () => {
     const u = 'postgres://fixture:fixture@aws-0-eu-west-1.pooler.supabase.com:6543/postgres';
     expect(() => assertQueueConnection(u, { migrate: false, supervise: true, schedule: true })).toThrow(/Session/);

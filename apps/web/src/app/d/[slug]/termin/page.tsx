@@ -1,16 +1,31 @@
 import type { Metadata } from 'next';
-import { findPublicDemo, openSlots, openingHoursToDays, siteThemeFor, type OnboardingDay } from '@wbm/core';
+import { demoTestSlots, findDemoTestBooking, findPublicDemo, openSlots, openingHoursToDays, siteThemeFor, type OnboardingDay } from '@wbm/core';
 import { BookingForm, BookingShell } from '@/components/booking/booking-ui';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Termin anfragen (Vorschau)', robots: { index: false, follow: false } };
 
+const ERRORS: Record<string, string> = {
+  taken: 'Diese Zeit wurde gerade vergeben. Bitte wählen Sie eine andere Zeit.',
+  invalid: 'Bitte wählen Sie eine Zeit, geben Sie Name, Telefon, E-Mail und den Grund des Termins an und bestätigen Sie den Datenschutzhinweis.',
+  rate_limited: 'Zu viele Testanfragen in kurzer Zeit. Bitte später erneut versuchen.',
+  unavailable: 'Die Anfrage konnte gerade nicht zugestellt werden. Bitte später erneut versuchen.',
+};
+
 /**
- * Vorschau der Online-Terminwahl im Entwurf: gleiche Oberfläche und Gestaltung wie nach dem Kauf, aber Absenden gesperrt –
- * es wird nichts gebucht oder versendet. Zeiten aus den öffentlichen Öffnungszeiten, sonst gekennzeichnete Beispielzeiten.
+ * Terminwahl im Entwurf. Echte Betriebe: gesperrte Vorschau (nichts wird gebucht oder versendet).
+ * Fiktive Testbetriebe (Lead-Quelle „mock“): Testlauf – Anfragen gehen an die eigene SeitenWerk-Adresse, damit der
+ * ganze Ablauf (Anfrage → Bestätigen/Ablehnen → Bestätigung mit Kalenderdatei) geprüft werden kann.
  */
-export default async function DemoBookingPreview({ params }: { params: Promise<{ slug: string }> }) {
+export default async function DemoBookingPreview({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ fehler?: string }>;
+}) {
   const { slug } = await params;
+  const { fehler } = await searchParams;
   const found = await findPublicDemo(slug);
   if (found.state !== 'ok')
     return (
@@ -19,6 +34,29 @@ export default async function DemoBookingPreview({ params }: { params: Promise<{
       </BookingShell>
     );
   const lead = found.lead;
+  const theme = siteThemeFor(found.demo.templateId, lead.businessName);
+  const test = await findDemoTestBooking(slug);
+  if (test) {
+    const slots = await demoTestSlots(test);
+    return (
+      <BookingShell company={test.company} theme={theme} websiteUrl={`/d/${slug}`} backLabel="Zum Entwurf">
+        <p role="note" className="bk-note">
+          <strong>Testlauf:</strong> Dieser Entwurf gehört zu einem erfundenen Testbetrieb. Anfragen werden wirklich verschickt: die
+          Mail „an den Betrieb“ geht an die SeitenWerk-Adresse, die Bestätigung an die E-Mail, die Sie unten eingeben.
+        </p>
+        <h1>Termin anfragen</h1>
+        <p className="bk-lead">Wählen Sie Tag und Uhrzeit. {test.company} bestätigt den Termin per E-Mail.</p>
+        <BookingForm
+          action={`/d/${slug}/termin/senden`}
+          days={slots}
+          services={test.services}
+          slotMinutes={test.cfg.slotMinutes}
+          privacyUrl={null}
+          error={fehler ? (ERRORS[fehler] ?? ERRORS.invalid) : null}
+        />
+      </BookingShell>
+    );
+  }
   let days: OnboardingDay[] = openingHoursToDays(lead.openingHours);
   const known = days.some((d) => !d.closed);
   if (!known)
@@ -27,12 +65,7 @@ export default async function DemoBookingPreview({ params }: { params: Promise<{
   const services = (content?.services ?? []).map((s) => String(s.title ?? '').trim()).filter(Boolean).slice(0, 8);
   const slots = openSlots({ slotMinutes: 60, days }, []);
   return (
-    <BookingShell
-      company={lead.businessName}
-      theme={siteThemeFor(found.demo.templateId, lead.businessName)}
-      websiteUrl={`/d/${slug}`}
-      backLabel="Zum Entwurf"
-    >
+    <BookingShell company={lead.businessName} theme={theme} websiteUrl={`/d/${slug}`} backLabel="Zum Entwurf">
       <p role="note" className="bk-note">
         <strong>Vorschau:</strong> So wählen Ihre Kunden später einen Termin – im Entwurf wird nichts gebucht.
         {known ? ' Die Zeiten richten sich nach Ihren Öffnungszeiten.' : ' Beispielzeiten Mo–Fr 8–16 Uhr, später Ihre Öffnungszeiten.'}

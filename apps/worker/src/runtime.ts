@@ -100,7 +100,12 @@ export async function scheduleCrons(boss: PgBoss, crons: CronDef[]): Promise<voi
       await boss.unschedule(c.queue).catch(() => undefined);
       continue;
     }
-    await boss.schedule(c.queue, c.cron, {}, { tz });
-    logger.info({ queue: c.queue, cron: c.cron }, 'cron geplant');
+    // Ein einzelner fehlerhafter Zeitplan (z. B. fehlende Warteschlange) darf den Worker nicht in eine Neustartschleife schicken
+    try {
+      await boss.schedule(c.queue, c.cron, {}, { tz });
+      logger.info({ queue: c.queue, cron: c.cron }, 'cron geplant');
+    } catch (err) {
+      logger.error({ queue: c.queue, err: err instanceof Error ? err.message : String(err) }, 'cron konnte nicht geplant werden');
+    }
   }
 }
