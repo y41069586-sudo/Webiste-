@@ -53,6 +53,17 @@ const nextConfig: NextConfig = {
         source: '/d/:path*',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
       },
+      // Tempo (19.11.2026): Seiten der Firmen-Website kommen aus dem Netlify-Zwischenspeicher statt aus der Serverfunktion
+      // (keine Kaltstarts, keine Datenbankrunde). Inhalte ändern sich selten; nach 5 Minuten wird im Hintergrund erneuert.
+      ...['/', '/preise', '/so-funktionierts', '/beispiele', '/garantie', '/ueber-mich', '/impressum', '/datenschutz', '/agb', '/quellen'].map(
+        (source) => ({
+          source,
+          headers: [
+            { key: 'Netlify-CDN-Cache-Control', value: 'public, durable, s-maxage=300, stale-while-revalidate=604800' },
+            { key: 'Netlify-Cache-Tag', value: 'site-pages' },
+          ],
+        }),
+      ),
       {
         source: '/(einrichten|onboarding|preview|verlaengern|checkout)/:path*',
         headers: [

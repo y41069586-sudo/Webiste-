@@ -192,11 +192,17 @@ export interface PublicBookingSite {
 /** Nur live geschaltete, bezahlte Websites mit Online-Terminwahl. */
 export async function findBookingSite(formKey: string, db: DbOrTx = getDb()): Promise<PublicBookingSite | null> {
   if (!/^[A-Za-z0-9]{24}$/.test(formKey)) return null;
-  const site = await db.query.sites.findFirst({ where: eq(sites.formKey, formKey) });
-  if (!site || site.status !== 'live' || !site.formTargetEmail) return null;
-  const customer = await db.query.customers.findFirst({ where: eq(customers.id, site.customerId) });
-  const order = customer ? await db.query.orders.findFirst({ where: eq(orders.id, customer.orderId) }) : null;
-  if (!customer || !order || order.status !== 'paid') return null;
+  // Tempo (19.11.2026): Website, Kunde und Bestellung in einer Abfrage statt drei (Funktion USA, Datenbank Frankfurt)
+  const [row] = await db
+    .select({ site: sites, customer: customers, order: orders })
+    .from(sites)
+    .innerJoin(customers, eq(customers.id, sites.customerId))
+    .innerJoin(orders, eq(orders.id, customers.orderId))
+    .where(eq(sites.formKey, formKey))
+    .limit(1);
+  if (!row) return null;
+  const { site, customer, order } = row;
+  if (site.status !== 'live' || !site.formTargetEmail || order.status !== 'paid') return null;
   if (order.provider === 'stripe' && order.paymentMode === 'test') return null;
   const cfg = bookingConfigFor(site);
   if (!cfg) return null;
@@ -232,8 +238,11 @@ export interface DemoTestBooking {
  * Testlauf (Betreiber, 19.11.2026): Nur Entwürfe fiktiver Testbetriebe (Lead-Quelle „mock“) nehmen echte Terminanfragen an.
  * Die Mail „an den Betrieb“ geht an die eigene Absenderadresse von SeitenWerk – nie an einen echten Betrieb.
  */
-export async function findDemoTestBooking(slug: string): Promise<DemoTestBooking | null> {
-  const found = await findPublicDemo(slug);
+export async function findDemoTestBooking(
+  slug: string,
+  known?: Awaited<ReturnType<typeof findPublicDemo>>,
+): Promise<DemoTestBooking | null> {
+  const found = known ?? (await findPublicDemo(slug));
   if (found.state !== 'ok' || found.lead.source !== 'mock') return null;
   const own = (await getConfig()).sender.email.trim();
   if (!MAIL_RE.test(own)) return null;
@@ -294,13 +303,31 @@ export function bookingInput(form: FormData): BookingInput {
     phone: f('phone'),
     message: f('message'),
     consent: form.get('consent') === 'on',
-    honeypot: f('website'),
+    // Spam-Schutz mit Namen, den kein Autofill kennt (vorher „website“ – iPhone-Autofill füllte es aus)
+    honeypot: f('hp_sw_k7'),
   };
 }
 
+export type BookingField = 'start' | 'name' | 'email' | 'phone' | 'message' | 'consent' | 'service' | 'spam';
 export type BookingRequestResult =
   | { ok: true; bookingId: string; startsAt: Date }
-  | { ok: false; reason: 'not_found' | 'invalid' | 'taken' | 'rate_limited' | 'unavailable' };
+  | { ok: false; reason: 'not_found' | 'taken' | 'rate_limited' | 'unavailable' }
+  | { ok: false; reason: 'invalid'; field: BookingField };
+
+/** Welche Angabe fehlt oder ungültig ist – für eine genaue Meldung statt „bitte alles ausfüllen“. */
+export function bookingInputProblem(input: BookingInput): BookingField | null {
+  const email = input.email.trim();
+  if (input.honeypot.trim()) return 'spam';
+  if (Number.isNaN(new Date(input.start).getTime())) return 'start';
+  if (input.name.trim().length < 2 || input.name.trim().length > 120) return 'name';
+  if (input.phone.replace(/\D/g, '').length < 6 || input.phone.length > 40) return 'phone';
+  if (!MAIL_RE.test(email) || email.length > 254) return 'email';
+  if (input.service.length > 120) return 'service';
+  if (input.message.trim().length < 3 || input.message.length > 2000 || (input.message.match(/https?:\/\//g) ?? []).length > 2)
+    return 'message';
+  if (!input.consent) return 'consent';
+  return null;
+}
 
 const clean = (s: string, max: number) => s.trim().replace(/[\r\n]+/g, ' ').slice(0, max);
 
@@ -338,37 +365,26 @@ async function createBooking(
   const now = opts.now ?? new Date();
   const db = getDb();
   const key = b.siteId ?? `demo:${b.demoId}`;
-  // Honeypot: wie Erfolg aussehen lassen, aber nichts tun
-  if (input.honeypot.trim()) return { ok: false, reason: 'invalid' };
+  const problem = bookingInputProblem(input);
+  if (problem) return { ok: false, reason: 'invalid', field: problem };
   const email = input.email.trim();
   const start = new Date(input.start);
-  if (
-    !input.consent ||
-    input.name.trim().length < 2 ||
-    input.name.trim().length > 120 ||
-    !MAIL_RE.test(email) ||
-    email.length > 254 ||
-    input.phone.replace(/\D/g, '').length < 6 ||
-    input.phone.length > 40 ||
-    input.message.trim().length < 3 ||
-    input.message.length > 2000 ||
-    input.service.length > 120 ||
-    (input.message.match(/https?:\/\//g) ?? []).length > 2 ||
-    Number.isNaN(start.getTime())
-  )
-    return { ok: false, reason: 'invalid' };
   const provider = opts.provider ?? getProviders().email;
   if (provider.name === 'mock') return { ok: false, reason: 'unavailable' };
-  const r1 = await rateLimit(db, `booking:${key}:${meta.ipHash}`, b.test ? 20 : 4, 3600);
-  const r2 = await rateLimit(db, `booking:${key}`, 60, 86_400);
+  // Tempo (19.11.2026): unabhängige Abfragen gleichzeitig (Funktion in den USA, Datenbank in Frankfurt)
+  const [r1, r2, cfg] = await Promise.all([
+    rateLimit(db, `booking:${key}:${meta.ipHash}`, b.test ? 20 : 4, 3600),
+    rateLimit(db, `booking:${key}`, 60, 86_400),
+    getConfig(),
+  ]);
   if (!r1.allowed || !r2.allowed) return { ok: false, reason: 'rate_limited' };
 
   const businessToken = randomToken(32);
   const visitorToken = randomToken(32);
   const end = new Date(start.getTime() + b.cfg.slotMinutes * 60_000);
-  let bookingId: string;
+  let booking: Booking;
   try {
-    bookingId = await db.transaction(async (tx) => {
+    booking = await db.transaction(async (tx) => {
       await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`booking:${key}`}))`);
       // Abgelaufene Anfragen freigeben, bevor die Zeit erneut geprüft wird
       await tx
@@ -396,17 +412,17 @@ async function createBooking(
           visitorTokenHash: sha256(visitorToken),
           requestExpiresAt: new Date(now.getTime() + BOOKING_RULES.requestHours * 3_600_000),
         })
-        .returning({ id: bookings.id });
-      return row!.id;
+        .returning();
+      return row!;
     });
   } catch (err) {
     if (err instanceof SlotTakenError || (err as { code?: string }).code === '23505') return { ok: false, reason: 'taken' };
     throw err;
   }
-  const booking = (await db.query.bookings.findFirst({ where: eq(bookings.id, bookingId) }))!;
-  const cfg = await getConfig();
-  try {
-    await sendTransactionalEmail(
+  const bookingId = booking.id;
+  // Beide Mails gleichzeitig (spart eine volle Runde); ohne Mail an den Betrieb keine offene Reservierung
+  const [business, visitor] = await Promise.allSettled([
+    sendTransactionalEmail(
       {
         kind: 'booking_request_business',
         idempotencyKey: `booking:${bookingId}:request:business`,
@@ -416,26 +432,27 @@ async function createBooking(
         ...businessRequestEmail(cfg, b.company, booking, businessToken, b.test),
       },
       { provider },
-    );
-  } catch (err) {
-    // Ohne Nachricht an den Betrieb keine offene Reservierung: Zeit sofort wieder freigeben
+    ),
+    sendTransactionalEmail(
+      {
+        kind: 'booking_request_visitor',
+        idempotencyKey: `booking:${bookingId}:request:visitor`,
+        to: email,
+        replyTo: b.targetEmail,
+        customerId: b.customerId,
+        ...visitorEmail(b.company, booking, 'requested', visitorToken, b.test),
+      },
+      { provider },
+    ),
+  ]);
+  if (business.status === 'rejected') {
     await db.update(bookings).set({ status: 'cancelled', updatedAt: new Date() }).where(eq(bookings.id, bookingId));
+    const err = business.reason as unknown;
     logger.error({ target: key, errorClass: err instanceof Error ? err.name : 'Error' }, 'Terminanfrage: Betrieb nicht erreichbar');
     return { ok: false, reason: 'unavailable' };
   }
-  await sendTransactionalEmail(
-    {
-      kind: 'booking_request_visitor',
-      idempotencyKey: `booking:${bookingId}:request:visitor`,
-      to: email,
-      replyTo: b.targetEmail,
-      customerId: b.customerId,
-      ...visitorEmail(b.company, booking, 'requested', visitorToken, b.test),
-    },
-    { provider },
-  ).catch((err) =>
-    logger.warn({ target: key, errorClass: err instanceof Error ? err.name : 'Error' }, 'Terminanfrage: Eingangsbestätigung fehlgeschlagen'),
-  );
+  if (visitor.status === 'rejected')
+    logger.warn({ target: key }, 'Terminanfrage: Eingangsbestätigung fehlgeschlagen');
   if (b.siteId && b.customerId) await bookingEvent(b.customerId, b.siteId, 'requested');
   return { ok: true, bookingId, startsAt: start };
 }

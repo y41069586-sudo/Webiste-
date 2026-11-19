@@ -17,7 +17,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ formKey
     const res = await requestBooking(formKey, bookingInput(form), requestMetaFrom(req.headers));
     if (res.ok) return back(`/danke?t=${encodeURIComponent(res.startsAt.toISOString())}`);
     if (res.reason === 'not_found') return back('');
-    return back(`?fehler=${res.reason}`);
+    return back(`?fehler=${res.reason}${res.reason === 'invalid' ? `&feld=${res.field}` : ''}`);
   } catch (err) {
     logger.error({ errorClass: err instanceof Error ? err.name : 'Error' }, 'Terminanfrage fehlgeschlagen');
     return back('?fehler=unavailable');

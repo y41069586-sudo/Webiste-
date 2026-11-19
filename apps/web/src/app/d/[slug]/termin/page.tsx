@@ -1,16 +1,10 @@
 import type { Metadata } from 'next';
 import { demoTestSlots, findDemoTestBooking, findPublicDemo, openSlots, openingHoursToDays, siteThemeFor, type OnboardingDay } from '@wbm/core';
-import { BookingForm, BookingShell } from '@/components/booking/booking-ui';
+import { BookingForm, BookingShell, bookingErrorText } from '@/components/booking/booking-ui';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Termin anfragen (Vorschau)', robots: { index: false, follow: false } };
 
-const ERRORS: Record<string, string> = {
-  taken: 'Diese Zeit wurde gerade vergeben. Bitte wählen Sie eine andere Zeit.',
-  invalid: 'Bitte wählen Sie eine Zeit, geben Sie Name, Telefon, E-Mail und den Grund des Termins an und bestätigen Sie den Datenschutzhinweis.',
-  rate_limited: 'Zu viele Testanfragen in kurzer Zeit. Bitte später erneut versuchen.',
-  unavailable: 'Die Anfrage konnte gerade nicht zugestellt werden. Bitte später erneut versuchen.',
-};
 
 /**
  * Terminwahl im Entwurf. Echte Betriebe: gesperrte Vorschau (nichts wird gebucht oder versendet).
@@ -22,10 +16,10 @@ export default async function DemoBookingPreview({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ fehler?: string }>;
+  searchParams: Promise<{ fehler?: string; feld?: string }>;
 }) {
   const { slug } = await params;
-  const { fehler } = await searchParams;
+  const { fehler, feld } = await searchParams;
   const found = await findPublicDemo(slug);
   if (found.state !== 'ok')
     return (
@@ -35,7 +29,7 @@ export default async function DemoBookingPreview({
     );
   const lead = found.lead;
   const theme = siteThemeFor(found.demo.templateId, lead.businessName);
-  const test = await findDemoTestBooking(slug);
+  const test = await findDemoTestBooking(slug, found);
   if (test) {
     const slots = await demoTestSlots(test);
     return (
@@ -52,7 +46,7 @@ export default async function DemoBookingPreview({
           services={test.services}
           slotMinutes={test.cfg.slotMinutes}
           privacyUrl={null}
-          error={fehler ? (ERRORS[fehler] ?? ERRORS.invalid) : null}
+          error={bookingErrorText(fehler, feld)}
         />
       </BookingShell>
     );

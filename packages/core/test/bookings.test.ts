@@ -162,12 +162,14 @@ describe('Buchung, Bestätigung, Absage', () => {
     const slot = berlinToUtc(2026, 11, 24, 9, 0);
     const res = await requestBooking(site.formKey, input(slot), meta, { now: NOW });
     expect(res.ok).toBe(true);
-    expect(sent.map((m) => m.to)).toEqual(['betrieb@client.test', 'besucherin@request.test']);
-    expect(sent[0]!.replyTo).toBe('besucherin@request.test');
-    expect(sent[0]!.text).toContain('Termin bestätigen oder ablehnen');
-    expect(sent[0]!.text).toContain('Dachreparatur');
-    expect(sent[1]!.replyTo).toBe('betrieb@client.test');
-    expect(sent[1]!.text).toContain('noch nicht bestätigt');
+    expect(sent.map((m) => m.to).sort()).toEqual(['besucherin@request.test', 'betrieb@client.test']);
+    const toBusiness = sent.find((m) => m.to === 'betrieb@client.test')!;
+    const toVisitor = sent.find((m) => m.to === 'besucherin@request.test')!;
+    expect(toBusiness.replyTo).toBe('besucherin@request.test');
+    expect(toBusiness.text).toContain('Termin bestätigen oder ablehnen');
+    expect(toBusiness.text).toContain('Dachreparatur');
+    expect(toVisitor.replyTo).toBe('betrieb@client.test');
+    expect(toVisitor.text).toContain('noch nicht bestätigt');
     // gleiche Zeit nochmal: vergeben
     expect(await requestBooking(site.formKey, input(slot, { email: 'zweite@request.test' }), { ...meta, ipHash: 'x' }, { now: NOW })).toEqual({
       ok: false,
@@ -200,18 +202,22 @@ describe('Buchung, Bestätigung, Absage', () => {
     ])
       expect((await requestBooking(site.formKey, bad, meta, { now: NOW })).ok).toBe(false);
     const slot = berlinToUtc(2026, 11, 24, 10, 0);
-    expect(await requestBooking(site.formKey, input(slot, { email: '' }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
-    expect(await requestBooking(site.formKey, input(slot, { consent: false }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
-    expect(await requestBooking(site.formKey, input(slot, { message: '  ' }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
-    expect(await requestBooking(site.formKey, input(slot, { phone: '' }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
-    expect(await requestBooking(site.formKey, input(slot, { phone: '12' }), meta, { now: NOW })).toEqual({ ok: false, reason: 'invalid' });
+    expect(await requestBooking(site.formKey, input(slot, { email: '' }), meta, { now: NOW })).toMatchObject({ ok: false, reason: 'invalid' });
+    expect(await requestBooking(site.formKey, input(slot, { consent: false }), meta, { now: NOW })).toMatchObject({ ok: false, reason: 'invalid' });
+    expect(await requestBooking(site.formKey, input(slot, { message: '  ' }), meta, { now: NOW })).toMatchObject({ ok: false, reason: 'invalid' });
+    expect(await requestBooking(site.formKey, input(slot, { phone: '' }), meta, { now: NOW })).toMatchObject({ ok: false, reason: 'invalid' });
+    expect(await requestBooking(site.formKey, input(slot, { phone: '12' }), meta, { now: NOW })).toMatchObject({ ok: false, reason: 'invalid' });
+    // genaue Meldung je Feld; Autofill im (umbenannten) Spam-Feld wird als solches erkannt
+    expect(await requestBooking(site.formKey, input(slot, { phone: '12' }), meta, { now: NOW })).toMatchObject({ field: 'phone' });
+    expect(await requestBooking(site.formKey, input(slot, { consent: false }), meta, { now: NOW })).toMatchObject({ field: 'consent' });
+    expect(await requestBooking(site.formKey, input(slot, { honeypot: 'https://x.test' }), meta, { now: NOW })).toMatchObject({ field: 'spam' });
     expect(sent).toHaveLength(0);
   });
 
   it('Bestätigen: Besucher bekommt Bestätigung mit Kalenderdatei; nur offene Anfragen; zweimal klicken schadet nicht', async () => {
     const { site, lead } = await fixture();
     await requestBooking(site.formKey, input(berlinToUtc(2026, 11, 24, 8, 0)), meta, { now: NOW });
-    const token = tokenFrom(sent[0]!, '/termin/aktion');
+    const token = tokenFrom(sent.find((m) => m.text.includes('/termin/aktion'))!, '/termin/aktion');
     sent.length = 0;
     expect(await decideBooking(token, 'confirm', 'Bitte bei Müller klingeln', { now: NOW })).toEqual({ ok: true, status: 'confirmed' });
     expect(sent).toHaveLength(1);
@@ -237,7 +243,7 @@ describe('Buchung, Bestätigung, Absage', () => {
     const { site } = await fixture();
     const slot = berlinToUtc(2026, 11, 24, 11, 0);
     await requestBooking(site.formKey, input(slot), meta, { now: NOW });
-    const token = tokenFrom(sent[0]!, '/termin/aktion');
+    const token = tokenFrom(sent.find((m) => m.text.includes('/termin/aktion'))!, '/termin/aktion');
     sent.length = 0;
     expect(await decideBooking(token, 'decline', '', { now: NOW })).toEqual({ ok: false, reason: 'reason_required' });
     expect(sent).toHaveLength(0);
@@ -250,7 +256,7 @@ describe('Buchung, Bestätigung, Absage', () => {
   it('Absage durch den Besucher informiert den Betrieb', async () => {
     const { site } = await fixture();
     await requestBooking(site.formKey, input(berlinToUtc(2026, 11, 26, 9, 0)), meta, { now: NOW });
-    const visitorToken = tokenFrom(sent[1]!, '/termin/absagen');
+    const visitorToken = tokenFrom(sent.find((m) => m.text.includes('/termin/absagen'))!, '/termin/absagen');
     sent.length = 0;
     expect(await cancelByVisitor(visitorToken, { now: NOW })).toEqual({ ok: true, status: 'cancelled' });
     expect(sent[0]!.to).toBe('betrieb@client.test');
@@ -261,7 +267,7 @@ describe('Buchung, Bestätigung, Absage', () => {
     const { site } = await fixture();
     const slot = berlinToUtc(2026, 12, 1, 9, 0);
     await requestBooking(site.formKey, input(slot), meta, { now: NOW });
-    const token = tokenFrom(sent[0]!, '/termin/aktion');
+    const token = tokenFrom(sent.find((m) => m.text.includes('/termin/aktion'))!, '/termin/aktion');
     sent.length = 0;
     const later = new Date(NOW.getTime() + 49 * 3_600_000);
     expect(await sweepBookings(later)).toMatchObject({ expired: 1 });
@@ -336,10 +342,10 @@ describe('Testlauf über den Entwurf eines fiktiven Testbetriebs', () => {
     const slot = berlinToUtc(2026, 11, 24, 9, 0);
     const res = await requestDemoTestBooking(slug, input(slot, { email: 'tester@request.test' }), meta, { now: NOW });
     expect(res.ok).toBe(true);
-    expect(sent.map((m) => m.to)).toEqual(['betreiber@seitenwerk.test', 'tester@request.test']);
+    expect(sent.map((m) => m.to).sort()).toEqual(['betreiber@seitenwerk.test', 'tester@request.test']);
     expect(sent.every((m) => m.subject.startsWith('[TEST]'))).toBe(true);
-    expect(sent[0]!.text).toContain('TESTLAUF');
-    const token = tokenFrom(sent[0]!, '/termin/aktion');
+    expect(sent.find((m) => m.to === 'betreiber@seitenwerk.test')!.text).toContain('TESTLAUF');
+    const token = tokenFrom(sent.find((m) => m.text.includes('/termin/aktion'))!, '/termin/aktion');
     sent.length = 0;
     expect(await decideBooking(token, 'confirm', '', { now: NOW })).toEqual({ ok: true, status: 'confirmed' });
     expect(sent[0]!.to).toBe('tester@request.test');

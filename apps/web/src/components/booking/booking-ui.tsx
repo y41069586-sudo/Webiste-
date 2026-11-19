@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { SiteTheme, SlotDay } from '@wbm/core';
+import { BookingSubmit } from './submit-button';
 
 /**
  * Terminseiten im Design des Betriebs (19.11.2026): gleiche Farben, Akzentfarbe und Schriften wie seine Website.
@@ -74,6 +75,9 @@ html{scroll-behavior:smooth}
 .bk-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:14px 28px;border-radius:6px;border:1.5px solid var(--ac);background:var(--ac);color:var(--on);font:inherit;font-weight:700;cursor:pointer;transition:background .16s,border-color .16s}
 .bk-btn:hover{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .bk-btn:disabled{opacity:.55;cursor:not-allowed}
+.bk-btn[data-sending]{pointer-events:none;opacity:.8}
+.bk-spin{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:bk-rot .7s linear infinite}
+@keyframes bk-rot{to{transform:rotate(360deg)}}
 .bk-btn.alt{background:transparent;color:var(--ink);border-color:var(--ink)}
 .bk-btn.alt:hover{background:var(--ink);color:var(--bg)}
 .bk-small{color:var(--mu);font-size:.9rem;margin:12px 0 0}
@@ -259,8 +263,8 @@ export function BookingForm({
           </div>
         </div>
         <div className="bk-sr" aria-hidden="true">
-          <label htmlFor="b-website">Website</label>
-          <input id="b-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+          <label htmlFor="b-hp">Bitte leer lassen</label>
+          <input id="b-hp" name="hp_sw_k7" type="text" tabIndex={-1} autoComplete="off" data-1p-ignore data-lpignore="true" />
         </div>
       </section>
 
@@ -278,12 +282,32 @@ export function BookingForm({
             ) : null}
           </label>
         </div>
-        <button type="submit" className="bk-btn" disabled={preview}>
-          Termin anfragen
-        </button>
+        <BookingSubmit disabled={preview} />
         {preview ? <p className="bk-small"><strong>Vorschau:</strong> Absenden ist im Entwurf gesperrt.</p> : null}
         <p className="bk-small">Verbindlich wird der Termin erst mit der Bestätigung per E-Mail.</p>
       </section>
     </form>
   );
+}
+
+/** Genaue Meldung, welche Angabe fehlt (statt „bitte alles ausfüllen“). */
+export function bookingErrorText(fehler?: string, feld?: string): string | null {
+  if (!fehler) return null;
+  const fields: Record<string, string> = {
+    start: 'Bitte wählen Sie Tag und Uhrzeit.',
+    name: 'Bitte geben Sie Ihren Namen an.',
+    phone: 'Bitte geben Sie eine Telefonnummer mit mindestens 6 Ziffern an.',
+    email: 'Bitte prüfen Sie Ihre E-Mail-Adresse.',
+    message: 'Bitte beschreiben Sie kurz den Grund des Termins (ohne viele Links).',
+    consent: 'Bitte bestätigen Sie den Datenschutzhinweis.',
+    service: 'Bitte wählen Sie eine Leistung aus der Liste.',
+    spam: 'Die Anfrage wurde als automatisch erkannt. Bitte Seite neu laden und ohne automatisches Ausfüllen erneut senden.',
+  };
+  const other: Record<string, string> = {
+    taken: 'Diese Zeit wurde gerade vergeben. Bitte wählen Sie eine andere Zeit.',
+    rate_limited: 'Zu viele Anfragen in kurzer Zeit. Bitte später erneut versuchen.',
+    unavailable: 'Die Anfrage konnte gerade nicht zugestellt werden. Bitte später erneut versuchen oder anrufen.',
+  };
+  if (fehler === 'invalid') return (feld && fields[feld]) || 'Bitte prüfen Sie Ihre Angaben.';
+  return other[fehler] ?? 'Bitte prüfen Sie Ihre Angaben.';
 }
