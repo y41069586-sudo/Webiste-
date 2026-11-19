@@ -1926,3 +1926,8 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   Alle Indizes aus den Migrationen vorhanden. Offen: letztes geprüftes Backup vom 03.11. (Timer auf dem VPS prüfen).
   Eigene Messaufrufe vom 18./19.11. haben beim echten Lead „Kolle Inh. Magerhans“ 22 `cta_click`-Events
   (ua `mobil/safari`) erzeugt; Löschung nur nach Freigabe. Keine zusätzlichen Mails ausgelöst.
+- 19.11.2026 Betreiber: „alle Scans von mir, nichts von echten“ → „lösch alle tests“. Entfernt: 45 Test-Ereignisse
+  (scan, demo_view, cta_click, checkout_started, checkout_abandoned) bei Bischoff und Greb, H.-G. Heeren, Kolle, Magho,
+  Müller; Status zurück auf `letter_sent`, je ein `audit_log`-Eintrag `test_events_removed` mit vorherigem Status und
+  Anzahl. Eigene Test-Betriebe (Krawczyk, Uluca) unverändert. Abgelaufene Bestellungen (4×, nie bezahlt) bleiben als
+  Verlauf. Funnel-Sichten neu berechnet: 0 echte Scans.
