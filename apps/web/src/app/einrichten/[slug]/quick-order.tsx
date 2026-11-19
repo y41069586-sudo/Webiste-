@@ -85,7 +85,7 @@ export function TariffPicker({ slug, options, preferred }: { slug: string; optio
               name="plan"
               value={o.plan}
               disabled={pending}
-              className={`btn-site mt-6 w-full disabled:opacity-60 ${o.recommended ? 'btn-primary' : 'btn-secondary'}`}
+              className="btn-site btn-sw mt-6 w-full disabled:opacity-60"
             >
               {pending ? 'Bezahlseite öffnet …' : `${o.name} wählen`}
               <span className="arrow" aria-hidden="true">

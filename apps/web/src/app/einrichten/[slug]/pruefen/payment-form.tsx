@@ -93,7 +93,7 @@ export function PaymentForm({
           {state.error}
         </p>
       ) : null}
-      <button disabled={pending} className="btn-site btn-primary w-full disabled:opacity-60">
+      <button disabled={pending} className="btn-site btn-sw w-full disabled:opacity-60">
         {pending ? 'Bezahlseite öffnet …' : 'Weiter zur Bezahlung'}
         <span className="arrow" aria-hidden="true">
           →

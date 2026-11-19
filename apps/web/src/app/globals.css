@@ -199,6 +199,16 @@ body {
 .btn-primary::after {
   box-shadow: 0 10px 30px rgb(31 79 216 / 0.38);
 }
+.btn-sw {
+  /* Knopf wie auf seitenwerk.world (19.11.2026): hellblauer Verlauf, Pillenform */
+  background: linear-gradient(180deg, #2f62f0, #1f4fd8);
+  color: #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+.btn-sw::after {
+  box-shadow: 0 10px 30px rgb(47 98 240 / 0.38);
+}
 .btn-secondary {
   background: #ffffff;
   color: #0f172a;
