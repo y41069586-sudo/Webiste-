@@ -11,6 +11,9 @@ import type { EmailProvider } from '../providers/types';
 import { BOOKING_SLOT_MINUTES, type OnboardingData, type OnboardingDay } from '../sites/onboarding-data';
 import { randomToken, sha256 } from '../util/crypto';
 import { sendTransactionalEmail } from './email';
+
+/** Gestaltung des Betriebs für die Terminseiten (gleiche Farben/Schriften wie seine Website) */
+export { siteThemeFor, type SiteTheme } from '@wbm/templates';
 import { rateLimit } from './rate-limit';
 import { recordEvent, type RequestMeta } from './tracking';
 
@@ -358,6 +361,7 @@ export interface BookingView {
   booking: Booking;
   company: string;
   siteId: string;
+  templateId: string;
   formTargetEmail: string;
 }
 
@@ -367,7 +371,7 @@ async function viewFor(booking: Booking | undefined): Promise<BookingView | null
   const site = await db.query.sites.findFirst({ where: eq(sites.id, booking.siteId) });
   const customer = site ? await db.query.customers.findFirst({ where: eq(customers.id, site.customerId) }) : null;
   if (!site || !customer || !site.formTargetEmail) return null;
-  return { booking, company: customer.company, siteId: site.id, formTargetEmail: site.formTargetEmail };
+  return { booking, company: customer.company, siteId: site.id, templateId: site.templateId, formTargetEmail: site.formTargetEmail };
 }
 
 const tokenOk = (t: string) => /^[A-Za-z0-9]{32}$/.test(t);

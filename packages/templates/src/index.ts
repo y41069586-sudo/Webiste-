@@ -45,6 +45,7 @@ export {
   type PraxisDirection,
   type PraxisDirectionKey,
 } from './praxis/directions';
+export { siteThemeFor, type SiteTheme } from './praxis/theme';
 export { updateAuthoredCopy } from './authored/update';
 export { AUTHORED_TEMPLATES, authoredTemplateId, isAuthoredTemplate } from './authored/render';
 export {

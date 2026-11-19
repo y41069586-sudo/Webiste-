@@ -59,6 +59,11 @@ export function kitFontFamily(font: KitDisplayFont | KitTextFont): string {
   return FILES[font].family;
 }
 
+/** Schriftdateien ohne Einbettung (für Seiten, die die Dateien als statische Adressen ausliefern, z. B. die Terminseite). */
+export function kitFontFaces(fonts: (KitDisplayFont | KitTextFont)[]): { family: string; file: string; weight: string; stretch?: string }[] {
+  return [...new Set(fonts)].flatMap((font) => FILES[font].faces.map((face) => ({ family: FILES[font].family, ...face })));
+}
+
 /** @font-face-Regeln für genau die Schriften eines Kits (nur diese werden eingebettet). */
 export function kitFontCss(fonts: (KitDisplayFont | KitTextFont)[]): string {
   return [...new Set(fonts)]
