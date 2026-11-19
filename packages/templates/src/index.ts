@@ -13,6 +13,8 @@ import { handwerkSolid } from './sites/handwerk-solid';
 import { handwerkWerkstatt } from './sites/handwerk-werkstatt';
 import { PHOTO_TEMPLATES } from './sites/photo-layouts';
 import { PLAKAT_TEMPLATES } from './sites/plakat';
+import { PRAXIS_TEMPLATES } from './praxis/render';
+import { isPraxisTemplate } from './praxis/directions';
 import type { BranchGroup, RenderInput, TemplateDef } from './types';
 import { KITS, getKit } from './kits/kits';
 import { renderKit } from './kits/render';
@@ -32,6 +34,17 @@ export const KIT_TEMPLATES: TemplateDef[] = KITS.map((kit) => ({
 }));
 
 export * from './types';
+export { PRAXIS_TEMPLATES } from './praxis/render';
+export {
+  PRAXIS_DIRECTIONS,
+  PRAXIS_TEMPLATE_VERSION,
+  praxisDirectionFor,
+  praxisTemplateId,
+  isPraxisTemplate,
+  praxisKeyOf,
+  type PraxisDirection,
+  type PraxisDirectionKey,
+} from './praxis/directions';
 export { updateAuthoredCopy } from './authored/update';
 export { AUTHORED_TEMPLATES, authoredTemplateId, isAuthoredTemplate } from './authored/render';
 export {
@@ -68,6 +81,7 @@ export const TEMPLATES: TemplateDef[] = [
   ...PLAKAT_TEMPLATES,
   ...KIT_TEMPLATES,
   ...AUTHORED_TEMPLATES,
+  ...PRAXIS_TEMPLATES,
 ];
 
 export function getTemplate(id: string): TemplateDef {
@@ -86,7 +100,8 @@ export function renderSite(input: RenderInput): string {
   if (!tpl.palettes.includes(input.palette)) throw new Error(`Palette ${input.palette} passt nicht zu ${tpl.id}`);
   if (input.mode === 'demo' && !input.demo) throw new Error('Demo-Modus braucht demo-Optionen');
   if (input.mode === 'live' && !input.live) throw new Error('Live-Modus braucht live-Optionen');
-  if (isAuthoredTemplate(tpl.id)) {
+  // Praxis-Vorlagen bringen wie freie Entwürfe Schrift und Farben selbst mit (keine Art-Direction-Schicht)
+  if (isAuthoredTemplate(tpl.id) || isPraxisTemplate(tpl.id)) {
     const parts = buildParts({ ...input, artDirection: undefined, palette: 'anthrazit' });
     const d = input.artDirection;
     const meta = d

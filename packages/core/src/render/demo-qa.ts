@@ -19,6 +19,7 @@ import {
   renderSite,
   slopFindingsForPage,
   isAuthoredTemplate,
+  isPraxisTemplate,
   checkAuthoredDesign,
   applyMobileHeroLayer,
 } from '@wbm/templates';
@@ -33,6 +34,8 @@ import { audit } from '../services/audit';
 import { raiseAlert } from '../services/budget';
 import { approveDemo, requiresManualReview } from '../services/demo-review';
 import { llmStructured } from '../services/llm';
+import { buildDesignBrief, type DesignBrief } from '../demos/design-policy';
+import { reviewPraxisDemo } from '../demos/praxis-author';
 import { enqueue, QUEUES } from '../queue';
 import { browserChecks, lighthouseCheck, validateHtml } from './qa';
 import { renderComposite, takeScreenshots } from './screenshots';
@@ -161,9 +164,11 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
 
   // Capture once from the stored HTML. Reused for AI review, admin and the bound letter composite.
   const studio = isAuthoredTemplate(demo.templateId);
-  const shots = await phase('screenshots', () => takeScreenshots(html, { hideDemoChrome: true, studioReview: studio }));
+  // Praxis-Vorlage: getrennte Bewertung nach Kriterienkatalog (eigener Aufruf, eigener Kontext, nach den Browser-Tests)
+  const praxis = isPraxisTemplate(demo.templateId);
+  const shots = await phase('screenshots', () => takeScreenshots(html, { hideDemoChrome: true, studioReview: studio || praxis }));
   opts.signal?.throwIfAborted();
-  const visual = getKit(demo.templateId) || isAuthoredTemplate(demo.templateId) ? visualReviewInput(shots) : undefined;
+  const visual = getKit(demo.templateId) || isAuthoredTemplate(demo.templateId) || praxis ? visualReviewInput(shots) : undefined;
 
   let visualBlocking = false;
 
@@ -183,6 +188,8 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
       if (!craft?.passed) throw Error('Keine bestandene Studio-Sichtprüfung zum gespeicherten HTML vorhanden.');
       checks.push({ ...craft });
     }
+  } else if (praxis) {
+    // eigener Bewertungsaufruf weiter unten (nach den technischen Tests)
   } else if (
     opts.llm !== false &&
     demo.qaResultJson?.visualCheckpoint?.htmlHash === sha256(stored) &&
@@ -315,6 +322,44 @@ async function runDemoQa(demoId: string, actor: string, opts: DemoQaOptions): Pr
     )),
   );
   opts.signal?.throwIfAborted();
+
+  // 4b) Getrennte Bewertung der Praxis-Vorlage: Kriterien, Originalbriefing, gerenderte Ansichten, Testergebnisse
+  if (praxis) {
+    if (opts.llm === false) {
+      checks.push({ name: 'design-bewertung', passed: false, details: 'Visuelle Bewertung nicht ausgeführt – ungeprüft, keine Freigabe.' });
+    } else {
+      try {
+        const meta = demo.contentJson?._meta as { praxisBrief?: DesignBrief } | undefined;
+        const brief = meta?.praxisBrief ?? buildDesignBrief(facts, { hasPhotos: true });
+        const review = await phase('design-review', () =>
+          reviewPraxisDemo({
+            facts,
+            brief,
+            content,
+            testResults: checks.map((c) => `${c.name}: ${c.passed ? 'ok' : `FEHLER ${(c.details ?? '').slice(0, 160)}`}`),
+            images: visual?.images,
+            viewNote: visual?.prompt,
+            leadId: lead.id,
+            signal: opts.signal,
+          }),
+        );
+        checks.push({ name: 'design-bewertung', passed: review.passed, details: review.details });
+        const high = review.issues.filter((i) => i.severity === 'hoch');
+        checks.push({
+          name: 'ki-pruefung',
+          passed: high.length === 0,
+          details: review.issues.map((i) => `[${i.severity}] ${i.field}: ${i.problem}`).join(' | ') || 'keine Befunde',
+        });
+        rebuildFeedback.push(...review.corrections, ...high.map((i) => `${i.field}: ${i.problem}`));
+      } catch (err) {
+        checks.push({
+          name: 'design-bewertung',
+          passed: false,
+          details: `Bewertung fehlgeschlagen – ungeprüft: ${err instanceof Error ? err.message : String(err)}`,
+        });
+      }
+    }
+  }
 
   // 5) Lighthouse auf der Live-Variante (ohne Banner/noindex)
   if (opts.lighthouse !== false) {

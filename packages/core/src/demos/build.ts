@@ -28,6 +28,9 @@ import { browserChecks } from '../render/browser-checks';
 import type { ContentFacts, RuleViolation } from './content';
 import { libraryContent } from './library';
 import './mock-handlers';
+import { isPraxisTemplate, praxisDirectionFor, praxisTemplateId } from '@wbm/templates';
+import { buildDesignBrief, designMeta } from './design-policy';
+import { authorPraxisContent } from './praxis-author';
 import { STUDIO_VERSION } from './studio';
 import { authorStudioContent, type GeneratedContent } from './studio-author';
 import { clearOperatorWish, loadOperatorWish, operatorWishPrompt } from './operator-wish';
@@ -130,6 +133,14 @@ export function chooseTemplate(
   void usage;
   void direction;
   void hours;
+  // 19.11.2026 (Designrichtlinie): Handwerk baut auf der Praxis-Vorlage mit vier Gestaltungsrichtungen; das Modell
+  // liefert nur geprüfte Texte. DEMO_GENERATOR=authored schaltet bei Bedarf auf den freien Entwurf zurück.
+  if (lead.branchGroup === 'handwerk' && process.env.DEMO_GENERATOR !== 'authored')
+    return {
+      templateId: praxisTemplateId(praxisDirectionFor(lead.branch ?? '')),
+      palette: 'anthrazit',
+      reason: 'Praxis-Vorlage nach Designrichtlinie; Richtung nach Besuchsanlass des Gewerks.',
+    };
   return {
     templateId: authoredTemplateId(lead.branchGroup),
     palette: 'custom',
@@ -336,21 +347,32 @@ export async function buildDemo(
           }));
       }
     : undefined;
-  const generated = await generateDemoContent(
-    lead,
-    cfg,
-    design.direction,
-    opts.qaFeedback,
-    photoSlots,
-    recentConcepts,
-    opts.signal,
-    wish ? operatorWishPrompt(wish) : undefined,
-    precheck,
-  );
+  const praxis = isPraxisTemplate(templateId);
+  const contentFacts = { ...leadContentFacts(lead, cfg, research), requireFullPage: false };
+  // Designbriefing vor dem Bau (Pipeline: Daten prüfen → Assets → Briefing → bauen → testen → getrennt bewerten)
+  const praxisBrief = praxis ? buildDesignBrief(contentFacts, { hasPhotos: photoSlots.length > 0 }) : undefined;
+  const generated = praxisBrief
+    ? await authorPraxisContent(contentFacts, praxisBrief, {
+        leadId: lead.id,
+        signal: opts.signal,
+        feedback: opts.qaFeedback,
+        operatorWish: wish ? operatorWishPrompt(wish) : undefined,
+      })
+    : await generateDemoContent(
+        lead,
+        cfg,
+        design.direction,
+        opts.qaFeedback,
+        photoSlots,
+        recentConcepts,
+        opts.signal,
+        wish ? operatorWishPrompt(wish) : undefined,
+        precheck,
+      );
   opts.signal?.throwIfAborted();
   if (isAuthoredTemplate(templateId) && (!generated.content.design || checkAuthoredDesign(generated.content.design).length))
     throw Error('Kein gültiger individueller Gestaltungsentwurf. Zur Prüfung liegen lassen; keine Standardvorlage als Ersatz.');
-  const brief = freeDesignBrief(facts, generated.content);
+  const brief = praxis ? undefined : freeDesignBrief(facts, generated.content);
   const slug = randomToken(24);
   const html = renderDemoHtml({
     templateId,
@@ -405,6 +427,7 @@ export async function buildDemo(
               photoAssets: photoSlots.map((p) => p.assetId).filter(Boolean),
               studio: { version: STUDIO_VERSION, plan: generated.studioPlan },
               ...(brief ? { designBrief: brief } : {}),
+              ...(praxisBrief ? { design: designMeta(praxisBrief), praxisBrief } : {}),
               ...(opts.qaFeedback?.length ? { qaRetry: 1 } : {}),
               ...(generated.precheckOpen?.length ? { precheckOpen: generated.precheckOpen.map((v) => v.field) } : {}),
               ...(wish ? { operatorWish: { note: wish.note, fromDemo: wish.demoId } } : {}),

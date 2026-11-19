@@ -1,6 +1,6 @@
 import { studioQaFixture } from './helpers';
 import { eq } from 'drizzle-orm';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { getDb } from '../src/db/client';
 import { demos, leads } from '../src/db/schema';
 import { buildDemo, closeBrowser, qaDemo } from '../src/render';
@@ -14,6 +14,11 @@ import { QA_TOOL_NAME } from '../src/demos/content';
 import { alerts } from '../src/db/schema';
 import { resetDb } from './helpers';
 import { loadOperatorWish, operatorWishPrompt } from '../src/demos/operator-wish';
+
+// Einzelne Tests prüfen gezielt den freien Studio-Pfad (DEMO_GENERATOR=authored)
+afterEach(() => {
+  delete process.env.DEMO_GENERATOR;
+});
 
 describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
   let leadId: string;
@@ -176,6 +181,8 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
   }, 90_000);
 
   it('Gestaltungsbefunde blockieren nie: Demo geht mit Hinweis in die manuelle Prüfung', async () => {
+    // prüft den freien Studio-Pfad (gilt weiter für andere Branchengruppen)
+    process.env.DEMO_GENERATOR = 'authored';
     const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
     await updateConfig({ switches: { autoApproveDemos: true }, review: { manualReviewFirstN: 0, sampleRatePercent: 0 } }, 'test');
     registerMockStructured(QA_TOOL_NAME, () => {
@@ -199,6 +206,8 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
   }, 90_000);
 
   it('keeps a controlled single run in manual review without queued QA or a later paid rebuild', async () => {
+    // prüft den freien Studio-Pfad (gilt weiter für andere Branchengruppen)
+    process.env.DEMO_GENERATOR = 'authored';
     const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
     registerMockStructured(QA_TOOL_NAME, () =>
       studioQaFixture([{ field: 'about', problem: 'Fiktiver Kontrollbefund', severity: 'hoch' }]),
@@ -248,6 +257,8 @@ describe('Demo-Pipeline (Mock-KI, echter Browser)', () => {
     }
   }, 60_000);
   it('keeps a completed visual verdict across a later technical failure without paying for another review', async () => {
+    // prüft den freien Studio-Pfad (gilt weiter für andere Branchengruppen)
+    process.env.DEMO_GENERATOR = 'authored';
     const other = (await getDb().select().from(leads).where(eq(leads.status, 'qualified')).limit(1))[0]!;
     const id = await buildDemo(other.id, { actor: 'test:checkpoint', enqueueQa: false });
     let reviews = 0;

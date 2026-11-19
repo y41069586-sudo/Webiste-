@@ -76,10 +76,15 @@ describe('V5: zehn fiktive Demos durch bestehenden Generator und echte Browser-Q
           .mockResolvedValueOnce({
             data: {},
             usage: { model: 'mock:invalid', inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 },
+          })
+          // Praxis-Pfad: Erstentwurf + zwei Korrekturen (Budget) – auch der dritte Versuch unbrauchbar
+          .mockResolvedValueOnce({
+            data: {},
+            usage: { model: 'mock:invalid', inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 },
           });
       if (index === 0) {
         // Zweimal unbrauchbare KI-Antwort: seit der freien Gestaltung kein stiller Vorlagen-Ersatz, der Bau stoppt
-        await expect(buildDemo(lead!.id, { actor: 'test:quality', templateId })).rejects.toThrow(/Gestaltungskonzept/);
+        await expect(buildDemo(lead!.id, { actor: 'test:quality', templateId })).rejects.toThrow(/Gestaltungskonzept|Studio-Entwurf fehlgeschlagen/);
         spy?.mockRestore();
         continue;
       }

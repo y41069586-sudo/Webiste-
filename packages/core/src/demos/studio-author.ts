@@ -1,6 +1,6 @@
 import type { BusinessFacts, SiteContent } from '@wbm/templates';
 import { LlmNoToolCallError, LlmRefusalError } from '../providers/llm/anthropic';
-import { llmStructured } from '../services/llm';
+import { buildDesignBrief, designCall, designContext } from './design-policy';
 import { logger } from '../logger';
 import {
   buildDemoPrompt,
@@ -68,9 +68,12 @@ export async function authorStudioContent(
   const leadId = opts.leadId;
   const qaFeedback = opts.feedback;
   const images = await studioImages(photos);
+  // Designrichtlinie und Betriebskontext gelten für Konzept, Entwurf und jede Korrektur (designCall)
+  const ctx = designContext(facts, buildDesignBrief(facts, { hasPhotos: photos.length > 0 }));
   opts.signal?.throwIfAborted();
   const studioPlan = parseStudioPlan(
-    await llmStructured<unknown>({
+    await designCall<unknown>({
+      designContext: ctx,
       tier: 'creative',
       system: STUDIO_SYSTEM,
       prompt: studioPrompt(facts, { seed, recentConcepts: opts.recentConcepts, operatorWish: opts.operatorWish }),
@@ -94,7 +97,8 @@ export async function authorStudioContent(
   for (let attempt = 1; attempt <= 2; attempt++) {
     opts.signal?.throwIfAborted();
     try {
-      const raw = await llmStructured<SiteContent>({
+      const raw = await designCall<SiteContent>({
+        designContext: ctx,
         tier: 'creative',
         system: DEMO_SYSTEM_PROMPT,
         prompt:

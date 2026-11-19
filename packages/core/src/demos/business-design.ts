@@ -14,7 +14,8 @@ import { leads } from '../db/schema';
 import { getSetting, setSetting } from '../config/service';
 import { getProviders } from '../providers';
 import { registerMockStructured } from '../providers/llm/mock';
-import { llmStructured, modelFor } from '../services/llm';
+import { modelFor } from '../services/llm';
+import { designCall } from './design-policy';
 import { audit } from '../services/audit';
 import { optimizeImage } from '../render/images';
 import { imageType, MAX_UPLOAD_BYTES } from '../services/sites';
@@ -230,7 +231,9 @@ async function resolveBusinessDesignOnce(lead: {
     pictures.push({ ...image, data: prepared });
   }
   if (cached?.key !== key) {
-    const raw = await llmStructured<unknown>({
+    const raw = await designCall<unknown>({
+      // Designrichtlinie gilt auch für das Briefing aus Betriebsbelegen
+      designContext: '', // Auftrag bleibt reines JSON; Richtlinie steht im Systemprompt
       tier: 'bulk',
       system: DESIGN_SYSTEM_PROMPT,
       prompt: JSON.stringify({ business: lead.businessName, fallback, notes: evidence.notes, sourceKind: evidence.sourceKind }),
