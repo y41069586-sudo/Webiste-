@@ -33,8 +33,8 @@ for (const slug of slugs) {
   const mail = (subject) => `mailto:${contact}?subject=${encodeURIComponent(subject + ' ' + slug.slice(0, 6))}`;
   html = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(new RegExp(`/d/${slug}/uebernehmen(\\?[^"']*)?`, 'g'), mail('Website übernehmen'))
-    .replaceAll(`/d/${slug}/kein-interesse`, mail('Kein Interesse'))
+    .replace(new RegExp(`(?:https?://[^"'\\s<>]*)?/d/${slug}/uebernehmen(\\?[^"']*)?`, 'g'), mail('Website übernehmen'))
+    .replace(new RegExp(`(?:https?://[^"'\\s<>]*)?/d/${slug}/kein-interesse`, 'g'), mail('Kein Interesse'))
     .replace('</head>', '<meta name="robots" content="noindex, nofollow"><style>form[action^="/d/"],#link-per-email{display:none!important}</style></head>')
     .replace(/<section id="uebernehmen"/, (m) => box(slug) + m);
   if (!html.includes('kontakt-notfall')) html = html.replace('</body>', box(slug) + '</body>');
