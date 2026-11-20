@@ -84,6 +84,11 @@ describe('Vollständige freie Seiten, Laufzeit und Größe', () => {
     expect(html).not.toContain('.grid-cols-4');
     expect(Buffer.byteLength(html)).toBeLessThan(160000);
   });
+  it('Terminwahl-Knopf steht im geschützten Kontaktbereich (nicht vom Modell abhängig)', () => {
+    const html = renderSite(input());
+    expect(html).toContain('Freie Termine ansehen');
+    expect(html).toMatch(/class="sw-book k-book"/);
+  });
   it('keeps the protected contact markup identical while changing only the CSS theme', () => {
     const dark = renderSite(input());
     const i = input();

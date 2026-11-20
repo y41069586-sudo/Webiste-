@@ -19,6 +19,11 @@ export interface SharedParts {
   liveForm: { action: string; privacyPath: string } | null;
   /** Online-Terminwahl: Live = echte Buchungsseite, Entwurf = gesperrte Vorschau; sonst null */
   bookingHref: string | null;
+  /**
+   * Kasten „Lieber gleich eine Zeit wählen?“ mit Knopf zur Terminwahl – für alle Vorlagen, wo Termine sinnvoll sind
+   * (Handwerk, Beauty, Kurse, Dienstleistung). Gastronomie (Tisch braucht Personenzahl) und Einzelhandel: leer.
+   */
+  bookingBox(o: { className: string; titleClass?: string; buttonClass: string; mutedClass?: string }): string;
   /** Hinweis „Beispiel-Leistungen“ (nur Demo) */
   servicesNote(cls?: string): string;
   callHref: string | null;
@@ -867,10 +872,18 @@ ${jsonLd}
     <h2 id="kontakt-titel" class="${o.titleClass}">Kontakt &amp; Anfahrt</h2>
     <p class="mt-2 max-w-2xl text-lg text-muted">So erreichen Sie ${esc(facts.name)} in ${esc(facts.city)}.</p>
     <div class="mt-8 grid gap-5 md:grid-cols-3">${reach}${address}${hours}</div>
+    ${bookingBox({ className: `mt-5 ${o.cardClass}`, titleClass: 'text-xl font-semibold', buttonClass: `${o.buttonClass} mt-4`, mutedClass: 'mt-2 text-muted' })}
     ${area}
     ${requestMock}
   </div>
 </section>`;
+  };
+
+  const bookingHref = isLive ? (live?.bookingUrl ?? null) : isDemo && demo ? `/d/${demo.slug}/termin` : null;
+  const bookingBox = (o: { className: string; titleClass?: string; buttonClass: string; mutedClass?: string }) => {
+    if (!bookingHref || industry === 'gastronomie' || industry === 'einzelhandel') return '';
+    const what = industry === 'kurse_training' ? 'eine Probestunde' : 'einen Termin';
+    return `<div class="sw-book ${o.className}"><h3 class="${o.titleClass ?? ''}">Lieber gleich eine Zeit wählen?</h3><p class="${o.mutedClass ?? ''}">Sie sehen freie Zeiten und fragen ${what} an. ${esc(facts.name)} bestätigt per E-Mail.${draft ? ' <em>(Im Entwurf als Vorschau.)</em>' : ''}</p><a class="${o.buttonClass}" href="${esc(bookingHref)}">Freie Termine ansehen<span aria-hidden="true"> →</span></a></div>`;
   };
 
   const seed = [...(demo?.slug ?? facts.name)].reduce((a, ch) => a + ch.charCodeAt(0), 0);
@@ -926,7 +939,8 @@ ${jsonLd}
     isDemo,
     isLive,
     liveForm: isLive && live ? { action: live.formAction, privacyPath: live.privacyPath } : null,
-    bookingHref: isLive ? (live?.bookingUrl ?? null) : isDemo && demo ? `/d/${demo.slug}/termin` : null,
+    bookingHref,
+    bookingBox,
     servicesNote,
     callHref,
     phoneLabel,

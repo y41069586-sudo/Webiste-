@@ -190,7 +190,7 @@ function blocks(ctx: RenderContext, kit: Kit) {
       : kit.group === 'beauty'
         ? 'Termin und Anfahrt'
         : 'Anfrage und Kontakt';
-  const kontaktInfo = `<div id="oeffnungszeiten" class="k-kinfo"><h2 id="k-k">${kontaktTitle}</h2><p class="k-lead">${formNote}</p>${call ? `<p class="k-bigtel"><a href="${esc(call.href)}">${esc(call.label)}</a></p>` : ''}<p class="k-addr">${p.addressLines}<br><a href="${esc(p.mapsHref)}" target="_blank" rel="noopener noreferrer">Route planen</a></p>${hours ? `<h3 class="k-hours-t">Öffnungszeiten</h3><dl class="k-hours">${hours}</dl>` : ''}</div>`;
+  const kontaktInfo = `<div id="oeffnungszeiten" class="k-kinfo"><h2 id="k-k">${kontaktTitle}</h2><p class="k-lead">${formNote}</p>${call ? `<p class="k-bigtel"><a href="${esc(call.href)}">${esc(call.label)}</a></p>` : ''}<p class="k-addr">${p.addressLines}<br><a href="${esc(p.mapsHref)}" target="_blank" rel="noopener noreferrer">Route planen</a></p>${hours ? `<h3 class="k-hours-t">Öffnungszeiten</h3><dl class="k-hours">${hours}</dl>` : ''}${p.bookingBox({ className: 'k-book', titleClass: 'k-hours-t', buttonClass: 'k-btn k-btn-primary', mutedClass: 'k-note' })}</div>`;
   const kontakt = `<section id="anfrage" class="k-sec k-kontakt" aria-labelledby="k-k"><div class="k-wrap k-kontakt-in">${kontaktInfo}${form}</div></section>`;
 
   const header = (cls = '') =>
@@ -412,6 +412,7 @@ body.k{margin:0;overflow-x:clip;background:${k.base};color:${k.ink};font:400 1.0
 .k-kontakt-in{display:grid;gap:36px;grid-template-columns:minmax(0,1fr)}
 .k-bigtel{font:${kit.weight} clamp(1.8rem,6vw,2.6rem)/1.1 ${display};${stretch}margin-top:18px!important}.k-bigtel a{text-decoration:none}
 .k-addr{margin-top:14px!important}.k-hours-t{margin-top:24px!important;margin-bottom:6px!important}
+.k-book{margin-top:28px;padding-top:20px;border-top:1px solid var(--ln)}.k-book h3{margin:0 0 6px!important}.k-book p{margin:0 0 14px!important}
 .k-hours div{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid var(--k-line)}.k-hours dt{color:var(--k-ink)}
 .k-form{display:grid;gap:16px;background:var(--k-base);padding:22px;border-radius:${r};border:1px solid var(--k-line)}
 .k-form label{display:grid;gap:6px;font-weight:700;font-size:.95rem}.k-form small{font-weight:400;color:var(--k-muted)}

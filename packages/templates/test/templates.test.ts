@@ -176,3 +176,33 @@ describe('Beispielfotos (lizenzfrei, nur im Entwurf)', () => {
     expect(stockPhotos('kurse', -7, 'Ballettschule')[0]!.file).toBe('kurse/ballettschuhe.jpg');
   });
 });
+
+describe('Terminwahl in allen Vorlagen, wo sie gebraucht wird (20.11.2026)', () => {
+  const legacy = TEMPLATES.filter((t) => !isAuthoredTemplate(t.id) && !isPraxisTemplate(t.id));
+  const needs = (group: string) => group !== 'gastronomie' && group !== 'einzelhandel';
+  for (const t of legacy) {
+    it(`${t.id}: Termin-Knopf ${needs(t.group) ? 'vorhanden' : 'nicht vorhanden'}`, () => {
+      const html = renderSite(demoInput(t.id, t.palettes[0]!, t.group));
+      if (needs(t.group)) {
+        expect(html).toMatch(/href="\/d\/abcdefghijklmnopqrstuvwx\/termin"/);
+        expect(html).toContain('Freie Termine ansehen');
+      } else {
+        expect(html).not.toContain('Freie Termine ansehen');
+      }
+    });
+  }
+
+  it('Live: Knopf nur mit echter Buchungsseite, sonst keiner', () => {
+    const t = legacy.find((x) => x.group === 'beauty')!;
+    const base = demoInput(t.id, t.palettes[0]!, 'beauty');
+    const liveInput = {
+      ...base,
+      mode: 'live' as const,
+      demo: undefined,
+      live: { formAction: '/api/forms/x', imprintPath: 'impressum.html', privacyPath: 'datenschutz.html', canonicalUrl: 'https://x.de/' },
+    };
+    expect(renderSite(liveInput)).not.toContain('Freie Termine ansehen');
+    const withBooking = renderSite({ ...liveInput, live: { ...liveInput.live, bookingUrl: 'https://app.test/termin/abc' } });
+    expect(withBooking).toContain('href="https://app.test/termin/abc"');
+  });
+});
