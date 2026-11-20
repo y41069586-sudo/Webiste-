@@ -6,7 +6,8 @@ import {
   type VerifiedLetterContext,
 } from './personalization';
 import { DEFAULT_BLOCKLIST } from './truth-check';
-import { applyStandard4 } from './standard4';
+import { V4_PRICES } from '../services/offers-v4';
+import { applyStandard4, letterPriceText, letterPrices } from './standard4';
 import { invitationContextHash, type WrittenInvitation } from './writer';
 import { v4PriceText } from '../services/offers-v4';
 import type { LetterData } from '@wbm/templates/letter-types';
@@ -162,7 +163,8 @@ export function letterTruthBlocklist(cfg: AppConfig): string[] {
           'automatisch gelöscht',
           'nur noch kurz',
           'nur noch bis',
-          '\\d[\\d.,]*\\s*(?:€|Euro\\b|EUR\\b)',
+          // Beträge sind im Brief gesperrt – außer den beiden Festpreisen des Basis-Tarifs (Betreiber 20.11.2026)
+          `(?<![\\d.,])(?!(?:${V4_PRICES.setupCents / 100}|${V4_PRICES.basisCents / 100})\\s*€)\\d[\\d.,]*\\s*(?:€|Euro\\b|EUR\\b)`,
           'Care\\+',
         ]
       : []),
@@ -239,7 +241,9 @@ export function placeholderValues(i: ComposeInput): string[] {
       ...(usesStandard4(i) && i.recipientPhone?.trim() ? [i.recipientPhone.trim()] : []),
       ...(usesStandard4(i) && i.personalization ? [i.personalization.businessName] : []),
       // Vorlage 5 nennt die Frist ohne Jahr („bis 17. Dezember online“)
-      ...(usesStandard4(i) ? [i.expiresLabel.replace(/\s+\d{4}$/, '')] : []),
+      ...(usesStandard4(i)
+        ? [i.expiresLabel.replace(/\s+\d{4}$/, ''), letterPriceText(), letterPrices().setup, letterPrices().monthly]
+        : []),
       ...(i.personalization
         ? reviewedLetterDetails(i.personalization)
             .filter((f) => f.kind !== 'website_search')

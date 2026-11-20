@@ -44,8 +44,21 @@ export function isBot(ua: string | null): boolean {
   return !ua || /bot|crawl|spider|slurp|facebookexternalhit|preview|headless|curl|wget|python|scanner/i.test(ua);
 }
 
-/** Anfrage-Metadaten für Tracking (ohne IP, ohne Cookies). */
-export function requestMetaFrom(h: Headers): { ua: string; ipHash: string; isBot: boolean } {
+/** Gerät, das der Betreiber im Admin ausdrücklich als „eigenes Testgerät“ markiert hat (20.11.2026). */
+export const TEST_DEVICE_COOKIE = 'sw_test_device';
+
+/**
+ * Anfrage-Metadaten für Tracking (ohne IP, keine Tracking-Cookies). Nur ein ausdrücklich im Admin gesetzter
+ * Testgerät-Marker (kein Besucher-Cookie) kennzeichnet Aufrufe als Test: sie zählen nicht im Funnel und lösen keine
+ * Statuswechsel oder Meldungen aus – so verfälschen eigene Tests die Kennzahlen nicht.
+ */
+export function requestMetaFrom(h: Headers): { ua: string; ipHash: string; isBot: boolean; audience?: 'test' } {
   const ua = h.get('user-agent');
-  return { ua: shortUserAgent(ua), ipHash: dailyIpHash(clientIpFrom(h)), isBot: isBot(ua) };
+  const test = new RegExp(`(?:^|;\\s*)${TEST_DEVICE_COOKIE}=1(?:;|$)`).test(h.get('cookie') ?? '');
+  return {
+    ua: shortUserAgent(ua),
+    ipHash: dailyIpHash(clientIpFrom(h)),
+    isBot: isBot(ua),
+    ...(test ? { audience: 'test' as const } : {}),
+  };
 }

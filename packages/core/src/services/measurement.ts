@@ -71,16 +71,22 @@ export async function whatsappRedirect(slug: string, req: RequestMeta): Promise<
  * Rücksendung „unzustellbar“ manuell erfassen (B6.1, Button am Lead). Markiert den Brief, setzt den Lead auf
  * failed und zählt für die Unzustellbar-Bremse (B6.7).
  */
-export async function markLetterUndeliverable(letterId: string, actor: string): Promise<boolean> {
+export const RETURN_REASONS = ['Anschrift unbekannt', 'Empfänger verzogen', 'Annahme verweigert', 'Sonstiges'] as const;
+export async function markLetterUndeliverable(letterId: string, actor: string, reason?: string): Promise<boolean> {
+  // Grund der Post („unbekannt verzogen“ usw.) erklärt, ob die Anschriftenquelle taugt – nur bekannte Werte speichern
+  const why = RETURN_REASONS.find((r) => r === reason);
+  const statusReason = why ? `Rücksendung: ${why}` : 'Rücksendung: unzustellbar';
   const db = getDb();
   return db.transaction(async (tx) => {
     const letter = await tx.query.letters.findFirst({ where: eq(letters.id, letterId) });
     if (!letter || letter.undeliverable || letter.isTest) return false;
     await tx
       .update(letters)
-      .set({ undeliverable: true, status: 'failed', statusReason: 'Rücksendung: unzustellbar', updatedAt: new Date() })
+      .set({ undeliverable: true, status: 'failed', statusReason, updatedAt: new Date() })
       .where(and(eq(letters.id, letterId), eq(letters.undeliverable, false)));
-    await tx.insert(events).values({ leadId: letter.leadId, type: 'undeliverable', metaJson: { letterId } });
+    await tx
+      .insert(events)
+      .values({ leadId: letter.leadId, type: 'undeliverable', metaJson: { letterId, ...(why ? { reason: why } : {}) } });
     await transitionLead(tx, letter.leadId, 'failed', { actor, reason: 'Brief unzustellbar (Rücksendung)', soft: true });
     await audit(tx, { entity: 'letter', entityId: letterId, action: 'undeliverable', actor });
     await raiseAlert(tx, {

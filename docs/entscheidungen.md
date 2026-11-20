@@ -1994,3 +1994,21 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
 - Tabelle `bookings` (Migration 0021, rein additiv, RLS an) am 19.11.2026 in Produktion angelegt.
 - Bewusst nicht: Kalender-Synchronisation mit Google/Outlook des Betriebs, SMS-Erinnerungen, Bezahlung bei Buchung.
 
+
+## 20.11.2026 – Brief, Demo und Funnel auf 9/10 (Analyse `reports/Brief Demo Funnel Analyse.md`)
+
+- **Brief:** dritter Schritt nennt den Festpreis des Basis-Tarifs („Festpreis 597 € einmalig, danach 19 € im Monat, monatlich
+  kündbar. Online erst nach Freigabe.“), Werte aus `V4_PRICES` (gleiche Quelle wie der Kaufweg). Die Betragssperre der
+  Brief-Wahrheitsprüfung lässt genau diese beiden Beträge zu, alle anderen bleiben gesperrt. Einseitig, Layoutprüfung grün.
+  Ersetzt die Regel „keine Preise im Brief“ vom 16.11.2026 (Betreiber: „verbessere die Schwächen“).
+- **Demo:** Leiste oben nennt den Festpreis (statt „Erst einrichten, dann kostenpflichtig bestellen“), der Kaufblock unten
+  ebenfalls; zusätzlich ein kurzer Angebotsstreifen direkt nach den Leistungen (`#angebot-kurz`, auch für bereits gebaute
+  Demos beim Ausliefern). Von den drei Entwurfsplatzhalter-Kästen bleibt einer sichtbar. Ersetzt die Regel „keine Preise auf
+  der Demo“ vom 19.11.2026; zurückzunehmen durch Entfernen von `priceHint`/`toolbarNote` in `demoOptions` und von `offerStrip`.
+- **Funnel:** „Website übernehmen“ zeigt sofort die Tarife (keine Zwischenfrage „Wie möchten Sie weitermachen?“); „Angaben
+  zuerst“ bleibt als zweiter Weg. Tarifseite nennt vier Zusagen (Freigabe, Änderungsrunden, Monatsgebühr erst ab Go-Live, Stripe).
+- **Messung:** im Admin unter „Mehr → Eigene Tests“ lässt sich ein Gerät ausdrücklich als Testgerät markieren (Cookie
+  `sw_test_device`, nur durch den Betreiber). Aufrufe von dort tragen `audience: test`: kein Funnel-Zähler, kein Statuswechsel,
+  keine Meldung. Rücksendungen können mit Grund erfasst werden (Anschrift unbekannt, verzogen, Annahme verweigert, Sonstiges).
+- **Notfall-Kopien:** „Übernehmen“/„Kein Interesse“ wurden bei absoluten Links zu `…netlify.appmailto:…`; behoben im Skript.
+- **Bewusst nicht geändert** (Betreiberentscheidungen): kein Telefon/WhatsApp im Brief, keine Garantie, „Komplett“ aus, kein Foto.

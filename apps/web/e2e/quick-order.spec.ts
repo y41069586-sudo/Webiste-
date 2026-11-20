@@ -17,13 +17,11 @@ test('Schnellbestellung am Handy: ohne Formular zur Bezahlseite, Angaben danach'
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(`/d/${demo.slug}/uebernehmen?plan=basis`);
   await expect(page).toHaveURL(new RegExp(`/einrichten/${demo.slug}`));
-  // Erst der Weg mit Dauer, keine Vorauswahl, noch kein Formular sichtbar
-  await expect(page.getByRole('heading', { name: 'Wie möchten Sie weitermachen?' })).toBeVisible();
-  await expect(page.locator('summary', { hasText: 'Angaben nach der Zahlung' })).toContainText('ca. 2 Minuten');
-  await expect(page.locator('summary', { hasText: 'Angaben jetzt eintragen' })).toContainText('ca. 15 Minuten');
+  // Seit 20.11.2026 ohne Zwischenfrage: sofort die Tarife, „Angaben zuerst“ nur als zweiter Weg
+  await expect(page.getByRole('heading', { name: 'Welcher Tarif passt?' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Angaben zuerst eintragen' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Machen Sie Ihre Website zu Ihrer.' })).toBeHidden();
   if (out) await page.screenshot({ path: path.join(out, 'quick-0-wahl-390.png') });
-  await page.locator('summary', { hasText: 'Angaben nach der Zahlung' }).click();
   // Schlanke Tarifknöpfe: Name, Preis, eine Zeile
   const basis = page.getByRole('button', { name: /Basis/ });
   await expect(basis).toContainText(/597\s€ einmalig/);

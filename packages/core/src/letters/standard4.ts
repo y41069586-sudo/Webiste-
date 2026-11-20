@@ -1,6 +1,8 @@
 import type { LetterData, LetterStandard4 } from '@wbm/templates/letter-types';
 import type { AppConfig } from '../config/settings';
 import type { LeadSourceKind } from '../types';
+import { V4_PRICES } from '../services/offers-v4';
+import { formatEuroShort } from '../util/time';
 import { dataSourceText } from './notices';
 import { reviewedLetterDetails, type VerifiedLetterContext } from './personalization';
 
@@ -54,11 +56,24 @@ export function standard4Reason(i: Pick<Standard4Input, 'personalization' | 'lis
   return '';
 }
 
-export const STANDARD4_STEPS: LetterStandard4['steps'] = [
-  { title: 'Ansehen', text: 'Code scannen, Entwurf in Ruhe ansehen – ohne Kosten und Anmeldung.' },
-  { title: 'Anpassen', text: 'Was nicht passt, ändere ich vor dem Kauf – auch das ohne Kosten.' },
-  { title: 'Übernehmen', text: 'Kostenpflichtig, Preis sehen Sie vorher. Online erst nach Freigabe.' },
-];
+/** Festpreise des Basis-Tarifs für den Brief (Betreiber 20.11.2026: Preis offen nennen, nicht erst nach Klicks). */
+export function letterPrices(): { setup: string; monthly: string } {
+  return { setup: formatEuroShort(V4_PRICES.setupCents), monthly: formatEuroShort(V4_PRICES.basisCents) };
+}
+
+/** Die Preisangabe im dritten Schritt – dieselben Werte wie im Kaufweg (V4_PRICES). */
+export function letterPriceText(): string {
+  const p = letterPrices();
+  return `Festpreis ${p.setup} einmalig, danach ${p.monthly} im Monat, monatlich kündbar. Online erst nach Freigabe.`;
+}
+
+export function standard4Steps(): LetterStandard4['steps'] {
+  return [
+    { title: 'Ansehen', text: 'Code scannen, Entwurf in Ruhe ansehen – ohne Kosten und Anmeldung.' },
+    { title: 'Anpassen', text: 'Was nicht passt, ändere ich vor dem Kauf – auch das ohne Kosten.' },
+    { title: 'Übernehmen', text: letterPriceText() },
+  ];
+}
 
 export const STANDARD4_CALM =
   '**Ansehen kostet nichts und verpflichtet zu nichts.** Wenn Sie die Website behalten möchten, ist die Übernahme kostenpflichtig. Preis und Bedingungen stehen vorher auf der Seite.';
@@ -168,7 +183,7 @@ export function applyStandard4(data: LetterData, i: Standard4Input): void {
     tag: `Entwurf · Startseite ${displayName}`,
     mobileDataUri: i.mobileDataUri ?? null,
     qrHint: 'Handykamera auf den Code halten.',
-    steps: STANDARD4_STEPS,
+    steps: standard4Steps(),
     until: `**Der Entwurf ist bis ${i.expiresLabel} online.** Danach nehme ich ihn vom Netz. Wenn Sie nichts tun, entstehen Ihnen keine Kosten.`,
     senderTagline: i.industry === 'handwerk' ? 'Websites für Handwerksbetriebe' : 'Websites für lokale Betriebe',
     legalPrefix: 'Unverbindlicher, nicht beauftragter Entwurf.',

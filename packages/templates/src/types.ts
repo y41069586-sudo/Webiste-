@@ -170,6 +170,10 @@ export interface DemoOptions {
   slug: string;
   /** Einmalpreis (Kurzform) – für Altdaten/Fallback */
   priceLabel: string;
+  /** Festpreis-Zeile des Basis-Tarifs (Betreiber 20.11.2026: Preis auf der Demo nennen), z. B. „597 € einmalig, danach 19 € im Monat, monatlich kündbar“ */
+  priceHint?: string;
+  /** Text der Leiste oben auf der Demo (mit Festpreis) */
+  toolbarNote?: string;
   checkoutUrl: string;
   questionUrl: string;
   optOutUrl: string;

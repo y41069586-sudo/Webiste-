@@ -246,7 +246,7 @@ export function offerSection(demo: NonNullable<RenderInput['demo']>, opts: { rev
   <div class="mx-auto max-w-4xl px-4">
     <p class="text-sm font-medium text-[#4b5563]">${brandMarkHtml(24)} Entwurf von ${esc(providerName)} – nicht Teil der Website</p>
     <h2 id="uebernehmen-titel" class="mt-1 text-2xl font-semibold tracking-tight">Gefällt Ihnen Ihre neue Website?</h2>
-    <p class="mt-3">Übernehmen Sie sie – Tarif und Preis wählen Sie im nächsten Schritt. Online geht sie erst nach Ihrer Freigabe.</p>
+    ${demo.priceHint ? `<p class="mt-3">Übernehmen Sie sie zum <strong>Festpreis: ${esc(demo.priceHint)}.</strong> Die Monatsgebühr beginnt erst, wenn Ihre Website online ist – und online geht sie erst nach Ihrer Freigabe.</p>` : `<p class="mt-3">Übernehmen Sie sie – Tarif und Preis wählen Sie im nächsten Schritt. Online geht sie erst nach Ihrer Freigabe.</p>`}
     <a href="${esc(demo.checkoutUrl)}" class="mt-5 inline-flex min-h-11 items-center justify-center rounded-md bg-[#111827] px-4 py-2 font-semibold text-white hover:bg-[#1f2937]" style="display:inline-flex;min-height:48px;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:999px;background:linear-gradient(180deg,#2f62f0,#1f4fd8);color:#fff;font-weight:600;text-decoration:none;box-shadow:0 6px 18px rgba(31,79,216,.28)">Website übernehmen <span aria-hidden="true">→</span></a>
     ${
       assured.length
@@ -459,7 +459,7 @@ ${jsonLd}
     banner =
       `<aside class="sw-demo-context" aria-label="Hinweis zum Entwurf"><strong>Unverbindlicher Website-Entwurf</strong> von ${esc(demo.sender.company)} für ${esc(facts.name)}. Leistungen und Bilder sind Beispiele – dies ist nicht die offizielle Website des Betriebs.</aside>
 +<aside class="sw-demo-toolbar" aria-label="Website übernehmen"><div class="sw-demo-toolbar-inner">
-+  <span class="sw-provider-mark">${brandMarkHtml(24)}</span><p class="sw-demo-toolbar-title text-sm"><strong>Ihr Entwurf.</strong> Erst einrichten, dann kostenpflichtig bestellen.</p>
++  <span class="sw-provider-mark">${brandMarkHtml(24)}</span><p class="sw-demo-toolbar-title text-sm"><strong>Ihr Entwurf.</strong> ${esc(demo.toolbarNote || 'Erst einrichten, dann kostenpflichtig bestellen.')}</p>
 +  <div class="sw-demo-actions"><a href="${esc(demo.checkoutUrl)}" class="sw-demo-buy">Website übernehmen</a><a href="#frage" class="sw-demo-ask">Fragen</a></div>
 +</div></aside>`.replace(/^\+/gm, '');
   } else if (mode === 'preview') {

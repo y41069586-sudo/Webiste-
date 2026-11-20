@@ -9,6 +9,7 @@ import {
   getConfig,
   getDb,
   REJECTION_LABELS,
+  RETURN_REASONS,
   schema,
   type RejectionReason,
 } from '@wbm/core';
@@ -381,6 +382,19 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
                       <form action={markUndeliverableAction} className="flex items-center gap-2">
                         <input type="hidden" name="letterId" value={l.id} />
                         <input type="hidden" name="leadId" value={l.leadId} />
+                        <select
+                          name="reason"
+                          aria-label="Grund der Rücksendung"
+                          className={`${input} w-40 text-xs`}
+                          defaultValue=""
+                        >
+                          <option value="">Grund (optional)</option>
+                          {RETURN_REASONS.map((r) => (
+                            <option key={r} value={r}>
+                              {r}
+                            </option>
+                          ))}
+                        </select>
                         <input
                           name="confirm"
                           aria-label="Zur Bestätigung UNZUSTELLBAR eintippen"

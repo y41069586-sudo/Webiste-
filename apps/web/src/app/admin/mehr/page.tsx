@@ -1,5 +1,8 @@
 import Link from 'next/link';
-import { PageHeader } from '@/components/ui';
+import { cookies } from 'next/headers';
+import { PageHeader, btn } from '@/components/ui';
+import { TEST_DEVICE_COOKIE } from '@/lib/request';
+import { toggleTestDevice } from './actions';
 import { requireAdmin } from '@/lib/auth';
 
 export const metadata = { title: 'Mehr' };
@@ -44,6 +47,7 @@ const GROUPS: { title: string; links: { href: string; label: string; text: strin
 
 export default async function MorePage() {
   await requireAdmin();
+  const isTestDevice = (await cookies()).get(TEST_DEVICE_COOKIE)?.value === '1';
   return (
     <>
       <PageHeader title="Mehr" subtitle="Alles, was du im Alltag selten brauchst." />
@@ -63,6 +67,19 @@ export default async function MorePage() {
             </ul>
           </section>
         ))}
+        <section className="more-group">
+          <h2 className="home-h2">Eigene Tests</h2>
+          <p className="text-sm">
+            {isTestDevice
+              ? 'Dieses Gerät ist als Testgerät markiert: Scans, Demo-Aufrufe und Klicks von hier zählen nicht in den Kennzahlen.'
+              : 'Teste Briefe und Demos auf diesem Gerät, ohne die Kennzahlen zu verfälschen: Markiere es als Testgerät.'}
+          </p>
+          <form action={toggleTestDevice} className="mt-2">
+            <button type="submit" className={btn.secondary}>
+              {isTestDevice ? 'Testgerät-Markierung entfernen' : 'Dieses Gerät als Testgerät markieren'}
+            </button>
+          </form>
+        </section>
       </div>
     </>
   );

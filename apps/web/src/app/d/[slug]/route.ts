@@ -9,6 +9,8 @@ import {
   getDb,
   esc,
   demoOfferSectionHtml,
+  demoPriceHint,
+  demoToolbarText,
   applyMobileHeroLayer,
   v4TierLabel,
   demoCdnHeaders,
@@ -52,6 +54,25 @@ const DEMO_HEADERS = {
  * Preissektion beim Ausliefern auf die aktuellen Tarife bringen (z. B. „Komplett“ statt Care+), auch für vor der
  * Umstellung gebaute Demos. Inhalte des Betriebs bleiben unberührt; das Foto im Vertrauensblock wird übernommen.
  */
+/**
+ * Kurzes Angebot gleich nach den Leistungen (20.11.2026, Analyse Brief/Demo/Funnel): der volle Kaufblock steht ganz unten
+ * auf einer sehr langen Handy-Seite. Hier steht schon früh: Festpreis, „online erst nach Ihrer Freigabe“ und der Knopf.
+ * Nur in Demos mit Leistungsbereich; sonst bleibt alles wie gehabt.
+ */
+function offerStrip(page: string, slug: string, v4: boolean): string {
+  if (!v4 || page.includes('id="angebot-kurz"')) return page;
+  const start = page.indexOf('data-ad-section="services"');
+  if (start < 0) return page;
+  const end = page.indexOf('</section>', start);
+  if (end < 0) return page;
+  const at = end + '</section>'.length;
+  const strip = `<aside id="angebot-kurz" aria-label="Website übernehmen" style="margin:0;padding:20px 16px;background:#f3f4f6;border-top:1px solid #dce2ed;border-bottom:1px solid #dce2ed;color:#111827;font:16px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif"><div style="max-width:56rem;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px"><p style="margin:0;flex:1 1 18rem;font-size:15px"><strong style="display:block;font-size:17px">Gefällt Ihnen Ihre Website?</strong>${esc(demoPriceHint())}. Online geht sie erst nach Ihrer Freigabe. <span style="color:#4b5563;font-size:13px">Entwurf von SeitenWerk – nicht Teil der Website.</span></p><a href="/d/${slug}/uebernehmen" style="display:inline-flex;min-height:48px;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:999px;background:linear-gradient(180deg,#2f62f0,#1f4fd8);color:#fff;font-weight:600;text-decoration:none">Website übernehmen <span aria-hidden="true">→</span></a></div></aside>`;
+  return page.slice(0, at) + strip + page.slice(at);
+}
+
+const PLACEHOLDER_CSS =
+  '<style>#sw-ai-design [data-ad-placeholder="team"],#sw-ai-design [data-ad-placeholder="references"]{display:none!important}</style>';
+
 function refreshOfferSection(page: string, slug: string, cfg: Awaited<ReturnType<typeof getConfig>>): string {
   const start = page.indexOf('<section id="uebernehmen"');
   if (start < 0) return page;
@@ -114,7 +135,11 @@ async function serveDemo(req: Request, slug: string): Promise<Response> {
     ? `<p role="status" style="margin:1rem 0;padding:1rem;border:1px solid #94a3b8;border-radius:.75rem;background:white;color:#0f172a">Bezahlvorgang verlassen. Zuletzt gewählter Tarif: <strong>${v4TierLabel(selected)}</strong>. Sie können das Angebot hier noch einmal prüfen. Falls Sie bereits bezahlt haben, warten Sie bitte auf die Bestätigung.</p>`
     : '';
   // Handy-Einstieg mit Bild auch für vor dem 07.11.2026 gebaute Demos (idempotent)
-  const page = refreshOfferSection(polishDemoForMobile(applyMobileHeroLayer(html.toString('utf8'))), slug, fullCfg)
+  const page = offerStrip(
+    refreshOfferSection(polishDemoForMobile(applyMobileHeroLayer(html.toString('utf8'))), slug, fullCfg),
+    slug,
+    fullCfg.offers.activeVersion === 'v4',
+  )
     // Kontakt nur per E-Mail (Betreiber, 06.11.2026): WhatsApp-Knöpfe aus bereits gebauten Demos entfernen
     .replace(/<a [^>]*href="[^"]*\/whatsapp"[^>]*>[^<]*WhatsApp[^<]*<\/a>/g, '')
     // Upgrade only our purchase toolbar in already stored demos; business content stays untouched.
@@ -124,7 +149,13 @@ async function serveDemo(req: Request, slug: string): Promise<Response> {
     )
     // 19.11.2026: keine Preise mehr auf der Demo – der Knopf „Preise und Leistungen“ entfällt auch in gebauten Demos
     .replaceAll('<a href="#uebernehmen" class="sw-demo-ask">Preise und Leistungen</a>', '')
+    // 20.11.2026: Festpreis in der Leiste (auch in gebauten Demos); versteckt zudem die zwei überzähligen Platzhalter-Kästen
     .replace('In Ruhe ansehen, direkt übernehmen.', 'Erst einrichten, dann kostenpflichtig bestellen.')
+    .replace(
+      'Erst einrichten, dann kostenpflichtig bestellen.',
+      fullCfg.offers.activeVersion === 'v4' ? demoToolbarText() : 'Erst einrichten, dann kostenpflichtig bestellen.',
+    )
+    .replace('</head>', `${PLACEHOLDER_CSS}</head>`)
     .replace('Nach der Einmalzahlung ergänzen Sie Ihre Angaben.', 'Ihre vor der Zahlung gespeicherten Angaben werden übernommen.')
     .replaceAll(EXPIRES_PLACEHOLDER, label)
     .replace('<h2 id="uebernehmen-titel"', `${notice}<h2 id="uebernehmen-titel"`)

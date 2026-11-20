@@ -116,6 +116,7 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
     offerVersion: cfg.offers.activeVersion,
     slug,
     priceLabel: formatEuroShort(cfg.offers.activeVersion === 'v4' ? v4Offer('basis').setupCents : p.packageCents),
+    ...(cfg.offers.activeVersion === 'v4' ? { priceHint: demoPriceHint(), toolbarNote: demoToolbarText() } : {}),
     checkoutUrl: demoUrl(`/d/${slug}/uebernehmen`),
     questionUrl: demoUrl(`/d/${slug}/frage`),
     optOutUrl: demoUrl(`/d/${slug}/kein-interesse`),
@@ -157,6 +158,18 @@ export function demoOptions(slug: string, cfg: AppConfig, photoDataUri: string |
       imprintUrl: appUrl('/impressum'),
     },
   };
+}
+
+/** Kurze Festpreis-Zeile des Basis-Tarifs für Leiste und Kaufblock der Demo (gleiche Werte wie der Kaufweg). */
+export function demoPriceHint(): string {
+  const o = v4Offer('basis');
+  return `${formatEuroShort(o.setupCents)} einmalig, danach ${formatEuroShort(o.monthlyCents)} im Monat, monatlich kündbar`;
+}
+
+/** Text der Leiste oben auf der Demo. */
+export function demoToolbarText(): string {
+  const o = v4Offer('basis');
+  return `Festpreis ${formatEuroShort(o.setupCents)} + ${formatEuroShort(o.monthlyCents)}/Monat, monatlich kündbar. Online erst nach Ihrer Freigabe.`;
 }
 
 /** Preissektion „Gefällt Ihnen Ihre neue Website?“ mit den aktuell angebotenen Tarifen (für das Ausliefern). */

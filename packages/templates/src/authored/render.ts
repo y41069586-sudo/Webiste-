@@ -35,7 +35,9 @@ export function renderAuthored(ctx: RenderContext): string {
     phone_url: p.callHref && p.callHref.startsWith('tel:') ? p.callHref : '#anfrage',
     map_url: p.mapsHref,
     service_area: locationText(f, p.draft),
-    placeholder_photos: 'Entwurfsplatzhalter: Hier ergänzen Sie eigene, freigegebene Fotos Ihres Betriebs.',
+    // Ein einziger ruhiger Hinweis statt dreier Kästen (Betreiber 20.11.2026); die beiden anderen Marken bleiben im Quelltext, sind aber verborgen
+    placeholder_photos:
+      'Entwurfsplatzhalter: Hier ergänzen Sie eigene, freigegebene Fotos, eine bestätigte Vorstellung Ihres Teams und echte Referenzen.',
     placeholder_team: 'Entwurfsplatzhalter: Hier ergänzen Sie eine bestätigte Vorstellung und eigene Bilder Ihres Teams.',
     placeholder_references: 'Entwurfsplatzhalter: Hier ergänzen Sie echte, zur Veröffentlichung freigegebene Referenzen.',
   };
@@ -49,7 +51,7 @@ export function renderAuthored(ctx: RenderContext): string {
     .replace('<body ', `<body data-design="${FREE_DESIGN_VERSION}" `)
     .replace(
       '</head>',
-      `<style>${fonts}${purgeCss(contact.css, shell)}${authoredContactCss(d)}#sw-ai-design{${vars}position:relative;isolation:isolate;contain:layout paint;background:var(--design-bg);color:var(--design-ink);font-family:var(--body)}#sw-ai-design *{box-sizing:border-box}#sw-ai-design img{max-width:100%;height:auto}#sw-ai-design .ad-stock-note{display:block;font:11px/1.5 var(--body);margin-top:8px;color:inherit}#sw-ai-design :focus-visible{outline:3px solid currentColor;outline-offset:5px}${scopedDesignCss(d.css)}</style></head>`,
+      `<style>${fonts}${purgeCss(contact.css, shell)}${authoredContactCss(d)}#sw-ai-design{${vars}position:relative;isolation:isolate;contain:layout paint;background:var(--design-bg);color:var(--design-ink);font-family:var(--body)}#sw-ai-design *{box-sizing:border-box}#sw-ai-design img{max-width:100%;height:auto}${p.draft ? '#sw-ai-design [data-ad-placeholder="team"],#sw-ai-design [data-ad-placeholder="references"]{display:none!important}' : ''}#sw-ai-design .ad-stock-note{display:block;font:11px/1.5 var(--body);margin-top:8px;color:inherit}#sw-ai-design :focus-visible{outline:3px solid currentColor;outline-offset:5px}${scopedDesignCss(d.css)}</style></head>`,
     );
   // Prune only shared utility CSS; authored selectors and details/media rules stay intact.
   const pruned = html.replace(/<style>([\s\S]*?)<\/style>/, (_m, css: string) => `<style>${purgeCss(css, html)}</style>`);

@@ -87,61 +87,10 @@ export default async function SetupPage({
         }))
       : [];
 
-  // Weg: ausdrücklich gewählt; eine begonnene Einrichtung führt immer zum Weg „Angaben zuerst“
-  const weg = draft.touched || wegParam === 'davor' ? 'davor' : wegParam === 'danach' && quick.length ? 'danach' : null;
+  // Weg (20.11.2026, Analyse Brief/Demo/Funnel): keine Zwischenfrage mehr vor dem Preis – „Übernehmen“ zeigt sofort die
+  // Tarife. „Angaben zuerst“ bleibt als zweiter Weg erreichbar; eine begonnene Einrichtung führt immer dorthin.
+  const weg = draft.touched || wegParam === 'davor' || !quick.length ? 'davor' : 'danach';
   const back = (q = '') => `/einrichten/${slug}${q}`;
-
-  if (!weg) {
-    // Schritt 0: nur die Wahl, sonst nichts
-    const card =
-      'card-site card-hover group block p-6 transition-colors hover:border-brand-600 focus-visible:border-brand-600 sm:p-7';
-    return (
-      <PublicShell company={cfg.sender.company}>
-        <header className="mb-8">
-          <p className="text-brand-700 text-sm font-semibold">Ihre Website übernehmen</p>
-          <h1 className="font-tight mt-3 text-[clamp(1.9rem,6vw,2.6rem)] leading-[1.08] font-semibold tracking-[-0.04em] text-slate-900">
-            Wie möchten Sie weitermachen?
-          </h1>
-          <p className="mt-3 max-w-xl text-[1.05rem] leading-relaxed text-slate-600">
-            Beide Wege führen zur selben fertigen Website. Online geht sie erst, wenn Sie die Vorschau freigeben.
-          </p>
-        </header>
-        <div className={`grid gap-4 ${quick.length ? 'sm:grid-cols-2' : ''}`}>
-          {quick.length ? (
-            <Link href={back(`?weg=danach${preferred ? `&plan=${encodeURIComponent(preferred)}` : ''}`)} className={card}>
-              <span className="bg-brand-50 text-brand-700 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold">
-                ca. 2 Minuten
-              </span>
-              <strong className="font-tight mt-4 block text-xl font-semibold tracking-[-0.03em] text-slate-900">
-                Erst bestellen, Angaben danach
-              </strong>
-              <span className="mt-2 block text-slate-600">Tarif wählen, bezahlen. Impressum, Texte und Fotos danach in Ruhe.</span>
-              <span className="text-brand-700 mt-5 inline-flex items-center gap-2 font-semibold">
-                Tarif wählen <span className="transition-transform group-hover:translate-x-1">→</span>
-              </span>
-            </Link>
-          ) : null}
-          <Link href={back('?weg=davor')} className={card}>
-            <span className="inline-block rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
-              ca. 15 Minuten
-            </span>
-            <strong className="font-tight mt-4 block text-xl font-semibold tracking-[-0.03em] text-slate-900">
-              Erst Angaben, dann bestellen
-            </strong>
-            <span className="mt-2 block text-slate-600">Impressum, Texte und Fotos eintragen, alles prüfen, dann bezahlen.</span>
-            <span className="text-brand-700 mt-5 inline-flex items-center gap-2 font-semibold">
-              Angaben eintragen <span className="transition-transform group-hover:translate-x-1">→</span>
-            </span>
-          </Link>
-        </div>
-        <p className="mt-8 text-sm text-slate-500">
-          <Link href={`/d/${slug}`} className="underline-offset-4 hover:text-slate-900 hover:underline">
-            ← Zurück zur Website
-          </Link>
-        </p>
-      </PublicShell>
-    );
-  }
 
   if (weg === 'danach') {
     return (
@@ -151,14 +100,35 @@ export default async function SetupPage({
           current={0}
           title="Welcher Tarif passt?"
           lead="Nach der Zahlung bekommen Sie per E-Mail den Link für Ihre Angaben."
-          back={{ href: back(), label: 'Anderen Weg wählen' }}
+          back={{ href: `/d/${slug}`, label: 'Zurück zur Website' }}
         />
+        <ul className="mb-6 grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
+          {[
+            'Online erst nach Ihrer Freigabe der fertigen Vorschau.',
+            `${rounds} Änderungsrunden sind im Preis enthalten.`,
+            'Die Monatsgebühr beginnt erst, wenn Ihre Website online ist.',
+            'Sichere Bezahlung über Stripe, Rechnung zu jeder Zahlung.',
+          ].map((t) => (
+            <li key={t} className="flex gap-2">
+              <span aria-hidden="true" className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-xs font-bold text-emerald-700">
+                ✓
+              </span>
+              <span>{t}</span>
+            </li>
+          ))}
+        </ul>
         {abgebrochen ? (
           <p role="status" className="mb-5 rounded-lg bg-amber-50 p-4 text-sm">
             Die Bezahlung wurde abgebrochen, es wurde nichts abgebucht. Sie können hier einfach erneut wählen.
           </p>
         ) : null}
         <TariffPicker slug={slug} options={quick} preferred={preferred} />
+        <p className="mt-6 text-sm text-slate-600">
+          Lieber zuerst alles in Ruhe eintragen und prüfen, dann bezahlen?{' '}
+          <Link href={back('?weg=davor')} className="text-brand-700 font-semibold underline-offset-4 hover:underline">
+            Angaben zuerst eintragen
+          </Link>
+        </p>
       </PublicShell>
     );
   }
@@ -170,7 +140,7 @@ export default async function SetupPage({
         current={0}
         title="Ihre Angaben für die Website"
         lead="Etwa 15 Minuten. Mit „Zwischenspeichern“ bleibt alles bis zu sieben Tage in diesem Browser erhalten. Danach prüfen Sie alles und wählen Ihren Tarif."
-        back={draft.touched ? undefined : { href: back(), label: 'Anderen Weg wählen' }}
+        back={draft.touched ? undefined : quick.length ? { href: back('?weg=danach'), label: 'Zurück zur Tarifwahl' } : { href: `/d/${slug}`, label: 'Zurück zur Website' }}
       />
       <SetupEditor slug={slug} initial={draft.data} assets={Object.keys(draft.assetKeys)} />
     </PublicShell>

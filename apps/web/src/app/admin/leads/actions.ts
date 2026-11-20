@@ -95,6 +95,6 @@ export async function markUndeliverableAction(form: FormData): Promise<void> {
   const leadId = String(form.get('leadId'));
   if (String(form.get('confirm')).trim().toUpperCase() !== 'UNZUSTELLBAR')
     throw new Error('Bitte zur Bestätigung UNZUSTELLBAR eintippen.');
-  await markLetterUndeliverable(letterId, actorOf(s));
+  await markLetterUndeliverable(letterId, actorOf(s), String(form.get('reason') ?? ''));
   revalidatePath(`/admin/leads/${leadId}`);
 }

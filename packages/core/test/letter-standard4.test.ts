@@ -96,7 +96,7 @@ describe('Standardvorlage 4', () => {
     expect(standard4DisplayName('Müller')).toBe('Müller');
   });
 
-  it('nennt Entwurf, Grund und Kostenpflicht oben – ohne Preise, mit bestandenem Wahrheits-Check', async () => {
+  it('nennt Entwurf, Grund und Kostenpflicht oben – mit Festpreis, mit bestandenem Wahrheits-Check', async () => {
     const i = await input();
     const data = composeLetter(i);
     expect(data.standard4).toBeDefined();
@@ -108,7 +108,8 @@ describe('Standardvorlage 4', () => {
     expect(data.intro.join(' ')).toContain('**0551 793785**');
     expect(data.standard4!.until).toContain('17. Dezember 2026');
     const body = letterBodyText(data);
-    expect(body).not.toMatch(/€|\bEuro\b|Care\+|Basis|Komplett/);
+    expect(body).not.toMatch(/\bEuro\b|Care\+|Basis|Komplett/);
+    expect(body).toContain('Festpreis 597 € einmalig, danach 19 € im Monat, monatlich kündbar');
     const truth = checkLetterTruth({
       letter: data,
       claimSpans: [],
@@ -171,7 +172,7 @@ describe('Standardvorlage 4', () => {
     expect(text).not.toMatch(/Sperrhash/);
   }, 60000);
 
-  it('Vorlage 5: Name zuerst, Grund als Einstieg, Kalenderblatt, ohne Preise, Wahrheits-Check bestanden', async () => {
+  it('Vorlage 5: Name zuerst, Grund als Einstieg, Kalenderblatt, Festpreis, Wahrheits-Check bestanden', async () => {
     const i = await input({ design: 'standard-5' });
     expect(usesStandard4(i)).toBe(true);
     const data = composeLetter(i);
@@ -184,7 +185,8 @@ describe('Standardvorlage 4', () => {
     expect(data.standard4!.calm).toMatch(/Übernahme kostenpflichtig/);
     expect(data.standard4!.leaf).toEqual({ month: 'DEZ', day: '17' });
     expect(data.standard4!.until).toContain('bis 17. Dezember online');
-    expect(letterBodyText(data)).not.toMatch(/€|\bEuro\b|Care\+|Basis|Komplett/);
+    expect(letterBodyText(data)).not.toMatch(/\bEuro\b|Care\+|Basis|Komplett/);
+    expect(letterBodyText(data)).toContain('Festpreis 597 € einmalig');
     const truth = checkLetterTruth({
       letter: data,
       claimSpans: [],
