@@ -64,12 +64,11 @@ Distrust is a measurable but minority reason for abandoning a purchase (about 19
 
 ### Cited Findings
 - [US][HARD, Baymard, n=1,026 US respondents, 2016] 19% had abandoned a checkout in the last 3 months because they did not trust the site with their card details. Baymard's seal tests found that even a made-up generic seal raised perceived security, and that perceived security of the payment fields matters more than actual security. — [Baymard: perceived security](https://baymard.com/blog/perceived-security-of-payment-form); [Baymard: site seals](https://baymard.com/blog/site-seal-trust)
-- [US][HARD, Baymard 2026, average of 50 studies] Average cart abandonment is 70.22%. Reasons include extra costs too high (40%), card distrust (19%), forced account creation (18%), a checkout that was too long (17%) and a total cost that could not be calculated up front (12%). — [Baymard cart abandonment](https://baymard.com/lists/cart-abandonment-rate)
+- [US][HARD, Baymard 2026, average of 50 studies] Average cart abandonment is 70.22%. Reasons include extra costs too high (40%), card distrust (19%), forced account creation (18%), a checkout that was too long (17%) and a total cost that could not be calculated up front (12%). — [Baymard cart abandonment](https://baymard.com/blog/cart-abandonment-rate)
 - [US][HARD, Stanford Web Credibility Project, 3 years, 4,500+ people] Guideline: "Show that there's a real organization behind your site". Secondary summaries name address, phone number and email as top credibility signals, followed by photos of the people. — [Stanford Credibility Guidelines](https://credibility.stanford.edu/guidelines); [Userlike summary](https://userlike.com/blog/10-crucial-elements-website-credibility)
 - [DE][HARD-ish, ECC Handel with Trusted Shops, BillSAFE, PayPal; >1,000 online shoppers; older study, year not confirmed] Shops with a quality seal reached up to 23.1% higher conversion. 74% of shoppers pay attention to seals, and 64% are more likely to buy in a certified shop. This is a sponsored B2C e-commerce study. — [etailment](https://www.etailment.de/magazin/ecc-guetesiegel-pushen-die-konversionsrate-in-onlineshops); [IFH Köln](https://www.ifhkoeln.de/sechs-von-zehn-kleinen-und-mittleren-online-shops-haben-guetesiegel/)
 - [DE][HARD, Bitkom 2025, n=504] **72% of craft firms see online customer reviews as a big opportunity**. 88% use directory entries such as Google, and 40% are on review platforms. — [Bitkom 2025](https://www.bitkom.org/sites/main/files/2026-01/bitkom-studienbericht-handwerk.pdf)
 - [DE][VENDOR, agency self-study] Of 500 craft websites tested, 78% had no photo of the owner. The same agency claims click-to-call converts "10–15×" better than forms, which is unverified. — [Huchel Medienagentur](https://huchel-medienagentur.de/wissen/handwerker-website-worauf-es-ankommt)
-- [DE][legal] Fake or bought reviews and invented references are unlawful under the UWG (§ 5, and UWG Annex No. 23b/23c since the 2022 Omnibus rules on reviews). This matches SeitenWerk's rules. — [Baymard is not the source; see IHK guidance referenced in earlier notes](https://www.ihk-arnsberg.de/upload/Werbung_per_Telefon_Brief_E_mail_43871.pdf) (general advertising-law guidance; Annex No. 23b/c not verified in this pass)
 
 ### Inferences
 - Legal ways to make up for missing customer references:
@@ -81,6 +80,7 @@ Distrust is a measurable but minority reason for abandoning a purchase (about 19
 - A Trusted Shops or similar seal is designed for shops and B2C. Its proven effect is B2C, and for a solo B2B service with few transactions, cost and benefit are unclear. It is low priority compared with a phone number and photo.
 
 ### Gaps
+- The exact legal basis against fake reviews and invented references (UWG § 5 and the review rules in the UWG annex since the 2022 Omnibus reform) was not verified against a primary source in this pass. The project rule "no invented references" (CLAUDE.md) already covers it.
 - No German study on what makes **business owners** (rather than consumers) trust an unknown online service provider. No data on how much an Impressum or phone number specifically changes conversion.
 
 ## 4. Friction: should a purchase require a call? Callback options; preferred channels of Handwerker
