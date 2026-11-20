@@ -8,7 +8,7 @@ describe('Festpreis auf der Demo', () => {
   cfg.offers.activeVersion = 'v4';
 
   it('nennt Einmalpreis, Monatsgebühr und Kündbarkeit', () => {
-    expect(demoPriceHint()).toBe('597 € einmalig, danach 19 € im Monat, monatlich kündbar');
+    expect(demoPriceHint().replace(/\u00a0/g, ' ')).toBe('597 € einmalig, danach 19 € im Monat, monatlich kündbar');
     expect(demoToolbarText()).toContain('Online erst nach Ihrer Freigabe');
     const o = demoOptions('abcdefghijklmnopqrstuv', cfg);
     expect(o.priceHint).toBe(demoPriceHint());
@@ -16,7 +16,7 @@ describe('Festpreis auf der Demo', () => {
   });
 
   it('Kaufblock enthält den Festpreis und die Freigabe-Zusage', () => {
-    const html = demoOfferSectionHtml('abcdefghijklmnopqrstuv', cfg);
+    const html = demoOfferSectionHtml('abcdefghijklmnopqrstuv', cfg).replace(/\u00a0/g, ' ');
     expect(html).toContain('Festpreis: 597 € einmalig, danach 19 € im Monat, monatlich kündbar');
     expect(html).toContain('erst nach Ihrer Freigabe');
     expect(html).not.toContain('Tarif und Preis wählen Sie im nächsten Schritt');
