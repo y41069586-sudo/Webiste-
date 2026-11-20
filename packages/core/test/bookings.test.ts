@@ -22,6 +22,7 @@ import {
   type BookingInput,
 } from '../src/services/bookings';
 import { randomToken } from '../src/util/crypto';
+import { siteThemeFor } from '@wbm/templates';
 import { resetDb } from './helpers';
 
 const meta = { ua: 'test-browser', ipHash: 'test-ip-hash', isBot: false };
@@ -170,6 +171,12 @@ describe('Buchung, Bestätigung, Absage', () => {
     expect(toBusiness.text).toContain('Dachreparatur');
     expect(toVisitor.replyTo).toBe('betrieb@client.test');
     expect(toVisitor.text).toContain('noch nicht bestätigt');
+    // Design des Betriebs: Akzentfarbe und Schrift der Website auch in den Mails
+    const theme = siteThemeFor('praxis-projekt', 'FIKTIVER TEST Dachdeckerei');
+    for (const m of [toBusiness, toVisitor]) {
+      expect(m.html).toContain(theme.accent);
+      expect(m.html).toContain(theme.display);
+    }
     // gleiche Zeit nochmal: vergeben
     expect(await requestBooking(site.formKey, input(slot, { email: 'zweite@request.test' }), { ...meta, ipHash: 'x' }, { now: NOW })).toEqual({
       ok: false,

@@ -1,3 +1,4 @@
+import { renderBusinessEmail } from '../emails/business-email';
 import { and, asc, eq } from 'drizzle-orm';
 import type { SiteContent } from '@wbm/templates/types';
 import { setupSnapshotKey, type SetupSnapshot } from './checkout-drafts';
@@ -687,7 +688,35 @@ export async function handleSiteForm(
         replyTo: mail || site.formTargetEmail,
         subject: `${acceptance ? '[TEST] ' : ''}${request} von ${name}`,
         text,
-        html: '',
+        // Design des Betriebs (Farben, Schrift wie seine Website); Textfassung bleibt unverändert
+        html: renderBusinessEmail({
+          templateId: site.templateId,
+          company: customer.company,
+          subject: `${request} von ${name}`,
+          heading: `${request} über Ihre Website`,
+          preheader: `${name}${service ? ` · ${service}` : ''}`,
+          blocks: [
+            ...(acceptance ? ['GEKENNZEICHNETER TEST – fiktive Anfrage, kein echter Termin und keine Kundenkontaktaufnahme.'] : []),
+            {
+              details: [
+                ['Name', name],
+                ['E-Mail', mail || 'keine angegeben – bitte telefonisch melden'],
+                ...(input.phone.trim() ? [['Telefon', input.phone.trim().slice(0, 40)] as [string, string]] : []),
+                ...(service ? [['Leistung', service] as [string, string]] : []),
+                ...(plz ? [['PLZ Einsatzort', plz] as [string, string]] : []),
+                ...(wish ? [['Wunsch', wish] as [string, string]] : []),
+              ],
+            },
+            { box: input.message.trim() || '(keine Nachricht)' },
+            'Dies ist eine Anfrage, keine bestätigte Buchung. Stimmen Sie einen gewünschten Termin direkt mit der anfragenden Person ab.',
+            {
+              small: mail
+                ? 'Antworten Sie direkt auf diese E-Mail, um der Person zu antworten.'
+                : 'Die Person hat nur eine Telefonnummer angegeben.',
+            },
+          ],
+          footer: `Anfrage über die Website von ${customer.company}${customer.domain ? ` (${customer.domain})` : ''} · Der Nachrichtentext wird in SeitenWerk nicht dauerhaft gespeichert · technische Umsetzung SeitenWerk`,
+        }).html,
         customerId: site.customerId,
       },
       { provider: email },

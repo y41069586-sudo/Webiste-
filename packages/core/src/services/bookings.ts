@@ -3,8 +3,8 @@ import { appUrl } from '../config/env';
 import { getConfig } from '../config/service';
 import { getDb, type DbOrTx } from '../db/client';
 import { bookings, customers, demos, leads, orders, sites, type BookingStatus } from '../db/schema';
-import { renderEmail, type EmailContent } from '../emails/templates';
-import { esc } from '../util/html';
+import { type EmailContent } from '../emails/templates';
+import { renderBusinessEmail } from '../emails/business-email';
 import { logger } from '../logger';
 import { getProviders } from '../providers';
 import type { EmailProvider } from '../providers/types';
@@ -156,6 +156,8 @@ export function openSlots(cfg: BookingConfig, busy: { startsAt: Date; endsAt: Da
 
 /** Ziel einer Buchung: Kunden-Website (echt) oder Entwurf eines fiktiven Testbetriebs (Testlauf an den Betreiber). */
 interface BookingTarget {
+  /** Vorlage des Betriebs – bestimmt das Design der Mails */
+  templateId: string;
   siteId: string | null;
   demoId: string | null;
   company: string;
@@ -275,7 +277,7 @@ export async function requestDemoTestBooking(
   const t = await findDemoTestBooking(slug);
   if (!t) return { ok: false, reason: 'not_found' };
   return createBooking(
-    { siteId: null, demoId: t.demoId, company: t.company, cfg: t.cfg, targetEmail: t.targetEmail, customerId: null, test: true },
+    { templateId: t.templateId, siteId: null, demoId: t.demoId, company: t.company, cfg: t.cfg, targetEmail: t.targetEmail, customerId: null, test: true },
     input,
     meta,
     opts,
@@ -342,6 +344,7 @@ export async function requestBooking(
   if (!b) return { ok: false, reason: 'not_found' };
   return createBooking(
     {
+      templateId: b.site.templateId,
       siteId: b.site.id,
       demoId: null,
       company: b.company,
@@ -372,10 +375,9 @@ async function createBooking(
   const provider = opts.provider ?? getProviders().email;
   if (provider.name === 'mock') return { ok: false, reason: 'unavailable' };
   // Tempo (19.11.2026): unabhängige Abfragen gleichzeitig (Funktion in den USA, Datenbank in Frankfurt)
-  const [r1, r2, cfg] = await Promise.all([
+  const [r1, r2] = await Promise.all([
     rateLimit(db, `booking:${key}:${meta.ipHash}`, b.test ? 20 : 4, 3600),
     rateLimit(db, `booking:${key}`, 60, 86_400),
-    getConfig(),
   ]);
   if (!r1.allowed || !r2.allowed) return { ok: false, reason: 'rate_limited' };
 
@@ -429,7 +431,7 @@ async function createBooking(
         to: b.targetEmail,
         replyTo: email,
         customerId: b.customerId,
-        ...businessRequestEmail(cfg, b.company, booking, businessToken, b.test),
+        ...businessRequestEmail(b.templateId, b.company, booking, businessToken, b.test),
       },
       { provider },
     ),
@@ -440,7 +442,7 @@ async function createBooking(
         to: email,
         replyTo: b.targetEmail,
         customerId: b.customerId,
-        ...visitorEmail(b.company, booking, 'requested', visitorToken, b.test),
+        ...visitorEmail(b.templateId, b.company, booking, 'requested', visitorToken, b.test),
       },
       { provider },
     ),
@@ -545,7 +547,7 @@ export async function decideBooking(
         to: row.visitorEmail,
         replyTo: view.formTargetEmail,
         customerId: null,
-        ...visitorEmail(view.company, row, target, null, view.test),
+        ...visitorEmail(view.templateId, view.company, row, target, null, view.test),
         ...(target === 'confirmed'
           ? { attachments: [{ filename: 'termin.ics', content: Buffer.from(icsFor(view.company, row)), contentType: 'text/calendar; charset=utf-8; method=PUBLISH' }] }
           : {}),
@@ -574,22 +576,22 @@ export async function cancelByVisitor(token: string, opts: { now?: Date; provide
     .where(and(eq(bookings.id, cur.id), inArray(bookings.status, ACTIVE)))
     .returning();
   if (!row) return { ok: false, reason: 'not_open' };
-  const cfg = await getConfig();
   await sendTransactionalEmail(
     {
       kind: 'booking_cancelled_business',
       idempotencyKey: `booking:${row.id}:cancelled:business`,
       to: view.formTargetEmail,
       ...(row.visitorEmail ? { replyTo: row.visitorEmail } : {}),
-      ...renderEmail(cfg, {
+      ...renderBusinessEmail({
+        templateId: view.templateId,
+        company: view.company,
         subject: `${view.test ? '[TEST] ' : ''}Termin abgesagt: ${formatBookingTime(row.startsAt)}`,
         heading: 'Termin vom Kunden abgesagt',
-        noGreeting: true,
-        noSpamHint: true,
         blocks: [
           `${row.visitorName ?? 'Die anfragende Person'} hat den Termin am ${formatBookingTime(row.startsAt)} Uhr abgesagt.`,
           'Die Zeit ist auf Ihrer Website wieder frei.',
         ],
+        footer: `Terminanfragen über die Website von ${view.company} · technische Umsetzung SeitenWerk`,
       }),
     },
     { provider: opts.provider },
@@ -619,7 +621,7 @@ export async function sweepBookings(now = new Date(), opts: { provider?: EmailPr
         idempotencyKey: `booking:${row.id}:expired:visitor`,
         to: row.visitorEmail,
         replyTo: view.formTargetEmail,
-        ...visitorEmail(view.company, row, 'expired', null, view.test),
+        ...visitorEmail(view.templateId, view.company, row, 'expired', null, view.test),
       },
       { provider: opts.provider },
     ).catch(() => undefined);
@@ -641,36 +643,43 @@ export async function sweepBookings(now = new Date(), opts: { provider?: EmailPr
 
 // ---------- E-Mails ----------
 
-function businessRequestEmail(cfg: Awaited<ReturnType<typeof getConfig>>, company: string, b: Booking, token: string, test = false): EmailContent {
+function businessRequestEmail(templateId: string, company: string, b: Booking, token: string, test = false): EmailContent {
   const when = formatBookingTime(b.startsAt);
   const link = appUrl(`/termin/aktion/${token}`);
-  return renderEmail(cfg, {
+  return renderBusinessEmail({
+    templateId,
+    company,
     subject: `${test ? '[TEST] ' : ''}Neue Terminanfrage: ${when} Uhr – ${b.visitorName ?? ''}`.trim(),
     heading: 'Neue Terminanfrage über Ihre Website',
     preheader: `${when} Uhr – bitte bestätigen oder ablehnen`,
-    noGreeting: true,
-    noSpamHint: true,
     blocks: [
       ...(test ? [`TESTLAUF über den Entwurf „${company}“ (fiktiver Testbetrieb). So sieht die Mail aus, die ein Betrieb nach dem Kauf bekommt.`] : []),
       {
-        box: [
-          `Termin: ${when} Uhr (${Math.round((b.endsAt.getTime() - b.startsAt.getTime()) / 60_000)} Minuten)`,
-          ...(b.service ? [`Leistung: ${b.service}`] : []),
-          `Name: ${b.visitorName ?? ''}`,
-          `E-Mail: ${b.visitorEmail ?? ''}`,
-          ...(b.visitorPhone ? [`Telefon: ${b.visitorPhone}`] : []),
-          ...(b.message ? ['', b.message] : []),
-        ].join('\n'),
+        details: [
+          ['Termin', `${when} Uhr (${Math.round((b.endsAt.getTime() - b.startsAt.getTime()) / 60_000)} Minuten)`],
+          ...(b.service ? [['Leistung', b.service] as [string, string]] : []),
+          ['Name', b.visitorName ?? ''],
+          ['Telefon', b.visitorPhone ?? '–'],
+          ['E-Mail', b.visitorEmail ?? ''],
+          ...(b.message ? [['Grund', b.message] as [string, string]] : []),
+        ],
       },
-      `Die Zeit ist für Sie reserviert, bis Sie entscheiden – höchstens bis ${formatBookingTime(b.requestExpiresAt)} Uhr. Ohne Entscheidung wird die Anfrage dann automatisch abgesagt und die Zeit wieder frei.`,
       { button: { href: link, label: 'Termin bestätigen oder ablehnen' } },
+      `Die Zeit ist für Sie reserviert, bis Sie entscheiden – höchstens bis ${formatBookingTime(b.requestExpiresAt)} Uhr. Ohne Entscheidung wird die Anfrage automatisch abgesagt und die Zeit wieder frei.`,
       'Anderen Termin vorschlagen: Antworten Sie einfach auf diese E-Mail – die Antwort geht direkt an die anfragende Person. Lehnen Sie die Anfrage danach über den Knopf ab, damit die Zeit wieder frei ist.',
-      { small: `Gesendet über die Website von ${company}. Erst nach Ihrer Bestätigung erhält die Person eine Terminbestätigung.` },
     ],
+    footer: `Terminanfrage über die Website von ${company} · Erst nach Ihrer Bestätigung erhält die Person eine Terminbestätigung · technische Umsetzung SeitenWerk`,
   });
 }
 
-function visitorEmail(company: string, b: Booking, state: BookingStatus, cancelToken: string | null, test = false): EmailContent {
+function visitorEmail(
+  templateId: string,
+  company: string,
+  b: Booking,
+  state: BookingStatus,
+  cancelToken: string | null,
+  test = false,
+): EmailContent {
   const when = formatBookingTime(b.startsAt);
   const name = b.visitorName ? `Guten Tag ${b.visitorName},` : 'Guten Tag,';
   const cancel = cancelToken ? appUrl(`/termin/absagen/${cancelToken}`) : null;
@@ -717,10 +726,27 @@ function visitorEmail(company: string, b: Booking, state: BookingStatus, cancelT
   };
   const c = { ...t[state]!, subject: `${test ? '[TEST] ' : ''}${t[state]!.subject}` };
   const footer = `Diese Nachricht wurde über die Website von ${company} versendet. Ihre Angaben werden nur für diesen Termin verwendet und spätestens ${BOOKING_RULES.retentionDays} Tage nach dem Termin gelöscht.`;
-  const text = [name, '', ...c.lines, ...(cancel ? ['', `Termin absagen: ${cancel}`] : []), '', `Viele Grüße`, company, '', '--', footer].join('\n');
-  const p = (s: string) => `<p style="margin:0 0 14px;font:16px/1.6 -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#1b1c1e">${esc(s)}</p>`;
-  const html = `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(c.subject)}</title></head><body style="margin:0;padding:24px 12px;background:#f5f5f4"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e2df;border-radius:8px"><tr><td style="padding:28px 24px">${p(name)}${c.lines.map(p).join('')}${cancel ? `<p style="margin:18px 0"><a href="${esc(cancel)}" style="display:inline-block;padding:12px 18px;border:1.5px solid #1b1c1e;border-radius:6px;color:#1b1c1e;font:600 15px -apple-system,Segoe UI,Roboto,Arial,sans-serif;text-decoration:none">Termin absagen</a></p>` : ''}${p('Viele Grüße')}${p(company)}<p style="margin:20px 0 0;font:12px/1.5 -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#6b6b66">${esc(footer)}</p></td></tr></table></body></html>`;
-  return { subject: c.subject, text, html };
+  const headings: Record<string, string> = {
+    requested: 'Anfrage eingegangen',
+    confirmed: 'Termin bestätigt',
+    declined: 'Termin leider nicht möglich',
+    cancelled: 'Termin abgesagt',
+    expired: 'Anfrage nicht bestätigt',
+  };
+  return renderBusinessEmail({
+    templateId,
+    company,
+    subject: c.subject,
+    heading: headings[state],
+    preheader: `${when} Uhr`,
+    greeting: name,
+    blocks: [
+      ...c.lines,
+      ...(cancel ? [{ button: { href: cancel, label: 'Termin absagen', secondary: true } }] : []),
+    ],
+    signature: true,
+    footer,
+  });
 }
 
 /** Kalenderdatei (RFC 5545) in UTC, ohne personenbezogene Angaben außer dem Betrieb. */
