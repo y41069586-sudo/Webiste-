@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { demoTestSlots, findDemoTestBooking, findPublicDemo, openSlots, openingHoursToDays, siteThemeFor, type OnboardingDay } from '@wbm/core';
+import { demoTestSlots, findDemoTestBooking, findPublicDemo, openSlots, openingHoursToDays, siteThemeFor, themeOf, type OnboardingDay } from '@wbm/core';
 import { BookingForm, BookingShell, bookingErrorText } from '@/components/booking/booking-ui';
 
 export const dynamic = 'force-dynamic';
@@ -28,7 +28,7 @@ export default async function DemoBookingPreview({
       </BookingShell>
     );
   const lead = found.lead;
-  const theme = siteThemeFor(found.demo.templateId, lead.businessName);
+  const theme = themeOf(found.demo.templateId, lead.businessName, found.demo.palette, found.demo.contentJson);
   const test = await findDemoTestBooking(slug, found);
   if (test) {
     const slots = await demoTestSlots(test);

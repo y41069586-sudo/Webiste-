@@ -25,7 +25,7 @@ export default async function BookingPage({
     );
   const days = await bookingSlotsFor(b);
   return (
-    <BookingShell company={b.company} theme={siteThemeFor(b.site.templateId, b.company)} websiteUrl={b.websiteUrl}>
+    <BookingShell company={b.company} theme={b.theme} websiteUrl={b.websiteUrl}>
       <h1>Termin anfragen</h1>
       <p className="bk-lead">Wählen Sie Tag und Uhrzeit. {b.company} bestätigt den Termin per E-Mail.</p>
       <BookingForm

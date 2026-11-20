@@ -26,7 +26,7 @@ export default async function CancelBooking({
   const b = v.booking;
   const open = (b.status === 'requested' || b.status === 'confirmed') && b.startsAt > new Date();
   return (
-    <BookingShell company={v.company} theme={siteThemeFor(v.templateId, v.company)}>
+    <BookingShell company={v.company} theme={v.theme}>
       <h1>Termin am {formatBookingTime(b.startsAt)} Uhr</h1>
       {sp.ok || b.status === 'cancelled' ? (
         <p role="status" className="bk-ok">

@@ -18,7 +18,7 @@ export default async function DemoBookingThanks({
   const when = t && !Number.isNaN(new Date(t).getTime()) ? formatBookingTime(new Date(t)) : null;
   const company = test?.company ?? 'Entwurf';
   return (
-    <BookingShell company={company} theme={siteThemeFor(test?.templateId ?? '', company)} websiteUrl={`/d/${slug}`} backLabel="Zum Entwurf">
+    <BookingShell company={company} theme={test?.theme ?? siteThemeFor('', company)} websiteUrl={`/d/${slug}`} backLabel="Zum Entwurf">
       <h1>Anfrage gesendet</h1>
       <p className="bk-lead">{when ? `Ihre Testanfrage für ${when} Uhr ist eingegangen.` : 'Ihre Testanfrage ist eingegangen.'}</p>
       <ol className="bk-card" style={{ paddingLeft: 40, margin: 0, display: 'grid', gap: 10 }}>

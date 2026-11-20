@@ -1,4 +1,5 @@
 import { renderBusinessEmail } from '../emails/business-email';
+import { themeOf } from './bookings';
 import { and, asc, eq } from 'drizzle-orm';
 import type { SiteContent } from '@wbm/templates/types';
 import { setupSnapshotKey, type SetupSnapshot } from './checkout-drafts';
@@ -690,7 +691,7 @@ export async function handleSiteForm(
         text,
         // Design des Betriebs (Farben, Schrift wie seine Website); Textfassung bleibt unverändert
         html: renderBusinessEmail({
-          templateId: site.templateId,
+          theme: themeOf(site.templateId, customer.company, site.palette, site.contentJson),
           company: customer.company,
           subject: `${request} von ${name}`,
           heading: `${request} über Ihre Website`,

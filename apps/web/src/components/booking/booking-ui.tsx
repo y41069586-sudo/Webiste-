@@ -19,7 +19,7 @@ function themeCss(t: SiteTheme): string {
     .join('');
   return `${faces}
 .bk{--bg:${t.base};--sf:${t.surface};--ink:${t.ink};--mu:${t.muted};--ln:${t.line};--ac:${t.accent};--on:${t.onAccent};
---display:'${t.display}',system-ui,sans-serif;--text:'${t.text}',system-ui,sans-serif;
+--display:${t.displayCss};--text:${t.textCss};
 min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.55}
 .bk h1,.bk h2,.bk .bk-brand{font-family:var(--display);font-weight:${Math.min(t.weight, 800)};${fmtStretch(t.stretch)}letter-spacing:-.01em;line-height:1.1;margin:0}`;
 }

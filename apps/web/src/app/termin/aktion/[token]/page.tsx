@@ -46,7 +46,7 @@ export default async function BookingAction({
   const b = v.booking;
   const action = `/termin/aktion/${token}/entscheiden`;
   return (
-    <BookingShell company={v.company} theme={siteThemeFor(v.templateId, v.company)}>
+    <BookingShell company={v.company} theme={v.theme}>
       {sp.ok && DONE[sp.ok] ? (
         <p role="status" className="bk-ok">
           {DONE[sp.ok]}

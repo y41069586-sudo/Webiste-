@@ -1,4 +1,4 @@
-import { siteThemeFor } from '@wbm/templates';
+import type { SiteTheme } from '@wbm/templates';
 import { appUrl } from '../config/env';
 import { esc } from '../util/html';
 import type { EmailContent } from './templates';
@@ -17,7 +17,8 @@ export type BusinessEmailBlock =
   | { small: string };
 
 export interface BusinessEmailInput {
-  templateId: string;
+  /** Design des Betriebs (siteThemeFor) */
+  theme: SiteTheme;
   company: string;
   subject: string;
   heading?: string;
@@ -31,9 +32,9 @@ export interface BusinessEmailInput {
 }
 
 export function renderBusinessEmail(input: BusinessEmailInput): EmailContent {
-  const t = siteThemeFor(input.templateId, input.company);
-  const display = `'${t.display}',Arial,Helvetica,sans-serif`;
-  const text = `'${t.text}',-apple-system,'Segoe UI',Roboto,Arial,sans-serif`;
+  const t = input.theme;
+  const display = t.displayCss.replace(/"/g, "'");
+  const text = t.textCss.replace(/"/g, "'");
   const fonts = t.faces
     .map(
       (f) =>

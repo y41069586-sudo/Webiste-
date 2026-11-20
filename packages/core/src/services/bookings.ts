@@ -13,7 +13,14 @@ import { randomToken, sha256 } from '../util/crypto';
 import { sendTransactionalEmail } from './email';
 
 /** Gestaltung des Betriebs für die Terminseiten (gleiche Farben/Schriften wie seine Website) */
+import { siteThemeFor, type SiteTheme } from '@wbm/templates';
 export { siteThemeFor, type SiteTheme } from '@wbm/templates';
+
+/** Design eines Betriebs aus Vorlage, Palette und – bei KI-Entwürfen – eigenen Farben/Schriften. */
+export function themeOf(templateId: string, company: string, palette: string | null | undefined, contentJson: unknown): SiteTheme {
+  const design = (contentJson as { design?: Parameters<typeof siteThemeFor>[2] extends infer S ? (S extends { design?: infer D } ? D : never) : never } | null)?.design ?? null;
+  return siteThemeFor(templateId, company, { palette: palette ?? null, design });
+}
 import { rateLimit } from './rate-limit';
 import { findPublicDemo, recordEvent, type RequestMeta } from './tracking';
 
@@ -156,8 +163,8 @@ export function openSlots(cfg: BookingConfig, busy: { startsAt: Date; endsAt: Da
 
 /** Ziel einer Buchung: Kunden-Website (echt) oder Entwurf eines fiktiven Testbetriebs (Testlauf an den Betreiber). */
 interface BookingTarget {
-  /** Vorlage des Betriebs – bestimmt das Design der Mails */
-  templateId: string;
+  /** Design des Betriebs (Farben, Schriften) für die Mails */
+  theme: SiteTheme;
   siteId: string | null;
   demoId: string | null;
   company: string;
@@ -184,6 +191,7 @@ async function busyTimes(db: DbOrTx, target: Pick<BookingTarget, 'siteId' | 'dem
 
 export interface PublicBookingSite {
   site: Site;
+  theme: SiteTheme;
   company: string;
   services: string[];
   cfg: BookingConfig;
@@ -213,6 +221,7 @@ export async function findBookingSite(formKey: string, db: DbOrTx = getDb()): Pr
   const base = site.productionUrl ?? null;
   return {
     site,
+    theme: themeOf(site.templateId, customer.company, site.palette, site.contentJson),
     company: customer.company,
     services,
     cfg,
@@ -229,6 +238,7 @@ export interface DemoTestBooking {
   demoId: string;
   company: string;
   templateId: string;
+  theme: SiteTheme;
   services: string[];
   cfg: BookingConfig;
   /** Öffnungszeiten aus den öffentlichen Daten bekannt (sonst Beispielzeiten Mo–Fr 8–16 Uhr) */
@@ -256,6 +266,7 @@ export async function findDemoTestBooking(
     demoId: found.demo.id,
     company: found.lead.businessName,
     templateId: found.demo.templateId,
+    theme: themeOf(found.demo.templateId, found.lead.businessName, found.demo.palette, found.demo.contentJson),
     services: (content?.services ?? []).map((x) => String(x.title ?? '').trim()).filter(Boolean).slice(0, 8),
     cfg: { slotMinutes: 60, days },
     knownHours,
@@ -277,7 +288,7 @@ export async function requestDemoTestBooking(
   const t = await findDemoTestBooking(slug);
   if (!t) return { ok: false, reason: 'not_found' };
   return createBooking(
-    { templateId: t.templateId, siteId: null, demoId: t.demoId, company: t.company, cfg: t.cfg, targetEmail: t.targetEmail, customerId: null, test: true },
+    { theme: t.theme, siteId: null, demoId: t.demoId, company: t.company, cfg: t.cfg, targetEmail: t.targetEmail, customerId: null, test: true },
     input,
     meta,
     opts,
@@ -344,7 +355,7 @@ export async function requestBooking(
   if (!b) return { ok: false, reason: 'not_found' };
   return createBooking(
     {
-      templateId: b.site.templateId,
+      theme: b.theme,
       siteId: b.site.id,
       demoId: null,
       company: b.company,
@@ -431,7 +442,7 @@ async function createBooking(
         to: b.targetEmail,
         replyTo: email,
         customerId: b.customerId,
-        ...businessRequestEmail(b.templateId, b.company, booking, businessToken, b.test),
+        ...businessRequestEmail(b.theme, b.company, booking, businessToken, b.test),
       },
       { provider },
     ),
@@ -442,7 +453,7 @@ async function createBooking(
         to: email,
         replyTo: b.targetEmail,
         customerId: b.customerId,
-        ...visitorEmail(b.templateId, b.company, booking, 'requested', visitorToken, b.test),
+        ...visitorEmail(b.theme, b.company, booking, 'requested', visitorToken, b.test),
       },
       { provider },
     ),
@@ -474,6 +485,7 @@ export interface BookingView {
   company: string;
   siteId: string | null;
   templateId: string;
+  theme: SiteTheme;
   /** Testlauf über einen Entwurf (Mails mit [TEST], Betriebs-Mail an SeitenWerk) */
   test: boolean;
   formTargetEmail: string;
@@ -487,12 +499,12 @@ async function viewFor(booking: Booking | undefined): Promise<BookingView | null
     const lead = demo ? await db.query.leads.findFirst({ where: eq(leads.id, demo.leadId) }) : null;
     const own = (await getConfig()).sender.email.trim();
     if (!demo || !lead || lead.source !== 'mock' || !MAIL_RE.test(own)) return null;
-    return { booking, company: lead.businessName, siteId: null, templateId: demo.templateId, test: true, formTargetEmail: own };
+    return { booking, company: lead.businessName, siteId: null, templateId: demo.templateId, theme: themeOf(demo.templateId, lead.businessName, demo.palette, demo.contentJson), test: true, formTargetEmail: own };
   }
   const site = await db.query.sites.findFirst({ where: eq(sites.id, booking.siteId) });
   const customer = site ? await db.query.customers.findFirst({ where: eq(customers.id, site.customerId) }) : null;
   if (!site || !customer || !site.formTargetEmail) return null;
-  return { booking, company: customer.company, siteId: site.id, templateId: site.templateId, test: false, formTargetEmail: site.formTargetEmail };
+  return { booking, company: customer.company, siteId: site.id, templateId: site.templateId, theme: themeOf(site.templateId, customer.company, site.palette, site.contentJson), test: false, formTargetEmail: site.formTargetEmail };
 }
 
 const tokenOk = (t: string) => /^[A-Za-z0-9]{32}$/.test(t);
@@ -547,7 +559,7 @@ export async function decideBooking(
         to: row.visitorEmail,
         replyTo: view.formTargetEmail,
         customerId: null,
-        ...visitorEmail(view.templateId, view.company, row, target, null, view.test),
+        ...visitorEmail(view.theme, view.company, row, target, null, view.test),
         ...(target === 'confirmed'
           ? { attachments: [{ filename: 'termin.ics', content: Buffer.from(icsFor(view.company, row)), contentType: 'text/calendar; charset=utf-8; method=PUBLISH' }] }
           : {}),
@@ -583,7 +595,7 @@ export async function cancelByVisitor(token: string, opts: { now?: Date; provide
       to: view.formTargetEmail,
       ...(row.visitorEmail ? { replyTo: row.visitorEmail } : {}),
       ...renderBusinessEmail({
-        templateId: view.templateId,
+        theme: view.theme,
         company: view.company,
         subject: `${view.test ? '[TEST] ' : ''}Termin abgesagt: ${formatBookingTime(row.startsAt)}`,
         heading: 'Termin vom Kunden abgesagt',
@@ -621,7 +633,7 @@ export async function sweepBookings(now = new Date(), opts: { provider?: EmailPr
         idempotencyKey: `booking:${row.id}:expired:visitor`,
         to: row.visitorEmail,
         replyTo: view.formTargetEmail,
-        ...visitorEmail(view.templateId, view.company, row, 'expired', null, view.test),
+        ...visitorEmail(view.theme, view.company, row, 'expired', null, view.test),
       },
       { provider: opts.provider },
     ).catch(() => undefined);
@@ -643,11 +655,11 @@ export async function sweepBookings(now = new Date(), opts: { provider?: EmailPr
 
 // ---------- E-Mails ----------
 
-function businessRequestEmail(templateId: string, company: string, b: Booking, token: string, test = false): EmailContent {
+function businessRequestEmail(theme: SiteTheme, company: string, b: Booking, token: string, test = false): EmailContent {
   const when = formatBookingTime(b.startsAt);
   const link = appUrl(`/termin/aktion/${token}`);
   return renderBusinessEmail({
-    templateId,
+    theme,
     company,
     subject: `${test ? '[TEST] ' : ''}Neue Terminanfrage: ${when} Uhr – ${b.visitorName ?? ''}`.trim(),
     heading: 'Neue Terminanfrage über Ihre Website',
@@ -673,7 +685,7 @@ function businessRequestEmail(templateId: string, company: string, b: Booking, t
 }
 
 function visitorEmail(
-  templateId: string,
+  theme: SiteTheme,
   company: string,
   b: Booking,
   state: BookingStatus,
@@ -734,7 +746,7 @@ function visitorEmail(
     expired: 'Anfrage nicht bestätigt',
   };
   return renderBusinessEmail({
-    templateId,
+    theme,
     company,
     subject: c.subject,
     heading: headings[state],

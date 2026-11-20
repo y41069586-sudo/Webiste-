@@ -9,6 +9,7 @@ import { resetProviders, setProviders } from '../src/providers';
 import type { OutgoingEmail } from '../src/providers/types';
 import {
   berlinToUtc,
+  themeOf,
   bookingConfigFor,
   bookingForBusiness,
   cancelByVisitor,
@@ -22,7 +23,6 @@ import {
   type BookingInput,
 } from '../src/services/bookings';
 import { randomToken } from '../src/util/crypto';
-import { siteThemeFor } from '@wbm/templates';
 import { resetDb } from './helpers';
 
 const meta = { ua: 'test-browser', ipHash: 'test-ip-hash', isBot: false };
@@ -172,7 +172,7 @@ describe('Buchung, Bestätigung, Absage', () => {
     expect(toVisitor.replyTo).toBe('betrieb@client.test');
     expect(toVisitor.text).toContain('noch nicht bestätigt');
     // Design des Betriebs: Akzentfarbe und Schrift der Website auch in den Mails
-    const theme = siteThemeFor('praxis-projekt', 'FIKTIVER TEST Dachdeckerei');
+    const theme = themeOf('praxis-projekt', 'FIKTIVER TEST Dachdeckerei', 'anthrazit', {});
     for (const m of [toBusiness, toVisitor]) {
       expect(m.html).toContain(theme.accent);
       expect(m.html).toContain(theme.display);
@@ -373,5 +373,24 @@ describe('Testlauf über den Entwurf eines fiktiven Testbetriebs', () => {
       reason: 'not_found',
     });
     expect(sent).toHaveLength(0);
+  });
+});
+
+describe('Design des Betriebs für alle Vorlagen', () => {
+  it('Kit, KI-Entwurf, ältere Palette und Praxis liefern je eigene Farben und Schriften', () => {
+    const kit = themeOf('kit-beauty', 'Salon A', 'leinen', {});
+    const kitAny = themeOf('kit-beauty', 'Salon A', null, {});
+    expect(kit.faces.length).toBeGreaterThan(0);
+    expect(kitAny.accent).toMatch(/^#[0-9a-f]{6}$/i);
+    const ai = themeOf('authored-beauty', 'Salon B', 'custom', {
+      design: { colors: { background: '#fff8f0', foreground: '#2a1a14', accent: '#8a2d4a', onAccent: '#ffffff' }, displayFont: 'bodoni', textFont: 'karla' },
+    });
+    expect(ai.accent).toBe('#8a2d4a');
+    expect(ai.base).toBe('#fff8f0');
+    const legacy = themeOf('beauty-soft', 'Salon C', 'salbei', {});
+    expect(legacy.faces).toEqual([]);
+    expect(legacy.displayCss.length).toBeGreaterThan(5);
+    const praxis = themeOf('praxis-projekt', 'Dach D', 'anthrazit', {});
+    expect(new Set([kit.accent, ai.accent, legacy.accent, praxis.accent]).size).toBeGreaterThan(2);
   });
 });
