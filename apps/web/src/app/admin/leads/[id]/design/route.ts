@@ -1,12 +1,13 @@
 import { saveBusinessDesignEvidence } from '@wbm/core';
 import { adminOrNull, actorOf } from '@/lib/auth';
 import { simplePage } from '@/lib/public-page';
+import { isOwnOrigin } from '@/lib/request';
 export const dynamic = 'force-dynamic';
 /** Small authenticated upload, no crawling, provider call, Chromium or public photo URL. */
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await adminOrNull();
   if (!session) return new Response('unauthorized', { status: 401 });
-  if (req.headers.get('origin') !== new URL(req.url).origin) return new Response('forbidden', { status: 403 });
+  if (!isOwnOrigin(req)) return new Response('forbidden', { status: 403 });
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/.test(id)) return new Response('not found', { status: 404 });
   if (Number(req.headers.get('content-length') ?? 0) > 4 * 1024 * 1024)

@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers';
 import { removeCheckoutUpload, SETUP_UPLOAD_BYTES, setupCookieName, uploadCheckoutDraft } from '@wbm/core';
+import { isOwnOrigin } from '@/lib/request';
 
 export const dynamic = 'force-dynamic';
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  if (req.headers.get('origin') !== new URL(req.url).origin)
-    return Response.json({ error: 'Ungültiger Ursprung.' }, { status: 403 });
+  if (!isOwnOrigin(req)) return Response.json({ error: 'Ungültiger Ursprung.' }, { status: 403 });
   const token = (await cookies()).get(setupCookieName(slug))?.value ?? '';
   if (Number(req.headers.get('content-length') ?? 0) > SETUP_UPLOAD_BYTES + 65536)
     return Response.json({ error: 'Datei zu groß.' }, { status: 413 });

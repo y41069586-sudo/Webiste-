@@ -1,6 +1,7 @@
 import { getEnv, getProviders, testSiteFormToOwnInbox } from '@wbm/core';
 import { Resend } from 'resend';
 import { actorOf, adminOrNull } from '@/lib/auth';
+import { isOwnOrigin } from '@/lib/request';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -9,7 +10,7 @@ export const runtime = 'nodejs';
 export async function POST(request: Request) {
   const admin = await adminOrNull();
   if (!admin) return new Response('unauthorized', { status: 401 });
-  if (request.headers.get('origin') !== new URL(getEnv().APP_URL).origin) return new Response('forbidden', { status: 403 });
+  if (!isOwnOrigin(request)) return new Response('forbidden', { status: 403 });
   const raw = await request.text();
   if (raw.length > 200) return new Response('too large', { status: 413 });
   let command: { check?: string; confirm?: string };

@@ -44,6 +44,23 @@ export function isBot(ua: string | null): boolean {
   return !ua || /bot|crawl|spider|slurp|facebookexternalhit|preview|headless|curl|wget|python|scanner/i.test(ua);
 }
 
+/**
+ * Gleiche Herkunft für Uploads und Admin-Aufrufe. Seit 25.11.2026 läuft die App auch unter seitenwerk.world (Proxy der
+ * Startseite): Dann kommt die Anfrage mit Origin seitenwerk.world, die App selbst sieht aber ihre Netlify-Adresse.
+ * Erlaubt sind daher genau die eigene Adresse und die konfigurierte APP_URL – keine fremden Seiten.
+ */
+export function isOwnOrigin(req: Request): boolean {
+  const origin = req.headers.get('origin');
+  if (!origin) return false;
+  const own = new Set([new URL(req.url).origin]);
+  try {
+    own.add(new URL(getEnv().APP_URL).origin);
+  } catch {
+    /* ungültige APP_URL: nur die eigene Adresse */
+  }
+  return own.has(origin);
+}
+
 /** Gerät, das der Betreiber im Admin ausdrücklich als „eigenes Testgerät“ markiert hat (20.11.2026). */
 export const TEST_DEVICE_COOKIE = 'sw_test_device';
 
