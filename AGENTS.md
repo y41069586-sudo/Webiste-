@@ -1226,3 +1226,22 @@ erschöpft, die Seite (auch alle QR-Ziele) lieferte 503 „usage_exceeded“. De
 - Netlify nur gezielt veröffentlichen, wenn sich etwas an `apps/web` oder an Code ändert, den die Seite nutzt, und gebündelt
   (höchstens einmal am Tag, außer bei Ausfällen). Reine Worker-Änderungen brauchen keinen Netlify-Deploy.
 - Keine Dauerabfragen im Admin ohne laufenden Vorgang.
+
+## 25.11.2026 – Website-Pflichtbausteine bei jedem Website-Auftrag (verbindlich, Betreiber)
+
+Wenn der Betreiber Claude/Codex bittet, eine Website (Demo für ein Gespräch oder Kundenseite) zu bauen, gehören diese
+Bausteine **immer** hinein, weil das Verkaufsgespräch genau damit argumentiert (laut DHZ-Auswertung von 500
+Handwerker-Seiten fehlen Preise, Inhaber-Foto, Bewertungs-Link und Antworten auf Kundenfragen meistens):
+
+1. **Preise** – „ab“-Preise oder Preisbeispiele je Leistung. Nur echte Angaben des Betriebs; nie erfinden (§ 5 UWG).
+2. **Öffnungszeiten** – vollständig, bestätigt vom Betrieb (sonst „nach Vereinbarung“).
+3. **Bewertungen** – nur echte: Link „Bewertungen bei Google ansehen“ zum Profil des Betriebs; Sterne/Anzahl nur mit
+   Quelle und Datum. Keine Bewertungstexte von Google kopieren (docs/compliance-google.md), keine erfundenen Stimmen.
+4. **Foto des Inhabers/Teams** – nur vom Betrieb geliefert und zur Veröffentlichung freigegeben.
+5. **Kurze Fragen und Antworten (FAQ)** – 3 bis 5 echte Kundenfragen (Anfahrt, Ablauf, Kosten, Termin).
+6. **Leistungen, Kontakt mit Telefon/Anfrage, Einzugsgebiet, Impressum/Datenschutz** wie bisher.
+
+**Vor dem Bau fragt Claude den Betreiber gesammelt nach den fehlenden Angaben** (nicht raten): Preise/„ab“-Preise je
+Leistung, Öffnungszeiten, Link zum Google-Profil (für den Bewertungs-Link), Foto des Inhabers mit Freigabe, 3–5 häufige
+Kundenfragen mit Antwort, Einzugsgebiet. Fehlt etwas, bleibt der Baustein als klar gekennzeichneter Platzhalter im
+Entwurf, und im Gespräch wird nichts gezeigt oder behauptet, was nicht auf der Seite steht.
