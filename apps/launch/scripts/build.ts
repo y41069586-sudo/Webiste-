@@ -309,6 +309,34 @@ for (const pkg of new Set(FONTS.map(([p]) => p))) {
 // Domain statt über …netlify.app. Brief-Wege (/q/…, /quellen, /{kurzcode}) gehen per 302 an die App; vorhandene
 // Seiten dieser Landingpage (/, /agb/, /datenschutz/ …) haben Vorrang, weil Netlify Weiterleitungen ohne „!“ nur
 // greift, wenn unter dem Pfad keine Datei liegt. Die Kurzcode-Regel steht deshalb ganz am Ende.
+/** Pfade der App (apps/web), die unter seitenwerk.world erreichbar sein sollen. */
+const APP_PROXY_PATHS = [
+  '_next',
+  'd',
+  'einrichten',
+  'onboarding',
+  'preview',
+  'checkout',
+  'termin',
+  'verlaengern',
+  'abmelden',
+  'abgemeldet',
+  'bestaetigen',
+  'admin',
+  'login',
+  'logout',
+  'api',
+  'wach',
+  'qz',
+  'q',
+  'fonts/kits',
+  'brand',
+  'notfall',
+  'beispiele',
+  'hero',
+  'muster-kits',
+  'muster-maler',
+];
 const appOrigin = (process.env.LAUNCH_APP_ORIGIN || 'https://seitenwerkworld.netlify.app').replace(/\/+$/, '');
 writeFileSync(
   path.join(dist, '_redirects'),
@@ -318,9 +346,11 @@ writeFileSync(
     '/so-funktionierts /#ablauf 301',
     '/kontakt /#anfrage 301',
     '/garantie /agb/ 301',
-    `/quellen ${appOrigin}/quellen 302`,
-    `/q/* ${appOrigin}/q/:splat 302`,
-    `/:code ${appOrigin}/:code 302`,
+    // 25.11.2026 (Betreiber: „Domain seitenwerk.world/… statt .netlify“): App-Pfade werden unsichtbar an die App
+    // weitergereicht (Netlify-Proxy, Status 200). Die Adresse bleibt seitenwerk.world; vorhandene Seiten haben Vorrang.
+    ...APP_PROXY_PATHS.flatMap((p) => [`/${p} ${appOrigin}/${p} 200`, `/${p}/* ${appOrigin}/${p}/:splat 200`]),
+    `/quellen ${appOrigin}/quellen 200`,
+    `/:code ${appOrigin}/:code 200`,
   ].join('\n') + '\n',
 );
 writeFileSync(path.join(dist, 'robots.txt'), indexable ? 'User-agent: *\nAllow: /\n' : 'User-agent: *\nDisallow: /\n');
