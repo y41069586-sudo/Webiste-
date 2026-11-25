@@ -44,7 +44,9 @@ const nextConfig: NextConfig = {
   turbopack: { root },
   experimental: {
     // Onboarding-Formular (lange Datenschutzerklärung); Bilder laufen über eine eigene Route
-    serverActions: { bodySizeLimit: '2mb' },
+    // 25.11.2026: Die Startseite seitenwerk.world leitet App-Pfade unsichtbar an diese App weiter (Netlify-Proxy).
+    // Formulare (Server Actions) kommen dann mit Origin seitenwerk.world an und müssen ausdrücklich erlaubt sein.
+    serverActions: { bodySizeLimit: '2mb', allowedOrigins: ['seitenwerk.world', 'www.seitenwerk.world'] },
   },
   async headers() {
     return [
@@ -55,15 +57,24 @@ const nextConfig: NextConfig = {
       },
       // Tempo (19.11.2026): Seiten der Firmen-Website kommen aus dem Netlify-Zwischenspeicher statt aus der Serverfunktion
       // (keine Kaltstarts, keine Datenbankrunde). Inhalte ändern sich selten; nach 5 Minuten wird im Hintergrund erneuert.
-      ...['/', '/preise', '/so-funktionierts', '/beispiele', '/garantie', '/ueber-mich', '/impressum', '/datenschutz', '/agb', '/quellen'].map(
-        (source) => ({
-          source,
-          headers: [
-            { key: 'Netlify-CDN-Cache-Control', value: 'public, durable, s-maxage=300, stale-while-revalidate=604800' },
-            { key: 'Netlify-Cache-Tag', value: 'site-pages' },
-          ],
-        }),
-      ),
+      ...[
+        '/',
+        '/preise',
+        '/so-funktionierts',
+        '/beispiele',
+        '/garantie',
+        '/ueber-mich',
+        '/impressum',
+        '/datenschutz',
+        '/agb',
+        '/quellen',
+      ].map((source) => ({
+        source,
+        headers: [
+          { key: 'Netlify-CDN-Cache-Control', value: 'public, durable, s-maxage=300, stale-while-revalidate=604800' },
+          { key: 'Netlify-Cache-Tag', value: 'site-pages' },
+        ],
+      })),
       {
         source: '/(einrichten|onboarding|preview|verlaengern|checkout)/:path*',
         headers: [
