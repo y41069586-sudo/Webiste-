@@ -12,7 +12,7 @@ export function PublicShell({ company, children, wide = false }: { company: stri
           <Link href="/" className="text-strong font-tight text-[1.05rem] text-[#0f172a]">
             <Brand />
           </Link>
-          <span className="hidden text-xs text-slate-600 min-[380px]:inline">Ohne Verkaufsgespräch</span>
+          <span className="hidden text-xs text-slate-600 min-[380px]:inline">Websites für lokale Betriebe</span>
         </div>
       </header>
       <main className={`page-fade mx-auto w-full flex-1 px-5 py-10 ${w}`}>{children}</main>
