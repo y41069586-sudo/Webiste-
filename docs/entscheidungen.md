@@ -2012,3 +2012,17 @@ Umgesetzt (gezählt mit Abfrage-Zähler im Test):
   keine Meldung. Rücksendungen können mit Grund erfasst werden (Anschrift unbekannt, verzogen, Annahme verweigert, Sonstiges).
 - **Notfall-Kopien:** „Übernehmen“/„Kein Interesse“ wurden bei absoluten Links zu `…netlify.appmailto:…`; behoben im Skript.
 - **Bewusst nicht geändert** (Betreiberentscheidungen): kein Telefon/WhatsApp im Brief, keine Garantie, „Komplett“ aus, kein Foto.
+
+## 25.11.2026 – App unter seitenwerk.world (Betreiber: „Domain seitenwerk.world/… statt .netlify“)
+
+- Die Startseite (Netlify-Projekt `seitenwerk-website`, Domain `seitenwerk.world`) reicht App-Pfade per Proxy (Status 200)
+  an `seitenwerkworld.netlify.app` weiter: `/d`, `/einrichten`, `/onboarding`, `/preview`, `/checkout`, `/termin`,
+  `/admin`, `/login`, `/api`, `/_next`, `/q`, `/qz`, `/{kurzcode}` u. a. (`apps/launch/scripts/build.ts`,
+  `APP_PROXY_PATHS`). Eigene Seiten der Startseite (/, /agb/, /impressum/, /datenschutz/ …) haben Vorrang.
+  Deploy `6b06a4dfe433bf0aa80fd5fa` aus den live geladenen Dateien plus neuer `_redirects`, vom Betreiber veröffentlicht.
+- App: `APP_URL=https://seitenwerk.world`, `DEMO_DOMAIN`/`TRACK_DOMAIN=seitenwerk.world` (Kontext production);
+  Server Actions erlauben Origin `seitenwerk.world`; Upload-/Admin-Herkunftsprüfung erlaubt eigene Adresse + APP_URL
+  (`isOwnOrigin`). Deploy `6b06a770b28380687d25b9a0`. `seitenwerkworld.netlify.app` funktioniert weiter (alte Links,
+  Stripe-Webhooks unverändert).
+- Gebaute Demos enthalten teils noch absolute netlify-Links; „Übernehmen“ funktioniert trotzdem (Weiterleitung
+  setzt das Einrichtungs-Cookie auf der richtigen Domain). Worker: `.env.worker` auf dieselben Werte umstellen.
