@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getConfig, DEFAULT_CONFIG, publicOperatorSettings, getOnboardingContext, MAX_PHOTOS } from '@wbm/core';
 import { PublicCard, PublicShell } from '@/components/public/shell';
-import { OnboardingForm } from './onboarding-form';
+import { OnboardingForm, StepBadge } from './onboarding-form';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Ihre Angaben', robots: { index: false, follow: false } };
@@ -55,19 +55,47 @@ export default async function OnboardingPage({
     'block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:font-medium file:text-brand-700 hover:file:bg-brand-100';
   return (
     <PublicShell company={cfg.sender.company}>
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Ihre Angaben für die Website</h1>
-      <p className="mt-2 mb-6 text-slate-600">
-        {ctx.businessName}: Bitte ergänzen Sie die folgenden Angaben. Das dauert etwa 10 Minuten – Sie können jederzeit
-        zwischenspeichern und später weitermachen. Danach erstellen wir eine Vorschau, die Sie in Ruhe prüfen.
-      </p>
+      <header className="mb-7">
+        <p className="text-brand-700 text-sm font-semibold">{ctx.businessName}</p>
+        <h1 className="font-tight mt-2 text-[clamp(1.8rem,6vw,2.4rem)] leading-[1.1] font-semibold tracking-[-0.03em] text-slate-900">
+          Ihre Angaben für die Website
+        </h1>
+        <p className="mt-3 max-w-xl text-[1.02rem] leading-relaxed text-slate-600">
+          Nur die Daten, die auf die Seite müssen. Das dauert etwa 5 bis 10 Minuten. Sie können jederzeit zwischenspeichern.
+          Danach bauen wir die Vorschau, und Sie prüfen sie in Ruhe.
+        </p>
+        <ol className="mt-5 flex flex-wrap gap-2 text-sm" aria-label="Abschnitte">
+          {[
+            ['bilder', 'Logo und Fotos'],
+            ['betrieb', 'Betrieb'],
+            ['zeiten', 'Öffnungszeiten'],
+            ['impressum', 'Impressum'],
+            ['datenschutz', 'Datenschutz'],
+            ['kontakt', 'Domain'],
+          ].map(([id, label], i) => (
+            <li key={id}>
+              <a
+                href={`#${id}`}
+                className="hover:border-brand-300 hover:text-brand-700 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700"
+              >
+                <span className="text-brand-700 font-semibold">{i + 1}</span>
+                {label}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </header>
 
       <section
         id="bilder"
         aria-labelledby="bilder-titel"
-        className="mb-6 rounded-[8px] border border-slate-200 bg-white p-6 shadow-sm"
+        className="mb-6 scroll-mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,.04),0_8px_24px_-12px_rgba(15,23,42,.12)] sm:p-7"
       >
-        <h2 id="bilder-titel" className="text-lg font-semibold">
-          1. Logo und Fotos <span className="text-sm font-normal text-slate-500">(optional)</span>
+        <h2 id="bilder-titel" className="flex items-start gap-3 text-lg font-semibold text-slate-900">
+          <StepBadge n={1} />
+          <span>
+            Logo und Fotos <span className="text-sm font-normal text-slate-500">(optional)</span>
+          </span>
         </h2>
         <p className="mt-1 text-sm text-slate-600">
           JPG, PNG oder WebP, je max. 8 MB. Bitte nur Bilder, an denen Sie die Rechte haben. Wir verkleinern die Bilder und

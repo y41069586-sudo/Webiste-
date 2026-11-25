@@ -40,15 +40,48 @@ interface Props {
   setupAction?: (prev: OnboardingState, form: FormData) => Promise<OnboardingState>;
 }
 
-function Section({ id, title, intro, children }: { id: string; title: string; intro?: ReactNode; children: ReactNode }) {
+function Section({
+  id,
+  step,
+  title,
+  intro,
+  children,
+}: {
+  id: string;
+  step?: number;
+  title: string;
+  intro?: ReactNode;
+  children: ReactNode;
+}) {
   return (
-    <section aria-labelledby={`${id}-titel`} className="rounded-[8px] border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 id={`${id}-titel`} className="text-lg font-semibold">
-        {title}
-      </h2>
-      {intro ? <div className="mt-1 text-sm text-slate-600">{intro}</div> : null}
+    <section
+      id={id}
+      aria-labelledby={`${id}-titel`}
+      className="scroll-mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,.04),0_8px_24px_-12px_rgba(15,23,42,.12)] sm:p-7"
+    >
+      <div className="flex items-start gap-3">
+        {step ? <StepBadge n={step} /> : null}
+        <div className="min-w-0">
+          <h2 id={`${id}-titel`} className="text-lg leading-snug font-semibold tracking-[-0.01em] text-slate-900">
+            {title}
+          </h2>
+          {intro ? <div className="mt-1 text-sm leading-relaxed text-slate-600">{intro}</div> : null}
+        </div>
+      </div>
       <div className="mt-5 space-y-4">{children}</div>
     </section>
+  );
+}
+
+/** Nummer eines Abschnitts (auch für den Bild-Abschnitt außerhalb des Formulars). */
+export function StepBadge({ n }: { n: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="bg-brand-600 mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+    >
+      {n}
+    </span>
   );
 }
 
@@ -142,8 +175,6 @@ export function OnboardingForm({ token, initial, photos, setupAction, externalPe
     };
   }, [domain]);
 
-  const services = [...v.texts.services];
-  while (services.length < 6) services.push({ title: '', text: '' });
   const registered = ['e. K.', 'GmbH', 'UG (haftungsbeschränkt)', 'OHG', 'KG', 'GmbH & Co. KG'].includes(legalForm);
   const errCount = Object.keys(e).length;
 
@@ -172,7 +203,8 @@ export function OnboardingForm({ token, initial, photos, setupAction, externalPe
 
       <Section
         id="betrieb"
-        title="2. Ihr Betrieb auf der Website"
+        step={2}
+        title="Ihr Betrieb auf der Website"
         intro="Diese Angaben erscheinen auf der Website (Kontaktbereich, Kopfzeile)."
       >
         <F name="business.name" label="Name des Betriebs" value={v.business.name} errors={e} maxLength={80} />
@@ -208,60 +240,20 @@ export function OnboardingForm({ token, initial, photos, setupAction, externalPe
         </div>
       </Section>
 
-      <Section
-        id="texte"
-        title="3. Texte und Leistungen"
-        intro="Wir haben Texte aus dem Entwurf vorbereitet. Passen Sie sie an – wir prüfen Rechtschreibung und Länge, erfinden aber nichts dazu."
-      >
-        <F name="texts.headline" label="Überschrift" value={v.texts.headline} errors={e} maxLength={70} />
-        <F name="texts.subline" label="Untertitel" value={v.texts.subline} errors={e} maxLength={180} textarea={2} />
-        <F
-          name="texts.about"
-          label="Über uns"
-          value={v.texts.about}
-          errors={e}
-          maxLength={1200}
-          textarea={5}
-          hint="Hier dürfen gern echte Fakten stehen: Gründungsjahr, Meistertitel, Spezialisierungen – nur, was stimmt."
-        />
-        <fieldset>
-          <legend className="mb-2 text-sm font-medium text-slate-800">Ihre Leistungen (bis zu 6)</legend>
-          {e['texts.services'] ? <p className="mb-2 text-sm text-red-700">{e['texts.services']}</p> : null}
-          <div className="space-y-3">
-            {services.map((s, i) => (
-              <div key={i} className="grid gap-2 rounded-lg border border-slate-200 p-3 sm:grid-cols-[14rem_1fr]">
-                <F
-                  name={`services.${i}.title`}
-                  label={`Leistung ${i + 1}`}
-                  value={s.title}
-                  errors={{ [`services.${i}.title`]: e[`texts.services.${i}.title`] ?? '' }}
-                  required={false}
-                  maxLength={40}
-                />
-                <F
-                  name={`services.${i}.text`}
-                  label="Kurzbeschreibung"
-                  value={s.text}
-                  errors={{ [`services.${i}.text`]: e[`texts.services.${i}.text`] ?? '' }}
-                  required={false}
-                  maxLength={200}
-                />
-              </div>
-            ))}
-          </div>
-        </fieldset>
-        <F
-          name="texts.wishes"
-          label="Weitere Wünsche oder Hinweise an uns"
-          value={v.texts.wishes}
-          errors={e}
-          required={false}
-          maxLength={2000}
-          textarea={3}
-        />
-      </Section>
+      {/* Texte und Wünsche klären wir im Gespräch (Betreiber, 25.11.2026). Vorhandene Texte aus dem Entwurf bleiben
+          unverändert erhalten und werden nur mitgeschickt. */}
+      <input type="hidden" name="texts.headline" value={v.texts.headline} />
+      <input type="hidden" name="texts.subline" value={v.texts.subline} />
+      <input type="hidden" name="texts.about" value={v.texts.about} />
+      <input type="hidden" name="texts.wishes" value={v.texts.wishes} />
+      {v.texts.services.map((sv, i) => (
+        <span key={i} hidden>
+          <input type="hidden" name={`services.${i}.title`} value={sv.title} />
+          <input type="hidden" name={`services.${i}.text`} value={sv.text} />
+        </span>
+      ))}
 
-      <Section id="zeiten" title="4. Öffnungszeiten">
+      <Section id="zeiten" step={3} title="Öffnungszeiten">
         <fieldset>
           <legend className="sr-only">Art der Öffnungszeiten</legend>
           <div className="flex flex-wrap gap-4 text-sm">
@@ -360,14 +352,19 @@ export function OnboardingForm({ token, initial, photos, setupAction, externalPe
               <span className="font-medium">Online-Terminwahl auf der Website anbieten</span>
               <span className="block text-slate-600">
                 Kunden sehen freie Zeiten innerhalb Ihrer Öffnungszeiten und fragen einen Termin an. Sie bekommen jede Anfrage per
-                E-Mail und bestätigen oder lehnen sie mit einem Klick ab. Erst Ihre Bestätigung macht den Termin verbindlich. Bitte
-                erwähnen Sie die Terminanfragen in Ihrer Datenschutzerklärung (Angaben werden 30 Tage nach dem Termin gelöscht).
+                E-Mail und bestätigen oder lehnen sie mit einem Klick ab. Erst Ihre Bestätigung macht den Termin verbindlich.
+                Bitte erwähnen Sie die Terminanfragen in Ihrer Datenschutzerklärung (Angaben werden 30 Tage nach dem Termin
+                gelöscht).
               </span>
             </span>
           </label>
           <label className="flex flex-wrap items-center gap-2">
             <span className="font-medium">Dauer eines Termins</span>
-            <select name="hours.slotMinutes" defaultValue={String(v.hours.slotMinutes ?? 60)} className={`${inputCls} w-36 border-slate-300`}>
+            <select
+              name="hours.slotMinutes"
+              defaultValue={String(v.hours.slotMinutes ?? 60)}
+              className={`${inputCls} w-36 border-slate-300`}
+            >
               {BOOKING_SLOT_MINUTES.map((m) => (
                 <option key={m} value={m}>
                   {m} Minuten
@@ -380,7 +377,8 @@ export function OnboardingForm({ token, initial, photos, setupAction, externalPe
 
       <Section
         id="impressum"
-        title="5. Impressum (Pflichtangaben)"
+        step={4}
+        title="Impressum (Pflichtangaben)"
         intro="Jede geschäftliche Website braucht ein Impressum (§ 5 DDG). Bitte genau so angeben, wie Sie im Gewerbe- bzw. Handelsregister eingetragen sind."
       >
         <F
@@ -516,7 +514,8 @@ export function OnboardingForm({ token, initial, photos, setupAction, externalPe
 
       <Section
         id="datenschutz"
-        title="6. Datenschutzerklärung"
+        step={5}
+        title="Datenschutzerklärung"
         intro={
           <>
             Bitte fügen Sie hier Ihre Datenschutzerklärung ein. Sie sind als Betreiber der Website dafür verantwortlich; wir
@@ -536,7 +535,7 @@ export function OnboardingForm({ token, initial, photos, setupAction, externalPe
         />
       </Section>
 
-      <Section id="kontakt" title="7. Kontaktformular und Domain">
+      <Section id="kontakt" step={6} title="Kontaktformular und Domain">
         <F
           name="formTargetEmail"
           label="Nachrichten aus dem Kontaktformular gehen an"
@@ -608,7 +607,7 @@ export function OnboardingForm({ token, initial, photos, setupAction, externalPe
         </Section>
       ) : null}
 
-      <section className="rounded-[8px] border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,.04),0_8px_24px_-12px_rgba(15,23,42,.12)] sm:p-7">
         <label className="flex items-start gap-3 text-sm">
           <input
             type="checkbox"

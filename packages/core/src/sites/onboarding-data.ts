@@ -110,13 +110,14 @@ export const onboardingSubmitSchema = z
         .regex(/^\d{5}$/, 'Bitte eine fünfstellige Postleitzahl angeben.'),
       city: req('Bitte den Ort angeben.', 80),
     }),
+    // Texte und Wünsche klärt der Betreiber im Gespräch (Betreiber, 25.11.2026): das Formular fragt sie nicht mehr ab,
+    // vorhandene Texte aus dem Entwurf werden unverändert übernommen. Daher hier nichts Pflicht.
     texts: z.object({
-      headline: req('Bitte eine Überschrift angeben.', 70),
-      subline: req('Bitte einen Untertitel angeben.', 180),
-      about: req('Bitte einen Text für „Über uns“ angeben.', 1200),
+      headline: opt(70),
+      subline: opt(180),
+      about: opt(1200),
       services: z
         .array(z.object({ title: req('Titel fehlt.', 40), text: req('Beschreibung fehlt.', 200) }))
-        .min(1, 'Bitte mindestens eine Leistung angeben.')
         .max(6, 'Höchstens 6 Leistungen.'),
       wishes: opt(2000),
     }),

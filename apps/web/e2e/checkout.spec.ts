@@ -22,18 +22,18 @@ test('Mobile Demo → private Einrichtung mit Logo → Zusammenfassung → Zahlu
   await expect(page.locator('details[data-weg="angaben"]')).toHaveAttribute('open', '');
   await expect(page.getByRole('heading', { name: 'Machen Sie Ihre Website zu Ihrer.' })).toBeVisible();
   await expect(page.getByText(/Erst danach prüfen Sie den Tarif/)).toBeVisible();
-  await page.locator('[name="texts.wishes"]').fill('Bitte die Überschrift im persönlichen Gespräch abstimmen.');
+  await page.locator('[name="impressum.owner"]').fill('Erika Zwischenstand');
   await page.getByLabel('Logo', { exact: true }).setInputFiles({
     name: 'logo.png',
     mimeType: 'image/png',
     buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwcAgAAAFkAMErqCR/AAAAAElFTkSuQmCC', 'base64'),
   });
   await expect(page.getByRole('status')).toContainText('Bilder gespeichert');
-  await expect(page.locator('[name="texts.wishes"]')).toHaveValue('Bitte die Überschrift im persönlichen Gespräch abstimmen.');
+  await expect(page.locator('[name="impressum.owner"]')).toHaveValue('Erika Zwischenstand');
   await page.getByRole('button', { name: 'Zwischenspeichern' }).click();
   await expect(page.getByText(/Zwischengespeichert/)).toBeVisible();
   await page.reload();
-  await expect(page.locator('[name="texts.wishes"]')).toHaveValue('Bitte die Überschrift im persönlichen Gespräch abstimmen.');
+  await expect(page.locator('[name="impressum.owner"]')).toHaveValue('Erika Zwischenstand');
   await expect(page.getByRole('img', { name: 'Ihr Logo' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await prepareWebsiteBeforePayment(page, { domain: 'e2e-vor-zahlung.de', plan: 'basis' });

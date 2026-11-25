@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import type { OnboardingData } from '@wbm/core';
-import { OnboardingForm } from '../../onboarding/[token]/onboarding-form';
+import { OnboardingForm, StepBadge } from '../../onboarding/[token]/onboarding-form';
 import { saveSetup } from './actions';
 
 /** Independent requests preserve unsaved text fields and stay below the serverless payload limit. */
@@ -66,8 +66,11 @@ export function SetupUploads({
   }
   return (
     <section className="card-site mb-6 p-6 sm:p-7" aria-labelledby="setup-images">
-      <h2 id="setup-images" className="text-lg font-semibold">
-        Logo und eigene Fotos <span className="text-sm font-normal text-slate-500">(optional)</span>
+      <h2 id="setup-images" className="flex items-start gap-3 text-lg font-semibold">
+        <StepBadge n={1} />
+        <span>
+          Logo und eigene Fotos <span className="text-sm font-normal text-slate-500">(optional)</span>
+        </span>
       </h2>
       <p className="mt-2 text-sm text-slate-600">
         JPG, PNG oder WebP bis 4 MB. Ein Logo und bis zu sechs Fotos, an denen Sie die Nutzungsrechte haben. Die Bilder werden für

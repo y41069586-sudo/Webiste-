@@ -114,9 +114,7 @@ export async function prepareWebsiteBeforePayment(
     if ((await choose.count()) && !(await page.locator('details[data-weg="angaben"][open]').count())) await choose.click();
     await expect(page.getByRole('heading', { name: 'Machen Sie Ihre Website zu Ihrer.' })).toBeVisible();
     const fill = (name: string, value: string) => page.locator(`[name="${name}"]`).fill(value);
-    // Demos enthalten seit 05.11.2026 keinen vorbereiteten „Über uns“-Text mehr; das Formular verlangt ihn weiterhin
-    if (!(await page.locator('[name="texts.about"]').inputValue()))
-      await fill('texts.about', 'Fiktiver Testbetrieb, ausschließlich für diesen isolierten Test angelegt.');
+    // Seit 25.11.2026 fragt das Formular keine Texte mehr ab (klärt der Betreiber im Gespräch)
     await fill('impressum.owner', o.name ?? 'Erika Beispiel');
     await fill('impressum.email', o.email ?? 'erika@example.org');
     await fill('impressum.phone', '0231 123456');
