@@ -28,8 +28,8 @@
           <a href="#beispiele">Beispiele</a>
           <a href="#preise">Ab {{SETUP}} einmalig</a>
           <a href="#fragen">Fragen</a>
-          <a class="btn btn-ghost" href="#anfrage" aria-label="Entwurf anfragen"
-            ><span class="lbl-long">Entwurf anfragen</span><span class="lbl-short" aria-hidden="true">Anfragen</span></a
+          <a class="btn btn-ghost" href="tel:+4915219682134" aria-label="Telefonisch kontaktieren"
+            ><span class="lbl-long">Telefonisch kontaktieren</span><span class="lbl-short" aria-hidden="true">Anrufen</span></a
           >
         </nav>
       </div>
@@ -52,48 +52,14 @@
               {{BASIS}} im Monat ab Go-Live.
             </p>
             <div class="hb-formwrap fade-up d2">
-              <form
-                class="hb-form"
-                name="anfrage"
-                method="POST"
-                action="/danke/"
-                data-netlify="true"
-                netlify-honeypot="website"
-                data-request
-                novalidate
-              >
-                <input type="hidden" name="form-name" value="anfrage" />
-                <input type="hidden" name="quelle" value="hero" />
-                <p class="hp">
-                  <label>Nicht ausfüllen <input name="website" tabindex="-1" autocomplete="off" /></label>
-                </p>
-                <label class="field"
-                  ><span>Name des Betriebs</span
-                  ><input type="text" name="betrieb" placeholder="So wie er im Netz steht" autocomplete="organization" required
-                /></label>
-                <div class="hb-row">
-                  <label class="field"
-                    ><span>Ort</span><input type="text" name="ort" placeholder="z. B. Passau" required
-                  /></label>
-                  <label class="field"
-                    ><span>E-Mail</span
-                    ><input type="email" name="email" placeholder="sie@ihr-betrieb.de" autocomplete="email" required
-                  /></label>
-                </div>
-                <label class="consent"
-                  ><input type="checkbox" name="einwilligung" value="ja" required /><span
-                    >Ich bin Unternehmer und möchte einen kostenlosen Entwurf. Die
-                    <a href="/datenschutz/">Datenschutzerklärung</a> habe ich gelesen.</span
-                  ></label
-                >
-                <p class="form-error" role="alert"></p>
-                <button class="btn btn-primary" type="submit">Kostenlosen Entwurf anfragen</button>
-              </form>
-              <div class="done" aria-live="polite">{{DONE}}</div>
+              <div class="hb-form">
+                <p class="field"><span>Telefon</span><a class="tel-num" href="tel:+4915219682134">+49 1521 968 2134</a></p>
+                <a class="btn btn-primary" href="tel:+4915219682134">Telefonisch kontaktieren</a>
+              </div>
             </div>
             <ul class="ticks fade-up d3">
               <li>Ansehen kostenlos</li>
-              <li>Kein Verkaufsgespräch</li>
+              <li>Unverbindlich</li>
               <li>Monatlich kündbar</li>
             </ul>
           </div>
@@ -492,7 +458,7 @@
               <p class="free">Ansehen: <b>0 €</b></p>
               <div class="big"><b>{{SETUP}}</b><span>einmalig</span></div>
               <p class="then">dann {{BASIS}} oder {{CARE}} im Monat ab Go-Live · monatlich kündbar</p>
-              <a class="btn btn-primary" href="#anfrage">Entwurf anfragen →</a>
+              <a class="btn btn-primary" href="tel:+4915219682134">Telefonisch kontaktieren →</a>
             </div>
             <div class="body">
               <div class="tier">
@@ -522,8 +488,7 @@
           <p class="price-note" data-reveal>
             Die Einrichtung ({{SETUP}}) zahlen Sie erst, wenn Sie den Entwurf übernehmen. Die Monatsgebühr beginnt nach dem
             bestätigten Go-Live. Keine Mindestlaufzeit. Nicht genutzte Care+-Minuten verfallen.{{GUARANTEE}} Das Angebot richtet
-            sich an Unternehmer; es gelten unsere <a href="/agb/">Vertragsbedingungen</a>. Entwürfe können Sie schon jetzt
-            anfragen – verbindliche Bestellungen nehmen wir derzeit noch nicht an.
+            sich an Unternehmer; es gelten unsere <a href="/agb/">Vertragsbedingungen</a>.
           </p>
         </div>
       </section>
@@ -544,10 +509,10 @@
             <p class="eyebrow" data-reveal>Jetzt anfragen</p>
             <h2 id="t-cta" data-reveal>Damit Ihre Kunden<br /><em>Sie finden</em><span class="dot">.</span></h2>
             <p class="lead" data-reveal style="margin-top: 18px">
-              Nennen Sie uns Ihren Betrieb. Wir bauen den Entwurf kostenlos und schicken Ihnen den Link per E-Mail.
+              Rufen Sie uns an und nennen Sie uns Ihren Betrieb. Wir bauen den Entwurf kostenlos und schicken Ihnen den Link.
             </p>
             <ul class="mini-steps" data-reveal>
-              <li><b>Angaben senden</b><span>Name, Ort, E-Mail – das ist das ganze Formular.</span></li>
+              <li><b>Anrufen</b><span>Name des Betriebs und Ort – mehr brauchen wir nicht.</span></li>
               <li><b>Wir bauen den Entwurf</b><span>Aus Ihren öffentlichen Angaben. Keine Zahlung.</span></li>
               <li>
                 <b>Sie entscheiden</b
@@ -556,42 +521,12 @@
             </ul>
           </div>
           <div class="card" data-reveal>
-            <p class="k">KOSTENLOSEN ENTWURF ANFRAGEN</p>
-            <form
-              class="cta-form"
-              name="anfrage"
-              method="POST"
-              action="/danke/"
-              data-netlify="true"
-              netlify-honeypot="website"
-              data-request
-              novalidate
-            >
-              <input type="hidden" name="form-name" value="anfrage" />
-              <input type="hidden" name="quelle" value="cta" />
-              <p class="hp">
-                <label>Nicht ausfüllen <input name="website" tabindex="-1" autocomplete="off" /></label>
-              </p>
-              <label
-                ><span>Name des Betriebs</span
-                ><input type="text" name="betrieb" placeholder="Malerei Beispiel" autocomplete="organization" required
-              /></label>
-              <label><span>Ort</span><input type="text" name="ort" placeholder="Passau" required /></label>
-              <label
-                ><span>Ihre E-Mail</span
-                ><input type="email" name="email" placeholder="sie@ihr-betrieb.de" autocomplete="email" required
-              /></label>
-              <label class="consent"
-                ><input type="checkbox" name="einwilligung" value="ja" required /><span
-                  >Ich bin Unternehmer und möchte einen kostenlosen Entwurf. Die
-                  <a href="/datenschutz/">Datenschutzerklärung</a> habe ich gelesen.</span
-                ></label
-              >
-              <p class="form-error" role="alert"></p>
-              <button class="btn btn-primary" type="submit">Kostenlosen Entwurf anfragen</button>
-              <p class="under">Keine Zahlung · kein Verkaufsgespräch</p>
-            </form>
-            <div class="done" aria-live="polite">{{DONE}}</div>
+            <p class="k">TELEFONISCH KONTAKTIEREN</p>
+            <div class="cta-form">
+              <p class="tel-big"><a href="tel:+4915219682134">+49 1521 968 2134</a></p>
+              <a class="btn btn-primary" href="tel:+4915219682134">Telefonisch kontaktieren</a>
+              <p class="under">Keine Zahlung · unverbindlich</p>
+            </div>
           </div>
         </div>
       </section>

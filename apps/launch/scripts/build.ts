@@ -81,7 +81,7 @@ const FAQ: [string, string][] = [
   ],
   [
     'Woher haben Sie die Angaben zu meinem Betrieb?',
-    'Aus öffentlich zugänglichen Angaben, zum Beispiel OpenStreetMap oder Ihren eigenen Profilen, und aus dem, was Sie uns im Formular nennen. Ein Mensch prüft jede Angabe. Wir erfinden nichts: keine Bewertungen, keine Referenzen, keine Kundenstimmen. Beispielleistungen sind als Beispiel gekennzeichnet.',
+    'Aus öffentlich zugänglichen Angaben, zum Beispiel OpenStreetMap oder Ihren eigenen Profilen, und aus dem, was Sie uns am Telefon nennen. Ein Mensch prüft jede Angabe. Wir erfinden nichts: keine Bewertungen, keine Referenzen, keine Kundenstimmen. Beispielleistungen sind als Beispiel gekennzeichnet.',
   ],
   [
     'Was muss ich vorbereiten?',
@@ -141,7 +141,7 @@ const footer = `<footer>
           <li><a href="/#beispiele">Beispiele</a></li>
           <li><a href="/#preise">Preise</a></li>
           <li><a href="/#fragen">Fragen</a></li>
-          <li><a href="/#anfrage">Entwurf anfragen</a></li>
+          <li><a href="tel:+4915219682134">+49 1521 968 2134</a></li>
         </ul>
       </div>
       <div>
@@ -192,7 +192,7 @@ function subpage(title: string, description: string, body: string) {
           <a href="/#ablauf">So funktioniert’s</a>
           <a href="/#preise">Preise</a>
           <a href="/#fragen">Fragen</a>
-          <a class="btn btn-ghost" href="/#anfrage" aria-label="Entwurf anfragen"><span class="lbl-long">Entwurf anfragen</span><span class="lbl-short" aria-hidden="true">Anfragen</span></a>
+          <a class="btn btn-ghost" href="tel:+4915219682134" aria-label="Telefonisch kontaktieren"><span class="lbl-long">Telefonisch kontaktieren</span><span class="lbl-short" aria-hidden="true">Anrufen</span></a>
         </nav>
       </div>
     </header>

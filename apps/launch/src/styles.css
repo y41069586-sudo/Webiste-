@@ -482,6 +482,28 @@ h1 em {
   padding: 18px;
   font-size: 17px;
 }
+.hb-form p.field {
+  margin: 0;
+}
+.tel-num,
+.tel-big a {
+  display: block;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 24px;
+  text-decoration: none;
+  padding: 2px 0;
+}
+.tel-big {
+  margin: 0 0 14px;
+}
+.cta .card {
+  min-height: 0;
+  align-self: center;
+}
+.tel-big a {
+  font-size: 28px;
+}
 .ticks {
   display: flex;
   flex-wrap: wrap;
