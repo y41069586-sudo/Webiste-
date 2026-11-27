@@ -1,0 +1,18 @@
+Musterseiten (erfundene Betriebe) – Bild- und Schriftquellen, Stand 27.11.2026
+
+Betriebe, Namen, Adressen, Telefonnummern, Preise und das Bautagebuch sind erfunden.
+Buttons auf den Musterseiten rufen niemanden an und senden nichts ab (muster.js).
+
+Bilder: Burst by Shopify (https://www.shopify.com/stock-photos), Burst-Lizenz:
+kommerzielle Nutzung und Bearbeitung erlaubt, keine Namensnennung nötig. Lokal skaliert und komprimiert.
+- treppen/img/spindel.jpg        spiral-staircase-from-above
+- treppen/img/treppenhaus.jpg    modern-stairwell-looking-up
+- tischlerei/img/hobeln.jpg      carpenter-at-work
+- tischlerei/img/bett.jpg        teak-headboard-table (Maßlinien von SeitenWerk ergänzt)
+- tischlerei/img/werkbank.jpg    wooden-desk-with-tools
+- bau/img/baustelle.jpg          worker-on-construction-site
+- bau/img/geruest.jpg            construction-scaffolding
+Alle Fotos sind als „Beispielfoto (Burst)“ gekennzeichnet und zeigen keine Mitarbeiter eines echten Betriebs.
+
+Schriften (SIL Open Font License 1.1, selbst gehostet über @fontsource, Lizenztexte in fonts/):
+Barlow, Barlow Condensed, Schibsted Grotesk, Young Serif, Work Sans.

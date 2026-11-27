@@ -286,6 +286,8 @@ writeFileSync(path.join(dist, '404.html'), notFound);
 cpSync(path.join(src, 'styles.css'), path.join(dist, 'styles.css'));
 cpSync(path.join(src, 'app.js'), path.join(dist, 'app.js'));
 cpSync(path.join(src, 'img'), path.join(dist, 'img'), { recursive: true });
+// Musterseiten (erfundene Betriebe) – eigenständige statische Seiten unter /muster/
+cpSync(path.join(src, 'muster'), path.join(dist, 'muster'), { recursive: true });
 
 const req = createRequire(path.join(root, 'package.json'));
 const pkgDir = (name: string) => path.dirname(req.resolve(`${name}/package.json`));

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Musterseiten · SeitenWerk</title>
+    <meta name="description" content="Drei Musterseiten von SeitenWerk für erfundene Handwerksbetriebe: Treppenbau, Tischlerei, Bau und Sanierung." />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/img/favicon.png" />
+    <style>
+      @font-face { font-family: 'Schibsted Grotesk'; font-weight: 400 900; font-display: swap; src: url('fonts/schibsted-grotesk-latin-wght-normal.woff2') format('woff2'); }
+      :root { --bg: #f3f3f1; --ink: #1d2126; --muted: #5d636a; --line: #d6d7d3; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 'Schibsted Grotesk', system-ui, sans-serif; }
+      a { color: inherit; }
+      .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+      header { padding: 28px 0; border-bottom: 1px solid var(--line); }
+      header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+      .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; }
+      .brand img { width: 28px; height: 28px; }
+      h1 { font-size: clamp(38px, 5.4vw, 64px); line-height: 1.02; letter-spacing: -0.03em; margin: 64px 0 16px; max-width: 16ch; }
+      .lead { color: var(--muted); max-width: 58ch; margin: 0 0 48px; font-size: 18.5px; }
+      .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .card { text-decoration: none; background: #fff; border: 1px solid var(--line); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; }
+      .card:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.35); }
+      .card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+      .card div { padding: 20px 20px 22px; }
+      .card h2 { font-size: 24px; margin: 0 0 6px; letter-spacing: -0.02em; }
+      .card p { margin: 0; color: var(--muted); font-size: 16px; }
+      .card span { display: inline-block; margin-top: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+      .note { color: var(--muted); font-size: 15px; margin: 40px 0 0; max-width: 70ch; }
+      .call { margin: 56px 0 80px; padding: 32px; background: var(--ink); color: #fff; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; }
+      .call p { margin: 0; font-size: 20px; max-width: 40ch; }
+      .call a { background: #fff; color: var(--ink); padding: 15px 22px; font-weight: 600; text-decoration: none; }
+      @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } h1 { margin-top: 40px; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <a class="brand" href="https://seitenwerk.world/"><img src="/img/mark.png" alt="" />SeitenWerk</a>
+        <a href="tel:+4915219682134">+49 1521 968 2134</a>
+      </div>
+    </header>
+    <main class="wrap">
+      <h1>So sehen unsere Websites aus.</h1>
+      <p class="lead">Drei Musterseiten für Handwerksbetriebe – jede mit eigenem Aufbau, Preisen, Öffnungszeiten, Fragen und Kontaktweg. Probieren Sie sie auf dem Handy aus.</p>
+      <div class="grid">
+        <a class="card" href="treppen/"><img src="treppen/img/vorschau.jpg" width="800" height="600" alt="" /><div><h2>Treppenbau</h2><p>Mit Preisrechner: Form und Material wählen, Ab-Preis sehen.</p><span>Seite ansehen</span></div></a>
+        <a class="card" href="tischlerei/"><img src="tischlerei/img/vorschau.jpg" width="800" height="600" alt="" /><div><h2>Tischlerei</h2><p>Möbel nach Maß, mit Stückliste und Maßzeichnung.</p><span>Seite ansehen</span></div></a>
+        <a class="card" href="bau/"><img src="bau/img/vorschau.jpg" width="800" height="600" alt="" /><div><h2>Bau &amp; Sanierung</h2><p>Mit Bauschild, Richtpreisen und Bautagebuch.</p><span>Seite ansehen</span></div></a>
+      </div>
+      <p class="note">Ehrlich gesagt: Die Betriebe auf diesen Seiten sind erfunden, die Fotos sind lizenzierte Beispielbilder. Für Ihren Betrieb bauen wir die Seite mit Ihren echten Angaben – den Entwurf kostenlos vorab.</p>
+      <div class="call">
+        <p>So eine Seite für Ihren Betrieb? Ansehen kostet nichts.</p>
+        <a href="tel:+4915219682134">Anrufen: +49 1521 968 2134</a>
+      </div>
+    </main>
+  </body>
+</html>

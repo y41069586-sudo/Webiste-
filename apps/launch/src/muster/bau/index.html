@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Muster Bau · Sanierung und Umbau in Unna (Musterseite)</title>
+    <meta name="description" content="Musterseite von SeitenWerk: so sieht eine Website für einen Bau- und Sanierungsbetrieb aus. Der Betrieb ist erfunden." />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/img/favicon.png" />
+    <link rel="preload" href="../fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="../muster.css" />
+    <style>
+      @font-face { font-family: 'Barlow Condensed'; font-weight: 600; font-display: swap; src: url('../fonts/barlow-condensed-latin-600-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'Barlow Condensed'; font-weight: 700; font-display: swap; src: url('../fonts/barlow-condensed-latin-700-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'Barlow'; font-weight: 400; font-display: swap; src: url('../fonts/barlow-latin-400-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'Barlow'; font-weight: 500; font-display: swap; src: url('../fonts/barlow-latin-500-normal.woff2') format('woff2'); }
+      @font-face { font-family: 'Barlow'; font-weight: 600; font-display: swap; src: url('../fonts/barlow-latin-600-normal.woff2') format('woff2'); }
+      :root {
+        --site: #d7d6d0;
+        --board: #fbfbf8;
+        --ink: #23262b;
+        --muted: #5a5e63;
+        --line: #bdbcb5;
+        --orange: #e5621c;
+        --orange-dk: #c24f12;
+        --c: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+        --t: 'Barlow', system-ui, sans-serif;
+        --m-ink: var(--ink); --m-accent: var(--orange); --m-accent-ink: #fff; --m-bar-bg: var(--board); --m-line-strong: var(--ink); --m-radius: 0; --m-strip-bg: var(--ink); --m-strip-ink: #e6e5e0;
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+      body { margin: 0; background: var(--site); color: var(--ink); font: 400 17px/1.6 var(--t); }
+      img { display: block; max-width: 100%; height: auto; }
+      a { color: inherit; }
+      :focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+      .wrap { width: min(1200px, 100% - 32px); margin-inline: auto; }
+      h1, h2, h3 { font-family: var(--c); font-weight: 700; margin: 0; line-height: 0.98; }
+      h2 { font-size: clamp(40px, 5.6vw, 72px); }
+      p { margin: 0; }
+      .lead { color: var(--muted); font-size: 18.5px; max-width: 54ch; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; padding: 16px 24px; font: 600 17px/1 var(--t); text-decoration: none; border: 2px solid var(--ink); cursor: pointer; border-radius: 0; }
+      .btn-o { background: var(--orange); border-color: var(--orange); color: #fff; }
+      .btn-o:hover { background: var(--orange-dk); border-color: var(--orange-dk); }
+      .btn-k { background: transparent; color: var(--ink); }
+      .btn-k:hover { background: var(--ink); color: #fff; }
+
+      header { background: var(--board); border-bottom: 2px solid var(--ink); }
+      header .wrap { display: flex; justify-content: space-between; align-items: center; min-height: 72px; gap: 16px; }
+      .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 28px/1 var(--c); }
+      .logo i { display: inline-block; width: 28px; height: 28px; background: var(--orange); clip-path: polygon(50% 0, 100% 45%, 100% 100%, 0 100%, 0 45%); }
+      nav { display: flex; align-items: center; gap: 26px; font-weight: 500; }
+      nav a { text-decoration: none; }
+      nav a:not(.btn):hover { color: var(--orange-dk); }
+      nav .btn { padding: 12px 18px; font-size: 16px; }
+
+      /* Hero mit Bauschild */
+      .hero { position: relative; min-height: min(780px, calc(100svh - 110px)); display: grid; align-items: center; overflow: hidden; }
+      .hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+      .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgb(35 38 43 / 0.55), rgb(35 38 43 / 0.1) 60%); }
+      .sign { position: relative; z-index: 2; background: var(--board); border: 3px solid var(--ink); box-shadow: 10px 10px 0 rgb(35 38 43 / 0.85); max-width: 640px; margin: 48px 0; }
+      .sign-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 22px; background: var(--ink); color: #fff; font: 600 18px/1.1 var(--c); }
+      .sign-top span:last-child { color: #ffb48a; }
+      .sign-body { padding: 26px 26px 28px; }
+      .sign h1 { font-size: clamp(46px, 6.2vw, 84px); text-transform: none; }
+      .sign dl { display: grid; grid-template-columns: auto 1fr; gap: 0; margin: 22px 0 0; border-top: 2px solid var(--ink); }
+      .sign dt, .sign dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--line); }
+      .sign dt { font: 600 16px/1.3 var(--c); color: var(--muted); padding-right: 18px; }
+      .sign dd { font-weight: 500; }
+      .sign .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+      .credit { position: absolute; z-index: 3; right: 10px; bottom: 10px; background: rgb(35 38 43 / 0.8); color: #fff; font-size: 12px; padding: 4px 8px; }
+
+      .ticker { background: var(--orange); color: #fff; font: 600 19px/1 var(--c); }
+      .ticker .wrap { display: flex; flex-wrap: wrap; gap: 8px 32px; padding: 16px 0; }
+
+      section { padding: clamp(64px, 9vw, 120px) 0; }
+      .head { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: end; margin-bottom: 44px; }
+
+      /* Gewerke + Richtpreise */
+      .trades { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid var(--ink); border-left: 1px solid var(--line); }
+      .trade { background: var(--board); padding: 26px 24px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+      .trade h3 { font-size: 30px; }
+      .trade p { color: var(--muted); font-size: 16px; }
+      .trade .p { margin-top: auto; padding-top: 12px; display: flex; justify-content: space-between; align-items: baseline; border-top: 1px dashed var(--line); font: 700 23px/1 var(--c); }
+      .trade .p small { font: 500 14px/1.2 var(--t); color: var(--muted); }
+      .note { color: var(--muted); font-size: 14.5px; margin-top: 14px; }
+
+      /* Bautagebuch */
+      .log { background: var(--ink); color: #e6e5e0; }
+      .log h2 { color: #fff; }
+      .log .lead { color: #aeb1b5; }
+      .log-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 56px; align-items: start; }
+      .log-img { position: relative; margin-top: 32px; }
+      .log-img img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+      .entries { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--orange); }
+      .entries li { position: relative; padding: 0 0 30px 28px; }
+      .entries li::before { content: ''; position: absolute; left: -8px; top: 6px; width: 14px; height: 14px; background: var(--ink); border: 2px solid var(--orange); }
+      .entries li:last-child { padding-bottom: 0; }
+      .entries li:last-child::before { background: var(--orange); }
+      .entries time { font: 600 16px/1 var(--c); color: #ffb48a; }
+      .entries h3 { font-size: 28px; color: #fff; margin: 6px 0 6px; }
+      .entries p { color: #aeb1b5; font-size: 16px; }
+      .tag { display: inline-block; margin-top: 18px; font-size: 14px; color: #aeb1b5; border: 1px solid #4a4e55; padding: 6px 10px; }
+
+      /* Vertrauen */
+      .trust { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 24px; }
+      .box { background: var(--board); border: 2px solid var(--ink); padding: 30px; }
+      .owner { display: grid; grid-template-columns: 180px 1fr; gap: 26px; align-items: start; }
+      .photo { aspect-ratio: 4 / 5; background: repeating-linear-gradient(-45deg, #ecebe6 0 10px, #e2e1db 10px 20px); border: 2px dashed #9c9b94; display: grid; place-items: center; text-align: center; font-size: 14px; color: var(--muted); padding: 12px; }
+      .owner h3 { font-size: 34px; }
+      .owner p { color: var(--muted); margin-top: 12px; }
+      .owner b { display: block; margin-top: 16px; }
+      .rev h3 { font-size: 34px; }
+      .rev p { color: var(--muted); margin-top: 12px; }
+      .rev .btn { margin-top: 22px; }
+      .g { display: flex; align-items: center; gap: 12px; margin-top: 18px; font-weight: 600; }
+
+      .info { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+      .info ul { columns: 2; list-style: none; padding: 0; margin: 18px 0 0; }
+      .info li { padding: 8px 0; border-bottom: 1px solid var(--line); break-inside: avoid; }
+      table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+      td { padding: 10px 0; border-bottom: 1px solid var(--line); }
+      td + td { text-align: right; font-weight: 600; }
+
+      .faq { display: grid; grid-template-columns: 0.7fr 1.3fr; gap: 56px; }
+      details { background: var(--board); border: 2px solid var(--ink); margin-bottom: 10px; }
+      summary { cursor: pointer; list-style: none; padding: 18px 56px 18px 20px; position: relative; font: 600 19px/1.3 var(--t); }
+      summary::-webkit-details-marker { display: none; }
+      summary::after { content: '+'; position: absolute; right: 0; top: 0; bottom: 0; width: 48px; display: grid; place-items: center; background: var(--ink); color: #fff; font: 600 26px/1 var(--t); }
+      details[open] summary::after { content: '–'; background: var(--orange); }
+      details p { padding: 0 20px 20px; color: var(--muted); max-width: 64ch; }
+
+      .contact { background: var(--board); border-top: 2px solid var(--ink); }
+      .contact .wrap { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 56px; }
+      .contact .lead { margin-top: 18px; }
+      .tel { display: inline-block; margin-top: 26px; font: 700 clamp(40px, 5vw, 60px)/1 var(--c); text-decoration: none; }
+      .addr { color: var(--muted); margin-top: 8px; }
+      form { display: grid; gap: 16px; }
+      label { display: grid; gap: 6px; font-weight: 600; font-size: 15px; }
+      input, select, textarea { font: 400 17px/1.4 var(--t); color: var(--ink); background: #fff; border: 2px solid var(--ink); border-radius: 0; padding: 13px; width: 100%; }
+      textarea { min-height: 120px; resize: vertical; }
+      .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .fine { font-size: 13.5px; color: var(--muted); }
+      footer { background: var(--ink); color: #aeb1b5; padding: 36px 0; font-size: 15px; }
+      footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+      footer nav { gap: 22px; }
+
+      @media (max-width: 980px) {
+        nav a:not(.btn) { display: none; }
+        .head, .log-grid, .trust, .info, .faq, .contact .wrap { grid-template-columns: 1fr; }
+        .trades { grid-template-columns: 1fr 1fr; }
+        .hero { align-items: end; }
+        .hero::before { background: linear-gradient(180deg, rgb(35 38 43 / 0.05), rgb(35 38 43 / 0.5)); }
+      }
+      @media (max-width: 600px) {
+        body { font-size: 16.5px; }
+        nav .btn { display: none; }
+        .hero { min-height: 0; padding-top: 220px; }
+        .sign { margin: 0 0 28px; box-shadow: 6px 6px 0 rgb(35 38 43 / 0.85); }
+        .sign-top { font-size: 15px; padding: 10px 16px; }
+        .sign-body { padding: 20px 18px 22px; }
+        .sign .cta .btn { flex: 1 1 100%; }
+        .trades, .two { grid-template-columns: 1fr; }
+        .owner { grid-template-columns: 1fr; }
+        .photo { max-width: 170px; }
+        .info ul { columns: 1; }
+        .box { padding: 22px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mstrip">Musterseite von SeitenWerk – der Betrieb ist erfunden.<a href="https://seitenwerk.world/">So eine Seite für Ihren Betrieb</a></div>
+    <header>
+      <div class="wrap">
+        <a class="logo" href="#"><i aria-hidden="true"></i>Muster Bau</a>
+        <nav aria-label="Hauptnavigation">
+          <a href="#leistungen">Leistungen &amp; Richtpreise</a>
+          <a href="#bautagebuch">Bautagebuch</a>
+          <a href="#fragen">Fragen</a>
+          <a class="btn btn-o" href="tel:" data-demo="call">02303 123 45 6</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="hero">
+        <img src="img/baustelle.jpg" width="2000" height="1333" alt="Bauarbeiter in Warnweste auf einer Baustelle mit Gerüst und Betonmischer" fetchpriority="high" />
+        <div class="wrap">
+          <div class="sign">
+            <div class="sign-top"><span>Hier baut für Sie</span><span>Muster Bau · Unna</span></div>
+            <div class="sign-body">
+              <h1>Umbau, Anbau, Sanierung. Aus einer Hand.</h1>
+              <dl>
+                <dt>Bauvorhaben</dt><dd>Ihr Haus, Ihre Wohnung, Ihr Altbau</dd>
+                <dt>Ausführung</dt><dd>Eigene Maurer, Trockenbauer, Fliesenleger</dd>
+                <dt>Gebiet</dt><dd>Unna, Kamen, Dortmund-Ost, Holzwickede</dd>
+                <dt>Erreichbar</dt><dd class="status" data-hours='{"1":["07:00","17:00"],"2":["07:00","17:00"],"3":["07:00","17:00"],"4":["07:00","17:00"],"5":["07:00","15:00"]}'>Mo–Do 7–17, Fr 7–15 Uhr</dd>
+              </dl>
+              <div class="cta">
+                <a class="btn btn-o" href="tel:" data-demo="call">Jetzt anrufen</a>
+                <a class="btn btn-k" href="#kontakt">Besichtigung anfragen</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="credit">Beispielfoto (Burst)</span>
+      </div>
+      <div class="ticker"><div class="wrap"><span>Ein Ansprechpartner für alle Gewerke</span><span>Schriftlicher Festpreis</span><span>Besichtigung kostenlos</span></div></div>
+
+      <section id="leistungen">
+        <div class="wrap">
+          <div class="head">
+            <h2>Was wir bauen. Und was es ungefähr kostet.</h2>
+            <p class="lead">Richtpreise helfen bei der ersten Planung. Ihren Festpreis bekommen Sie nach der Besichtigung schriftlich – und der gilt.</p>
+          </div>
+          <div class="trades">
+            <article class="trade"><h3>Komplettsanierung</h3><p>Altbau oder Wohnung entkernen und neu aufbauen: Wände, Böden, Leitungen, Bad.</p><div class="p">ab 690 € <small>pro m² Wohnfläche</small></div></article>
+            <article class="trade"><h3>Badsanierung</h3><p>Altes Bad raus, neues rein – mit Fliesen, Sanitär und Elektro in einem Ablauf.</p><div class="p">ab 14.900 € <small>Bad bis 6 m²</small></div></article>
+            <article class="trade"><h3>Anbau</h3><p>Mehr Platz am Haus: vom Bauantrag über den Rohbau bis zum fertigen Raum.</p><div class="p">ab 2.200 € <small>pro m²</small></div></article>
+            <article class="trade"><h3>Innenausbau</h3><p>Trockenbau, Dachausbau, neue Raumaufteilung, Decken abhängen.</p><div class="p">ab 45 € <small>pro m² Wand</small></div></article>
+            <article class="trade"><h3>Fassadendämmung</h3><p>Wärmedämmverbundsystem inklusive Putz und Anstrich, Gerüst organisieren wir.</p><div class="p">ab 120 € <small>pro m² Fassade</small></div></article>
+            <article class="trade"><h3>Abbruch &amp; Entkernung</h3><p>Rückbau mit Entsorgung, staubarm und mit festem Zeitplan.</p><div class="p">ab 35 € <small>pro m²</small></div></article>
+          </div>
+          <p class="note">Beispielpreise inkl. MwSt. Die Spanne hängt vom Zustand des Gebäudes ab – darum schauen wir uns alles vorher an.</p>
+        </div>
+      </section>
+
+      <section class="log" id="bautagebuch">
+        <div class="wrap log-grid">
+          <div>
+            <h2>Bautagebuch: so läuft eine Sanierung.</h2>
+            <p class="lead" style="margin-top: 18px">Sie wissen jede Woche, was auf Ihrer Baustelle passiert. Hier ein Beispiel, wie wir ein Projekt für Sie festhalten.</p>
+            <div class="log-img"><img src="img/geruest.jpg" width="1600" height="1067" alt="Gerüststützen in einem Rohbau" loading="lazy" /><span class="credit">Beispielfoto (Burst)</span></div>
+            <span class="tag">Beispielprojekt, erfunden: Sanierung einer 85-m²-Wohnung</span>
+          </div>
+          <ol class="entries">
+            <li><time>Woche 0</time><h3>Besichtigung &amp; Festpreis</h3><p>Wir sehen uns alles an, messen und schicken einen schriftlichen Festpreis mit Zeitplan.</p></li>
+            <li><time>Woche 1</time><h3>Abbruch</h3><p>Alte Böden, Fliesen und nichttragende Wände raus. Entsorgung inklusive.</p></li>
+            <li><time>Woche 2–3</time><h3>Leitungen &amp; Wände</h3><p>Neue Elektro- und Wasserleitungen, neue Raumaufteilung im Trockenbau.</p></li>
+            <li><time>Woche 4–5</time><h3>Bad, Estrich, Fliesen</h3><p>Das Bad entsteht, Böden werden vorbereitet und verlegt.</p></li>
+            <li><time>Woche 6</time><h3>Übergabe</h3><p>Gemeinsamer Rundgang, Protokoll, besenrein übergeben.</p></li>
+          </ol>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap trust">
+          <div class="box owner">
+            <div class="photo">Hier steht Ihr eigenes Foto</div>
+            <div>
+              <h3>Ihr Ansprechpartner auf der Baustelle.</h3>
+              <p>Hier stellen Sie sich in zwei, drei Sätzen vor: seit wann es den Betrieb gibt, wer zum Team gehört und warum bei Ihnen nur ein Ansprechpartner für alles zuständig ist.</p>
+              <b>Tom Muster, Maurermeister</b>
+            </div>
+          </div>
+          <div class="box rev">
+            <h3>Was Bauherren sagen.</h3>
+            <p>Hier steht auf Ihrer Seite Ihr echter Google-Schnitt mit Link zu allen Bewertungen. Wir erfinden keine Sterne und kopieren keine Texte.</p>
+            <div class="g"><svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Ihre echten Google-Bewertungen</div>
+            <a class="btn btn-k" href="#" data-demo="review">Bewertungen ansehen</a>
+          </div>
+        </div>
+      </section>
+
+      <section style="padding-top: 0">
+        <div class="wrap info">
+          <div>
+            <h2>Einsatzgebiet.</h2>
+            <ul><li>Unna</li><li>Kamen</li><li>Holzwickede</li><li>Fröndenberg</li><li>Bönen</li><li>Dortmund-Ost</li><li>Schwerte</li><li>Werl</li></ul>
+          </div>
+          <div>
+            <h2>Bürozeiten.</h2>
+            <table>
+              <tr><td>Montag bis Donnerstag</td><td>7:00 – 17:00</td></tr>
+              <tr><td>Freitag</td><td>7:00 – 15:00</td></tr>
+              <tr><td>Besichtigungen</td><td>auch samstags nach Termin</td></tr>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="fragen" style="padding-top: 0">
+        <div class="wrap faq">
+          <h2>Fragen vor dem Bau.</h2>
+          <div>
+            <details><summary>Bekomme ich einen Festpreis?</summary><p>Ja. Nach der Besichtigung bekommen Sie ein schriftliches Angebot mit Festpreis. Kommt etwas Unvorhergesehenes dazu, sprechen wir vorher mit Ihnen.</p></details>
+            <details><summary>Brauche ich für meinen Anbau eine Genehmigung?</summary><p>Meist ja. Wir sagen Ihnen bei der Besichtigung, was nötig ist, und arbeiten mit Architekten aus der Region zusammen.</p></details>
+            <details><summary>Kann ich während der Sanierung im Haus wohnen?</summary><p>Oft ja, wenn wir in Abschnitten arbeiten. Bei Komplettsanierungen empfehlen wir für zwei bis drei Wochen eine andere Bleibe.</p></details>
+            <details><summary>Gibt es Förderung für Dämmung und Sanierung?</summary><p>Für energetische Maßnahmen gibt es häufig Zuschüsse oder Steuervorteile. Wir nennen Ihnen Ansprechpartner für die Förderberatung.</p></details>
+            <details><summary>Ist das die Website eines echten Betriebs?</summary><p>Nein. Das ist eine Musterseite von SeitenWerk. Betrieb, Namen, Preise und das Bautagebuch sind erfunden.</p></details>
+          </div>
+        </div>
+      </section>
+
+      <section class="contact" id="kontakt">
+        <div class="wrap">
+          <div>
+            <h2>Was haben Sie vor?</h2>
+            <p class="lead">Schreiben Sie uns kurz Ihr Vorhaben. Innerhalb von zwei Werktagen melden wir uns mit einem Termin für die Besichtigung.</p>
+            <a class="tel" href="tel:" data-demo="call">02303 123 45 6</a>
+            <p class="addr">Musterstraße 21, 59423 Unna</p>
+          </div>
+          <form data-demo-form novalidate>
+            <div class="two">
+              <label>Name<input name="name" autocomplete="name" /></label>
+              <label>Telefon<input name="tel" type="tel" autocomplete="tel" /></label>
+            </div>
+            <div class="two">
+              <label>Vorhaben<select name="art"><option>Sanierung</option><option>Bad</option><option>Anbau</option><option>Innenausbau</option><option>Fassade</option><option>Etwas anderes</option></select></label>
+              <label>Wann soll es losgehen?<select name="zeit"><option>So bald wie möglich</option><option>In 1–3 Monaten</option><option>In 3–6 Monaten</option><option>Noch offen</option></select></label>
+            </div>
+            <label>Kurze Beschreibung<textarea name="text" placeholder="z. B. Altbau-Wohnung, 85 m², Bad und Böden neu"></textarea></label>
+            <button class="btn btn-o" type="submit">Besichtigung anfragen</button>
+            <p class="fine">Wir nutzen Ihre Angaben nur für diese Anfrage. Hinweise in der Datenschutzerklärung.</p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <span>Muster Bau – Musterseite, Betrieb erfunden. Gestaltet von SeitenWerk.</span>
+        <nav aria-label="Rechtliches"><a href="#" data-demo="legal">Impressum</a><a href="#" data-demo="legal">Datenschutz</a><a href="https://seitenwerk.world/">SeitenWerk</a></nav>
+      </div>
+    </footer>
+    <div class="mbar"><a href="tel:" data-demo="call">Anrufen</a><a href="#kontakt">Besichtigung</a></div>
+    <script src="../muster.js" defer></script>
+  </body>
+</html>
